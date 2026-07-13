@@ -1,0 +1,16 @@
+// Barrel export — lets pages do `import { getJobOrders } from '@/controllers'`
+
+export * from './authController'
+export * from './jobOrderController'
+export * from './customerController'
+export * from './bookingController'
+export * from './quotationController'
+export * from './mechanicController'
+export * from './billingController'
+export * from './reportController'
+export * from './historyController'
+export * from './databaseController'
+export * from './inspectionController'
+export * from './serviceProgressController'
+export * from './servicesController'
+export * from './diagnosticAssistantController'
