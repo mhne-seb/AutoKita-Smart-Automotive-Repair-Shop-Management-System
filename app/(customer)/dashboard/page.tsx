@@ -17,33 +17,42 @@ import {
   MapPin,
   PackageCheck,
   Search,
+  CreditCard,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
-import { getJobOrders } from "@/controllers/jobOrderController";
-import type { JobOrderCard as JobOrderData } from "@/data/types";
+import type {
+  DashboardData,
+  DashboardActivity,
+  DashboardJobOrder,
+  DashboardShop,
+} from "@/controllers/dashboardController";
+
 const heroCar = "/assets/ac/a1.jpg"; 
-const teslaImg = "/assets/cars/tesla.jpg"; 
-const hondaImg = "/assets/cars/honda.jpg"; 
 
-// The currently "logged in" mock customer — see src/data/users.ts. 
-const CURRENT_CUSTOMER_ID = "CUST-2026-1234";
-
-// Maps a job order's Stage to the 0-based index the ServiceCard stepper uses.
-const STAGE_TO_STEP: Record<string, number> = {
-  inspecting: 1,
-  quotation: 2,
-  "in-progress": 3,
-  completed: 4,
+// Status 
+const STATUS_TO_STEP: Record<string, number> = {
+  inspecting:                 1,
+  pending_customer_approval:  2,
+  revision_pending:           2,
+  waiting_on_parts:           3,
+  in_progress:                3,
+  completed:                  4,
+  released:                   4,
 };
 
-const STAGE_LABEL: Record<string, string> = {
-  inspecting: "Under Inspection",
-  quotation: "Under Quotation",
-  "in-progress": "In Progress",
-  completed: "Completed",
+const STATUS_LABEL: Record<string, string> = {
+  inspecting:                 "Under Inspection",
+  pending_customer_approval:  "Pending Approval",
+  revision_pending:           "Revision Pending",
+  waiting_on_parts:           "Waiting on Parts",
+  in_progress:                "In Progress",
+  completed:                  "Completed",
+  released:                   "Released",
 };
 
-// Cycle a couple of vehicle photos for cards beyond the first two.
-const CARD_IMAGES = [teslaImg, hondaImg];
+// The currently "logged in" demo customer — matches user_id 280 in the DB.
+const CURRENT_USER_ID = 280;
 
 function Dashboard() {
   useEffect(() => { document.title = "Dashboard — AutoKita"; }, []);
@@ -52,29 +61,88 @@ function Dashboard() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalData | null>(null);
 
-  const [myJobOrders, setMyJobOrders] = useState<JobOrderData[]>([]);
+  // Dynamic data from PostgreSQL 
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastSynced, setLastSynced] = useState<string>("");
 
-  useEffect(() => {
-    let active = true;
-    getJobOrders(CURRENT_CUSTOMER_ID).then((data) => {
-      if (active) setMyJobOrders(data);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
+  const fetchDashboard = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Get the logged in user ID from sessionStorage
+      const storedUserId = sessionStorage.getItem('autokita_user_id');
+      const userId = storedUserId ? parseInt(storedUserId, 10) : CURRENT_USER_ID;
+
+      const res = await fetch(`/api/dashboard?userId=${userId}`);
+      if (!res.ok) throw new Error("Failed to fetch dashboard data");
+      const json: DashboardData = await res.json();
+      setData(json);
+      setLastSynced(
+        new Date().toLocaleTimeString("en-PH", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        }),
+      );
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchDashboard(); }, []);
+
+  // Activity icon/colour helpers
+  const activityMeta = (type: DashboardActivity["type"]) => {
+    switch (type) {
+      case "payment":
+        return { icon: CreditCard, color: "text-success" };
+      case "progress_log":
+        return { icon: Wrench, color: "text-brand" };
+      case "status_change":
+        return { icon: RefreshCw, color: "text-warning" };
+      default:
+        return { icon: FileText, color: "text-muted-foreground" };
+    }
+  };
+
+  // Loading / error states
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-brand" />
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="mx-auto max-w-md px-6 py-24 text-center">
+        <AlertCircle className="mx-auto h-10 w-10 text-destructive" />
+        <p className="mt-4 text-sm text-muted-foreground">{error ?? "No data"}</p>
+        <button
+          onClick={fetchDashboard}
+          className="mt-4 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  const { user, vehicles, activeJobOrders, recentActivity, shop } = data;
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-6">
-          {/* WELCOME BANNER*/}
+         
           <section className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-brand via-brand to-[color:oklch(0.22_0.05_250)] p-6 text-white shadow-lg">
             <div className="pointer-events-none absolute -right-24 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
-            {
-
-            }
             <img
               src={heroCar}
               alt=""
@@ -84,48 +152,56 @@ function Dashboard() {
 
             <div className="relative">
               <div className="text-xs font-semibold uppercase tracking-widest text-white/70">Welcome back</div>
-              <h1 className="mt-1 text-3xl font-bold md:text-4xl animate-fade-up">Hello, Juan Dela Cruz 👋</h1>
+              <h1 className="mt-1 text-3xl font-bold md:text-4xl animate-fade-up">
+                Hello, {user ? `${user.first_name} ${user.last_name}` : "Customer"} 👋
+              </h1>
               <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1.5 text-sm text-white/85">
-                <span className="flex items-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5" /> juand.cruz@example.com
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Phone className="h-3.5 w-3.5" /> +63 951 234 567
-                </span>
+                {user && (
+                  <>
+                    <span className="flex items-center gap-1.5">
+                      <Mail className="h-3.5 w-3.5" /> {user.email}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Phone className="h-3.5 w-3.5" /> {user.contact_number}
+                    </span>
+                  </>
+                )}
               </div>
               <p className="mt-4 max-w-md text-sm text-white/80">
-                Your vehicles are being looked after. Here's what's happening today.
+                Your vehicles are being looked after. Here&apos;s what&apos;s happening today.
               </p>
             </div>
           </section>
 
-          {/* OVERVIEW - MY SERVICES */}
+         
           <section>
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">My Services</h2>
-              <span className="text-xs text-muted-foreground">Last synced: Today, 10:45 AM</span>
+              <span className="text-xs text-muted-foreground">
+                Last synced: Today, {lastSynced || "—"}
+              </span>
             </div>
             <div className="mt-3 grid gap-4 md:grid-cols-2">
-              {myJobOrders.length === 0 ? (
+              {activeJobOrders.length === 0 ? (
                 <div className="col-span-full rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
                   No active services yet — book one from the button above.
                 </div>
               ) : (
-                myJobOrders.map((job, i) => (
+                activeJobOrders.map((job) => (
                   <ServiceCard
                     key={job.id}
-                    image={CARD_IMAGES[i % CARD_IMAGES.length]}
-                    vehicle={job.vehicle}
-                    jobOrderId={`#${job.id.toUpperCase()}`}
-                    status={STAGE_LABEL[job.stage]}
-                    note={`Mechanic ${job.mechanic ?? "unassigned"} — ${job.service}`}
-                    stepIndex={STAGE_TO_STEP[job.stage]}
+                    vehicle={`${job.vehicle_year} ${job.vehicle_model}`}
+                    jobOrderId={`#JO-${job.id}`}
+                    status={STATUS_LABEL[job.status] ?? job.status}
+                    note={job.service_name ?? "Service"}
+                    stepIndex={STATUS_TO_STEP[job.status] ?? 0}
                   />
                 ))
               )}
             </div>
           </section>
 
+          
           <section>
             <div className="rounded-xl border bg-card p-6">
               <div className="flex items-center justify-between">
@@ -138,34 +214,23 @@ function Dashboard() {
                 </button>
               </div>
               <div className="mt-5 space-y-5">
-                <Activity
-                  icon={CheckCircle2}
-                  color="text-success"
-                  title="Payment Confirmed"
-                  time="2 hours ago"
-                  desc="Your payment of ₱ 1,945.00 for Job Order ID #JO-2024-8830 has been successfully processed and verified."
-                />
-                <Activity
-                  icon={Wrench}
-                  color="text-brand"
-                  title="New Booking Created"
-                  time="Yesterday"
-                  desc="Successfully scheduled a Brake System Inspection for the 2022 Tesla Model 3 on May 24th."
-                />
-                <Activity
-                  icon={AlertCircle}
-                  color="text-warning"
-                  title="Additional Service Proposed"
-                  time="Mar 20"
-                  desc="Mechanic suggested replacing front brake pads due to 80% wear. Please review the proposal in your notifications."
-                />
-                <Activity
-                  icon={FileText}
-                  color="text-muted-foreground"
-                  title="Report Generated"
-                  time="Mar 18"
-                  desc="A new diagnostic report for your Honda Civic is now available for download in the Billing section."
-                />
+                {recentActivity.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No recent activity.</p>
+                ) : (
+                  recentActivity.slice(0, 4).map((act) => {
+                    const meta = activityMeta(act.type);
+                    return (
+                      <Activity
+                        key={`${act.type}-${act.id}`}
+                        icon={meta.icon}
+                        color={meta.color}
+                        title={act.title}
+                        time={formatRelativeTime(act.time)}
+                        desc={act.description}
+                      />
+                    );
+                  })
+                )}
               </div>
             </div>
           </section>
@@ -191,11 +256,22 @@ function Dashboard() {
             </div>
           </div>
 
+          
           <div className="rounded-xl border bg-card p-5">
             <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your Vehicles</div>
             <div className="mt-4 space-y-3">
-              <VehicleRow image={teslaImg} model="2022 Tesla Model 3" plate="ABC 1234" />
-              <VehicleRow image={hondaImg} model="2019 Honda Civic RS" plate="GAH 5542" />
+              {vehicles.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No vehicles registered yet.</p>
+              ) : (
+                vehicles.map((v) => (
+                  <VehicleRow
+                    key={v.id}
+                    model={`${v.vehicle_year} ${v.vehicle_model}`}
+                    plate={v.plate_number}
+                    type={v.vehicle_type}
+                  />
+                ))
+              )}
               <Link
                 href="/dashboard/register-vehicle"
                 className="flex items-center justify-center gap-2 rounded-lg border border-dashed py-4 text-sm text-muted-foreground transition-colors hover:border-brand hover:bg-accent hover:text-brand"
@@ -205,70 +281,31 @@ function Dashboard() {
             </div>
           </div>
 
+          {/* CONTEXTUAL ALERTS — from recent activity */}
           <div className="rounded-xl border bg-card p-5">
             <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Contextual Alerts</div>
             <div className="mt-4 space-y-3">
-              <Alert
-                tone="destructive"
-                title="Approval Required"
-                badge="NOW"
-                body="Mechanical failure detected in Brake Pad wear sensor. Replacement cost: ₱ 750.00."
-                actions={
-                  <>
-                    <button
-                      onClick={() =>
-                        setConfirmModal({
-                          tone: "brand",
-                          title: "Review & Approve",
-                          body: "Mechanical failure detected in the Brake Pad wear sensor for your 2022 Tesla Model 3. The mechanic recommends an immediate replacement.",
-                          details: [
-                            { label: "Job Order", value: "#JO-2024-8830" },
-                            { label: "Part", value: "Brake Pad Wear Sensor" },
-                            { label: "Replacement Cost", value: "₱ 750.00" },
-                            { label: "Requested by", value: "Mechanic — Bay 2" },
-                          ],
-                          confirmLabel: "Approve Service",
-                          onConfirm: () => setConfirmModal(null),
-                        })
-                      }
-                      className="rounded-md bg-destructive px-3 py-1.5 text-xs font-medium text-white transition-transform duration-150 active:scale-[0.97]"
-                    >
-                      Review & Approve
-                    </button>
-                    <button
-                      onClick={() =>
-                        setConfirmModal({
-                          tone: "destructive",
-                          title: "Decline Service",
-                          body: "Are you sure you want to decline the Brake Pad wear sensor replacement? Your vehicle will continue to run with the current worn part.",
-                          details: [
-                            { label: "Job Order", value: "#JO-2024-8830" },
-                            { label: "Part", value: "Brake Pad Wear Sensor" },
-                            { label: "Replacement Cost", value: "₱ 750.00" },
-                          ],
-                          confirmLabel: "Decline",
-                          onConfirm: () => setConfirmModal(null),
-                        })
-                      }
-                      className="text-xs font-medium transition-transform duration-150 active:scale-[0.97]"
-                    >
-                      Decline
-                    </button>
-                  </>
-                }
-              />
-              <Alert
-                tone="neutral"
-                title="Mechanic Note"
-                badge="1H AGO"
-                body="I've started the intake inspection. Will update you once computer diagnostics are complete."
-              />
-              <Alert
-                tone="success"
-                title="Service Completed"
-                badge="YESTERDAY"
-                body="The oil change for your Honda Civic was completed successfully. Feel free to pick it up anytime before 6pm."
-              />
+              {recentActivity.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No alerts at this time.</p>
+              ) : (
+                recentActivity.slice(0, 3).map((act) => {
+                  const tone: "destructive" | "neutral" | "success" =
+                    act.type === "status_change"
+                      ? "destructive"
+                      : act.type === "payment"
+                        ? "success"
+                        : "neutral";
+                  return (
+                    <Alert
+                      key={`alert-${act.type}-${act.id}`}
+                      tone={tone}
+                      title={act.title}
+                      badge={formatBadgeTime(act.time)}
+                      body={act.description}
+                    />
+                  );
+                })
+              )}
               <button
                 onClick={() =>
                   setConfirmModal({
@@ -288,8 +325,8 @@ function Dashboard() {
         </aside>
       </div>
 
-      {contactOpen && <ContactShopModal onClose={() => setContactOpen(false)} />}
-      {historyOpen && <HistoryModal onClose={() => setHistoryOpen(false)} />}
+      {contactOpen && <ContactShopModal shop={shop} onClose={() => setContactOpen(false)} />}
+      {historyOpen && <HistoryModal activities={recentActivity} onClose={() => setHistoryOpen(false)} />}
       {confirmModal && (
         <ConfirmModal data={confirmModal} onClose={() => setConfirmModal(null)} />
       )}
@@ -297,7 +334,36 @@ function Dashboard() {
   );
 }
 
-/* ---------- Shared animated modal wrapper (fade + scale in/out) ---------- */
+// Utility: relative time formatting 
+
+function formatRelativeTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60_000);
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins} min ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+  return date.toLocaleDateString("en-PH", { month: "short", day: "numeric" });
+}
+
+function formatBadgeTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60_000);
+  if (diffMins < 60) return `${diffMins}M AGO`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}H AGO`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}D AGO`;
+  return date.toLocaleDateString("en-PH", { month: "short", day: "numeric" }).toUpperCase();
+}
+
+// Shared animated modal wrapper
 
 function Modal({
   onClose,
@@ -339,17 +405,30 @@ function Modal({
   );
 }
 
-/* ---------- Contact Shop modal ---------- */
+// Contact Shop modal 
 
-function ContactShopModal({ onClose }: { onClose: () => void }) {
+function ContactShopModal({ shop, onClose }: { shop: DashboardShop | null; onClose: () => void }) {
+  // Format operating hours for display
+  const formatHours = (hours: Record<string, string> | null | undefined) => {
+    if (!hours) return "Contact shop for hours";
+    const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    const weekday = days.slice(0, 5).map((d) => hours[d]).filter(Boolean);
+    const sat = hours["saturday"];
+    const sun = hours["sunday"];
+    const weekdayStr = weekday.length > 0 ? `Mon–Fri: ${weekday[0]}` : "";
+    const satStr = sat ? `Sat: ${sat}` : "";
+    const sunStr = sun ? `Sun: ${sun}` : "";
+    return [weekdayStr, satStr, sunStr].filter(Boolean).join(" | ");
+  };
+
   return (
     <Modal onClose={onClose}>
       {({ close }) => (
         <>
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-lg font-semibold">AutoKita Service Center</h3>
-              <p className="text-xs text-muted-foreground">We're here to help</p>
+              <h3 className="text-lg font-semibold">{shop?.name ?? "AutoKita Service Center"}</h3>
+              <p className="text-xs text-muted-foreground">We&apos;re here to help</p>
             </div>
             <button onClick={close} className="rounded-md p-1 transition-colors hover:bg-accent">
               <X className="h-4 w-4" />
@@ -361,34 +440,34 @@ function ContactShopModal({ onClose }: { onClose: () => void }) {
               <Phone className="mt-0.5 h-4 w-4 text-brand" />
               <div>
                 <div className="font-medium">Phone</div>
-                <div className="text-muted-foreground">+63 2 8123 4567 / +63 917 123 4567</div>
+                <div className="text-muted-foreground">{shop?.contact_number ?? "N/A"}</div>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Mail className="mt-0.5 h-4 w-4 text-brand" />
               <div>
                 <div className="font-medium">Email</div>
-                <div className="text-muted-foreground">support@autokita.ph</div>
+                <div className="text-muted-foreground">{shop?.email ?? "N/A"}</div>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <MapPin className="mt-0.5 h-4 w-4 text-brand" />
               <div>
                 <div className="font-medium">Address</div>
-                <div className="text-muted-foreground">123 Ortigas Ave, Pasig City, Metro Manila</div>
+                <div className="text-muted-foreground">{shop?.address ?? "N/A"}</div>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <Clock className="mt-0.5 h-4 w-4 text-brand" />
               <div>
                 <div className="font-medium">Business Hours</div>
-                <div className="text-muted-foreground">Mon–Sat, 8:00 AM – 6:00 PM</div>
+                <div className="text-muted-foreground">{formatHours(shop?.operating_hours)}</div>
               </div>
             </div>
           </div>
 
           <a
-            href="tel:+6329123456"
+            href={`tel:${shop?.contact_number ?? ""}`}
             className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-transform duration-150 hover:opacity-90 active:scale-[0.98]"
           >
             <Phone className="h-4 w-4" /> Call Shop Now
@@ -399,54 +478,22 @@ function ContactShopModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-/* ---------- Full History modal ---------- */
+// Full History modal 
 
-const FULL_HISTORY = [
-  {
-    icon: CheckCircle2,
-    color: "text-success",
-    title: "Payment Confirmed",
-    time: "2 hours ago",
-    desc: "Your payment of ₱ 1,945.00 for Job Order ID #JO-2024-8830 has been successfully processed and verified.",
-  },
-  {
-    icon: Wrench,
-    color: "text-brand",
-    title: "New Booking Created",
-    time: "Yesterday",
-    desc: "Successfully scheduled a Brake System Inspection for the 2022 Tesla Model 3 on May 24th.",
-  },
-  {
-    icon: AlertCircle,
-    color: "text-warning",
-    title: "Additional Service Proposed",
-    time: "Mar 20",
-    desc: "Mechanic suggested replacing front brake pads due to 80% wear. Please review the proposal in your notifications.",
-  },
-  {
-    icon: FileText,
-    color: "text-muted-foreground",
-    title: "Report Generated",
-    time: "Mar 18",
-    desc: "A new diagnostic report for your Honda Civic is now available for download in the Billing section.",
-  },
-  {
-    icon: CheckCircle2,
-    color: "text-success",
-    title: "Service Completed",
-    time: "Mar 15",
-    desc: "Oil change and filter replacement for your 2019 Honda Civic RS was completed.",
-  },
-  {
-    icon: Wrench,
-    color: "text-brand",
-    title: "Booking Created",
-    time: "Mar 10",
-    desc: "Scheduled a routine maintenance check for the 2019 Honda Civic RS.",
-  },
-];
+function HistoryModal({ activities, onClose }: { activities: DashboardActivity[]; onClose: () => void }) {
+  const activityMeta = (type: DashboardActivity["type"]) => {
+    switch (type) {
+      case "payment":
+        return { icon: CreditCard, color: "text-success" };
+      case "progress_log":
+        return { icon: Wrench, color: "text-brand" };
+      case "status_change":
+        return { icon: RefreshCw, color: "text-warning" };
+      default:
+        return { icon: FileText, color: "text-muted-foreground" };
+    }
+  };
 
-function HistoryModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal onClose={onClose} panelClassName="w-full max-w-lg max-h-[80vh] overflow-y-auto">
       {({ close }) => (
@@ -458,9 +505,23 @@ function HistoryModal({ onClose }: { onClose: () => void }) {
             </button>
           </div>
           <div className="mt-5 space-y-5">
-            {FULL_HISTORY.map((item, i) => (
-              <Activity key={i} icon={item.icon} color={item.color} title={item.title} time={item.time} desc={item.desc} />
-            ))}
+            {activities.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No activity history yet.</p>
+            ) : (
+              activities.map((act) => {
+                const meta = activityMeta(act.type);
+                return (
+                  <Activity
+                    key={`hist-${act.type}-${act.id}`}
+                    icon={meta.icon}
+                    color={meta.color}
+                    title={act.title}
+                    time={formatRelativeTime(act.time)}
+                    desc={act.description}
+                  />
+                );
+              })
+            )}
           </div>
         </>
       )}
@@ -468,7 +529,7 @@ function HistoryModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-/* ---------- Generic confirm modal (Review & Approve / Decline / Clear All) ---------- */
+// Generic confirm modal 
 
 type ConfirmModalData = {
   tone: "brand" | "destructive";
@@ -532,7 +593,7 @@ function ConfirmModal({ data, onClose }: { data: ConfirmModalData; onClose: () =
   );
 }
 
-/* ---------- Service card with car-icon stepper ---------- */
+// Service card with car-icon stepper
 
 const SERVICE_STEPS = [
   { label: "Received", icon: PackageCheck },
@@ -543,29 +604,20 @@ const SERVICE_STEPS = [
 ];
 
 function ServiceCard({
-  image,
   vehicle,
   jobOrderId,
   status,
   note,
   stepIndex,
 }: {
-  image: string;
-  vehicle: string;
+  vehicle: string;  
   jobOrderId: string;
   status: string;
   note: string;
-  stepIndex: number; // 0-based index into SERVICE_STEPS
+  stepIndex: number; 
 }) {
   return (
     <div className="group overflow-hidden rounded-xl border bg-card transition-shadow duration-300 hover:shadow-lg">
-      <div className="overflow-hidden">
-        <img
-          src={image}
-          alt={vehicle}
-          className="h-32 w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
-        />
-      </div>
       <div className="p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -583,7 +635,7 @@ function ServiceCard({
           <b>{status}</b>
         </div>
 
-        {/* Stepper */}
+        
         <div className="mt-6 flex items-start">
           {SERVICE_STEPS.map((step, i) => {
             const Icon = step.icon;
@@ -624,7 +676,7 @@ function ServiceCard({
         </div>
 
         <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Clock className="h-3 w-3" /> Last update: {note}
+          <Clock className="h-3 w-3" /> Service: {note}
         </div>
         <Link
           href="/dashboard/tracking/received"
@@ -667,17 +719,15 @@ function Activity({
   );
 }
 
-function VehicleRow({ image, model, plate }: { image: string; model: string; plate: string }) {
+function VehicleRow({ model, plate, type }: { model: string; plate: string; type: string }) {
   return (
     <div className="group flex items-center gap-3 rounded-md border bg-muted/30 p-2.5 transition-colors hover:bg-muted/60">
-      <img
-        src={image}
-        alt={model}
-        className="h-9 w-9 rounded-md object-cover transition-transform duration-300 group-hover:scale-110"
-      />
+      <div className="flex h-9 w-9 items-center justify-center rounded-md bg-brand/10 text-brand">
+        <Wrench className="h-4 w-4" />
+      </div>
       <div>
         <div className="text-sm font-semibold">{model}</div>
-        <div className="text-xs text-muted-foreground">{plate}</div>
+        <div className="text-xs text-muted-foreground">{plate} · {type}</div>
       </div>
     </div>
   );

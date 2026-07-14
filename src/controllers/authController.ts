@@ -25,11 +25,18 @@ function simulateDelay<T>(value: T, ms = 400): Promise<T> {
  * dashboard or the Admin dashboard.
  */
 export async function login(email: string, password: string): Promise<LoginResult> {
-  const user = findUserByCredentials(email, password)
-  if (!user) {
-    return simulateDelay({ success: false, message: 'Invalid email or password.' })
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    })
+    
+    const data = await res.json()
+    return simulateDelay(data)
+  } catch (error) {
+    return simulateDelay({ success: false, message: 'Network error occurred.' })
   }
-  return simulateDelay({ success: true, user, role: user.role })
 }
 
 /** Clears whichever mock session flag is currently set. */
@@ -40,8 +47,12 @@ export function logout() {
 }
 
 /** Persists the mock session flag for the given role after a successful login. */
-export function startSession(role: UserRole) {
+export function startSession(role: UserRole, userId?: string | number) {
   if (typeof window === 'undefined') return
   if (role === 'admin') sessionStorage.setItem('autokita_admin', 'true')
   else sessionStorage.setItem('autokita_customer', 'true')
+  
+  if (userId) {
+    sessionStorage.setItem('autokita_user_id', String(userId))
+  }
 }
