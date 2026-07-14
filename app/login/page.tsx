@@ -75,7 +75,7 @@ function LoginPage() {
           <div className="rounded-xl border bg-card p-8 shadow-sm">
             <h2 className="text-center text-2xl font-bold">Log in</h2>
             <p className="mt-2 text-center text-sm text-muted-foreground">
-              Enter your credentials — we'll automatically send you to your Customer or Admin dashboard.
+              Enter your credentials
             </p>
             <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
               <div>
