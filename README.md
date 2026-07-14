@@ -27,8 +27,6 @@ AutoKita is a capstone project focused on developing a smart automotive repair s
 - **jsPDF**
 - **Lucide React**
 
-## Getting Started
-
 Install the project dependencies:
 
 ```bash
@@ -49,12 +47,10 @@ http://localhost:3000
 
 ## Demo Accounts
 
-The application uses a unified login page (`/login`) that authenticates users using mock data stored in `src/data/users.ts`.
-
-| Role | Email | Password | Redirect |
-|------|-------|----------|----------|
-| Customer | customer@autocare.com | password | `/dashboard` |
-| Admin | admin@autokita.com | autokita2026 | `/overview` |
+| Role | Email | Password |
+|------|-------|----------|
+| Customer | customer@autocare.com | password |
+| Admin | admin@autokita.com | autokita2026 | 
 
 ## Project Structure
 
@@ -82,35 +78,6 @@ public/
 └── autokita-logo.png
 ```
 
-## Initial Controllers (Mock API Layer)
-
-The project follows a **controller-based architecture**, where all pages communicate with controllers instead of directly accessing mock data.
-
-```text
-UI
-│
-▼
-Controllers
-│
-▼
-Mock Data
-```
-
-Available controllers include:
-
-- authController
-- bookingController
-- billingController
-- customerController
-- databaseController
-- historyController
-- inspectionController
-- jobOrderController
-- mechanicController
-- quotationController
-- reportController
-- serviceProgressController
-- servicesController
 
 ## System Preview
 
