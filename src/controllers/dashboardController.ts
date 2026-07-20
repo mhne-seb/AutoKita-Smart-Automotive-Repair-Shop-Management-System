@@ -6,11 +6,14 @@ import { db } from '@/lib/db'
 
 export interface DashboardUser {
   id: number
-  first_name: string
-  last_name: string
+  nickname: string
+  first_name: string | null
+  last_name: string | null
   email: string
   contact_number: string
-  address: string
+  address: string | null
+  loyalty_points: number | null
+  tier: string | null
 }
 
 export interface DashboardVehicle {
@@ -19,6 +22,7 @@ export interface DashboardVehicle {
   vehicle_year: number
   plate_number: string
   vehicle_type: string
+  mileage: number | null
 }
 
 export interface DashboardJobOrder {
@@ -48,7 +52,7 @@ export interface DashboardShop {
   address: string
   contact_number: string
   email: string
-  operating_hours: Record<string, string>
+  operating_hours: Record<string, string> | null
 }
 
 export interface DashboardData {

@@ -153,7 +153,7 @@ function Dashboard() {
             <div className="relative">
               <div className="text-xs font-semibold uppercase tracking-widest text-white/70">Welcome back</div>
               <h1 className="mt-1 text-3xl font-bold md:text-4xl animate-fade-up">
-                Hello, {user ? `${user.first_name} ${user.last_name}` : "Customer"} 👋
+                Hello, {user ? (user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.nickname) : "Customer"} 👋
               </h1>
               <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1.5 text-sm text-white/85">
                 {user && (
