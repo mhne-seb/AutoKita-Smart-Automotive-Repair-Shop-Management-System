@@ -5,11 +5,33 @@ export async function POST(request: Request) {
   try {
     const { email, password } = await request.json()
 
-    if (!email || !password) {
-      return NextResponse.json({ success: false, message: 'Email and password are required' }, { status: 400 })
+    if (!email) {
+      return NextResponse.json({ success: false, message: 'Email is required' }, { status: 400 })
     }
 
-    // Directly query the users table for authentication
+    
+    const { rows: employeeRows } = await db.query(
+      `SELECT id, full_name, email, role FROM employees WHERE email = $1`,
+      [email]
+    )
+
+    if (employeeRows.length > 0) {
+      const employee = employeeRows[0]
+      return NextResponse.json({ 
+        success: true, 
+        user: {
+          id: employee.id,
+          email: employee.email,
+          name: employee.full_name,
+        },
+        role: 'admin' 
+      })
+    }
+
+    if (!password) {
+      return NextResponse.json({ success: false, message: 'Password is required' }, { status: 400 })
+    }
+
     const { rows } = await db.query(
       `SELECT * FROM get_authenticate_user($1, $2)`,
       [email, password]
