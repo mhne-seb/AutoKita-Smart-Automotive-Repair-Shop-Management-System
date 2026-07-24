@@ -9,16 +9,19 @@ import { JobOrderBreadcrumb } from '../components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
 import { getQuotationById } from '@/controllers/quotationController'
 import { currency } from '../data/mockData'
-import { QuotationService, JobOrderCard } from '../data/types'
+import { QuotationService, JobOrderCard, QuotationData } from '../data/types'
 
 interface Props {
   jobOrderId: string
 }
 
 export function Quotation({ jobOrderId }: Props) {
-  // Loaded through the controller (mock API) — see jobOrderController.ts.
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)
-  const initial = getQuotationById(jobOrderId)
+
+  // Quotation data now comes from the real database, which is an async call
+  // — loaded via useEffect/state, same as jobOrder, instead of being read
+  // synchronously at render time.
+  const [initial, setInitial] = useState<QuotationData | null | undefined>(undefined)
 
   useEffect(() => {
     let active = true
@@ -30,11 +33,30 @@ export function Quotation({ jobOrderId }: Props) {
     }
   }, [jobOrderId])
 
-  const [services, setServices] = useState<QuotationService[]>(initial?.services ?? [])
-  const [notes, setNotes] = useState(initial?.notes ?? '')
+  useEffect(() => {
+    let active = true
+    getQuotationById(jobOrderId).then((data) => {
+      if (active) setInitial(data ?? null)
+    })
+    return () => {
+      active = false
+    }
+  }, [jobOrderId])
+
+  const [services, setServices] = useState<QuotationService[]>([])
+  const [notes, setNotes] = useState('')
   const [editingNotes, setEditingNotes] = useState(false)
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null)
-  const [sent, setSent] = useState(initial?.sentToCustomer ?? false)
+  const [sent, setSent] = useState(false)
+
+  // Once the real data arrives, seed the editable state from it.
+  useEffect(() => {
+    if (initial) {
+      setServices(initial.services)
+      setNotes(initial.notes)
+      setSent(initial.sentToCustomer)
+    }
+  }, [initial])
 
   const totals = useMemo(() => {
     let laborTotal = 0
@@ -54,7 +76,7 @@ export function Quotation({ jobOrderId }: Props) {
     return { inStock, toOrder }
   }, [services])
 
-  if (jobOrder === undefined) {
+  if (jobOrder === undefined || initial === undefined) {
     return (
       <div className="p-8">
         <p className="text-sm text-slate-500">Loading quotation…</p>
@@ -150,8 +172,6 @@ export function Quotation({ jobOrderId }: Props) {
           >
             <Plus size={14} /> Add Service
           </button>
-          {/* "Generate Job Order" moved to the shared JobOrderBreadcrumb so it's
-              visible on Inspection, Quotation, and Progress alike. */}
           <button
             onClick={() => setSent(true)}
             disabled={sent}
@@ -168,6 +188,12 @@ export function Quotation({ jobOrderId }: Props) {
             <h2 className="text-lg font-bold text-slate-900">Services & Required Parts</h2>
             <span className="text-sm text-slate-400">{services.length} services added</span>
           </div>
+
+          {services.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-400">
+              No services or parts logged yet for this job order.
+            </div>
+          )}
 
           {services.map((s) => {
             const partsSubtotal = s.parts.reduce((sum, p) => sum + p.qty * p.unitPrice, 0)
@@ -325,7 +351,7 @@ export function Quotation({ jobOrderId }: Props) {
                 className="w-full rounded-lg border border-slate-200 p-3 text-sm focus:border-slate-400 focus:outline-none"
               />
             ) : (
-              <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{notes}</p>
+              <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{notes || 'No notes yet.'}</p>
             )}
             <button
               onClick={() => setEditingNotes((v) => !v)}

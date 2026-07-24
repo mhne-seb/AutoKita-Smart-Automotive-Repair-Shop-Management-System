@@ -9,7 +9,7 @@ import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderCon
 import { getQuotationById } from '@/controllers/quotationController'
 import { getServiceProgressById } from '@/controllers/serviceProgressController'
 import { currency } from '../data/mockData'
-import { ServiceSection, TaskStatus, JobOrderCard } from '../data/types'
+import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData } from '../data/types'
 
 interface Props {
   jobOrderId: string
@@ -27,7 +27,11 @@ export function ServiceProgress({ jobOrderId }: Props) {
   // Loaded through the controller (mock API) — see jobOrderController.ts.
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)
   const quotation = getQuotationById(jobOrderId)
-  const initial = getServiceProgressById(jobOrderId)
+
+  // Service progress now comes from the real database, which is an async
+  // call — so it's loaded via useEffect/state, same as jobOrder, instead of
+  // being read synchronously at render time.
+  const [initial, setInitial] = useState<ServiceProgressData | null | undefined>(undefined)
 
   useEffect(() => {
     let active = true
@@ -39,8 +43,26 @@ export function ServiceProgress({ jobOrderId }: Props) {
     }
   }, [jobOrderId])
 
-  const [sections, setSections] = useState<ServiceSection[]>(initial?.sections ?? [])
-  const [quotationConfirmed, setQuotationConfirmed] = useState(initial?.quotationConfirmed ?? false)
+  useEffect(() => {
+    let active = true
+    getServiceProgressById(jobOrderId).then((data) => {
+      if (active) setInitial(data ?? null)
+    })
+    return () => {
+      active = false
+    }
+  }, [jobOrderId])
+
+  const [sections, setSections] = useState<ServiceSection[]>([])
+  const [quotationConfirmed, setQuotationConfirmed] = useState(false)
+
+  // Once the real data arrives, seed the editable state from it.
+  useEffect(() => {
+    if (initial) {
+      setSections(initial.sections)
+      setQuotationConfirmed(initial.quotationConfirmed)
+    }
+  }, [initial])
 
   const allTasks = useMemo(() => sections.flatMap((s) => s.tasks), [sections])
   const completedCount = allTasks.filter((t) => t.status === 'completed').length
@@ -53,7 +75,7 @@ export function ServiceProgress({ jobOrderId }: Props) {
     )
   }, [quotation])
 
-  if (jobOrder === undefined) {
+  if (jobOrder === undefined || initial === undefined) {
     return (
       <div className="p-8">
         <p className="text-sm text-slate-500">Loading service progress…</p>
@@ -136,133 +158,139 @@ export function ServiceProgress({ jobOrderId }: Props) {
         </span>
       </div>
 
-      <div className="mx-auto max-w-[1000px] space-y-6">
-        {sections.map((section) => (
-          <div key={section.id} className="space-y-3">
-            <p className={`text-sm font-bold uppercase tracking-wide ${sectionColors[section.id] ?? 'text-slate-500'}`}>
-              {section.title}
-            </p>
-            {section.tasks.map((task) => (
-              <div
-                key={task.id}
-                className={`flex items-center justify-between rounded-xl border p-4 ${
-                  task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50' : 'border-slate-200 bg-white'
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <button
-                    onClick={() => toggleCheckbox(task.id, task.status)}
-                    className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
-                      task.status === 'completed'
-                        ? 'border-emerald-500 bg-emerald-500 text-white'
-                        : task.status === 'active'
-                        ? 'border-indigo-400 text-transparent hover:text-indigo-400'
-                        : 'border-slate-200 text-transparent'
-                    }`}
-                  >
-                    <Check size={13} />
-                  </button>
-                  <div>
-                    <p className="flex items-center gap-2 font-semibold text-slate-900">
-                      {task.title}
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                          task.status === 'completed'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : task.status === 'active'
-                            ? 'bg-indigo-100 text-indigo-700'
-                            : 'bg-slate-100 text-slate-400'
-                        }`}
-                      >
-                        {task.status}
-                      </span>
-                    </p>
-                    <p className="text-sm text-slate-500">{task.note}</p>
-                    <p className="mt-1 text-xs text-slate-400">🕐 {task.time}</p>
-                  </div>
-                </div>
-                {task.status === 'active' && (
-                  <button
-                    onClick={() => markDone(task.id)}
-                    className="shrink-0 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-                  >
-                    Mark Done
-                  </button>
-                )}
-              </div>
-            ))}
-
-            {section.id === 'quotation' && quotation && (
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                <div className="mb-3 flex items-center justify-between">
-                  <div>
-                    <p className="font-bold text-slate-900">Service Quotation</p>
-                    <p className="text-sm text-slate-400">Review recommended services and confirm to proceed</p>
-                  </div>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      quotationConfirmed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                    }`}
-                  >
-                    {quotationConfirmed ? 'Confirmed' : 'Awaiting Approval'}
-                  </span>
-                </div>
-
-                <table className="mb-3 w-full text-sm">
-                  <thead className="text-xs text-slate-400">
-                    <tr>
-                      <th className="pb-2 text-left font-medium">Description</th>
-                      <th className="pb-2 text-left font-medium">Type</th>
-                      <th className="pb-2 text-right font-medium">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {quotation.services.map((s) => (
-                      <Fragment key={s.id}>
-                        {s.parts.map((p) => (
-                          <tr key={p.id} className="border-t border-slate-100">
-                            <td className="py-2">{p.name}</td>
-                            <td className="py-2"><span className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-600">Part</span></td>
-                            <td className="py-2 text-right font-semibold">{currency(p.qty * p.unitPrice)}</td>
-                          </tr>
-                        ))}
-                        <tr className="border-t border-slate-100">
-                          <td className="py-2">{s.name}</td>
-                          <td className="py-2"><span className="rounded bg-purple-50 px-2 py-0.5 text-xs text-purple-600">Labor</span></td>
-                          <td className="py-2 text-right font-semibold">{currency(s.laborCost)}</td>
-                        </tr>
-                      </Fragment>
-                    ))}
-                  </tbody>
-                </table>
-
-                <div className="flex justify-between border-t border-slate-100 pt-3 text-base font-bold text-slate-900">
-                  <span>Total Estimate</span>
-                  <span>{currency(quotationTotal)}</span>
-                </div>
-
-                {!quotationConfirmed ? (
-                  <div className="mt-4 flex gap-3">
+      {sections.length === 0 ? (
+        <div className="mx-auto max-w-[1000px] rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-sm text-slate-400">
+          No service progress tasks recorded yet for this job order.
+        </div>
+      ) : (
+        <div className="mx-auto max-w-[1000px] space-y-6">
+          {sections.map((section) => (
+            <div key={section.id} className="space-y-3">
+              <p className={`text-sm font-bold uppercase tracking-wide ${sectionColors[section.id] ?? 'text-slate-500'}`}>
+                {section.title}
+              </p>
+              {section.tasks.map((task) => (
+                <div
+                  key={task.id}
+                  className={`flex items-center justify-between rounded-xl border p-4 ${
+                    task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50' : 'border-slate-200 bg-white'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
                     <button
-                      onClick={() => setQuotationConfirmed(true)}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+                      onClick={() => toggleCheckbox(task.id, task.status)}
+                      className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
+                        task.status === 'completed'
+                          ? 'border-emerald-500 bg-emerald-500 text-white'
+                          : task.status === 'active'
+                          ? 'border-indigo-400 text-transparent hover:text-indigo-400'
+                          : 'border-slate-200 text-transparent'
+                      }`}
                     >
-                      <Check size={15} /> Confirm & Proceed
+                      <Check size={13} />
                     </button>
-                    <button className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
-                      Request Changes
-                    </button>
+                    <div>
+                      <p className="flex items-center gap-2 font-semibold text-slate-900">
+                        {task.title}
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                            task.status === 'completed'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : task.status === 'active'
+                              ? 'bg-indigo-100 text-indigo-700'
+                              : 'bg-slate-100 text-slate-400'
+                          }`}
+                        >
+                          {task.status}
+                        </span>
+                      </p>
+                      <p className="text-sm text-slate-500">{task.note}</p>
+                      <p className="mt-1 text-xs text-slate-400">🕐 {task.time}</p>
+                    </div>
                   </div>
-                ) : (
-                  <p className="mt-4 text-sm font-semibold text-emerald-600">
-                    ✓ Quotation confirmed by customer — proceeding to In Progress.
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+                  {task.status === 'active' && (
+                    <button
+                      onClick={() => markDone(task.id)}
+                      className="shrink-0 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                    >
+                      Mark Done
+                    </button>
+                  )}
+                </div>
+              ))}
+
+              {section.id === 'quotation' && quotation && (
+                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div>
+                      <p className="font-bold text-slate-900">Service Quotation</p>
+                      <p className="text-sm text-slate-400">Review recommended services and confirm to proceed</p>
+                    </div>
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        quotationConfirmed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                      }`}
+                    >
+                      {quotationConfirmed ? 'Confirmed' : 'Awaiting Approval'}
+                    </span>
+                  </div>
+
+                  <table className="mb-3 w-full text-sm">
+                    <thead className="text-xs text-slate-400">
+                      <tr>
+                        <th className="pb-2 text-left font-medium">Description</th>
+                        <th className="pb-2 text-left font-medium">Type</th>
+                        <th className="pb-2 text-right font-medium">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {quotation.services.map((s) => (
+                        <Fragment key={s.id}>
+                          {s.parts.map((p) => (
+                            <tr key={p.id} className="border-t border-slate-100">
+                              <td className="py-2">{p.name}</td>
+                              <td className="py-2"><span className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-600">Part</span></td>
+                              <td className="py-2 text-right font-semibold">{currency(p.qty * p.unitPrice)}</td>
+                            </tr>
+                          ))}
+                          <tr className="border-t border-slate-100">
+                            <td className="py-2">{s.name}</td>
+                            <td className="py-2"><span className="rounded bg-purple-50 px-2 py-0.5 text-xs text-purple-600">Labor</span></td>
+                            <td className="py-2 text-right font-semibold">{currency(s.laborCost)}</td>
+                          </tr>
+                        </Fragment>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <div className="flex justify-between border-t border-slate-100 pt-3 text-base font-bold text-slate-900">
+                    <span>Total Estimate</span>
+                    <span>{currency(quotationTotal)}</span>
+                  </div>
+
+                  {!quotationConfirmed ? (
+                    <div className="mt-4 flex gap-3">
+                      <button
+                        onClick={() => setQuotationConfirmed(true)}
+                        className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+                      >
+                        <Check size={15} /> Confirm & Proceed
+                      </button>
+                      <button className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+                        Request Changes
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="mt-4 text-sm font-semibold text-emerald-600">
+                      ✓ Quotation confirmed by customer — proceeding to In Progress.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

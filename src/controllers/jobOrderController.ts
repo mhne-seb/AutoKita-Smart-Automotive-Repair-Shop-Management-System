@@ -9,15 +9,107 @@ function simulateDelay<T>(value: T, ms = 250): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), ms))
 }
 
-/** Returns every job order currently on record (optionally filtered by customer). */
-export async function getJobOrders(customerId?: string): Promise<JobOrderCard[]> {
-  const data = customerId ? jobOrders.filter((j) => j.customerId === customerId) : jobOrders
-  return simulateDelay(data)
+// ---------------------------------------------------------------------------
+// Real database-backed listing (used by the Job Orders board / JobOrders.tsx)
+// ---------------------------------------------------------------------------
+
+// Your DB has 7 status values, but the UI only understands 4 stages.
+// This function maps one to the other.
+function mapDbStatusToStage(dbStatus: string): Stage {
+  switch (dbStatus) {
+    case 'inspecting':
+      return 'inspecting'
+    case 'pending_customer_approval':
+    case 'revision_pending':
+      return 'quotation'
+    case 'in_progress':
+    case 'waiting_on_parts':
+      return 'in-progress'
+    case 'completed':
+    case 'released':
+      return 'completed'
+    default:
+      return 'inspecting'
+  }
 }
 
-/** Looks up a single job order by its id, or null if it doesn't exist. */
+const currency = (value: number | null) =>
+  `₱${(value ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 0 })}`
+
+const STAGE_STEP_NUMBER: Record<Stage, number> = {
+  inspecting: 1,
+  quotation: 2,
+  'in-progress': 3,
+  completed: 4,
+}
+
+// Converts one raw database row into the shape the JobOrders page expects.
+function toJobOrderCard(row: any): JobOrderCard {
+  const stage = mapDbStatusToStage(row.status)
+
+  return {
+    id: String(row.id),
+    customer: `${row.first_name ?? ''} ${row.last_name ?? ''}`.trim() || row.nickname || 'Unknown Customer',
+    vehicle: row.vehicle_model ? `${row.vehicle_year ?? ''} ${row.vehicle_model}`.trim() : 'Unknown Vehicle',
+    customerId: `CUST-${row.user_id ?? '0000'}`,
+    stage,
+    service: row.service_names || 'No services listed',
+    time: row.date_arrived
+      ? new Date(row.date_arrived).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+      : '—',
+    plate: row.plate_number || '—',
+    payment: currency(row.grand_total),
+    paid: row.balance !== null && Number(row.balance) <= 0,
+    mechanic: 'Unassigned', // no mechanic-assignment table exists in the schema yet
+    stepsDone: STAGE_STEP_NUMBER[stage],
+    stepsTotal: 4,
+  }
+}
+
+export interface PaginatedJobOrders {
+  data: JobOrderCard[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+/** Fetches one page of job orders from the real database via the API route. */
+export async function getJobOrders(page = 1, pageSize = 12): Promise<PaginatedJobOrders> {
+  const res = await fetch(`/api/job-orders?page=${page}&pageSize=${pageSize}`)
+  const json = await res.json()
+
+  if (!json.success) {
+    throw new Error(json.message || 'Failed to load job orders')
+  }
+
+  return {
+    data: json.data.map(toJobOrderCard),
+    total: json.total,
+    page: json.page,
+    pageSize: json.pageSize,
+    totalPages: json.totalPages,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Everything below still reads from the mock data file (src/data/jobOrders.ts)
+// — not yet wired to the real database. This is why clicking "View Full Job
+// Order" on a real database job order currently shows "Job order not found":
+// these lookups only know about the 5 fake ids (i1–i5). Wiring these to the
+// database is the next step.
+// ---------------------------------------------------------------------------
+
+/** Looks up a single job order by its id from the real database, or null if it doesn't exist. */
 export async function getJobOrderById(id: string): Promise<JobOrderCard | null> {
-  return simulateDelay(jobOrders.find((j) => j.id === id) ?? null)
+  const res = await fetch(`/api/job-orders/${id}`)
+
+  if (res.status === 404) return null
+
+  const json = await res.json()
+  if (!json.success) return null
+
+  return toJobOrderCard(json.data)
 }
 
 /**

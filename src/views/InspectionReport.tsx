@@ -7,17 +7,19 @@ import { TopBar } from '../components/TopBar'
 import { JobOrderBreadcrumb } from '../components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
 import { getInspectionById } from '@/controllers/inspectionController'
-import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard } from '../data/types'
+import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData } from '../data/types'
 
 interface Props {
   jobOrderId: string
 }
 
 export function InspectionReport({ jobOrderId }: Props) {
-  // Loaded through the controller (mock API) so this page is ready to point
-  // at a real endpoint later — see src/controllers/jobOrderController.ts.
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)
-  const initial = getInspectionById(jobOrderId)
+
+  // Inspection data now comes from the real database, which is an async
+  // call — loaded via useEffect/state, same as jobOrder, instead of being
+  // read synchronously at render time.
+  const [initial, setInitial] = useState<InspectionData | null | undefined>(undefined)
 
   useEffect(() => {
     let active = true
@@ -29,21 +31,39 @@ export function InspectionReport({ jobOrderId }: Props) {
     }
   }, [jobOrderId])
 
-  const [photoSlots, setPhotoSlots] = useState(initial?.photoSlots ?? [])
-  const [findings, setFindings] = useState<MechanicalFinding[]>(initial?.findings ?? [])
+  useEffect(() => {
+    let active = true
+    getInspectionById(jobOrderId).then((data) => {
+      if (active) setInitial(data ?? null)
+    })
+    return () => {
+      active = false
+    }
+  }, [jobOrderId])
+
+  const [photoSlots, setPhotoSlots] = useState<InspectionData['photoSlots']>([])
+  const [findings, setFindings] = useState<MechanicalFinding[]>([])
   const [noteDraft, setNoteDraft] = useState('')
-  const [notes, setNotes] = useState(initial?.notes ?? [])
+  const [notes, setNotes] = useState<InspectionData['notes']>([])
   const [editingFindingId, setEditingFindingId] = useState<string | null>(null)
-  const [timerRunning, setTimerRunning] = useState(initial?.timer.running ?? false)
+  const [timerRunning, setTimerRunning] = useState(false)
   const [approvalDecision, setApprovalDecision] = useState<'pending' | 'confirmed' | 'reverted'>('pending')
-  // Real (visible) state for the "Upload to customer portal" action, instead
-  // of a bare alert() — the button reflects the action actually happened.
   const [uploaded, setUploaded] = useState(false)
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
 
+  // Once the real data arrives, seed the editable state from it.
+  useEffect(() => {
+    if (initial) {
+      setPhotoSlots(initial.photoSlots)
+      setFindings(initial.findings)
+      setNotes(initial.notes)
+      setTimerRunning(initial.timer.running)
+    }
+  }, [initial])
+
   useMemo(() => findings.filter((f) => f.status === 'ok').length, [findings])
 
-  if (jobOrder === undefined) {
+  if (jobOrder === undefined || initial === undefined) {
     return (
       <div className="p-8">
         <p className="text-sm text-slate-500">Loading inspection…</p>
@@ -170,9 +190,7 @@ export function InspectionReport({ jobOrderId }: Props) {
                     </>
                   )}
                   <input
-                    ref={(el) => {
-                      fileInputRefs.current[slot.id] = el
-                    }}
+                    ref={(el) => { fileInputRefs.current[slot.id] = el }}
                     type="file"
                     accept="image/*"
                     className="hidden"
@@ -181,66 +199,48 @@ export function InspectionReport({ jobOrderId }: Props) {
                 </button>
               ))}
             </div>
-          </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-bold text-slate-900">Technician Workspace</h2>
-              <p className="text-xs text-slate-400">These notes are visible to customers after upload</p>
-            </div>
-            <textarea
-              value={noteDraft}
-              onChange={(e) => setNoteDraft(e.target.value)}
-              placeholder="Write technician notes..."
-              rows={3}
-              className="w-full rounded-xl border border-slate-200 p-4 text-sm focus:border-slate-400 focus:outline-none"
-            />
-            <div className="mt-2 flex items-center justify-between">
-              <span className="text-xs text-slate-400">No files attached</span>
+            <div className="my-6 border-t border-slate-100" />
+
+            <p className="mb-3 text-sm font-bold text-slate-900">Technician Notes</p>
+            <div className="mb-4 flex gap-2">
+              <input
+                value={noteDraft}
+                onChange={(e) => setNoteDraft(e.target.value)}
+                placeholder="Add a note about this inspection..."
+                className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+              />
               <button
                 onClick={saveNote}
-                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-40"
-                disabled={!noteDraft.trim()}
+                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
               >
-                Save Note
+                Add
               </button>
             </div>
 
-            <div className="mt-6 space-y-6">
-              {notes.map((n) => (
-                <div key={n.id} className="flex gap-3 border-t border-slate-100 pt-4 first:border-t-0 first:pt-0">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-white">
-                    {n.author.charAt(0)}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-slate-900">
-                      {n.author} <span className="ml-1 font-normal text-slate-400">· {n.timestamp}</span>
+            {notes.length === 0 ? (
+              <p className="mb-6 text-sm text-slate-400">No technician notes yet.</p>
+            ) : (
+              <div className="mb-6 space-y-3">
+                {notes.map((n) => (
+                  <div key={n.id} className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm">
+                    <p className="mb-1 flex items-center justify-between text-xs text-slate-400">
+                      <span className="font-semibold text-slate-600">{n.author}</span>
+                      <span>{n.timestamp}</span>
                     </p>
-                    <p className="mt-1 text-sm text-slate-600">{n.content}</p>
-                    {n.photos && (
-                      <div className="mt-3 grid grid-cols-3 gap-3">
-                        {n.photos.map((p) => (
-                          <div key={p.label}>
-                            <p className="mb-1 text-xs text-slate-400">{p.label}</p>
-                            <img src={p.url} alt={p.label} className="h-24 w-full rounded-lg object-cover" />
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <p className="text-slate-700">{n.content}</p>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            )}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-bold text-slate-900">🔧 Mechanical Findings</h2>
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-bold text-slate-900">Mechanical Findings</p>
               <button
                 onClick={addFinding}
-                className="flex items-center gap-1.5 rounded-lg border border-indigo-200 px-3 py-1.5 text-sm font-semibold text-indigo-600 hover:bg-indigo-50"
+                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
               >
-                <Plus size={14} /> Add Finding
+                <Plus size={13} /> Add Finding
               </button>
             </div>
 

@@ -9,9 +9,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Email is required' }, { status: 400 })
     }
 
-    
+    //from lm ace: added "Capstone-Testing". in here because my database from pg admin because it cannot search directly in my specified schema 
     const { rows: employeeRows } = await db.query(
-      `SELECT id, full_name, email, role FROM employees WHERE email = $1`,
+      `SELECT id, full_name, email, role FROM "Capstone-Testing".employees WHERE email = $1`,
       [email]
     )
 
@@ -32,8 +32,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Password is required' }, { status: 400 })
     }
 
+    //from lm ace: added "Capstone-Testing". in here because my database from pg admin because it cannot search directly in my specified schema 
     const { rows } = await db.query(
-      `SELECT * FROM get_authenticate_user($1, $2)`,
+      `SELECT * FROM "Capstone-Testing".get_authenticate_user($1, $2)`,
       [email, password]
     )
 
@@ -52,8 +53,23 @@ export async function POST(request: Request) {
       },
       role: user.role 
     })
-  } catch (error) {
+  } 
+
+  catch (error) {
+  console.error('Login error:', error)
+  return NextResponse.json(
+    { 
+      success: false, 
+      message: 'Internal server error',
+      // ⚠️ TEMPORARY - remove before deploying to production
+      debug: error instanceof Error ? error.message : String(error)
+    }, 
+    { status: 500 }
+  )
+}
+  /*
+  catch (error) {
     console.error('Login error:', error)
     return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 })
-  }
+  }*/
 }

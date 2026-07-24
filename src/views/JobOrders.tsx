@@ -3,7 +3,7 @@
 // Admin "Job Orders" board — lists every job order across all stages (inspecting/quotation/in-progress/completed), searchable and filterable by stage tab.
 import { useEffect, useMemo, useState } from 'react'
 import Link from "next/link";
-import { ClipboardList, Search, FileText, Wrench, CheckCircle2, Eye } from 'lucide-react'
+import { ClipboardList, Search, FileText, Wrench, CheckCircle2, Eye, ChevronLeft, ChevronRight } from 'lucide-react'
 import { TopBar } from '../components/TopBar'
 import { getJobOrders } from '@/controllers/jobOrderController'
 import { JobOrderCard, Stage, stageOrder, stageLabels } from '../data/types'
@@ -17,27 +17,52 @@ const stageIcons: Record<Stage, typeof Search> = {
   completed: CheckCircle2,
 }
 
+const PAGE_SIZE = 12
+
+// Maps each job-order stage to the page that handles it. "completed" has no
+// separate page of its own — a finished job order is just the Service
+// Progress page with every task checked off (see ServiceProgress.tsx).
+const stageToRoute: Record<Stage, string> = {
+  inspecting: 'inspection',
+  quotation: 'quotation',
+  'in-progress': 'progress',
+  completed: 'progress',
+}
+
 export function JobOrders() {
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [query, setQuery] = useState('')
 
-  // Pulled through the controller (mock API) rather than importing the data
-  // file directly, so this page is ready to point at a real endpoint later.
   const [jobOrders, setJobOrders] = useState<JobOrderCard[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Pagination state
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [total, setTotal] = useState(0)
 
   useEffect(() => {
     let active = true
-    getJobOrders().then((data) => {
-      if (active) {
-        setJobOrders(data)
+    setLoading(true)
+    setError(null)
+    getJobOrders(page, PAGE_SIZE)
+      .then((result) => {
+        if (!active) return
+        setJobOrders(result.data)
+        setTotalPages(result.totalPages)
+        setTotal(result.total)
         setLoading(false)
-      }
-    })
+      })
+      .catch((err) => {
+        if (!active) return
+        setError(err.message)
+        setLoading(false)
+      })
     return () => {
       active = false
     }
-  }, [])
+  }, [page])
 
   const tabs: { key: TabKey; label: string; icon: typeof ClipboardList; count: number }[] = [
     { key: 'all', label: 'All Orders', icon: ClipboardList, count: jobOrders.length },
@@ -61,7 +86,7 @@ export function JobOrders() {
         c.vehicle.toLowerCase().includes(q)
       return matchesTab && matchesQuery
     })
-  }, [activeTab, query])
+  }, [activeTab, query, jobOrders])
 
   return (
     <div className="space-y-6 p-8">
@@ -87,68 +112,101 @@ export function JobOrders() {
         })}
       </div>
 
-      {visibleCards.length === 0 ? (
+      {loading ? (
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-sm text-slate-400">
+          Loading job orders…
+        </div>
+      ) : error ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-12 text-center text-sm text-red-500">
+          {error}
+        </div>
+      ) : visibleCards.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-sm text-slate-400">
           No job orders match your search.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          {visibleCards.map((c) => (
-            <div key={c.id} className="rounded-2xl border border-slate-200 bg-white p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold text-white">
-                    {c.customer.charAt(0)}
+        <>
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+            {visibleCards.map((c) => (
+              <div key={c.id} className="rounded-2xl border border-slate-200 bg-white p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold text-white">
+                      {c.customer.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900">{c.customer}</p>
+                      <p className="text-sm text-slate-400">{c.vehicle}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-slate-900">{c.customer}</p>
-                    <p className="text-sm text-slate-400">{c.vehicle}</p>
-                  </div>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                    {stageLabels[c.stage]}
+                  </span>
                 </div>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                  {stageLabels[c.stage]}
-                </span>
-              </div>
 
-              <p className="mt-2 text-xs text-slate-400">{c.customerId}</p>
+                <p className="mt-2 text-xs text-slate-400">{c.customerId}</p>
 
-              <Stepper stage={c.stage} />
+                <Stepper stage={c.stage} />
 
-              <div className="mt-4 grid grid-cols-2 gap-y-3 text-sm">
-                <InfoField label="Service" value={c.service} />
-                <InfoField label="Time" value={c.time} />
-                <InfoField label="Plate" value={c.plate} prefix="#" />
-                <InfoField
-                  label="Payment"
-                  value={`${c.paid ? 'Paid' : 'Unpaid'} · ${c.payment}`}
-                  valueClass={c.paid ? 'text-emerald-600' : 'text-amber-600'}
-                />
-                <div className="col-span-2">
-                  <InfoField label="Assigned Mechanics" value={c.mechanic} />
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <div className="flex items-center justify-between text-xs text-slate-400">
-                  <span>{c.stepsDone}/{c.stepsTotal} steps completed</span>
-                </div>
-                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                  <div
-                    className="h-full rounded-full bg-slate-900"
-                    style={{ width: `${(c.stepsDone / c.stepsTotal) * 100}%` }}
+                <div className="mt-4 grid grid-cols-2 gap-y-3 text-sm">
+                  <InfoField label="Service" value={c.service} />
+                  <InfoField label="Time" value={c.time} />
+                  <InfoField label="Plate" value={c.plate} prefix="#" />
+                  <InfoField
+                    label="Payment"
+                    value={`${c.paid ? 'Paid' : 'Unpaid'} · ${c.payment}`}
+                    valueClass={c.paid ? 'text-emerald-600' : 'text-amber-600'}
                   />
+                  <div className="col-span-2">
+                    <InfoField label="Assigned Mechanics" value={c.mechanic} />
+                  </div>
                 </div>
-              </div>
 
-              <Link
-                href={`/job-orders/${c.id}/inspection`}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                <div className="mt-4">
+                  <div className="flex items-center justify-between text-xs text-slate-400">
+                    <span>{c.stepsDone}/{c.stepsTotal} steps completed</span>
+                  </div>
+                  <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className="h-full rounded-full bg-slate-900"
+                      style={{ width: `${(c.stepsDone / c.stepsTotal) * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                <Link
+                  href={`/job-orders/${c.id}/${stageToRoute[c.stage]}`}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  <Eye size={15} /> View Full Job Order
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination controls */}
+          <div className="flex items-center justify-between border-t border-slate-200 pt-4">
+            <p className="text-sm text-slate-500">
+              Page {page} of {totalPages} · {total} total job orders
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 disabled:opacity-40"
               >
-                <Eye size={15} /> View Full Job Order
-              </Link>
+                <ChevronLeft size={14} /> Prev
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 disabled:opacity-40"
+              >
+                Next <ChevronRight size={14} />
+              </button>
             </div>
-          ))}
-        </div>
+          </div>
+        </>
       )}
     </div>
   )
