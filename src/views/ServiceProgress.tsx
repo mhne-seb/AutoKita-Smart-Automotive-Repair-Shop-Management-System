@@ -9,7 +9,7 @@ import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderCon
 import { getQuotationById } from '@/controllers/quotationController'
 import { getServiceProgressById } from '@/controllers/serviceProgressController'
 import { currency } from '../data/mockData'
-import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData } from '../data/types'
+import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData } from '../data/types'
 
 interface Props {
   jobOrderId: string
@@ -26,7 +26,10 @@ const sectionColors: Record<string, string> = {
 export function ServiceProgress({ jobOrderId }: Props) {
   // Loaded through the controller (mock API) — see jobOrderController.ts.
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)
-  const quotation = getQuotationById(jobOrderId)
+
+  // Quotation data is now fetched from the real database asynchronously —
+  // loaded via useEffect/state instead of being read synchronously at render time.
+  const [quotation, setQuotation] = useState<QuotationData | null | undefined>(undefined)
 
   // Service progress now comes from the real database, which is an async
   // call — so it's loaded via useEffect/state, same as jobOrder, instead of
@@ -37,6 +40,16 @@ export function ServiceProgress({ jobOrderId }: Props) {
     let active = true
     getJobOrderById(jobOrderId).then((data) => {
       if (active) setJobOrder(data)
+    })
+    return () => {
+      active = false
+    }
+  }, [jobOrderId])
+
+  useEffect(() => {
+    let active = true
+    getQuotationById(jobOrderId).then((data) => {
+      if (active) setQuotation(data)
     })
     return () => {
       active = false
@@ -75,7 +88,7 @@ export function ServiceProgress({ jobOrderId }: Props) {
     )
   }, [quotation])
 
-  if (jobOrder === undefined || initial === undefined) {
+  if (jobOrder === undefined || initial === undefined || quotation === undefined) {
     return (
       <div className="p-8">
         <p className="text-sm text-slate-500">Loading service progress…</p>
