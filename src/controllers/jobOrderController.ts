@@ -132,18 +132,26 @@ export async function getJobOrderStageCounts(): Promise<Record<string, number>> 
 }
 
 /**
- * Moves a job order to a new stage. This is the write operation Admin pages
- * call when they inspect/quote/complete a vehicle — it's what makes the
- * Customer's tracking pages show up-to-date progress in this demo.
+ * Moves a job order to a new stage — now a real write to the database via
+ * advance_job_order_stage(), which also stamps timestamps and logs an audit
+ * entry. This is what Admin pages call when they inspect/quote/complete a
+ * vehicle; it's what makes the Customer's tracking pages show up-to-date,
+ * persisted progress (survives a page refresh, unlike the old mock version).
  */
 export async function advanceJobOrderStage(id: string, stage: Stage): Promise<JobOrderCard | null> {
-  const job = jobOrders.find((j) => j.id === id)
-  if (!job) return simulateDelay(null)
-  job.stage = stage
-  // step-progress indicator roughly in sync with the stage
-  const idx = stageOrder.indexOf(stage)
-  job.stepsDone = Math.min(job.stepsTotal, idx + 1)
-  return simulateDelay(job)
+  const res = await fetch(`/api/job-orders/${id}/advance-stage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stage }),
+  })
+
+  const json = await res.json()
+  if (!json.success) {
+    console.error('Failed to advance job order stage:', json.message)
+    return null
+  }
+
+  return toJobOrderCard(json.data)
 }
 
 /** Assigns (or reassigns) the mechanic responsible for a job order. */

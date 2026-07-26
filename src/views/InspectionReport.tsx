@@ -7,6 +7,7 @@ import { TopBar } from '../components/TopBar'
 import { JobOrderBreadcrumb } from '../components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
 import { getInspectionById } from '@/controllers/inspectionController'
+import { getLatestPreDiagnostic, sendForApproval, simulateCustomerResponse, type PreDiagnosticRound } from '@/controllers/preDiagnosticController'
 import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData } from '../data/types'
 
 interface Props {
@@ -41,6 +42,16 @@ export function InspectionReport({ jobOrderId }: Props) {
     }
   }, [jobOrderId])
 
+  useEffect(() => {
+    let active = true
+    getLatestPreDiagnostic(jobOrderId).then((data) => {
+      if (active) setPreDiagnostic(data)
+    })
+    return () => {
+      active = false
+    }
+  }, [jobOrderId])
+
   const [photoSlots, setPhotoSlots] = useState<InspectionData['photoSlots']>([])
   const [findings, setFindings] = useState<MechanicalFinding[]>([])
   const [noteDraft, setNoteDraft] = useState('')
@@ -48,7 +59,12 @@ export function InspectionReport({ jobOrderId }: Props) {
   const [editingFindingId, setEditingFindingId] = useState<string | null>(null)
   const [timerRunning, setTimerRunning] = useState(false)
   const [approvalDecision, setApprovalDecision] = useState<'pending' | 'confirmed' | 'reverted'>('pending')
-  const [uploaded, setUploaded] = useState(false)
+
+  // Real "send for approval" round — replaces the old local `uploaded` flag.
+  const [preDiagnostic, setPreDiagnostic] = useState<PreDiagnosticRound | null | undefined>(undefined)
+  const [sending, setSending] = useState(false)
+  const [respondingTo, setRespondingTo] = useState<'approved' | 'disputed' | null>(null)
+
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
 
   // Once the real data arrives, seed the editable state from it.
@@ -113,11 +129,27 @@ export function InspectionReport({ jobOrderId }: Props) {
     setFindings((prev) => [...prev, newFinding])
   }
 
-  // Advances the shared mock job order to "quotation" so the Customer's
-  // dashboard immediately reflects it (see jobOrderController for how the
-  // two sides stay connected on mock data).
-  function continueToQuotation() {
-    void advanceJobOrderStage(jobOrderId, 'quotation')
+  // Sends the current findings for approval — a real, persisted database
+  // write (creates a pre_diagnostics round) instead of the old fake local flag.
+  async function sendInspectionForApproval() {
+    setSending(true)
+    const summary = findings.map((f) => `${f.name}: ${f.note}`).join(' | ') || 'No findings logged.'
+    const round = await sendForApproval(jobOrderId, summary)
+    if (round) {
+      setPreDiagnostic(round)
+      // Marks the job order as awaiting customer approval in the real database.
+      void advanceJobOrderStage(jobOrderId, 'quotation')
+    }
+    setSending(false)
+  }
+
+  // Simulates the customer's decision on the current round (stands in for
+  // the real Customer-portal approval button, which is a separate task).
+  async function respondToInspection(status: 'approved' | 'disputed') {
+    setRespondingTo(status)
+    const round = await simulateCustomerResponse(jobOrderId, status)
+    if (round) setPreDiagnostic(round)
+    setRespondingTo(null)
   }
 
   return (
@@ -138,12 +170,20 @@ export function InspectionReport({ jobOrderId }: Props) {
               </div>
             </div>
             <button
-              onClick={() => setUploaded(true)}
-              disabled={uploaded}
+              onClick={sendInspectionForApproval}
+              disabled={sending || Boolean(preDiagnostic && preDiagnostic.status === 'pending')}
               className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-default disabled:bg-emerald-600"
             >
-              {uploaded ? <CheckCircle2 size={15} /> : <Cloud size={15} />}
-              {uploaded ? 'Uploaded to customer portal' : 'Upload to customer portal'}
+              {preDiagnostic ? <CheckCircle2 size={15} /> : <Cloud size={15} />}
+              {sending
+                ? 'Sending…'
+                : preDiagnostic?.status === 'pending'
+                ? 'Awaiting customer approval'
+                : preDiagnostic?.status === 'approved'
+                ? 'Approved by customer'
+                : preDiagnostic?.status === 'disputed'
+                ? 'Disputed — resend after changes'
+                : 'Upload to customer portal'}
             </button>
           </div>
 
@@ -400,13 +440,37 @@ export function InspectionReport({ jobOrderId }: Props) {
             </div>
           )}
 
-          <Link
-            href={`/job-orders/${jobOrderId}/quotation`}
-            onClick={continueToQuotation}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
-          >
-            Continue to Quotation <ChevronRight size={15} />
-          </Link>
+          {preDiagnostic && preDiagnostic.status === 'pending' && (
+            <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-5">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-indigo-500">Simulate Customer Decision</p>
+              <p className="mb-4 text-sm text-indigo-500">
+                Stands in for the real Customer portal (a separate task) — use this to test the approval flow.
+              </p>
+              <button
+                onClick={() => respondToInspection('approved')}
+                disabled={respondingTo !== null}
+                className="mb-2 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+              >
+                <Check size={15} /> {respondingTo === 'approved' ? 'Approving…' : 'Simulate: Customer Approves'}
+              </button>
+              <button
+                onClick={() => respondToInspection('disputed')}
+                disabled={respondingTo !== null}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white py-2.5 text-sm font-semibold text-indigo-600 hover:bg-indigo-50 disabled:opacity-50"
+              >
+                <X size={15} /> {respondingTo === 'disputed' ? 'Sending…' : 'Simulate: Customer Disputes'}
+              </button>
+            </div>
+          )}
+
+          {preDiagnostic?.status === 'approved' && (
+            <Link
+              href={`/job-orders/${jobOrderId}/quotation`}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+            >
+              Continue to Quotation <ChevronRight size={15} />
+            </Link>
+          )}
         </div>
       </div>
     </div>

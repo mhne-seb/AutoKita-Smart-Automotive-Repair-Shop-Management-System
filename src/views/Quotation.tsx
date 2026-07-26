@@ -3,11 +3,12 @@
 // Admin "Quotation" page (one step of the job-order workflow: Inspection -> Quotation -> Service Progress). Lets the mechanic/admin build a service+parts quote for the customer to approve, then hands off to Service Progress.
 import { useEffect, useMemo, useState } from 'react'
 import Link from "next/link";
-import { Plus, Pencil, Check, Send, ShieldCheck, ChevronRight } from 'lucide-react'
+import { Plus, Pencil, Check, Send, ShieldCheck, ChevronRight, X } from 'lucide-react'
 import { TopBar } from '../components/TopBar'
 import { JobOrderBreadcrumb } from '../components/dashboard/JobOrderBreadcrumb'
-import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
+import { getJobOrderById } from '@/controllers/jobOrderController'
 import { getQuotationById } from '@/controllers/quotationController'
+import { getLatestPreDiagnostic, sendForApproval, simulateCustomerResponse, type PreDiagnosticRound } from '@/controllers/preDiagnosticController'
 import { currency } from '../data/mockData'
 import { QuotationService, JobOrderCard, QuotationData } from '../data/types'
 
@@ -47,14 +48,27 @@ export function Quotation({ jobOrderId }: Props) {
   const [notes, setNotes] = useState('')
   const [editingNotes, setEditingNotes] = useState(false)
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null)
-  const [sent, setSent] = useState(false)
+
+  // Real "send for approval" round — replaces the old local `sent` flag.
+  const [preDiagnostic, setPreDiagnostic] = useState<PreDiagnosticRound | null | undefined>(undefined)
+  const [sending, setSending] = useState(false)
+  const [respondingTo, setRespondingTo] = useState<'approved' | 'disputed' | null>(null)
+
+  useEffect(() => {
+    let active = true
+    getLatestPreDiagnostic(jobOrderId).then((data) => {
+      if (active) setPreDiagnostic(data)
+    })
+    return () => {
+      active = false
+    }
+  }, [jobOrderId])
 
   // Once the real data arrives, seed the editable state from it.
   useEffect(() => {
     if (initial) {
       setServices(initial.services)
       setNotes(initial.notes)
-      setSent(initial.sentToCustomer)
     }
   }, [initial])
 
@@ -76,7 +90,7 @@ export function Quotation({ jobOrderId }: Props) {
     return { inStock, toOrder }
   }, [services])
 
-  if (jobOrder === undefined || initial === undefined) {
+  if (jobOrder === undefined || initial === undefined || preDiagnostic === undefined) {
     return (
       <div className="p-8">
         <p className="text-sm text-slate-500">Loading quotation…</p>
@@ -113,6 +127,26 @@ export function Quotation({ jobOrderId }: Props) {
           : s
       )
     )
+  }
+
+  // Sends the full quotation (services + parts + total) for approval — a
+  // real, persisted database write (creates a new pre_diagnostics round).
+  async function sendQuotationForApproval() {
+    setSending(true)
+    const summary = `Quotation total: ${currency(totals.grandTotal)} (Labor: ${currency(totals.laborTotal)}, Parts: ${currency(totals.partsTotal)}). ${notes}`
+    const round = await sendForApproval(jobOrderId, summary)
+    if (round) setPreDiagnostic(round)
+    setSending(false)
+  }
+
+  // Simulates the customer's decision on the quotation (stands in for the
+  // real Customer-portal approval button, which is a separate task).
+  // Approving here moves the job order into "in-progress" for real.
+  async function respondToQuotation(status: 'approved' | 'disputed') {
+    setRespondingTo(status)
+    const round = await simulateCustomerResponse(jobOrderId, status, status === 'approved' ? 'in-progress' : undefined)
+    if (round) setPreDiagnostic(round)
+    setRespondingTo(null)
   }
 
   function addService() {
@@ -173,11 +207,18 @@ export function Quotation({ jobOrderId }: Props) {
             <Plus size={14} /> Add Service
           </button>
           <button
-            onClick={() => setSent(true)}
-            disabled={sent}
+            onClick={sendQuotationForApproval}
+            disabled={sending || preDiagnostic?.status === 'pending'}
             className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
           >
-            <Send size={14} /> {sent ? 'Sent to Customer' : 'Send to Customer'}
+            <Send size={14} />{' '}
+            {sending
+              ? 'Sending…'
+              : preDiagnostic?.status === 'pending'
+              ? 'Awaiting customer approval'
+              : preDiagnostic?.status === 'approved'
+              ? 'Approved by customer'
+              : 'Send to Customer'}
           </button>
         </div>
       </div>
@@ -361,13 +402,37 @@ export function Quotation({ jobOrderId }: Props) {
             </button>
           </div>
 
-          <Link
-            href={`/job-orders/${jobOrderId}/progress`}
-            onClick={() => void advanceJobOrderStage(jobOrderId, 'in-progress')}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
-          >
-            Continue to Service Progress <ChevronRight size={15} />
-          </Link>
+          {preDiagnostic && preDiagnostic.status === 'pending' && (
+            <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-5">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-indigo-500">Simulate Customer Decision</p>
+              <p className="mb-4 text-sm text-indigo-500">
+                Stands in for the real Customer portal (a separate task) — use this to test the approval flow.
+              </p>
+              <button
+                onClick={() => respondToQuotation('approved')}
+                disabled={respondingTo !== null}
+                className="mb-2 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+              >
+                <Check size={15} /> {respondingTo === 'approved' ? 'Approving…' : 'Simulate: Customer Approves'}
+              </button>
+              <button
+                onClick={() => respondToQuotation('disputed')}
+                disabled={respondingTo !== null}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white py-2.5 text-sm font-semibold text-indigo-600 hover:bg-indigo-50 disabled:opacity-50"
+              >
+                <X size={15} /> {respondingTo === 'disputed' ? 'Sending…' : 'Simulate: Customer Disputes'}
+              </button>
+            </div>
+          )}
+
+          {preDiagnostic?.status === 'approved' && (
+            <Link
+              href={`/job-orders/${jobOrderId}/progress`}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+            >
+              Continue to Service Progress <ChevronRight size={15} />
+            </Link>
+          )}
         </div>
       </div>
     </div>
