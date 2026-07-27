@@ -1,19 +1,32 @@
 'use client'
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, KeyboardEvent } from "react";
-import { Car, FileText, Clock, Wrench, Package, AlertCircle, CreditCard, Mail, X, Upload, Paperclip, ShieldCheck, CheckCircle2, Loader2, Store, Wallet, Send, HourglassIcon, BadgeCheck } from "lucide-react";
+import { Car, FileText, Clock, AlertCircle, CreditCard, Mail, X, ShieldCheck, CheckCircle2, Loader2, Store, Wallet, Send, HourglassIcon, BadgeCheck, Lock } from "lucide-react";
 import { StageStepper } from "@/components/dashboard/StageStepper";
+import {
+  getQuotationData,
+  confirmQuotationVia2FA,
+  submitQuotationPayment,
+  getQuotationPaymentStatus,
+} from "@/controllers/quotationController";
 
-type Svc = { id: string; title: string; desc: string; price: number; labor: string; laborCost: string; parts: string; stock: string; stockOk: boolean; tag?: string; tagTone?: "order" | "special" };
+type FetchedService = {
+  id: number;
+  service_name: string;
+  description_of_work: string;
+  estimated_hours: number;
+  amount: string;
+};
 
-const SERVICES: Svc[] = [
-  { id: "SVC-001", title: "Engine Oil & Filter Change", desc: "Full synthetic oil change with genuine oil filter replacement.", price: 3200, labor: "1.5 hrs labor", laborCost: "₱1,800 labor", parts: "₱1,400 parts", stock: "2 in stock", stockOk: true },
-  { id: "SVC-002", title: "Front Brake Pad Replacement", desc: "Replace worn front brake pads and inspect rotors. Immediate attention required.", price: 7050, labor: "2 hrs labor", laborCost: "₱2,500 labor", parts: "₱4,550 parts", stock: "1 in stock", stockOk: true, tag: "1 to order", tagTone: "order" },
-  { id: "SVC-003", title: "Air Filter Replacement", desc: "Replace clogged engine air filter for optimal performance.", price: 1800, labor: "0.5 hrs labor", laborCost: "₱600 labor", parts: "₱1,200 parts", stock: "1 in stock", stockOk: true, tag: "1 to order", tagTone: "order" },
-  { id: "SVC-005", title: "Suspension Overhaul", desc: "Full replacement of front and rear suspension components for restored ride quality.", price: 39500, labor: "8 hrs labor", laborCost: "₱12,000 labor", parts: "₱27,900 parts", stock: "to order", stockOk: false, tag: "special order", tagTone: "special" },
-];
+type JobOrder = {
+  job_order_id: number;
+  quotation_approved: boolean;
+  vehicle_model: string;
+  vehicle_year: number;
+  plate_number: string;
+};
 
 type PaymentMethod = "shop" | "ewallet";
 type PaymentStatus = "none" | "pending" | "confirmed";
@@ -22,107 +35,186 @@ function Quotation() {
   useEffect(() => { document.title = "Quotation — AutoKita"; }, []);
 
   const router = useRouter();
-  const [checked, setChecked] = useState<Record<string, boolean>>({ "SVC-001": true, "SVC-002": true, "SVC-003": true, "SVC-005": true });
+  const searchParams = useSearchParams();
+  const jobOrderIdParam = searchParams.get("jobOrderId");
+
+  const [loading, setLoading] = useState(true);
+  const [jobOrder, setJobOrder] = useState<JobOrder | null>(null);
+  const [services, setServices] = useState<FetchedService[]>([]);
+  const [checked, setChecked] = useState<Record<number, boolean>>({});
+
   const [showPay, setShowPay] = useState(false);
   const [show2FA, setShow2FA] = useState(false);
-
-  // When the bill is below the mandatory downpayment threshold, the customer
-  // can still choose to pay a downpayment voluntarily instead of just doing 2FA.
   const [payChoice, setPayChoice] = useState<"2fa" | "downpayment">("2fa");
 
-  // Tracks the state of a submitted downpayment so the customer can see
-  // whether it's still waiting on shop/staff verification or already confirmed.
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("none");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
-  const [paymentRef, setPaymentRef] = useState<string | null>(null);
 
-  const total = SERVICES.filter((s) => checked[s.id]).reduce((sum, s) => sum + s.price, 0);
+  const goToInProgress = () => router.push(`/dashboard/tracking/in-progress?jobOrderId=${jobOrder?.job_order_id}`);
+
+  // Locked once the DB says the quotation was already approved/confirmed —
+  // this survives reloads and back-navigation, unlike component state.
+  const locked = jobOrder?.quotation_approved === true;
+
+  useEffect(() => {
+    const userId = Number(sessionStorage.getItem("autokita_user_id"));
+    const jobOrderId = jobOrderIdParam ? Number(jobOrderIdParam) : undefined;
+    setLoading(true);
+    getQuotationData(userId, jobOrderId)
+      .then((data) => {
+        setJobOrder(data.jobOrder);
+        setServices(data.services);
+        setChecked(Object.fromEntries(data.services.map((s) => [s.id, true])));
+        if (data.paymentStatus) {
+          if (data.paymentStatus.verification_status === "verified") {
+            setPaymentStatus("confirmed");
+          } else if (data.paymentStatus.verification_status === "pending") {
+            setPaymentStatus("pending");
+            setPaymentMethod(data.paymentStatus.payment_method === "cash" ? "shop" : "ewallet");
+          }
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [jobOrderIdParam]);
+
+  const total = services
+    .filter((s) => checked[s.id])
+    .reduce((sum, s) => sum + Number(s.amount), 0);
   const needsDownpayment = total > 50000;
   const downpayment = Math.round(total * 0.2);
   const selectedCount = Object.values(checked).filter(Boolean).length;
-  const wantsDownpayment = needsDownpayment || payChoice === "downpayment";
 
-  const goToInProgress = () => router.push("/dashboard/tracking/in-progress");
-
-  // Simulates staff/backend verification of a submitted downpayment.
+  // Poll for staff verification once a payment has been submitted — only while unlocked flow is live.
   useEffect(() => {
-    if (paymentStatus !== "pending") return;
-    const t = setTimeout(() => {
-      setPaymentStatus("confirmed");
-      setTimeout(goToInProgress, 1200);
+    if (paymentStatus !== "pending" || !jobOrder || locked === false) return;
+    const interval = setInterval(async () => {
+      const { paymentStatus: latest } = await getQuotationPaymentStatus(jobOrder.job_order_id);
+      if (latest?.verification_status === "verified") {
+        setPaymentStatus("confirmed");
+        clearInterval(interval);
+        setTimeout(goToInProgress, 1200);
+      }
     }, 5000);
-    return () => clearTimeout(t);
+    return () => clearInterval(interval);
+  }, [paymentStatus, jobOrder, locked]);
 
-  }, [paymentStatus]);
-
-  const handlePaymentSubmitted = (method: PaymentMethod, ref: string | null) => {
+  const handlePaymentSubmitted = async (method: PaymentMethod, amount: number) => {
+    if (!jobOrder) return;
+    const res = await submitQuotationPayment(jobOrder.job_order_id, method, amount);
+    if (!res.success) return; // e.g. 409 already-confirmed — server is the source of truth
     setPaymentMethod(method);
-    setPaymentRef(ref);
     setPaymentStatus("pending");
+    setJobOrder({ ...jobOrder, quotation_approved: true });
     setShowPay(false);
   };
 
+  const handle2FAVerified = async () => {
+    if (!jobOrder) return;
+    const res = await confirmQuotationVia2FA(jobOrder.job_order_id);
+    if (!res.success) return;
+    goToInProgress();
+  };
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-6xl px-6 py-8">
+        <div className="flex items-center justify-center gap-2 py-20 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" /> Loading quotation…
+        </div>
+      </div>
+    );
+  }
+
+  if (!jobOrder) {
+    return (
+      <div className="mx-auto max-w-6xl px-6 py-8">
+        <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">
+          You don't have any active quotation right now.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active="quotation" />
+      <StageStepper active="quotation" jobOrderId={jobOrder.job_order_id} />
+
+      {locked && (
+        <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
+          <Lock className="h-3.5 w-3.5" /> This quotation has already been confirmed and can no longer be changed.
+        </div>
+      )}
 
       <div className="rounded-xl border bg-card p-5">
         <div className="grid grid-cols-4 items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted"><Car className="h-4 w-4 text-brand" /></div>
-            <div><div className="text-xs text-muted-foreground">Vehicle</div><div className="font-bold">2022 Tesla Model 3</div></div>
+            <div><div className="text-xs text-muted-foreground">Vehicle</div><div className="font-bold">{jobOrder.vehicle_year} {jobOrder.vehicle_model}</div></div>
           </div>
-          <div><div className="text-xs text-muted-foreground">Plate No.</div><div className="font-bold">ABC-1234</div></div>
+          <div><div className="text-xs text-muted-foreground">Plate No.</div><div className="font-bold">{jobOrder.plate_number}</div></div>
           <div><div className="text-xs text-muted-foreground">Customer</div><div className="font-bold">Juan Dela Cruz</div></div>
-          <div className="text-right"><span className="text-xs text-muted-foreground">Job Order </span><span className="ml-2 rounded-md bg-brand px-3 py-1 text-xs font-bold text-brand-foreground">JO-1234</span></div>
+          <div className="text-right"><span className="text-xs text-muted-foreground">Job Order </span><span className="ml-2 rounded-md bg-brand px-3 py-1 text-xs font-bold text-brand-foreground">JO-{jobOrder.job_order_id}</span></div>
         </div>
       </div>
 
       <div>
         <span className="inline-flex items-center gap-2 rounded-full bg-teal px-4 py-1.5 text-xs font-semibold text-white">👤 Customer — Service Selection</span>
-        <span className="ml-3 text-xs text-muted-foreground">Select the services you wish to proceed with. Prices are inclusive of parts and labor.</span>
+        <span className="ml-3 text-xs text-muted-foreground">
+          {locked ? "Your confirmed service selection." : "Select the services you wish to proceed with. Prices are inclusive of parts and labor."}
+        </span>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div>
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold">Recommended Services</h3>
-              <p className="text-xs text-muted-foreground">Tick the services you would like to confirm. Untick to exclude from quotation.</p>
+              <h3 className="font-bold">{locked ? "Confirmed Services" : "Recommended Services"}</h3>
+              <p className="text-xs text-muted-foreground">
+                {locked ? "This selection is locked and can no longer be edited." : "Tick the services you would like to confirm. Untick to exclude from quotation."}
+              </p>
             </div>
-            <span className="text-xs text-muted-foreground">{selectedCount}/{SERVICES.length} selected</span>
+            <span className="text-xs text-muted-foreground">{selectedCount}/{services.length} selected</span>
           </div>
 
           <div className="mt-4 space-y-3">
-            {SERVICES.map((s) => (
-              <label key={s.id} className={`block cursor-pointer rounded-xl border-2 bg-card p-5 ${checked[s.id] ? "border-teal" : "border-border"}`}>
+            {services.map((s) => (
+              <label
+                key={s.id}
+                className={`block rounded-xl border-2 bg-card p-5 ${checked[s.id] ? "border-teal" : "border-border"} ${
+                  locked ? "cursor-not-allowed opacity-80" : "cursor-pointer"
+                }`}
+              >
                 <div className="flex items-start gap-4">
-                  <input type="checkbox" checked={!!checked[s.id]} onChange={(e) => setChecked({ ...checked, [s.id]: e.target.checked })} className="mt-1 h-5 w-5 accent-[color:var(--teal)]" />
+                  <input
+                    type="checkbox"
+                    checked={!!checked[s.id]}
+                    disabled={locked}
+                    onChange={(e) => setChecked({ ...checked, [s.id]: e.target.checked })}
+                    className="mt-1 h-5 w-5 accent-[color:var(--teal)] disabled:cursor-not-allowed"
+                  />
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>{s.id}</span>
-                          {s.tag && <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${s.tagTone === "order" ? "bg-warning/20 text-[color:oklch(0.55_0.15_60)]" : "bg-warning/20 text-[color:oklch(0.55_0.15_60)]"}`}>📦 {s.tag}</span>}
-                        </div>
-                        <div className="mt-1 font-bold">{s.title}</div>
-                        <p className="mt-1 text-xs text-muted-foreground">{s.desc}</p>
+                        <div className="mt-1 font-bold">{s.service_name}</div>
+                        <p className="mt-1 text-xs text-muted-foreground">{s.description_of_work}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <div className="text-lg font-bold">₱{s.price.toLocaleString()}</div>
+                        <div className="text-lg font-bold">₱{Number(s.amount).toLocaleString()}</div>
                         <div className="text-[10px] text-muted-foreground">incl. parts & labor</div>
                       </div>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1"><Clock className="h-3 w-3" /> {s.labor}</span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1"><Wrench className="h-3 w-3" /> {s.laborCost}</span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1"><Package className="h-3 w-3" /> {s.parts}</span>
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs ${s.stockOk ? "text-success" : "text-warning"}`}>● {s.stock}</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1"><Clock className="h-3 w-3" /> {s.estimated_hours} hrs est.</span>
                     </div>
                   </div>
                 </div>
               </label>
             ))}
+            {services.length === 0 && (
+              <div className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">
+                No services have been added to this job order yet.
+              </div>
+            )}
           </div>
         </div>
 
@@ -134,20 +226,30 @@ function Quotation() {
             </div>
             <div className="bg-card p-5">
               <div className="space-y-2 text-sm">
-                {SERVICES.filter((s) => checked[s.id]).map((s) => (
+                {services.filter((s) => checked[s.id]).map((s) => (
                   <div key={s.id} className="flex items-center justify-between">
-                    <span className="flex items-center gap-2"><span className="text-teal">●</span> {s.title}</span>
-                    <span className="font-medium">₱{s.price.toLocaleString()}</span>
+                    <span className="flex items-center gap-2"><span className="text-teal">●</span> {s.service_name}</span>
+                    <span className="font-medium">₱{Number(s.amount).toLocaleString()}</span>
                   </div>
                 ))}
                 {selectedCount === 0 && <p className="text-xs text-muted-foreground">No services selected yet.</p>}
               </div>
-              <div className="mt-4 border-t pt-3 text-sm"><div className="flex justify-between"><span className="text-muted-foreground">Est. Duration</span><b>{selectedCount * 3} hrs</b></div></div>
+              <div className="mt-4 border-t pt-3 text-sm"><div className="flex justify-between"><span className="text-muted-foreground">Est. Duration</span><b>{services.filter((s) => checked[s.id]).reduce((sum, s) => sum + s.estimated_hours, 0)} hrs</b></div></div>
               <div className="mt-2 flex items-center justify-between"><span className="font-semibold">Total Quotation</span><span className="text-xl font-bold">₱{total.toLocaleString()}</span></div>
 
-              {/* --- Payment status: shown once a downpayment has been submitted --- */}
-              {paymentStatus !== "none" ? (
-                <PaymentStatusCard status={paymentStatus} method={paymentMethod} reference={paymentRef} />
+              {locked ? (
+                <div className="mt-4 rounded-lg bg-success/10 p-4">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-success">
+                    <CheckCircle2 className="h-4 w-4" /> Quotation Confirmed
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {paymentStatus !== "none"
+                      ? `Confirmed via ${paymentMethod === "shop" ? "Pay at Shop" : "E-Wallet"} payment.`
+                      : "Confirmed via 2FA verification."}{" "}
+                    This selection can no longer be changed.
+                  </p>
+                  {paymentStatus !== "none" && <PaymentStatusCard status={paymentStatus} method={paymentMethod} />}
+                </div>
               ) : needsDownpayment ? (
                 <>
                   <div className="mt-4 rounded-lg bg-[color:oklch(0.97_0.04_50)] p-4">
@@ -168,9 +270,6 @@ function Quotation() {
                 </>
               ) : (
                 <>
-                  {/* Bill is below ₱50k — downpayment isn't required, but the
-                      customer can still opt into paying one now if they'd rather
-                      not wait for a 2FA prompt later. */}
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <button
                       onClick={() => setPayChoice("2fa")}
@@ -232,13 +331,24 @@ function Quotation() {
             </div>
           </div>
 
-          <div className="rounded-xl border bg-card p-4 text-xs text-muted-foreground">
-            <div className="flex gap-2"><AlertCircle className="h-4 w-4 shrink-0" /> Parts marked "To Order" may add 1-3 business days to the estimated completion time. The workshop will confirm once parts arrive.</div>
-          </div>
+          {!locked && (
+            <div className="rounded-xl border bg-card p-4 text-xs text-muted-foreground">
+              <div className="flex gap-2"><AlertCircle className="h-4 w-4 shrink-0" /> Parts marked "To Order" may add 1-3 business days to the estimated completion time. The workshop will confirm once parts arrive.</div>
+            </div>
+          )}
+
+          {locked && (
+            <button
+              onClick={goToInProgress}
+              className="flex w-full items-center justify-center gap-2 rounded-md border bg-card py-2.5 text-sm font-medium hover:border-brand hover:text-brand"
+            >
+              Go to Service Tracker
+            </button>
+          )}
         </aside>
       </div>
 
-      {showPay && (
+      {showPay && !locked && (
         <PaymentModal
           total={total}
           downpayment={downpayment}
@@ -247,54 +357,41 @@ function Quotation() {
           onSubmitted={handlePaymentSubmitted}
         />
       )}
-      {show2FA && <TwoFAModal onClose={() => setShow2FA(false)} onVerified={goToInProgress} />}
+      {show2FA && !locked && <TwoFAModal onClose={() => setShow2FA(false)} onVerified={handle2FAVerified} />}
     </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Payment status card — once a downpayment has been
-// submitted, so the customer can tell at a glance whether it's still waiting
-// on verification or already confirmed, instead of assuming it went through.
-// ---------------------------------------------------------------------------
-function PaymentStatusCard({ status, method, reference }: { status: PaymentStatus; method: PaymentMethod | null; reference: string | null }) {
+function PaymentStatusCard({ status, method }: { status: PaymentStatus; method: PaymentMethod | null }) {
   if (status === "confirmed") {
     return (
-      <div className="mt-4 flex items-start gap-3 rounded-lg bg-success/10 p-4">
-        <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-success" />
-        <div>
-          <div className="text-sm font-semibold text-success">Payment Verified</div>
-          <p className="mt-1 text-xs text-muted-foreground">Taking you to your service tracker…</p>
-        </div>
+      <div className="mt-3 flex items-start gap-3 rounded-lg bg-success/10 p-3">
+        <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+        <div className="text-xs text-muted-foreground">Payment verified.</div>
       </div>
     );
   }
 
   return (
-    <div className="mt-4 rounded-lg border border-warning/30 bg-warning/10 p-4">
+    <div className="mt-3 rounded-lg border border-warning/30 bg-warning/10 p-3">
       <div className="flex items-start gap-3">
-        <HourglassIcon className="mt-0.5 h-5 w-5 shrink-0 text-[color:oklch(0.55_0.15_60)] animate-pulse" />
+        <HourglassIcon className="mt-0.5 h-4 w-4 shrink-0 text-[color:oklch(0.55_0.15_60)] animate-pulse" />
         <div className="min-w-0">
-          <div className="text-sm font-semibold text-[color:oklch(0.5_0.13_50)]">
+          <div className="text-xs font-semibold text-[color:oklch(0.5_0.13_50)]">
             {method === "shop" ? "Pending Payment at Shop" : "Pending Verification"}
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
             {method === "shop"
-              ? "Please settle your downpayment at the shop counter and mention your Job Order number. This will update automatically once staff confirms receipt."
-              : "We're reviewing your uploaded proof and reference number. This usually takes a few minutes."}
+              ? "Please settle your downpayment at the shop counter."
+              : "We're confirming your GCash/Maya transfer."}
           </p>
-          {reference && (
-            <div className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-background px-2.5 py-1 text-[11px] font-mono">
-              Ref: {reference}
-            </div>
-          )}
         </div>
       </div>
     </div>
   );
 }
 
-function TwoFAModal({ onClose, onVerified }: { onClose: () => void; onVerified: () => void }) {
+function TwoFAModal({ onClose, onVerified }: { onClose: () => void; onVerified: () => void | Promise<void> }) {
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
   const [status, setStatus] = useState<"idle" | "verifying" | "success" | "error">("idle");
   const [resent, setResent] = useState(false);
@@ -319,9 +416,9 @@ function TwoFAModal({ onClose, onVerified }: { onClose: () => void; onVerified: 
   const verify = () => {
     if (!complete) return;
     setStatus("verifying");
-    setTimeout(() => {
+    setTimeout(async () => {
       setStatus("success");
-      setTimeout(onVerified, 900);
+      setTimeout(() => onVerified(), 900);
     }, 900);
   };
 
@@ -383,18 +480,6 @@ function TwoFAModal({ onClose, onVerified }: { onClose: () => void; onVerified: 
   );
 }
 
-// ---------------------------------------------------------------------------
-// E-wallet QR / account details shown when E-Wallet Transfer is selected
-// ---------------------------------------------------------------------------
-const WALLETS: { name: string; number: string }[] = [
-  { name: "GCash", number: "0917-123-4567" },
-  { name: "Maya", number: "0908-765-4321" },
-];
-
-// GCash/Maya reference numbers are numeric-ish alphanumeric strings, typically
-// 10-13 characters
-const REF_PATTERN = /^[A-Za-z0-9]{10,13}$/;
-
 function PaymentModal({
   total,
   downpayment,
@@ -406,39 +491,16 @@ function PaymentModal({
   downpayment: number;
   optional?: boolean;
   onClose: () => void;
-  onSubmitted: (method: PaymentMethod, reference: string | null) => void;
+  onSubmitted: (method: PaymentMethod, amount: number) => void | Promise<void>;
 }) {
   const [method, setMethod] = useState<PaymentMethod>("shop");
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [refNumber, setRefNumber] = useState("");
-  const [refTouched, setRefTouched] = useState(false);
   const [status, setStatus] = useState<"idle" | "processing" | "success">("idle");
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const handleFile = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) setFileName(e.target.files[0].name);
-  };
-
-  const refValid = REF_PATTERN.test(refNumber.trim());
-  const refError = refTouched && refNumber.trim().length > 0 && !refValid
-    ? "Reference number should be 10–13 letters/numbers, exactly as shown in your wallet app."
-    : refTouched && refNumber.trim().length === 0
-    ? "Reference number is required to verify your transfer."
-    : null;
-
-  // Pay at Shop is settled in person, so no proof is required — but it will
-  // still show as "pending" until staff confirms receipt (see PaymentStatusCard).
-  // E-Wallet Transfer requires both a screenshot AND a valid reference number,
-  // so a mistyped or copy-pasted wrong reference can't slip through.
-  const canConfirm = method === "shop" || (!!fileName && refValid);
 
   const confirm = () => {
-    setRefTouched(true);
-    if (!canConfirm) return;
     setStatus("processing");
-    setTimeout(() => {
+    setTimeout(async () => {
+      await onSubmitted(method, downpayment);
       setStatus("success");
-      setTimeout(() => onSubmitted(method, method === "ewallet" ? refNumber.trim() : null), 1000);
     }, 1200);
   };
 
@@ -452,7 +514,7 @@ function PaymentModal({
             <p className="text-xs text-muted-foreground">
               {method === "shop"
                 ? "Please settle the downpayment at the shop counter. We'll mark it verified once received."
-                : "We'll notify you once your reference number and proof are verified."}
+                : "We'll notify you once your GCash/Maya transfer has been confirmed."}
             </p>
           </div>
         ) : (
@@ -490,62 +552,13 @@ function PaymentModal({
             </div>
 
             {method === "ewallet" && (
-              <div className="mt-5 grid gap-5 md:grid-cols-2">
-                <div>
-                  <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    <Wallet className="h-3 w-3" /> Payment Details
-                  </div>
-                  {WALLETS.map((w) => (
-                    <div key={w.name} className="mt-2 flex items-center justify-between rounded-lg bg-muted/40 p-3">
-                      <div className="text-xs">
-                        <div className="text-sm font-bold">{w.name}</div>
-                        <div>Account Name: <b>AutoCare Services</b></div>
-                        <div>Mobile Number: <b>{w.number}</b></div>
-                      </div>
-                      <div className="text-center">
-                        <div className="grid h-16 w-16 place-items-center rounded border bg-white p-1 text-[8px]">QR</div>
-                        <div className="mt-1 text-[10px]">{w.name} QR</div>
-                      </div>
-                    </div>
-                  ))}
+              <div className="mt-5 flex flex-col items-center gap-3 rounded-lg border-2 border-dashed bg-muted/20 p-6 text-center">
+                <div className="grid h-40 w-40 place-items-center rounded-lg border bg-white text-xs text-muted-foreground">
+                  QR Code Coming Soon
                 </div>
-
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Upload Payment Proof
-                  </div>
-                  <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFile} />
-                  {fileName ? (
-                    <div className="mt-2 flex items-center justify-between rounded-md bg-muted/40 px-3 py-2 text-xs">
-                      <span className="flex items-center gap-2"><Paperclip className="h-3 w-3" /> {fileName}</span>
-                      <button onClick={() => setFileName(null)} className="text-muted-foreground hover:text-destructive">×</button>
-                    </div>
-                  ) : (
-                    <label className="mt-2 flex h-32 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/20 p-6 text-center hover:bg-muted/30">
-                      <Upload className="h-6 w-6 text-muted-foreground" />
-                      <p className="mt-2 text-xs text-muted-foreground">Drag and drop or click to upload PDF/JPG</p>
-                      <input type="file" accept="image/*,.pdf" className="hidden" onChange={handleFile} />
-                    </label>
-                  )}
-
-                  <div className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Reference Number
-                  </div>
-                  <input
-                    value={refNumber}
-                    onChange={(e) => setRefNumber(e.target.value)}
-                    onBlur={() => setRefTouched(true)}
-                    placeholder="e.g. 0123456789"
-                    className={`mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm font-mono focus:outline-none ${
-                      refError ? "border-destructive" : "focus:border-brand"
-                    }`}
-                  />
-                  {refError ? (
-                    <p className="mt-1.5 text-[11px] text-destructive">{refError}</p>
-                  ) : (
-                    <p className="mt-1.5 text-[11px] text-muted-foreground">Copy this exactly from your GCash/Maya transaction receipt.</p>
-                  )}
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  Scan this QR code with your GCash or Maya app to send your downpayment. Once GCash/Maya integration is live, this will show a live payment QR.
+                </p>
               </div>
             )}
 
@@ -558,7 +571,7 @@ function PaymentModal({
 
             <button
               onClick={confirm}
-              disabled={status === "processing" || (method === "ewallet" && !!fileName && refTouched && !refValid)}
+              disabled={status === "processing"}
               className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
               {status === "processing" ? (<><Loader2 className="h-4 w-4 animate-spin" /> Processing…</>) : (<><CheckCircle2 className="h-4 w-4" /> Confirm Payment</>)}

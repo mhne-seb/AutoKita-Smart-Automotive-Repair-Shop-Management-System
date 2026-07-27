@@ -9,7 +9,13 @@ const STAGES: { key: string; label: string; icon: LucideIcon; to: string }[] = [
   { key: "completed", label: "COMPLETED", icon: CheckCircle2, to: "/dashboard/tracking/completed" },
 ];
 
-export function StageStepper({ active }: { active: (typeof STAGES)[number]["key"] }) {
+export function StageStepper({
+  active,
+  jobOrderId,
+}: {
+  active: (typeof STAGES)[number]["key"];
+  jobOrderId: number;
+}) {
   const activeIdx = STAGES.findIndex((s) => s.key === active);
 
   return (
@@ -23,7 +29,7 @@ export function StageStepper({ active }: { active: (typeof STAGES)[number]["key"
 
           return (
             <div key={s.key} className="flex flex-1 items-center last:flex-none">
-              <Link href={s.to} className="flex flex-col items-center gap-1.5">
+              <Link href={`${s.to}?jobOrderId=${jobOrderId}`} className="flex flex-col items-center gap-1.5">
                 <div className="relative flex h-10 w-10 items-center justify-center">
                   {isCurrent && (
                     <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
