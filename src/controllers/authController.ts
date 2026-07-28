@@ -1,58 +1,60 @@
 // authController
 //
 // Controllers in this project are the single seam between UI components and
-// data. Right now every function here reads from src/data/*.ts (mock data)
+// data. This file now talks to the real database via /api/auth/login,
+// instead of the old mock data in src/data/users.ts.
 
+export type UserRole = 'admin' | 'customer'
 
-import { findUserByCredentials, type MockUser, type UserRole } from '@/data/users'
+export interface AuthUser {
+  id: number
+  email: string
+  nickname: string
+  first_name: string | null
+  last_name: string | null
+  role: string
+}
 
 export interface LoginResult {
   success: boolean
-  user?: MockUser
+  user?: AuthUser
   role?: UserRole
   message?: string
 }
 
-// Simulates network latency so loading states can be exercised even against
-// mock data.
-function simulateDelay<T>(value: T, ms = 400): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(value), ms))
-}
-
 /**
- * Attempts to log a user in and reports which role they belong to, so the
- * caller (the unified /login page) knows whether to redirect to the Customer
- * dashboard or the Admin dashboard.
+ * Attempts to log a user in against the real database and reports which
+ * role they belong to, so the caller (the unified /login page) knows
+ * whether to redirect to the Customer dashboard or the Admin dashboard.
  */
 export async function login(email: string, password: string): Promise<LoginResult> {
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
     })
-    
+
     const data = await res.json()
-    return simulateDelay(data)
-  } catch (error) {
-    return simulateDelay({ success: false, message: 'Network error occurred.' })
+    return data as LoginResult
+  } catch (err) {
+    console.error('Login request failed:', err)
+    return { success: false, message: 'Unable to reach the server.' }
   }
 }
 
-/** Clears whichever mock session flag is currently set. */
+/** Clears whichever session flags are currently set. */
 export function logout() {
   if (typeof window === 'undefined') return
   sessionStorage.removeItem('autokita_admin')
   sessionStorage.removeItem('autokita_customer')
+  sessionStorage.removeItem('autokita_user_id')
 }
 
-/** Persists the mock session flag for the given role after a successful login. */
-export function startSession(role: UserRole, userId?: string | number) {
+/** Persists the session flags for the given role + user id after a successful login. */
+export function startSession(role: UserRole, userId: number) {
   if (typeof window === 'undefined') return
   if (role === 'admin') sessionStorage.setItem('autokita_admin', 'true')
   else sessionStorage.setItem('autokita_customer', 'true')
-  
-  if (userId) {
-    sessionStorage.setItem('autokita_user_id', String(userId))
-  }
+  sessionStorage.setItem('autokita_user_id', String(userId))
 }
