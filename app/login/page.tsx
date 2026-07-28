@@ -135,7 +135,7 @@ function LoginPage() {
             <div className="mt-4 rounded-md border border-dashed bg-muted/40 p-3 text-[11px] leading-relaxed text-muted-foreground">
               <p className="font-semibold text-foreground">Demo accounts</p>
               <p>Customer: customer@autocare.com / password</p>
-              <p>Admin: admin@autokita.com / autokita2026</p>
+              <p>Admin: employee1@company.com / admin_placeholder1</p>
             </div>
           </div>
           <Link href="/" className="mt-4 flex items-center justify-center gap-2 rounded-full border bg-background py-2.5 text-sm hover:bg-accent">
