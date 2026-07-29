@@ -7,7 +7,7 @@ RETURNS TABLE (
     started_at     TIMESTAMP,
     completed_at   TIMESTAMP,
     status         job_orders_status,
-    grand_total    DECIMAL(10,2),
+    actual_grand_total    DECIMAL(10,2),
     vehicle_model  VARCHAR(40),
     vehicle_year   INT,
     plate_number   VARCHAR(10)
@@ -20,7 +20,7 @@ AS $$
         jo.started_at,
         jo.completed_at,
         jo.status,
-        jo.grand_total,
+        jo.actual_grand_total,
         v.vehicle_model,
         v.vehicle_year,
         v.plate_number

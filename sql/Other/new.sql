@@ -6,12 +6,12 @@ ALTER TABLE service_progress_tasks ADD COLUMN IF NOT EXISTS billable BOOLEAN DEF
 -- 2. Quotation Functions
 CREATE OR REPLACE FUNCTION get_job_order_quotation(p_job_order_id integer)
 RETURNS TABLE (
-job_order_id INTEGER, quotation_notes TEXT, grand_total TEXT, balance TEXT,
+job_order_id INTEGER, quotation_notes TEXT, actual_grand_total TEXT, balance TEXT,
 approval_status TEXT, mechanic_notes TEXT, datetime_created TEXT, datetime_approved TEXT
 )
 LANGUAGE sql STABLE
 AS $$
-SELECT jo.id, jo.quotation_notes, jo.grand_total::text, jo.balance::text,
+SELECT jo.id, jo.quotation_notes, jo.actual_grand_total::text, jo.balance::text,
 pd.customer_approval_status::text, pd.mechanic_notes,
 pd.datetime_created::text, pd.datetime_approved::text
 FROM job_orders jo
@@ -75,13 +75,13 @@ CREATE OR REPLACE FUNCTION get_job_order_by_id(p_job_order_id integer)
 RETURNS TABLE (
 job_order_id INTEGER, status TEXT, quotation_approved BOOLEAN, date_arrived TEXT,
 started_at TEXT, date_promised TEXT, estimated_duration TEXT, actual_duration TEXT,
-grand_total TEXT, balance TEXT, vehicle_model VARCHAR, vehicle_year INTEGER, plate_number VARCHAR, user_id INTEGER
+actual_grand_total TEXT, balance TEXT, vehicle_model VARCHAR, vehicle_year INTEGER, plate_number VARCHAR, user_id INTEGER
 )
 LANGUAGE sql STABLE
 AS $$
 SELECT jo.id, jo.status::text, jo.quotation_approved, jo.date_arrived::text,
 jo.started_at::text, jo.date_promised::text, jo.estimated_duration::text,
-jo.actual_duration::text, jo.grand_total::text, jo.balance::text,
+jo.actual_duration::text, jo.actual_grand_total::text, jo.balance::text,
 v.vehicle_model, v.vehicle_year, v.plate_number, jo.user_id
 FROM job_orders jo
 JOIN vehicles v ON v.id = jo.vehicle_id
@@ -91,13 +91,13 @@ $$;
 CREATE OR REPLACE FUNCTION get_customer_active_job_order(p_user_id integer)
 RETURNS TABLE (
 job_order_id INTEGER, status TEXT, date_arrived TEXT, started_at TEXT, date_promised TEXT,
-estimated_duration TEXT, actual_duration TEXT, grand_total TEXT, balance TEXT,
+estimated_duration TEXT, actual_duration TEXT, actual_grand_total TEXT, balance TEXT,
 vehicle_model VARCHAR, vehicle_year INTEGER, plate_number VARCHAR
 )
 LANGUAGE sql STABLE
 AS $$
 SELECT jo.id, jo.status::text, jo.date_arrived::text, jo.started_at::text, jo.date_promised::text,
-jo.estimated_duration::text, jo.actual_duration::text, jo.grand_total::text, jo.balance::text,
+jo.estimated_duration::text, jo.actual_duration::text, jo.actual_grand_total::text, jo.balance::text,
 v.vehicle_model, v.vehicle_year, v.plate_number
 FROM job_orders jo
 JOIN vehicles v ON v.id = jo.vehicle_id
@@ -110,13 +110,13 @@ $$;
 CREATE OR REPLACE FUNCTION get_customer_completed_job_order(p_user_id integer)
 RETURNS TABLE (
 job_order_id INTEGER, status TEXT, date_arrived TEXT, started_at TEXT, date_promised TEXT,
-estimated_duration TEXT, actual_duration TEXT, grand_total TEXT, balance TEXT,
+estimated_duration TEXT, actual_duration TEXT, actual_grand_total TEXT, balance TEXT,
 vehicle_model VARCHAR, vehicle_year INTEGER, plate_number VARCHAR
 )
 LANGUAGE sql STABLE
 AS $$
 SELECT jo.id, jo.status::text, jo.date_arrived::text, jo.started_at::text, jo.date_promised::text,
-jo.estimated_duration::text, jo.actual_duration::text, jo.grand_total::text, jo.balance::text,
+jo.estimated_duration::text, jo.actual_duration::text, jo.actual_grand_total::text, jo.balance::text,
 v.vehicle_model, v.vehicle_year, v.plate_number
 FROM job_orders jo
 JOIN vehicles v ON v.id = jo.vehicle_id
@@ -152,7 +152,7 @@ WHERE jo.id = p_job_order_id;
 $$;
 
 CREATE OR REPLACE FUNCTION get_vehicle_service_history(p_vehicle_id integer, p_exclude_job_order_id integer)
-RETURNS TABLE (jo_date TEXT, service_name TEXT, grand_total TEXT)
+RETURNS TABLE (jo_date TEXT, service_name TEXT, actual_grand_total TEXT)
 LANGUAGE sql STABLE
 AS $$
 SELECT jo.jo_date::text,
@@ -161,7 +161,7 @@ SELECT s.service_name FROM job_order_services jos
 JOIN services s ON s.id = jos.service_id
 WHERE jos.job_order_id = jo.id LIMIT 1
 ) AS service_name,
-jo.grand_total::text
+jo.actual_grand_total::text
 FROM job_orders jo
 WHERE jo.vehicle_id = p_vehicle_id
 AND jo.id != p_exclude_job_order_id

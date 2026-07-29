@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION get_customer_billing_services(p_user_id INT)
 RETURNS TABLE (
     job_order_id   INT,
     status         job_orders_status,
-    grand_total    DECIMAL(10,2),
+    actual_grand_total    DECIMAL(10,2),
     partial_payment DECIMAL(10,2),
     balance        DECIMAL(10,2),
     completed_at   TIMESTAMP,
@@ -21,7 +21,7 @@ AS $$
     SELECT
         jo.id          AS job_order_id,
         jo.status,
-        jo.grand_total,
+        jo.actual_grand_total,
         jo.partial_payment,
         jo.balance,
         jo.completed_at,

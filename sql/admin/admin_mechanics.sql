@@ -84,7 +84,7 @@ RETURNS TABLE (
     job_order_id   INT,
     jo_date        DATE,
     status         job_orders_status,
-    grand_total    DECIMAL(10,2),
+    actual_grand_total    DECIMAL(10,2),
     first_name     VARCHAR(40),
     last_name      VARCHAR(40),
     vehicle_model  VARCHAR(40),
@@ -97,7 +97,7 @@ AS $$
         jo.id          AS job_order_id,
         jo.jo_date,
         jo.status,
-        jo.grand_total,
+        jo.actual_grand_total,
         u.first_name,
         u.last_name,
         v.vehicle_model,
@@ -111,7 +111,7 @@ AS $$
     LEFT JOIN services s             ON s.id = jos.service_id
     WHERE sal.employees_id = p_employee_id
       AND sal.entity_type = 'job_orders'
-    GROUP BY jo.id, jo.jo_date, jo.status, jo.grand_total,
+    GROUP BY jo.id, jo.jo_date, jo.status, jo.actual_grand_total,
              u.first_name, u.last_name, v.vehicle_model, v.plate_number
     ORDER BY jo.jo_date DESC;
 $$;

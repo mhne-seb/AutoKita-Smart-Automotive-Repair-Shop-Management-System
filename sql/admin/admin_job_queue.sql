@@ -101,7 +101,7 @@ BEGIN
     -- Create the job order
     INSERT INTO job_orders (
         ticket_id, user_id, vehicle_id, jo_date,
-        date_arrived, grand_total, partial_payment, balance, status
+        date_arrived, actual_grand_total, partial_payment, balance, status
     ) VALUES (
         p_ticket_id, v_user_id, v_vehicle_id, CURRENT_DATE,
         NOW(), 0, 0, 0, 'inspecting'

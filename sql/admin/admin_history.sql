@@ -5,7 +5,7 @@ RETURNS TABLE (
     jo_date        DATE,
     completed_at   TIMESTAMP,
     status         job_orders_status,
-    grand_total    DECIMAL(10,2),
+    actual_grand_total    DECIMAL(10,2),
     first_name     VARCHAR(40),
     last_name      VARCHAR(40),
     vehicle_model  VARCHAR(40)
@@ -17,7 +17,7 @@ AS $$
         jo.jo_date,
         jo.completed_at,
         jo.status,
-        jo.grand_total,
+        jo.actual_grand_total,
         u.first_name,
         u.last_name,
         v.vehicle_model
@@ -107,7 +107,7 @@ AS $$
         u.last_name,
         u.tier,
         u.loyalty_points,
-        COALESCE(SUM(jo.grand_total), 0) AS total_spent,
+        COALESCE(SUM(jo.actual_grand_total), 0) AS total_spent,
         COUNT(jo.id)                      AS total_jobs,
         MAX(jo.completed_at)              AS last_service
     FROM users u

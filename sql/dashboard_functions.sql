@@ -46,7 +46,7 @@ CREATE OR REPLACE FUNCTION get_dashboard_active_job_orders(p_user_id INTEGER)
 RETURNS TABLE (
     id              INTEGER,
     status          TEXT,
-    grand_total     TEXT,
+    actual_grand_total     TEXT,
     balance         TEXT,
     jo_date         TEXT,
     vehicle_model   VARCHAR,
@@ -59,7 +59,7 @@ AS $$
     SELECT
         jo.id,
         jo.status::text,
-        jo.grand_total::text,
+        jo.actual_grand_total::text,
         jo.balance::text,
         jo.jo_date::text,
         v.vehicle_model,

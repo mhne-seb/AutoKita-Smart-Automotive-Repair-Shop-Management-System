@@ -2,7 +2,7 @@
 CREATE OR REPLACE FUNCTION get_quotation_for_job_order(p_job_order_id INT)
 RETURNS TABLE (
     job_order_id    INT,
-    grand_total     DECIMAL(10,2),
+    actual_grand_total     DECIMAL(10,2),
     quotation_notes TEXT,
     services_total  DECIMAL,
     parts_total     DECIMAL(10,2)
@@ -11,7 +11,7 @@ LANGUAGE SQL STABLE
 AS $$
     SELECT
         jo.id                AS job_order_id,
-        jo.grand_total,
+        jo.actual_grand_total,
         jo.quotation_notes,
         COALESCE((
             SELECT SUM(jos.amount)

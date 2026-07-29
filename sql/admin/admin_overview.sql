@@ -85,7 +85,7 @@ $$;
 CREATE OR REPLACE FUNCTION get_admin_active_customers()
 RETURNS TABLE (
     job_order_id   INT,
-    grand_total    DECIMAL(10,2),
+    actual_grand_total    DECIMAL(10,2),
     balance        DECIMAL(10,2),
     status         job_orders_status,
     first_name     VARCHAR(40),
@@ -98,7 +98,7 @@ LANGUAGE SQL STABLE
 AS $$
     SELECT
         jo.id          AS job_order_id,
-        jo.grand_total,
+        jo.actual_grand_total,
         jo.balance,
         jo.status,
         u.first_name,
