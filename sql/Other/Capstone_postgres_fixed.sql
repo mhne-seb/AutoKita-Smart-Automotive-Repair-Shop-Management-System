@@ -270,7 +270,8 @@ CREATE TABLE "job_order_services" (
   "actual_duration" time,
   "estimated_hours" DECIMAL(5,2),
   "actual_hours" DECIMAL(5,2),
-  "amount" decimal
+  "estimated_amount" decimal,
+  "actual_amount" decimal
 );
 
 CREATE TABLE "vehicle_inspections" (

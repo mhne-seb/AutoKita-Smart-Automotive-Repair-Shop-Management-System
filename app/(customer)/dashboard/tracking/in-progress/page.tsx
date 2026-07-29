@@ -297,7 +297,40 @@ function InProgress() {
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" /> Estimated Finish
                 </span>
-                <b>{jobOrder.date_promised ? new Date(jobOrder.date_promised).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Not scheduled'}</b>
+                <b>
+                  {(() => {
+                    const allScheduled = tasks.length > 0 && tasks.every(t => t.scheduled_date || t.completed_at);
+                    if (allScheduled && aiTime?.predicted_duration_mins) {
+                       const maxDate = new Date(Math.max(...tasks.map(t => new Date(t.scheduled_date || t.completed_at || 0).getTime())));
+                       
+                       // Find all tasks that happen on the same day as the maxDate (the last day of service)
+                       const lastDayString = maxDate.toDateString();
+                       const lastDayTasks = tasks.filter(t => {
+                         const d = new Date(t.scheduled_date || t.completed_at || 0);
+                         return d.toDateString() === lastDayString;
+                       });
+                       
+                       // Sum the AI predicted duration for these specific tasks
+                       let additionalMins = 0;
+                       if (aiTime.services) {
+                         for (const task of lastDayTasks) {
+                           const servicePred = aiTime.services.find((s: any) => s.service_name === task.task_title);
+                           if (servicePred) {
+                             additionalMins += servicePred.predicted_duration_mins;
+                           }
+                         }
+                       }
+                       // Fallback if no specific services match or no services available
+                       if (additionalMins === 0) {
+                          additionalMins = Math.max(60, Math.round(aiTime.predicted_duration_mins / tasks.length));
+                       }
+                       
+                       maxDate.setMinutes(maxDate.getMinutes() + additionalMins);
+                       return maxDate.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+                    }
+                    return jobOrder.date_promised ? new Date(jobOrder.date_promised).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Not scheduled';
+                  })()}
+                </b>
               </div>
             </div>
             <div className="mt-4 border-t border-white/20 pt-3 text-xs">
@@ -312,23 +345,7 @@ function InProgress() {
             </div>
           </div>
 
-          {aiTime && (
-            <div className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 p-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-600">
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.4V11h3a3 3 0 0 1 3 3v1a2 2 0 0 1-2 2h-1v3a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-3H6a2 2 0 0 1-2-2v-1a3 3 0 0 1 3-3h3V9.4A4 4 0 0 1 8 6a4 4 0 0 1 4-4z" /><circle cx="9" cy="17" r="1" /><circle cx="15" cy="17" r="1" /></svg>
-                AI Estimated Time
-              </div>
-              <div className="mt-2 text-2xl font-bold text-purple-900">
-                {aiTime.predicted_hours.toFixed(1)} hrs
-              </div>
-              <p className="mt-1 text-[11px] text-purple-600/70">
-                ~{Math.round(aiTime.predicted_duration_mins)} minutes predicted by ML model
-              </p>
-              <div className="mt-2 rounded-md bg-purple-100/50 px-2 py-1 text-[10px] font-medium text-purple-600">
-                Based on service history &amp; vehicle data
-              </div>
-            </div>
-          )}
+
 
           <div className="rounded-xl border bg-card p-4">
             <div className="flex items-center gap-2 text-sm font-semibold">

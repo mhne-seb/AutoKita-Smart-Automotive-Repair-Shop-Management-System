@@ -40,7 +40,7 @@ AS $$
     SELECT
         s.service_name,
         COUNT(jos.id)          AS total_completed,
-        COALESCE(SUM(jos.amount), 0) AS total_revenue
+        COALESCE(SUM(jos.actual_amount), 0) AS total_revenue
     FROM job_order_services jos
     JOIN services s    ON s.id = jos.service_id
     JOIN job_orders jo ON jo.id = jos.job_order_id

@@ -14,7 +14,8 @@ export async function GET(req: NextRequest) {
     const result = await db.query(`
       SELECT
         jos.service_id,
-        jos.amount::float,
+        s.service_name,
+        jos.actual_amount::float,
         EXTRACT(EPOCH FROM jos.estimated_duration) / 60.0 AS estimated_duration_mins,
         s.base_price::float,
         s.base_duration_hours::float,
@@ -49,7 +50,11 @@ export async function GET(req: NextRequest) {
             vehicle_type: row.vehicle_type || 'Sedan',
           }),
         })
-        return res.json()
+        const data = await res.json()
+        return {
+          service_name: row.service_name,
+          ...data
+        }
       })
     )
 

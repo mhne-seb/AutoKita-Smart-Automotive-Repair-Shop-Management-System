@@ -14,7 +14,7 @@ AS $$
         jo.actual_grand_total,
         jo.quotation_notes,
         COALESCE((
-            SELECT SUM(jos.amount)
+            SELECT SUM(jos.actual_amount)
             FROM job_order_services jos
             WHERE jos.job_order_id = jo.id
         ), 0)                AS services_total,

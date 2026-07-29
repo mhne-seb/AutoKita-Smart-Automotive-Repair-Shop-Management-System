@@ -25,7 +25,7 @@ CREATE OR REPLACE FUNCTION get_job_order_quotation_services(p_job_order_id integ
 RETURNS TABLE (id INTEGER, service_name VARCHAR, description_of_work TEXT, estimated_hours NUMERIC, amount TEXT)
 LANGUAGE sql STABLE
 AS $$
-SELECT jos.id, s.service_name, jos.description_of_work, jos.estimated_hours, jos.amount::text
+SELECT jos.id, s.service_name, jos.description_of_work, jos.estimated_hours, jos.actual_amount::text
 FROM job_order_services jos
 JOIN services s ON s.id = jos.service_id
 WHERE jos.job_order_id = p_job_order_id;
@@ -232,7 +232,7 @@ CREATE OR REPLACE FUNCTION get_job_order_invoice_services(p_job_order_id INTEGER
 RETURNS TABLE (id INTEGER, service_name VARCHAR, description_of_work TEXT, estimated_hours NUMERIC, actual_hours NUMERIC, amount TEXT)
 LANGUAGE sql STABLE
 AS $$
-SELECT jos.id, s.service_name, jos.description_of_work, jos.estimated_hours, jos.actual_hours, jos.amount::text
+SELECT jos.id, s.service_name, jos.description_of_work, jos.estimated_hours, jos.actual_hours, jos.actual_amount::text
 FROM job_order_services jos
 JOIN services s ON s.id = jos.service_id
 WHERE jos.job_order_id = p_job_order_id

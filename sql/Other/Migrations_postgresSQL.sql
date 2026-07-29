@@ -140,15 +140,14 @@ CROSS JOIN LATERAL(
 
 -- Services 4 (30 for now)
 INSERT INTO services(shop_id, service_name, description, base_price, base_duration_hours, is_price_fixed, is_active)
-VALUES
-(1, 'Oil Change', 'Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.', 1500.00, 1.0, true, true),
-(1, 'Brake Pad Replacement', 'Description: repair performed by the mechanics to ensure vehicle safety and reliability.', 3500.00, 2.0, false, true),
-(1, 'Tire Rotation & Balance', 'Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.', 800.00, 0.5, true, true),
-(1, 'Wheel Alignment', 'Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.', 1200.00, 1.0, true, true),
-(1, 'Engine Diagnostics', 'Description: inspection performed by the mechanics to ensure vehicle safety and reliability.', 2000.00, 1.5, false, true),
-(1, 'Battery Testing & Replacement', 'Description: repair performed by the mechanics to ensure vehicle safety and reliability.', 4500.00, 0.5, true, true),
-(1, 'A/C System Recharge', 'Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.', 2500.00, 1.0, true, true),
-(1, 'Transmission Fluid Flush', 'Description: servicing performed by the mechanics to ensure vehicle safety and reliability.', 4000.00, 2.0, false, true);
+SELECT (SELECT id FROM shops LIMIT 1), 'Oil Change', 'Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.', 1500.00, 1.0, true, true UNION ALL
+SELECT (SELECT id FROM shops LIMIT 1), 'Brake Pad Replacement', 'Description: repair performed by the mechanics to ensure vehicle safety and reliability.', 3500.00, 2.0, false, true UNION ALL
+SELECT (SELECT id FROM shops LIMIT 1), 'Tire Rotation & Balance', 'Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.', 800.00, 0.5, true, true UNION ALL
+SELECT (SELECT id FROM shops LIMIT 1), 'Wheel Alignment', 'Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.', 1200.00, 1.0, true, true UNION ALL
+SELECT (SELECT id FROM shops LIMIT 1), 'Engine Diagnostics', 'Description: inspection performed by the mechanics to ensure vehicle safety and reliability.', 2000.00, 1.5, false, true UNION ALL
+SELECT (SELECT id FROM shops LIMIT 1), 'Battery Testing & Replacement', 'Description: repair performed by the mechanics to ensure vehicle safety and reliability.', 4500.00, 0.5, true, true UNION ALL
+SELECT (SELECT id FROM shops LIMIT 1), 'A/C System Recharge', 'Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.', 2500.00, 1.0, true, true UNION ALL
+SELECT (SELECT id FROM shops LIMIT 1), 'Transmission Fluid Flush', 'Description: servicing performed by the mechanics to ensure vehicle safety and reliability.', 4000.00, 2.0, false, true;
 
 
 -- vehicles 5
@@ -341,8 +340,8 @@ FROM (
     request_date + ((offset_arrive + offset_start + offset_complete) || ' hours')::INTERVAL AS completed_at,
     request_date + ((offset_arrive + offset_start + offset_complete + offset_release) || ' hours')::INTERVAL AS released_at,
     
-    (est_sec || ' seconds')::INTERVAL AS estimated_duration,
-    (act_sec || ' seconds')::INTERVAL AS actual_duration,
+    (est_sec || ' seconds')::INTERVAL::TIME AS estimated_duration,
+    (act_sec || ' seconds')::INTERVAL::TIME AS actual_duration,
     
     gt AS actual_grand_total,
     CASE 
@@ -627,8 +626,8 @@ SELECT
     (NOW() - (FLOOR(RANDOM() * 55)::INT || ' days')::INTERVAL) AS started_at,
     (NOW() - (FLOOR(RANDOM() * 40)::INT || ' days')::INTERVAL) AS completed_at,
     (NOW() - (FLOOR(RANDOM() * 30)::INT || ' days')::INTERVAL) AS released_at,
-    ((1 + FLOOR(RANDOM() * 5))::INT || ' hours')::TIME AS estimated_duration,
-    ((1 + FLOOR(RANDOM() * 6))::INT || ' hours')::TIME AS actual_duration,
+    ((1 + FLOOR(RANDOM() * 5))::INT || ' hours')::INTERVAL::TIME AS estimated_duration,
+    ((1 + FLOOR(RANDOM() * 6))::INT || ' hours')::INTERVAL::TIME AS actual_duration,
     ROUND((1000 + (RANDOM() * 9000))::NUMERIC, 2) AS estimated_grand_total,
     ROUND((1000 + (RANDOM() * 9000))::NUMERIC, 2) AS actual_grand_total,
     ROUND((100 + (RANDOM() * 900))::NUMERIC, 2) AS partial_payment,
@@ -652,7 +651,8 @@ INSERT INTO job_order_services (
                                 description_of_work, 
 								estimated_duration, 
                                 actual_duration, 
-                                amount
+                                estimated_amount,
+                                actual_amount
 )
 SELECT 
   -- job_order_id
@@ -663,13 +663,16 @@ SELECT
   description_of_work,
   
   -- estimated_duration
-  (est_sec || ' seconds')::INTERVAL AS estimated_duration,
+  (est_sec || ' seconds')::INTERVAL::TIME AS estimated_duration,
   
   -- actual_duration
-  (GREATEST(900, est_sec + FLOOR((RANDOM() * 3600) - 900)::INT) || ' seconds')::INTERVAL AS actual_duration,
+  (GREATEST(900, est_sec + FLOOR((RANDOM() * 3600) - 900)::INT) || ' seconds')::INTERVAL::TIME AS actual_duration,
   
-  -- amount
-  labor_cost AS amount
+  -- estimated_amount
+  ROUND(labor_cost * 0.9, 2) AS estimated_amount,
+  
+  -- actual_amount
+  labor_cost AS actual_amount
 
 FROM (
   SELECT 

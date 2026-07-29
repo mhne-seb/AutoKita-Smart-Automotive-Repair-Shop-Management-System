@@ -7,7 +7,7 @@ BEGIN
         FROM pg_tables 
         WHERE schemaname = 'public' 
     LOOP
-        EXECUTE 'TRUNCATE TABLE public.' || quote_ident(table_record.tablename) || ' CASCADE;';
+        EXECUTE 'TRUNCATE TABLE public.' || quote_ident(table_record.tablename) || ' RESTART IDENTITY CASCADE;';
         RAISE NOTICE 'Truncated table: %', table_record.tablename;
     END LOOP;
 END $$;

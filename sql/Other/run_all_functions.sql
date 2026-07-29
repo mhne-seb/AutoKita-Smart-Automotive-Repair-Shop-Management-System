@@ -1348,7 +1348,10 @@ RETURNS TABLE (
     task_title    VARCHAR(100),
     note          TEXT,
     task_status   VARCHAR,
-    completed_at  TIMESTAMP
+    completed_at  TIMESTAMP,
+    price         DECIMAL(10,2),
+    billable      BOOLEAN,
+    scheduled_date TIMESTAMP
 )
 LANGUAGE SQL STABLE
 AS $$
@@ -1358,7 +1361,8 @@ AS $$
         spt.task_title,
         spt.note,
         spt.task_status,
-        spt.completed_at
+        spt.completed_at,
+        spt.scheduled_date
     FROM service_progress_tasks spt
     WHERE spt.job_order_id = p_job_order_id
     ORDER BY spt.section_id ASC, spt.id ASC;
@@ -1378,6 +1382,25 @@ AS $$
         completed_at = CASE
             WHEN p_status = 'completed' THEN NOW()
             ELSE completed_at
+        END
+    WHERE id = p_task_id;
+$$;
+
+-- schedule_service_task_with_status
+CREATE OR REPLACE FUNCTION schedule_service_task_with_status(
+    p_task_id INT,
+    p_scheduled_date TIMESTAMP,
+    p_status  VARCHAR
+)
+RETURNS VOID
+LANGUAGE SQL VOLATILE
+AS $$
+    UPDATE service_progress_tasks
+    SET task_status  = p_status,
+        scheduled_date = p_scheduled_date,
+        completed_at = CASE
+            WHEN p_status = 'completed' THEN NOW()
+            ELSE NULL
         END
     WHERE id = p_task_id;
 $$;
@@ -2048,12 +2071,12 @@ $$;
 CREATE OR REPLACE FUNCTION get_job_order_tasks(p_job_order_id INTEGER)
 RETURNS TABLE (
 id INTEGER, section_id TEXT, task_title VARCHAR, note TEXT, task_status TEXT,
-completed_at TEXT, price TEXT, billable BOOLEAN
+completed_at TEXT, price TEXT, billable BOOLEAN, scheduled_date TIMESTAMP
 )
 LANGUAGE sql STABLE
 AS $$
 SELECT spt.id, spt.section_id::text, spt.task_title, spt.note,
-spt.task_status, spt.completed_at::text, spt.price::text, spt.billable
+spt.task_status, spt.completed_at::text, spt.price::text, spt.billable, spt.scheduled_date
 FROM service_progress_tasks spt
 WHERE spt.job_order_id = p_job_order_id
 ORDER BY spt.id ASC;
@@ -2073,7 +2096,8 @@ AS $$
         spt.task_status,
         spt.completed_at,
         spt.price,
-        spt.billable
+        spt.billable,
+        spt.scheduled_date
     FROM service_progress_tasks spt
     WHERE spt.job_order_id = p_job_order_id
     ORDER BY spt.section_id ASC, spt.id ASC;
