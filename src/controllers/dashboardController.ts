@@ -28,7 +28,7 @@ export interface DashboardVehicle {
 export interface DashboardJobOrder {
   id: number
   status: string
-  grand_total: string
+  actual_grand_total: string
   balance: string
   jo_date: string
   vehicle_model: string

@@ -74,6 +74,7 @@ export interface InspectionData {
     progressPercent: number
   }
   approvalRequired: boolean
+  pullOutRequested?: boolean
 }
 
 export type PartStatus = 'in-stock' | 'to-order'
@@ -95,6 +96,9 @@ export interface QuotationService {
   laborHours: number
   laborCost: number
   parts: QuotationPart[]
+  dbServiceId?: number
+  estimated_amount?: number
+  estimated_hours?: number
 }
 
 export interface QuotationData {
@@ -112,6 +116,7 @@ export interface ServiceTask {
   note: string
   time: string
   status: TaskStatus
+  scheduledDate?: string
 }
 
 export interface ServiceSection {

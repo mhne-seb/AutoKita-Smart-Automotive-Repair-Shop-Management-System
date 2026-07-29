@@ -6,8 +6,8 @@ import { Camera, Plus, Pencil, Trash2, Check, X, Cloud, Clock, ChevronRight, Che
 import { TopBar } from '../components/TopBar'
 import { JobOrderBreadcrumb } from '../components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
-import { getInspectionById } from '@/controllers/inspectionController'
-import { getLatestPreDiagnostic, sendForApproval, simulateCustomerResponse, type PreDiagnosticRound } from '@/controllers/preDiagnosticController'
+import { getInspectionById, addInspectionFinding, updateInspectionFinding, deleteInspectionFinding } from '@/controllers/inspectionController'
+import { getLatestPreDiagnostic, sendForApproval, type PreDiagnosticRound } from '@/controllers/preDiagnosticController'
 import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData } from '../data/types'
 
 interface Props {
@@ -57,6 +57,8 @@ export function InspectionReport({ jobOrderId }: Props) {
   const [noteDraft, setNoteDraft] = useState('')
   const [notes, setNotes] = useState<InspectionData['notes']>([])
   const [editingFindingId, setEditingFindingId] = useState<string | null>(null)
+  const [editFindingName, setEditFindingName] = useState('')
+  const [editFindingNote, setEditFindingNote] = useState('')
   const [timerRunning, setTimerRunning] = useState(false)
   const [approvalDecision, setApprovalDecision] = useState<'pending' | 'confirmed' | 'reverted'>('pending')
 
@@ -110,23 +112,45 @@ export function InspectionReport({ jobOrderId }: Props) {
     setNoteDraft('')
   }
 
-  function updateFindingStatus(fId: string, status: FindingStatus) {
+  async function updateFindingStatus(fId: string, status: FindingStatus) {
+    // Optimistic update
     setFindings((prev) => prev.map((f) => (f.id === fId ? { ...f, status } : f)))
     setEditingFindingId(null)
+    
+    // API Call
+    await updateInspectionFinding(jobOrderId, { id: fId, status })
   }
 
-  function deleteFinding(fId: string) {
+  async function updateFindingContent(fId: string, name: string, note: string, status: FindingStatus) {
+    setFindings((prev) => prev.map((f) => (f.id === fId ? { ...f, name, note, status } : f)))
+    setEditingFindingId(null)
+
+    await updateInspectionFinding(jobOrderId, { id: fId, name, note, status })
+  }
+
+  async function deleteFinding(fId: string) {
+    // Optimistic update
     setFindings((prev) => prev.filter((f) => f.id !== fId))
+    
+    // API Call
+    await deleteInspectionFinding(jobOrderId, fId)
   }
 
-  function addFinding() {
-    const newFinding: MechanicalFinding = {
-      id: `f${Date.now()}`,
+  async function addFinding() {
+    const newFindingData = {
       name: 'New finding',
       note: 'Describe what was found...',
-      status: 'ok',
+      status: 'ok' as FindingStatus,
     }
-    setFindings((prev) => [...prev, newFinding])
+    
+    // API Call to get real ID
+    const added = await addInspectionFinding(jobOrderId, newFindingData)
+    if (added) {
+      setFindings((prev) => [...prev, added])
+      setEditingFindingId(added.id)
+      setEditFindingName(added.name)
+      setEditFindingNote(added.note)
+    }
   }
 
   // Sends the current findings for approval — a real, persisted database
@@ -143,14 +167,7 @@ export function InspectionReport({ jobOrderId }: Props) {
     setSending(false)
   }
 
-  // Simulates the customer's decision on the current round (stands in for
-  // the real Customer-portal approval button, which is a separate task).
-  async function respondToInspection(status: 'approved' | 'disputed') {
-    setRespondingTo(status)
-    const round = await simulateCustomerResponse(jobOrderId, status)
-    if (round) setPreDiagnostic(round)
-    setRespondingTo(null)
-  }
+  // Removed simulate customer response logic
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 p-8">
@@ -294,10 +311,35 @@ export function InspectionReport({ jobOrderId }: Props) {
                     className={`rounded-xl border p-4 ${editing ? 'border-indigo-300 bg-indigo-50/40' : 'border-slate-200'}`}
                   >
                     <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <p className="font-semibold text-slate-900">{f.name}</p>
-                        <p className="mt-1 text-sm text-slate-500">{f.note}</p>
-                        {f.photo && <img src={f.photo} alt={f.name} className="mt-3 h-20 w-28 rounded-lg object-cover" />}
+                      <div className="flex-1 mr-4">
+                        {editing ? (
+                          <div className="space-y-2">
+                            <input 
+                              type="text" 
+                              value={editFindingName} 
+                              onChange={(e) => setEditFindingName(e.target.value)} 
+                              className="w-full rounded border border-slate-300 px-2 py-1 text-sm font-semibold text-slate-900 focus:border-indigo-500 focus:outline-none"
+                            />
+                            <textarea 
+                              value={editFindingNote} 
+                              onChange={(e) => setEditFindingNote(e.target.value)} 
+                              rows={2}
+                              className="w-full rounded border border-slate-300 px-2 py-1 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none"
+                            />
+                            <button 
+                              onClick={() => updateFindingContent(f.id, editFindingName, editFindingNote, f.status)}
+                              className="rounded bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700"
+                            >
+                              Save
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="font-semibold text-slate-900">{f.name}</p>
+                            <p className="mt-1 text-sm text-slate-500">{f.note}</p>
+                            {f.photo && <img src={f.photo} alt={f.name} className="mt-3 h-20 w-28 rounded-lg object-cover" />}
+                          </>
+                        )}
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
                         {editing ? (
@@ -323,7 +365,14 @@ export function InspectionReport({ jobOrderId }: Props) {
                             {meta.label}
                           </button>
                         )}
-                        <button onClick={() => setEditingFindingId(f.id)} className="rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50">
+                        <button 
+                          onClick={() => {
+                            setEditingFindingId(f.id)
+                            setEditFindingName(f.name)
+                            setEditFindingNote(f.note)
+                          }} 
+                          className="rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50"
+                        >
                           <Pencil size={14} />
                         </button>
                         <button onClick={() => deleteFinding(f.id)} className="rounded-lg border border-slate-200 p-1.5 text-rose-500 hover:bg-rose-50">
@@ -408,7 +457,7 @@ export function InspectionReport({ jobOrderId }: Props) {
             </button>
           </div>
 
-          {initial.approvalRequired && (
+          {initial.pullOutRequested && (
             <div className="rounded-2xl border border-rose-100 bg-rose-50 p-5">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-rose-500">Review Action</p>
               {approvalDecision === 'pending' && (
@@ -440,28 +489,7 @@ export function InspectionReport({ jobOrderId }: Props) {
             </div>
           )}
 
-          {preDiagnostic && preDiagnostic.status === 'pending' && (
-            <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-5">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-indigo-500">Simulate Customer Decision</p>
-              <p className="mb-4 text-sm text-indigo-500">
-                Stands in for the real Customer portal (a separate task) — use this to test the approval flow.
-              </p>
-              <button
-                onClick={() => respondToInspection('approved')}
-                disabled={respondingTo !== null}
-                className="mb-2 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
-              >
-                <Check size={15} /> {respondingTo === 'approved' ? 'Approving…' : 'Simulate: Customer Approves'}
-              </button>
-              <button
-                onClick={() => respondToInspection('disputed')}
-                disabled={respondingTo !== null}
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white py-2.5 text-sm font-semibold text-indigo-600 hover:bg-indigo-50 disabled:opacity-50"
-              >
-                <X size={15} /> {respondingTo === 'disputed' ? 'Sending…' : 'Simulate: Customer Disputes'}
-              </button>
-            </div>
-          )}
+
 
           {preDiagnostic?.status === 'approved' && (
             <Link

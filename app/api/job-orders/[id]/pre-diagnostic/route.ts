@@ -41,3 +41,34 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     )
   }
 }
+
+// DELETE — recalls (removes) a pending pre-diagnostic round so the admin can
+// make changes before re-sending. Only works when status is still 'pending'.
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params
+
+    const latest = await db.query(`SELECT * FROM get_pre_diagnostic($1)`, [id])
+    if (latest.rows.length === 0 || !latest.rows[0]) {
+      return NextResponse.json({ success: false, message: 'No pre-diagnostic round found' }, { status: 404 })
+    }
+
+    const row = latest.rows[0]
+    if (row.customer_approval_status !== 'pending') {
+      return NextResponse.json(
+        { success: false, message: 'Only pending approvals can be recalled' },
+        { status: 400 }
+      )
+    }
+
+    await db.query(`DELETE FROM pre_diagnostics WHERE id = $1`, [row.id])
+
+    return NextResponse.json({ success: true, message: 'Approval recalled successfully' })
+  } catch (error) {
+    console.error('Pre-diagnostic recall error:', error)
+    return NextResponse.json(
+      { success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    )
+  }
+}

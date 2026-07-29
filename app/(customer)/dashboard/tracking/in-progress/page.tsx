@@ -15,6 +15,7 @@ type Task = {
   completed_at: string | null;
   price: string;
   billable: boolean;
+  scheduled_date?: string;
 };
 
 type JobOrder = {
@@ -25,7 +26,7 @@ type JobOrder = {
   date_promised: string;
   estimated_duration: string;
   actual_duration: string;
-  grand_total: string;
+  actual_grand_total: string;
   balance: string;
   vehicle_model: string;
   vehicle_year: number;
@@ -66,6 +67,16 @@ function InProgress() {
   // Locked once the job order has moved past active servicing — the
   // "Pull Out Vehicle" action no longer makes sense and must stay disabled.
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
+
+  const [aiTime, setAiTime] = useState<{ predicted_hours: number; predicted_duration_mins: number } | null>(null);
+
+  useEffect(() => {
+    if (!jobOrder) return;
+    fetch(`/api/predict/time?jobOrderId=${jobOrder.job_order_id}`)
+      .then(r => r.json())
+      .then(d => { if (d.predicted_hours) setAiTime(d); })
+      .catch(() => {});
+  }, [jobOrder]);
 
   const completedBillable = tasks.filter(
     (t) => getTag(t.task_status) === "completed" && t.billable
@@ -190,7 +201,6 @@ function InProgress() {
                             </div>
                           )}
                         </div>
-
                         <div className="flex shrink-0 flex-col items-end gap-1.5">
                           <span
                             className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${badgeClasses}`}
@@ -264,13 +274,30 @@ function InProgress() {
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" /> Started
                 </span>
-                <b>{jobOrder.started_at}</b>
+                <b>
+                  {(() => {
+                    const startedRaw = jobOrder.started_at || (tasks.filter(t => t.task_status !== 'pending').length > 0
+                      ? (() => {
+                          const firstTask = [...tasks]
+                            .filter(t => t.task_status !== 'pending')
+                            .sort((a, b) => {
+                              const dateA = a.scheduled_date || a.completed_at || '';
+                              const dateB = b.scheduled_date || b.completed_at || '';
+                              return new Date(dateA).getTime() - new Date(dateB).getTime();
+                            })[0];
+                          return firstTask?.scheduled_date || firstTask?.completed_at;
+                        })()
+                      : null);
+                    
+                    return startedRaw ? new Date(startedRaw).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Not yet started';
+                  })()}
+                </b>
               </div>
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" /> Estimated Finish
                 </span>
-                <b>{jobOrder.date_promised}</b>
+                <b>{jobOrder.date_promised ? new Date(jobOrder.date_promised).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Not scheduled'}</b>
               </div>
             </div>
             <div className="mt-4 border-t border-white/20 pt-3 text-xs">
@@ -284,6 +311,24 @@ function InProgress() {
               </div>
             </div>
           </div>
+
+          {aiTime && (
+            <div className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 p-4">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-600">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.4V11h3a3 3 0 0 1 3 3v1a2 2 0 0 1-2 2h-1v3a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-3H6a2 2 0 0 1-2-2v-1a3 3 0 0 1 3-3h3V9.4A4 4 0 0 1 8 6a4 4 0 0 1 4-4z" /><circle cx="9" cy="17" r="1" /><circle cx="15" cy="17" r="1" /></svg>
+                AI Estimated Time
+              </div>
+              <div className="mt-2 text-2xl font-bold text-purple-900">
+                {aiTime.predicted_hours.toFixed(1)} hrs
+              </div>
+              <p className="mt-1 text-[11px] text-purple-600/70">
+                ~{Math.round(aiTime.predicted_duration_mins)} minutes predicted by ML model
+              </p>
+              <div className="mt-2 rounded-md bg-purple-100/50 px-2 py-1 text-[10px] font-medium text-purple-600">
+                Based on service history &amp; vehicle data
+              </div>
+            </div>
+          )}
 
           <div className="rounded-xl border bg-card p-4">
             <div className="flex items-center gap-2 text-sm font-semibold">

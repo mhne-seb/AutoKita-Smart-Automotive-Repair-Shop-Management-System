@@ -192,6 +192,7 @@ function Dashboard() {
                     key={job.id}
                     vehicle={`${job.vehicle_year} ${job.vehicle_model}`}
                     jobOrderId={`#JO-${job.id}`}
+                    jobId={job.id}
                     status={STATUS_LABEL[job.status] ?? job.status}
                     note={job.service_name ?? "Service"}
                     stepIndex={STATUS_TO_STEP[job.status] ?? 0}
@@ -606,12 +607,14 @@ const SERVICE_STEPS = [
 function ServiceCard({
   vehicle,
   jobOrderId,
+  jobId,
   status,
   note,
   stepIndex,
 }: {
   vehicle: string;  
   jobOrderId: string;
+  jobId: number;
   status: string;
   note: string;
   stepIndex: number; 
@@ -643,9 +646,9 @@ function ServiceCard({
             const isCurrent = i === stepIndex;
             const isActive = isDone || isCurrent;
             return (
-              <div key={step.label} className="flex flex-1 items-center last:flex-none">
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="relative flex h-7 w-7 items-center justify-center">
+              <div key={step.label} className="relative flex flex-1 flex-col items-center last:flex-none">
+                <div className="relative z-10 flex flex-col items-center gap-1.5">
+                  <div className="relative flex h-7 w-7 items-center justify-center bg-card">
                     {isCurrent && (
                       <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
                     )}
@@ -668,7 +671,7 @@ function ServiceCard({
 </span>
                 </div>
                 {i < SERVICE_STEPS.length - 1 && (
-                  <div className={`-mt-5 h-0.5 flex-1 transition-colors duration-300 ${isDone ? "bg-brand" : "bg-muted"}`} />
+                  <div className={`absolute top-3.5 left-1/2 h-0.5 w-full transition-colors duration-300 ${isDone ? "bg-brand" : "bg-muted"}`} />
                 )}
               </div>
             );
@@ -679,7 +682,7 @@ function ServiceCard({
           <Clock className="h-3 w-3" /> Service: {note}
         </div>
         <Link
-          href="/dashboard/tracking/received"
+          href={`/dashboard/tracking/${["received", "inspecting", "quotation", "in-progress", "completed"][stepIndex] ?? "received"}?jobOrderId=${jobId}`}
           className="mt-4 flex w-full items-center justify-center gap-1 rounded-md bg-[color:oklch(0.22_0.05_250)] py-2 text-xs font-medium text-white transition-transform duration-150 hover:opacity-90 active:scale-[0.98]"
         >
           View Full Tracking{" "}

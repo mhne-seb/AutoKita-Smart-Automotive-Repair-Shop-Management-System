@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import ExcelJS from 'exceljs'
-import { Download, Info, Gift, Search, Check } from 'lucide-react'
+import { Download, Info, Gift, Search, Check, ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -12,9 +12,12 @@ import {
   Tooltip,
   CartesianGrid,
   Legend,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts'
 import { StatusBadge } from '../components/StatusBadge'
-import { getRevenueTrend, getChurnList } from '@/controllers/reportController'
+import { getAnalytics, getChurnList } from '@/controllers/reportController'
 import { currency } from '../data/mockData'
 
 // ---- Churn classification helpers -------------------------------------
@@ -53,6 +56,7 @@ const TIME_RANGES = [
   { label: 'Last 7 Days', value: 7 },
   { label: 'Last 30 Days', value: 30 },
   { label: 'Last 90 Days', value: 90 },
+  { label: 'Last 180 Days', value: 180 },
   { label: 'All Time', value: Infinity },
 ]
 
@@ -235,24 +239,37 @@ const OFFER_CATALOG = [
   },
 ] as const
 
+type ChartType = 'donut' | 'bar' | 'stacked'
+
+const CHART_OPTIONS: { label: string; value: ChartType }[] = [
+  { label: 'Donut', value: 'donut' },
+  { label: 'Bar', value: 'bar' },
+  { label: 'Stacked', value: 'stacked' },
+]
+
+const ROWS_PER_PAGE_OPTIONS = [10, 25, 50]
+
 export function Analytics() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [timeRange, setTimeRange] = useState<number>(Infinity)
   const [search, setSearch] = useState('')
   const [offersSent, setOffersSent] = useState<Record<string, string>>({})
+  const [chartType, setChartType] = useState<ChartType>('donut')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
 
   // Loaded through the controller (mock API) — see reportController.ts.
   const [churnList, setChurnList] = useState<any[]>([])
-  const [revenueTrend, setRevenueTrend] = useState<any[]>([])
+  const [analyticsData, setAnalyticsData] = useState<any>(null)
 
   useEffect(() => {
     let active = true
     getChurnList().then((data) => active && setChurnList(data))
-    getRevenueTrend().then((data) => active && setRevenueTrend(data))
+    getAnalytics(timeRange).then((data) => active && setAnalyticsData(data))
     return () => {
       active = false
     }
-  }, [])
+  }, [timeRange])
 
   // Offer modal state
   const [offerTarget, setOfferTarget] = useState<any | null>(null)
@@ -292,6 +309,9 @@ export function Analytics() {
       return matchesStatus && matchesSearch
     })
   }, [timeFilteredList, statusFilter, search])
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => { setCurrentPage(1) }, [statusFilter, search, timeRange])
 
   const counts = useMemo(() => {
     const base: Record<string, number> = {
@@ -389,19 +409,31 @@ export function Analytics() {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className="space-y-5">
-          <SummaryCard label="Revenue Summaries" value={currency(1444900)} sub="Total Monthly Intake" trend="+12.4%" />
-          <SummaryCard label="Service Statistics" value="150 Jobs Done" sub="Average 20.4 services daily" trend="+8.4%" />
+          <SummaryCard 
+            label="Revenue Summaries" 
+            value={currency(analyticsData?.summary?.revenue || 0)} 
+            sub="Total Monthly Intake" 
+            trend={`${(analyticsData?.summary?.revenueTrend > 0 ? '+' : '')}${(analyticsData?.summary?.revenueTrend || 0).toFixed(1)}%`} 
+          />
+          <SummaryCard 
+            label="Service Statistics" 
+            value={`${analyticsData?.summary?.jobsDone || 0} Jobs Done`} 
+            sub={`Average ${(analyticsData?.summary?.averageDailyJobs || 0).toFixed(1)} services daily`} 
+            trend={`${(analyticsData?.summary?.jobsTrend > 0 ? '+' : '')}${(analyticsData?.summary?.jobsTrend || 0).toFixed(1)}%`} 
+          />
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               Business Performance Trend
             </p>
             <div className="mt-2 flex items-center justify-between">
-              <p className="text-2xl font-bold text-slate-900">Optimal</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {(analyticsData?.summary?.safetyRate || 0) >= 90 ? 'Optimal' : (analyticsData?.summary?.safetyRate || 0) >= 75 ? 'Stable' : 'Needs Review'}
+              </p>
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                Stable
+                {(analyticsData?.summary?.safetyRate || 0) >= 90 ? 'Stable' : 'Warning'}
               </span>
             </div>
-            <p className="mt-1 text-sm text-slate-400">98.2% operational safety rate</p>
+            <p className="mt-1 text-sm text-slate-400">{(analyticsData?.summary?.safetyRate || 0).toFixed(1)}% operational safety rate</p>
           </div>
         </div>
 
@@ -409,7 +441,7 @@ export function Analytics() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Revenue & Job Trends</p>
-              <p className="text-2xl font-bold text-slate-900">{currency(1444900)}</p>
+              <p className="text-2xl font-bold text-slate-900">{currency(analyticsData?.summary?.revenue || 0)}</p>
             </div>
             <div className="flex items-center gap-4 text-xs font-semibold text-slate-500">
               <span className="flex items-center gap-1.5">
@@ -422,7 +454,7 @@ export function Analytics() {
           </div>
           <div className="mt-4 h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={revenueTrend} barGap={4}>
+              <BarChart data={analyticsData?.chartData || []} barGap={4}>
                 <CartesianGrid vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
@@ -431,6 +463,155 @@ export function Analytics() {
                 <Bar dataKey="jobsCompleted" fill="#10b981" radius={[4, 4, 0, 0]} name="Services Done" />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Churn Distribution</p>
+            <p className="text-2xl font-bold text-slate-900">ML Predictions</p>
+          </div>
+          {/* Chart type switcher */}
+          <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 p-1">
+            {CHART_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setChartType(opt.value)}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
+                  chartType === opt.value
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-5">
+          {/* LEFT — Chart */}
+          <div className="lg:col-span-3">
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                {chartType === 'donut' ? (
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'High Churn Risk', value: counts['High Churn Risk'] || 0 },
+                        { name: 'Medium Churn Risk', value: counts['Medium Churn Risk'] || 0 },
+                        { name: 'Loyal Customer', value: counts['Loyal Customer'] || 0 },
+                        { name: 'New Customer', value: counts['New Customer'] || 0 },
+                      ].filter((d) => d.value > 0)}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={95}
+                      paddingAngle={2}
+                      dataKey="value"
+                      label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                      labelLine={false}
+                    >
+                      {[
+                        { name: 'High Churn Risk', value: counts['High Churn Risk'] || 0 },
+                        { name: 'Medium Churn Risk', value: counts['Medium Churn Risk'] || 0 },
+                        { name: 'Loyal Customer', value: counts['Loyal Customer'] || 0 },
+                        { name: 'New Customer', value: counts['New Customer'] || 0 },
+                      ]
+                        .filter((d) => d.value > 0)
+                        .map((entry, index) => {
+                          const colors: Record<string, string> = {
+                            'High Churn Risk': '#ef4444',
+                            'Medium Churn Risk': '#f59e0b',
+                            'Loyal Customer': '#10b981',
+                            'New Customer': '#0ea5e9',
+                          }
+                          return <Cell key={`cell-${index}`} fill={colors[entry.name]} />
+                        })}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                ) : chartType === 'bar' ? (
+                  <BarChart
+                    data={[
+                      { name: 'High Churn Risk', value: counts['High Churn Risk'] || 0, fill: '#ef4444' },
+                      { name: 'Medium Churn Risk', value: counts['Medium Churn Risk'] || 0, fill: '#f59e0b' },
+                      { name: 'Loyal Customer', value: counts['Loyal Customer'] || 0, fill: '#10b981' },
+                      { name: 'New Customer', value: counts['New Customer'] || 0, fill: '#0ea5e9' },
+                    ].filter((d) => d.value > 0)}
+                    layout="vertical"
+                    margin={{ left: 20 }}
+                  >
+                    <CartesianGrid horizontal={false} stroke="#f1f5f9" />
+                    <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#334155', fontSize: 11, fontWeight: 600 }}
+                      width={130}
+                    />
+                    <Tooltip />
+                    <Bar dataKey="value" radius={[0, 6, 6, 0]} name="Customers">
+                      {[
+                        { name: 'High Churn Risk', fill: '#ef4444' },
+                        { name: 'Medium Churn Risk', fill: '#f59e0b' },
+                        { name: 'Loyal Customer', fill: '#10b981' },
+                        { name: 'New Customer', fill: '#0ea5e9' },
+                      ].map((entry, index) => (
+                        <Cell key={`bar-cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                ) : (
+                  /* Stacked horizontal bar */
+                  <BarChart
+                    data={[{
+                      name: 'All',
+                      'High Churn Risk': counts['High Churn Risk'] || 0,
+                      'Medium Churn Risk': counts['Medium Churn Risk'] || 0,
+                      'Loyal Customer': counts['Loyal Customer'] || 0,
+                      'New Customer': counts['New Customer'] || 0,
+                    }]}
+                    layout="vertical"
+                    margin={{ left: 0 }}
+                  >
+                    <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                    <YAxis type="category" dataKey="name" hide />
+                    <Tooltip />
+                    <Bar dataKey="High Churn Risk" stackId="a" fill="#ef4444" radius={[6, 0, 0, 6]} />
+                    <Bar dataKey="Medium Churn Risk" stackId="a" fill="#f59e0b" />
+                    <Bar dataKey="Loyal Customer" stackId="a" fill="#10b981" />
+                    <Bar dataKey="New Customer" stackId="a" fill="#0ea5e9" radius={[0, 6, 6, 0]} />
+                  </BarChart>
+                )}
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* RIGHT — Summary stats */}
+          <div className="flex flex-col justify-center gap-3 lg:col-span-2">
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Total Customers</p>
+              <p className="mt-1 text-3xl font-bold text-slate-900">{counts.all}</p>
+            </div>
+            {[
+              { key: 'High Churn Risk', color: 'bg-red-500' },
+              { key: 'Medium Churn Risk', color: 'bg-amber-500' },
+              { key: 'Loyal Customer', color: 'bg-emerald-500' },
+              { key: 'New Customer', color: 'bg-sky-500' },
+            ].map((s) => (
+              <div key={s.key} className="flex items-center justify-between rounded-xl border border-slate-100 px-4 py-2.5">
+                <div className="flex items-center gap-2.5">
+                  <span className={`h-2.5 w-2.5 rounded-full ${s.color}`} />
+                  <span className="text-sm font-medium text-slate-700">{s.key}</span>
+                </div>
+                <span className="text-sm font-bold text-slate-900">{counts[s.key] || 0}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -470,75 +651,150 @@ export function Analytics() {
           </div>
         </div>
 
-        <table className="mt-4 w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
-              <th className="py-3 font-semibold">Customer ID</th>
-              <th className="py-3 font-semibold">Name</th>
-              <th className="py-3 font-semibold">Contact</th>
-              <th className="py-3 font-semibold">Status (Churn)</th>
-              <th className="py-3 font-semibold">Vehicle (Year & Model)</th>
-              <th className="py-3 font-semibold">Mileage</th>
-              <th className="py-3 font-semibold">Last Checkup</th>
-              <th className="py-3 font-semibold">Promotional Offer</th>
-              <th className="py-3 font-semibold"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredList.map((c: any) => {
-              const sentOffer = offersSent[c.customerId]
-              const sent = Boolean(sentOffer)
-              return (
-                <tr key={c.customerId} className="border-b border-slate-50 last:border-0">
-                  <td className="py-4 font-semibold text-slate-800">{c.customerId}</td>
-                  <td className="py-4 text-slate-700">{c.name}</td>
-                  <td className="py-4 text-slate-500">{c.contact}</td>
-                  <td className="py-4">
-                    <StatusBadge status={c.churnStatus} />
-                  </td>
-                  <td className="py-4 text-slate-600">{c.vehicle}</td>
-                  <td className="py-4 text-slate-600">{c.mileage}</td>
-                  <td className="py-4 text-slate-600">{c.lastCheckup ?? '—'}</td>
-                  <td className="py-4">
-                    <span className="flex items-center gap-1.5 font-semibold text-slate-800">
-                      <Info size={13} className="text-slate-300" />
-                      {sentOffer ?? c.offer ?? (c.churnStatus === 'New Customer' ? 'Welcome Discount' : '—')}
-                    </span>
-                  </td>
-                  <td className="py-4 text-right">
-                    <button
-                      onClick={() => !sent && openOfferModal(c)}
-                      disabled={sent}
-                      className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
-                        sent
-                          ? 'cursor-default border border-emerald-200 bg-emerald-50 text-emerald-700'
-                          : 'bg-slate-900 text-white hover:bg-slate-800'
-                      }`}
-                    >
-                      {sent ? (
-                        <>
-                          <Check size={13} /> Offer Sent
-                        </>
-                      ) : (
-                        <>
-                          <Gift size={13} /> Give Offer
-                        </>
-                      )}
-                    </button>
-                  </td>
-                </tr>
-              )
-            })}
+        {/* Paginated table */}
+        {(() => {
+          const totalPages = Math.max(1, Math.ceil(filteredList.length / rowsPerPage))
+          const safePage = Math.min(currentPage, totalPages)
+          const startIdx = (safePage - 1) * rowsPerPage
+          const pageRows = filteredList.slice(startIdx, startIdx + rowsPerPage)
 
-            {filteredList.length === 0 && (
-              <tr>
-                <td colSpan={9} className="py-8 text-center text-sm text-slate-400">
-                  No customers match this filter.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+          return (
+            <>
+              <table className="mt-4 w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
+                    <th className="py-3 font-semibold">Customer ID</th>
+                    <th className="py-3 font-semibold">Name</th>
+                    <th className="py-3 font-semibold">Contact</th>
+                    <th className="py-3 font-semibold">Status (Churn)</th>
+                    <th className="py-3 font-semibold">Vehicle (Year & Model)</th>
+                    <th className="py-3 font-semibold">Mileage</th>
+                    <th className="py-3 font-semibold">Last Checkup</th>
+                    <th className="py-3 font-semibold">Promotional Offer</th>
+                    <th className="py-3 font-semibold"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pageRows.map((c: any) => {
+                    const sentOffer = offersSent[c.customerId]
+                    const sent = Boolean(sentOffer)
+                    return (
+                      <tr key={c.customerId} className="border-b border-slate-50 last:border-0">
+                        <td className="py-4 font-semibold text-slate-800">{c.customerId}</td>
+                        <td className="py-4 text-slate-700">{c.name}</td>
+                        <td className="py-4 text-slate-500">{c.contact}</td>
+                        <td className="py-4">
+                          <StatusBadge status={c.churnStatus} />
+                        </td>
+                        <td className="py-4 text-slate-600">{c.vehicle}</td>
+                        <td className="py-4 text-slate-600">{c.mileage}</td>
+                        <td className="py-4 text-slate-600">{c.lastCheckup ?? '—'}</td>
+                        <td className="py-4">
+                          <span className="flex items-center gap-1.5 font-semibold text-slate-800">
+                            <Info size={13} className="text-slate-300" />
+                            {sentOffer ?? c.offer ?? (c.churnStatus === 'New Customer' ? 'Welcome Discount' : '—')}
+                          </span>
+                        </td>
+                        <td className="py-4 text-right">
+                          <button
+                            onClick={() => !sent && openOfferModal(c)}
+                            disabled={sent}
+                            className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
+                              sent
+                                ? 'cursor-default border border-emerald-200 bg-emerald-50 text-emerald-700'
+                                : 'bg-slate-900 text-white hover:bg-slate-800'
+                            }`}
+                          >
+                            {sent ? (
+                              <>
+                                <Check size={13} /> Offer Sent
+                              </>
+                            ) : (
+                              <>
+                                <Gift size={13} /> Give Offer
+                              </>
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+
+                  {filteredList.length === 0 && (
+                    <tr>
+                      <td colSpan={9} className="py-8 text-center text-sm text-slate-400">
+                        No customers match this filter.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+
+              {/* Pagination controls */}
+              {filteredList.length > 0 && (
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <span>Rows per page:</span>
+                    <select
+                      value={rowsPerPage}
+                      onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1) }}
+                      className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-medium text-slate-600"
+                    >
+                      {ROWS_PER_PAGE_OPTIONS.map((n) => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
+                    <span className="ml-2 text-slate-400">
+                      Showing {startIdx + 1}–{Math.min(startIdx + rowsPerPage, filteredList.length)} of {filteredList.length}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={safePage <= 1}
+                      className="rounded-lg border border-slate-200 p-1.5 text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-40"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                      let pageNum: number
+                      if (totalPages <= 7) {
+                        pageNum = i + 1
+                      } else if (safePage <= 4) {
+                        pageNum = i + 1
+                      } else if (safePage >= totalPages - 3) {
+                        pageNum = totalPages - 6 + i
+                      } else {
+                        pageNum = safePage - 3 + i
+                      }
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`min-w-[32px] rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+                            pageNum === safePage
+                              ? 'bg-slate-900 text-white'
+                              : 'text-slate-500 hover:bg-slate-100'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      )
+                    })}
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={safePage >= totalPages}
+                      className="rounded-lg border border-slate-200 p-1.5 text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-40"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )
+        })()}
       </div>
 
       {offerTarget && (

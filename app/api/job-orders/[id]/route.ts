@@ -6,7 +6,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const { id } = await params
 
     const detailResult = await db.query(
-      `SELECT * FROM "Capstone-Testing".get_job_order_detail($1)`,
+      `SELECT * FROM get_job_order_detail($1)`,
       [id]
     )
 
@@ -17,7 +17,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     // Service names aren't part of get_job_order_detail(), so we pull them
     // separately from get_job_order_services() and combine into one payload.
     const servicesResult = await db.query(
-      `SELECT service_name FROM "Capstone-Testing".get_job_order_services($1)`,
+      `SELECT service_name FROM get_job_order_services($1)`,
       [id]
     )
     const serviceNames = servicesResult.rows.map((r) => r.service_name).join(', ')

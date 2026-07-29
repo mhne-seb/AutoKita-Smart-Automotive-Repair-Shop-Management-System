@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
-  const { jobOrderId, method, amount } = await request.json()
-  if (!jobOrderId || !method || amount == null) {
-    return NextResponse.json({ error: 'jobOrderId, method, and amount are required' }, { status: 400 })
+  const { jobOrderId, method, amount, acceptedServiceIds } = await request.json()
+  if (!jobOrderId || !method || amount == null || !Array.isArray(acceptedServiceIds)) {
+    return NextResponse.json({ error: 'jobOrderId, method, amount, and acceptedServiceIds are required' }, { status: 400 })
   }
 
   const dbMethod = method === 'shop' ? 'cash' : 'e_wallet'
@@ -15,6 +15,17 @@ export async function POST(request: NextRequest) {
     )
     if (joRows[0]?.quotation_approved) {
       return NextResponse.json({ error: 'Quotation already confirmed' }, { status: 409 })
+    }
+
+    // Delete rejected services
+    await db.query(
+      `DELETE FROM job_order_services WHERE job_order_id = $1 AND id != ALL($2::int[])`,
+      [jobOrderId, acceptedServiceIds]
+    )
+
+    // Delete rejected parts (ID 999999 is the pseudo-service representing all parts)
+    if (!acceptedServiceIds.includes(999999)) {
+      await db.query(`DELETE FROM job_order_parts WHERE job_order_id = $1`, [jobOrderId])
     }
 
     const { rows } = await db.query(

@@ -42,7 +42,7 @@ function LoginPage() {
 
     // Automatically detect the account's role and route to the right dashboard.
     startSession(result.role, result.user!.id)
-    router.push(result.role === 'admin' ? '/overview' : '/dashboard')
+    router.push(result.role === 'customer' ? '/dashboard' : '/overview')
   }
 
   return (

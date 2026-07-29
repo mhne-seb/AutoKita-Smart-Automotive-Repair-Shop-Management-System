@@ -96,7 +96,7 @@ function humanizeKey(key: string) {
 
 // Turns an array of flat objects into a CSV file and triggers a browser
 // download — good enough for a mock "Export" button without a backend.
-function downloadCsv(filename: string, rows: Record<string, unknown>[]) {
+function downloadCsv(filename: string, rows: any[]) {
   if (rows.length === 0) return
   const headers = Object.keys(rows[0])
   const escape = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
@@ -126,7 +126,7 @@ export function HistoryLogs({ tab }: Props) {
   const [tierFilter, setTierFilter] = useState('All Tiers')
 
   // ---- New: view details modal ----
-  const [selectedRow, setSelectedRow] = useState<Record<string, unknown> | null>(null)
+  const [selectedRow, setSelectedRow] = useState<any | null>(null)
 
   function togglePopover(key: PopoverKey) {
     setOpenPopover((prev) => (prev === key ? null : key))

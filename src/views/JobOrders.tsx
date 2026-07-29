@@ -37,21 +37,17 @@ export function JobOrders() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Pagination state
+  // Local pagination state
   const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [total, setTotal] = useState(0)
 
   useEffect(() => {
     let active = true
     setLoading(true)
     setError(null)
-    getJobOrders(page, PAGE_SIZE)
+    getJobOrders(1, 1000000)
       .then((result) => {
         if (!active) return
         setJobOrders(result.data)
-        setTotalPages(result.totalPages)
-        setTotal(result.total)
         setLoading(false)
       })
       .catch((err) => {
@@ -62,7 +58,11 @@ export function JobOrders() {
     return () => {
       active = false
     }
-  }, [page])
+  }, [])
+
+  useEffect(() => {
+    setPage(1)
+  }, [query, activeTab])
 
   const tabs: { key: TabKey; label: string; icon: typeof ClipboardList; count: number }[] = [
     { key: 'all', label: 'All Orders', icon: ClipboardList, count: jobOrders.length },
@@ -83,14 +83,24 @@ export function JobOrders() {
         c.customer.toLowerCase().includes(q) ||
         c.plate.toLowerCase().includes(q) ||
         c.service.toLowerCase().includes(q) ||
-        c.vehicle.toLowerCase().includes(q)
+        c.vehicle.toLowerCase().includes(q) ||
+        c.id.toLowerCase().includes(q)
       return matchesTab && matchesQuery
     })
   }, [activeTab, query, jobOrders])
 
+  const total = visibleCards.length
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const paginatedCards = visibleCards.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
   return (
     <div className="space-y-6 p-8">
-      <TopBar title="Job Orders" subtitle="Job order workflow & time tracking." />
+      <TopBar 
+        title="Job Orders" 
+        subtitle="Job order workflow & time tracking." 
+        searchQuery={query}
+        onSearchChange={setQuery}
+      />
 
       <div className="flex flex-wrap gap-3">
         {tabs.map(({ key, label, count, icon: Icon }) => {
@@ -126,8 +136,31 @@ export function JobOrders() {
         </div>
       ) : (
         <>
+          {/* Pagination controls */}
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-sm text-slate-500">
+              Page {page} of {totalPages} · {total} total job orders
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+              >
+                <ChevronLeft size={14} /> Prev
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+              >
+                Next <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-            {visibleCards.map((c) => (
+            {paginatedCards.map((c) => (
               <div key={c.id} className="rounded-2xl border border-slate-200 bg-white p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -182,29 +215,6 @@ export function JobOrders() {
                 </Link>
               </div>
             ))}
-          </div>
-
-          {/* Pagination controls */}
-          <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-            <p className="text-sm text-slate-500">
-              Page {page} of {totalPages} · {total} total job orders
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 disabled:opacity-40"
-              >
-                <ChevronLeft size={14} /> Prev
-              </button>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 disabled:opacity-40"
-              >
-                Next <ChevronRight size={14} />
-              </button>
-            </div>
           </div>
         </>
       )}

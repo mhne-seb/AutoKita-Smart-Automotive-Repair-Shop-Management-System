@@ -83,6 +83,51 @@ export async function getInspectionForJobOrder(jobOrderId: string): Promise<Insp
 
 
 
+export async function addInspectionFinding(jobOrderId: string, finding: Partial<MechanicalFinding>): Promise<MechanicalFinding | null> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/findings`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(finding)
+  })
+  if (!res.ok) return null
+  const json = await res.json()
+  if (!json.success) return null
+  return {
+    id: String(json.data.id),
+    name: json.data.name,
+    note: json.data.findings_description,
+    status: json.data.status,
+    photo: json.data.photo || undefined,
+  }
+}
+
+export async function updateInspectionFinding(jobOrderId: string, finding: Partial<MechanicalFinding> & { id: string }): Promise<MechanicalFinding | null> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/findings`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(finding)
+  })
+  if (!res.ok) return null
+  const json = await res.json()
+  if (!json.success) return null
+  return {
+    id: String(json.data.id),
+    name: json.data.name,
+    note: json.data.findings_description,
+    status: json.data.status,
+    photo: json.data.photo || undefined,
+  }
+}
+
+export async function deleteInspectionFinding(jobOrderId: string, findingId: string): Promise<boolean> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/findings?findingId=${findingId}`, {
+    method: 'DELETE'
+  })
+  if (!res.ok) return false
+  const json = await res.json()
+  return json.success
+}
+
 /**
 // ---------------------------------------------------------------------------
 // inspectionController — wraps src/data/inspections.ts (Admin Inspection

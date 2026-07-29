@@ -52,9 +52,9 @@ export function logout() {
 }
 
 /** Persists the session flags for the given role + user id after a successful login. */
-export function startSession(role: UserRole, userId: number) {
+export function startSession(role: string, userId: number) {
   if (typeof window === 'undefined') return
-  if (role === 'admin') sessionStorage.setItem('autokita_admin', 'true')
+  if (role !== 'customer') sessionStorage.setItem('autokita_admin', 'true')
   else sessionStorage.setItem('autokita_customer', 'true')
   sessionStorage.setItem('autokita_user_id', String(userId))
 }

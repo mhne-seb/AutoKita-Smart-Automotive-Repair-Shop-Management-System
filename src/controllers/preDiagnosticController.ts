@@ -47,6 +47,15 @@ export async function sendForApproval(jobOrderId: string, notes: string): Promis
   return toPreDiagnosticRound(json.data)
 }
 
+/** Recalls a pending approval so the admin can make further changes before re-sending. */
+export async function recallApproval(jobOrderId: string): Promise<boolean> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/pre-diagnostic`, {
+    method: 'DELETE',
+  })
+  const json = await res.json()
+  return json.success === true
+}
+
 /**
  * Simulates the customer's decision on the latest round. Pass advanceToStage
  * when approval should also move the job order's real stage forward (e.g.

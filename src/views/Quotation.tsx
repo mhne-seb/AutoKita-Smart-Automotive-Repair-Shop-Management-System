@@ -1,14 +1,14 @@
 'use client'
 
 // Admin "Quotation" page (one step of the job-order workflow: Inspection -> Quotation -> Service Progress). Lets the mechanic/admin build a service+parts quote for the customer to approve, then hands off to Service Progress.
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import Link from "next/link";
-import { Plus, Pencil, Check, Send, ShieldCheck, ChevronRight, X } from 'lucide-react'
+import { Plus, Pencil, Check, Send, ShieldCheck, ChevronRight, X, Trash2, RotateCcw } from 'lucide-react'
 import { TopBar } from '../components/TopBar'
 import { JobOrderBreadcrumb } from '../components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById } from '@/controllers/jobOrderController'
 import { getQuotationById } from '@/controllers/quotationController'
-import { getLatestPreDiagnostic, sendForApproval, simulateCustomerResponse, type PreDiagnosticRound } from '@/controllers/preDiagnosticController'
+import { getLatestPreDiagnostic, sendForApproval, recallApproval } from '@/controllers/preDiagnosticController'
 import { currency } from '../data/mockData'
 import { QuotationService, JobOrderCard, QuotationData } from '../data/types'
 
@@ -50,9 +50,9 @@ export function Quotation({ jobOrderId }: Props) {
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null)
 
   // Real "send for approval" round — replaces the old local `sent` flag.
-  const [preDiagnostic, setPreDiagnostic] = useState<PreDiagnosticRound | null | undefined>(undefined)
+  const [preDiagnostic, setPreDiagnostic] = useState<any>(undefined)
   const [sending, setSending] = useState(false)
-  const [respondingTo, setRespondingTo] = useState<'approved' | 'disputed' | null>(null)
+  const [recalling, setRecalling] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -65,12 +65,49 @@ export function Quotation({ jobOrderId }: Props) {
   }, [jobOrderId])
 
   // Once the real data arrives, seed the editable state from it.
+  const hasSeeded = useRef(false)
   useEffect(() => {
-    if (initial) {
+    if (initial && !hasSeeded.current) {
+      hasSeeded.current = true
       setServices(initial.services)
       setNotes(initial.notes)
     }
   }, [initial])
+
+  // Auto-save logic — only fires after the initial DB data has been seeded,
+  // and skips the very first change triggered by seeding itself.
+  const isFirstRender = useRef(true)
+  // AI predictions for each service
+  const [aiPredictions, setAiPredictions] = useState<Record<string, { predicted_amount: number; predicted_duration_mins?: number; is_mock?: boolean }>>({})
+
+  useEffect(() => {
+    // Don't auto-save until initial data has loaded and seeded
+    if (!hasSeeded.current) return
+    
+    // Skip the first execution which is triggered by the initial setServices/setNotes
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    
+    const timer = setTimeout(() => {
+      const servicesWithEstimates = services.map(s => {
+        const prediction = aiPredictions[s.id]
+        return {
+          ...s,
+          estimated_amount: prediction?.predicted_amount || s.estimated_amount || s.laborCost,
+          actual_amount: s.laborCost
+        }
+      })
+
+      fetch(`/api/job-orders/${jobOrderId}/quotation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes, services: servicesWithEstimates }),
+      }).catch(console.error)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [notes, services, aiPredictions, jobOrderId])
 
   const totals = useMemo(() => {
     let laborTotal = 0
@@ -82,6 +119,56 @@ export function Quotation({ jobOrderId }: Props) {
     return { laborTotal, partsTotal, grandTotal: laborTotal + partsTotal }
   }, [services])
 
+
+  useEffect(() => {
+    if (!jobOrder || services.length === 0) return
+    
+    // Parse vehicle info from jobOrder.vehicle (e.g., "2023 Honda CR-V")
+    const match = jobOrder.vehicle.match(/^(\d{4})\s+(.+)$/)
+    const vehicleYear = match ? parseInt(match[1]) : new Date().getFullYear()
+    const vehicleAge = Math.max(0, new Date().getFullYear() - vehicleYear)
+    const vehicleType = match ? match[2] : jobOrder.vehicle
+
+    // Fetch AI cost predictions for each service
+    services.forEach(async (s) => {
+      // Skip AI estimation for custom services since they lack historical store data
+      if (!s.dbServiceId) return
+      
+      // If we already have an estimated amount stored, use it and skip AI call
+      if (s.estimated_amount !== undefined && s.estimated_amount !== null && s.estimated_amount > 0) {
+        setAiPredictions(prev => ({ ...prev, [s.id]: { predicted_amount: s.estimated_amount!, predicted_duration_mins: (s.estimated_hours || 0) * 60 } }))
+        return
+      }
+      
+      const dbService = availableServices.find(as => as.id === s.dbServiceId)
+      const basePrice = dbService ? Number(dbService.base_price) : (s.laborCost || 0)
+      const baseDurationHours = dbService ? Number(dbService.base_duration_hours) : (s.laborHours || 1)
+
+      try {
+        const res = await fetch('/api/predict/cost', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            // For Time Model
+            estimated_duration_mins: (s.laborHours || 1) * 60,
+            actual_amount: s.laborCost || 0,
+            service_id: s.dbServiceId || 0,
+            // Shared
+            base_price: basePrice,
+            base_duration_hours: baseDurationHours,
+            is_price_fixed: 0,
+            vehicle_age: vehicleAge,
+            vehicle_type: vehicleType,
+          }),
+        })
+        const data = await res.json()
+        if (data.predicted_amount) {
+          setAiPredictions(prev => ({ ...prev, [s.id]: data }))
+        }
+      } catch {}
+    })
+  }, [jobOrder, services.length])
+
   const partsStatusCount = useMemo(() => {
     let inStock = 0
     let toOrder = 0
@@ -89,6 +176,25 @@ export function Quotation({ jobOrderId }: Props) {
       for (const p of s.parts) (p.status === 'in-stock' ? inStock++ : toOrder++)
     return { inStock, toOrder }
   }, [services])
+
+  const [availableServices, setAvailableServices] = useState<any[]>([])
+  const [showServiceModal, setShowServiceModal] = useState(false)
+  const [selectedServiceId, setSelectedServiceId] = useState<string>('')
+  const [customServiceName, setCustomServiceName] = useState('')
+  const [isAddingService, setIsAddingService] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    fetch('/api/services')
+      .then(res => res.json())
+      .then(data => {
+        if (active && data.success) {
+          setAvailableServices(data.services)
+        }
+      })
+      .catch(console.error)
+    return () => { active = false }
+  }, [])
 
   if (jobOrder === undefined || initial === undefined || preDiagnostic === undefined) {
     return (
@@ -108,6 +214,10 @@ export function Quotation({ jobOrderId }: Props) {
 
   function updateLaborCost(serviceId: string, laborCost: number) {
     setServices((prev) => prev.map((s) => (s.id === serviceId ? { ...s, laborCost } : s)))
+  }
+
+  function updateLaborHours(serviceId: string, laborHours: number) {
+    setServices((prev) => prev.map((s) => (s.id === serviceId ? { ...s, laborHours } : s)))
   }
 
   function addPart(serviceId: string) {
@@ -133,35 +243,88 @@ export function Quotation({ jobOrderId }: Props) {
   // real, persisted database write (creates a new pre_diagnostics round).
   async function sendQuotationForApproval() {
     setSending(true)
+
+    // First save the quotation services and notes
+    try {
+      const servicesWithEstimates = services.map(s => {
+        const prediction = aiPredictions[s.id]
+        return {
+          ...s,
+          estimated_amount: prediction?.predicted_amount || s.estimated_amount || s.laborCost,
+          actual_amount: s.laborCost // Admin's quoted actual_amount becomes the actual quoted actual_amount
+        }
+      })
+
+      const estimated_grand_total = servicesWithEstimates.reduce((sum, s) => sum + Number(s.estimated_amount), 0) + totals.partsTotal
+      const actual_grand_total = totals.grandTotal
+
+      await fetch(`/api/job-orders/${jobOrderId}/quotation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes, services: servicesWithEstimates, estimated_grand_total, actual_grand_total }),
+      })
+    } catch (e) {
+      console.error('Failed to save quotation', e)
+    }
+
     const summary = `Quotation total: ${currency(totals.grandTotal)} (Labor: ${currency(totals.laborTotal)}, Parts: ${currency(totals.partsTotal)}). ${notes}`
     const round = await sendForApproval(jobOrderId, summary)
     if (round) setPreDiagnostic(round)
     setSending(false)
   }
 
-  // Simulates the customer's decision on the quotation (stands in for the
-  // real Customer-portal approval button, which is a separate task).
-  // Approving here moves the job order into "in-progress" for real.
-  async function respondToQuotation(status: 'approved' | 'disputed') {
-    setRespondingTo(status)
-    const round = await simulateCustomerResponse(jobOrderId, status, status === 'approved' ? 'in-progress' : undefined)
-    if (round) setPreDiagnostic(round)
-    setRespondingTo(null)
+  // Recalls a pending approval so the admin can make changes.
+  async function handleRecallApproval() {
+    setRecalling(true)
+    const ok = await recallApproval(jobOrderId)
+    if (ok) setPreDiagnostic(null)
+    setRecalling(false)
   }
 
-  function addService() {
-    const name = window.prompt('New service name?')
-    if (!name) return
+
+  function openAddServiceModal() {
+    setShowServiceModal(true)
+    setSelectedServiceId('')
+    setCustomServiceName('')
+  }
+
+  function removeService(serviceId: string) {
+    setServices((prev) => prev.filter((s) => s.id !== serviceId))
+  }
+
+  async function confirmAddService() {
+    let name = ''
+    let laborHours = 1
+    let laborCost = 0
+
+    if (selectedServiceId === 'custom') {
+      name = customServiceName.trim()
+      if (!name) return
+    } else if (selectedServiceId) {
+      const srv = availableServices.find((s) => String(s.id) === selectedServiceId)
+      if (srv) {
+        name = srv.service_name
+        laborHours = Number(srv.base_duration_hours) || 1
+        laborCost = Number(srv.base_price) || 0
+      } else {
+        return
+      }
+    } else {
+      return
+    }
+
     const newService: QuotationService = {
       id: `SVC-${services.length + 1}`,
       code: `SVC-${String(services.length + 1).padStart(3, '0')}`,
       name,
       description: 'Describe the service...',
-      laborHours: 1,
-      laborCost: 0,
+      laborHours,
+      laborCost,
       parts: [],
+      dbServiceId: selectedServiceId === 'custom' ? undefined : Number(selectedServiceId)
     }
     setServices((prev) => [...prev, newService])
+    setShowServiceModal(false)
   }
 
   return (
@@ -201,25 +364,34 @@ export function Quotation({ jobOrderId }: Props) {
         </div>
         <div className="flex flex-wrap gap-2">
           <button
-            onClick={addService}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            onClick={openAddServiceModal}
+            disabled={preDiagnostic?.status === 'pending' || preDiagnostic?.status === 'approved'}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus size={14} /> Add Service
           </button>
-          <button
-            onClick={sendQuotationForApproval}
-            disabled={sending || preDiagnostic?.status === 'pending'}
-            className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
-          >
-            <Send size={14} />{' '}
-            {sending
-              ? 'Sending…'
-              : preDiagnostic?.status === 'pending'
-              ? 'Awaiting customer approval'
-              : preDiagnostic?.status === 'approved'
-              ? 'Approved by customer'
-              : 'Send to Customer'}
-          </button>
+          {preDiagnostic?.status === 'pending' ? (
+            <button
+              onClick={handleRecallApproval}
+              disabled={recalling}
+              className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
+            >
+              <RotateCcw size={14} /> {recalling ? 'Recalling…' : 'Recall Approval'}
+            </button>
+          ) : (
+            <button
+              onClick={sendQuotationForApproval}
+              disabled={sending || preDiagnostic?.status === 'approved'}
+              className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
+            >
+              <Send size={14} />{' '}
+              {sending
+                ? 'Sending…'
+                : preDiagnostic?.status === 'approved'
+                ? 'Approved by customer'
+                : 'Send to Customer'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -253,38 +425,91 @@ export function Quotation({ jobOrderId }: Props) {
                   </div>
                   <div className="flex shrink-0 items-center gap-6 text-sm">
                     <div>
-                      <p className="text-slate-400">Labor Time</p>
-                      <p className="font-semibold text-slate-800">{s.laborHours} hrs</p>
-                    </div>
-                    <div>
-                      <p className="text-slate-400">Labor Cost</p>
+                      <p className="flex items-center gap-1.5 text-slate-400">
+                        Labor Time
+                        {!s.dbServiceId ? (
+                          <span className="inline-flex cursor-help items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 hover:bg-slate-200" title="Need more historical data for AI estimation">
+                            🤖 Low Data
+                          </span>
+                        ) : aiPredictions[s.id] && aiPredictions[s.id].predicted_duration_mins && (
+                          <span
+                            className="inline-flex cursor-help items-center gap-1 rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-700 hover:bg-purple-200"
+                            title={`${aiPredictions[s.id].is_mock ? 'ai' : 'AI'} suggests ${Math.round(aiPredictions[s.id].predicted_duration_mins! / 60 * 10) / 10} hrs`}
+                          >
+                            🤖 {Math.round(aiPredictions[s.id].predicted_duration_mins! / 60 * 10) / 10} hrs
+                          </span>
+                        )}
+                      </p>
                       {editing ? (
                         <input
                           type="number"
-                          autoFocus
+                          step="0.1"
+                          defaultValue={s.laborHours}
+                          onBlur={(e) => {
+                            updateLaborHours(s.id, Number(e.target.value) || 0)
+                          }}
+                          className="w-20 rounded border border-slate-300 px-2 py-1 text-sm focus:border-emerald-500 focus:outline-none"
+                        />
+                      ) : (
+                        <p className="font-semibold text-slate-800">{s.laborHours} hrs</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="flex items-center gap-1.5 text-slate-400">
+                        Labor Cost
+                        {!s.dbServiceId ? (
+                          <span className="inline-flex cursor-help items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 hover:bg-slate-200" title="Need more historical data for AI estimation">
+                            🤖 Low Data
+                          </span>
+                        ) : aiPredictions[s.id] && (
+                          <span
+                            className="inline-flex cursor-help items-center gap-1 rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-700 hover:bg-purple-200"
+                            title={`${aiPredictions[s.id].is_mock ? 'ai' : 'AI'} suggests ${currency(aiPredictions[s.id].predicted_amount)}`}
+                          >
+                            🤖 {currency(aiPredictions[s.id].predicted_amount)}
+                          </span>
+                        )}
+                      </p>
+                      {editing ? (
+                        <input
+                          type="number"
                           defaultValue={s.laborCost}
                           onBlur={(e) => {
                             updateLaborCost(s.id, Number(e.target.value) || 0)
-                            setEditingServiceId(null)
                           }}
-                          className="w-24 rounded border border-slate-300 px-2 py-1 text-sm"
+                          className="w-24 rounded border border-slate-300 px-2 py-1 text-sm focus:border-emerald-500 focus:outline-none"
                         />
                       ) : (
                         <p className="font-semibold text-slate-800">{currency(s.laborCost)}</p>
                       )}
                     </div>
-                    <button
-                      onClick={() => setEditingServiceId(editing ? null : s.id)}
-                      className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-                    >
-                      {editing ? <Check size={13} /> : <Pencil size={13} />} {editing ? 'Done' : 'Edit'}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setEditingServiceId(editing ? null : s.id)}
+                        disabled={preDiagnostic?.status === 'pending' || preDiagnostic?.status === 'approved'}
+                        className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {editing ? <Check size={13} /> : <Pencil size={13} />} {editing ? 'Done' : 'Edit'}
+                      </button>
+                      <button
+                        onClick={() => removeService(s.id)}
+                        disabled={preDiagnostic?.status === 'pending' || preDiagnostic?.status === 'approved'}
+                        className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Remove Service"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
                 <div className="mt-4 flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-slate-400">
                   <span>Required Parts</span>
-                  <button onClick={() => addPart(s.id)} className="flex items-center gap-1 text-emerald-600 hover:underline">
+                  <button 
+                    onClick={() => addPart(s.id)} 
+                    disabled={preDiagnostic?.status === 'pending' || preDiagnostic?.status === 'approved'}
+                    className="flex items-center gap-1 text-emerald-600 hover:underline disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed"
+                  >
                     <Plus size={12} /> Add Part
                   </button>
                 </div>
@@ -402,28 +627,6 @@ export function Quotation({ jobOrderId }: Props) {
             </button>
           </div>
 
-          {preDiagnostic && preDiagnostic.status === 'pending' && (
-            <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-5">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-indigo-500">Simulate Customer Decision</p>
-              <p className="mb-4 text-sm text-indigo-500">
-                Stands in for the real Customer portal (a separate task) — use this to test the approval flow.
-              </p>
-              <button
-                onClick={() => respondToQuotation('approved')}
-                disabled={respondingTo !== null}
-                className="mb-2 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
-              >
-                <Check size={15} /> {respondingTo === 'approved' ? 'Approving…' : 'Simulate: Customer Approves'}
-              </button>
-              <button
-                onClick={() => respondToQuotation('disputed')}
-                disabled={respondingTo !== null}
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white py-2.5 text-sm font-semibold text-indigo-600 hover:bg-indigo-50 disabled:opacity-50"
-              >
-                <X size={15} /> {respondingTo === 'disputed' ? 'Sending…' : 'Simulate: Customer Disputes'}
-              </button>
-            </div>
-          )}
 
           {preDiagnostic?.status === 'approved' && (
             <Link
@@ -435,6 +638,59 @@ export function Quotation({ jobOrderId }: Props) {
           )}
         </div>
       </div>
+
+      {showServiceModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setShowServiceModal(false)}>
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-900">Add Service</h3>
+              <button onClick={() => setShowServiceModal(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Select Service</label>
+                <select 
+                  value={selectedServiceId}
+                  onChange={(e) => setSelectedServiceId(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+                >
+                  <option value="" disabled>Select a service from database...</option>
+                  {availableServices.length > 0 ? (
+                    availableServices.map(s => (
+                      <option key={s.id} value={s.id}>{s.service_name}</option>
+                    ))
+                  ) : (
+                    <option value="" disabled>No services available</option>
+                  )}
+                  <option value="custom">+ Custom Service (Not Listed)</option>
+                </select>
+              </div>
+
+              {selectedServiceId === 'custom' && (
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Custom Service Name</label>
+                  <input
+                    autoFocus
+                    type="text"
+                    value={customServiceName}
+                    onChange={(e) => setCustomServiceName(e.target.value)}
+                    placeholder="e.g. Special Engine Detail"
+                    className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button onClick={() => setShowServiceModal(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50">Cancel</button>
+              <button onClick={confirmAddService} disabled={!selectedServiceId || (selectedServiceId === 'custom' && !customServiceName.trim())} className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">
+                Add Service
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

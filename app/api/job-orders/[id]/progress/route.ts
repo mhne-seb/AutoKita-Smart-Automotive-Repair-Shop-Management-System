@@ -6,7 +6,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const { id } = await params
 
     const result = await db.query(
-      `SELECT * FROM "Capstone-Testing".get_service_progress_tasks($1)`,
+      `SELECT * FROM get_service_progress_tasks($1)`,
       [id]
     )
 

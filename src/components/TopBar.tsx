@@ -5,9 +5,11 @@ interface TopBarProps {
   subtitle: string
   rightSlot?: React.ReactNode
   showFilters?: boolean
+  searchQuery?: string
+  onSearchChange?: (val: string) => void
 }
 
-export function TopBar({ title, subtitle, rightSlot, showFilters }: TopBarProps) {
+export function TopBar({ title, subtitle, rightSlot, showFilters, searchQuery, onSearchChange }: TopBarProps) {
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div>
@@ -23,6 +25,8 @@ export function TopBar({ title, subtitle, rightSlot, showFilters }: TopBarProps)
           />
           <input
             type="text"
+            value={searchQuery ?? ''}
+            onChange={(e) => onSearchChange?.(e.target.value)}
             placeholder="Search tickets, plates, customers..."
             className="w-72 rounded-full border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
           />

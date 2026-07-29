@@ -2,14 +2,14 @@
 
 // Admin "Service Progress" page — the final step of the job-order workflow. Shows a section-by-section task checklist; once every task is marked done the job order is written back to "completed" (see jobOrderController.advanceJobOrderStage).
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { Check, ListChecks } from 'lucide-react'
+import { Check, ListChecks, CalendarDays, Clock, X } from 'lucide-react'
 import { TopBar } from '../components/TopBar'
 import { JobOrderBreadcrumb } from '../components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
 import { getQuotationById } from '@/controllers/quotationController'
-import { getServiceProgressById } from '@/controllers/serviceProgressController'
+import { getServiceProgressById, scheduleTask } from '@/controllers/serviceProgressController'
 import { currency } from '../data/mockData'
-import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData } from '../data/types'
+import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask } from '../data/types'
 
 interface Props {
   jobOrderId: string
@@ -68,6 +68,7 @@ export function ServiceProgress({ jobOrderId }: Props) {
 
   const [sections, setSections] = useState<ServiceSection[]>([])
   const [quotationConfirmed, setQuotationConfirmed] = useState(false)
+  const [schedulingTask, setSchedulingTask] = useState<ServiceTask | null>(null)
 
   // Once the real data arrives, seed the editable state from it.
   useEffect(() => {
@@ -183,53 +184,45 @@ export function ServiceProgress({ jobOrderId }: Props) {
                 {section.title}
               </p>
               {section.tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`flex items-center justify-between rounded-xl border p-4 ${
-                    task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50' : 'border-slate-200 bg-white'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <button
-                      onClick={() => toggleCheckbox(task.id, task.status)}
-                      className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
-                        task.status === 'completed'
-                          ? 'border-emerald-500 bg-emerald-500 text-white'
-                          : task.status === 'active'
-                          ? 'border-indigo-400 text-transparent hover:text-indigo-400'
-                          : 'border-slate-200 text-transparent'
-                      }`}
-                    >
-                      <Check size={13} />
-                    </button>
-                    <div>
-                      <p className="flex items-center gap-2 font-semibold text-slate-900">
-                        {task.title}
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                            task.status === 'completed'
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : task.status === 'active'
-                              ? 'bg-indigo-100 text-indigo-700'
-                              : 'bg-slate-100 text-slate-400'
-                          }`}
-                        >
-                          {task.status}
-                        </span>
-                      </p>
-                      <p className="text-sm text-slate-500">{task.note}</p>
-                      <p className="mt-1 text-xs text-slate-400">🕐 {task.time}</p>
+                  <div
+                    key={task.id}
+                    className={`flex items-center justify-between rounded-xl border p-4 ${
+                      task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50' : 'border-slate-200 bg-white hover:bg-slate-50 cursor-pointer'
+                    }`}
+                    onClick={() => setSchedulingTask(task)}
+                  >
+                    <div className="flex items-start gap-4 flex-1 min-w-0">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-slate-900 truncate">
+                          {task.title}
+                        </p>
+                        <p className="text-sm text-slate-500 mt-1 truncate">{task.note}</p>
+                        <div className="mt-2 flex items-center gap-4 text-xs text-slate-400">
+                          <span>🕐 {task.time}</span>
+                          {task.scheduledDate && (
+                            <span className="flex items-center gap-1 font-semibold text-indigo-600">
+                              <CalendarDays size={13} />
+                              Scheduled: {new Date(task.scheduledDate).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="shrink-0 ml-4 flex flex-col items-end gap-2">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                          task.status === 'completed'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : task.status === 'active'
+                            ? 'bg-indigo-100 text-indigo-700'
+                            : 'bg-slate-100 text-slate-500'
+                        }`}
+                      >
+                        {task.status === 'completed' ? 'Finished' : task.status === 'active' ? 'Started' : 'Not Yet'}
+                      </span>
                     </div>
                   </div>
-                  {task.status === 'active' && (
-                    <button
-                      onClick={() => markDone(task.id)}
-                      className="shrink-0 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-                    >
-                      Mark Done
-                    </button>
-                  )}
-                </div>
               ))}
 
               {section.id === 'quotation' && quotation && (
@@ -304,6 +297,112 @@ export function ServiceProgress({ jobOrderId }: Props) {
           ))}
         </div>
       )}
+      
+      {schedulingTask && (
+        <ScheduleModal 
+          task={schedulingTask} 
+          jobOrderId={jobOrderId}
+          onClose={() => setSchedulingTask(null)}
+          onSaved={() => {
+            setSchedulingTask(null)
+            getServiceProgressById(jobOrderId).then((data) => {
+              if (data) setSections(data.sections)
+            })
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+function ScheduleModal({ task, jobOrderId, onClose, onSaved }: { task: ServiceTask, jobOrderId: string, onClose: () => void, onSaved: () => void }) {
+  const [date, setDate] = useState(() => {
+    if (task.scheduledDate) {
+      // Postgres returns local time timestamp natively as UTC Date on some clients,
+      // but since we send exact string and read exact string we can extract local values directly
+      const d = new Date(task.scheduledDate)
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    }
+    return new Date().toISOString().split('T')[0]
+  })
+  
+  const [time, setTime] = useState(() => {
+    if (task.scheduledDate) {
+      const d = new Date(task.scheduledDate)
+      return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+    }
+    return '09:00'
+  })
+
+  const [status, setStatus] = useState<TaskStatus>(task.status)
+  const [saving, setSaving] = useState(false)
+
+  const handleSave = async () => {
+    setSaving(true)
+    // Create a local timestamp string matching standard format (without Z) to prevent timezone shifting
+    // E.g., '2026-07-25T07:00:00'
+    const datetime = `${date}T${time}:00`
+    await scheduleTask(jobOrderId, task.id, datetime, status)
+    setSaving(false)
+    onSaved()
+  }
+
+  const handleQuickPick = (daysToAdd: number) => {
+    const d = new Date()
+    d.setDate(d.getDate() + daysToAdd)
+    setDate(d.toISOString().split('T')[0])
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-slate-900">Schedule Task</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 rounded-full p-1 hover:bg-slate-100"><X size={20}/></button>
+        </div>
+        
+        <div className="mb-6 rounded-lg bg-slate-50 p-4 border border-slate-100">
+          <p className="font-semibold text-slate-900">{task.title}</p>
+          <p className="text-sm text-slate-500 mt-1">{task.note || 'No notes provided.'}</p>
+        </div>
+
+        <div className="space-y-4 mb-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Status</label>
+            <div className="flex gap-2">
+              <button onClick={() => setStatus('pending')} className={`flex-1 rounded-lg border py-2 text-sm font-semibold transition-colors ${status === 'pending' ? 'bg-slate-200 border-slate-300 text-slate-800' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>Not Yet</button>
+              <button onClick={() => setStatus('active')} className={`flex-1 rounded-lg border py-2 text-sm font-semibold transition-colors ${status === 'active' ? 'bg-indigo-100 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>Started</button>
+              <button onClick={() => setStatus('completed')} className={`flex-1 rounded-lg border py-2 text-sm font-semibold transition-colors ${status === 'completed' ? 'bg-emerald-100 border-emerald-200 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>Finished</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <button onClick={() => handleQuickPick(0)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Today</button>
+            <button onClick={() => handleQuickPick(1)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Tomorrow</button>
+            <button onClick={() => handleQuickPick(2)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">In 2 Days</button>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Date</label>
+              <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Time</label>
+              <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-6 flex gap-3">
+          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+          <button onClick={handleSave} disabled={saving} className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-70 flex items-center justify-center gap-2">
+            {saving ? 'Saving...' : <><CalendarDays size={16}/> Save Schedule</>}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

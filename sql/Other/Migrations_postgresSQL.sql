@@ -139,49 +139,16 @@ CROSS JOIN LATERAL(
 ) AS o;
 
 -- Services 4 (30 for now)
-INSERT INTO services(shop_id, 
-					 service_name, 
-                     description, 
-                     base_price, 
-                     base_duration_hours, 
-                     is_price_fixed, 
-                     is_active)
-SELECT 
-	-- shop_id
-	s.id, 
-    -- service_name 
-    (ARRAY[
-        'Oil Change', 
-        'Brake Pad Replacement', 
-        'Tire Rotation & Balance', 
-        'Wheel Alignment', 
-        'Engine Diagnostics', 
-        'Battery Testing & Replacement', 
-        'A/C System Recharge', 
-        'Transmission Fluid Flush'
-    ])[1 + FLOOR(RANDOM() * 8)::INT],
-    -- description 
-    CONCAT(
-        'Description: ', 
-        (ARRAY['inspection', 'maintenance', 'repair', 'servicing'])[1 + FLOOR(RANDOM() * 4)::INT], 
-        ' performed by the mechanics to ensure vehicle safety and reliability.'
-    ),
-    -- base_price (500.00 and 8000.00)
-    ROUND((500 + (RANDOM() * 7500))::NUMERIC, 2),
-    -- base_duration_hours (0.5 and 5.0 hours)
-    ROUND((0.5 + (RANDOM() * 4.5))::NUMERIC, 2),
-    -- is_price_fixed (50/50 chance)
-    CASE WHEN RANDOM() > 0.5 THEN TRUE ELSE FALSE END,
-    -- is_active (90% chance of being active)
-    CASE WHEN RANDOM() > 0.1 THEN TRUE ELSE FALSE END
-FROM GENERATE_SERIES(1, 30) AS loop(n)
-CROSS JOIN LATERAL(
-	SELECT id 
-	FROM shops 
-	WHERE loop.n = loop.n
-	ORDER BY RANDOM() 
-	LIMIT 1
-) AS s;
+INSERT INTO services(shop_id, service_name, description, base_price, base_duration_hours, is_price_fixed, is_active)
+VALUES
+(1, 'Oil Change', 'Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.', 1500.00, 1.0, true, true),
+(1, 'Brake Pad Replacement', 'Description: repair performed by the mechanics to ensure vehicle safety and reliability.', 3500.00, 2.0, false, true),
+(1, 'Tire Rotation & Balance', 'Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.', 800.00, 0.5, true, true),
+(1, 'Wheel Alignment', 'Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.', 1200.00, 1.0, true, true),
+(1, 'Engine Diagnostics', 'Description: inspection performed by the mechanics to ensure vehicle safety and reliability.', 2000.00, 1.5, false, true),
+(1, 'Battery Testing & Replacement', 'Description: repair performed by the mechanics to ensure vehicle safety and reliability.', 4500.00, 0.5, true, true),
+(1, 'A/C System Recharge', 'Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.', 2500.00, 1.0, true, true),
+(1, 'Transmission Fluid Flush', 'Description: servicing performed by the mechanics to ensure vehicle safety and reliability.', 4000.00, 2.0, false, true);
 
 
 -- vehicles 5
@@ -333,7 +300,7 @@ INSERT INTO job_orders (
                         released_at, 
                         estimated_duration, 
 						actual_duration, 
-                        grand_total, 
+                        actual_grand_total, 
                         partial_payment, 
                         balance, 
                         status
@@ -354,10 +321,10 @@ SELECT
   estimated_duration,
   CASE WHEN generated_status IN ('completed', 'released') THEN actual_duration ELSE NULL END AS actual_duration,
   
-  grand_total,
+  actual_grand_total,
   partial_payment,
   
-  (grand_total - partial_payment) AS balance,
+  (actual_grand_total - partial_payment) AS balance,
   
   generated_status AS status
 FROM (
@@ -377,7 +344,7 @@ FROM (
     (est_sec || ' seconds')::INTERVAL AS estimated_duration,
     (act_sec || ' seconds')::INTERVAL AS actual_duration,
     
-    gt AS grand_total,
+    gt AS actual_grand_total,
     CASE 
         WHEN generated_status = 'released' THEN gt 
         WHEN RANDOM() > 0.5 THEN ROUND((gt * 0.5)::NUMERIC, 2) 
@@ -629,93 +596,54 @@ FROM (
   ) AS sup
 ) AS raw_data;
 
--- Job order parts 11
-INSERT INTO job_order_parts (
-							 job_order_id, 
-                             purchase_order_id, 
-                             status, 
-                             part_number, 
-                             description, 
-							 quantity, 
-                             retail_unit_price, 
-                             total_retail_amount, 
-                             supplier_unit_cost
+-- Job Orders 11
+INSERT INTO job_orders (
+    ticket_id, 
+    user_id, 
+    vehicle_id, 
+    jo_date, 
+    date_arrived, 
+    date_promised, 
+    started_at, 
+    completed_at, 
+    released_at, 
+    estimated_duration, 
+    actual_duration, 
+    estimated_grand_total, 
+    actual_grand_total, 
+    partial_payment, 
+    balance, 
+    status, 
+    quotation_notes, 
+    quotation_approved
 )
-SELECT 
-  jo_id AS job_order_id,
-  
-  -- If its in stock then no PO.
-  CASE WHEN gen_status IN ('in_stock', 'to_order') THEN NULL ELSE po_id END AS purchase_order_id,
-  
-  gen_status AS status,
-  
-  -- part_number
-  CONCAT('PN-', FLOOR(1000 + RANDOM() * 8999)::INT, '-', CHR(65 + FLOOR(RANDOM() * 26)::INT)) AS part_number,
-  
-  -- description
-  part_desc AS description,
-  
-  -- quantity
-  qty AS quantity,
-  
-  -- retail_unit_price markup 40%
-  ROUND((sup_cost * 1.40)::NUMERIC, 2) AS retail_unit_price,
-  
-  -- total_retail_amount
-  ROUND((qty * (sup_cost * 1.40))::NUMERIC, 2) AS total_retail_amount,
-  
-  -- supplier_unit_cost
-  sup_cost AS supplier_unit_cost
-
-FROM (
-  SELECT 
-    -- job_order_id
-    jo.id AS jo_id,
-    -- purchase_order_id
-    po.id AS po_id,
-    
-    -- status
-    (ARRAY[
-        'in_stock', 'to_order', 'ordered', 'in_transit', 'received', 'installed'
-    ])[1 + FLOOR(RANDOM() * 6)::INT]::job_order_parts_status AS gen_status,
-    
-    -- quantity
-    FLOOR(1 + (RANDOM() * 4))::INT AS qty,
-    
-    -- retail_unit_price (between 200 and 5,000)
-    ROUND((200 + (RANDOM() * 4800))::NUMERIC, 2) AS sup_cost,
-    
-    -- description
-    (ARRAY[
-        'Oil Filter - Premium', 
-        'Ceramic Brake Pad Set', 
-        'Air Intake Filter', 
-        'Spark Plug (Iridium)', 
-        'Cabin Air Filter', 
-        'Alternator Belt', 
-        'Synthetic Engine Oil (1L)', 
-        'Wiper Blade Set', 
-        'Radiator Coolant (1 Gallon)', 
-        'Fuel Filter'
-    ])[1 + FLOOR(RANDOM() * 10)::INT] AS part_desc
-  FROM GENERATE_SERIES(1, 50) AS loop(n)
-
-  CROSS JOIN LATERAL (
-	SELECT id
-	FROM job_orders
-	WHERE loop.n = loop.n
-	ORDER BY RANDOM()
-	LIMIT 1
-  ) AS jo
-
-  CROSS JOIN LATERAL (
-	SELECT id
-	FROM purchase_orders
-	WHERE loop.n = loop.n
-	ORDER BY RANDOM()
-	LIMIT 1
-  ) AS po
-) AS raw_data;
+SELECT
+    t_id AS ticket_id,
+    u_id AS user_id,
+    v_id AS vehicle_id,
+    (NOW() - (FLOOR(RANDOM() * 60)::INT || ' days')::INTERVAL)::DATE AS jo_date,
+    (NOW() - (FLOOR(RANDOM() * 60)::INT || ' days')::INTERVAL) AS date_arrived,
+    (NOW() - (FLOOR(RANDOM() * 50)::INT || ' days')::INTERVAL) AS date_promised,
+    (NOW() - (FLOOR(RANDOM() * 55)::INT || ' days')::INTERVAL) AS started_at,
+    (NOW() - (FLOOR(RANDOM() * 40)::INT || ' days')::INTERVAL) AS completed_at,
+    (NOW() - (FLOOR(RANDOM() * 30)::INT || ' days')::INTERVAL) AS released_at,
+    ((1 + FLOOR(RANDOM() * 5))::INT || ' hours')::TIME AS estimated_duration,
+    ((1 + FLOOR(RANDOM() * 6))::INT || ' hours')::TIME AS actual_duration,
+    ROUND((1000 + (RANDOM() * 9000))::NUMERIC, 2) AS estimated_grand_total,
+    ROUND((1000 + (RANDOM() * 9000))::NUMERIC, 2) AS actual_grand_total,
+    ROUND((100 + (RANDOM() * 900))::NUMERIC, 2) AS partial_payment,
+    ROUND((500 + (RANDOM() * 8000))::NUMERIC, 2) AS balance,
+    (ARRAY['inspecting', 'pending_customer_approval', 'in_progress', 'waiting_on_parts', 'revision_pending', 'completed', 'released'])[1 + FLOOR(RANDOM() * 7)::INT]::job_orders_status AS status,
+    'Synthetic quotation notes generated for testing.' AS quotation_notes,
+    (RANDOM() > 0.5) AS quotation_approved
+FROM GENERATE_SERIES(1, 20) AS loop(n)
+CROSS JOIN LATERAL (
+    SELECT id AS t_id, user_id AS u_id, vehicle_id AS v_id 
+    FROM service_tickets 
+    WHERE loop.n = loop.n 
+    ORDER BY RANDOM() 
+    LIMIT 1
+) AS t;
 
 -- Job Order Services 12
 INSERT INTO job_order_services (
@@ -782,6 +710,45 @@ FROM (
 	ORDER BY RANDOM()
 	LIMIT 1
   ) AS s
+) AS raw_data;
+
+-- Job order parts 12.5
+INSERT INTO job_order_parts (
+                             job_order_id, 
+                             job_order_service_id,
+                             purchase_order_id, 
+                             status, 
+                             part_number, 
+                             description, 
+                             quantity, 
+                             retail_unit_price, 
+                             total_retail_amount, 
+                             supplier_unit_cost
+)
+SELECT 
+  jo_id AS job_order_id,
+  jos_id AS job_order_service_id,
+  CASE WHEN gen_status IN ('in_stock', 'to_order') THEN NULL ELSE po_id END AS purchase_order_id,
+  gen_status AS status,
+  CONCAT('PN-', FLOOR(1000 + RANDOM() * 8999)::INT, '-', CHR(65 + FLOOR(RANDOM() * 26)::INT)) AS part_number,
+  part_desc AS description,
+  qty AS quantity,
+  ROUND((sup_cost * 1.40)::NUMERIC, 2) AS retail_unit_price,
+  ROUND((qty * (sup_cost * 1.40))::NUMERIC, 2) AS total_retail_amount,
+  sup_cost AS supplier_unit_cost
+FROM (
+  SELECT 
+    jo.id AS jo_id,
+    jos.id AS jos_id,
+    po.id AS po_id,
+    (ARRAY['in_stock', 'to_order', 'ordered', 'in_transit', 'received', 'installed'])[1 + FLOOR(RANDOM() * 6)::INT]::job_order_parts_status AS gen_status,
+    FLOOR(1 + (RANDOM() * 4))::INT AS qty,
+    ROUND((200 + (RANDOM() * 4800))::NUMERIC, 2) AS sup_cost,
+    (ARRAY['Oil Filter - Premium', 'Ceramic Brake Pad Set', 'Air Intake Filter', 'Spark Plug (Iridium)', 'Cabin Air Filter', 'Alternator Belt', 'Synthetic Engine Oil (1L)', 'Wiper Blade Set', 'Radiator Coolant (1 Gallon)', 'Fuel Filter'])[1 + FLOOR(RANDOM() * 10)::INT] AS part_desc
+  FROM GENERATE_SERIES(1, 50) AS loop(n)
+  CROSS JOIN LATERAL (SELECT id FROM job_orders WHERE loop.n = loop.n ORDER BY RANDOM() LIMIT 1) AS jo
+  CROSS JOIN LATERAL (SELECT id FROM job_order_services WHERE job_order_id = jo.id ORDER BY RANDOM() LIMIT 1) AS jos
+  CROSS JOIN LATERAL (SELECT id FROM purchase_orders WHERE loop.n = loop.n ORDER BY RANDOM() LIMIT 1) AS po
 ) AS raw_data;
 
 -- Vehicle Inspections 13
@@ -900,7 +867,7 @@ SELECT
   
   -- amount_paid (70% for full payment, 30% for partial payment(50%))
   ROUND(
-    ((SELECT grand_total FROM job_orders WHERE id = jo_id) * CASE WHEN RANDOM() > 0.3 THEN 1.0 ELSE 0.5 END)::NUMERIC, 
+    ((SELECT actual_grand_total FROM job_orders WHERE id = jo_id) * CASE WHEN RANDOM() > 0.3 THEN 1.0 ELSE 0.5 END)::NUMERIC, 
     2
   ) AS amount_paid,
   

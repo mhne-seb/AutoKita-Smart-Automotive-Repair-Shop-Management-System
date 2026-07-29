@@ -9,10 +9,17 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const result = await db.query(
+    let result = await db.query(
       'SELECT id, email, nickname, first_name, last_name, role FROM users WHERE email = $1 AND password = $2',
       [email, password]
     )
+
+    if (result.rows.length === 0) {
+      result = await db.query(
+        "SELECT id, email, full_name as nickname, split_part(full_name, ' ', 1) as first_name, split_part(full_name, ' ', 2) as last_name, role FROM employees WHERE email = $1 AND password = $2",
+        [email, password]
+      )
+    }
 
     if (result.rows.length === 0) {
       return NextResponse.json({ success: false, message: 'Invalid email or password.' }, { status: 401 })
@@ -22,7 +29,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       user,
-      role: user.role?.trim() === 'admin' ? 'admin' : 'customer',
+      role: user.role?.trim() || 'customer',
     })
   } catch (err) {
     console.error('Login query failed:', err)

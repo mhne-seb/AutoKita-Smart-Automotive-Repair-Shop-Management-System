@@ -11,38 +11,33 @@
 import type { QuotationData, QuotationService, QuotationPart } from '@/data/types'
 
 function toQuotationData(row: any): QuotationData {
+  // Group parts by their service
+  const partsByService = row.parts.reduce((acc: any, part: any) => {
+    const serviceId = part.job_order_service_id
+    if (!acc[serviceId]) acc[serviceId] = []
+    acc[serviceId].push({
+      id: `PRT-${part.id}`,
+      name: part.description || 'Unnamed Part',
+      partNo: part.part_number || '—',
+      qty: part.quantity ?? 1,
+      unitPrice: Number(part.retail_unit_price ?? 0),
+      status: part.status === 'in_stock' ? 'in-stock' : 'to-order',
+    })
+    return acc
+  }, {})
+
   const services: QuotationService[] = row.services.map((s: any) => ({
     id: `SVC-${s.id}`,
     code: `SVC-${String(s.id).padStart(3, '0')}`,
     name: s.service_name || 'Unnamed Service',
     description: s.description_of_work || '',
     laborHours: s.estimated_hours ?? 0,
-    laborCost: Number(s.amount ?? 0),
-    parts: [],
+    laborCost: Number(s.actual_amount ?? s.amount ?? 0),
+    parts: partsByService[s.id] || [],
+    dbServiceId: s.service_id,
+    estimated_amount: s.estimated_amount !== null ? Number(s.estimated_amount) : undefined,
+    estimated_hours: s.estimated_hours !== null ? Number(s.estimated_hours) : undefined,
   }))
-
-  const parts: QuotationPart[] = row.parts.map((p: any) => ({
-    id: `PRT-${p.id}`,
-    name: p.description || 'Unnamed Part',
-    partNo: p.part_number || '—',
-    qty: p.quantity ?? 1,
-    unitPrice: Number(p.retail_unit_price ?? 0),
-    status: p.status === 'in_stock' ? 'in-stock' : 'to-order',
-  }))
-
-  // All real parts get bundled into one extra card, since the database
-  // doesn't link individual parts to individual services.
-  if (parts.length > 0) {
-    services.push({
-      id: 'PARTS',
-      code: 'PARTS',
-      name: 'Parts & Materials',
-      description: 'All parts logged for this job order (not linked to a specific service in the current schema).',
-      laborHours: 0,
-      laborCost: 0,
-      parts,
-    })
-  }
 
   return {
     jobOrderId: String(row.id),
@@ -68,4 +63,55 @@ export async function getQuotationForJobOrder(jobOrderId: string): Promise<Quota
 /** Mock "approve quotation" — no real write endpoint for this yet. */
 export async function approveQuotation(jobOrderId: string): Promise<{ success: boolean }> {
   return { success: true }
+}
+
+export async function getQuotationData(userId: number, jobOrderId?: number) {
+  const qs = new URLSearchParams({ userId: String(userId) })
+  if (jobOrderId) qs.set('jobOrderId', String(jobOrderId))
+  const res = await fetch(`/api/tracking/quotation?${qs}`)
+  return res.json() as Promise<{
+    jobOrder: {
+      job_order_id: number
+      quotation_approved: boolean
+      vehicle_model: string
+      vehicle_year: number
+      plate_number: string
+    } | null
+    quotationStatus: 'preparing' | 'ready'
+    services: {
+      id: number;
+      service_name: string;
+      description_of_work: string;
+      estimated_hours: number;
+      actual_amount: string;
+      estimated_amount: string | null;
+      parts: any[];
+    }[]
+    paymentStatus: { id: number; payment_method: string; amount_paid: string; verification_status: string; payment_date: string } | null
+  }>
+}
+
+export async function confirmQuotationVia2FA(jobOrderId: number, acceptedServiceIds: number[]) {
+  const res = await fetch('/api/tracking/quotation/confirm', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jobOrderId, acceptedServiceIds }),
+  })
+  return res.json() as Promise<{ success: boolean }>
+}
+
+export async function submitQuotationPayment(jobOrderId: number, method: 'shop' | 'ewallet', amount: number, acceptedServiceIds: number[]) {
+  const res = await fetch('/api/tracking/quotation/payment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jobOrderId, method, amount, acceptedServiceIds }),
+  })
+  return res.json() as Promise<{ success: boolean; paymentId: number }>
+}
+
+export async function getQuotationPaymentStatus(jobOrderId: number) {
+  const res = await fetch(`/api/tracking/quotation/payment-status?jobOrderId=${jobOrderId}`)
+  return res.json() as Promise<{
+    paymentStatus: { verification_status: string; payment_method: string } | null
+  }>
 }

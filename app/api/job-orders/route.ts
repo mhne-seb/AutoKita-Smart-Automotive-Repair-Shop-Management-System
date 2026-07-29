@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const offset = (page - 1) * pageSize
 
     const countResult = await db.query(
-      `SELECT COUNT(*) FROM "Capstone-Testing".get_job_orders_list()`
+      `SELECT COUNT(*) FROM get_job_orders_list()`
     )
     const total = parseInt(countResult.rows[0].count, 10)
 
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
         gol.id,
         jo.date_arrived,
         gol.status,
-        gol.grand_total,
+        gol.actual_grand_total,
         jo.balance,
         jo.user_id,
         gol.first_name,
@@ -33,12 +33,12 @@ export async function GET(request: Request) {
         v.vehicle_year,
         gol.plate_number,
         STRING_AGG(DISTINCT s.service_name, ', ') AS service_names
-      FROM "Capstone-Testing".get_job_orders_list() gol
-      JOIN "Capstone-Testing".job_orders jo ON jo.id = gol.id
-      LEFT JOIN "Capstone-Testing".vehicles v ON v.id = jo.vehicle_id
-      LEFT JOIN "Capstone-Testing".job_order_services jos ON jos.job_order_id = gol.id
-      LEFT JOIN "Capstone-Testing".services s ON s.id = jos.service_id
-      GROUP BY gol.id, jo.date_arrived, gol.status, gol.grand_total, jo.balance,
+      FROM get_job_orders_list() gol
+      JOIN job_orders jo ON jo.id = gol.id
+      LEFT JOIN vehicles v ON v.id = jo.vehicle_id
+      LEFT JOIN job_order_services jos ON jos.job_order_id = gol.id
+      LEFT JOIN services s ON s.id = jos.service_id
+      GROUP BY gol.id, jo.date_arrived, gol.status, gol.actual_grand_total, jo.balance,
                jo.user_id, gol.first_name, gol.last_name, gol.vehicle_model,
                v.vehicle_year, gol.plate_number
       ORDER BY gol.id

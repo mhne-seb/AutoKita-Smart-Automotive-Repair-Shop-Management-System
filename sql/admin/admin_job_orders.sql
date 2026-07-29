@@ -104,9 +104,11 @@ RETURNS TABLE (
     description_of_work TEXT,
     estimated_duration  TIME,
     actual_duration     TIME,
-    estimated_hours     INT,
-    actual_hours        INT,
-    amount              DECIMAL
+    estimated_hours     NUMERIC,
+    actual_hours        NUMERIC,
+    actual_amount       DECIMAL,
+    estimated_amount    DECIMAL,
+    service_id          INT
 )
 LANGUAGE SQL STABLE
 AS $$
@@ -118,7 +120,9 @@ AS $$
         jos.actual_duration,
         jos.estimated_hours,
         jos.actual_hours,
-        jos.amount
+        jos.actual_amount,
+        jos.estimated_amount,
+        jos.service_id
     FROM job_order_services jos
     JOIN services s ON s.id = jos.service_id
     WHERE jos.job_order_id = p_job_order_id
@@ -161,7 +165,7 @@ CREATE OR REPLACE FUNCTION add_job_order_service(
     p_description      TEXT,
     p_amount           DECIMAL,
     p_estimated_duration TIME DEFAULT NULL,
-    p_estimated_hours  INT DEFAULT NULL
+    p_estimated_hours NUMERIC DEFAULT NULL
 )
 RETURNS TABLE (
     id                  INT,

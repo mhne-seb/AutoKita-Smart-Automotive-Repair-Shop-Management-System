@@ -63,7 +63,7 @@ function Completed() {
 
   const { jobOrder, logs, warranties, services, parts } = data;
 
-  const laborTotal = services.reduce((sum, s) => sum + Number(s.amount ?? 0), 0);
+  const laborTotal = services.reduce((sum, s) => sum + Number(s.actual_amount ?? 0), 0);
   const partsTotal = parts.reduce((sum, p) => sum + Number(p.total_retail_amount ?? 0), 0);
 
   const handleDownload = () => {
@@ -72,13 +72,13 @@ function Completed() {
       `Vehicle: ${jobOrder.vehicle_year} ${jobOrder.vehicle_model} — ${jobOrder.plate_number}`,
       ``,
       `Technician Labor`,
-      ...services.map((s) => `  ${s.service_name} (${s.actual_hours ?? s.estimated_hours} hrs)`.padEnd(42) + formatMoney(s.amount)),
+      ...services.map((s) => `  ${s.service_name} (${s.actual_hours ?? s.estimated_hours} hrs)`.padEnd(42) + formatMoney(s.actual_amount)),
       ``,
       `Replaced Parts`,
       ...parts.map((p) => `  ${p.description} x${p.quantity}`.padEnd(42) + formatMoney(p.total_retail_amount)),
       ``,
       `------------------------------------------------`,
-      `Total Due`.padEnd(42) + formatMoney(jobOrder.grand_total),
+      `Total Due`.padEnd(42) + formatMoney(jobOrder.actual_grand_total),
     ];
     const blob = new Blob([lines.join("\n")], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -175,7 +175,7 @@ function Completed() {
               {services.map((s) => (
                 <div key={s.id} className="flex justify-between text-muted-foreground">
                   <span>{s.service_name} ({s.actual_hours ?? s.estimated_hours} hrs)</span>
-                  <span>{formatMoney(s.amount)}</span>
+                  <span>{formatMoney(s.actual_amount)}</span>
                 </div>
               ))}
 

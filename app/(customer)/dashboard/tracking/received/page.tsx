@@ -158,7 +158,7 @@ function Received() {
                     <div className="font-semibold">{h.service_name ?? "Service"}</div>
                     <div className="text-xs text-muted-foreground">{h.jo_date}</div>
                   </div>
-                  <div className="font-medium">₱{h.grand_total}</div>
+                  <div className="font-medium">₱{h.actual_grand_total}</div>
                 </div>
               ))}
               {history.length === 0 && (

@@ -23,36 +23,80 @@ import {
   Hash,
   AlertCircle,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { TopBar } from '../components/TopBar'
 import { StatCard } from '../components/StatCard'
 import { StatusBadge } from '../components/StatusBadge'
-import { getCustomers } from '@/controllers/customerController'
-import type { Customer, JobStatus } from '../data/mockData'
 import { PROVINCES, SERVICE_CATEGORIES, YEARS } from '@/data/ticketFormOptions'
 
+export type JobStatus = 'Pending' | 'In Progress' | 'Approved' | 'Cancelled' | 'Completed'
+
+export interface Job {
+  ticketId: number
+  customerId: string
+  name: string
+  phone: string
+  email: string
+  vehicle: string
+  plate: string
+  serviceMode: string
+  status: JobStatus
+  date: string
+  servicesNeeded: string[]
+  assignedMechanic?: string
+  total?: number
+  holdReason?: string
+}
+
 type Tab = 'All Jobs' | 'Pending' | 'Approved' | 'Cancelled'
-type Job = Customer & { holdReason?: string }
 
 const validEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 const validPhone = (v: string) => /^(09\d{9}|\+639\d{9})$/.test(v.replace(/\s|-/g, ''))
 
 export function JobQueue() {
-  // Seeded through the controller (mock API) instead of importing the data
-  // file directly — see src/controllers/customerController.ts.
   const [jobs, setJobs] = useState<Job[]>([])
+  const [mechanics, setMechanics] = useState<any[]>([])
+
+  const fetchJobs = () => {
+    fetch('/api/admin/job-queue')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const mappedJobs = data.tickets.map((t: any) => {
+            let status: JobStatus = 'Pending'
+            if (t.ticket_status === 'approved') status = 'Approved'
+            if (t.ticket_status === 'declined' || t.ticket_status === 'cancelled') status = 'Cancelled'
+            return {
+              ticketId: t.ticket_id,
+              customerId: `CUST-${t.user_id}`,
+              name: `${t.first_name} ${t.last_name}`,
+              phone: t.contact_number,
+              email: t.email,
+              vehicle: `${t.vehicle_model} ${t.vehicle_year}`,
+              plate: t.plate_number,
+              serviceMode: t.service_mode === 'walk_in' ? 'Shop Visit' : 'Home Service',
+              servicesNeeded: [t.customer_concern || 'N/A'],
+              assignedMechanic: t.mechanic_id ? t.mechanic_id.toString() : undefined,
+              status,
+              date: new Date(t.request_date).toLocaleDateString(),
+            }
+          })
+          setJobs(mappedJobs)
+          setMechanics(data.mechanics || [])
+        }
+      })
+      .catch(console.error)
+  }
 
   useEffect(() => {
-    let active = true
-    getCustomers().then((data) => {
-      if (active) setJobs(data as Job[])
-    })
-    return () => {
-      active = false
-    }
+    fetchJobs()
   }, [])
 
   const [tab, setTab] = useState<Tab>('All Jobs')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 9
 
   const [showNewTicket, setShowNewTicket] = useState(false)
   const [approveTarget, setApproveTarget] = useState<Job | null>(null)
@@ -78,6 +122,9 @@ export function JobQueue() {
     return true
   })
 
+  const totalPages = Math.ceil(filtered.length / itemsPerPage)
+  const paginatedJobs = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+
   const tabs: { label: Tab; count: number }[] = [
     { label: 'All Jobs', count: counts.all },
     { label: 'Pending', count: counts.pending },
@@ -85,33 +132,54 @@ export function JobQueue() {
     { label: 'Cancelled', count: counts.cancelled },
   ]
 
-  const updateMechanic = (id: string, mechanic: string) => {
+  const updateMechanic = (ticketId: number, mechanic: string) => {
     setJobs((prev) =>
-      prev.map((j) => (j.customerId === id ? { ...j, assignedMechanic: mechanic === 'Unassigned' ? undefined : mechanic } : j)),
+      prev.map((j) => (j.ticketId === ticketId ? { ...j, assignedMechanic: mechanic === 'Unassigned' ? undefined : mechanic } : j)),
     )
   }
 
-  const confirmApprove = (job: Job) => {
-    if (!job.assignedMechanic || job.assignedMechanic === 'Unassigned') return
-    setJobs((prev) =>
-      prev.map((j) => (j.customerId === job.customerId ? { ...j, status: 'Approved' as JobStatus, holdReason: undefined } : j)),
-    )
-    setApproveTarget(null)
+  const confirmApprove = async (job: Job) => {
+    if (!job.assignedMechanic || job.assignedMechanic === 'Unassigned') {
+      alert("Please assign a mechanic first");
+      return;
+    }
+    await fetch('/api/admin/job-queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'approve', ticketId: job.ticketId, mechanicId: job.assignedMechanic })
+    });
+    setApproveTarget(null);
+    fetchJobs();
   }
 
-  const confirmReject = (job: Job) => {
-    setJobs((prev) => prev.map((j) => (j.customerId === job.customerId ? { ...j, status: 'Cancelled' as JobStatus } : j)))
-    setRejectTarget(null)
+  const confirmReject = async (job: Job) => {
+    await fetch('/api/admin/job-queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reject', ticketId: job.ticketId })
+    });
+    setRejectTarget(null);
+    fetchJobs();
   }
 
-  const confirmHold = (job: Job, reason: string) => {
-    setJobs((prev) => prev.map((j) => (j.customerId === job.customerId ? { ...j, holdReason: reason } : j)))
-    setHoldTarget(null)
+  const confirmHold = async (job: Job, reason: string) => {
+    await fetch('/api/admin/job-queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'hold', ticketId: job.ticketId, holdReason: reason })
+    });
+    setHoldTarget(null);
+    fetchJobs();
   }
 
-  const confirmDelete = (job: Job) => {
-    setJobs((prev) => prev.filter((j) => j.customerId !== job.customerId))
-    setDeleteTarget(null)
+  const confirmDelete = async (job: Job) => {
+    await fetch('/api/admin/job-queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reject', ticketId: job.ticketId }) // treat delete as reject for now
+    });
+    setDeleteTarget(null);
+    fetchJobs();
   }
 
   const addTicket = (data: NewTicketData) => {
@@ -148,7 +216,7 @@ export function JobQueue() {
       />
 
       <div className="flex flex-wrap gap-5">
-        <StatCard label="Total Customers" value={`${counts.all} Customers`} icon={Wrench} iconBg="bg-brand/10" iconColor="text-brand" />
+        <StatCard label="Total Tickets" value={`${counts.all} Tickets`} icon={Wrench} iconBg="bg-brand/10" iconColor="text-brand" />
         <StatCard label="Waiting Approval" value={`${counts.pending} Pending`} icon={ShieldAlert} iconBg="bg-violet-50" iconColor="text-violet-600" />
         <StatCard label="Approved Service" value={`${counts.approved} Approved`} icon={Package} iconBg="bg-amber-50" iconColor="text-amber-600" />
         <StatCard label="Cancelled Service" value={`${counts.cancelled} Cancelled`} icon={XCircle} iconBg="bg-rose-50" iconColor="text-rose-600" />
@@ -158,7 +226,7 @@ export function JobQueue() {
         {tabs.map(({ label, count }) => (
           <button
             key={label}
-            onClick={() => setTab(label)}
+            onClick={() => { setTab(label); setCurrentPage(1); }}
             className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
               tab === label ? 'bg-brand text-brand-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
@@ -175,13 +243,37 @@ export function JobQueue() {
         ))}
       </div>
 
+      {totalPages > 1 && (
+        <div className="mb-4 flex items-center justify-between">
+          <p className="text-sm text-slate-500">
+            Page {currentPage} of {totalPages} · {filtered.length} total service tickets
+          </p>
+          <div className="flex gap-2">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(p => p - 1)}
+              className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            >
+              <ChevronLeft size={14} /> Prev
+            </button>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(p => p + 1)}
+              className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            >
+              Next <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-        {filtered.map((c) => {
+        {paginatedJobs.map((c) => {
           const approvedLike = c.status === 'Approved' || c.status === 'In Progress'
           const unassigned = !c.assignedMechanic || c.assignedMechanic === 'Unassigned'
           return (
             <div
-              key={c.customerId}
+              key={c.ticketId}
               className="rounded-2xl border border-border bg-card p-5 transition-shadow hover:shadow-sm"
             >
               <div className="flex items-start justify-between">
@@ -237,15 +329,15 @@ export function JobQueue() {
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Assigned Mechanic</p>
                   <select
                     value={c.assignedMechanic ?? 'Unassigned'}
-                    onChange={(e) => updateMechanic(c.customerId, e.target.value)}
+                    onChange={(e) => updateMechanic(c.ticketId, e.target.value)}
                     className={`mt-0.5 w-full rounded-md border px-2 py-1 text-sm text-foreground ${
                       unassigned ? 'border-amber-300 bg-amber-50' : 'border-border'
                     }`}
                   >
-                    <option>Unassigned</option>
-                    <option>Jose S.</option>
-                    <option>Anthony T.</option>
-                    <option>Robert D.</option>
+                    <option value="Unassigned">Unassigned</option>
+                    {mechanics.map(m => (
+                      <option key={m.id} value={m.id.toString()}>{m.full_name}</option>
+                    ))}
                   </select>
                 </div>
               </div>

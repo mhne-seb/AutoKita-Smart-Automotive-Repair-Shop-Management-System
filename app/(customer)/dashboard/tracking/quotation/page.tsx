@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, KeyboardEvent } from "react";
-import { Car, FileText, Clock, AlertCircle, CreditCard, Mail, X, ShieldCheck, CheckCircle2, Loader2, Store, Wallet, Send, HourglassIcon, BadgeCheck, Lock } from "lucide-react";
+import { Car, FileText, Clock, AlertCircle, CreditCard, Mail, X, ShieldCheck, CheckCircle2, Loader2, Store, Wallet, Send, HourglassIcon, BadgeCheck, Lock, Wrench } from "lucide-react";
 import { StageStepper } from "@/components/dashboard/StageStepper";
 import {
   getQuotationData,
@@ -17,7 +17,9 @@ type FetchedService = {
   service_name: string;
   description_of_work: string;
   estimated_hours: number;
-  amount: string;
+  actual_amount: string;
+  estimated_amount: string | null;
+  parts: any[];
 };
 
 type JobOrder = {
@@ -40,6 +42,7 @@ function Quotation() {
 
   const [loading, setLoading] = useState(true);
   const [jobOrder, setJobOrder] = useState<JobOrder | null>(null);
+  const [quotationStatus, setQuotationStatus] = useState<'preparing' | 'ready'>('preparing');
   const [services, setServices] = useState<FetchedService[]>([]);
   const [checked, setChecked] = useState<Record<number, boolean>>({});
 
@@ -63,6 +66,7 @@ function Quotation() {
     getQuotationData(userId, jobOrderId)
       .then((data) => {
         setJobOrder(data.jobOrder);
+        setQuotationStatus(data.quotationStatus || 'ready');
         setServices(data.services);
         setChecked(Object.fromEntries(data.services.map((s) => [s.id, true])));
         if (data.paymentStatus) {
@@ -79,7 +83,7 @@ function Quotation() {
 
   const total = services
     .filter((s) => checked[s.id])
-    .reduce((sum, s) => sum + Number(s.amount), 0);
+    .reduce((sum, s) => sum + Number(s.actual_amount), 0);
   const needsDownpayment = total > 50000;
   const downpayment = Math.round(total * 0.2);
   const selectedCount = Object.values(checked).filter(Boolean).length;
@@ -98,9 +102,10 @@ function Quotation() {
     return () => clearInterval(interval);
   }, [paymentStatus, jobOrder, locked]);
 
-  const handlePaymentSubmitted = async (method: PaymentMethod, amount: number) => {
+  const handlePaymentSubmitted = async (method: PaymentMethod, actual_amount: number) => {
     if (!jobOrder) return;
-    const res = await submitQuotationPayment(jobOrder.job_order_id, method, amount);
+    const acceptedServiceIds = Object.entries(checked).filter(([, v]) => v).map(([k]) => Number(k));
+    const res = await submitQuotationPayment(jobOrder.job_order_id, method, actual_amount, acceptedServiceIds);
     if (!res.success) return; // e.g. 409 already-confirmed — server is the source of truth
     setPaymentMethod(method);
     setPaymentStatus("pending");
@@ -110,7 +115,8 @@ function Quotation() {
 
   const handle2FAVerified = async () => {
     if (!jobOrder) return;
-    const res = await confirmQuotationVia2FA(jobOrder.job_order_id);
+    const acceptedServiceIds = Object.entries(checked).filter(([, v]) => v).map(([k]) => Number(k));
+    const res = await confirmQuotationVia2FA(jobOrder.job_order_id, acceptedServiceIds);
     if (!res.success) return;
     goToInProgress();
   };
@@ -130,6 +136,19 @@ function Quotation() {
       <div className="mx-auto max-w-6xl px-6 py-8">
         <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">
           You don't have any active quotation right now.
+        </div>
+      </div>
+    );
+  }
+
+  if (quotationStatus === 'preparing' && !locked) {
+    return (
+      <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
+        <StageStepper active="quotation" jobOrderId={jobOrder.job_order_id} />
+        <div className="rounded-xl border bg-card p-12 text-center text-muted-foreground">
+          <Wrench className="mx-auto mb-4 h-12 w-12 text-brand/50" />
+          <h2 className="text-lg font-bold text-foreground">Preparing Quotation</h2>
+          <p className="mt-2 text-sm">Your quotation is currently being drafted by our expert mechanics. We will notify you once it is ready for your review.</p>
         </div>
       </div>
     );
@@ -199,12 +218,32 @@ function Quotation() {
                         <p className="mt-1 text-xs text-muted-foreground">{s.description_of_work}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <div className="text-lg font-bold">₱{Number(s.amount).toLocaleString()}</div>
+
+                        <div className="text-lg font-bold">₱{Number(s.actual_amount).toLocaleString()}</div>
                         <div className="text-[10px] text-muted-foreground">incl. parts & labor</div>
                       </div>
                     </div>
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1"><Clock className="h-3 w-3" /> {s.estimated_hours} hrs est.</span>
+                    <div className="mt-3 flex flex-col gap-2">
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1">
+                          <Clock className="h-3 w-3" /> {Number(s.estimated_hours).toFixed(2)} hrs
+
+                        </span>
+                      </div>
+                      
+                      {s.parts && s.parts.length > 0 && (
+                        <div className="mt-2 pl-2 border-l-2 border-muted text-xs text-muted-foreground">
+                          <div className="font-semibold text-[10px] uppercase tracking-wider mb-1">Required Parts</div>
+                          <ul className="space-y-1">
+                            {s.parts.map((p: any, idx: number) => (
+                              <li key={idx} className="flex justify-between">
+                                <span>{p.quantity}x {p.description || p.part_number}</span>
+                                <span>₱{Number(p.total_retail_amount).toLocaleString()}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -229,13 +268,23 @@ function Quotation() {
                 {services.filter((s) => checked[s.id]).map((s) => (
                   <div key={s.id} className="flex items-center justify-between">
                     <span className="flex items-center gap-2"><span className="text-teal">●</span> {s.service_name}</span>
-                    <span className="font-medium">₱{Number(s.amount).toLocaleString()}</span>
+                    <span className="font-medium">₱{Number(s.actual_amount).toLocaleString()}</span>
                   </div>
                 ))}
                 {selectedCount === 0 && <p className="text-xs text-muted-foreground">No services selected yet.</p>}
               </div>
-              <div className="mt-4 border-t pt-3 text-sm"><div className="flex justify-between"><span className="text-muted-foreground">Est. Duration</span><b>{services.filter((s) => checked[s.id]).reduce((sum, s) => sum + s.estimated_hours, 0)} hrs</b></div></div>
-              <div className="mt-2 flex items-center justify-between"><span className="font-semibold">Total Quotation</span><span className="text-xl font-bold">₱{total.toLocaleString()}</span></div>
+              <div className="mt-4 border-t pt-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Est. Duration</span>
+                  <b>{services.filter((s) => checked[s.id]).reduce((sum, s) => sum + Number(s.estimated_hours), 0).toFixed(2).replace(/\.00$/, '')} hrs</b>
+                </div>
+              </div>
+              <div className="mt-2 flex flex-col gap-1 items-end">
+                <div className="flex w-full items-center justify-between">
+                  <span className="font-semibold">Total Quotation</span>
+                  <span className="text-xl font-bold">₱{total.toLocaleString()}</span>
+                </div>
+              </div>
 
               {locked ? (
                 <div className="mt-4 rounded-lg bg-success/10 p-4">
@@ -297,7 +346,7 @@ function Quotation() {
                     <>
                       <div className="mt-3 rounded-lg bg-brand-soft/50 p-4">
                         <div className="flex items-center gap-2 text-sm font-semibold"><Wallet className="h-4 w-4 text-brand" /> Optional Downpayment</div>
-                        <p className="mt-2 text-xs text-muted-foreground">Not required for this amount, but paying now can help speed up your drop-off.</p>
+                        <p className="mt-2 text-xs text-muted-foreground">Not required for this actual_amount, but paying now can help speed up your drop-off.</p>
                         <div className="mt-3 rounded-lg bg-background p-3">
                           <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground"><span>Downpayment (20%)</span><span>Total Bill</span></div>
                           <div className="mt-1 flex items-center justify-between"><b className="text-lg">₱{downpayment.toLocaleString()}</b><b>₱{total.toLocaleString()}</b></div>
@@ -417,8 +466,12 @@ function TwoFAModal({ onClose, onVerified }: { onClose: () => void; onVerified: 
     if (!complete) return;
     setStatus("verifying");
     setTimeout(async () => {
-      setStatus("success");
-      setTimeout(() => onVerified(), 900);
+      if (code === "000000") {
+        setStatus("success");
+        setTimeout(() => onVerified(), 900);
+      } else {
+        setStatus("error");
+      }
     }, 900);
   };
 
@@ -491,7 +544,7 @@ function PaymentModal({
   downpayment: number;
   optional?: boolean;
   onClose: () => void;
-  onSubmitted: (method: PaymentMethod, amount: number) => void | Promise<void>;
+  onSubmitted: (method: PaymentMethod, actual_amount: number) => void | Promise<void>;
 }) {
   const [method, setMethod] = useState<PaymentMethod>("shop");
   const [status, setStatus] = useState<"idle" | "processing" | "success">("idle");

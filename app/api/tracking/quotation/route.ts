@@ -29,14 +29,40 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ jobOrder: null, services: [], paymentStatus: null })
     }
 
-    const [servicesRes, paymentRes] = await Promise.all([
+    const [servicesRes, paymentRes, partsRes, preDiagRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_quotation_services($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_payment_status($1)`, [jobOrder.job_order_id]),
+      db.query(`SELECT * FROM get_job_order_parts($1)`, [jobOrder.job_order_id]),
+      db.query(`SELECT customer_approval_status FROM pre_diagnostics WHERE job_order_id = $1 ORDER BY id DESC LIMIT 1`, [jobOrder.job_order_id]),
     ])
+
+    const latestStatus = preDiagRes.rows[0]?.customer_approval_status
+    const isReady = latestStatus === 'pending' || latestStatus === 'approved' || jobOrder.quotation_approved
+
+    let services = servicesRes.rows
+    const parts = partsRes.rows
+
+    // Map parts into their respective services
+    services = services.map((s: any) => {
+      const serviceParts = parts.filter((p: any) => p.job_order_service_id === s.id)
+      const partsTotal = serviceParts.reduce((sum: number, p: any) => sum + Number(p.total_retail_amount), 0)
+      
+      return {
+        ...s,
+        parts: serviceParts,
+        estimated_amount: s.estimated_amount ? String(Number(s.estimated_amount) + partsTotal) : null,
+        actual_amount: String(Number(s.actual_amount) + partsTotal)
+      }
+    })
+
+    if (!isReady) {
+      services = []
+    }
 
     return NextResponse.json({
       jobOrder,
-      services: servicesRes.rows,
+      services,
+      quotationStatus: isReady ? 'ready' : 'preparing',
       paymentStatus: paymentRes.rows[0] ?? null,
     })
   } catch (err) {

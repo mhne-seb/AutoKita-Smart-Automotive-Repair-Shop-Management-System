@@ -28,9 +28,9 @@ export function StageStepper({
           const isActive = isDone || isCurrent;
 
           return (
-            <div key={s.key} className="flex flex-1 items-center last:flex-none">
-              <Link href={`${s.to}?jobOrderId=${jobOrderId}`} className="flex flex-col items-center gap-1.5">
-                <div className="relative flex h-10 w-10 items-center justify-center">
+            <div key={s.key} className="relative flex flex-1 flex-col items-center last:flex-none">
+              <Link href={`${s.to}?jobOrderId=${jobOrderId}`} className="relative z-10 flex flex-col items-center gap-1.5">
+                <div className="relative flex h-10 w-10 items-center justify-center bg-card">
                   {isCurrent && (
                     <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
                   )}
@@ -55,7 +55,7 @@ export function StageStepper({
 
               {i < STAGES.length - 1 && (
                 <div
-                  className={`-mt-5 h-0.5 flex-1 transition-colors duration-300 ${
+                  className={`absolute top-5 left-1/2 h-0.5 w-full transition-colors duration-300 ${
                     isDone ? "bg-brand" : "bg-muted"
                   }`}
                 />

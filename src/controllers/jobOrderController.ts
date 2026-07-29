@@ -33,8 +33,8 @@ function mapDbStatusToStage(dbStatus: string): Stage {
   }
 }
 
-const currency = (value: number | null) =>
-  `₱${(value ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 0 })}`
+const currency = (value: number | string | null) =>
+  `₱${Number(value ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 0 })}`
 
 const STAGE_STEP_NUMBER: Record<Stage, number> = {
   inspecting: 1,
@@ -58,7 +58,7 @@ function toJobOrderCard(row: any): JobOrderCard {
       ? new Date(row.date_arrived).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
       : '—',
     plate: row.plate_number || '—',
-    payment: currency(row.grand_total),
+    payment: currency(row.actual_grand_total),
     paid: row.balance !== null && Number(row.balance) <= 0,
     mechanic: 'Unassigned', // no mechanic-assignment table exists in the schema yet
     stepsDone: STAGE_STEP_NUMBER[stage],
