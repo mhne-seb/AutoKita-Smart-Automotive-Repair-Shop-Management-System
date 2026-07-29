@@ -49,7 +49,10 @@ RETURNS TABLE (
     task_title    VARCHAR(100),
     note          TEXT,
     task_status   VARCHAR,
-    completed_at  TIMESTAMP
+    completed_at  TIMESTAMP,
+    price         DECIMAL(10,2),
+    billable      BOOLEAN,
+    scheduled_date TIMESTAMP
 )
 LANGUAGE SQL STABLE
 AS $$
@@ -59,7 +62,10 @@ AS $$
         spt.task_title,
         spt.note,
         spt.task_status,
-        spt.completed_at
+        spt.completed_at,
+        spt.price,
+        spt.billable,
+        spt.scheduled_date
     FROM service_progress_tasks spt
     WHERE spt.job_order_id = p_job_order_id
     ORDER BY spt.section_id ASC, spt.id ASC;

@@ -1362,6 +1362,8 @@ AS $$
         spt.note,
         spt.task_status,
         spt.completed_at,
+        spt.price,
+        spt.billable,
         spt.scheduled_date
     FROM service_progress_tasks spt
     WHERE spt.job_order_id = p_job_order_id
@@ -2084,7 +2086,7 @@ $$;
 
 DROP FUNCTION IF EXISTS get_service_progress_tasks(integer);
 CREATE OR REPLACE FUNCTION get_service_progress_tasks(p_job_order_id integer)
-RETURNS TABLE(id integer, section_id text, task_title text, note text, task_status text, completed_at timestamp without time zone, price numeric, billable boolean)
+RETURNS TABLE(id integer, section_id text, task_title text, note text, task_status text, completed_at timestamp without time zone, price numeric, billable boolean, scheduled_date timestamp without time zone)
 LANGUAGE sql
 STABLE
 AS $$
