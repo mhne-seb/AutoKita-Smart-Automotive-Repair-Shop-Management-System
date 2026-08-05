@@ -2094,7 +2094,26 @@ WHERE spt.job_order_id = p_job_order_id
 ORDER BY spt.id ASC;
 $$;
 
-
+DROP FUNCTION IF EXISTS get_service_progress_tasks(integer);
+CREATE OR REPLACE FUNCTION get_service_progress_tasks(p_job_order_id integer)
+RETURNS TABLE(id integer, section_id text, task_title text, note text, task_status text, completed_at timestamp without time zone, price numeric, billable boolean)
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT
+        spt.id,
+        spt.section_id,
+        spt.task_title,
+        spt.note,
+        spt.task_status,
+        spt.completed_at,
+        spt.price,
+        spt.billable,
+        spt.scheduled_date
+    FROM service_progress_tasks spt
+    WHERE spt.job_order_id = p_job_order_id
+    ORDER BY spt.section_id ASC, spt.id ASC;
+$$;
 
 CREATE OR REPLACE FUNCTION get_job_order_ticket_notes(p_job_order_id integer)
 RETURNS TABLE (customer_concern TEXT)

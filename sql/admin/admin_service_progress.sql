@@ -49,12 +49,7 @@ RETURNS TABLE (
     task_title    VARCHAR(100),
     note          TEXT,
     task_status   VARCHAR,
-    completed_at  TIMESTAMP,
-    price         DECIMAL(10,2),
-    billable      BOOLEAN,
-    scheduled_date TIMESTAMP,
-    mechanic_id   INT,
-    estimated_finish TIMESTAMP
+    completed_at  TIMESTAMP
 )
 LANGUAGE SQL STABLE
 AS $$
