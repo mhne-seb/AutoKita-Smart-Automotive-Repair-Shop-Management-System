@@ -1,0 +1,1001 @@
+id,user_id,employees_id,action_performed,entity_type,entity_id,old_values,new_values,action_date
+1,37,,updated,job_orders,177,"{""amount"": 749.86, ""record_id"": 177}","{""amount"": 2060.73, ""record_id"": 177}",2026-07-17 22:55:58.312132
+2,78,,approved,service_tickets,407,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-25 23:14:49.312132
+3,20,,created,vehicles,105,,"{""id"": 105, ""is_active"": true}",2026-08-03 09:52:26.312132
+4,147,,approved,service_tickets,463,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-02 14:26:08.312132
+5,415,,status_changed,job_orders,4,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-19 04:12:04.312132
+6,23,,logged_in,users,23,,,2026-08-02 16:48:08.312132
+7,487,,rejected,service_tickets,395,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-23 10:34:03.312132
+8,,39,updated,vehicles,96,"{""amount"": 782.43, ""record_id"": 96}","{""amount"": 2849.85, ""record_id"": 96}",2026-07-06 15:52:41.312132
+9,,405,status_changed,job_orders,301,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-08 19:09:52.312132
+10,191,,created,payments,148,,"{""id"": 148, ""is_active"": true}",2026-07-08 12:54:30.312132
+11,,366,created,vehicles,495,,"{""id"": 495, ""is_active"": true}",2026-07-14 03:55:09.312132
+12,,271,rejected,service_tickets,44,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-09 19:21:40.312132
+13,,467,rejected,service_tickets,398,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-03 15:35:10.312132
+14,,370,status_changed,job_orders,383,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-11 04:59:54.312132
+15,,400,status_changed,job_orders,323,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-08-01 08:30:56.312132
+16,128,,rejected,service_tickets,25,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-07 21:30:39.312132
+17,,291,deleted,vehicles,272,"{""id"": 272, ""is_active"": true}",,2026-07-17 03:33:28.312132
+18,,277,approved,service_tickets,326,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-13 04:48:37.312132
+19,,205,created,job_orders,312,,"{""id"": 312, ""is_active"": true}",2026-07-21 08:50:09.312132
+20,,123,claimed,retention_offers,119,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 270}",2026-08-02 08:46:17.312132
+21,,174,deleted,job_orders,292,"{""id"": 292, ""is_active"": true}",,2026-07-29 03:51:48.312132
+22,499,,created,users,272,,"{""id"": 272, ""is_active"": true}",2026-07-18 18:17:06.312132
+23,,228,status_changed,job_orders,320,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-14 06:21:36.312132
+24,,410,logged_in,employees,410,,,2026-07-09 01:36:11.312132
+25,,120,claimed,retention_offers,179,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 471}",2026-07-25 22:09:14.312132
+26,,492,rejected,service_tickets,450,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-13 21:55:05.312132
+27,,141,deleted,job_orders,125,"{""id"": 125, ""is_active"": true}",,2026-07-30 19:15:44.312132
+28,,188,rejected,service_tickets,342,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-30 21:07:04.312132
+29,,499,status_changed,job_orders,414,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-17 02:01:01.312132
+30,,426,approved,service_tickets,303,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-15 23:27:44.312132
+31,,210,created,job_orders,152,,"{""id"": 152, ""is_active"": true}",2026-07-08 07:58:00.312132
+32,267,,rejected,service_tickets,211,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-12 17:38:57.312132
+33,,304,updated,job_orders,1,"{""amount"": 1124.08, ""record_id"": 1}","{""amount"": 2562.86, ""record_id"": 1}",2026-07-11 14:53:48.312132
+34,,407,rejected,service_tickets,345,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-20 07:54:44.312132
+35,,315,rejected,service_tickets,294,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-24 16:46:06.312132
+36,317,,deleted,payments,446,"{""id"": 446, ""is_active"": true}",,2026-07-10 02:06:54.312132
+37,,262,approved,service_tickets,282,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-04 23:30:04.312132
+38,5,,approved,service_tickets,189,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-28 17:57:08.312132
+39,,393,deleted,users,330,"{""id"": 330, ""is_active"": true}",,2026-07-29 21:56:10.312132
+40,436,,claimed,retention_offers,111,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 276}",2026-07-25 13:08:27.312132
+41,,407,approved,service_tickets,193,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-02 01:07:36.312132
+42,,79,status_changed,job_orders,488,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-21 21:55:40.312132
+43,451,,approved,service_tickets,54,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-21 16:07:00.312132
+44,,378,created,payments,275,,"{""id"": 275, ""is_active"": true}",2026-07-15 00:04:35.312132
+45,234,,created,payments,495,,"{""id"": 495, ""is_active"": true}",2026-07-24 19:04:48.312132
+46,286,,deleted,vehicles,383,"{""id"": 383, ""is_active"": true}",,2026-07-26 14:50:25.312132
+47,201,,status_changed,job_orders,232,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-11 01:14:57.312132
+48,279,,created,vehicles,68,,"{""id"": 68, ""is_active"": true}",2026-07-13 09:38:38.312132
+49,9,,claimed,retention_offers,456,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 253}",2026-07-15 17:32:21.312132
+50,,65,deleted,vehicles,301,"{""id"": 301, ""is_active"": true}",,2026-07-23 23:29:41.312132
+51,,93,approved,service_tickets,454,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-01 04:59:08.312132
+52,91,,deleted,users,412,"{""id"": 412, ""is_active"": true}",,2026-07-07 18:41:32.312132
+53,,372,approved,service_tickets,186,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-08 21:58:07.312132
+54,380,,rejected,service_tickets,416,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-09 12:54:46.312132
+55,,411,created,vehicles,300,,"{""id"": 300, ""is_active"": true}",2026-07-21 21:33:28.312132
+56,,467,deleted,vehicles,215,"{""id"": 215, ""is_active"": true}",,2026-07-16 00:19:19.312132
+57,,207,rejected,service_tickets,17,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-17 17:35:30.312132
+58,,162,status_changed,job_orders,358,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-27 12:23:42.312132
+59,,101,rejected,service_tickets,384,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-08 08:03:29.312132
+60,,180,approved,service_tickets,292,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-22 13:14:49.312132
+61,300,,approved,service_tickets,147,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-25 05:44:32.312132
+62,,222,claimed,retention_offers,200,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 13}",2026-07-13 09:24:44.312132
+63,129,,claimed,retention_offers,473,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 85}",2026-07-30 05:41:53.312132
+64,,344,updated,job_orders,262,"{""amount"": 1481.70, ""record_id"": 262}","{""amount"": 3330.15, ""record_id"": 262}",2026-07-08 06:53:05.312132
+65,56,,logged_in,users,56,,,2026-07-08 14:28:29.312132
+66,,410,rejected,service_tickets,468,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-02 01:58:02.312132
+67,432,,rejected,service_tickets,497,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-26 19:37:00.312132
+68,,35,created,users,422,,"{""id"": 422, ""is_active"": true}",2026-07-13 00:03:25.312132
+69,,295,deleted,vehicles,278,"{""id"": 278, ""is_active"": true}",,2026-07-15 13:45:52.312132
+70,,291,updated,payments,386,"{""amount"": 1142.92, ""record_id"": 386}","{""amount"": 3177.94, ""record_id"": 386}",2026-07-16 05:53:05.312132
+71,489,,logged_in,users,489,,,2026-07-11 09:53:35.312132
+72,,34,approved,service_tickets,78,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-13 04:00:45.312132
+73,,166,status_changed,job_orders,303,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-20 07:43:18.312132
+74,,334,approved,service_tickets,317,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-27 14:51:58.312132
+75,,255,deleted,vehicles,453,"{""id"": 453, ""is_active"": true}",,2026-07-12 00:30:51.312132
+76,,392,updated,job_orders,188,"{""amount"": 977.10, ""record_id"": 188}","{""amount"": 1955.17, ""record_id"": 188}",2026-07-21 01:11:03.312132
+77,234,,updated,users,143,"{""amount"": 1297.91, ""record_id"": 143}","{""amount"": 2304.23, ""record_id"": 143}",2026-08-01 14:07:23.312132
+78,,151,deleted,job_orders,72,"{""id"": 72, ""is_active"": true}",,2026-07-21 12:36:46.312132
+79,,293,status_changed,job_orders,314,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-13 10:37:59.312132
+80,,249,logged_in,employees,249,,,2026-07-12 15:34:57.312132
+81,,49,approved,service_tickets,213,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-15 21:04:28.312132
+82,,228,claimed,retention_offers,422,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 238}",2026-07-12 01:19:21.312132
+83,,220,created,vehicles,117,,"{""id"": 117, ""is_active"": true}",2026-07-19 00:28:49.312132
+84,,56,status_changed,job_orders,163,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-18 10:41:08.312132
+85,,495,approved,service_tickets,277,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-17 04:44:10.312132
+86,,87,created,job_orders,210,,"{""id"": 210, ""is_active"": true}",2026-07-20 10:11:14.312132
+87,309,,rejected,service_tickets,325,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-24 12:18:09.312132
+88,,276,rejected,service_tickets,375,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-29 08:45:55.312132
+89,,84,updated,vehicles,24,"{""amount"": 975.30, ""record_id"": 24}","{""amount"": 3064.89, ""record_id"": 24}",2026-07-17 03:15:23.312132
+90,66,,status_changed,job_orders,337,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-12 19:16:21.312132
+91,450,,claimed,retention_offers,110,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 116}",2026-07-21 08:29:37.312132
+92,,202,claimed,retention_offers,49,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 465}",2026-08-04 12:38:27.312132
+93,185,,deleted,vehicles,248,"{""id"": 248, ""is_active"": true}",,2026-08-04 02:19:39.312132
+94,,455,created,job_orders,390,,"{""id"": 390, ""is_active"": true}",2026-07-15 13:54:51.312132
+95,,372,approved,service_tickets,494,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-07 20:04:07.312132
+96,,470,created,users,375,,"{""id"": 375, ""is_active"": true}",2026-07-18 00:17:00.312132
+97,,55,status_changed,job_orders,43,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-27 02:19:51.312132
+98,,278,deleted,job_orders,161,"{""id"": 161, ""is_active"": true}",,2026-07-11 18:46:21.312132
+99,,246,status_changed,job_orders,288,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-10 12:13:18.312132
+100,435,,deleted,payments,361,"{""id"": 361, ""is_active"": true}",,2026-08-04 11:39:45.312132
+101,,43,updated,users,118,"{""amount"": 574.21, ""record_id"": 118}","{""amount"": 2146.71, ""record_id"": 118}",2026-07-17 20:43:46.312132
+102,,330,rejected,service_tickets,499,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-17 04:47:56.312132
+103,152,,created,vehicles,262,,"{""id"": 262, ""is_active"": true}",2026-07-31 10:35:38.312132
+104,83,,approved,service_tickets,305,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-12 07:53:26.312132
+105,,250,approved,service_tickets,206,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-20 13:32:07.312132
+106,,96,approved,service_tickets,444,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-08 14:02:24.312132
+107,,258,approved,service_tickets,481,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-17 12:42:52.312132
+108,493,,created,job_orders,7,,"{""id"": 7, ""is_active"": true}",2026-07-27 10:33:22.312132
+109,385,,claimed,retention_offers,119,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 143}",2026-07-11 20:16:26.312132
+110,,407,claimed,retention_offers,422,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 150}",2026-07-13 17:29:02.312132
+111,,162,status_changed,job_orders,62,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-23 07:14:24.312132
+112,,466,updated,payments,437,"{""amount"": 1028.26, ""record_id"": 437}","{""amount"": 1630.61, ""record_id"": 437}",2026-07-31 12:32:35.312132
+113,,432,deleted,users,496,"{""id"": 496, ""is_active"": true}",,2026-07-19 02:38:24.312132
+114,,242,logged_in,employees,242,,,2026-07-25 19:36:58.312132
+115,70,,logged_in,users,70,,,2026-07-10 15:02:42.312132
+116,,283,rejected,service_tickets,111,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-11 03:52:03.312132
+117,,294,logged_in,employees,294,,,2026-07-30 03:40:36.312132
+118,,310,deleted,vehicles,400,"{""id"": 400, ""is_active"": true}",,2026-07-20 22:46:15.312132
+119,,403,approved,service_tickets,191,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-17 14:46:35.312132
+120,,385,updated,payments,142,"{""amount"": 1039.33, ""record_id"": 142}","{""amount"": 3499.85, ""record_id"": 142}",2026-07-24 04:05:44.312132
+121,,349,updated,job_orders,206,"{""amount"": 1398.29, ""record_id"": 206}","{""amount"": 2235.04, ""record_id"": 206}",2026-07-12 21:17:59.312132
+122,,85,logged_in,employees,85,,,2026-08-04 11:08:42.312132
+123,,301,created,payments,132,,"{""id"": 132, ""is_active"": true}",2026-07-28 09:39:29.312132
+124,,481,updated,users,307,"{""amount"": 945.36, ""record_id"": 307}","{""amount"": 1819.77, ""record_id"": 307}",2026-07-10 09:22:41.312132
+125,,274,logged_in,employees,274,,,2026-07-30 23:59:39.312132
+126,,149,logged_in,employees,149,,,2026-07-18 13:53:08.312132
+127,,196,created,users,106,,"{""id"": 106, ""is_active"": true}",2026-07-18 17:31:19.312132
+128,,128,logged_in,employees,128,,,2026-07-14 06:34:47.312132
+129,118,,approved,service_tickets,264,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-09 19:01:16.312132
+130,,320,approved,service_tickets,418,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-09 00:33:26.312132
+131,,411,rejected,service_tickets,496,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-26 04:44:21.312132
+132,,78,created,payments,85,,"{""id"": 85, ""is_active"": true}",2026-07-11 06:18:24.312132
+133,,16,claimed,retention_offers,28,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 259}",2026-07-18 04:03:53.312132
+134,,424,updated,job_orders,205,"{""amount"": 978.23, ""record_id"": 205}","{""amount"": 2255.28, ""record_id"": 205}",2026-07-12 13:22:32.312132
+135,,299,logged_in,employees,299,,,2026-07-10 22:52:12.312132
+674,,283,created,users,321,,"{""id"": 321, ""is_active"": true}",2026-07-26 02:19:27.312132
+136,,159,rejected,service_tickets,351,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-20 07:39:29.312132
+137,67,,logged_in,users,67,,,2026-07-20 20:41:56.312132
+138,,350,rejected,service_tickets,84,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-02 06:32:46.312132
+139,408,,created,vehicles,79,,"{""id"": 79, ""is_active"": true}",2026-07-23 17:14:48.312132
+140,,336,updated,vehicles,119,"{""amount"": 664.97, ""record_id"": 119}","{""amount"": 1965.45, ""record_id"": 119}",2026-07-31 19:46:10.312132
+141,,467,status_changed,job_orders,279,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-08-03 02:08:22.312132
+142,,306,logged_in,employees,306,,,2026-07-25 06:24:47.312132
+143,,207,deleted,job_orders,13,"{""id"": 13, ""is_active"": true}",,2026-07-10 17:37:42.312132
+144,,224,logged_in,employees,224,,,2026-07-22 02:39:59.312132
+145,,283,approved,service_tickets,163,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-16 01:01:20.312132
+146,,346,rejected,service_tickets,226,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-30 23:19:13.312132
+147,,4,status_changed,job_orders,182,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-24 06:09:42.312132
+148,191,,status_changed,job_orders,294,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-12 01:02:36.312132
+149,284,,rejected,service_tickets,377,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-31 02:29:07.312132
+150,,109,created,payments,199,,"{""id"": 199, ""is_active"": true}",2026-07-20 06:06:10.312132
+151,,415,claimed,retention_offers,40,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 226}",2026-07-30 16:03:54.312132
+152,,261,status_changed,job_orders,15,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-21 19:36:09.312132
+153,,464,approved,service_tickets,338,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-02 04:01:22.312132
+154,,59,rejected,service_tickets,381,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-19 22:45:58.312132
+155,,170,rejected,service_tickets,136,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-07 01:32:55.312132
+156,,13,created,job_orders,271,,"{""id"": 271, ""is_active"": true}",2026-08-02 09:50:55.312132
+157,486,,deleted,payments,92,"{""id"": 92, ""is_active"": true}",,2026-07-18 12:37:04.312132
+158,,474,status_changed,job_orders,238,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-24 09:47:49.312132
+159,360,,status_changed,job_orders,312,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-29 08:20:33.312132
+160,128,,claimed,retention_offers,164,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 135}",2026-07-19 00:14:02.312132
+161,,138,approved,service_tickets,40,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-20 17:35:25.312132
+162,68,,deleted,job_orders,277,"{""id"": 277, ""is_active"": true}",,2026-07-21 17:01:35.312132
+163,,471,logged_in,employees,471,,,2026-07-12 16:43:58.312132
+164,,470,approved,service_tickets,259,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-18 17:28:50.312132
+165,,77,claimed,retention_offers,277,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 372}",2026-08-04 16:45:19.312132
+166,361,,deleted,job_orders,400,"{""id"": 400, ""is_active"": true}",,2026-07-22 05:23:19.312132
+167,,175,rejected,service_tickets,470,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-04 09:33:44.312132
+168,,461,updated,vehicles,132,"{""amount"": 705.72, ""record_id"": 132}","{""amount"": 1654.79, ""record_id"": 132}",2026-07-30 08:42:10.312132
+169,,197,deleted,users,344,"{""id"": 344, ""is_active"": true}",,2026-07-20 08:11:24.312132
+170,,71,updated,vehicles,196,"{""amount"": 1195.74, ""record_id"": 196}","{""amount"": 2309.68, ""record_id"": 196}",2026-08-04 14:50:55.312132
+171,,301,approved,service_tickets,37,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-04 01:56:06.312132
+172,,51,status_changed,job_orders,429,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-08-02 19:44:58.312132
+173,,86,approved,service_tickets,338,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-23 08:46:01.312132
+174,,37,claimed,retention_offers,170,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 223}",2026-07-31 10:38:10.312132
+175,,210,logged_in,employees,210,,,2026-07-19 14:16:12.312132
+176,,446,rejected,service_tickets,441,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-20 14:35:03.312132
+177,390,,created,vehicles,217,,"{""id"": 217, ""is_active"": true}",2026-07-22 23:38:16.312132
+178,352,,created,vehicles,212,,"{""id"": 212, ""is_active"": true}",2026-07-29 16:17:24.312132
+179,,139,approved,service_tickets,212,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-15 10:04:46.312132
+180,,65,approved,service_tickets,327,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-04 15:59:11.312132
+181,,457,logged_in,employees,457,,,2026-07-14 10:51:27.312132
+182,,212,rejected,service_tickets,251,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-03 12:56:03.312132
+183,,320,created,vehicles,358,,"{""id"": 358, ""is_active"": true}",2026-07-11 15:13:46.312132
+184,,258,claimed,retention_offers,181,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 212}",2026-08-03 07:29:59.312132
+185,,350,claimed,retention_offers,132,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 457}",2026-07-16 05:39:03.312132
+186,,459,updated,job_orders,224,"{""amount"": 790.46, ""record_id"": 224}","{""amount"": 1927.72, ""record_id"": 224}",2026-07-23 16:53:35.312132
+187,,325,status_changed,job_orders,189,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-11 14:05:13.312132
+188,,30,created,vehicles,191,,"{""id"": 191, ""is_active"": true}",2026-07-12 00:37:33.312132
+189,,21,claimed,retention_offers,84,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 344}",2026-07-06 04:43:29.312132
+190,,50,updated,users,215,"{""amount"": 862.85, ""record_id"": 215}","{""amount"": 2126.17, ""record_id"": 215}",2026-07-21 02:35:13.312132
+191,423,,logged_in,users,423,,,2026-08-03 19:58:22.312132
+192,,70,approved,service_tickets,159,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-29 22:16:42.312132
+193,,327,rejected,service_tickets,322,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-12 02:10:29.312132
+194,,137,logged_in,employees,137,,,2026-07-14 10:09:56.312132
+195,,481,created,payments,185,,"{""id"": 185, ""is_active"": true}",2026-07-06 18:11:38.312132
+196,,197,updated,job_orders,96,"{""amount"": 1132.51, ""record_id"": 96}","{""amount"": 2506.75, ""record_id"": 96}",2026-07-27 13:32:22.312132
+197,365,,logged_in,users,365,,,2026-07-20 04:45:47.312132
+198,,420,claimed,retention_offers,368,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 486}",2026-07-30 02:33:19.312132
+199,,437,rejected,service_tickets,422,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-29 22:31:38.312132
+200,,475,updated,job_orders,323,"{""amount"": 1413.34, ""record_id"": 323}","{""amount"": 3359.54, ""record_id"": 323}",2026-08-03 06:53:32.312132
+201,,250,claimed,retention_offers,287,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 7}",2026-07-24 03:30:05.312132
+202,,123,logged_in,employees,123,,,2026-07-19 17:53:47.312132
+203,,405,claimed,retention_offers,222,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 445}",2026-07-22 20:08:04.312132
+204,,109,logged_in,employees,109,,,2026-07-31 03:38:54.312132
+205,342,,logged_in,users,342,,,2026-07-27 10:25:12.312132
+206,,400,status_changed,job_orders,28,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-09 00:23:44.312132
+207,356,,rejected,service_tickets,160,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-23 19:11:46.312132
+208,,370,deleted,payments,446,"{""id"": 446, ""is_active"": true}",,2026-07-12 15:05:19.312132
+209,,57,claimed,retention_offers,400,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 421}",2026-07-10 22:25:03.312132
+210,,31,claimed,retention_offers,17,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 44}",2026-07-10 19:14:02.312132
+211,,428,updated,payments,275,"{""amount"": 572.38, ""record_id"": 275}","{""amount"": 1527.64, ""record_id"": 275}",2026-07-23 00:36:09.312132
+212,362,,approved,service_tickets,362,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-27 17:50:21.312132
+213,,35,deleted,users,295,"{""id"": 295, ""is_active"": true}",,2026-07-06 15:00:10.312132
+214,197,,approved,service_tickets,311,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-01 22:27:10.312132
+215,,146,deleted,vehicles,399,"{""id"": 399, ""is_active"": true}",,2026-08-04 11:08:44.312132
+216,,87,deleted,job_orders,383,"{""id"": 383, ""is_active"": true}",,2026-07-17 03:34:01.312132
+217,95,,status_changed,job_orders,86,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-11 05:27:05.312132
+218,194,,rejected,service_tickets,15,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-23 22:14:03.312132
+219,,394,rejected,service_tickets,499,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-19 15:24:22.312132
+220,,492,updated,payments,267,"{""amount"": 1110.82, ""record_id"": 267}","{""amount"": 2179.72, ""record_id"": 267}",2026-07-26 05:07:31.312132
+221,,365,approved,service_tickets,325,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-28 14:36:43.312132
+222,480,,approved,service_tickets,33,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-16 22:15:15.312132
+223,304,,created,users,350,,"{""id"": 350, ""is_active"": true}",2026-07-23 11:39:19.312132
+224,,473,logged_in,employees,473,,,2026-07-22 20:01:28.312132
+225,339,,updated,job_orders,69,"{""amount"": 707.27, ""record_id"": 69}","{""amount"": 3432.72, ""record_id"": 69}",2026-08-02 02:54:02.312132
+226,,80,created,vehicles,53,,"{""id"": 53, ""is_active"": true}",2026-07-23 14:33:14.312132
+227,,477,deleted,payments,483,"{""id"": 483, ""is_active"": true}",,2026-07-21 14:02:21.312132
+228,,72,logged_in,employees,72,,,2026-07-08 09:45:21.312132
+229,25,,updated,vehicles,201,"{""amount"": 633.76, ""record_id"": 201}","{""amount"": 1662.18, ""record_id"": 201}",2026-07-15 10:39:20.312132
+230,500,,updated,job_orders,118,"{""amount"": 674.68, ""record_id"": 118}","{""amount"": 3282.19, ""record_id"": 118}",2026-07-28 16:52:03.312132
+231,,388,deleted,payments,141,"{""id"": 141, ""is_active"": true}",,2026-07-08 01:03:54.312132
+232,110,,updated,users,215,"{""amount"": 1353.79, ""record_id"": 215}","{""amount"": 3077.11, ""record_id"": 215}",2026-08-01 01:01:27.312132
+233,,81,status_changed,job_orders,136,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-08 19:20:11.312132
+234,77,,updated,vehicles,65,"{""amount"": 1058.33, ""record_id"": 65}","{""amount"": 1561.21, ""record_id"": 65}",2026-07-07 18:20:55.312132
+235,,102,claimed,retention_offers,290,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 494}",2026-07-20 15:53:02.312132
+236,359,,logged_in,users,359,,,2026-07-22 20:47:37.312132
+237,,496,updated,job_orders,70,"{""amount"": 1234.83, ""record_id"": 70}","{""amount"": 3040.33, ""record_id"": 70}",2026-08-03 23:25:07.312132
+238,367,,logged_in,users,367,,,2026-07-27 15:02:31.312132
+239,238,,approved,service_tickets,289,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-23 22:03:49.312132
+240,486,,updated,users,91,"{""amount"": 981.95, ""record_id"": 91}","{""amount"": 2148.45, ""record_id"": 91}",2026-07-27 20:17:17.312132
+241,,350,rejected,service_tickets,195,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-02 04:36:38.312132
+242,76,,claimed,retention_offers,92,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 317}",2026-07-30 03:26:19.312132
+243,,53,approved,service_tickets,362,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-09 02:11:42.312132
+244,49,,updated,users,188,"{""amount"": 751.23, ""record_id"": 188}","{""amount"": 2725.31, ""record_id"": 188}",2026-07-23 13:41:22.312132
+245,448,,logged_in,users,448,,,2026-08-01 04:56:52.312132
+246,,175,rejected,service_tickets,317,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-31 05:26:21.312132
+247,500,,status_changed,job_orders,364,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-06 23:14:49.312132
+248,142,,logged_in,users,142,,,2026-07-30 17:14:33.312132
+249,,356,rejected,service_tickets,144,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-07 16:09:05.312132
+250,,465,approved,service_tickets,365,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-01 12:33:30.312132
+251,,323,approved,service_tickets,152,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-26 17:27:08.312132
+252,,412,deleted,users,420,"{""id"": 420, ""is_active"": true}",,2026-07-26 04:51:22.312132
+253,,499,updated,payments,326,"{""amount"": 1374.75, ""record_id"": 326}","{""amount"": 2902.79, ""record_id"": 326}",2026-08-02 04:37:47.312132
+254,,61,claimed,retention_offers,318,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 65}",2026-07-22 19:20:18.312132
+255,,156,created,job_orders,81,,"{""id"": 81, ""is_active"": true}",2026-07-11 06:47:23.312132
+256,,98,approved,service_tickets,5,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-31 15:26:47.312132
+257,,25,status_changed,job_orders,313,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-14 16:49:51.312132
+258,,283,updated,payments,360,"{""amount"": 573.50, ""record_id"": 360}","{""amount"": 2319.30, ""record_id"": 360}",2026-08-02 16:13:45.312132
+259,,97,created,job_orders,338,,"{""id"": 338, ""is_active"": true}",2026-07-24 19:24:22.312132
+260,,184,approved,service_tickets,114,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-12 06:54:25.312132
+261,473,,created,users,446,,"{""id"": 446, ""is_active"": true}",2026-07-21 02:06:40.312132
+262,,290,deleted,users,316,"{""id"": 316, ""is_active"": true}",,2026-07-09 01:16:08.312132
+263,175,,rejected,service_tickets,468,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-27 12:53:05.312132
+264,,413,updated,job_orders,135,"{""amount"": 1325.59, ""record_id"": 135}","{""amount"": 3303.58, ""record_id"": 135}",2026-07-23 21:12:39.312132
+265,,417,created,payments,155,,"{""id"": 155, ""is_active"": true}",2026-07-27 14:01:44.312132
+266,,42,deleted,job_orders,157,"{""id"": 157, ""is_active"": true}",,2026-07-25 04:08:55.312132
+267,,379,rejected,service_tickets,186,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-19 09:46:10.312132
+268,,140,status_changed,job_orders,481,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-06 07:12:27.312132
+269,,262,updated,job_orders,34,"{""amount"": 1020.96, ""record_id"": 34}","{""amount"": 3434.82, ""record_id"": 34}",2026-07-17 07:46:30.312132
+270,,20,status_changed,job_orders,294,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-20 12:53:57.312132
+271,88,,approved,service_tickets,233,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-04 19:08:44.312132
+272,,417,approved,service_tickets,463,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-23 03:52:33.312132
+273,,362,updated,vehicles,260,"{""amount"": 578.18, ""record_id"": 260}","{""amount"": 1550.00, ""record_id"": 260}",2026-07-15 19:07:48.312132
+274,326,,deleted,users,208,"{""id"": 208, ""is_active"": true}",,2026-07-18 06:39:50.312132
+275,,76,logged_in,employees,76,,,2026-08-04 07:20:37.312132
+276,297,,claimed,retention_offers,373,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 494}",2026-07-13 00:59:40.312132
+277,,39,logged_in,employees,39,,,2026-07-11 23:04:31.312132
+278,,94,deleted,vehicles,290,"{""id"": 290, ""is_active"": true}",,2026-07-13 14:23:04.312132
+279,,238,claimed,retention_offers,49,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 332}",2026-07-28 19:00:10.312132
+280,,77,claimed,retention_offers,177,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 268}",2026-07-11 16:25:59.312132
+281,,366,created,payments,323,,"{""id"": 323, ""is_active"": true}",2026-07-12 19:19:22.312132
+282,,475,approved,service_tickets,487,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-25 03:07:56.312132
+283,,452,created,users,288,,"{""id"": 288, ""is_active"": true}",2026-07-21 06:18:12.312132
+284,,97,updated,payments,397,"{""amount"": 1260.43, ""record_id"": 397}","{""amount"": 2925.85, ""record_id"": 397}",2026-07-29 22:26:45.312132
+285,,378,logged_in,employees,378,,,2026-07-11 14:59:23.312132
+286,111,,logged_in,users,111,,,2026-07-26 20:40:40.312132
+287,44,,deleted,job_orders,73,"{""id"": 73, ""is_active"": true}",,2026-07-07 02:54:57.312132
+288,214,,created,job_orders,429,,"{""id"": 429, ""is_active"": true}",2026-07-09 21:58:32.312132
+289,,264,logged_in,employees,264,,,2026-07-07 10:11:48.312132
+290,26,,approved,service_tickets,56,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-22 22:41:58.312132
+291,314,,created,vehicles,248,,"{""id"": 248, ""is_active"": true}",2026-08-04 12:19:13.312132
+292,,253,claimed,retention_offers,420,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 12}",2026-07-11 02:23:41.312132
+293,,191,rejected,service_tickets,191,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-28 21:08:36.312132
+294,143,,rejected,service_tickets,317,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-15 11:23:54.312132
+295,278,,status_changed,job_orders,343,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-12 00:46:08.312132
+296,,23,rejected,service_tickets,142,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-31 08:17:04.312132
+297,,296,created,payments,86,,"{""id"": 86, ""is_active"": true}",2026-07-09 02:14:15.312132
+298,494,,approved,service_tickets,496,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-11 22:11:34.312132
+299,,78,status_changed,job_orders,244,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-19 13:14:48.312132
+300,,77,claimed,retention_offers,107,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 97}",2026-07-07 23:00:30.312132
+301,,259,deleted,vehicles,68,"{""id"": 68, ""is_active"": true}",,2026-08-05 00:08:01.312132
+302,262,,created,payments,255,,"{""id"": 255, ""is_active"": true}",2026-07-25 07:05:02.312132
+303,,78,created,payments,355,,"{""id"": 355, ""is_active"": true}",2026-07-24 16:08:51.312132
+304,,448,status_changed,job_orders,3,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-08 12:21:40.312132
+305,338,,deleted,job_orders,186,"{""id"": 186, ""is_active"": true}",,2026-07-09 05:02:17.312132
+306,32,,logged_in,users,32,,,2026-07-18 00:03:10.312132
+307,,472,claimed,retention_offers,352,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 458}",2026-07-23 04:40:35.312132
+308,366,,status_changed,job_orders,84,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-08 17:43:17.312132
+309,,383,deleted,vehicles,456,"{""id"": 456, ""is_active"": true}",,2026-07-11 07:42:50.312132
+310,,88,deleted,users,358,"{""id"": 358, ""is_active"": true}",,2026-07-11 07:12:54.312132
+311,,127,claimed,retention_offers,32,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 102}",2026-07-23 02:51:37.312132
+312,,107,logged_in,employees,107,,,2026-08-03 15:07:08.312132
+313,,353,deleted,users,149,"{""id"": 149, ""is_active"": true}",,2026-07-08 15:19:46.312132
+314,,367,claimed,retention_offers,68,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 490}",2026-08-01 16:42:01.312132
+315,,489,approved,service_tickets,313,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-31 12:12:55.312132
+316,125,,updated,vehicles,242,"{""amount"": 705.16, ""record_id"": 242}","{""amount"": 1581.32, ""record_id"": 242}",2026-07-12 00:35:26.312132
+317,,89,deleted,vehicles,121,"{""id"": 121, ""is_active"": true}",,2026-07-09 14:25:40.312132
+318,,421,status_changed,job_orders,41,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-17 03:04:37.312132
+319,189,,deleted,users,277,"{""id"": 277, ""is_active"": true}",,2026-07-21 14:00:25.312132
+320,,316,claimed,retention_offers,321,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 368}",2026-07-23 16:49:46.312132
+321,,385,approved,service_tickets,317,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-01 12:30:32.312132
+322,,338,created,job_orders,159,,"{""id"": 159, ""is_active"": true}",2026-07-30 21:21:42.312132
+323,,16,logged_in,employees,16,,,2026-07-19 04:56:23.312132
+324,,498,logged_in,employees,498,,,2026-07-17 00:58:59.312132
+325,,489,deleted,payments,65,"{""id"": 65, ""is_active"": true}",,2026-07-23 10:11:41.312132
+326,,4,approved,service_tickets,286,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-20 21:47:11.312132
+327,,22,status_changed,job_orders,183,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-19 03:37:53.312132
+328,,79,created,job_orders,493,,"{""id"": 493, ""is_active"": true}",2026-07-30 11:40:03.312132
+329,318,,logged_in,users,318,,,2026-07-20 17:58:36.312132
+330,,374,deleted,vehicles,2,"{""id"": 2, ""is_active"": true}",,2026-08-03 01:43:45.312132
+331,,202,approved,service_tickets,202,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-01 13:46:05.312132
+332,,411,status_changed,job_orders,492,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-10 16:35:20.312132
+333,350,,created,users,275,,"{""id"": 275, ""is_active"": true}",2026-07-13 13:39:56.312132
+334,,355,updated,users,347,"{""amount"": 925.13, ""record_id"": 347}","{""amount"": 1982.07, ""record_id"": 347}",2026-07-09 17:30:21.312132
+335,,220,rejected,service_tickets,298,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-12 23:15:49.312132
+336,,296,rejected,service_tickets,99,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-07 10:32:18.312132
+337,,196,logged_in,employees,196,,,2026-07-07 15:19:51.312132
+338,,107,rejected,service_tickets,288,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-26 17:22:29.312132
+339,319,,deleted,users,177,"{""id"": 177, ""is_active"": true}",,2026-07-19 07:36:51.312132
+340,,235,updated,vehicles,280,"{""amount"": 1332.46, ""record_id"": 280}","{""amount"": 2401.59, ""record_id"": 280}",2026-07-15 22:19:52.312132
+341,,488,updated,job_orders,153,"{""amount"": 887.64, ""record_id"": 153}","{""amount"": 3355.94, ""record_id"": 153}",2026-07-07 13:17:26.312132
+342,,241,approved,service_tickets,159,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-20 11:45:12.312132
+343,315,,deleted,users,450,"{""id"": 450, ""is_active"": true}",,2026-07-24 11:19:37.312132
+344,104,,rejected,service_tickets,151,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-20 17:03:43.312132
+345,,429,claimed,retention_offers,203,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 200}",2026-07-29 15:37:26.312132
+346,,458,created,job_orders,274,,"{""id"": 274, ""is_active"": true}",2026-07-11 18:00:38.312132
+347,49,,logged_in,users,49,,,2026-07-21 21:50:47.312132
+348,138,,rejected,service_tickets,341,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-22 12:48:21.312132
+349,,66,approved,service_tickets,308,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-11 08:31:02.312132
+350,,289,logged_in,employees,289,,,2026-07-29 04:45:11.312132
+351,234,,claimed,retention_offers,163,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 441}",2026-08-04 00:11:33.312132
+352,,32,updated,users,436,"{""amount"": 731.41, ""record_id"": 436}","{""amount"": 1891.48, ""record_id"": 436}",2026-07-28 14:18:22.312132
+353,367,,approved,service_tickets,34,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-31 14:43:24.312132
+354,70,,logged_in,users,70,,,2026-07-29 06:22:53.312132
+355,,282,logged_in,employees,282,,,2026-08-04 13:49:34.312132
+356,,270,updated,job_orders,194,"{""amount"": 1263.13, ""record_id"": 194}","{""amount"": 2053.70, ""record_id"": 194}",2026-07-13 01:26:09.312132
+357,,292,created,users,426,,"{""id"": 426, ""is_active"": true}",2026-07-23 21:03:04.312132
+358,,395,updated,payments,197,"{""amount"": 513.93, ""record_id"": 197}","{""amount"": 2258.52, ""record_id"": 197}",2026-07-17 21:47:08.312132
+359,,274,logged_in,employees,274,,,2026-07-14 11:09:21.312132
+360,,23,approved,service_tickets,424,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-17 14:28:41.312132
+361,,24,created,job_orders,102,,"{""id"": 102, ""is_active"": true}",2026-07-22 05:30:39.312132
+362,,252,claimed,retention_offers,146,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 178}",2026-07-28 19:25:48.312132
+363,,441,logged_in,employees,441,,,2026-08-01 07:02:44.312132
+364,170,,deleted,payments,45,"{""id"": 45, ""is_active"": true}",,2026-07-21 01:02:53.312132
+365,,125,logged_in,employees,125,,,2026-07-14 03:48:04.312132
+366,,457,created,users,387,,"{""id"": 387, ""is_active"": true}",2026-07-06 07:37:37.312132
+367,,266,updated,vehicles,25,"{""amount"": 737.38, ""record_id"": 25}","{""amount"": 1953.70, ""record_id"": 25}",2026-07-27 19:05:42.312132
+368,,344,status_changed,job_orders,363,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-19 09:16:26.312132
+369,,185,claimed,retention_offers,435,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 16}",2026-08-01 19:49:06.312132
+370,,414,rejected,service_tickets,57,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-09 21:43:48.312132
+371,160,,logged_in,users,160,,,2026-07-09 16:58:00.312132
+372,,126,created,payments,187,,"{""id"": 187, ""is_active"": true}",2026-07-12 11:02:25.312132
+373,,413,claimed,retention_offers,333,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 25}",2026-07-18 22:03:37.312132
+374,,361,approved,service_tickets,469,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-18 03:37:03.312132
+375,,41,rejected,service_tickets,265,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-18 20:34:59.312132
+376,,47,deleted,job_orders,90,"{""id"": 90, ""is_active"": true}",,2026-07-28 14:27:06.312132
+377,,426,created,payments,8,,"{""id"": 8, ""is_active"": true}",2026-07-22 12:57:39.312132
+378,,250,deleted,job_orders,379,"{""id"": 379, ""is_active"": true}",,2026-07-19 00:17:50.312132
+379,,438,approved,service_tickets,467,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-23 12:21:28.312132
+380,,42,approved,service_tickets,311,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-02 03:28:35.312132
+381,,100,claimed,retention_offers,487,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 264}",2026-07-27 00:53:00.312132
+382,273,,claimed,retention_offers,260,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 66}",2026-07-12 00:27:05.312132
+383,181,,created,payments,141,,"{""id"": 141, ""is_active"": true}",2026-08-02 06:14:20.312132
+384,,398,status_changed,job_orders,113,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-06 10:57:49.312132
+385,,19,updated,users,233,"{""amount"": 547.39, ""record_id"": 233}","{""amount"": 2781.66, ""record_id"": 233}",2026-08-01 17:17:34.312132
+386,234,,claimed,retention_offers,385,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 368}",2026-07-17 08:49:30.312132
+387,,309,updated,payments,9,"{""amount"": 686.89, ""record_id"": 9}","{""amount"": 1649.97, ""record_id"": 9}",2026-07-31 11:11:13.312132
+388,,493,rejected,service_tickets,190,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-13 08:33:36.312132
+389,,159,created,job_orders,317,,"{""id"": 317, ""is_active"": true}",2026-07-22 22:20:41.312132
+390,,362,deleted,users,106,"{""id"": 106, ""is_active"": true}",,2026-07-25 04:51:34.312132
+391,,351,claimed,retention_offers,149,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 287}",2026-08-03 14:32:40.312132
+392,368,,deleted,payments,199,"{""id"": 199, ""is_active"": true}",,2026-07-11 17:42:25.312132
+393,,406,updated,users,137,"{""amount"": 1018.47, ""record_id"": 137}","{""amount"": 2238.90, ""record_id"": 137}",2026-07-12 02:27:36.312132
+394,,31,logged_in,employees,31,,,2026-07-24 15:09:41.312132
+395,,201,created,payments,170,,"{""id"": 170, ""is_active"": true}",2026-07-27 19:05:11.312132
+396,260,,logged_in,users,260,,,2026-07-15 23:12:18.312132
+397,312,,rejected,service_tickets,488,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-15 09:36:48.312132
+398,247,,rejected,service_tickets,327,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-03 03:20:19.312132
+399,,56,status_changed,job_orders,52,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-18 13:44:48.312132
+400,,267,created,vehicles,493,,"{""id"": 493, ""is_active"": true}",2026-07-22 22:03:32.312132
+401,,291,created,users,463,,"{""id"": 463, ""is_active"": true}",2026-07-31 12:14:24.312132
+402,91,,claimed,retention_offers,132,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 296}",2026-07-24 23:41:23.312132
+403,434,,rejected,service_tickets,425,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-28 08:55:13.312132
+404,361,,logged_in,users,361,,,2026-08-02 17:45:42.312132
+405,412,,status_changed,job_orders,194,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-25 23:33:57.312132
+406,,388,claimed,retention_offers,179,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 52}",2026-07-26 00:29:28.312132
+407,275,,approved,service_tickets,216,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-11 23:04:19.312132
+408,77,,approved,service_tickets,401,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-14 21:29:01.312132
+409,,364,deleted,job_orders,258,"{""id"": 258, ""is_active"": true}",,2026-08-04 23:56:08.312132
+410,182,,logged_in,users,182,,,2026-07-15 19:37:39.312132
+411,,45,status_changed,job_orders,186,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-13 22:00:00.312132
+412,,261,claimed,retention_offers,152,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 227}",2026-07-23 20:39:25.312132
+413,,116,rejected,service_tickets,473,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-03 20:21:19.312132
+414,454,,status_changed,job_orders,478,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-30 08:58:58.312132
+415,278,,updated,vehicles,247,"{""amount"": 1124.03, ""record_id"": 247}","{""amount"": 3100.21, ""record_id"": 247}",2026-07-25 04:42:00.312132
+416,499,,status_changed,job_orders,451,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-08-03 08:58:10.312132
+417,,100,approved,service_tickets,19,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-02 05:35:53.312132
+418,,403,claimed,retention_offers,497,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 380}",2026-07-12 22:31:38.312132
+419,48,,updated,payments,453,"{""amount"": 773.17, ""record_id"": 453}","{""amount"": 1964.19, ""record_id"": 453}",2026-07-31 21:03:15.312132
+420,200,,status_changed,job_orders,448,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-10 14:14:41.312132
+421,,240,approved,service_tickets,384,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-19 18:40:01.312132
+422,,79,created,vehicles,199,,"{""id"": 199, ""is_active"": true}",2026-07-31 14:17:15.312132
+423,,266,approved,service_tickets,388,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-24 12:28:33.312132
+424,,55,claimed,retention_offers,483,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 385}",2026-07-24 15:00:58.312132
+425,,270,logged_in,employees,270,,,2026-07-25 16:32:20.312132
+426,222,,deleted,users,2,"{""id"": 2, ""is_active"": true}",,2026-07-31 10:57:43.312132
+427,45,,created,users,473,,"{""id"": 473, ""is_active"": true}",2026-07-29 00:51:53.312132
+428,,407,created,vehicles,479,,"{""id"": 479, ""is_active"": true}",2026-07-20 19:41:31.312132
+429,,87,approved,service_tickets,260,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-09 21:14:50.312132
+430,,47,status_changed,job_orders,498,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-11 12:25:13.312132
+431,,244,updated,job_orders,189,"{""amount"": 1122.12, ""record_id"": 189}","{""amount"": 3406.17, ""record_id"": 189}",2026-07-08 05:05:34.312132
+432,,286,approved,service_tickets,272,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-17 07:09:14.312132
+433,,404,claimed,retention_offers,497,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 342}",2026-07-12 22:39:01.312132
+434,405,,created,users,138,,"{""id"": 138, ""is_active"": true}",2026-07-18 21:25:08.312132
+435,,471,rejected,service_tickets,236,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-14 17:27:58.312132
+436,150,,deleted,vehicles,455,"{""id"": 455, ""is_active"": true}",,2026-07-14 00:02:13.312132
+437,,281,claimed,retention_offers,484,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 301}",2026-07-13 08:39:01.312132
+438,,319,created,users,283,,"{""id"": 283, ""is_active"": true}",2026-07-19 18:26:02.312132
+439,,209,deleted,vehicles,137,"{""id"": 137, ""is_active"": true}",,2026-07-12 13:36:29.312132
+440,,84,status_changed,job_orders,95,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-19 10:34:10.312132
+441,,469,approved,service_tickets,128,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-25 23:43:25.312132
+442,272,,approved,service_tickets,340,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-03 09:50:53.312132
+443,,157,claimed,retention_offers,78,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 168}",2026-07-30 16:02:36.312132
+444,,450,updated,vehicles,40,"{""amount"": 1292.74, ""record_id"": 40}","{""amount"": 3347.79, ""record_id"": 40}",2026-07-07 00:48:41.312132
+445,,344,rejected,service_tickets,358,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-06 10:33:32.312132
+446,312,,deleted,payments,281,"{""id"": 281, ""is_active"": true}",,2026-07-09 00:00:10.312132
+447,,128,rejected,service_tickets,2,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-12 10:47:03.312132
+448,,142,approved,service_tickets,158,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-30 20:15:56.312132
+449,,112,created,payments,257,,"{""id"": 257, ""is_active"": true}",2026-07-28 07:54:18.312132
+450,,460,created,vehicles,262,,"{""id"": 262, ""is_active"": true}",2026-07-06 13:53:55.312132
+451,132,,updated,vehicles,107,"{""amount"": 594.97, ""record_id"": 107}","{""amount"": 2417.63, ""record_id"": 107}",2026-07-11 09:15:03.312132
+452,,348,status_changed,job_orders,101,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-27 05:12:48.312132
+453,,64,claimed,retention_offers,373,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 164}",2026-07-09 04:13:11.312132
+454,,314,updated,users,335,"{""amount"": 712.18, ""record_id"": 335}","{""amount"": 1688.94, ""record_id"": 335}",2026-08-03 07:28:56.312132
+455,,250,created,job_orders,235,,"{""id"": 235, ""is_active"": true}",2026-07-13 08:16:22.312132
+456,170,,deleted,users,191,"{""id"": 191, ""is_active"": true}",,2026-08-04 01:13:13.312132
+457,,248,deleted,payments,287,"{""id"": 287, ""is_active"": true}",,2026-07-10 18:00:37.312132
+458,317,,logged_in,users,317,,,2026-07-29 10:35:14.312132
+459,,334,rejected,service_tickets,254,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-23 13:24:55.312132
+460,,442,updated,users,154,"{""amount"": 517.81, ""record_id"": 154}","{""amount"": 2883.43, ""record_id"": 154}",2026-07-29 23:23:22.312132
+461,,97,updated,payments,312,"{""amount"": 1471.54, ""record_id"": 312}","{""amount"": 1922.48, ""record_id"": 312}",2026-07-20 20:49:08.312132
+462,372,,rejected,service_tickets,350,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-22 19:47:44.312132
+463,,391,updated,payments,327,"{""amount"": 542.75, ""record_id"": 327}","{""amount"": 2540.91, ""record_id"": 327}",2026-07-10 20:23:10.312132
+464,,26,approved,service_tickets,471,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-10 07:31:17.312132
+465,,302,deleted,users,134,"{""id"": 134, ""is_active"": true}",,2026-07-15 00:19:06.312132
+466,,291,rejected,service_tickets,279,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-19 13:47:39.312132
+467,,228,updated,job_orders,70,"{""amount"": 518.12, ""record_id"": 70}","{""amount"": 2078.85, ""record_id"": 70}",2026-07-07 12:01:37.312132
+468,,150,status_changed,job_orders,313,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-14 10:48:38.312132
+469,351,,rejected,service_tickets,385,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-07 20:01:54.312132
+470,148,,rejected,service_tickets,447,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-26 21:21:47.312132
+471,288,,claimed,retention_offers,31,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 450}",2026-07-07 11:02:02.312132
+472,,403,status_changed,job_orders,95,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-26 15:38:35.312132
+473,,286,rejected,service_tickets,261,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-26 22:37:07.312132
+474,,212,rejected,service_tickets,16,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-04 21:09:53.312132
+475,,108,logged_in,employees,108,,,2026-07-17 18:05:33.312132
+476,,191,rejected,service_tickets,329,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-02 09:42:54.312132
+477,,127,created,vehicles,339,,"{""id"": 339, ""is_active"": true}",2026-07-12 00:56:09.312132
+478,,102,claimed,retention_offers,127,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 233}",2026-07-07 08:44:20.312132
+479,,431,approved,service_tickets,490,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-06 05:54:14.312132
+480,,479,rejected,service_tickets,200,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-31 11:47:22.312132
+481,,264,logged_in,employees,264,,,2026-07-12 05:33:41.312132
+482,82,,claimed,retention_offers,73,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 460}",2026-07-12 04:18:52.312132
+483,,421,claimed,retention_offers,245,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 318}",2026-07-27 09:37:33.312132
+484,,91,created,vehicles,335,,"{""id"": 335, ""is_active"": true}",2026-07-26 14:33:09.312132
+485,,113,claimed,retention_offers,195,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 302}",2026-07-29 12:01:50.312132
+486,,32,logged_in,employees,32,,,2026-07-23 16:28:28.312132
+487,104,,status_changed,job_orders,42,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-26 01:06:04.312132
+488,,293,deleted,vehicles,41,"{""id"": 41, ""is_active"": true}",,2026-07-14 17:03:36.312132
+489,,181,updated,payments,89,"{""amount"": 1032.69, ""record_id"": 89}","{""amount"": 3396.38, ""record_id"": 89}",2026-07-22 14:07:57.312132
+490,259,,approved,service_tickets,153,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-11 15:58:30.312132
+491,,386,approved,service_tickets,3,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-24 02:08:40.312132
+492,438,,claimed,retention_offers,331,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 77}",2026-07-22 07:03:15.312132
+493,,380,rejected,service_tickets,415,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-26 20:04:43.312132
+494,,311,status_changed,job_orders,437,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-26 12:45:11.312132
+495,246,,updated,users,435,"{""amount"": 1073.47, ""record_id"": 435}","{""amount"": 2586.72, ""record_id"": 435}",2026-07-06 03:17:43.312132
+496,,467,created,vehicles,376,,"{""id"": 376, ""is_active"": true}",2026-07-27 05:33:20.312132
+497,388,,claimed,retention_offers,240,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 114}",2026-07-23 15:18:31.312132
+498,364,,created,payments,242,,"{""id"": 242, ""is_active"": true}",2026-07-12 22:06:18.312132
+499,220,,deleted,users,151,"{""id"": 151, ""is_active"": true}",,2026-08-04 12:38:20.312132
+500,32,,logged_in,users,32,,,2026-08-04 15:27:46.312132
+501,,498,status_changed,job_orders,99,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-26 11:56:18.312132
+502,426,,logged_in,users,426,,,2026-07-07 09:42:34.312132
+503,,51,claimed,retention_offers,477,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 381}",2026-07-25 00:27:36.312132
+504,,111,approved,service_tickets,278,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-18 11:18:00.312132
+505,,172,logged_in,employees,172,,,2026-07-16 21:15:04.312132
+506,,94,approved,service_tickets,479,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-20 15:40:23.312132
+507,,263,rejected,service_tickets,260,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-07 23:02:26.312132
+508,,17,deleted,vehicles,25,"{""id"": 25, ""is_active"": true}",,2026-08-03 02:13:22.312132
+509,,4,logged_in,employees,4,,,2026-08-04 10:03:16.312132
+510,,476,created,users,325,,"{""id"": 325, ""is_active"": true}",2026-07-14 05:29:37.312132
+511,,446,updated,vehicles,444,"{""amount"": 1440.93, ""record_id"": 444}","{""amount"": 3039.41, ""record_id"": 444}",2026-07-08 13:41:10.312132
+512,,335,logged_in,employees,335,,,2026-07-28 02:08:00.312132
+513,,171,approved,service_tickets,95,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-21 22:12:59.312132
+514,449,,status_changed,job_orders,115,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-10 09:55:55.312132
+515,124,,claimed,retention_offers,319,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 295}",2026-07-08 01:01:57.312132
+516,87,,claimed,retention_offers,398,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 74}",2026-07-10 04:33:27.312132
+517,,18,approved,service_tickets,168,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-14 01:44:45.312132
+518,,165,updated,vehicles,206,"{""amount"": 884.07, ""record_id"": 206}","{""amount"": 3220.51, ""record_id"": 206}",2026-07-21 00:21:33.312132
+519,,496,deleted,payments,177,"{""id"": 177, ""is_active"": true}",,2026-07-24 22:48:40.312132
+520,468,,rejected,service_tickets,466,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-25 13:42:26.312132
+521,,304,approved,service_tickets,310,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-14 14:07:54.312132
+522,229,,claimed,retention_offers,331,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 42}",2026-07-28 17:40:35.312132
+523,428,,claimed,retention_offers,371,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 51}",2026-07-15 19:45:55.312132
+524,,106,approved,service_tickets,349,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-22 12:55:41.312132
+525,,61,updated,vehicles,224,"{""amount"": 1201.22, ""record_id"": 224}","{""amount"": 3098.09, ""record_id"": 224}",2026-08-01 21:04:27.312132
+526,,98,rejected,service_tickets,194,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-19 20:05:46.312132
+527,,301,deleted,users,410,"{""id"": 410, ""is_active"": true}",,2026-07-14 03:14:17.312132
+528,,197,claimed,retention_offers,139,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 46}",2026-07-30 14:08:56.312132
+529,,249,status_changed,job_orders,1,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-29 04:02:18.312132
+530,,3,status_changed,job_orders,24,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-18 05:51:48.312132
+531,,79,created,users,289,,"{""id"": 289, ""is_active"": true}",2026-07-07 12:03:53.312132
+532,,227,created,payments,39,,"{""id"": 39, ""is_active"": true}",2026-07-22 20:32:32.312132
+533,,9,deleted,vehicles,2,"{""id"": 2, ""is_active"": true}",,2026-07-09 18:19:36.312132
+534,,240,rejected,service_tickets,293,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-10 03:00:07.312132
+535,224,,status_changed,job_orders,156,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-08-01 08:41:08.312132
+536,,138,deleted,job_orders,431,"{""id"": 431, ""is_active"": true}",,2026-07-30 06:40:23.312132
+537,,426,updated,vehicles,179,"{""amount"": 1433.11, ""record_id"": 179}","{""amount"": 3043.57, ""record_id"": 179}",2026-07-14 06:21:02.312132
+538,,405,rejected,service_tickets,369,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-02 09:07:17.312132
+539,,137,deleted,vehicles,180,"{""id"": 180, ""is_active"": true}",,2026-07-14 19:06:41.312132
+540,92,,approved,service_tickets,200,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-04 07:56:37.312132
+541,,413,logged_in,employees,413,,,2026-08-01 01:45:00.312132
+542,319,,updated,job_orders,25,"{""amount"": 632.87, ""record_id"": 25}","{""amount"": 3111.08, ""record_id"": 25}",2026-07-17 10:33:23.312132
+543,,462,status_changed,job_orders,237,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-31 19:46:10.312132
+544,296,,claimed,retention_offers,347,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 106}",2026-07-23 05:36:00.312132
+545,397,,claimed,retention_offers,79,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 184}",2026-07-24 18:54:44.312132
+546,,327,rejected,service_tickets,399,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-10 05:45:57.312132
+547,,152,approved,service_tickets,394,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-11 18:41:40.312132
+548,,378,status_changed,job_orders,225,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-13 02:58:09.312132
+549,,305,status_changed,job_orders,435,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-27 11:30:01.312132
+550,,301,created,vehicles,62,,"{""id"": 62, ""is_active"": true}",2026-07-16 16:46:43.312132
+551,,95,rejected,service_tickets,497,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-17 18:56:54.312132
+552,,60,status_changed,job_orders,411,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-31 03:42:39.312132
+553,,114,status_changed,job_orders,40,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-22 15:15:46.312132
+554,,14,deleted,vehicles,445,"{""id"": 445, ""is_active"": true}",,2026-07-18 23:10:05.312132
+555,,236,deleted,payments,410,"{""id"": 410, ""is_active"": true}",,2026-07-27 12:34:41.312132
+556,,31,logged_in,employees,31,,,2026-07-10 16:07:27.312132
+557,86,,rejected,service_tickets,194,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-27 04:19:54.312132
+558,,197,rejected,service_tickets,412,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-09 09:48:29.312132
+559,,184,status_changed,job_orders,352,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-21 05:01:09.312132
+560,69,,status_changed,job_orders,395,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-12 01:44:33.312132
+561,,104,deleted,vehicles,146,"{""id"": 146, ""is_active"": true}",,2026-07-24 17:34:11.312132
+562,,82,claimed,retention_offers,244,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 200}",2026-07-25 04:59:29.312132
+563,432,,approved,service_tickets,154,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-16 03:43:48.312132
+564,368,,claimed,retention_offers,147,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 467}",2026-07-13 08:57:12.312132
+565,,214,created,vehicles,86,,"{""id"": 86, ""is_active"": true}",2026-08-01 19:59:56.312132
+566,,169,logged_in,employees,169,,,2026-07-22 20:16:07.312132
+567,,121,status_changed,job_orders,402,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-30 13:33:50.312132
+568,,382,approved,service_tickets,359,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-07 14:48:57.312132
+569,330,,updated,users,259,"{""amount"": 625.11, ""record_id"": 259}","{""amount"": 2952.32, ""record_id"": 259}",2026-07-28 08:25:06.312132
+570,186,,approved,service_tickets,354,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-02 04:17:28.312132
+571,448,,rejected,service_tickets,50,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-31 06:59:44.312132
+572,,25,deleted,vehicles,181,"{""id"": 181, ""is_active"": true}",,2026-07-08 11:46:02.312132
+573,,299,updated,vehicles,141,"{""amount"": 770.80, ""record_id"": 141}","{""amount"": 2127.36, ""record_id"": 141}",2026-07-06 14:23:46.312132
+574,,6,status_changed,job_orders,42,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-26 19:06:01.312132
+575,471,,status_changed,job_orders,126,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-08-04 18:31:50.312132
+576,,2,created,job_orders,165,,"{""id"": 165, ""is_active"": true}",2026-07-09 16:35:09.312132
+577,268,,updated,users,327,"{""amount"": 687.67, ""record_id"": 327}","{""amount"": 2194.80, ""record_id"": 327}",2026-07-19 02:02:54.312132
+578,,409,approved,service_tickets,483,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-20 09:35:25.312132
+579,,127,deleted,payments,413,"{""id"": 413, ""is_active"": true}",,2026-07-17 10:17:06.312132
+580,,212,logged_in,employees,212,,,2026-07-23 12:34:13.312132
+581,142,,status_changed,job_orders,6,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-07 08:44:52.312132
+582,,308,logged_in,employees,308,,,2026-07-21 15:25:04.312132
+583,,114,created,vehicles,458,,"{""id"": 458, ""is_active"": true}",2026-07-11 23:27:55.312132
+584,,181,status_changed,job_orders,313,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-12 07:13:27.312132
+585,122,,status_changed,job_orders,288,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-13 21:09:50.312132
+586,,448,logged_in,employees,448,,,2026-07-23 04:48:26.312132
+587,,450,status_changed,job_orders,496,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-16 21:41:05.312132
+588,,132,created,vehicles,108,,"{""id"": 108, ""is_active"": true}",2026-07-09 23:35:41.312132
+589,,494,created,users,487,,"{""id"": 487, ""is_active"": true}",2026-07-06 18:33:30.312132
+590,263,,created,vehicles,247,,"{""id"": 247, ""is_active"": true}",2026-08-03 08:40:46.312132
+591,,118,updated,vehicles,342,"{""amount"": 1413.39, ""record_id"": 342}","{""amount"": 2996.91, ""record_id"": 342}",2026-07-20 09:19:54.312132
+592,396,,logged_in,users,396,,,2026-07-09 04:12:45.312132
+593,,451,updated,users,271,"{""amount"": 1323.74, ""record_id"": 271}","{""amount"": 2997.64, ""record_id"": 271}",2026-07-31 20:38:37.312132
+594,338,,logged_in,users,338,,,2026-08-04 12:07:13.312132
+595,,6,approved,service_tickets,251,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-12 02:45:10.312132
+596,127,,claimed,retention_offers,236,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 436}",2026-07-17 03:53:16.312132
+597,,276,approved,service_tickets,188,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-26 04:02:52.312132
+598,,129,approved,service_tickets,397,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-10 15:07:39.312132
+599,,231,deleted,payments,346,"{""id"": 346, ""is_active"": true}",,2026-07-18 15:48:29.312132
+600,74,,logged_in,users,74,,,2026-07-26 15:58:13.312132
+601,,51,logged_in,employees,51,,,2026-07-30 05:41:38.312132
+602,,359,created,job_orders,329,,"{""id"": 329, ""is_active"": true}",2026-08-05 02:24:30.312132
+603,,69,updated,job_orders,349,"{""amount"": 539.37, ""record_id"": 349}","{""amount"": 1992.63, ""record_id"": 349}",2026-08-02 21:36:28.312132
+604,,224,updated,users,68,"{""amount"": 667.57, ""record_id"": 68}","{""amount"": 3413.40, ""record_id"": 68}",2026-07-20 23:17:07.312132
+605,,155,rejected,service_tickets,424,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-26 20:04:05.312132
+606,,366,updated,job_orders,303,"{""amount"": 817.14, ""record_id"": 303}","{""amount"": 1610.61, ""record_id"": 303}",2026-07-18 07:00:38.312132
+607,,379,logged_in,employees,379,,,2026-07-14 06:06:17.312132
+608,,490,created,job_orders,173,,"{""id"": 173, ""is_active"": true}",2026-07-12 22:41:56.312132
+609,,357,claimed,retention_offers,108,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 6}",2026-07-19 06:05:53.312132
+610,286,,claimed,retention_offers,422,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 11}",2026-08-03 15:32:12.312132
+611,204,,rejected,service_tickets,64,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-15 15:51:44.312132
+612,,254,status_changed,job_orders,157,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-22 03:37:26.312132
+613,200,,status_changed,job_orders,328,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-08-01 11:43:33.312132
+614,,314,deleted,vehicles,266,"{""id"": 266, ""is_active"": true}",,2026-07-31 00:57:47.312132
+615,,224,created,payments,69,,"{""id"": 69, ""is_active"": true}",2026-07-25 22:33:28.312132
+616,,41,approved,service_tickets,412,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-05 01:09:50.312132
+617,431,,rejected,service_tickets,245,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-27 17:09:34.312132
+618,,182,approved,service_tickets,76,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-11 13:22:50.312132
+619,,364,claimed,retention_offers,250,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 24}",2026-07-16 16:08:37.312132
+620,,216,approved,service_tickets,36,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-16 21:51:48.312132
+621,,464,status_changed,job_orders,137,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-08-03 21:10:53.312132
+622,,171,deleted,users,449,"{""id"": 449, ""is_active"": true}",,2026-07-23 08:31:19.312132
+623,,8,updated,job_orders,472,"{""amount"": 588.73, ""record_id"": 472}","{""amount"": 2008.53, ""record_id"": 472}",2026-07-28 15:01:30.312132
+624,415,,logged_in,users,415,,,2026-07-15 19:47:30.312132
+625,,176,updated,vehicles,463,"{""amount"": 598.82, ""record_id"": 463}","{""amount"": 2397.00, ""record_id"": 463}",2026-07-15 08:57:04.312132
+626,,243,created,vehicles,473,,"{""id"": 473, ""is_active"": true}",2026-07-12 10:16:42.312132
+627,,33,rejected,service_tickets,160,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-18 13:27:03.312132
+628,,450,status_changed,job_orders,458,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-24 02:38:01.312132
+629,,492,status_changed,job_orders,28,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-29 00:34:04.312132
+630,,418,rejected,service_tickets,399,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-17 02:55:13.312132
+631,,68,rejected,service_tickets,473,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-05 01:21:03.312132
+632,,13,approved,service_tickets,96,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-08 08:08:31.312132
+633,,311,created,payments,496,,"{""id"": 496, ""is_active"": true}",2026-07-23 07:32:53.312132
+634,,158,logged_in,employees,158,,,2026-07-30 06:06:40.312132
+635,183,,approved,service_tickets,131,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-31 17:45:46.312132
+636,292,,deleted,payments,498,"{""id"": 498, ""is_active"": true}",,2026-07-09 08:17:08.312132
+637,,260,updated,vehicles,481,"{""amount"": 1341.65, ""record_id"": 481}","{""amount"": 2992.50, ""record_id"": 481}",2026-08-04 15:06:17.312132
+638,,93,created,vehicles,218,,"{""id"": 218, ""is_active"": true}",2026-07-12 14:04:07.312132
+639,,18,logged_in,employees,18,,,2026-07-14 11:44:16.312132
+640,,53,created,job_orders,82,,"{""id"": 82, ""is_active"": true}",2026-07-31 01:31:35.312132
+641,,234,updated,job_orders,409,"{""amount"": 1241.27, ""record_id"": 409}","{""amount"": 1833.23, ""record_id"": 409}",2026-08-01 12:15:35.312132
+642,218,,claimed,retention_offers,54,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 169}",2026-07-07 20:26:02.312132
+643,222,,updated,users,397,"{""amount"": 1412.96, ""record_id"": 397}","{""amount"": 2627.17, ""record_id"": 397}",2026-08-04 08:47:03.312132
+644,451,,logged_in,users,451,,,2026-07-26 02:56:30.312132
+645,,405,status_changed,job_orders,173,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-18 08:58:48.312132
+646,312,,claimed,retention_offers,44,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 431}",2026-07-24 07:38:34.312132
+647,315,,logged_in,users,315,,,2026-07-16 11:52:15.312132
+648,,339,updated,users,339,"{""amount"": 935.72, ""record_id"": 339}","{""amount"": 1765.33, ""record_id"": 339}",2026-07-18 08:00:41.312132
+649,,463,updated,payments,384,"{""amount"": 1384.51, ""record_id"": 384}","{""amount"": 1970.79, ""record_id"": 384}",2026-07-11 07:07:26.312132
+650,459,,approved,service_tickets,68,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-27 20:58:38.312132
+651,,6,deleted,users,323,"{""id"": 323, ""is_active"": true}",,2026-07-13 09:53:18.312132
+652,,321,created,payments,97,,"{""id"": 97, ""is_active"": true}",2026-07-20 13:38:44.312132
+653,,389,updated,payments,17,"{""amount"": 989.06, ""record_id"": 17}","{""amount"": 3016.68, ""record_id"": 17}",2026-08-03 14:51:39.312132
+654,,315,deleted,job_orders,321,"{""id"": 321, ""is_active"": true}",,2026-07-23 01:33:34.312132
+655,,370,status_changed,job_orders,32,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-27 17:00:42.312132
+656,200,,rejected,service_tickets,489,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-02 18:31:49.312132
+657,,400,updated,vehicles,462,"{""amount"": 1480.16, ""record_id"": 462}","{""amount"": 2065.83, ""record_id"": 462}",2026-07-24 17:32:06.312132
+658,,400,updated,users,29,"{""amount"": 1451.39, ""record_id"": 29}","{""amount"": 2291.82, ""record_id"": 29}",2026-07-10 05:58:07.312132
+659,,380,claimed,retention_offers,474,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 175}",2026-07-20 02:16:37.312132
+660,,242,status_changed,job_orders,392,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-07 20:10:37.312132
+661,,422,claimed,retention_offers,446,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 87}",2026-08-03 03:24:48.312132
+662,,56,rejected,service_tickets,227,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-08 18:47:24.312132
+663,298,,deleted,vehicles,277,"{""id"": 277, ""is_active"": true}",,2026-07-29 14:06:47.312132
+664,,279,rejected,service_tickets,199,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-22 21:03:00.312132
+665,427,,claimed,retention_offers,133,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 79}",2026-07-11 08:35:20.312132
+666,,331,rejected,service_tickets,66,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-22 10:37:34.312132
+667,294,,updated,job_orders,121,"{""amount"": 628.01, ""record_id"": 121}","{""amount"": 2572.71, ""record_id"": 121}",2026-07-10 11:19:29.312132
+668,,310,updated,vehicles,5,"{""amount"": 1265.00, ""record_id"": 5}","{""amount"": 2514.98, ""record_id"": 5}",2026-07-16 21:56:52.312132
+669,,230,approved,service_tickets,425,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-09 14:03:16.312132
+670,,62,created,vehicles,488,,"{""id"": 488, ""is_active"": true}",2026-07-11 20:26:37.312132
+671,,116,claimed,retention_offers,42,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 320}",2026-07-25 02:06:09.312132
+672,,387,status_changed,job_orders,111,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-25 23:07:44.312132
+673,,184,status_changed,job_orders,263,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-14 14:18:44.312132
+675,,116,claimed,retention_offers,313,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 9}",2026-07-23 09:41:03.312132
+676,447,,created,job_orders,293,,"{""id"": 293, ""is_active"": true}",2026-07-12 09:13:51.312132
+677,,57,claimed,retention_offers,297,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 314}",2026-07-22 23:52:49.312132
+678,,241,approved,service_tickets,274,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-16 01:06:37.312132
+679,4,,status_changed,job_orders,176,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-11 00:51:47.312132
+680,,120,claimed,retention_offers,445,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 143}",2026-07-18 17:16:21.312132
+681,,463,deleted,users,472,"{""id"": 472, ""is_active"": true}",,2026-07-06 02:59:58.312132
+682,,218,created,payments,408,,"{""id"": 408, ""is_active"": true}",2026-08-04 10:34:01.312132
+683,,347,deleted,job_orders,155,"{""id"": 155, ""is_active"": true}",,2026-07-30 19:00:28.312132
+684,389,,logged_in,users,389,,,2026-07-13 03:33:48.312132
+685,481,,claimed,retention_offers,13,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 258}",2026-07-30 20:48:10.312132
+686,265,,status_changed,job_orders,272,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-12 00:58:08.312132
+687,,352,deleted,payments,35,"{""id"": 35, ""is_active"": true}",,2026-08-02 13:39:51.312132
+688,,10,created,job_orders,444,,"{""id"": 444, ""is_active"": true}",2026-07-31 21:30:05.312132
+689,150,,rejected,service_tickets,12,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-01 00:49:14.312132
+690,,439,updated,vehicles,257,"{""amount"": 1496.58, ""record_id"": 257}","{""amount"": 2593.96, ""record_id"": 257}",2026-07-12 23:49:00.312132
+691,,151,claimed,retention_offers,423,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 133}",2026-07-22 01:41:49.312132
+692,,189,deleted,job_orders,467,"{""id"": 467, ""is_active"": true}",,2026-07-23 10:28:07.312132
+693,,253,created,job_orders,252,,"{""id"": 252, ""is_active"": true}",2026-07-29 06:19:31.312132
+694,55,,deleted,job_orders,399,"{""id"": 399, ""is_active"": true}",,2026-07-16 21:39:23.312132
+695,,377,rejected,service_tickets,166,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-12 15:09:39.312132
+696,123,,deleted,users,56,"{""id"": 56, ""is_active"": true}",,2026-07-13 14:18:44.312132
+697,,426,deleted,payments,284,"{""id"": 284, ""is_active"": true}",,2026-07-08 18:34:14.312132
+698,,123,created,vehicles,350,,"{""id"": 350, ""is_active"": true}",2026-07-21 10:15:09.312132
+699,385,,status_changed,job_orders,417,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-09 20:20:04.312132
+700,,72,updated,job_orders,94,"{""amount"": 802.63, ""record_id"": 94}","{""amount"": 2401.65, ""record_id"": 94}",2026-07-09 04:01:28.312132
+701,,325,rejected,service_tickets,277,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-06 18:17:25.312132
+702,,303,status_changed,job_orders,38,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-09 17:51:51.312132
+703,483,,claimed,retention_offers,355,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 275}",2026-07-07 05:49:50.312132
+704,201,,logged_in,users,201,,,2026-07-22 10:41:37.312132
+705,,205,updated,vehicles,435,"{""amount"": 516.09, ""record_id"": 435}","{""amount"": 1672.99, ""record_id"": 435}",2026-07-09 00:00:09.312132
+706,142,,rejected,service_tickets,398,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-29 23:16:05.312132
+707,,146,created,vehicles,216,,"{""id"": 216, ""is_active"": true}",2026-08-02 09:50:41.312132
+708,,17,deleted,job_orders,11,"{""id"": 11, ""is_active"": true}",,2026-07-15 15:58:18.312132
+709,442,,deleted,job_orders,440,"{""id"": 440, ""is_active"": true}",,2026-07-29 01:10:51.312132
+710,,414,created,vehicles,213,,"{""id"": 213, ""is_active"": true}",2026-07-24 00:07:19.312132
+711,41,,created,users,320,,"{""id"": 320, ""is_active"": true}",2026-07-18 22:47:50.312132
+712,,322,claimed,retention_offers,247,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 340}",2026-07-18 17:38:24.312132
+713,,302,rejected,service_tickets,56,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-20 08:42:52.312132
+714,,219,claimed,retention_offers,255,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 252}",2026-07-10 05:59:39.312132
+715,,465,approved,service_tickets,120,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-01 04:52:27.312132
+716,,442,updated,users,393,"{""amount"": 568.23, ""record_id"": 393}","{""amount"": 2825.87, ""record_id"": 393}",2026-07-28 11:06:05.312132
+717,,241,approved,service_tickets,133,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-23 18:59:24.312132
+718,,145,claimed,retention_offers,130,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 149}",2026-07-15 21:47:50.312132
+719,,236,deleted,users,32,"{""id"": 32, ""is_active"": true}",,2026-07-06 17:36:10.312132
+720,,205,status_changed,job_orders,164,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-08-01 00:38:37.312132
+721,,154,rejected,service_tickets,253,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-22 07:43:35.312132
+722,,134,deleted,payments,265,"{""id"": 265, ""is_active"": true}",,2026-07-19 07:44:54.312132
+723,,170,updated,payments,272,"{""amount"": 1249.07, ""record_id"": 272}","{""amount"": 3479.15, ""record_id"": 272}",2026-07-26 05:05:31.312132
+724,165,,updated,vehicles,178,"{""amount"": 675.04, ""record_id"": 178}","{""amount"": 2307.84, ""record_id"": 178}",2026-07-21 21:38:38.312132
+725,,25,approved,service_tickets,127,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-08 10:40:49.312132
+726,95,,rejected,service_tickets,105,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-19 14:09:54.312132
+727,,202,deleted,job_orders,332,"{""id"": 332, ""is_active"": true}",,2026-08-02 15:16:58.312132
+728,444,,deleted,job_orders,432,"{""id"": 432, ""is_active"": true}",,2026-07-21 09:02:27.312132
+729,,141,status_changed,job_orders,200,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-14 12:51:19.312132
+730,,112,deleted,payments,283,"{""id"": 283, ""is_active"": true}",,2026-08-04 13:30:04.312132
+731,,81,status_changed,job_orders,315,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-25 01:08:02.312132
+732,,1,logged_in,employees,1,,,2026-07-30 13:48:36.312132
+733,,172,logged_in,employees,172,,,2026-08-05 00:45:44.312132
+734,,4,rejected,service_tickets,343,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-24 01:20:24.312132
+735,50,,updated,users,381,"{""amount"": 821.27, ""record_id"": 381}","{""amount"": 3325.28, ""record_id"": 381}",2026-08-04 02:02:06.312132
+736,,328,claimed,retention_offers,73,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 471}",2026-07-06 17:22:38.312132
+737,,17,claimed,retention_offers,108,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 324}",2026-08-03 11:29:06.312132
+738,15,,status_changed,job_orders,397,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-14 03:18:28.312132
+739,,476,claimed,retention_offers,94,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 323}",2026-07-10 03:41:10.312132
+740,,69,approved,service_tickets,215,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-26 12:33:23.312132
+741,,414,deleted,payments,195,"{""id"": 195, ""is_active"": true}",,2026-07-15 03:52:05.312132
+742,,244,approved,service_tickets,91,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-23 23:32:20.312132
+743,,336,status_changed,job_orders,419,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-30 17:00:30.312132
+744,207,,claimed,retention_offers,247,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 336}",2026-07-22 20:15:01.312132
+745,,491,rejected,service_tickets,400,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-25 08:50:40.312132
+746,,480,deleted,vehicles,170,"{""id"": 170, ""is_active"": true}",,2026-07-16 20:07:58.312132
+747,138,,approved,service_tickets,27,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-10 02:27:56.312132
+748,212,,logged_in,users,212,,,2026-07-14 00:25:19.312132
+749,99,,created,users,198,,"{""id"": 198, ""is_active"": true}",2026-07-23 16:43:36.312132
+750,,157,deleted,users,204,"{""id"": 204, ""is_active"": true}",,2026-07-16 23:15:06.312132
+751,,439,deleted,job_orders,245,"{""id"": 245, ""is_active"": true}",,2026-07-14 16:03:54.312132
+752,301,,logged_in,users,301,,,2026-08-01 14:07:09.312132
+753,,378,approved,service_tickets,172,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-29 01:52:55.312132
+754,248,,created,payments,267,,"{""id"": 267, ""is_active"": true}",2026-07-10 18:22:34.312132
+755,,235,rejected,service_tickets,468,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-04 06:31:23.312132
+756,,255,created,job_orders,121,,"{""id"": 121, ""is_active"": true}",2026-07-17 11:07:03.312132
+757,,354,approved,service_tickets,96,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-22 23:56:07.312132
+758,,473,claimed,retention_offers,237,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 99}",2026-07-13 21:33:22.312132
+759,,124,rejected,service_tickets,143,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-28 20:47:35.312132
+760,,159,updated,job_orders,360,"{""amount"": 1427.78, ""record_id"": 360}","{""amount"": 3186.70, ""record_id"": 360}",2026-07-12 16:21:19.312132
+761,,343,created,job_orders,162,,"{""id"": 162, ""is_active"": true}",2026-07-29 02:13:25.312132
+762,,301,claimed,retention_offers,145,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 195}",2026-07-23 13:29:35.312132
+763,,255,deleted,users,382,"{""id"": 382, ""is_active"": true}",,2026-07-26 20:22:27.312132
+764,,271,created,job_orders,106,,"{""id"": 106, ""is_active"": true}",2026-07-27 05:33:55.312132
+765,63,,rejected,service_tickets,159,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-24 12:39:40.312132
+766,395,,deleted,payments,111,"{""id"": 111, ""is_active"": true}",,2026-07-25 19:08:06.312132
+767,395,,created,job_orders,487,,"{""id"": 487, ""is_active"": true}",2026-08-04 19:55:55.312132
+768,,311,status_changed,job_orders,466,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-21 15:17:15.312132
+769,,29,rejected,service_tickets,73,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-27 16:25:29.312132
+770,462,,rejected,service_tickets,270,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-20 07:01:19.312132
+771,,224,deleted,users,176,"{""id"": 176, ""is_active"": true}",,2026-07-13 03:46:19.312132
+772,303,,logged_in,users,303,,,2026-07-29 04:53:22.312132
+773,,120,claimed,retention_offers,427,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 411}",2026-08-02 15:40:09.312132
+774,238,,rejected,service_tickets,449,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-30 23:30:53.312132
+775,,276,created,vehicles,351,,"{""id"": 351, ""is_active"": true}",2026-07-23 22:41:13.312132
+776,,296,deleted,payments,453,"{""id"": 453, ""is_active"": true}",,2026-07-25 04:22:01.312132
+777,48,,updated,vehicles,320,"{""amount"": 1327.00, ""record_id"": 320}","{""amount"": 2708.93, ""record_id"": 320}",2026-07-19 16:53:42.312132
+778,,318,logged_in,employees,318,,,2026-07-24 05:38:57.312132
+779,150,,rejected,service_tickets,396,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-15 05:59:29.312132
+780,,216,created,users,287,,"{""id"": 287, ""is_active"": true}",2026-08-03 13:24:10.312132
+781,84,,rejected,service_tickets,235,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-12 10:49:55.312132
+782,,234,logged_in,employees,234,,,2026-07-27 20:03:17.312132
+783,,107,status_changed,job_orders,68,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-08-02 08:17:04.312132
+784,,227,status_changed,job_orders,118,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-17 06:22:26.312132
+785,74,,created,payments,284,,"{""id"": 284, ""is_active"": true}",2026-08-04 02:18:42.312132
+786,,382,updated,vehicles,99,"{""amount"": 1109.45, ""record_id"": 99}","{""amount"": 2050.76, ""record_id"": 99}",2026-07-07 15:46:52.312132
+787,,61,status_changed,job_orders,197,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-30 03:41:49.312132
+788,,271,updated,job_orders,71,"{""amount"": 858.18, ""record_id"": 71}","{""amount"": 2416.66, ""record_id"": 71}",2026-07-14 01:08:40.312132
+789,41,,status_changed,job_orders,50,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-09 07:04:07.312132
+790,73,,created,vehicles,130,,"{""id"": 130, ""is_active"": true}",2026-07-07 21:20:51.312132
+791,,8,approved,service_tickets,456,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-27 07:29:29.312132
+792,,235,rejected,service_tickets,45,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-06 23:18:38.312132
+793,,441,rejected,service_tickets,413,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-24 01:04:09.312132
+794,,99,updated,vehicles,240,"{""amount"": 1120.69, ""record_id"": 240}","{""amount"": 2719.56, ""record_id"": 240}",2026-07-08 15:10:01.312132
+795,,20,status_changed,job_orders,41,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-24 18:56:16.312132
+796,,206,logged_in,employees,206,,,2026-07-15 16:08:27.312132
+797,,307,created,payments,352,,"{""id"": 352, ""is_active"": true}",2026-07-06 05:06:51.312132
+798,,244,status_changed,job_orders,316,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-08 18:02:00.312132
+799,127,,deleted,job_orders,91,"{""id"": 91, ""is_active"": true}",,2026-07-18 18:54:30.312132
+800,,318,claimed,retention_offers,228,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 469}",2026-07-31 06:36:23.312132
+801,,457,rejected,service_tickets,36,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-28 14:26:29.312132
+802,,477,approved,service_tickets,365,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-21 11:53:58.312132
+803,,482,status_changed,job_orders,24,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-28 07:36:45.312132
+804,,77,updated,users,88,"{""amount"": 1027.13, ""record_id"": 88}","{""amount"": 1793.38, ""record_id"": 88}",2026-08-03 02:22:20.312132
+805,293,,approved,service_tickets,45,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-21 12:34:15.312132
+806,,305,approved,service_tickets,159,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-14 18:13:17.312132
+807,,441,approved,service_tickets,117,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-06 06:06:56.312132
+808,,295,deleted,vehicles,85,"{""id"": 85, ""is_active"": true}",,2026-07-07 06:35:52.312132
+809,,211,claimed,retention_offers,19,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 82}",2026-07-24 00:21:08.312132
+810,,11,updated,payments,343,"{""amount"": 1400.13, ""record_id"": 343}","{""amount"": 2674.33, ""record_id"": 343}",2026-08-04 18:08:32.312132
+811,,362,approved,service_tickets,173,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-27 11:16:10.312132
+812,,12,approved,service_tickets,262,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-13 18:20:06.312132
+813,21,,claimed,retention_offers,117,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 497}",2026-08-02 07:17:00.312132
+814,375,,created,payments,88,,"{""id"": 88, ""is_active"": true}",2026-07-11 12:30:15.312132
+815,,228,approved,service_tickets,326,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-09 13:17:20.312132
+816,,362,updated,users,453,"{""amount"": 683.72, ""record_id"": 453}","{""amount"": 2275.07, ""record_id"": 453}",2026-07-27 06:56:49.312132
+817,,338,approved,service_tickets,1,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-14 22:26:01.312132
+818,,7,claimed,retention_offers,109,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 153}",2026-07-24 23:41:35.312132
+819,,257,claimed,retention_offers,258,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 41}",2026-07-09 22:07:02.312132
+820,,449,claimed,retention_offers,205,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 180}",2026-07-19 13:12:36.312132
+821,,123,logged_in,employees,123,,,2026-07-07 11:42:29.312132
+822,,327,approved,service_tickets,164,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-30 04:55:41.312132
+823,210,,status_changed,job_orders,68,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-18 10:34:43.312132
+824,,362,created,users,211,,"{""id"": 211, ""is_active"": true}",2026-07-29 01:36:41.312132
+825,460,,created,payments,102,,"{""id"": 102, ""is_active"": true}",2026-07-22 06:35:39.312132
+826,176,,deleted,users,197,"{""id"": 197, ""is_active"": true}",,2026-07-22 20:46:19.312132
+827,,476,status_changed,job_orders,430,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-08 17:16:19.312132
+828,132,,deleted,job_orders,357,"{""id"": 357, ""is_active"": true}",,2026-07-06 10:04:27.312132
+829,412,,deleted,users,100,"{""id"": 100, ""is_active"": true}",,2026-07-17 20:41:52.312132
+830,,94,updated,users,161,"{""amount"": 714.49, ""record_id"": 161}","{""amount"": 3372.62, ""record_id"": 161}",2026-07-15 22:31:11.312132
+831,,431,claimed,retention_offers,477,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 9}",2026-07-25 08:15:07.312132
+832,,399,logged_in,employees,399,,,2026-07-23 17:51:16.312132
+833,,88,status_changed,job_orders,181,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-26 19:47:47.312132
+834,,317,deleted,users,45,"{""id"": 45, ""is_active"": true}",,2026-07-24 00:10:12.312132
+835,,256,status_changed,job_orders,423,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-09 11:24:49.312132
+836,16,,created,vehicles,270,,"{""id"": 270, ""is_active"": true}",2026-07-14 20:21:08.312132
+837,404,,updated,users,296,"{""amount"": 1336.17, ""record_id"": 296}","{""amount"": 1710.80, ""record_id"": 296}",2026-07-23 02:28:17.312132
+838,,288,logged_in,employees,288,,,2026-07-10 04:56:57.312132
+839,,139,deleted,vehicles,428,"{""id"": 428, ""is_active"": true}",,2026-07-07 21:08:12.312132
+840,364,,created,vehicles,75,,"{""id"": 75, ""is_active"": true}",2026-07-27 19:32:37.312132
+841,,102,created,payments,382,,"{""id"": 382, ""is_active"": true}",2026-08-03 02:08:42.312132
+842,,99,updated,payments,474,"{""amount"": 553.80, ""record_id"": 474}","{""amount"": 3410.93, ""record_id"": 474}",2026-07-30 00:59:50.312132
+843,,46,logged_in,employees,46,,,2026-08-03 07:30:38.312132
+844,,117,logged_in,employees,117,,,2026-07-07 08:57:18.312132
+845,,354,updated,payments,276,"{""amount"": 1162.08, ""record_id"": 276}","{""amount"": 1878.47, ""record_id"": 276}",2026-07-13 03:08:30.312132
+846,,343,approved,service_tickets,205,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-26 15:40:45.312132
+847,,135,created,vehicles,312,,"{""id"": 312, ""is_active"": true}",2026-07-11 04:01:02.312132
+848,,216,status_changed,job_orders,121,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-25 21:17:28.312132
+849,,298,status_changed,job_orders,257,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-08-02 01:47:08.312132
+850,,72,claimed,retention_offers,377,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 60}",2026-07-07 10:27:38.312132
+851,,76,claimed,retention_offers,300,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 317}",2026-07-24 07:57:43.312132
+852,,71,deleted,users,250,"{""id"": 250, ""is_active"": true}",,2026-07-07 01:18:04.312132
+853,,382,updated,payments,140,"{""amount"": 1319.14, ""record_id"": 140}","{""amount"": 2780.27, ""record_id"": 140}",2026-07-26 22:52:21.312132
+854,,369,updated,users,224,"{""amount"": 1365.60, ""record_id"": 224}","{""amount"": 3274.30, ""record_id"": 224}",2026-07-08 05:41:27.312132
+855,,221,deleted,vehicles,228,"{""id"": 228, ""is_active"": true}",,2026-08-01 23:21:49.312132
+856,,454,status_changed,job_orders,494,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-28 00:35:01.312132
+857,,500,deleted,vehicles,173,"{""id"": 173, ""is_active"": true}",,2026-07-30 22:00:15.312132
+858,27,,deleted,users,410,"{""id"": 410, ""is_active"": true}",,2026-07-08 07:18:34.312132
+859,,452,rejected,service_tickets,425,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-21 18:04:32.312132
+860,210,,logged_in,users,210,,,2026-07-30 20:11:02.312132
+861,,448,rejected,service_tickets,119,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-28 06:04:15.312132
+862,,249,status_changed,job_orders,188,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-31 17:52:55.312132
+863,,468,updated,vehicles,86,"{""amount"": 1317.64, ""record_id"": 86}","{""amount"": 2582.50, ""record_id"": 86}",2026-08-03 23:41:58.312132
+864,,50,created,job_orders,427,,"{""id"": 427, ""is_active"": true}",2026-07-13 00:55:02.312132
+865,499,,claimed,retention_offers,354,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 100}",2026-07-28 18:44:06.312132
+866,,186,deleted,payments,382,"{""id"": 382, ""is_active"": true}",,2026-07-18 02:15:42.312132
+867,,87,created,users,57,,"{""id"": 57, ""is_active"": true}",2026-07-12 07:28:35.312132
+868,153,,deleted,users,410,"{""id"": 410, ""is_active"": true}",,2026-07-24 04:09:40.312132
+869,,203,claimed,retention_offers,81,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 307}",2026-07-09 14:34:32.312132
+870,,296,claimed,retention_offers,392,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 388}",2026-07-12 06:08:34.312132
+871,,422,deleted,payments,133,"{""id"": 133, ""is_active"": true}",,2026-07-23 00:15:17.312132
+872,,355,created,job_orders,468,,"{""id"": 468, ""is_active"": true}",2026-07-19 04:20:02.312132
+873,62,,rejected,service_tickets,338,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-13 07:17:47.312132
+874,342,,updated,job_orders,112,"{""amount"": 711.01, ""record_id"": 112}","{""amount"": 1650.52, ""record_id"": 112}",2026-07-29 11:06:48.312132
+875,,406,status_changed,job_orders,460,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-11 03:00:59.312132
+876,465,,deleted,vehicles,315,"{""id"": 315, ""is_active"": true}",,2026-07-06 13:03:11.312132
+877,,251,claimed,retention_offers,183,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 371}",2026-07-08 15:24:29.312132
+878,,346,approved,service_tickets,279,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-17 17:55:10.312132
+879,,456,logged_in,employees,456,,,2026-07-20 09:08:23.312132
+880,119,,claimed,retention_offers,328,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 69}",2026-07-22 17:52:50.312132
+881,,384,approved,service_tickets,210,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-14 06:49:34.312132
+882,,453,deleted,payments,324,"{""id"": 324, ""is_active"": true}",,2026-07-22 13:17:20.312132
+883,86,,rejected,service_tickets,445,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-07 02:37:15.312132
+884,239,,logged_in,users,239,,,2026-08-04 14:02:11.312132
+885,,65,claimed,retention_offers,287,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 135}",2026-07-25 04:53:07.312132
+886,,22,updated,users,439,"{""amount"": 630.80, ""record_id"": 439}","{""amount"": 2396.00, ""record_id"": 439}",2026-07-22 14:18:49.312132
+887,,25,deleted,job_orders,162,"{""id"": 162, ""is_active"": true}",,2026-07-18 19:51:37.312132
+888,,236,created,payments,469,,"{""id"": 469, ""is_active"": true}",2026-07-15 14:45:45.312132
+889,,320,claimed,retention_offers,367,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 249}",2026-07-10 07:51:30.312132
+890,,405,updated,payments,316,"{""amount"": 1200.74, ""record_id"": 316}","{""amount"": 2725.60, ""record_id"": 316}",2026-07-08 16:35:55.312132
+891,,373,created,payments,11,,"{""id"": 11, ""is_active"": true}",2026-07-09 10:43:48.312132
+892,,409,deleted,vehicles,217,"{""id"": 217, ""is_active"": true}",,2026-07-11 20:22:05.312132
+893,,60,deleted,vehicles,119,"{""id"": 119, ""is_active"": true}",,2026-07-21 14:39:48.312132
+894,,139,rejected,service_tickets,431,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-02 20:19:35.312132
+895,341,,claimed,retention_offers,449,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 99}",2026-08-04 04:44:09.312132
+896,,202,logged_in,employees,202,,,2026-07-24 20:21:31.312132
+897,,262,updated,job_orders,406,"{""amount"": 1066.54, ""record_id"": 406}","{""amount"": 3151.86, ""record_id"": 406}",2026-07-24 22:01:48.312132
+898,,23,logged_in,employees,23,,,2026-07-28 12:59:35.312132
+899,,417,deleted,vehicles,94,"{""id"": 94, ""is_active"": true}",,2026-07-18 22:38:14.312132
+900,,456,rejected,service_tickets,304,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-06 22:53:05.312132
+901,,252,updated,payments,282,"{""amount"": 734.38, ""record_id"": 282}","{""amount"": 2176.81, ""record_id"": 282}",2026-08-05 01:02:58.312132
+902,,36,claimed,retention_offers,299,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 2}",2026-07-21 18:40:27.312132
+903,121,,rejected,service_tickets,464,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-08 07:46:31.312132
+904,,225,created,vehicles,115,,"{""id"": 115, ""is_active"": true}",2026-08-02 10:47:46.312132
+905,,335,claimed,retention_offers,367,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 163}",2026-07-30 19:48:44.312132
+906,,241,logged_in,employees,241,,,2026-07-06 07:57:57.312132
+907,415,,updated,job_orders,286,"{""amount"": 1078.79, ""record_id"": 286}","{""amount"": 2588.75, ""record_id"": 286}",2026-07-21 08:31:01.312132
+908,,169,created,vehicles,273,,"{""id"": 273, ""is_active"": true}",2026-07-25 09:36:38.312132
+909,,296,approved,service_tickets,433,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-09 18:31:33.312132
+910,,195,rejected,service_tickets,461,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-14 06:26:04.312132
+911,95,,created,payments,262,,"{""id"": 262, ""is_active"": true}",2026-07-23 08:54:06.312132
+912,,294,rejected,service_tickets,440,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-24 10:17:42.312132
+913,,364,created,payments,454,,"{""id"": 454, ""is_active"": true}",2026-07-28 10:38:30.312132
+914,,100,updated,vehicles,300,"{""amount"": 620.82, ""record_id"": 300}","{""amount"": 2843.45, ""record_id"": 300}",2026-07-08 08:17:08.312132
+915,,470,rejected,service_tickets,266,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-27 04:25:49.312132
+916,,394,deleted,users,406,"{""id"": 406, ""is_active"": true}",,2026-07-13 02:25:48.312132
+917,223,,status_changed,job_orders,339,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-16 00:12:55.312132
+918,,196,approved,service_tickets,26,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-08 11:15:15.312132
+919,,280,logged_in,employees,280,,,2026-07-06 16:03:40.312132
+920,,390,created,payments,245,,"{""id"": 245, ""is_active"": true}",2026-07-31 20:40:57.312132
+921,246,,updated,job_orders,308,"{""amount"": 901.28, ""record_id"": 308}","{""amount"": 2344.12, ""record_id"": 308}",2026-07-18 13:40:30.312132
+922,160,,status_changed,job_orders,37,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-15 15:08:43.312132
+923,91,,claimed,retention_offers,342,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 249}",2026-07-18 12:48:28.312132
+924,,98,claimed,retention_offers,8,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 398}",2026-07-31 14:13:01.312132
+925,,208,status_changed,job_orders,363,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-16 04:10:35.312132
+926,,412,created,vehicles,398,,"{""id"": 398, ""is_active"": true}",2026-07-24 08:30:59.312132
+927,,253,claimed,retention_offers,393,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 424}",2026-07-13 08:25:22.312132
+928,,93,logged_in,employees,93,,,2026-07-24 08:00:58.312132
+929,36,,approved,service_tickets,443,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-13 02:22:07.312132
+930,,393,created,job_orders,48,,"{""id"": 48, ""is_active"": true}",2026-07-30 14:44:09.312132
+931,,467,logged_in,employees,467,,,2026-07-13 19:23:00.312132
+932,,106,deleted,payments,182,"{""id"": 182, ""is_active"": true}",,2026-07-21 07:46:50.312132
+933,344,,status_changed,job_orders,406,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-22 08:13:51.312132
+934,,440,approved,service_tickets,406,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-08 10:07:23.312132
+935,,126,updated,payments,475,"{""amount"": 1224.22, ""record_id"": 475}","{""amount"": 1936.72, ""record_id"": 475}",2026-07-14 15:00:25.312132
+936,,30,approved,service_tickets,24,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-25 21:11:52.312132
+937,,330,rejected,service_tickets,10,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-22 07:17:41.312132
+938,,23,deleted,job_orders,476,"{""id"": 476, ""is_active"": true}",,2026-08-03 17:10:47.312132
+939,361,,approved,service_tickets,267,"{""status"": ""pending""}","{""status"": ""approved""}",2026-08-03 13:24:40.312132
+940,,285,deleted,job_orders,350,"{""id"": 350, ""is_active"": true}",,2026-07-28 13:14:58.312132
+941,,340,logged_in,employees,340,,,2026-07-31 07:18:02.312132
+942,,390,created,vehicles,113,,"{""id"": 113, ""is_active"": true}",2026-07-30 04:10:31.312132
+943,,430,deleted,payments,467,"{""id"": 467, ""is_active"": true}",,2026-07-27 11:12:41.312132
+944,,301,rejected,service_tickets,279,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-07 17:41:46.312132
+945,,233,created,vehicles,289,,"{""id"": 289, ""is_active"": true}",2026-07-28 07:21:13.312132
+946,,460,logged_in,employees,460,,,2026-07-08 08:03:58.312132
+947,,194,updated,users,130,"{""amount"": 876.35, ""record_id"": 130}","{""amount"": 2597.90, ""record_id"": 130}",2026-07-17 23:05:00.312132
+948,249,,updated,payments,143,"{""amount"": 877.05, ""record_id"": 143}","{""amount"": 3035.36, ""record_id"": 143}",2026-08-01 23:21:02.312132
+949,,466,claimed,retention_offers,272,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 183}",2026-07-20 03:45:46.312132
+950,,470,deleted,users,215,"{""id"": 215, ""is_active"": true}",,2026-07-14 11:11:40.312132
+951,,142,claimed,retention_offers,156,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 59}",2026-07-23 15:12:53.312132
+952,,135,created,job_orders,387,,"{""id"": 387, ""is_active"": true}",2026-07-20 11:35:04.312132
+953,,370,claimed,retention_offers,111,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 483}",2026-07-29 03:18:41.312132
+954,,342,logged_in,employees,342,,,2026-07-15 00:49:54.312132
+955,,105,logged_in,employees,105,,,2026-07-20 10:19:16.312132
+956,323,,approved,service_tickets,67,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-31 22:30:05.312132
+957,,189,created,payments,55,,"{""id"": 55, ""is_active"": true}",2026-07-25 22:36:43.312132
+958,,274,created,users,127,,"{""id"": 127, ""is_active"": true}",2026-07-28 16:35:10.312132
+959,477,,created,vehicles,364,,"{""id"": 364, ""is_active"": true}",2026-07-24 21:27:25.312132
+960,,275,updated,users,29,"{""amount"": 1405.06, ""record_id"": 29}","{""amount"": 2053.74, ""record_id"": 29}",2026-07-17 11:16:03.312132
+961,,198,logged_in,employees,198,,,2026-07-14 06:24:59.312132
+962,203,,logged_in,users,203,,,2026-07-28 01:58:42.312132
+963,,251,status_changed,job_orders,286,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-08 18:13:55.312132
+964,,365,logged_in,employees,365,,,2026-07-18 00:52:55.312132
+965,58,,rejected,service_tickets,101,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-02 14:44:58.312132
+966,,465,claimed,retention_offers,425,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 421}",2026-07-25 13:32:02.312132
+967,,195,deleted,users,63,"{""id"": 63, ""is_active"": true}",,2026-07-28 20:08:41.312132
+968,,455,claimed,retention_offers,364,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 34}",2026-07-07 23:50:30.312132
+969,,76,status_changed,job_orders,231,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-23 13:08:53.312132
+970,,362,created,job_orders,327,,"{""id"": 327, ""is_active"": true}",2026-07-08 01:57:56.312132
+971,,367,claimed,retention_offers,385,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 342}",2026-07-24 01:18:48.312132
+972,,73,rejected,service_tickets,439,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-23 12:11:58.312132
+973,324,,claimed,retention_offers,456,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 147}",2026-07-23 16:12:14.312132
+974,,199,deleted,users,292,"{""id"": 292, ""is_active"": true}",,2026-07-09 23:35:45.312132
+975,,484,updated,vehicles,245,"{""amount"": 1435.93, ""record_id"": 245}","{""amount"": 1517.10, ""record_id"": 245}",2026-08-03 09:25:18.312132
+976,,477,rejected,service_tickets,304,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-17 21:13:17.312132
+977,494,,logged_in,users,494,,,2026-07-25 09:19:24.312132
+978,,278,deleted,users,257,"{""id"": 257, ""is_active"": true}",,2026-07-10 08:38:02.312132
+979,,347,status_changed,job_orders,46,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-13 12:38:50.312132
+980,323,,approved,service_tickets,8,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-23 07:08:42.312132
+981,,49,claimed,retention_offers,243,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 62}",2026-07-06 11:40:34.312132
+982,5,,approved,service_tickets,231,"{""status"": ""pending""}","{""status"": ""approved""}",2026-07-19 04:06:20.312132
+983,,426,deleted,job_orders,146,"{""id"": 146, ""is_active"": true}",,2026-07-25 09:53:51.312132
+984,,142,status_changed,job_orders,132,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-14 10:39:05.312132
+985,,336,deleted,job_orders,74,"{""id"": 74, ""is_active"": true}",,2026-08-04 10:00:39.312132
+986,,303,rejected,service_tickets,30,"{""status"": ""pending""}","{""status"": ""declined""}",2026-07-08 04:20:49.312132
+987,,437,created,payments,417,,"{""id"": 417, ""is_active"": true}",2026-07-16 15:35:55.312132
+988,419,,updated,job_orders,280,"{""amount"": 1180.11, ""record_id"": 280}","{""amount"": 2832.84, ""record_id"": 280}",2026-07-12 17:50:57.312132
+989,277,,created,vehicles,341,,"{""id"": 341, ""is_active"": true}",2026-07-14 19:16:38.312132
+990,390,,created,job_orders,11,,"{""id"": 11, ""is_active"": true}",2026-07-26 10:39:58.312132
+991,328,,created,users,57,,"{""id"": 57, ""is_active"": true}",2026-07-06 14:24:32.312132
+992,,347,claimed,retention_offers,289,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 54}",2026-07-26 04:49:10.312132
+993,166,,updated,vehicles,38,"{""amount"": 1119.71, ""record_id"": 38}","{""amount"": 2010.34, ""record_id"": 38}",2026-07-17 22:25:58.312132
+994,,204,logged_in,employees,204,,,2026-07-21 22:21:54.312132
+995,99,,status_changed,job_orders,394,"{""status"": ""inspecting""}","{""status"": ""in_progress""}",2026-07-31 10:38:58.312132
+996,,217,claimed,retention_offers,293,"{""is_claimed"": false}","{""is_claimed"": true, ""claimed_on_job_order_id"": 393}",2026-07-15 08:12:19.312132
+997,,486,deleted,vehicles,189,"{""id"": 189, ""is_active"": true}",,2026-07-28 18:02:52.312132
+998,185,,updated,vehicles,305,"{""amount"": 1488.94, ""record_id"": 305}","{""amount"": 1668.38, ""record_id"": 305}",2026-07-07 07:52:38.312132
+999,,276,updated,vehicles,142,"{""amount"": 1188.12, ""record_id"": 142}","{""amount"": 3247.38, ""record_id"": 142}",2026-07-17 18:28:10.312132
+1000,,299,rejected,service_tickets,374,"{""status"": ""pending""}","{""status"": ""declined""}",2026-08-02 08:02:53.312132

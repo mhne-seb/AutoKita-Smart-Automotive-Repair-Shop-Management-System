@@ -53,6 +53,9 @@ export function Quotation({ jobOrderId }: Props) {
   const [preDiagnostic, setPreDiagnostic] = useState<any>(undefined)
   const [sending, setSending] = useState(false)
   const [recalling, setRecalling] = useState(false)
+  const [savingDraft, setSavingDraft] = useState(false)
+  const [savedDraft, setSavedDraft] = useState(false)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -123,22 +126,17 @@ export function Quotation({ jobOrderId }: Props) {
   useEffect(() => {
     if (!jobOrder || services.length === 0) return
     
-    // Parse vehicle info from jobOrder.vehicle (e.g., "2023 Honda CR-V")
-    const match = jobOrder.vehicle.match(/^(\d{4})\s+(.+)$/)
-    const vehicleYear = match ? parseInt(match[1]) : new Date().getFullYear()
+    // Use DB data if available, otherwise parse from string
+    const match = !jobOrder.vehicleYear ? jobOrder.vehicle.match(/^(\d{4})\s+(.+)$/) : null
+    const vehicleYear = jobOrder.vehicleYear || (match ? parseInt(match[1]) : new Date().getFullYear())
     const vehicleAge = Math.max(0, new Date().getFullYear() - vehicleYear)
-    const vehicleType = match ? match[2] : jobOrder.vehicle
+    const vehicleType = (match ? match[2] : jobOrder.vehicle) || 'Unknown'
+    const actualMileage = jobOrder.mileage || (vehicleAge * 15000)
 
     // Fetch AI cost predictions for each service
     services.forEach(async (s) => {
       // Skip AI estimation for custom services since they lack historical store data
       if (!s.dbServiceId) return
-      
-      // If we already have an estimated amount stored, use it and skip AI call
-      if (s.estimated_amount !== undefined && s.estimated_amount !== null && s.estimated_amount > 0) {
-        setAiPredictions(prev => ({ ...prev, [s.id]: { predicted_amount: s.estimated_amount!, predicted_duration_mins: (s.estimated_hours || 0) * 60 } }))
-        return
-      }
       
       const dbService = availableServices.find(as => as.id === s.dbServiceId)
       const basePrice = dbService ? Number(dbService.base_price) : (s.laborCost || 0)
@@ -151,7 +149,6 @@ export function Quotation({ jobOrderId }: Props) {
           body: JSON.stringify({
             // For Time Model
             estimated_duration_mins: (s.laborHours || 1) * 60,
-            actual_amount: s.laborCost || 0,
             service_id: s.dbServiceId || 0,
             // Shared
             base_price: basePrice,
@@ -159,13 +156,22 @@ export function Quotation({ jobOrderId }: Props) {
             is_price_fixed: 0,
             vehicle_age: vehicleAge,
             vehicle_type: vehicleType,
+            mileage: actualMileage,
           }),
         })
         const data = await res.json()
         if (data.predicted_amount) {
           setAiPredictions(prev => ({ ...prev, [s.id]: data }))
+        } else if (s.estimated_amount && s.estimated_amount > 0) {
+          // Fall back to stored value if prediction fails
+          setAiPredictions(prev => ({ ...prev, [s.id]: { predicted_amount: s.estimated_amount!, predicted_duration_mins: (s.estimated_hours || 0) * 60 } }))
         }
-      } catch {}
+      } catch {
+        // Fall back to stored value on network error
+        if (s.estimated_amount && s.estimated_amount > 0) {
+          setAiPredictions(prev => ({ ...prev, [s.id]: { predicted_amount: s.estimated_amount!, predicted_duration_mins: (s.estimated_hours || 0) * 60 } }))
+        }
+      }
     })
   }, [jobOrder, services.length])
 
@@ -214,10 +220,12 @@ export function Quotation({ jobOrderId }: Props) {
 
   function updateLaborCost(serviceId: string, laborCost: number) {
     setServices((prev) => prev.map((s) => (s.id === serviceId ? { ...s, laborCost } : s)))
+    setHasUnsavedChanges(true)
   }
 
   function updateLaborHours(serviceId: string, laborHours: number) {
     setServices((prev) => prev.map((s) => (s.id === serviceId ? { ...s, laborHours } : s)))
+    setHasUnsavedChanges(true)
   }
 
   function addPart(serviceId: string) {
@@ -237,21 +245,19 @@ export function Quotation({ jobOrderId }: Props) {
           : s
       )
     )
+    setHasUnsavedChanges(true)
   }
-
-  // Sends the full quotation (services + parts + total) for approval — a
-  // real, persisted database write (creates a new pre_diagnostics round).
-  async function sendQuotationForApproval() {
-    setSending(true)
-
-    // First save the quotation services and notes
+  // Saves the quotation draft to the database without sending for approval.
+  async function saveDraft() {
+    setSavingDraft(true)
+    setSavedDraft(false)
     try {
       const servicesWithEstimates = services.map(s => {
         const prediction = aiPredictions[s.id]
         return {
           ...s,
           estimated_amount: prediction?.predicted_amount || s.estimated_amount || s.laborCost,
-          actual_amount: s.laborCost // Admin's quoted actual_amount becomes the actual quoted actual_amount
+          actual_amount: s.laborCost
         }
       })
 
@@ -263,9 +269,23 @@ export function Quotation({ jobOrderId }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notes, services: servicesWithEstimates, estimated_grand_total, actual_grand_total }),
       })
+      setSavedDraft(true)
+      setHasUnsavedChanges(false)
+      setTimeout(() => setSavedDraft(false), 3000)
     } catch (e) {
       console.error('Failed to save quotation', e)
     }
+    setSavingDraft(false)
+  }
+
+  // Sends the full quotation (services + parts + total) for approval — a
+  // real, persisted database write (creates a new pre_diagnostics round).
+  async function sendQuotationForApproval() {
+    setSending(true)
+
+    // First save the quotation services and notes
+    await saveDraft()
+
 
     const summary = `Quotation total: ${currency(totals.grandTotal)} (Labor: ${currency(totals.laborTotal)}, Parts: ${currency(totals.partsTotal)}). ${notes}`
     const round = await sendForApproval(jobOrderId, summary)
@@ -290,6 +310,7 @@ export function Quotation({ jobOrderId }: Props) {
 
   function removeService(serviceId: string) {
     setServices((prev) => prev.filter((s) => s.id !== serviceId))
+    setHasUnsavedChanges(true)
   }
 
   async function confirmAddService() {
@@ -325,6 +346,7 @@ export function Quotation({ jobOrderId }: Props) {
     }
     setServices((prev) => [...prev, newService])
     setShowServiceModal(false)
+    setHasUnsavedChanges(true)
   }
 
   return (
@@ -379,18 +401,27 @@ export function Quotation({ jobOrderId }: Props) {
               <RotateCcw size={14} /> {recalling ? 'Recalling…' : 'Recall Approval'}
             </button>
           ) : (
-            <button
-              onClick={sendQuotationForApproval}
-              disabled={sending || preDiagnostic?.status === 'approved'}
-              className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
-            >
-              <Send size={14} />{' '}
-              {sending
-                ? 'Sending…'
-                : preDiagnostic?.status === 'approved'
-                ? 'Approved by customer'
-                : 'Send to Customer'}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={saveDraft}
+                disabled={savingDraft || savedDraft || sending || preDiagnostic?.status === 'approved'}
+                className={`flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-slate-50 disabled:opacity-50 ${hasUnsavedChanges ? 'border-amber-400 bg-amber-50 text-amber-700' : 'border-slate-200 bg-white text-slate-700'}`}
+              >
+                {savingDraft ? 'Saving...' : savedDraft ? '✓ Draft Saved' : hasUnsavedChanges ? '* Save Draft' : 'Save Draft'}
+              </button>
+              <button
+                onClick={sendQuotationForApproval}
+                disabled={sending || preDiagnostic?.status === 'approved'}
+                className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
+              >
+                <Send size={14} />{' '}
+                {sending
+                  ? 'Sending…'
+                  : preDiagnostic?.status === 'approved'
+                  ? 'Approved by customer'
+                  : 'Send to Customer'}
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -612,7 +643,7 @@ export function Quotation({ jobOrderId }: Props) {
             {editingNotes ? (
               <textarea
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={(e) => { setNotes(e.target.value); setHasUnsavedChanges(true); }}
                 rows={5}
                 className="w-full rounded-lg border border-slate-200 p-3 text-sm focus:border-slate-400 focus:outline-none"
               />

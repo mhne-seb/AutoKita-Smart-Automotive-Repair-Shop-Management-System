@@ -36,7 +36,7 @@ function getDaysSince(dateStr?: string) {
 
 function computeChurnStatus(c: any): string {
   const serviceCount = c.serviceCount ?? (c.lastCheckup ? 1 : 0)
-  if (serviceCount < 2) return 'New Customer'
+  if (serviceCount < 1) return 'New Customer'
 
   const days = getDaysSince(c.lastCheckup)
   if (days > 180) return 'High Churn Risk'

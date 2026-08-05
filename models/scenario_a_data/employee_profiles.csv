@@ -1,0 +1,500 @@
+id,employee_id,shop_id,branch,location,rank,base_salary,commission_percent,jobs_capacity,color
+1,2,2,North Branch,Quezon City,Mid-Level,29456.33,7.12,2,#FF5733
+2,3,5,West Branch,Pasig City,Senior,45712.80,9.96,4,#33FFF0
+3,4,6,West Branch,Taguig,Lead,43095.57,5.92,4,#F033FF
+4,5,2,West Branch,Taguig,Mid-Level,48406.37,1.82,4,#F033FF
+5,6,6,Main Branch,Quezon City,Senior,44561.34,2.61,4,#F033FF
+6,7,6,East Branch,Makati City,Senior,40895.97,4.76,3,#33FF57
+7,8,2,North Branch,Taguig,Junior,16444.45,7.94,3,#F033FF
+8,9,7,South Branch,Makati City,Lead,43757.98,4.66,2,#FF5733
+9,10,2,Main Branch,Manila,Mid-Level,47048.53,7.97,4,#3357FF
+10,11,4,Main Branch,Manila,Senior,47005.11,9.35,3,#3357FF
+11,12,10,West Branch,Makati City,Junior,47782.84,2.08,4,#3357FF
+12,13,1,East Branch,Quezon City,Senior,46888.71,6.23,1,#FF5733
+13,14,8,East Branch,Quezon City,Mid-Level,19705.03,1.65,2,#3357FF
+14,15,7,West Branch,Makati City,Senior,29843.21,7.21,2,#33FF57
+15,16,4,North Branch,Makati City,Lead,46243.17,1.96,2,#33FF57
+16,17,5,West Branch,Pasig City,Mid-Level,22137.67,7.58,2,#F033FF
+17,18,7,Main Branch,Makati City,Mid-Level,17341.39,5.50,2,#3357FF
+18,19,1,South Branch,Taguig,Lead,31581.43,4.63,4,#FF5733
+19,20,7,South Branch,Pasig City,Junior,34485.97,7.49,3,#33FF57
+20,21,2,South Branch,Manila,Junior,30949.52,5.49,1,#FF5733
+21,22,7,South Branch,Quezon City,Mid-Level,30140.87,6.23,2,#F033FF
+22,23,8,South Branch,Quezon City,Lead,41600.92,9.35,2,#F033FF
+23,24,5,West Branch,Taguig,Senior,41406.92,3.61,4,#33FFF0
+24,25,8,South Branch,Quezon City,Junior,49090.66,3.09,1,#33FFF0
+25,26,4,East Branch,Quezon City,Senior,36538.78,1.60,1,#F033FF
+26,27,1,North Branch,Makati City,Lead,17707.44,6.12,4,#33FF57
+27,28,4,North Branch,Quezon City,Senior,24299.70,1.63,4,#F0FF33
+28,29,9,Main Branch,Manila,Lead,41551.79,5.31,3,#F033FF
+29,30,7,East Branch,Makati City,Mid-Level,31698.99,6.59,4,#FF5733
+30,31,2,Main Branch,Pasig City,Lead,36998.11,5.19,1,#F0FF33
+31,32,7,East Branch,Makati City,Mid-Level,28946.45,3.77,3,#33FF57
+32,33,8,East Branch,Taguig,Senior,31414.41,6.05,1,#33FFF0
+33,34,7,West Branch,Quezon City,Senior,18139.61,2.50,2,#33FF57
+34,35,5,South Branch,Makati City,Senior,35674.97,1.99,3,#F033FF
+35,36,6,East Branch,Pasig City,Lead,24737.52,8.51,4,#F033FF
+36,37,7,South Branch,Taguig,Mid-Level,28880.25,8.58,1,#F0FF33
+37,38,3,South Branch,Manila,Senior,44351.88,8.71,3,#F0FF33
+38,39,5,West Branch,Makati City,Mid-Level,34878.44,9.21,3,#3357FF
+39,40,8,South Branch,Pasig City,Junior,47722.94,3.93,2,#F0FF33
+40,41,4,South Branch,Taguig,Lead,32848.52,5.00,4,#33FFF0
+41,42,2,North Branch,Makati City,Senior,36179.77,2.72,4,#F0FF33
+42,43,2,Main Branch,Manila,Mid-Level,25338.28,9.56,1,#F0FF33
+43,44,3,North Branch,Pasig City,Mid-Level,46998.05,7.18,1,#33FF57
+44,45,9,West Branch,Taguig,Junior,32766.50,1.40,2,#F0FF33
+45,46,6,West Branch,Manila,Junior,28745.30,7.36,1,#FF5733
+46,47,9,East Branch,Quezon City,Junior,36593.88,9.15,2,#33FF57
+47,48,5,Main Branch,Makati City,Mid-Level,48533.65,3.18,4,#3357FF
+48,49,1,South Branch,Manila,Senior,26623.43,1.69,3,#F033FF
+49,50,7,Main Branch,Manila,Junior,48028.61,7.21,2,#3357FF
+50,51,2,Main Branch,Quezon City,Lead,24151.73,9.92,2,#F033FF
+51,52,7,East Branch,Makati City,Lead,15262.88,2.26,4,#3357FF
+52,53,3,West Branch,Quezon City,Junior,46078.31,6.41,1,#33FF57
+53,54,1,South Branch,Makati City,Lead,35451.21,2.55,3,#33FFF0
+54,55,2,North Branch,Makati City,Mid-Level,21193.03,4.87,2,#F0FF33
+55,56,8,East Branch,Makati City,Junior,27567.07,5.23,2,#F033FF
+56,57,4,East Branch,Quezon City,Lead,44127.76,2.21,4,#F0FF33
+57,58,1,Main Branch,Pasig City,Lead,36516.87,7.14,1,#F0FF33
+58,59,5,West Branch,Taguig,Lead,48619.41,4.76,2,#F033FF
+59,60,10,Main Branch,Quezon City,Mid-Level,41505.12,5.53,3,#F0FF33
+60,61,9,South Branch,Taguig,Mid-Level,39932.75,3.63,4,#3357FF
+61,62,7,North Branch,Pasig City,Junior,47825.16,3.03,2,#33FFF0
+62,63,7,North Branch,Manila,Senior,23148.50,1.45,3,#3357FF
+63,64,6,North Branch,Quezon City,Mid-Level,38562.79,7.25,4,#3357FF
+64,65,4,South Branch,Manila,Mid-Level,17519.72,6.86,1,#FF5733
+65,66,3,East Branch,Taguig,Lead,38618.72,6.13,3,#33FFF0
+66,67,3,East Branch,Makati City,Lead,46464.41,4.42,3,#FF5733
+67,68,9,South Branch,Quezon City,Senior,24219.77,2.20,3,#F033FF
+68,69,7,Main Branch,Manila,Junior,18346.14,6.04,4,#3357FF
+69,70,3,West Branch,Taguig,Junior,23782.06,3.12,4,#33FF57
+70,71,5,East Branch,Manila,Mid-Level,17181.81,8.31,1,#3357FF
+71,72,3,Main Branch,Pasig City,Lead,26752.41,6.29,4,#F033FF
+72,73,7,East Branch,Pasig City,Senior,27856.36,1.19,1,#33FF57
+73,74,7,North Branch,Manila,Mid-Level,30750.34,2.84,1,#33FFF0
+74,75,8,East Branch,Quezon City,Mid-Level,46364.11,5.37,2,#F033FF
+75,76,3,West Branch,Taguig,Senior,48153.18,2.54,1,#33FF57
+76,77,6,South Branch,Pasig City,Mid-Level,41330.13,8.11,4,#F033FF
+77,78,2,West Branch,Taguig,Senior,27426.83,1.84,2,#F0FF33
+78,79,4,Main Branch,Taguig,Lead,44710.77,7.70,3,#FF5733
+79,80,5,West Branch,Taguig,Mid-Level,24821.68,3.28,2,#FF5733
+80,81,7,East Branch,Pasig City,Mid-Level,34594.85,3.01,4,#3357FF
+81,82,4,East Branch,Quezon City,Junior,15800.81,7.34,2,#F033FF
+82,83,2,Main Branch,Taguig,Junior,29552.81,5.41,4,#F033FF
+83,84,3,South Branch,Makati City,Lead,40225.24,5.06,2,#F0FF33
+84,85,8,Main Branch,Taguig,Mid-Level,21822.22,3.78,4,#F033FF
+85,86,5,Main Branch,Manila,Mid-Level,16002.99,6.21,4,#33FFF0
+86,87,4,Main Branch,Taguig,Mid-Level,26420.24,1.39,1,#FF5733
+87,88,10,East Branch,Quezon City,Mid-Level,38859.29,6.78,4,#F033FF
+88,89,7,South Branch,Manila,Lead,22324.88,2.33,4,#33FFF0
+89,90,7,North Branch,Makati City,Senior,27068.10,5.93,2,#33FF57
+90,91,1,West Branch,Quezon City,Senior,32169.37,4.05,4,#FF5733
+91,92,5,East Branch,Makati City,Mid-Level,24354.69,7.66,2,#F0FF33
+92,93,4,West Branch,Taguig,Mid-Level,27158.82,9.55,4,#F0FF33
+93,94,4,West Branch,Manila,Junior,45886.93,3.59,2,#FF5733
+94,95,5,Main Branch,Manila,Senior,33396.68,8.44,1,#F0FF33
+95,96,6,South Branch,Manila,Mid-Level,20083.20,7.86,3,#F0FF33
+96,97,7,West Branch,Pasig City,Lead,16718.21,8.25,4,#F033FF
+97,98,9,East Branch,Makati City,Mid-Level,38848.44,5.78,4,#33FF57
+98,99,1,East Branch,Makati City,Junior,21537.28,8.88,3,#33FFF0
+99,100,1,North Branch,Taguig,Senior,40210.36,3.23,3,#33FFF0
+100,101,7,Main Branch,Manila,Mid-Level,16041.03,4.47,2,#33FF57
+101,102,10,East Branch,Makati City,Junior,49554.98,7.14,4,#3357FF
+102,103,5,Main Branch,Manila,Lead,32620.44,2.37,1,#FF5733
+103,104,7,West Branch,Quezon City,Junior,34766.49,6.78,1,#33FF57
+104,105,8,North Branch,Pasig City,Junior,27392.49,1.47,4,#FF5733
+105,106,2,East Branch,Makati City,Senior,27583.25,6.08,4,#F0FF33
+106,107,3,South Branch,Manila,Junior,18665.70,5.85,2,#FF5733
+107,108,8,East Branch,Pasig City,Junior,45204.80,4.40,4,#FF5733
+108,109,4,West Branch,Quezon City,Senior,46495.86,3.38,4,#33FFF0
+109,110,5,West Branch,Taguig,Lead,23571.14,7.62,4,#33FFF0
+110,111,7,South Branch,Taguig,Senior,36787.50,1.17,3,#FF5733
+111,112,2,Main Branch,Pasig City,Senior,29562.82,7.54,1,#33FF57
+112,113,3,East Branch,Manila,Mid-Level,17562.36,7.65,1,#3357FF
+113,114,2,North Branch,Quezon City,Senior,29629.75,2.49,3,#3357FF
+114,115,1,Main Branch,Makati City,Junior,46675.86,1.33,1,#FF5733
+115,116,1,West Branch,Quezon City,Mid-Level,47795.45,8.15,3,#FF5733
+116,117,1,Main Branch,Manila,Senior,31546.53,4.93,3,#F0FF33
+117,118,2,South Branch,Quezon City,Senior,19550.32,2.06,1,#33FFF0
+118,119,8,North Branch,Pasig City,Junior,41385.45,3.57,1,#33FFF0
+119,120,5,South Branch,Pasig City,Senior,19050.17,3.10,3,#F0FF33
+120,121,6,North Branch,Makati City,Mid-Level,20631.98,3.13,3,#33FF57
+121,122,7,East Branch,Pasig City,Lead,22683.74,6.42,1,#33FFF0
+122,123,4,South Branch,Manila,Junior,15222.55,2.69,3,#F033FF
+123,124,3,South Branch,Manila,Junior,40189.28,6.29,2,#F0FF33
+124,125,7,East Branch,Pasig City,Mid-Level,27644.33,9.70,1,#33FFF0
+125,126,9,East Branch,Pasig City,Mid-Level,29052.86,5.66,1,#3357FF
+126,127,4,North Branch,Quezon City,Junior,32185.37,7.57,3,#3357FF
+127,128,2,East Branch,Pasig City,Mid-Level,17173.22,3.79,1,#F033FF
+128,129,5,East Branch,Manila,Senior,23019.31,7.07,1,#3357FF
+129,130,10,North Branch,Quezon City,Senior,27999.40,6.35,4,#FF5733
+130,131,1,West Branch,Taguig,Mid-Level,48939.26,4.31,2,#FF5733
+131,132,6,North Branch,Taguig,Junior,28947.75,2.90,1,#3357FF
+132,133,1,North Branch,Quezon City,Senior,44040.82,3.91,3,#FF5733
+133,134,4,West Branch,Makati City,Lead,15014.75,2.85,4,#33FFF0
+134,135,5,South Branch,Manila,Senior,30214.97,8.35,3,#3357FF
+135,136,2,North Branch,Pasig City,Mid-Level,25589.61,8.79,2,#33FF57
+136,137,6,Main Branch,Quezon City,Senior,30654.45,7.41,2,#33FF57
+137,138,6,North Branch,Quezon City,Lead,31698.22,8.43,4,#FF5733
+138,139,4,North Branch,Taguig,Lead,15495.39,5.92,2,#33FFF0
+139,140,2,Main Branch,Pasig City,Lead,18968.48,6.98,1,#33FF57
+140,141,8,South Branch,Pasig City,Senior,37881.23,6.11,1,#33FFF0
+141,142,5,North Branch,Makati City,Mid-Level,26435.01,8.84,1,#F033FF
+142,143,7,West Branch,Pasig City,Senior,30087.00,4.17,1,#F033FF
+143,144,1,South Branch,Pasig City,Junior,44159.97,2.77,2,#F033FF
+144,145,6,East Branch,Manila,Lead,38851.72,5.28,2,#F033FF
+145,146,6,North Branch,Pasig City,Junior,21414.16,7.90,4,#33FFF0
+146,147,4,Main Branch,Pasig City,Lead,30283.08,2.86,4,#F0FF33
+147,148,6,North Branch,Manila,Lead,41970.67,9.13,2,#3357FF
+148,149,6,East Branch,Quezon City,Mid-Level,39234.89,9.43,3,#F0FF33
+149,150,2,North Branch,Taguig,Senior,47881.40,5.90,4,#3357FF
+150,151,8,South Branch,Taguig,Senior,31743.58,7.77,4,#F0FF33
+151,152,10,Main Branch,Taguig,Junior,36116.39,8.86,2,#3357FF
+152,153,7,South Branch,Manila,Junior,29893.25,7.91,4,#FF5733
+153,154,5,North Branch,Manila,Mid-Level,22233.71,2.13,2,#F0FF33
+154,155,6,North Branch,Pasig City,Mid-Level,28774.24,5.96,1,#33FF57
+155,156,9,South Branch,Manila,Senior,44791.59,9.92,1,#F0FF33
+156,157,1,Main Branch,Taguig,Junior,34876.80,9.01,1,#F033FF
+157,158,3,South Branch,Manila,Mid-Level,32216.97,1.60,3,#33FF57
+158,159,10,East Branch,Quezon City,Mid-Level,23256.15,5.65,4,#3357FF
+159,160,8,West Branch,Taguig,Senior,44475.22,9.36,4,#33FF57
+160,161,1,South Branch,Quezon City,Lead,24325.81,3.77,1,#33FF57
+161,162,7,Main Branch,Quezon City,Senior,42595.20,7.84,1,#F0FF33
+162,163,10,Main Branch,Pasig City,Mid-Level,38045.03,8.23,4,#3357FF
+163,164,8,South Branch,Pasig City,Lead,19010.75,3.94,4,#F033FF
+164,165,10,South Branch,Makati City,Mid-Level,18629.55,7.74,2,#33FF57
+165,166,6,North Branch,Makati City,Junior,41134.79,4.50,1,#FF5733
+166,167,10,Main Branch,Taguig,Mid-Level,17042.92,6.39,4,#F0FF33
+167,168,3,North Branch,Pasig City,Mid-Level,30751.71,5.78,3,#F0FF33
+168,169,2,East Branch,Pasig City,Senior,15503.66,9.19,2,#33FFF0
+169,170,9,North Branch,Pasig City,Senior,18660.14,4.97,3,#F033FF
+170,171,8,North Branch,Pasig City,Senior,39516.77,1.50,2,#33FF57
+171,172,8,South Branch,Makati City,Senior,47758.60,9.06,2,#33FF57
+172,173,3,Main Branch,Manila,Junior,39891.44,9.26,1,#F033FF
+173,174,5,North Branch,Manila,Mid-Level,40486.00,8.98,3,#F0FF33
+174,175,5,East Branch,Taguig,Senior,26480.56,2.87,3,#3357FF
+175,176,4,East Branch,Manila,Mid-Level,33738.79,8.11,1,#F0FF33
+176,177,3,East Branch,Quezon City,Senior,40812.27,6.27,4,#33FFF0
+177,178,7,West Branch,Makati City,Lead,42685.89,9.73,1,#F0FF33
+178,179,2,Main Branch,Taguig,Senior,29953.76,2.10,2,#FF5733
+179,180,3,North Branch,Manila,Senior,27627.01,8.52,2,#33FF57
+180,181,4,North Branch,Pasig City,Mid-Level,47290.09,8.92,3,#3357FF
+181,182,6,North Branch,Manila,Lead,47946.36,8.34,1,#F0FF33
+182,183,3,East Branch,Pasig City,Lead,33271.30,7.64,4,#33FF57
+183,184,1,Main Branch,Manila,Mid-Level,32115.45,3.69,1,#33FF57
+184,185,1,East Branch,Quezon City,Mid-Level,42368.48,5.73,3,#F033FF
+185,186,7,Main Branch,Manila,Mid-Level,31447.66,3.97,2,#33FF57
+186,187,8,West Branch,Pasig City,Junior,39636.07,6.02,3,#F0FF33
+187,188,3,East Branch,Taguig,Senior,48165.38,9.34,4,#3357FF
+188,189,5,Main Branch,Quezon City,Mid-Level,38240.03,5.49,2,#33FF57
+189,190,8,West Branch,Quezon City,Mid-Level,36437.87,1.64,1,#F033FF
+190,191,3,East Branch,Taguig,Senior,48419.03,6.56,4,#F033FF
+191,192,5,North Branch,Taguig,Junior,15454.52,8.93,4,#3357FF
+192,193,1,West Branch,Quezon City,Lead,44795.70,4.02,3,#33FFF0
+193,194,2,West Branch,Taguig,Junior,33256.68,4.93,4,#F0FF33
+194,195,2,West Branch,Manila,Senior,19307.01,4.38,1,#33FF57
+195,196,4,Main Branch,Manila,Senior,15778.83,6.26,4,#33FFF0
+196,197,1,North Branch,Taguig,Mid-Level,49154.50,7.35,1,#33FF57
+197,198,4,East Branch,Manila,Lead,42046.84,9.81,4,#F0FF33
+198,199,8,North Branch,Pasig City,Junior,33673.22,7.11,2,#F0FF33
+199,200,10,Main Branch,Manila,Junior,19919.28,7.85,3,#3357FF
+200,201,7,West Branch,Makati City,Junior,48771.47,1.82,1,#33FFF0
+201,202,7,North Branch,Makati City,Lead,27402.35,5.57,2,#FF5733
+202,203,4,East Branch,Taguig,Senior,26279.96,5.85,3,#33FF57
+203,204,7,South Branch,Pasig City,Mid-Level,40427.61,2.14,4,#FF5733
+204,205,10,Main Branch,Taguig,Junior,26498.61,2.43,3,#F033FF
+205,206,9,Main Branch,Manila,Senior,39067.33,3.73,2,#F033FF
+206,207,9,South Branch,Quezon City,Senior,38172.59,9.10,4,#3357FF
+207,208,9,North Branch,Manila,Lead,36453.12,3.04,4,#33FF57
+208,209,5,South Branch,Pasig City,Junior,27851.27,4.58,1,#33FF57
+209,210,4,North Branch,Quezon City,Junior,18104.88,2.12,3,#F033FF
+210,211,4,Main Branch,Taguig,Junior,20911.49,9.66,1,#F033FF
+211,212,4,East Branch,Pasig City,Senior,36215.00,2.27,2,#FF5733
+212,213,6,South Branch,Taguig,Senior,38758.50,1.67,3,#33FFF0
+213,214,6,West Branch,Makati City,Mid-Level,23715.77,9.50,2,#F0FF33
+214,215,10,South Branch,Pasig City,Senior,19035.74,5.76,4,#F033FF
+215,216,8,Main Branch,Quezon City,Junior,46337.86,2.95,2,#FF5733
+216,217,9,North Branch,Makati City,Junior,42453.26,3.09,2,#33FFF0
+217,218,2,South Branch,Pasig City,Mid-Level,15649.25,2.12,2,#FF5733
+218,219,2,West Branch,Taguig,Junior,17724.53,9.65,2,#FF5733
+219,220,1,North Branch,Pasig City,Mid-Level,31547.38,3.24,4,#F033FF
+220,221,4,West Branch,Quezon City,Senior,38152.66,5.53,1,#F0FF33
+221,222,6,North Branch,Quezon City,Senior,15550.62,2.99,3,#33FF57
+222,223,10,South Branch,Pasig City,Junior,46438.37,7.62,2,#F033FF
+223,224,3,South Branch,Quezon City,Mid-Level,37127.15,6.36,2,#F0FF33
+224,225,4,East Branch,Manila,Senior,48835.66,8.83,4,#FF5733
+225,226,8,North Branch,Manila,Lead,46478.52,1.41,1,#F0FF33
+226,227,5,South Branch,Makati City,Senior,49808.09,1.69,1,#33FF57
+227,228,9,West Branch,Taguig,Lead,37678.78,1.07,1,#FF5733
+228,229,8,South Branch,Taguig,Senior,41873.65,7.39,4,#F033FF
+229,230,5,West Branch,Makati City,Lead,18236.96,9.33,3,#F0FF33
+230,231,5,East Branch,Manila,Mid-Level,15338.83,4.51,1,#33FFF0
+231,232,3,West Branch,Makati City,Mid-Level,36514.89,9.58,3,#FF5733
+232,233,1,Main Branch,Manila,Lead,41011.73,3.07,1,#F033FF
+233,234,8,South Branch,Quezon City,Lead,45518.52,8.70,1,#33FF57
+234,235,8,West Branch,Pasig City,Senior,42484.77,1.16,1,#3357FF
+235,236,8,North Branch,Taguig,Lead,29701.42,9.70,2,#F033FF
+236,237,9,South Branch,Taguig,Junior,29175.58,7.77,1,#33FF57
+237,238,9,South Branch,Taguig,Lead,31534.74,4.35,2,#F0FF33
+238,239,7,South Branch,Quezon City,Mid-Level,44426.51,3.79,1,#33FF57
+239,240,10,West Branch,Manila,Senior,25040.23,8.70,4,#33FF57
+240,241,4,East Branch,Quezon City,Lead,44491.83,1.64,1,#F0FF33
+241,242,4,East Branch,Manila,Senior,31850.97,7.15,3,#F033FF
+242,243,1,Main Branch,Pasig City,Lead,43163.45,9.53,1,#F033FF
+243,244,9,South Branch,Manila,Senior,28188.90,3.29,1,#33FFF0
+244,245,9,Main Branch,Taguig,Lead,49341.28,9.86,1,#F033FF
+245,246,4,West Branch,Taguig,Mid-Level,39338.64,2.92,2,#33FFF0
+246,247,5,East Branch,Manila,Mid-Level,49160.17,2.40,2,#33FF57
+247,248,2,South Branch,Pasig City,Lead,24865.58,4.70,1,#FF5733
+248,249,4,West Branch,Pasig City,Senior,32230.05,2.41,3,#F033FF
+249,250,9,East Branch,Pasig City,Junior,47720.54,7.67,2,#FF5733
+250,251,4,Main Branch,Makati City,Junior,33785.78,3.71,2,#33FF57
+251,252,2,North Branch,Pasig City,Lead,20031.28,4.98,3,#FF5733
+252,253,4,North Branch,Manila,Mid-Level,37558.48,5.24,1,#F033FF
+253,254,8,East Branch,Taguig,Junior,45896.59,1.88,1,#FF5733
+254,255,6,South Branch,Taguig,Mid-Level,24964.68,2.24,4,#F033FF
+255,256,6,Main Branch,Pasig City,Junior,18769.82,1.54,3,#F033FF
+256,257,9,South Branch,Taguig,Junior,18806.23,5.25,2,#33FFF0
+257,258,1,West Branch,Pasig City,Senior,38291.06,6.82,4,#FF5733
+258,259,5,North Branch,Pasig City,Lead,20784.45,2.65,2,#33FFF0
+259,260,4,Main Branch,Quezon City,Mid-Level,40320.44,7.94,3,#FF5733
+260,261,2,North Branch,Quezon City,Lead,36758.06,5.08,3,#FF5733
+261,262,4,West Branch,Makati City,Senior,29543.17,5.08,1,#F0FF33
+262,263,4,South Branch,Pasig City,Mid-Level,25502.87,1.25,3,#33FFF0
+263,264,7,North Branch,Quezon City,Mid-Level,41292.01,8.53,1,#F033FF
+264,265,3,West Branch,Manila,Junior,16675.00,8.09,4,#33FF57
+265,266,1,South Branch,Taguig,Lead,34550.02,8.13,4,#3357FF
+266,267,10,South Branch,Pasig City,Junior,46507.78,3.35,1,#3357FF
+267,268,6,West Branch,Manila,Mid-Level,34581.45,4.97,4,#FF5733
+268,269,7,North Branch,Makati City,Mid-Level,32409.74,5.44,2,#33FF57
+269,270,3,South Branch,Pasig City,Lead,37038.92,5.49,1,#3357FF
+270,271,3,East Branch,Makati City,Junior,36921.85,6.93,4,#F0FF33
+271,272,5,South Branch,Makati City,Lead,29393.03,9.39,1,#33FFF0
+272,273,9,South Branch,Taguig,Mid-Level,33391.07,5.46,4,#33FFF0
+273,274,3,South Branch,Pasig City,Mid-Level,43763.56,1.05,3,#F033FF
+274,275,6,Main Branch,Makati City,Mid-Level,33728.67,2.71,2,#33FFF0
+275,276,2,South Branch,Pasig City,Senior,28537.42,7.63,3,#33FFF0
+276,277,4,South Branch,Manila,Junior,19249.28,7.16,3,#FF5733
+277,278,2,South Branch,Makati City,Senior,34744.24,1.09,2,#F033FF
+278,279,9,South Branch,Makati City,Junior,36565.38,5.89,1,#33FFF0
+279,280,5,North Branch,Manila,Lead,34827.60,7.79,4,#F033FF
+280,281,9,Main Branch,Makati City,Lead,45163.88,6.59,3,#F033FF
+281,282,5,Main Branch,Taguig,Senior,33541.99,4.55,2,#33FFF0
+282,283,3,Main Branch,Taguig,Lead,46474.14,8.12,1,#F0FF33
+283,284,7,Main Branch,Makati City,Lead,36774.06,5.40,1,#3357FF
+284,285,8,West Branch,Makati City,Lead,37986.50,2.01,3,#3357FF
+285,286,5,Main Branch,Pasig City,Mid-Level,35309.06,3.54,1,#FF5733
+286,287,5,East Branch,Manila,Mid-Level,29061.26,5.45,2,#F033FF
+287,288,8,West Branch,Manila,Lead,40345.34,5.99,1,#F0FF33
+288,289,8,South Branch,Manila,Mid-Level,15277.54,7.80,3,#F033FF
+289,290,5,North Branch,Makati City,Senior,48193.12,3.85,4,#3357FF
+290,291,2,East Branch,Taguig,Mid-Level,30593.73,5.37,2,#3357FF
+291,292,1,East Branch,Taguig,Senior,17645.27,6.25,1,#F033FF
+292,293,4,South Branch,Quezon City,Lead,47095.82,5.64,2,#33FFF0
+293,294,6,South Branch,Quezon City,Lead,49799.84,5.83,4,#FF5733
+294,295,9,West Branch,Quezon City,Junior,17141.00,1.64,4,#FF5733
+295,296,10,South Branch,Manila,Lead,15169.96,3.73,2,#F0FF33
+296,297,7,East Branch,Pasig City,Lead,27115.21,5.25,4,#F033FF
+297,298,7,South Branch,Makati City,Lead,31429.16,9.50,2,#FF5733
+298,299,1,West Branch,Taguig,Lead,38365.19,4.34,1,#33FFF0
+299,300,2,East Branch,Quezon City,Senior,21959.58,3.10,4,#FF5733
+300,301,10,West Branch,Taguig,Junior,30511.79,1.45,2,#33FFF0
+301,302,9,Main Branch,Quezon City,Senior,28062.68,5.11,2,#33FFF0
+302,303,6,West Branch,Makati City,Senior,28697.51,6.73,2,#FF5733
+303,304,6,West Branch,Taguig,Lead,38883.64,1.14,4,#33FFF0
+304,305,8,West Branch,Taguig,Lead,41971.16,6.67,2,#F0FF33
+305,306,5,South Branch,Manila,Mid-Level,49780.43,6.68,2,#33FFF0
+306,307,7,North Branch,Taguig,Mid-Level,44396.48,5.47,1,#33FFF0
+307,308,5,Main Branch,Pasig City,Mid-Level,37578.24,6.45,1,#3357FF
+308,309,9,Main Branch,Makati City,Senior,28803.27,4.32,1,#3357FF
+309,310,3,West Branch,Makati City,Mid-Level,15304.97,5.31,3,#33FFF0
+310,311,10,East Branch,Quezon City,Senior,36613.14,7.91,3,#33FF57
+311,312,6,North Branch,Makati City,Senior,27798.21,6.26,4,#FF5733
+312,313,10,Main Branch,Taguig,Senior,25015.78,6.65,1,#F0FF33
+313,314,6,Main Branch,Quezon City,Mid-Level,45423.24,4.54,3,#FF5733
+314,315,2,Main Branch,Makati City,Lead,17925.85,6.87,4,#33FF57
+315,316,4,South Branch,Pasig City,Lead,24827.99,4.74,4,#3357FF
+316,317,7,South Branch,Pasig City,Mid-Level,30755.01,7.29,4,#F0FF33
+317,318,4,South Branch,Manila,Senior,48878.59,1.65,1,#3357FF
+318,319,3,South Branch,Taguig,Mid-Level,28285.46,1.13,1,#33FF57
+319,320,5,West Branch,Quezon City,Senior,31046.18,4.08,1,#33FF57
+320,321,9,East Branch,Taguig,Junior,43975.62,6.19,2,#F0FF33
+321,322,5,Main Branch,Pasig City,Lead,48224.34,6.38,3,#33FFF0
+322,323,10,South Branch,Makati City,Junior,31424.44,7.84,1,#F033FF
+323,324,3,East Branch,Taguig,Mid-Level,38233.00,3.95,2,#3357FF
+324,325,9,South Branch,Pasig City,Senior,41513.81,4.96,3,#F033FF
+325,326,10,South Branch,Manila,Lead,30772.65,2.40,2,#3357FF
+326,327,4,East Branch,Makati City,Mid-Level,30667.01,6.50,1,#33FFF0
+327,328,10,North Branch,Makati City,Senior,25715.97,4.21,4,#33FFF0
+328,329,7,West Branch,Taguig,Mid-Level,47028.24,8.37,4,#F033FF
+329,330,10,East Branch,Pasig City,Junior,21313.50,5.67,2,#F0FF33
+330,331,1,Main Branch,Quezon City,Lead,28811.81,6.17,3,#3357FF
+331,332,2,North Branch,Manila,Junior,20435.86,8.67,1,#F0FF33
+332,333,5,Main Branch,Pasig City,Senior,40642.21,6.99,3,#33FF57
+333,334,5,East Branch,Taguig,Junior,39518.46,9.27,3,#33FFF0
+334,335,9,South Branch,Pasig City,Mid-Level,24011.41,9.71,3,#F033FF
+335,336,2,South Branch,Pasig City,Lead,18394.56,6.73,3,#F0FF33
+336,337,4,Main Branch,Pasig City,Senior,16518.80,6.39,3,#33FF57
+337,338,10,North Branch,Manila,Senior,15649.44,1.15,4,#F033FF
+338,339,5,East Branch,Makati City,Mid-Level,16436.57,9.69,1,#33FFF0
+339,340,7,North Branch,Manila,Mid-Level,39070.12,9.29,4,#F033FF
+340,341,7,West Branch,Makati City,Lead,39981.51,6.46,1,#F033FF
+341,342,8,South Branch,Quezon City,Junior,35180.03,4.64,1,#33FF57
+342,343,2,Main Branch,Taguig,Junior,48835.89,7.71,1,#33FFF0
+343,344,10,East Branch,Manila,Lead,19534.91,7.48,1,#F033FF
+344,345,5,South Branch,Manila,Lead,21080.67,3.32,2,#F033FF
+345,346,1,South Branch,Taguig,Mid-Level,40268.27,6.57,2,#F033FF
+346,347,10,Main Branch,Pasig City,Lead,31308.52,3.59,3,#F033FF
+347,348,8,East Branch,Makati City,Senior,16673.60,4.98,2,#FF5733
+348,349,8,Main Branch,Pasig City,Mid-Level,21173.61,6.69,3,#33FF57
+349,350,10,East Branch,Makati City,Mid-Level,36880.69,1.70,1,#33FFF0
+350,351,6,East Branch,Pasig City,Senior,38509.07,7.58,4,#F033FF
+351,352,4,North Branch,Taguig,Lead,23836.93,4.19,2,#F033FF
+352,353,5,West Branch,Taguig,Lead,28480.52,1.34,3,#33FF57
+353,354,10,North Branch,Pasig City,Senior,29976.05,2.95,2,#F033FF
+354,355,6,North Branch,Pasig City,Junior,21623.21,1.82,2,#FF5733
+355,356,1,North Branch,Pasig City,Mid-Level,33370.68,5.20,1,#FF5733
+356,357,5,North Branch,Quezon City,Junior,21309.77,9.39,2,#F033FF
+357,358,1,West Branch,Taguig,Junior,39638.49,1.59,4,#FF5733
+358,359,7,East Branch,Quezon City,Lead,25153.19,9.99,4,#33FF57
+359,360,3,North Branch,Makati City,Senior,40220.41,8.63,4,#33FFF0
+360,361,10,Main Branch,Quezon City,Junior,45862.83,5.79,1,#33FFF0
+361,362,4,Main Branch,Taguig,Mid-Level,29237.93,3.29,2,#FF5733
+362,363,9,Main Branch,Pasig City,Senior,48835.80,2.17,3,#F0FF33
+363,364,5,East Branch,Pasig City,Junior,25654.79,4.95,2,#F033FF
+364,365,1,Main Branch,Taguig,Senior,28309.04,4.89,4,#33FFF0
+365,366,4,West Branch,Manila,Junior,18154.33,4.04,4,#33FFF0
+366,367,3,South Branch,Taguig,Mid-Level,28962.51,3.33,1,#F033FF
+367,368,1,South Branch,Quezon City,Junior,45226.50,2.66,3,#FF5733
+368,369,8,South Branch,Manila,Senior,32360.30,3.04,2,#FF5733
+369,370,5,West Branch,Manila,Junior,25000.86,6.86,1,#FF5733
+370,371,3,North Branch,Makati City,Mid-Level,41748.50,1.05,1,#FF5733
+371,372,10,East Branch,Pasig City,Junior,19400.68,4.15,2,#F0FF33
+372,373,1,South Branch,Makati City,Mid-Level,19582.48,3.21,1,#3357FF
+373,374,1,Main Branch,Makati City,Senior,48225.63,3.24,3,#33FFF0
+374,375,8,East Branch,Quezon City,Senior,47750.02,4.87,1,#F033FF
+375,376,2,South Branch,Taguig,Junior,43292.89,3.62,3,#FF5733
+376,377,5,West Branch,Taguig,Lead,28641.63,7.02,4,#33FFF0
+377,378,9,West Branch,Manila,Junior,24496.37,7.10,2,#F0FF33
+378,379,8,East Branch,Quezon City,Lead,38460.05,7.54,4,#FF5733
+379,380,7,South Branch,Makati City,Lead,33037.10,9.02,3,#F033FF
+380,381,4,East Branch,Manila,Junior,45266.95,9.40,4,#33FF57
+381,382,3,South Branch,Manila,Senior,25315.73,3.69,4,#3357FF
+382,383,6,North Branch,Makati City,Lead,22297.78,1.41,1,#33FF57
+383,384,3,North Branch,Quezon City,Senior,36690.98,4.78,4,#F033FF
+384,385,1,Main Branch,Taguig,Mid-Level,35686.26,5.12,4,#FF5733
+385,386,3,East Branch,Taguig,Junior,27399.15,6.48,4,#FF5733
+386,387,3,West Branch,Taguig,Junior,43250.55,9.48,3,#F033FF
+387,388,9,West Branch,Pasig City,Lead,21598.22,8.98,1,#3357FF
+388,389,3,Main Branch,Manila,Lead,24616.98,7.12,2,#FF5733
+389,390,6,West Branch,Quezon City,Mid-Level,15028.98,1.73,4,#33FFF0
+390,391,2,East Branch,Taguig,Senior,18950.37,4.71,3,#F033FF
+391,392,6,Main Branch,Quezon City,Senior,15880.46,6.07,4,#F033FF
+392,393,5,West Branch,Pasig City,Senior,44860.88,3.88,2,#FF5733
+393,394,5,North Branch,Makati City,Lead,37493.03,1.53,2,#FF5733
+394,395,2,Main Branch,Pasig City,Lead,43957.56,5.49,3,#F033FF
+395,396,5,South Branch,Manila,Mid-Level,26540.58,9.71,1,#FF5733
+396,397,3,East Branch,Pasig City,Lead,36902.39,4.07,2,#33FFF0
+397,398,2,Main Branch,Quezon City,Senior,48521.97,6.06,1,#3357FF
+398,399,1,West Branch,Taguig,Junior,48164.56,1.20,3,#33FF57
+399,400,3,East Branch,Pasig City,Lead,35517.26,6.26,4,#33FFF0
+400,401,3,West Branch,Taguig,Mid-Level,33165.43,7.00,2,#33FF57
+401,402,5,East Branch,Quezon City,Senior,42984.40,2.12,1,#FF5733
+402,403,6,East Branch,Taguig,Junior,21289.85,5.54,1,#3357FF
+403,404,3,East Branch,Taguig,Lead,45334.37,2.67,2,#F0FF33
+404,405,2,North Branch,Manila,Senior,16546.82,1.07,1,#33FF57
+405,406,6,South Branch,Quezon City,Lead,49473.18,1.45,4,#F0FF33
+406,407,3,Main Branch,Quezon City,Mid-Level,34108.71,2.49,2,#33FF57
+407,408,3,East Branch,Makati City,Mid-Level,43426.39,8.98,2,#33FF57
+408,409,6,South Branch,Quezon City,Mid-Level,32834.77,1.99,1,#F0FF33
+409,410,7,East Branch,Makati City,Senior,44934.32,8.66,1,#FF5733
+410,411,2,West Branch,Taguig,Senior,45508.06,3.16,1,#F0FF33
+411,412,8,North Branch,Quezon City,Mid-Level,45922.61,2.63,2,#FF5733
+412,413,5,East Branch,Taguig,Junior,22323.90,2.95,4,#F033FF
+413,414,5,North Branch,Quezon City,Senior,22436.17,8.87,2,#33FF57
+414,415,4,East Branch,Manila,Mid-Level,41175.64,5.53,2,#F033FF
+415,416,7,South Branch,Makati City,Junior,24770.14,3.51,2,#33FF57
+416,417,8,North Branch,Makati City,Junior,22306.42,1.68,1,#3357FF
+417,418,8,West Branch,Manila,Junior,44346.88,2.06,2,#3357FF
+418,419,7,East Branch,Makati City,Lead,24073.42,5.88,2,#F033FF
+419,420,3,Main Branch,Taguig,Junior,19443.58,9.39,2,#F0FF33
+420,421,2,Main Branch,Quezon City,Senior,36192.18,2.80,4,#33FF57
+421,422,7,South Branch,Makati City,Senior,28120.28,5.96,2,#33FF57
+422,423,9,East Branch,Makati City,Junior,33266.97,7.31,2,#33FF57
+423,424,6,East Branch,Makati City,Mid-Level,29655.91,6.87,1,#F0FF33
+424,425,6,Main Branch,Taguig,Senior,36353.74,1.87,3,#F033FF
+425,426,4,East Branch,Manila,Senior,21819.25,9.90,2,#33FF57
+426,427,10,South Branch,Manila,Senior,47541.74,1.50,4,#F033FF
+427,428,5,East Branch,Makati City,Mid-Level,29362.31,3.45,1,#FF5733
+428,429,3,South Branch,Manila,Senior,46516.82,1.05,3,#F033FF
+429,430,4,West Branch,Manila,Lead,42096.89,8.39,2,#3357FF
+430,431,8,South Branch,Manila,Mid-Level,19283.06,7.36,4,#F033FF
+431,432,1,West Branch,Taguig,Senior,30607.47,3.20,4,#3357FF
+432,433,6,South Branch,Taguig,Lead,34268.54,6.52,4,#F0FF33
+433,434,7,South Branch,Taguig,Mid-Level,27881.39,6.69,1,#33FFF0
+434,435,3,Main Branch,Manila,Junior,30943.93,6.79,2,#FF5733
+435,436,3,East Branch,Taguig,Mid-Level,33637.35,5.61,4,#3357FF
+436,437,1,Main Branch,Manila,Mid-Level,34031.26,3.83,1,#F033FF
+437,438,8,Main Branch,Pasig City,Junior,22749.12,1.35,3,#F0FF33
+438,439,6,East Branch,Quezon City,Mid-Level,18279.08,7.48,2,#F033FF
+439,440,4,South Branch,Quezon City,Mid-Level,37145.37,6.35,1,#33FFF0
+440,441,6,West Branch,Taguig,Junior,49028.94,5.32,3,#FF5733
+441,442,7,South Branch,Manila,Mid-Level,34018.86,3.19,1,#F0FF33
+442,443,3,East Branch,Makati City,Senior,17974.85,9.73,1,#FF5733
+443,444,1,South Branch,Taguig,Junior,44827.61,8.55,2,#33FF57
+444,445,8,Main Branch,Taguig,Senior,18515.62,2.68,4,#F0FF33
+445,446,2,Main Branch,Pasig City,Junior,23928.00,1.79,1,#33FFF0
+446,447,3,Main Branch,Taguig,Mid-Level,16860.69,4.47,3,#3357FF
+447,448,7,West Branch,Taguig,Lead,43196.75,1.88,3,#F033FF
+448,449,3,East Branch,Manila,Lead,48087.93,8.01,1,#F0FF33
+449,450,2,South Branch,Manila,Junior,15146.22,7.45,2,#33FFF0
+450,451,2,East Branch,Taguig,Junior,27328.01,3.53,4,#33FFF0
+451,452,10,North Branch,Manila,Senior,29990.86,9.50,1,#FF5733
+452,453,4,West Branch,Pasig City,Lead,43476.46,3.42,2,#FF5733
+453,454,2,South Branch,Quezon City,Lead,39094.54,1.07,4,#33FF57
+454,455,9,South Branch,Quezon City,Lead,43125.85,6.54,4,#F033FF
+455,456,1,North Branch,Taguig,Mid-Level,22352.30,5.78,1,#33FF57
+456,457,10,North Branch,Quezon City,Junior,42763.04,4.10,3,#33FFF0
+457,458,1,West Branch,Makati City,Junior,29571.17,6.10,3,#3357FF
+458,459,6,North Branch,Manila,Mid-Level,24621.23,1.89,3,#33FFF0
+459,460,5,South Branch,Makati City,Mid-Level,49430.82,4.28,3,#F033FF
+460,461,3,East Branch,Manila,Mid-Level,19777.11,9.79,4,#FF5733
+461,462,3,Main Branch,Pasig City,Lead,35065.52,6.12,1,#F0FF33
+462,463,5,East Branch,Pasig City,Mid-Level,45325.01,4.05,1,#F033FF
+463,464,7,North Branch,Makati City,Mid-Level,39058.45,6.71,2,#3357FF
+464,465,1,East Branch,Makati City,Senior,25651.04,3.18,1,#33FF57
+465,466,2,Main Branch,Taguig,Lead,32087.91,3.75,2,#33FFF0
+466,467,7,West Branch,Taguig,Lead,16997.40,1.20,1,#33FFF0
+467,468,6,West Branch,Pasig City,Senior,26302.60,8.22,2,#FF5733
+468,469,7,South Branch,Manila,Lead,23967.81,9.40,4,#F033FF
+469,470,2,South Branch,Pasig City,Senior,47655.89,6.07,3,#F033FF
+470,471,2,West Branch,Quezon City,Senior,49484.42,5.76,1,#3357FF
+471,472,5,Main Branch,Makati City,Mid-Level,41599.43,4.47,1,#FF5733
+472,473,2,East Branch,Quezon City,Mid-Level,39453.96,4.46,1,#3357FF
+473,474,3,East Branch,Manila,Junior,28422.28,1.86,1,#33FF57
+474,475,4,North Branch,Taguig,Mid-Level,42473.06,5.07,3,#F033FF
+475,476,9,East Branch,Makati City,Junior,30042.18,6.40,2,#33FFF0
+476,477,4,West Branch,Pasig City,Senior,16744.69,9.11,1,#33FFF0
+477,478,4,South Branch,Makati City,Lead,42004.71,5.63,4,#3357FF
+478,479,7,Main Branch,Taguig,Senior,19795.04,1.06,1,#FF5733
+479,480,5,Main Branch,Taguig,Senior,28031.48,4.39,3,#33FF57
+480,481,4,South Branch,Makati City,Senior,23059.08,5.95,1,#33FFF0
+481,482,8,North Branch,Taguig,Junior,46652.48,2.18,2,#F033FF
+482,483,6,South Branch,Quezon City,Senior,38041.66,1.98,1,#33FF57
+483,484,2,East Branch,Makati City,Junior,39118.31,5.93,3,#FF5733
+484,485,5,East Branch,Pasig City,Senior,35172.64,7.10,4,#F0FF33
+485,486,1,Main Branch,Taguig,Junior,49318.75,5.87,4,#F033FF
+486,487,7,Main Branch,Manila,Junior,18513.73,9.78,1,#3357FF
+487,488,8,North Branch,Quezon City,Lead,33849.64,3.45,2,#3357FF
+488,489,1,East Branch,Pasig City,Junior,34013.57,6.69,1,#F0FF33
+489,490,9,North Branch,Manila,Mid-Level,39182.38,2.04,3,#F033FF
+490,491,3,East Branch,Pasig City,Mid-Level,34370.11,8.66,3,#3357FF
+491,492,2,North Branch,Pasig City,Junior,22407.91,2.13,4,#33FF57
+492,493,6,North Branch,Quezon City,Junior,32606.62,9.88,4,#F0FF33
+493,494,7,Main Branch,Taguig,Lead,26253.51,6.66,3,#33FF57
+494,495,1,West Branch,Pasig City,Lead,28961.93,1.02,3,#FF5733
+495,496,1,North Branch,Makati City,Lead,21181.86,9.39,2,#FF5733
+496,497,4,North Branch,Pasig City,Senior,34567.61,9.27,3,#FF5733
+497,498,8,North Branch,Pasig City,Junior,17742.45,8.73,2,#F0FF33
+498,499,1,East Branch,Pasig City,Lead,37872.71,8.64,2,#33FFF0
+499,500,4,South Branch,Pasig City,Senior,15349.13,3.05,2,#F033FF

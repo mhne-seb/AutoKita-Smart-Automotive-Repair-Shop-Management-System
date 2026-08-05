@@ -1,0 +1,6 @@
+id,full_name,email,password,contact_number,role,hire_date,EOC,status
+1,John Doe,owner@autokita.com,password123_e1,09123456781,owner,2023-01-01,,active
+2,Mike Wrench,mech1@autokita.com,password123_e2,09123456782,mechanic,2023-01-01,,active
+3,Steve Bolt,mech2@autokita.com,password123_e3,09123456783,mechanic,2023-01-01,,active
+4,Sarah Finance,sarah@autokita.com,password123_e4,09123456786,finance_adviser,2023-01-01,,active
+5,Tom Clean,tom@autokita.com,password123_e5,09123456787,cleaner,2023-01-01,,active

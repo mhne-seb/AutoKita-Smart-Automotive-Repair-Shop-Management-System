@@ -1,0 +1,501 @@
+id,job_order_id,name,notes,status,photo,findings_description,logged_date
+1,380,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-01-08 21:56:21.312132
+2,298,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-08-20 05:19:42.312132
+3,64,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-03-15 14:06:15.312132
+4,444,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-06-24 00:04:29.312132
+5,274,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-09-27 14:44:47.312132
+6,266,,,,,No major issues found during standard multipoint inspection.,2025-12-15 09:10:40.312132
+7,476,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-01-10 16:50:50.312132
+8,250,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-06-22 08:01:42.312132
+9,253,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-12-05 21:57:00.312132
+10,425,,,,,No major issues found during standard multipoint inspection.,2026-01-19 00:30:19.312132
+11,100,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-10-23 00:50:43.312132
+12,434,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-11-02 22:25:48.312132
+13,466,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-09-05 17:57:15.312132
+14,451,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-09-20 00:44:03.312132
+15,271,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-07-06 09:36:47.312132
+16,189,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-05-15 20:47:54.312132
+17,220,,,,,No major issues found during standard multipoint inspection.,2025-09-25 21:40:14.312132
+18,145,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-11-04 23:19:33.312132
+19,212,,,,,No major issues found during standard multipoint inspection.,2026-05-14 21:52:48.312132
+20,450,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-12-25 00:23:50.312132
+21,84,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-12-20 12:46:30.312132
+22,510,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-06-19 05:35:41.312132
+23,332,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-07-31 13:12:04.312132
+24,94,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-03-19 10:38:49.312132
+25,281,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-03-03 02:19:19.312132
+26,264,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-05-08 10:53:05.312132
+27,212,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-05-14 21:52:48.312132
+28,466,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-09-05 16:57:15.312132
+29,39,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-09-17 00:34:46.312132
+30,79,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-07-05 14:56:53.312132
+31,91,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-01-29 04:07:42.312132
+32,235,,,,,No major issues found during standard multipoint inspection.,2025-12-02 04:11:55.312132
+33,291,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-02-17 16:41:13.312132
+34,257,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-10-19 03:28:49.312132
+35,188,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-08-21 05:24:56.312132
+36,72,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-01-15 05:31:41.312132
+37,267,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-11-27 13:47:29.312132
+38,419,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-11-07 05:30:09.312132
+39,312,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-12-05 09:00:23.312132
+40,200,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-11-01 07:51:25.312132
+41,395,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-08-15 20:47:20.312132
+42,367,,,,,No major issues found during standard multipoint inspection.,2026-05-26 16:05:36.312132
+43,317,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-12-03 06:17:50.312132
+44,113,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-11-30 17:49:01.312132
+45,240,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-11-30 21:25:54.312132
+46,262,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-02-10 04:06:12.312132
+47,94,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-03-19 08:38:49.312132
+48,216,,,,,No major issues found during standard multipoint inspection.,2025-10-16 23:00:36.312132
+49,210,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-10-01 18:04:00.312132
+50,204,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-05-20 05:56:31.312132
+51,136,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-02-15 07:02:45.312132
+52,495,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-06-20 15:37:15.312132
+53,1,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-01-07 00:24:39.312132
+54,225,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-10-02 09:21:52.312132
+55,24,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-10-09 01:54:32.312132
+56,115,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-11-15 03:49:13.312132
+57,83,,,,,No major issues found during standard multipoint inspection.,2025-08-06 09:24:43.312132
+58,375,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-09-05 02:28:57.312132
+59,216,,,,,No major issues found during standard multipoint inspection.,2025-10-16 23:00:36.312132
+60,234,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-10-29 00:21:25.312132
+61,103,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-11-18 15:32:33.312132
+62,65,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-02-06 18:43:13.312132
+63,456,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-10-28 18:07:59.312132
+64,47,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-02-13 22:23:50.312132
+65,76,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-02-10 12:40:29.312132
+66,43,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-07-19 03:32:24.312132
+67,414,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-02-10 20:57:15.312132
+68,64,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-03-15 13:06:15.312132
+69,83,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-08-06 10:24:43.312132
+70,186,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-02-15 01:36:53.312132
+71,58,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-11-04 23:55:31.312132
+72,502,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-06-20 04:35:41.312132
+73,478,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-04-26 04:40:58.312132
+74,110,,,,,No major issues found during standard multipoint inspection.,2025-12-21 15:27:40.312132
+75,384,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-05-31 01:51:44.312132
+76,170,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-11-04 09:36:18.312132
+77,302,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-11-28 01:54:42.312132
+78,111,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-07-07 21:24:49.312132
+79,314,,,,,No major issues found during standard multipoint inspection.,2026-03-12 16:17:56.312132
+80,76,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-02-10 10:40:29.312132
+81,75,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-05-27 01:23:43.312132
+82,438,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-06-17 10:35:32.312132
+83,502,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-06-20 04:35:41.312132
+84,287,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-07-17 04:19:24.312132
+85,285,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-01-25 21:48:45.312132
+86,188,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-08-21 05:24:56.312132
+87,466,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-09-05 19:57:15.312132
+88,499,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-05-02 16:09:38.312132
+89,403,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-12-16 06:34:53.312132
+90,54,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-04-20 03:06:29.312132
+91,109,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-05-29 13:26:29.312132
+92,442,,,,,No major issues found during standard multipoint inspection.,2026-03-10 02:41:16.312132
+93,98,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-05-05 09:28:10.312132
+94,502,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-06-20 04:35:41.312132
+95,326,,,,,No major issues found during standard multipoint inspection.,2025-08-07 12:35:34.312132
+96,408,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-08-26 00:00:56.312132
+97,125,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-03-17 18:43:11.312132
+98,150,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-02-28 05:23:51.312132
+99,421,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-03-21 14:07:06.312132
+100,142,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-01-08 07:53:37.312132
+101,71,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-03-29 00:28:57.312132
+102,59,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-06-06 09:41:17.312132
+103,99,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-04-11 09:36:19.312132
+104,153,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-10-21 11:08:50.312132
+105,154,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-12-15 10:47:06.312132
+106,176,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-06-26 21:23:25.312132
+107,503,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-07-03 05:35:41.312132
+108,252,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-12-02 13:05:45.312132
+109,388,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-01-09 09:15:50.312132
+110,171,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-12-17 07:31:44.312132
+111,321,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-03-05 02:32:31.312132
+112,167,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-06-16 04:30:48.312132
+113,332,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-07-31 14:12:04.312132
+114,136,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-02-15 05:02:45.312132
+115,12,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-07-21 10:52:38.312132
+116,511,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-07-30 06:35:41.312132
+117,256,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-04-19 13:57:51.312132
+118,99,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-04-11 07:36:19.312132
+119,160,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-08-28 23:50:56.312132
+120,512,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-07-07 06:35:41.312132
+121,33,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-12-22 07:15:04.312132
+122,400,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-06-22 03:15:43.312132
+123,326,,,,,No major issues found during standard multipoint inspection.,2025-08-07 12:35:34.312132
+124,84,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-12-20 09:46:30.312132
+125,444,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-06-23 22:04:29.312132
+126,447,,,,,No major issues found during standard multipoint inspection.,2026-04-08 16:26:59.312132
+127,401,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-02-11 00:51:55.312132
+128,292,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-06-03 13:15:54.312132
+129,407,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-05-22 06:56:11.312132
+130,141,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-12-19 16:10:45.312132
+131,91,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-01-29 01:07:42.312132
+132,12,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-07-21 08:52:38.312132
+133,344,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-10-24 16:48:53.312132
+134,459,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-11-08 00:12:41.312132
+135,145,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-11-05 00:19:33.312132
+136,225,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-10-02 06:21:52.312132
+137,210,,,,,No major issues found during standard multipoint inspection.,2025-10-01 21:04:00.312132
+138,181,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-11-04 15:17:32.312132
+139,445,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-03-17 23:27:41.312132
+140,331,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-02-22 11:57:17.312132
+141,336,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-11-23 01:33:02.312132
+142,52,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-11-15 23:13:36.312132
+143,161,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-06-16 01:29:23.312132
+144,362,,,,,No major issues found during standard multipoint inspection.,2025-08-10 17:28:35.312132
+145,145,,,,,No major issues found during standard multipoint inspection.,2025-11-05 01:19:33.312132
+146,352,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-03-14 22:08:15.312132
+147,214,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-11-25 21:28:13.312132
+148,226,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-08-20 15:27:15.312132
+149,5,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-09-24 13:16:19.312132
+150,199,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-07-12 03:46:24.312132
+151,496,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-02-21 20:42:11.312132
+152,46,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-07-18 11:31:07.312132
+153,178,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-09-30 21:28:46.312132
+154,77,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-12-12 16:16:21.312132
+155,14,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-03-16 05:36:02.312132
+156,234,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-10-29 02:21:25.312132
+157,224,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-01-30 01:47:37.312132
+158,371,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-01-28 06:02:59.312132
+159,488,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-12-19 05:39:40.312132
+160,7,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-03-23 12:37:11.312132
+161,322,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-06-05 10:54:02.312132
+162,511,,,,,No major issues found during standard multipoint inspection.,2026-07-30 06:35:41.312132
+163,488,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-12-19 06:39:40.312132
+164,331,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-02-22 10:57:17.312132
+165,205,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-04-02 08:17:23.312132
+166,250,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-06-22 09:01:42.312132
+167,333,,,,,No major issues found during standard multipoint inspection.,2026-07-23 05:30:24.312132
+168,249,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-01-16 03:38:24.312132
+169,206,,,,,No major issues found during standard multipoint inspection.,2026-07-12 03:18:29.312132
+170,31,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-07-25 09:59:44.312132
+171,293,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-02-23 00:41:07.312132
+172,454,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-02-26 17:29:15.312132
+173,311,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-02-17 23:01:02.312132
+174,110,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-12-21 15:27:40.312132
+175,314,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-03-12 15:17:56.312132
+176,26,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-06-28 21:04:33.312132
+177,510,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-06-19 06:35:41.312132
+178,118,,,,,No major issues found during standard multipoint inspection.,2026-01-16 03:04:53.312132
+179,91,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-01-29 01:07:42.312132
+180,130,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-01-18 07:05:36.312132
+181,21,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-08-23 00:14:34.312132
+182,316,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-01-28 02:39:05.312132
+183,489,,,,,No major issues found during standard multipoint inspection.,2025-08-29 15:33:13.312132
+184,58,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-11-04 22:55:31.312132
+185,428,,,,,No major issues found during standard multipoint inspection.,2025-12-16 23:36:09.312132
+186,71,,,,,No major issues found during standard multipoint inspection.,2026-03-29 01:28:57.312132
+187,134,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-08-10 04:44:51.312132
+188,434,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-11-02 20:25:48.312132
+189,159,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-10-22 09:36:10.312132
+190,69,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-05-16 05:36:35.312132
+191,362,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-08-10 17:28:35.312132
+192,320,,,,,No major issues found during standard multipoint inspection.,2025-09-13 06:03:35.312132
+193,375,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-09-05 02:28:57.312132
+194,385,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-05-20 00:18:10.312132
+195,370,,,,,No major issues found during standard multipoint inspection.,2026-03-19 11:17:15.312132
+196,96,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-06-18 03:13:21.312132
+197,349,,,,,No major issues found during standard multipoint inspection.,2026-02-05 23:21:16.312132
+198,80,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-09-02 12:59:58.312132
+199,429,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-03-23 14:40:04.312132
+200,321,,,,,No major issues found during standard multipoint inspection.,2026-03-05 00:32:31.312132
+201,117,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-03-10 20:45:25.312132
+202,211,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-02-23 23:22:53.312132
+203,197,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-10-14 10:24:23.312132
+204,229,,,,,No major issues found during standard multipoint inspection.,2026-06-20 17:55:23.312132
+205,261,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-03-28 13:10:35.312132
+206,482,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-11-19 23:41:14.312132
+207,285,,,,,No major issues found during standard multipoint inspection.,2026-01-25 23:48:45.312132
+208,140,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-07-26 07:40:39.312132
+209,247,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-12-29 01:46:39.312132
+210,233,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-02-02 14:29:57.312132
+211,11,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-10-18 16:14:23.312132
+212,23,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-10-09 20:05:15.312132
+213,196,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-10-07 03:23:17.312132
+214,148,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-05-22 13:51:38.312132
+215,491,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-02-28 00:01:11.312132
+216,473,,,,,No major issues found during standard multipoint inspection.,2026-07-09 09:01:59.312132
+217,21,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-08-22 22:14:34.312132
+218,194,,,,,No major issues found during standard multipoint inspection.,2025-12-22 13:21:50.312132
+219,429,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-03-23 12:40:04.312132
+220,176,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-06-26 21:23:25.312132
+221,226,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-08-20 17:27:15.312132
+222,135,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-01-25 05:03:55.312132
+223,454,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-02-26 17:29:15.312132
+224,80,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-09-02 10:59:58.312132
+225,33,,,,,No major issues found during standard multipoint inspection.,2025-12-22 07:15:04.312132
+226,406,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-05-31 19:31:11.312132
+227,407,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-05-22 08:56:11.312132
+228,231,,,,,No major issues found during standard multipoint inspection.,2025-11-28 04:47:30.312132
+229,501,,,,,No major issues found during standard multipoint inspection.,2026-07-08 03:35:41.312132
+230,422,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-01-05 23:55:56.312132
+231,318,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-01-22 01:25:11.312132
+232,359,,,,,No major issues found during standard multipoint inspection.,2026-03-11 12:22:52.312132
+233,278,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-11-09 20:32:12.312132
+234,91,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-01-29 04:07:42.312132
+235,375,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-09-05 01:28:57.312132
+236,28,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-12-03 12:41:22.312132
+237,411,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-03-07 05:53:06.312132
+238,386,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-04-04 17:47:04.312132
+239,297,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-05-28 05:10:14.312132
+240,459,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-11-07 21:12:41.312132
+241,162,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-08-05 15:13:49.312132
+242,260,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-10-25 18:51:52.312132
+243,260,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-10-25 19:51:52.312132
+244,175,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-09-26 10:38:44.312132
+245,87,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-09-28 19:04:29.312132
+246,93,,,,,No major issues found during standard multipoint inspection.,2026-06-05 17:08:13.312132
+247,254,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-03-18 06:54:32.312132
+248,156,,,,,No major issues found during standard multipoint inspection.,2026-05-26 14:27:00.312132
+249,402,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-10-31 13:36:35.312132
+250,220,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-09-25 18:40:14.312132
+251,55,,,,,No major issues found during standard multipoint inspection.,2026-05-16 19:51:37.312132
+252,252,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-12-02 14:05:45.312132
+253,347,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-03-17 17:46:57.312132
+254,8,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-12-26 15:36:06.312132
+255,420,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-11-06 20:59:33.312132
+256,217,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-08-14 13:16:00.312132
+257,315,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-12-25 15:30:29.312132
+258,453,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-04-30 10:14:32.312132
+259,308,,,,,No major issues found during standard multipoint inspection.,2026-07-22 13:17:31.312132
+260,49,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-01-16 02:27:51.312132
+261,443,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-11-11 06:56:11.312132
+262,226,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-08-20 15:27:15.312132
+263,113,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-11-30 16:49:01.312132
+264,407,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-05-22 09:56:11.312132
+265,454,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-02-26 20:29:15.312132
+266,484,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-10-02 21:50:21.312132
+267,447,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-04-08 18:26:59.312132
+268,453,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-04-30 12:14:32.312132
+269,69,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-05-16 07:36:35.312132
+270,267,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-11-27 12:47:29.312132
+271,489,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-08-29 15:33:13.312132
+272,428,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-12-16 21:36:09.312132
+273,192,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-11-10 15:51:08.312132
+274,485,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-06-10 00:06:53.312132
+275,372,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-02-07 05:17:28.312132
+276,470,,,,,No major issues found during standard multipoint inspection.,2025-10-13 04:35:30.312132
+277,139,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-10-28 14:38:22.312132
+278,389,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-03-13 09:39:44.312132
+279,224,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-01-30 02:47:37.312132
+280,132,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-04-20 17:56:06.312132
+281,437,,,,,No major issues found during standard multipoint inspection.,2025-08-16 14:44:12.312132
+282,41,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-05-25 03:20:42.312132
+283,493,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-03-10 05:05:36.312132
+284,14,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-03-16 04:36:02.312132
+285,95,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-08-16 09:18:43.312132
+286,383,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-08-05 16:03:41.312132
+287,158,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-08-15 18:13:39.312132
+288,330,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-10-23 00:32:19.312132
+289,267,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-11-27 15:47:29.312132
+290,442,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-03-10 01:41:16.312132
+291,76,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-02-10 13:40:29.312132
+292,214,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-11-25 20:28:13.312132
+293,43,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-07-19 05:32:24.312132
+294,417,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-01-31 11:20:02.312132
+295,148,,,,,No major issues found during standard multipoint inspection.,2026-05-22 11:51:38.312132
+296,2,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-02-19 07:01:43.312132
+297,310,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-02-23 23:08:11.312132
+298,280,,,,,No major issues found during standard multipoint inspection.,2026-05-29 18:16:59.312132
+299,304,,,,,No major issues found during standard multipoint inspection.,2026-04-02 06:17:49.312132
+300,192,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-11-10 14:51:08.312132
+301,251,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-07-19 20:25:08.312132
+302,425,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-01-18 23:30:19.312132
+303,54,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-04-20 03:06:29.312132
+304,80,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-09-02 11:59:58.312132
+305,75,,,,,No major issues found during standard multipoint inspection.,2026-05-26 23:23:43.312132
+306,119,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-08-05 22:56:24.312132
+307,174,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-03-28 02:12:10.312132
+308,238,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-03-07 11:50:27.312132
+309,4,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-02-05 15:51:04.312132
+310,37,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-02-24 23:39:03.312132
+311,251,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-07-19 17:25:08.312132
+312,218,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-05-05 06:14:35.312132
+313,126,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-01-26 13:04:06.312132
+314,125,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-03-17 19:43:11.312132
+315,520,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-07-18 04:35:41.312132
+316,289,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-06-29 14:25:44.312132
+317,53,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-01-01 04:39:31.312132
+318,11,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-10-18 15:14:23.312132
+319,464,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-12-25 00:49:45.312132
+320,88,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-07-23 08:39:25.312132
+321,209,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-03-14 12:23:00.312132
+322,311,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-02-17 21:01:02.312132
+323,462,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-01-29 15:33:45.312132
+324,400,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-06-22 01:15:43.312132
+325,60,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-09-20 06:40:35.312132
+326,131,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-07-22 05:09:28.312132
+327,102,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-01-30 16:19:12.312132
+328,300,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-05-27 20:51:01.312132
+329,280,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-05-29 18:16:59.312132
+330,277,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-02-03 23:41:07.312132
+331,57,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-05-02 09:49:37.312132
+332,262,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-02-10 04:06:12.312132
+333,163,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-10-08 00:14:41.312132
+334,271,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-07-06 09:36:47.312132
+335,268,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-03-26 13:45:12.312132
+336,22,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-03-03 18:27:03.312132
+337,6,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-01-07 20:01:52.312132
+338,309,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-05-21 03:05:19.312132
+339,371,,,,,No major issues found during standard multipoint inspection.,2026-01-28 03:02:59.312132
+340,488,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-12-19 05:39:40.312132
+341,18,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-06-20 18:52:18.312132
+342,219,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-10-20 22:00:21.312132
+343,279,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-05-20 01:38:26.312132
+344,233,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-02-02 16:29:57.312132
+345,248,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-07-04 08:37:10.312132
+346,120,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-07-25 18:12:26.312132
+347,33,,,,,No major issues found during standard multipoint inspection.,2025-12-22 08:15:04.312132
+348,82,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-10-06 00:17:07.312132
+349,256,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-04-19 11:57:51.312132
+350,177,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-01-05 23:02:50.312132
+351,123,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-09-05 02:54:31.312132
+352,211,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-02-24 02:22:53.312132
+353,315,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-12-25 12:30:29.312132
+354,239,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-01-04 02:35:29.312132
+355,299,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-08-09 15:10:01.312132
+356,141,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-12-19 16:10:45.312132
+357,430,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-02-13 01:49:06.312132
+358,430,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-02-13 02:49:06.312132
+359,353,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-09-08 21:32:35.312132
+360,392,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-04-23 22:03:24.312132
+361,276,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-06-16 06:29:32.312132
+362,355,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-01-28 08:04:54.312132
+363,133,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-12-25 07:00:59.312132
+364,311,,,,,No major issues found during standard multipoint inspection.,2026-02-17 20:01:02.312132
+365,394,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-05-16 06:40:02.312132
+366,475,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-03-28 10:21:30.312132
+367,174,,,,,No major issues found during standard multipoint inspection.,2026-03-28 01:12:10.312132
+368,22,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-03-03 18:27:03.312132
+369,278,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-11-09 18:32:12.312132
+370,250,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-06-22 10:01:42.312132
+371,144,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-04-30 05:19:58.312132
+372,49,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-01-16 03:27:51.312132
+373,237,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-11-19 10:52:26.312132
+374,301,,,,,No major issues found during standard multipoint inspection.,2026-05-26 17:27:26.312132
+375,479,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-05-28 11:51:54.312132
+376,193,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-06-15 02:23:30.312132
+377,506,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-06-13 06:35:41.312132
+378,254,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-03-18 08:54:32.312132
+379,366,,,,,No major issues found during standard multipoint inspection.,2026-04-27 14:16:27.312132
+380,74,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-10-17 05:34:30.312132
+381,376,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-01-13 12:58:59.312132
+382,236,,,,,No major issues found during standard multipoint inspection.,2026-04-13 22:18:24.312132
+383,24,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-10-09 01:54:32.312132
+384,420,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-11-06 19:59:33.312132
+385,443,,,,,No major issues found during standard multipoint inspection.,2025-11-11 06:56:11.312132
+386,499,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-05-02 14:09:38.312132
+387,443,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-11-11 06:56:11.312132
+388,272,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-08-11 09:02:08.312132
+389,223,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-05-21 19:37:59.312132
+390,467,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-04-06 14:09:24.312132
+391,293,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-02-23 02:41:07.312132
+392,343,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-09-11 19:02:15.312132
+393,247,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-12-29 00:46:39.312132
+394,232,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-09-21 00:27:54.312132
+395,189,,,,,No major issues found during standard multipoint inspection.,2026-05-15 18:47:54.312132
+396,74,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-10-17 05:34:30.312132
+397,177,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-01-05 23:02:50.312132
+398,479,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-05-28 09:51:54.312132
+399,424,,,,,No major issues found during standard multipoint inspection.,2026-07-01 02:27:08.312132
+400,131,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-07-22 04:09:28.312132
+401,513,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-07-31 06:35:41.312132
+402,360,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-05-08 18:40:07.312132
+403,221,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-02-21 02:43:31.312132
+404,300,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-05-27 18:51:01.312132
+405,16,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-10-08 00:25:29.312132
+406,281,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-03-03 05:19:19.312132
+407,376,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-01-13 10:58:59.312132
+408,444,,,,,No major issues found during standard multipoint inspection.,2026-06-24 01:04:29.312132
+409,104,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-02-10 01:47:36.312132
+410,31,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-07-25 08:59:44.312132
+411,170,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-11-04 08:36:18.312132
+412,264,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-05-08 10:53:05.312132
+413,326,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-08-07 14:35:34.312132
+414,237,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-11-19 10:52:26.312132
+415,105,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-03-01 13:17:02.312132
+416,222,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-02-26 11:45:20.312132
+417,361,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-09-02 06:54:18.312132
+418,318,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-01-22 01:25:11.312132
+419,477,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-05-23 01:22:17.312132
+420,314,,,,,No major issues found during standard multipoint inspection.,2026-03-12 16:17:56.312132
+421,81,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-03-17 15:36:13.312132
+422,327,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-05-14 19:44:15.312132
+423,336,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-11-23 03:33:02.312132
+424,69,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-05-16 05:36:35.312132
+425,131,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-07-22 05:09:28.312132
+426,198,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-05-03 16:51:07.312132
+427,265,,,,,No major issues found during standard multipoint inspection.,2026-05-29 10:38:16.312132
+428,172,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-03-17 16:51:20.312132
+429,457,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-12-03 00:58:15.312132
+430,55,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-05-16 19:51:37.312132
+431,457,,,,,No major issues found during standard multipoint inspection.,2025-12-03 03:58:15.312132
+432,43,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-07-19 03:32:24.312132
+433,407,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-05-22 07:56:11.312132
+434,152,,,,,No major issues found during standard multipoint inspection.,2025-09-05 04:18:37.312132
+435,32,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-08-19 07:38:57.312132
+436,41,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-05-25 03:20:42.312132
+437,503,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-07-03 03:35:41.312132
+438,325,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2025-11-16 23:36:50.312132
+439,513,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-07-31 04:35:41.312132
+440,241,,,,,No major issues found during standard multipoint inspection.,2026-05-16 03:32:14.312132
+441,345,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-03-27 15:59:47.312132
+442,302,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-11-27 22:54:42.312132
+443,432,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-02-02 21:40:47.312132
+444,318,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-01-22 01:25:11.312132
+445,379,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-04-26 05:13:42.312132
+446,255,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-01-15 11:04:52.312132
+447,506,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-06-13 03:35:41.312132
+448,124,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-06-16 18:28:28.312132
+449,296,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-11-10 20:35:53.312132
+450,358,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-01-05 11:02:12.312132
+451,231,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-11-28 02:47:30.312132
+452,191,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-03-07 13:00:28.312132
+453,161,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-06-16 03:29:23.312132
+454,381,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-11-30 00:37:24.312132
+455,228,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-02-15 01:41:18.312132
+456,423,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2025-10-07 17:25:14.312132
+457,143,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-03-09 07:25:49.312132
+458,218,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-05-05 08:14:35.312132
+459,327,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-05-14 20:44:15.312132
+460,223,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-05-21 18:37:59.312132
+461,465,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-04-16 19:46:15.312132
+462,53,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-01-01 06:39:31.312132
+463,484,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-10-02 23:50:21.312132
+464,509,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-07-10 04:35:41.312132
+465,295,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-06-21 04:02:39.312132
+466,389,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-03-13 10:39:44.312132
+467,143,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-03-09 08:25:49.312132
+468,19,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-03-12 18:06:35.312132
+469,309,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-05-21 05:05:19.312132
+470,42,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-08-01 15:59:26.312132
+471,261,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-03-28 13:10:35.312132
+472,203,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-12-27 13:56:13.312132
+473,326,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2025-08-07 14:35:34.312132
+474,214,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-11-25 18:28:13.312132
+475,360,,,,,No major issues found during standard multipoint inspection.,2026-05-08 18:40:07.312132
+476,145,,,,,No major issues found during standard multipoint inspection.,2025-11-04 22:19:33.312132
+477,479,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-05-28 12:51:54.312132
+478,47,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-02-13 23:23:50.312132
+479,101,,,,,All fluid levels are normal. Brake pads are at 40% life.,2025-10-01 13:42:15.312132
+480,284,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-11-11 07:53:28.312132
+481,174,,,,,Tire tread depth is below safety limits on rear tires. Recommended replacement.,2026-03-28 00:12:10.312132
+482,275,,,,,No major issues found during standard multipoint inspection.,2026-02-28 02:04:54.312132
+483,512,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-07-07 05:35:41.312132
+484,471,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2026-05-27 23:14:02.312132
+485,144,,,,,No major issues found during standard multipoint inspection.,2026-04-30 06:19:58.312132
+486,219,,,,,Battery health is at 65%. Terminals cleaned due to minor corrosion.,2025-10-20 23:00:21.312132
+487,132,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-04-20 16:56:06.312132
+488,322,,,,,Suspension check complete. Front right strut is leaking and requires replacement.,2026-06-05 07:54:02.312132
+489,397,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2025-10-25 15:10:59.312132
+490,389,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2026-03-13 09:39:44.312132
+491,431,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-08-19 12:52:18.312132
+492,295,,,,,"Scanned for OBD2 codes. Found history code for O2 sensor, but currently not active.",2026-06-21 04:02:39.312132
+493,518,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-07-31 05:35:41.312132
+494,200,,,,,No major issues found during standard multipoint inspection.,2025-11-01 09:51:25.312132
+495,483,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-07-22 09:00:36.312132
+496,90,,,,,Vehicle inspected. Found minor oil leak near the valve cover gasket.,2026-02-25 08:38:37.312132
+497,110,,,,,Coolant level is low. Pressure tested system and found small leak at the radiator hose.,2025-12-21 15:27:40.312132
+498,25,,,,,All fluid levels are normal. Brake pads are at 40% life.,2026-03-23 11:27:50.312132
+499,116,,,,,No major issues found during standard multipoint inspection.,2026-06-01 01:44:44.312132
+500,363,,,,,No major issues found during standard multipoint inspection.,2026-07-21 19:25:07.312132

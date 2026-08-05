@@ -1,0 +1,1501 @@
+id,job_order_id,activity_description,log_time
+1,143,Old components successfully removed. Cleaning mounting surfaces.,2026-07-12 06:02:39.293298
+2,403,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-17 22:21:22.293298
+3,454,Initial repairs complete. Proceeding with system calibration and testing.,2025-10-06 22:29:27.293298
+4,446,Waiting on customer approval for additional minor findings.,2025-10-19 08:54:55.293298
+5,113,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-26 21:25:02.293298
+6,392,Waiting on customer approval for additional minor findings.,2026-07-05 09:41:08.293298
+7,191,Old components successfully removed. Cleaning mounting surfaces.,2026-06-29 05:06:58.293298
+8,380,Washing and detailing vehicle exterior before final release.,2025-10-18 17:53:08.293298
+9,492,Waiting on customer approval for additional minor findings.,2026-01-23 22:04:39.293298
+10,342,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-26 19:31:46.293298
+11,57,Waiting on customer approval for additional minor findings.,2026-07-26 13:12:49.293298
+12,502,Old components successfully removed. Cleaning mounting surfaces.,2026-06-30 01:35:38.293298
+13,464,Road test completed successfully. Vehicle handles as expected.,2026-06-16 20:26:34.293298
+14,348,Final reassembly in progress. Checking all torques and fittings.,2025-10-28 17:56:08.293298
+15,7,Washing and detailing vehicle exterior before final release.,2025-10-18 20:32:42.293298
+16,358,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-04 08:28:54.293298
+17,381,Final reassembly in progress. Checking all torques and fittings.,2025-10-05 02:18:35.293298
+18,297,Old components successfully removed. Cleaning mounting surfaces.,2026-05-12 13:47:40.293298
+19,190,Road test completed successfully. Vehicle handles as expected.,2026-02-27 01:50:57.293298
+20,149,Final reassembly in progress. Checking all torques and fittings.,2026-04-01 12:25:19.293298
+21,252,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-07 09:02:10.293298
+22,179,Vehicle moved into the service bay. Preparing tools and equipment.,2026-01-26 15:05:36.293298
+23,500,Final reassembly in progress. Checking all torques and fittings.,2026-03-10 06:00:33.293298
+24,235,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-22 02:10:25.293298
+25,390,Waiting on customer approval for additional minor findings.,2026-06-29 00:26:23.293298
+26,410,Parts have arrived from the inventory/supplier. Beginning installation.,2025-08-09 08:30:26.293298
+27,407,Washing and detailing vehicle exterior before final release.,2026-05-11 13:09:58.293298
+28,120,Old components successfully removed. Cleaning mounting surfaces.,2025-12-05 08:08:19.293298
+29,122,Old components successfully removed. Cleaning mounting surfaces.,2026-03-22 01:53:04.293298
+30,280,Initial repairs complete. Proceeding with system calibration and testing.,2025-12-10 06:47:48.293298
+31,304,Road test completed successfully. Vehicle handles as expected.,2026-04-10 00:15:06.293298
+32,217,System pressure tested. No leaks detected at this time.,2025-09-30 15:55:40.293298
+33,112,Road test completed successfully. Vehicle handles as expected.,2026-06-11 20:25:18.293298
+34,245,Washing and detailing vehicle exterior before final release.,2026-06-02 21:25:13.293298
+35,181,System pressure tested. No leaks detected at this time.,2025-09-04 05:31:49.293298
+36,35,Vehicle moved into the service bay. Preparing tools and equipment.,2026-05-03 22:18:51.293298
+37,403,Road test completed successfully. Vehicle handles as expected.,2025-12-19 14:21:22.293298
+38,71,Waiting on customer approval for additional minor findings.,2025-10-26 19:24:29.293298
+39,286,System pressure tested. No leaks detected at this time.,2026-03-18 20:09:02.293298
+40,364,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-05-18 01:36:47.293298
+41,28,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-21 22:18:04.293298
+42,121,System pressure tested. No leaks detected at this time.,2025-08-17 07:20:04.293298
+43,212,Vehicle moved into the service bay. Preparing tools and equipment.,2026-02-06 22:17:18.293298
+44,520,Initial repairs complete. Proceeding with system calibration and testing.,2026-08-07 22:35:38.293298
+45,480,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-19 00:52:54.293298
+46,42,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-19 10:12:00.293298
+47,444,Parts have arrived from the inventory/supplier. Beginning installation.,2025-09-19 17:08:59.293298
+48,210,Vehicle moved into the service bay. Preparing tools and equipment.,2026-02-03 10:33:17.293298
+49,438,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-22 04:27:10.293298
+50,472,Parts have arrived from the inventory/supplier. Beginning installation.,2025-10-24 22:15:47.293298
+51,465,Washing and detailing vehicle exterior before final release.,2025-09-15 02:16:52.293298
+52,514,Initial repairs complete. Proceeding with system calibration and testing.,2026-08-04 16:35:38.293298
+53,217,Initial repairs complete. Proceeding with system calibration and testing.,2025-10-03 11:55:40.293298
+54,365,Washing and detailing vehicle exterior before final release.,2026-07-19 15:26:34.293298
+55,447,System pressure tested. No leaks detected at this time.,2026-05-19 02:28:26.293298
+56,233,Final reassembly in progress. Checking all torques and fittings.,2025-09-26 12:39:02.293298
+57,94,Initial repairs complete. Proceeding with system calibration and testing.,2026-07-12 18:29:10.293298
+58,211,Road test completed successfully. Vehicle handles as expected.,2026-02-19 13:41:19.293298
+59,60,System pressure tested. No leaks detected at this time.,2026-01-03 12:01:08.293298
+60,177,Final reassembly in progress. Checking all torques and fittings.,2026-04-30 21:05:20.293298
+61,293,Vehicle moved into the service bay. Preparing tools and equipment.,2025-08-23 05:58:50.293298
+62,49,Washing and detailing vehicle exterior before final release.,2026-01-17 04:43:03.293298
+63,381,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-06 00:18:35.293298
+64,114,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-14 19:17:53.293298
+65,285,Initial repairs complete. Proceeding with system calibration and testing.,2026-02-23 08:01:08.293298
+66,158,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-11-11 04:09:19.293298
+67,364,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-19 13:36:47.293298
+68,302,Waiting on customer approval for additional minor findings.,2025-10-20 04:28:09.293298
+69,53,Final reassembly in progress. Checking all torques and fittings.,2026-01-09 23:48:02.293298
+70,79,Washing and detailing vehicle exterior before final release.,2025-09-14 06:33:16.293298
+71,16,Parts have arrived from the inventory/supplier. Beginning installation.,2026-04-02 00:23:16.293298
+72,46,Washing and detailing vehicle exterior before final release.,2025-08-30 02:36:16.293298
+73,86,System pressure tested. No leaks detected at this time.,2025-11-05 00:07:18.293298
+74,232,Washing and detailing vehicle exterior before final release.,2025-08-22 04:55:54.293298
+75,9,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-28 09:47:38.293298
+76,460,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-15 16:45:01.293298
+77,330,Old components successfully removed. Cleaning mounting surfaces.,2025-10-22 05:41:58.293298
+78,500,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-03-12 10:00:33.293298
+79,45,Final reassembly in progress. Checking all torques and fittings.,2025-09-22 13:07:55.293298
+80,511,Old components successfully removed. Cleaning mounting surfaces.,2026-07-11 11:35:38.293298
+81,440,Initial repairs complete. Proceeding with system calibration and testing.,2025-12-20 09:01:31.293298
+82,243,Road test completed successfully. Vehicle handles as expected.,2026-02-16 15:17:00.293298
+83,391,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-19 17:33:25.293298
+84,356,Initial repairs complete. Proceeding with system calibration and testing.,2025-10-31 07:41:24.293298
+85,501,Old components successfully removed. Cleaning mounting surfaces.,2026-07-31 08:35:38.293298
+86,497,Final reassembly in progress. Checking all torques and fittings.,2025-12-16 20:56:23.293298
+87,250,Old components successfully removed. Cleaning mounting surfaces.,2026-03-04 07:26:43.293298
+88,283,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-21 20:36:16.293298
+89,92,Washing and detailing vehicle exterior before final release.,2025-11-15 02:38:22.293298
+90,426,Parts have arrived from the inventory/supplier. Beginning installation.,2025-08-13 23:21:24.293298
+91,293,Old components successfully removed. Cleaning mounting surfaces.,2025-08-23 20:58:50.293298
+92,387,Waiting on customer approval for additional minor findings.,2026-05-06 21:54:19.293298
+93,379,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-03 20:00:53.293298
+94,180,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-03 22:34:51.293298
+95,241,Road test completed successfully. Vehicle handles as expected.,2025-12-02 01:36:38.293298
+96,160,Old components successfully removed. Cleaning mounting surfaces.,2025-12-20 12:41:44.293298
+97,2,Final reassembly in progress. Checking all torques and fittings.,2025-12-27 07:41:24.293298
+98,279,Road test completed successfully. Vehicle handles as expected.,2026-01-31 22:53:26.293298
+99,88,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-13 23:46:13.293298
+100,158,Vehicle moved into the service bay. Preparing tools and equipment.,2025-11-12 15:09:19.293298
+101,361,System pressure tested. No leaks detected at this time.,2025-11-30 18:26:48.293298
+102,323,Washing and detailing vehicle exterior before final release.,2026-05-05 17:22:21.293298
+103,358,Waiting on customer approval for additional minor findings.,2026-02-05 19:28:54.293298
+104,339,Washing and detailing vehicle exterior before final release.,2025-10-17 14:54:44.293298
+105,346,Final reassembly in progress. Checking all torques and fittings.,2025-08-19 06:06:08.293298
+106,368,Waiting on customer approval for additional minor findings.,2025-11-08 07:51:04.293298
+107,309,Road test completed successfully. Vehicle handles as expected.,2026-03-21 08:21:58.293298
+108,263,Final reassembly in progress. Checking all torques and fittings.,2026-08-04 13:22:15.293298
+109,268,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-09 12:25:13.293298
+110,439,Waiting on customer approval for additional minor findings.,2026-01-21 13:52:23.293298
+111,229,Washing and detailing vehicle exterior before final release.,2026-02-17 19:05:51.293298
+112,481,Final reassembly in progress. Checking all torques and fittings.,2026-03-28 14:34:27.293298
+113,499,System pressure tested. No leaks detected at this time.,2026-04-15 16:24:06.293298
+114,323,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-05-06 04:22:21.293298
+115,15,System pressure tested. No leaks detected at this time.,2025-12-11 09:04:43.293298
+116,283,Road test completed successfully. Vehicle handles as expected.,2026-01-21 07:36:16.293298
+117,188,Parts have arrived from the inventory/supplier. Beginning installation.,2025-08-21 13:22:32.293298
+118,121,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-16 16:20:04.293298
+119,4,Washing and detailing vehicle exterior before final release.,2026-05-07 00:31:27.293298
+120,152,Road test completed successfully. Vehicle handles as expected.,2026-01-04 11:27:22.293298
+121,232,Vehicle moved into the service bay. Preparing tools and equipment.,2025-08-21 17:55:54.293298
+122,386,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-02 08:23:18.293298
+123,517,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-18 07:35:38.293298
+124,395,Old components successfully removed. Cleaning mounting surfaces.,2025-10-29 10:46:23.293298
+125,189,Vehicle moved into the service bay. Preparing tools and equipment.,2026-04-07 05:46:11.293298
+126,56,Old components successfully removed. Cleaning mounting surfaces.,2026-03-03 11:31:02.293298
+127,274,System pressure tested. No leaks detected at this time.,2025-08-14 16:17:38.293298
+128,241,System pressure tested. No leaks detected at this time.,2025-12-01 16:36:38.293298
+129,96,Vehicle moved into the service bay. Preparing tools and equipment.,2026-05-08 11:33:12.293298
+130,406,Parts have arrived from the inventory/supplier. Beginning installation.,2025-10-16 14:22:51.293298
+131,299,Parts have arrived from the inventory/supplier. Beginning installation.,2025-11-08 07:38:59.293298
+132,63,Final reassembly in progress. Checking all torques and fittings.,2026-06-22 13:33:17.293298
+133,119,Old components successfully removed. Cleaning mounting surfaces.,2025-09-14 12:30:45.293298
+134,37,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-04 13:29:23.293298
+135,121,Old components successfully removed. Cleaning mounting surfaces.,2025-08-14 14:20:04.293298
+136,421,Vehicle moved into the service bay. Preparing tools and equipment.,2025-09-29 09:10:42.293298
+137,360,System pressure tested. No leaks detected at this time.,2025-08-20 11:56:17.293298
+138,12,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-03-27 20:19:49.293298
+139,36,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-29 10:43:21.293298
+140,423,Old components successfully removed. Cleaning mounting surfaces.,2026-01-28 23:27:55.293298
+141,64,Vehicle moved into the service bay. Preparing tools and equipment.,2026-05-11 01:33:16.293298
+142,302,Old components successfully removed. Cleaning mounting surfaces.,2025-10-18 14:28:09.293298
+143,159,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-12-29 21:20:35.293298
+144,504,Old components successfully removed. Cleaning mounting surfaces.,2026-07-12 21:35:38.293298
+145,195,Parts have arrived from the inventory/supplier. Beginning installation.,2026-04-30 16:16:50.293298
+146,4,Final reassembly in progress. Checking all torques and fittings.,2026-05-06 12:31:27.293298
+147,157,Washing and detailing vehicle exterior before final release.,2025-12-21 03:15:57.293298
+148,177,Parts have arrived from the inventory/supplier. Beginning installation.,2026-04-30 19:05:20.293298
+149,258,Initial repairs complete. Proceeding with system calibration and testing.,2026-02-09 11:24:43.293298
+150,462,Road test completed successfully. Vehicle handles as expected.,2026-02-27 14:10:53.293298
+151,158,Waiting on customer approval for additional minor findings.,2025-11-13 13:09:19.293298
+152,307,Parts have arrived from the inventory/supplier. Beginning installation.,2025-11-30 04:29:06.293298
+153,93,Final reassembly in progress. Checking all torques and fittings.,2026-04-29 18:05:57.293298
+154,138,Road test completed successfully. Vehicle handles as expected.,2025-08-09 21:23:17.293298
+155,450,Road test completed successfully. Vehicle handles as expected.,2025-08-30 13:04:19.293298
+156,276,System pressure tested. No leaks detected at this time.,2026-07-31 09:48:42.293298
+157,290,System pressure tested. No leaks detected at this time.,2025-12-10 10:20:23.293298
+158,194,Initial repairs complete. Proceeding with system calibration and testing.,2026-03-19 13:46:00.293298
+159,350,Road test completed successfully. Vehicle handles as expected.,2025-09-25 18:43:49.293298
+160,76,Parts have arrived from the inventory/supplier. Beginning installation.,2026-05-05 21:41:05.293298
+161,418,System pressure tested. No leaks detected at this time.,2026-06-16 23:54:03.293298
+162,455,Final reassembly in progress. Checking all torques and fittings.,2026-02-22 20:22:58.293298
+163,207,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-06-14 12:04:52.293298
+164,454,Road test completed successfully. Vehicle handles as expected.,2025-10-05 05:29:27.293298
+165,376,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-05 10:33:25.293298
+166,392,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-03 17:41:08.293298
+167,80,Final reassembly in progress. Checking all torques and fittings.,2026-05-26 09:43:17.293298
+168,19,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-27 20:05:14.293298
+169,337,System pressure tested. No leaks detected at this time.,2026-05-10 08:16:38.293298
+170,481,Final reassembly in progress. Checking all torques and fittings.,2026-03-28 13:34:27.293298
+171,144,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-18 15:27:47.293298
+172,105,Old components successfully removed. Cleaning mounting surfaces.,2025-12-04 23:51:42.293298
+173,298,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-19 04:07:39.293298
+174,453,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-05-14 20:10:27.293298
+175,192,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-03-10 20:28:48.293298
+176,223,Road test completed successfully. Vehicle handles as expected.,2026-01-25 05:30:28.293298
+177,502,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-27 20:35:38.293298
+178,303,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-02-09 11:30:40.293298
+179,22,Vehicle moved into the service bay. Preparing tools and equipment.,2025-09-29 00:22:30.293298
+180,497,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-16 01:56:23.293298
+181,63,Washing and detailing vehicle exterior before final release.,2026-06-22 08:33:17.293298
+182,227,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-06-01 02:57:42.293298
+183,458,Initial repairs complete. Proceeding with system calibration and testing.,2026-04-13 10:23:56.293298
+184,434,Old components successfully removed. Cleaning mounting surfaces.,2025-08-21 10:45:07.293298
+185,102,Parts have arrived from the inventory/supplier. Beginning installation.,2025-11-12 19:49:21.293298
+186,423,Vehicle moved into the service bay. Preparing tools and equipment.,2026-01-28 10:27:55.293298
+187,478,Washing and detailing vehicle exterior before final release.,2025-09-02 13:37:44.293298
+188,400,Waiting on customer approval for additional minor findings.,2026-01-24 18:13:24.293298
+189,308,Old components successfully removed. Cleaning mounting surfaces.,2026-08-02 03:39:11.293298
+190,354,Washing and detailing vehicle exterior before final release.,2025-08-07 04:22:53.293298
+191,324,Final reassembly in progress. Checking all torques and fittings.,2026-02-21 08:42:42.293298
+192,454,Washing and detailing vehicle exterior before final release.,2025-10-07 06:29:27.293298
+193,193,System pressure tested. No leaks detected at this time.,2025-09-06 04:56:13.293298
+194,57,System pressure tested. No leaks detected at this time.,2026-07-27 06:12:49.293298
+195,512,Waiting on customer approval for additional minor findings.,2026-07-14 21:35:38.293298
+196,58,Waiting on customer approval for additional minor findings.,2026-04-09 21:33:57.293298
+197,309,Road test completed successfully. Vehicle handles as expected.,2026-03-20 22:21:58.293298
+198,200,Final reassembly in progress. Checking all torques and fittings.,2025-09-11 09:14:28.293298
+199,268,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-07 17:25:13.293298
+200,132,Old components successfully removed. Cleaning mounting surfaces.,2026-05-31 11:41:20.293298
+201,163,Washing and detailing vehicle exterior before final release.,2026-02-11 11:25:59.293298
+202,216,System pressure tested. No leaks detected at this time.,2025-12-29 01:05:28.293298
+203,225,Road test completed successfully. Vehicle handles as expected.,2026-06-27 19:08:36.293298
+204,250,Washing and detailing vehicle exterior before final release.,2026-03-05 13:26:43.293298
+205,20,System pressure tested. No leaks detected at this time.,2026-03-29 08:09:06.293298
+206,18,Old components successfully removed. Cleaning mounting surfaces.,2025-12-16 23:53:57.293298
+207,255,Waiting on customer approval for additional minor findings.,2025-08-13 04:43:14.293298
+208,364,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-05-19 08:36:47.293298
+209,251,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-10-22 19:45:09.293298
+210,421,Waiting on customer approval for additional minor findings.,2025-09-29 10:10:42.293298
+211,451,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-23 14:34:42.293298
+212,261,Initial repairs complete. Proceeding with system calibration and testing.,2026-08-04 09:45:40.293298
+213,249,System pressure tested. No leaks detected at this time.,2025-12-29 07:32:27.293298
+214,197,Parts have arrived from the inventory/supplier. Beginning installation.,2025-08-16 00:28:59.293298
+215,211,Vehicle moved into the service bay. Preparing tools and equipment.,2026-02-19 12:41:19.293298
+216,97,Road test completed successfully. Vehicle handles as expected.,2026-03-28 20:22:03.293298
+217,421,Initial repairs complete. Proceeding with system calibration and testing.,2025-09-28 18:10:42.293298
+218,339,Final reassembly in progress. Checking all torques and fittings.,2025-10-17 03:54:44.293298
+219,332,Washing and detailing vehicle exterior before final release.,2026-01-13 16:40:11.293298
+220,259,Parts have arrived from the inventory/supplier. Beginning installation.,2026-04-06 11:47:00.293298
+221,411,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-10-24 08:10:16.293298
+222,479,Washing and detailing vehicle exterior before final release.,2025-12-12 20:55:59.293298
+223,401,Vehicle moved into the service bay. Preparing tools and equipment.,2026-02-01 21:43:35.293298
+224,99,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-25 12:11:53.293298
+225,140,Waiting on customer approval for additional minor findings.,2025-11-22 00:30:49.293298
+226,403,Road test completed successfully. Vehicle handles as expected.,2025-12-19 00:21:22.293298
+227,175,Road test completed successfully. Vehicle handles as expected.,2026-05-06 00:49:51.293298
+228,157,Waiting on customer approval for additional minor findings.,2025-12-20 09:15:57.293298
+229,329,System pressure tested. No leaks detected at this time.,2025-08-27 11:43:23.293298
+230,405,System pressure tested. No leaks detected at this time.,2026-01-18 15:04:45.293298
+231,503,Old components successfully removed. Cleaning mounting surfaces.,2026-08-01 03:35:38.293298
+232,430,Final reassembly in progress. Checking all torques and fittings.,2026-05-17 18:19:42.293298
+233,470,System pressure tested. No leaks detected at this time.,2025-12-03 01:42:11.293298
+234,386,Old components successfully removed. Cleaning mounting surfaces.,2025-12-31 07:23:18.293298
+235,236,Waiting on customer approval for additional minor findings.,2025-12-26 03:23:40.293298
+236,145,Final reassembly in progress. Checking all torques and fittings.,2026-06-09 08:16:41.293298
+237,16,Road test completed successfully. Vehicle handles as expected.,2026-04-03 14:23:16.293298
+238,515,System pressure tested. No leaks detected at this time.,2026-07-08 23:35:38.293298
+239,92,Parts have arrived from the inventory/supplier. Beginning installation.,2025-11-16 16:38:22.293298
+240,178,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-21 19:38:42.293298
+241,284,Parts have arrived from the inventory/supplier. Beginning installation.,2026-05-29 21:33:07.293298
+242,380,Final reassembly in progress. Checking all torques and fittings.,2025-10-16 01:53:08.293298
+243,205,Vehicle moved into the service bay. Preparing tools and equipment.,2026-06-19 15:49:07.293298
+244,107,Final reassembly in progress. Checking all torques and fittings.,2025-12-11 20:41:06.293298
+245,471,Parts have arrived from the inventory/supplier. Beginning installation.,2026-05-28 18:07:29.293298
+246,468,Final reassembly in progress. Checking all torques and fittings.,2026-03-22 22:42:30.293298
+247,29,Old components successfully removed. Cleaning mounting surfaces.,2025-08-06 16:49:30.293298
+248,119,Waiting on customer approval for additional minor findings.,2025-09-14 01:30:45.293298
+249,420,Road test completed successfully. Vehicle handles as expected.,2026-03-26 03:08:39.293298
+250,191,System pressure tested. No leaks detected at this time.,2026-06-26 19:06:58.293298
+251,298,Old components successfully removed. Cleaning mounting surfaces.,2026-06-19 06:07:39.293298
+252,371,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-10-04 10:40:03.293298
+253,439,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-21 15:52:23.293298
+254,460,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-07-16 07:45:01.293298
+255,378,Road test completed successfully. Vehicle handles as expected.,2025-12-31 20:30:57.293298
+256,332,Road test completed successfully. Vehicle handles as expected.,2026-01-13 08:40:11.293298
+257,300,Washing and detailing vehicle exterior before final release.,2025-08-18 14:23:05.293298
+258,67,Washing and detailing vehicle exterior before final release.,2026-07-17 04:33:07.293298
+259,230,Road test completed successfully. Vehicle handles as expected.,2026-06-22 00:04:03.293298
+260,173,Washing and detailing vehicle exterior before final release.,2025-12-03 08:46:26.293298
+261,286,Vehicle moved into the service bay. Preparing tools and equipment.,2026-03-16 13:09:02.293298
+262,377,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-09-18 23:14:37.293298
+263,42,Old components successfully removed. Cleaning mounting surfaces.,2026-07-18 16:12:00.293298
+264,288,Parts have arrived from the inventory/supplier. Beginning installation.,2026-07-08 08:13:35.293298
+265,459,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-08-18 14:31:32.293298
+266,196,Washing and detailing vehicle exterior before final release.,2026-08-02 14:59:54.293298
+267,238,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-31 03:54:38.293298
+268,15,Waiting on customer approval for additional minor findings.,2025-12-12 20:04:43.293298
+269,129,Vehicle moved into the service bay. Preparing tools and equipment.,2026-06-09 19:48:37.293298
+270,172,Old components successfully removed. Cleaning mounting surfaces.,2025-12-24 13:23:20.293298
+271,305,Vehicle moved into the service bay. Preparing tools and equipment.,2026-05-27 23:43:09.293298
+272,406,Waiting on customer approval for additional minor findings.,2025-10-15 22:22:51.293298
+273,212,System pressure tested. No leaks detected at this time.,2026-02-06 19:17:18.293298
+274,87,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-11 13:18:04.293298
+275,60,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-03 03:01:08.293298
+276,352,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-21 22:22:53.293298
+277,479,Washing and detailing vehicle exterior before final release.,2025-12-13 02:55:59.293298
+278,303,Waiting on customer approval for additional minor findings.,2026-02-10 13:30:40.293298
+279,216,System pressure tested. No leaks detected at this time.,2025-12-28 01:05:28.293298
+280,335,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-28 07:41:19.293298
+281,281,Road test completed successfully. Vehicle handles as expected.,2026-01-17 00:56:01.293298
+282,80,Road test completed successfully. Vehicle handles as expected.,2026-05-26 22:43:17.293298
+283,140,System pressure tested. No leaks detected at this time.,2025-11-22 07:30:49.293298
+284,438,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-12-21 08:27:10.293298
+285,507,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-06 12:35:38.293298
+286,410,Road test completed successfully. Vehicle handles as expected.,2025-08-09 14:30:26.293298
+287,399,Vehicle moved into the service bay. Preparing tools and equipment.,2025-09-10 16:12:45.293298
+288,18,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-17 06:53:57.293298
+289,14,Initial repairs complete. Proceeding with system calibration and testing.,2025-09-19 10:36:27.293298
+290,378,Washing and detailing vehicle exterior before final release.,2025-12-31 17:30:57.293298
+291,108,Road test completed successfully. Vehicle handles as expected.,2026-07-24 06:26:16.293298
+292,477,Parts have arrived from the inventory/supplier. Beginning installation.,2026-07-24 15:38:37.293298
+293,229,Old components successfully removed. Cleaning mounting surfaces.,2026-02-20 02:05:51.293298
+294,330,Final reassembly in progress. Checking all torques and fittings.,2025-10-23 05:41:58.293298
+295,14,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-09-18 03:36:27.293298
+296,434,Old components successfully removed. Cleaning mounting surfaces.,2025-08-19 03:45:07.293298
+297,100,Washing and detailing vehicle exterior before final release.,2026-06-03 18:21:05.293298
+298,464,Washing and detailing vehicle exterior before final release.,2026-06-16 05:26:34.293298
+299,224,Waiting on customer approval for additional minor findings.,2025-08-19 00:31:33.293298
+300,107,Initial repairs complete. Proceeding with system calibration and testing.,2025-12-12 17:41:06.293298
+301,432,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-17 20:28:02.293298
+302,376,System pressure tested. No leaks detected at this time.,2026-06-04 03:33:25.293298
+303,321,Old components successfully removed. Cleaning mounting surfaces.,2026-04-25 17:56:21.293298
+304,304,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-04-11 00:15:06.293298
+305,140,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-22 12:30:49.293298
+306,317,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-29 13:00:13.293298
+307,121,Parts have arrived from the inventory/supplier. Beginning installation.,2025-08-14 15:20:04.293298
+308,114,Old components successfully removed. Cleaning mounting surfaces.,2026-01-15 14:17:53.293298
+309,418,Old components successfully removed. Cleaning mounting surfaces.,2026-06-16 12:54:03.293298
+310,218,Old components successfully removed. Cleaning mounting surfaces.,2026-02-22 15:49:47.293298
+311,221,Waiting on customer approval for additional minor findings.,2025-12-04 17:11:58.293298
+312,405,Vehicle moved into the service bay. Preparing tools and equipment.,2026-01-19 22:04:45.293298
+313,209,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-02 17:56:29.293298
+314,451,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-22 00:34:42.293298
+315,427,Waiting on customer approval for additional minor findings.,2026-01-14 17:21:27.293298
+316,209,System pressure tested. No leaks detected at this time.,2026-01-05 02:56:29.293298
+317,429,Final reassembly in progress. Checking all torques and fittings.,2026-04-05 01:08:10.293298
+318,498,Parts have arrived from the inventory/supplier. Beginning installation.,2025-08-28 07:25:35.293298
+319,508,Final reassembly in progress. Checking all torques and fittings.,2026-06-16 07:35:38.293298
+320,266,System pressure tested. No leaks detected at this time.,2025-11-07 15:07:05.293298
+321,110,System pressure tested. No leaks detected at this time.,2026-01-11 11:33:07.293298
+322,46,Old components successfully removed. Cleaning mounting surfaces.,2025-08-30 03:36:16.293298
+323,238,Washing and detailing vehicle exterior before final release.,2026-06-02 05:54:38.293298
+324,230,Old components successfully removed. Cleaning mounting surfaces.,2026-06-20 11:04:03.293298
+325,44,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-21 18:11:55.293298
+326,401,Washing and detailing vehicle exterior before final release.,2026-02-01 23:43:35.293298
+327,206,Washing and detailing vehicle exterior before final release.,2025-10-30 14:30:32.293298
+328,310,Washing and detailing vehicle exterior before final release.,2026-01-24 02:43:18.293298
+329,460,System pressure tested. No leaks detected at this time.,2026-07-14 18:45:01.293298
+330,20,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-03-28 04:09:06.293298
+331,80,System pressure tested. No leaks detected at this time.,2026-05-26 10:43:17.293298
+332,54,Parts have arrived from the inventory/supplier. Beginning installation.,2026-07-12 02:39:48.293298
+333,284,System pressure tested. No leaks detected at this time.,2026-05-31 10:33:07.293298
+334,211,Initial repairs complete. Proceeding with system calibration and testing.,2026-02-18 22:41:19.293298
+335,37,Waiting on customer approval for additional minor findings.,2025-10-05 18:29:23.293298
+336,212,System pressure tested. No leaks detected at this time.,2026-02-04 12:17:18.293298
+337,275,Parts have arrived from the inventory/supplier. Beginning installation.,2026-05-29 13:10:24.293298
+338,56,Final reassembly in progress. Checking all torques and fittings.,2026-03-01 00:31:02.293298
+339,392,Waiting on customer approval for additional minor findings.,2026-07-05 06:41:08.293298
+340,453,Washing and detailing vehicle exterior before final release.,2026-05-14 02:10:27.293298
+341,179,Waiting on customer approval for additional minor findings.,2026-01-26 21:05:36.293298
+342,483,System pressure tested. No leaks detected at this time.,2026-02-04 22:52:20.293298
+343,415,System pressure tested. No leaks detected at this time.,2025-09-28 03:40:02.293298
+344,447,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-17 03:28:26.293298
+345,188,Road test completed successfully. Vehicle handles as expected.,2025-08-19 17:22:32.293298
+346,129,Vehicle moved into the service bay. Preparing tools and equipment.,2026-06-09 22:48:37.293298
+347,517,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-20 14:35:38.293298
+348,132,Road test completed successfully. Vehicle handles as expected.,2026-05-31 05:41:20.293298
+349,142,Road test completed successfully. Vehicle handles as expected.,2026-06-27 23:40:44.293298
+350,511,Parts have arrived from the inventory/supplier. Beginning installation.,2026-07-11 11:35:38.293298
+351,229,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-02-17 08:05:51.293298
+352,235,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-24 01:10:25.293298
+353,119,Old components successfully removed. Cleaning mounting surfaces.,2025-09-15 10:30:45.293298
+354,483,Washing and detailing vehicle exterior before final release.,2026-02-06 23:52:20.293298
+355,56,Initial repairs complete. Proceeding with system calibration and testing.,2026-03-02 17:31:02.293298
+356,291,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-12-25 00:47:25.293298
+357,501,Final reassembly in progress. Checking all torques and fittings.,2026-07-31 01:35:38.293298
+358,279,System pressure tested. No leaks detected at this time.,2026-02-02 15:53:26.293298
+359,318,Washing and detailing vehicle exterior before final release.,2025-12-15 05:36:17.293298
+360,352,Washing and detailing vehicle exterior before final release.,2026-01-23 00:22:53.293298
+361,181,Final reassembly in progress. Checking all torques and fittings.,2025-09-05 11:31:49.293298
+362,251,Road test completed successfully. Vehicle handles as expected.,2025-10-24 03:45:09.293298
+363,389,Road test completed successfully. Vehicle handles as expected.,2026-02-24 06:28:25.293298
+364,96,Final reassembly in progress. Checking all torques and fittings.,2026-05-08 10:33:12.293298
+365,209,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-03 23:56:29.293298
+366,322,System pressure tested. No leaks detected at this time.,2025-10-14 02:46:02.293298
+367,426,Final reassembly in progress. Checking all torques and fittings.,2025-08-16 09:21:24.293298
+368,459,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-19 15:31:32.293298
+369,51,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-07-02 22:40:29.293298
+370,145,Final reassembly in progress. Checking all torques and fittings.,2026-06-10 10:16:41.293298
+371,12,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-03-29 00:19:49.293298
+372,449,Washing and detailing vehicle exterior before final release.,2026-01-03 21:20:04.293298
+373,338,Old components successfully removed. Cleaning mounting surfaces.,2026-07-19 16:43:36.293298
+374,69,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-11 00:12:01.293298
+375,223,System pressure tested. No leaks detected at this time.,2026-01-26 00:30:28.293298
+376,287,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-14 12:52:22.293298
+377,262,Initial repairs complete. Proceeding with system calibration and testing.,2025-09-05 22:09:04.293298
+378,329,Waiting on customer approval for additional minor findings.,2025-08-27 12:43:23.293298
+379,96,Waiting on customer approval for additional minor findings.,2026-05-10 05:33:12.293298
+380,108,Washing and detailing vehicle exterior before final release.,2026-07-23 19:26:16.293298
+381,514,Parts have arrived from the inventory/supplier. Beginning installation.,2026-08-05 14:35:38.293298
+382,440,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-21 05:01:31.293298
+383,466,Road test completed successfully. Vehicle handles as expected.,2026-07-14 18:01:59.293298
+384,403,Initial repairs complete. Proceeding with system calibration and testing.,2025-12-19 12:21:22.293298
+385,34,Washing and detailing vehicle exterior before final release.,2026-08-03 23:11:36.293298
+386,511,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-11 10:35:38.293298
+387,366,Old components successfully removed. Cleaning mounting surfaces.,2026-07-13 20:49:12.293298
+388,65,System pressure tested. No leaks detected at this time.,2025-12-03 21:37:58.293298
+389,439,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-22 07:52:23.293298
+390,224,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-19 12:31:33.293298
+391,513,Parts have arrived from the inventory/supplier. Beginning installation.,2026-07-05 03:35:38.293298
+392,23,Road test completed successfully. Vehicle handles as expected.,2026-01-17 19:08:05.293298
+393,140,System pressure tested. No leaks detected at this time.,2025-11-21 04:30:49.293298
+394,40,Waiting on customer approval for additional minor findings.,2025-09-17 00:08:33.293298
+395,126,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-26 13:58:05.293298
+396,38,Final reassembly in progress. Checking all torques and fittings.,2025-09-28 01:56:19.293298
+397,423,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-30 04:27:55.293298
+398,203,Washing and detailing vehicle exterior before final release.,2026-05-18 11:36:07.293298
+399,500,Final reassembly in progress. Checking all torques and fittings.,2026-03-10 18:00:33.293298
+400,374,Road test completed successfully. Vehicle handles as expected.,2026-03-01 02:03:36.293298
+401,200,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-09-13 02:14:28.293298
+402,150,Waiting on customer approval for additional minor findings.,2025-09-02 14:01:16.293298
+403,79,Old components successfully removed. Cleaning mounting surfaces.,2025-09-15 23:33:16.293298
+404,373,Old components successfully removed. Cleaning mounting surfaces.,2026-01-02 22:17:23.293298
+405,356,Old components successfully removed. Cleaning mounting surfaces.,2025-11-02 10:41:24.293298
+406,335,Washing and detailing vehicle exterior before final release.,2026-01-26 11:41:19.293298
+407,162,Waiting on customer approval for additional minor findings.,2025-10-13 02:31:35.293298
+408,180,Washing and detailing vehicle exterior before final release.,2025-10-05 06:34:51.293298
+409,126,Waiting on customer approval for additional minor findings.,2025-10-26 05:58:05.293298
+410,415,Washing and detailing vehicle exterior before final release.,2025-09-28 20:40:02.293298
+411,145,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-09 03:16:41.293298
+412,1,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-18 09:52:19.293298
+413,154,Final reassembly in progress. Checking all torques and fittings.,2025-09-03 04:01:53.293298
+414,507,System pressure tested. No leaks detected at this time.,2026-07-08 10:35:38.293298
+415,104,Vehicle moved into the service bay. Preparing tools and equipment.,2026-01-08 09:25:49.293298
+416,15,System pressure tested. No leaks detected at this time.,2025-12-14 06:04:43.293298
+417,8,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-08 22:21:17.293298
+418,505,Road test completed successfully. Vehicle handles as expected.,2026-06-22 18:35:38.293298
+419,390,Road test completed successfully. Vehicle handles as expected.,2026-06-29 19:26:23.293298
+420,16,Washing and detailing vehicle exterior before final release.,2026-04-04 08:23:16.293298
+421,130,Old components successfully removed. Cleaning mounting surfaces.,2026-03-10 23:00:58.293298
+422,34,Road test completed successfully. Vehicle handles as expected.,2026-08-04 23:11:36.293298
+423,282,Waiting on customer approval for additional minor findings.,2026-01-08 06:22:01.293298
+424,511,System pressure tested. No leaks detected at this time.,2026-07-11 13:35:38.293298
+425,491,Final reassembly in progress. Checking all torques and fittings.,2025-10-25 12:46:13.293298
+426,258,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-07 10:24:43.293298
+427,174,Waiting on customer approval for additional minor findings.,2026-05-13 13:51:23.293298
+428,361,Initial repairs complete. Proceeding with system calibration and testing.,2025-12-01 21:26:48.293298
+429,126,Washing and detailing vehicle exterior before final release.,2025-10-28 09:58:05.293298
+430,176,Old components successfully removed. Cleaning mounting surfaces.,2025-11-10 22:33:13.293298
+431,40,Waiting on customer approval for additional minor findings.,2025-09-18 15:08:33.293298
+432,228,Waiting on customer approval for additional minor findings.,2026-02-11 17:40:33.293298
+433,473,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-07 05:53:08.293298
+434,409,Old components successfully removed. Cleaning mounting surfaces.,2025-10-09 17:34:43.293298
+435,290,Old components successfully removed. Cleaning mounting surfaces.,2025-12-11 12:20:23.293298
+436,372,Final reassembly in progress. Checking all torques and fittings.,2026-06-09 07:56:47.293298
+437,272,Final reassembly in progress. Checking all torques and fittings.,2026-02-12 12:55:00.293298
+438,302,Old components successfully removed. Cleaning mounting surfaces.,2025-10-20 13:28:09.293298
+439,450,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-08-29 23:04:19.293298
+440,479,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-13 18:55:59.293298
+441,305,System pressure tested. No leaks detected at this time.,2026-05-26 12:43:09.293298
+442,241,Washing and detailing vehicle exterior before final release.,2025-12-03 00:36:38.293298
+443,449,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-06 03:20:04.293298
+444,259,Initial repairs complete. Proceeding with system calibration and testing.,2026-04-06 06:47:00.293298
+445,131,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-06-12 00:41:05.293298
+446,106,Waiting on customer approval for additional minor findings.,2026-01-09 21:33:23.293298
+447,164,Waiting on customer approval for additional minor findings.,2025-12-25 15:13:08.293298
+448,438,Road test completed successfully. Vehicle handles as expected.,2025-12-21 01:27:10.293298
+449,154,Road test completed successfully. Vehicle handles as expected.,2025-09-05 03:01:53.293298
+450,165,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-08-06 01:04:27.293298
+451,39,Final reassembly in progress. Checking all torques and fittings.,2026-04-18 22:30:50.293298
+452,408,Final reassembly in progress. Checking all torques and fittings.,2026-06-15 16:51:51.293298
+453,206,Final reassembly in progress. Checking all torques and fittings.,2025-11-01 00:30:32.293298
+454,520,Old components successfully removed. Cleaning mounting surfaces.,2026-08-07 15:35:38.293298
+455,367,Final reassembly in progress. Checking all torques and fittings.,2025-11-11 11:16:32.293298
+456,234,Initial repairs complete. Proceeding with system calibration and testing.,2025-12-18 15:53:24.293298
+457,295,Washing and detailing vehicle exterior before final release.,2026-02-13 14:52:32.293298
+458,61,Waiting on customer approval for additional minor findings.,2026-03-16 22:07:12.293298
+459,381,Road test completed successfully. Vehicle handles as expected.,2025-10-07 05:18:35.293298
+460,202,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-11 07:03:13.293298
+461,429,Road test completed successfully. Vehicle handles as expected.,2026-04-07 00:08:10.293298
+462,516,Waiting on customer approval for additional minor findings.,2026-06-26 02:35:38.293298
+463,413,Vehicle moved into the service bay. Preparing tools and equipment.,2026-06-04 02:34:59.293298
+464,127,Old components successfully removed. Cleaning mounting surfaces.,2025-09-02 12:56:01.293298
+465,26,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-21 20:02:42.293298
+466,430,Old components successfully removed. Cleaning mounting surfaces.,2026-05-18 16:19:42.293298
+467,123,System pressure tested. No leaks detected at this time.,2026-07-28 13:02:43.293298
+468,13,Initial repairs complete. Proceeding with system calibration and testing.,2026-04-13 23:51:07.293298
+469,287,System pressure tested. No leaks detected at this time.,2026-02-15 07:52:22.293298
+470,295,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-02-12 17:52:32.293298
+471,516,System pressure tested. No leaks detected at this time.,2026-06-25 10:35:38.293298
+472,188,System pressure tested. No leaks detected at this time.,2025-08-19 19:22:32.293298
+473,493,Old components successfully removed. Cleaning mounting surfaces.,2026-07-24 04:28:46.293298
+474,270,Waiting on customer approval for additional minor findings.,2026-03-10 22:24:07.293298
+475,429,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-04-06 15:08:10.293298
+476,71,Final reassembly in progress. Checking all torques and fittings.,2025-10-25 17:24:29.293298
+477,155,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-27 16:39:01.293298
+478,416,Parts have arrived from the inventory/supplier. Beginning installation.,2026-05-30 19:43:51.293298
+479,206,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-29 13:30:32.293298
+480,144,System pressure tested. No leaks detected at this time.,2026-06-19 08:27:47.293298
+481,83,Parts have arrived from the inventory/supplier. Beginning installation.,2025-11-16 21:42:25.293298
+482,126,Parts have arrived from the inventory/supplier. Beginning installation.,2025-10-27 11:58:05.293298
+483,365,Washing and detailing vehicle exterior before final release.,2026-07-19 15:26:34.293298
+484,298,Washing and detailing vehicle exterior before final release.,2026-06-19 06:07:39.293298
+485,306,Waiting on customer approval for additional minor findings.,2025-10-24 15:30:20.293298
+486,457,Parts have arrived from the inventory/supplier. Beginning installation.,2026-07-16 12:35:30.293298
+487,487,Vehicle moved into the service bay. Preparing tools and equipment.,2025-08-08 18:12:42.293298
+488,383,Road test completed successfully. Vehicle handles as expected.,2026-05-14 11:32:14.293298
+489,332,Vehicle moved into the service bay. Preparing tools and equipment.,2026-01-14 09:40:11.293298
+490,369,Old components successfully removed. Cleaning mounting surfaces.,2026-03-20 18:56:09.293298
+491,402,Road test completed successfully. Vehicle handles as expected.,2025-08-25 06:06:49.293298
+492,222,System pressure tested. No leaks detected at this time.,2025-12-29 12:52:44.293298
+493,326,Final reassembly in progress. Checking all torques and fittings.,2025-10-14 09:09:57.293298
+494,277,Final reassembly in progress. Checking all torques and fittings.,2026-05-26 16:42:01.293298
+495,251,Final reassembly in progress. Checking all torques and fittings.,2025-10-24 08:45:09.293298
+496,116,System pressure tested. No leaks detected at this time.,2025-10-21 11:06:46.293298
+497,344,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-05 08:59:32.293298
+498,260,Waiting on customer approval for additional minor findings.,2025-11-29 04:27:08.293298
+499,453,Road test completed successfully. Vehicle handles as expected.,2026-05-14 15:10:27.293298
+500,79,Parts have arrived from the inventory/supplier. Beginning installation.,2025-09-13 18:33:16.293298
+501,159,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-12-30 11:20:35.293298
+502,153,Vehicle moved into the service bay. Preparing tools and equipment.,2026-02-13 12:08:25.293298
+503,376,Final reassembly in progress. Checking all torques and fittings.,2026-06-04 06:33:25.293298
+504,405,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-17 22:04:45.293298
+505,95,Waiting on customer approval for additional minor findings.,2026-03-02 05:05:36.293298
+506,245,System pressure tested. No leaks detected at this time.,2026-06-04 21:25:13.293298
+507,226,Initial repairs complete. Proceeding with system calibration and testing.,2026-04-22 19:21:21.293298
+508,169,Final reassembly in progress. Checking all torques and fittings.,2025-12-14 04:27:32.293298
+509,311,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-16 20:08:21.293298
+510,434,Road test completed successfully. Vehicle handles as expected.,2025-08-18 15:45:07.293298
+511,284,Washing and detailing vehicle exterior before final release.,2026-05-31 09:33:07.293298
+512,387,Road test completed successfully. Vehicle handles as expected.,2026-05-05 03:54:19.293298
+513,330,Road test completed successfully. Vehicle handles as expected.,2025-10-23 19:41:58.293298
+514,187,Parts have arrived from the inventory/supplier. Beginning installation.,2026-03-25 20:54:28.293298
+515,414,Road test completed successfully. Vehicle handles as expected.,2026-05-03 01:33:08.293298
+516,144,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-06-19 19:27:47.293298
+517,250,Old components successfully removed. Cleaning mounting surfaces.,2026-03-04 16:26:43.293298
+518,437,Old components successfully removed. Cleaning mounting surfaces.,2025-11-20 11:26:06.293298
+519,177,Vehicle moved into the service bay. Preparing tools and equipment.,2026-05-03 15:05:20.293298
+520,478,Vehicle moved into the service bay. Preparing tools and equipment.,2025-09-02 17:37:44.293298
+521,298,Vehicle moved into the service bay. Preparing tools and equipment.,2026-06-18 20:07:39.293298
+522,198,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-11 23:37:25.293298
+523,245,Old components successfully removed. Cleaning mounting surfaces.,2026-06-03 02:25:13.293298
+524,428,Old components successfully removed. Cleaning mounting surfaces.,2025-08-07 20:05:21.293298
+525,210,Vehicle moved into the service bay. Preparing tools and equipment.,2026-02-03 01:33:17.293298
+526,110,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-12 12:33:07.293298
+527,321,Parts have arrived from the inventory/supplier. Beginning installation.,2026-04-24 17:56:21.293298
+528,366,Road test completed successfully. Vehicle handles as expected.,2026-07-13 17:49:12.293298
+529,405,Old components successfully removed. Cleaning mounting surfaces.,2026-01-18 17:04:45.293298
+530,231,Waiting on customer approval for additional minor findings.,2025-09-02 14:55:23.293298
+531,247,Waiting on customer approval for additional minor findings.,2025-12-05 22:51:13.293298
+532,62,Vehicle moved into the service bay. Preparing tools and equipment.,2026-02-21 09:15:27.293298
+533,325,Old components successfully removed. Cleaning mounting surfaces.,2026-03-04 16:52:53.293298
+534,493,Old components successfully removed. Cleaning mounting surfaces.,2026-07-22 11:28:46.293298
+535,235,Waiting on customer approval for additional minor findings.,2025-11-22 17:10:25.293298
+536,76,Final reassembly in progress. Checking all torques and fittings.,2026-05-06 18:41:05.293298
+537,172,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-24 01:23:20.293298
+538,401,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-02-01 00:43:35.293298
+539,93,Washing and detailing vehicle exterior before final release.,2026-04-29 22:05:57.293298
+540,238,Road test completed successfully. Vehicle handles as expected.,2026-06-02 02:54:38.293298
+541,256,Parts have arrived from the inventory/supplier. Beginning installation.,2026-05-03 07:37:46.293298
+542,127,Parts have arrived from the inventory/supplier. Beginning installation.,2025-09-01 13:56:01.293298
+543,164,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-26 02:13:08.293298
+544,92,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-16 15:38:22.293298
+545,76,Old components successfully removed. Cleaning mounting surfaces.,2026-05-06 08:41:05.293298
+546,121,Parts have arrived from the inventory/supplier. Beginning installation.,2025-08-17 13:20:04.293298
+547,150,Waiting on customer approval for additional minor findings.,2025-09-02 05:01:16.293298
+548,480,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-05-21 01:52:54.293298
+549,199,Parts have arrived from the inventory/supplier. Beginning installation.,2026-07-28 04:25:12.293298
+550,222,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-12-30 15:52:44.293298
+551,264,Vehicle moved into the service bay. Preparing tools and equipment.,2026-04-24 07:34:52.293298
+552,398,System pressure tested. No leaks detected at this time.,2025-09-22 07:15:30.293298
+553,155,Waiting on customer approval for additional minor findings.,2026-01-28 10:39:01.293298
+554,188,Waiting on customer approval for additional minor findings.,2025-08-20 23:22:32.293298
+555,329,Old components successfully removed. Cleaning mounting surfaces.,2025-08-26 15:43:23.293298
+556,507,Washing and detailing vehicle exterior before final release.,2026-07-06 12:35:38.293298
+557,57,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-26 19:12:49.293298
+558,330,Washing and detailing vehicle exterior before final release.,2025-10-22 23:41:58.293298
+559,104,Old components successfully removed. Cleaning mounting surfaces.,2026-01-07 17:25:49.293298
+560,245,Washing and detailing vehicle exterior before final release.,2026-06-03 19:25:13.293298
+561,8,Parts have arrived from the inventory/supplier. Beginning installation.,2025-10-08 12:21:17.293298
+562,451,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-12-24 10:34:42.293298
+563,430,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-17 09:19:42.293298
+564,261,Road test completed successfully. Vehicle handles as expected.,2026-08-03 10:45:40.293298
+565,123,Waiting on customer approval for additional minor findings.,2026-07-28 17:02:43.293298
+566,350,Waiting on customer approval for additional minor findings.,2025-09-25 23:43:49.293298
+567,229,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-17 11:05:51.293298
+568,211,Vehicle moved into the service bay. Preparing tools and equipment.,2026-02-19 10:41:19.293298
+569,257,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-07-25 12:14:33.293298
+640,46,System pressure tested. No leaks detected at this time.,2025-08-31 08:36:16.293298
+570,458,Washing and detailing vehicle exterior before final release.,2026-04-15 06:23:56.293298
+571,405,Washing and detailing vehicle exterior before final release.,2026-01-19 02:04:45.293298
+572,34,Old components successfully removed. Cleaning mounting surfaces.,2026-08-04 06:11:36.293298
+573,328,Old components successfully removed. Cleaning mounting surfaces.,2026-01-28 14:12:37.293298
+574,137,Final reassembly in progress. Checking all torques and fittings.,2026-06-01 05:40:22.293298
+575,36,Washing and detailing vehicle exterior before final release.,2026-01-30 22:43:21.293298
+576,266,Washing and detailing vehicle exterior before final release.,2025-11-07 09:07:05.293298
+577,278,System pressure tested. No leaks detected at this time.,2025-10-13 01:25:49.293298
+578,217,Parts have arrived from the inventory/supplier. Beginning installation.,2025-10-01 21:55:40.293298
+579,116,Final reassembly in progress. Checking all torques and fittings.,2025-10-21 09:06:46.293298
+580,462,Initial repairs complete. Proceeding with system calibration and testing.,2026-02-27 18:10:53.293298
+581,317,Final reassembly in progress. Checking all torques and fittings.,2025-12-29 12:00:13.293298
+582,233,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-09-27 16:39:02.293298
+583,339,System pressure tested. No leaks detected at this time.,2025-10-17 17:54:44.293298
+584,327,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-27 21:23:25.293298
+585,193,Final reassembly in progress. Checking all torques and fittings.,2025-09-05 11:56:13.293298
+586,492,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-23 00:04:39.293298
+587,306,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-26 14:30:20.293298
+588,95,Washing and detailing vehicle exterior before final release.,2026-02-28 04:05:36.293298
+589,255,Waiting on customer approval for additional minor findings.,2025-08-12 14:43:14.293298
+590,428,Vehicle moved into the service bay. Preparing tools and equipment.,2025-08-06 06:05:21.293298
+591,118,Waiting on customer approval for additional minor findings.,2025-12-30 07:16:19.293298
+592,280,Waiting on customer approval for additional minor findings.,2025-12-12 19:47:48.293298
+593,296,Parts have arrived from the inventory/supplier. Beginning installation.,2026-03-06 01:51:12.293298
+594,279,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-02-01 11:53:26.293298
+595,2,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-25 09:41:24.293298
+596,448,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-18 10:27:05.293298
+597,506,Road test completed successfully. Vehicle handles as expected.,2026-07-19 03:35:38.293298
+598,319,System pressure tested. No leaks detected at this time.,2026-02-03 02:32:57.293298
+599,38,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-09-27 08:56:19.293298
+600,352,Waiting on customer approval for additional minor findings.,2026-01-24 05:22:53.293298
+601,115,System pressure tested. No leaks detected at this time.,2026-03-05 13:16:44.293298
+602,445,System pressure tested. No leaks detected at this time.,2026-01-15 01:30:16.293298
+603,104,Old components successfully removed. Cleaning mounting surfaces.,2026-01-08 05:25:49.293298
+604,441,Parts have arrived from the inventory/supplier. Beginning installation.,2025-10-17 09:42:41.293298
+605,213,Parts have arrived from the inventory/supplier. Beginning installation.,2026-03-21 03:33:43.293298
+606,232,Old components successfully removed. Cleaning mounting surfaces.,2025-08-21 02:55:54.293298
+607,55,Old components successfully removed. Cleaning mounting surfaces.,2025-12-13 05:50:42.293298
+608,151,Parts have arrived from the inventory/supplier. Beginning installation.,2025-11-06 10:59:09.293298
+609,355,Final reassembly in progress. Checking all torques and fittings.,2026-02-07 22:13:29.293298
+610,34,Parts have arrived from the inventory/supplier. Beginning installation.,2026-08-03 20:11:36.293298
+611,439,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-21 18:52:23.293298
+612,315,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-10 05:01:42.293298
+613,498,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-08-28 07:25:35.293298
+614,330,Road test completed successfully. Vehicle handles as expected.,2025-10-21 02:41:58.293298
+615,335,Vehicle moved into the service bay. Preparing tools and equipment.,2026-01-28 10:41:19.293298
+616,267,Road test completed successfully. Vehicle handles as expected.,2025-08-27 03:29:00.293298
+617,255,Old components successfully removed. Cleaning mounting surfaces.,2025-08-14 01:43:14.293298
+618,252,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-06 18:02:10.293298
+619,489,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-28 20:21:04.293298
+620,218,Final reassembly in progress. Checking all torques and fittings.,2026-02-24 05:49:47.293298
+621,425,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-23 15:56:11.293298
+622,420,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-03-26 06:08:39.293298
+623,156,Final reassembly in progress. Checking all torques and fittings.,2026-02-10 21:41:07.293298
+624,498,Road test completed successfully. Vehicle handles as expected.,2025-08-29 12:25:35.293298
+625,393,Washing and detailing vehicle exterior before final release.,2026-03-20 00:16:07.293298
+626,335,Road test completed successfully. Vehicle handles as expected.,2026-01-28 02:41:19.293298
+627,155,Old components successfully removed. Cleaning mounting surfaces.,2026-01-27 07:39:01.293298
+628,112,Final reassembly in progress. Checking all torques and fittings.,2026-06-13 06:25:18.293298
+629,490,Waiting on customer approval for additional minor findings.,2026-04-03 03:58:31.293298
+630,241,Washing and detailing vehicle exterior before final release.,2025-12-02 20:36:38.293298
+631,291,Old components successfully removed. Cleaning mounting surfaces.,2025-12-25 19:47:25.293298
+632,134,Vehicle moved into the service bay. Preparing tools and equipment.,2026-01-25 17:07:53.293298
+633,352,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-23 23:22:53.293298
+634,110,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-11 17:33:07.293298
+635,343,Initial repairs complete. Proceeding with system calibration and testing.,2026-02-03 00:13:51.293298
+636,39,Parts have arrived from the inventory/supplier. Beginning installation.,2026-04-17 04:30:50.293298
+637,130,Initial repairs complete. Proceeding with system calibration and testing.,2026-03-09 09:00:58.293298
+638,27,Parts have arrived from the inventory/supplier. Beginning installation.,2026-08-05 09:20:24.293298
+639,274,Vehicle moved into the service bay. Preparing tools and equipment.,2025-08-15 01:17:38.293298
+641,353,Old components successfully removed. Cleaning mounting surfaces.,2025-12-26 11:48:55.293298
+642,183,Waiting on customer approval for additional minor findings.,2026-06-07 19:37:56.293298
+643,452,Road test completed successfully. Vehicle handles as expected.,2025-09-13 11:49:47.293298
+644,75,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-05 09:20:29.293298
+645,481,Initial repairs complete. Proceeding with system calibration and testing.,2026-03-30 06:34:27.293298
+646,102,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-11-14 14:49:21.293298
+647,481,System pressure tested. No leaks detected at this time.,2026-03-30 02:34:27.293298
+648,256,Final reassembly in progress. Checking all torques and fittings.,2026-05-03 19:37:46.293298
+649,5,Road test completed successfully. Vehicle handles as expected.,2025-08-20 04:10:35.293298
+650,433,Road test completed successfully. Vehicle handles as expected.,2025-12-22 08:26:43.293298
+651,167,Waiting on customer approval for additional minor findings.,2025-08-12 16:42:47.293298
+652,176,Final reassembly in progress. Checking all torques and fittings.,2025-11-12 20:33:13.293298
+653,96,System pressure tested. No leaks detected at this time.,2026-05-07 18:33:12.293298
+654,476,Waiting on customer approval for additional minor findings.,2026-07-28 08:32:05.293298
+655,182,Road test completed successfully. Vehicle handles as expected.,2025-11-17 07:14:26.293298
+656,190,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-27 19:50:57.293298
+657,103,Final reassembly in progress. Checking all torques and fittings.,2026-05-05 03:23:16.293298
+658,388,Road test completed successfully. Vehicle handles as expected.,2026-01-17 19:17:59.293298
+659,239,Road test completed successfully. Vehicle handles as expected.,2026-07-25 21:01:18.293298
+660,395,System pressure tested. No leaks detected at this time.,2025-10-29 01:46:23.293298
+661,499,System pressure tested. No leaks detected at this time.,2026-04-15 17:24:06.293298
+662,123,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-07-30 07:02:43.293298
+663,421,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-09-30 20:10:42.293298
+664,185,Washing and detailing vehicle exterior before final release.,2026-08-08 01:23:50.293298
+665,134,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-23 19:07:53.293298
+666,370,Final reassembly in progress. Checking all torques and fittings.,2025-08-15 18:40:40.293298
+667,147,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-27 06:53:01.293298
+668,322,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-13 16:46:02.293298
+669,254,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-20 19:16:47.293298
+670,482,Waiting on customer approval for additional minor findings.,2026-02-26 22:27:28.293298
+671,481,Road test completed successfully. Vehicle handles as expected.,2026-03-29 06:34:27.293298
+672,178,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-12-21 18:38:42.293298
+673,179,Old components successfully removed. Cleaning mounting surfaces.,2026-01-26 08:05:36.293298
+674,112,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-11 19:25:18.293298
+675,180,System pressure tested. No leaks detected at this time.,2025-10-04 04:34:51.293298
+676,132,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-05-31 13:41:20.293298
+677,68,Parts have arrived from the inventory/supplier. Beginning installation.,2026-03-14 20:35:10.293298
+678,83,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-11-16 09:42:25.293298
+679,373,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-05 20:17:23.293298
+680,212,Old components successfully removed. Cleaning mounting surfaces.,2026-02-05 22:17:18.293298
+681,50,Vehicle moved into the service bay. Preparing tools and equipment.,2026-06-09 16:42:25.293298
+682,502,Road test completed successfully. Vehicle handles as expected.,2026-06-28 21:35:38.293298
+683,234,Old components successfully removed. Cleaning mounting surfaces.,2025-12-19 09:53:24.293298
+684,49,Final reassembly in progress. Checking all torques and fittings.,2026-01-16 13:43:03.293298
+685,221,Old components successfully removed. Cleaning mounting surfaces.,2025-12-06 05:11:58.293298
+686,149,Washing and detailing vehicle exterior before final release.,2026-03-31 23:25:19.293298
+687,258,Vehicle moved into the service bay. Preparing tools and equipment.,2026-02-09 22:24:43.293298
+688,510,Washing and detailing vehicle exterior before final release.,2026-07-07 06:35:38.293298
+689,72,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-04-01 15:49:52.293298
+690,411,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-10-23 03:10:16.293298
+691,461,Initial repairs complete. Proceeding with system calibration and testing.,2026-02-01 05:11:45.293298
+692,325,Road test completed successfully. Vehicle handles as expected.,2026-03-02 13:52:53.293298
+693,74,Old components successfully removed. Cleaning mounting surfaces.,2026-05-04 08:09:30.293298
+694,422,Parts have arrived from the inventory/supplier. Beginning installation.,2026-03-14 05:18:25.293298
+695,204,Initial repairs complete. Proceeding with system calibration and testing.,2026-04-21 02:48:10.293298
+696,503,Washing and detailing vehicle exterior before final release.,2026-08-01 08:35:38.293298
+697,110,Final reassembly in progress. Checking all torques and fittings.,2026-01-10 22:33:07.293298
+698,186,Waiting on customer approval for additional minor findings.,2025-12-21 19:16:13.293298
+699,404,Vehicle moved into the service bay. Preparing tools and equipment.,2026-06-13 05:08:43.293298
+700,226,System pressure tested. No leaks detected at this time.,2026-04-24 01:21:21.293298
+701,328,Road test completed successfully. Vehicle handles as expected.,2026-01-28 16:12:37.293298
+702,394,Waiting on customer approval for additional minor findings.,2025-08-18 15:09:33.293298
+703,357,Parts have arrived from the inventory/supplier. Beginning installation.,2026-03-15 23:16:54.293298
+704,428,Vehicle moved into the service bay. Preparing tools and equipment.,2025-08-07 05:05:21.293298
+705,414,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-02 21:33:08.293298
+706,37,Initial repairs complete. Proceeding with system calibration and testing.,2025-10-04 07:29:23.293298
+707,319,Washing and detailing vehicle exterior before final release.,2026-02-03 06:32:57.293298
+708,486,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-17 01:11:50.293298
+709,333,Vehicle moved into the service bay. Preparing tools and equipment.,2025-11-06 01:53:29.293298
+710,500,Parts have arrived from the inventory/supplier. Beginning installation.,2026-03-10 18:00:33.293298
+711,440,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-12-19 12:01:31.293298
+712,121,Waiting on customer approval for additional minor findings.,2025-08-17 08:20:04.293298
+713,123,Waiting on customer approval for additional minor findings.,2026-07-29 14:02:43.293298
+714,95,Old components successfully removed. Cleaning mounting surfaces.,2026-02-28 20:05:36.293298
+715,363,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-11-30 18:16:11.293298
+716,8,Road test completed successfully. Vehicle handles as expected.,2025-10-08 23:21:17.293298
+717,126,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-10-28 00:58:05.293298
+718,283,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-22 01:36:16.293298
+719,516,Road test completed successfully. Vehicle handles as expected.,2026-06-25 14:35:38.293298
+720,305,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-28 11:43:09.293298
+721,445,Old components successfully removed. Cleaning mounting surfaces.,2026-01-15 00:30:16.293298
+722,363,Final reassembly in progress. Checking all torques and fittings.,2025-12-02 05:16:11.293298
+723,122,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-03-21 06:53:04.293298
+724,7,Old components successfully removed. Cleaning mounting surfaces.,2025-10-18 09:32:42.293298
+725,253,Road test completed successfully. Vehicle handles as expected.,2026-07-21 17:11:50.293298
+726,233,Parts have arrived from the inventory/supplier. Beginning installation.,2025-09-25 17:39:02.293298
+727,415,System pressure tested. No leaks detected at this time.,2025-09-28 16:40:02.293298
+728,137,System pressure tested. No leaks detected at this time.,2026-06-02 02:40:22.293298
+729,467,Waiting on customer approval for additional minor findings.,2026-02-19 21:02:30.293298
+730,254,Washing and detailing vehicle exterior before final release.,2026-01-19 12:16:47.293298
+731,228,Old components successfully removed. Cleaning mounting surfaces.,2026-02-09 22:40:33.293298
+732,450,Old components successfully removed. Cleaning mounting surfaces.,2025-09-01 04:04:19.293298
+733,20,Parts have arrived from the inventory/supplier. Beginning installation.,2026-03-28 21:09:06.293298
+734,175,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-05-06 08:49:51.293298
+735,412,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-09-24 05:56:11.293298
+736,121,Road test completed successfully. Vehicle handles as expected.,2025-08-16 05:20:04.293298
+737,519,Final reassembly in progress. Checking all torques and fittings.,2026-06-29 18:35:38.293298
+738,90,Initial repairs complete. Proceeding with system calibration and testing.,2025-09-20 15:09:48.293298
+739,490,Parts have arrived from the inventory/supplier. Beginning installation.,2026-04-02 03:58:31.293298
+740,63,Old components successfully removed. Cleaning mounting surfaces.,2026-06-20 18:33:17.293298
+741,56,Waiting on customer approval for additional minor findings.,2026-03-01 12:31:02.293298
+742,39,Initial repairs complete. Proceeding with system calibration and testing.,2026-04-17 22:30:50.293298
+743,95,Road test completed successfully. Vehicle handles as expected.,2026-02-28 04:05:36.293298
+744,354,Waiting on customer approval for additional minor findings.,2025-08-09 12:22:53.293298
+745,365,Final reassembly in progress. Checking all torques and fittings.,2026-07-18 22:26:34.293298
+746,283,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-19 19:36:16.293298
+747,75,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-05 13:20:29.293298
+748,7,Final reassembly in progress. Checking all torques and fittings.,2025-10-19 07:32:42.293298
+749,439,Old components successfully removed. Cleaning mounting surfaces.,2026-01-23 15:52:23.293298
+750,390,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-06-30 18:26:23.293298
+751,331,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-09-21 05:59:08.293298
+752,254,Vehicle moved into the service bay. Preparing tools and equipment.,2026-01-20 10:16:47.293298
+753,38,Waiting on customer approval for additional minor findings.,2025-09-28 04:56:19.293298
+754,465,Washing and detailing vehicle exterior before final release.,2025-09-16 07:16:52.293298
+755,400,Final reassembly in progress. Checking all torques and fittings.,2026-01-22 22:13:24.293298
+756,34,System pressure tested. No leaks detected at this time.,2026-08-04 18:11:36.293298
+757,459,Road test completed successfully. Vehicle handles as expected.,2025-08-16 19:31:32.293298
+758,279,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-31 10:53:26.293298
+759,225,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-30 03:08:36.293298
+760,438,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-22 23:27:10.293298
+761,480,System pressure tested. No leaks detected at this time.,2026-05-19 12:52:54.293298
+762,97,Initial repairs complete. Proceeding with system calibration and testing.,2026-03-29 01:22:03.293298
+763,9,Vehicle moved into the service bay. Preparing tools and equipment.,2026-06-27 10:47:38.293298
+764,504,System pressure tested. No leaks detected at this time.,2026-07-13 18:35:38.293298
+765,12,Washing and detailing vehicle exterior before final release.,2026-03-28 00:19:49.293298
+766,112,Final reassembly in progress. Checking all torques and fittings.,2026-06-13 16:25:18.293298
+767,228,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-10 20:40:33.293298
+768,15,Old components successfully removed. Cleaning mounting surfaces.,2025-12-12 21:04:43.293298
+769,212,Old components successfully removed. Cleaning mounting surfaces.,2026-02-04 17:17:18.293298
+770,181,Old components successfully removed. Cleaning mounting surfaces.,2025-09-06 16:31:49.293298
+771,405,System pressure tested. No leaks detected at this time.,2026-01-18 18:04:45.293298
+772,324,Road test completed successfully. Vehicle handles as expected.,2026-02-22 09:42:42.293298
+773,225,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-30 02:08:36.293298
+774,150,Final reassembly in progress. Checking all torques and fittings.,2025-09-02 14:01:16.293298
+775,370,Waiting on customer approval for additional minor findings.,2025-08-17 06:40:40.293298
+776,56,Washing and detailing vehicle exterior before final release.,2026-03-01 20:31:02.293298
+777,410,Washing and detailing vehicle exterior before final release.,2025-08-09 06:30:26.293298
+778,15,Washing and detailing vehicle exterior before final release.,2025-12-12 03:04:43.293298
+779,190,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-02-28 17:50:57.293298
+780,317,Final reassembly in progress. Checking all torques and fittings.,2026-01-01 04:00:13.293298
+781,132,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-01 06:41:20.293298
+782,276,System pressure tested. No leaks detected at this time.,2026-07-29 12:48:42.293298
+783,9,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-06-26 19:47:38.293298
+784,510,Initial repairs complete. Proceeding with system calibration and testing.,2026-07-09 07:35:38.293298
+785,463,Final reassembly in progress. Checking all torques and fittings.,2025-08-25 07:16:48.293298
+786,512,Washing and detailing vehicle exterior before final release.,2026-07-17 02:35:38.293298
+787,516,Road test completed successfully. Vehicle handles as expected.,2026-06-25 21:35:38.293298
+788,32,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-29 15:53:27.293298
+789,424,Waiting on customer approval for additional minor findings.,2025-10-19 06:57:40.293298
+790,450,Old components successfully removed. Cleaning mounting surfaces.,2025-08-31 07:04:19.293298
+791,218,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-24 08:49:47.293298
+792,492,Washing and detailing vehicle exterior before final release.,2026-01-23 00:04:39.293298
+793,187,Vehicle moved into the service bay. Preparing tools and equipment.,2026-03-24 12:54:28.293298
+794,158,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-11-11 17:09:19.293298
+795,512,Road test completed successfully. Vehicle handles as expected.,2026-07-14 13:35:38.293298
+796,372,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-10 21:56:47.293298
+797,286,Initial repairs complete. Proceeding with system calibration and testing.,2026-03-16 11:09:02.293298
+798,16,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-04-03 18:23:16.293298
+799,290,Washing and detailing vehicle exterior before final release.,2025-12-11 17:20:23.293298
+800,202,Washing and detailing vehicle exterior before final release.,2025-12-12 02:03:13.293298
+801,104,Waiting on customer approval for additional minor findings.,2026-01-08 06:25:49.293298
+802,71,Washing and detailing vehicle exterior before final release.,2025-10-27 21:24:29.293298
+803,51,Washing and detailing vehicle exterior before final release.,2026-07-02 05:40:29.293298
+804,73,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-12 05:31:28.293298
+805,483,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-02-05 19:52:20.293298
+806,505,Final reassembly in progress. Checking all torques and fittings.,2026-06-24 12:35:38.293298
+807,159,Washing and detailing vehicle exterior before final release.,2025-12-29 22:20:35.293298
+808,467,Washing and detailing vehicle exterior before final release.,2026-02-20 10:02:30.293298
+809,327,Washing and detailing vehicle exterior before final release.,2026-06-28 03:23:25.293298
+810,115,Waiting on customer approval for additional minor findings.,2026-03-05 07:16:44.293298
+811,238,Waiting on customer approval for additional minor findings.,2026-06-01 04:54:38.293298
+812,95,Washing and detailing vehicle exterior before final release.,2026-03-01 01:05:36.293298
+813,123,Final reassembly in progress. Checking all torques and fittings.,2026-07-29 03:02:43.293298
+814,284,Old components successfully removed. Cleaning mounting surfaces.,2026-06-01 02:33:07.293298
+815,436,Old components successfully removed. Cleaning mounting surfaces.,2025-10-01 06:31:37.293298
+816,158,Road test completed successfully. Vehicle handles as expected.,2025-11-12 21:09:19.293298
+817,368,Parts have arrived from the inventory/supplier. Beginning installation.,2025-11-08 09:51:04.293298
+818,442,Old components successfully removed. Cleaning mounting surfaces.,2026-08-06 05:32:49.293298
+819,473,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-06 05:53:08.293298
+820,460,Final reassembly in progress. Checking all torques and fittings.,2026-07-17 02:45:01.293298
+821,75,Road test completed successfully. Vehicle handles as expected.,2026-01-06 13:20:29.293298
+822,350,Old components successfully removed. Cleaning mounting surfaces.,2025-09-25 16:43:49.293298
+823,210,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-02-02 02:33:17.293298
+824,70,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-03-25 21:17:00.293298
+825,52,Road test completed successfully. Vehicle handles as expected.,2025-09-15 22:49:47.293298
+826,122,Road test completed successfully. Vehicle handles as expected.,2026-03-20 21:53:04.293298
+827,440,Washing and detailing vehicle exterior before final release.,2025-12-21 11:01:31.293298
+828,239,Final reassembly in progress. Checking all torques and fittings.,2026-07-26 17:01:18.293298
+829,174,Final reassembly in progress. Checking all torques and fittings.,2026-05-13 20:51:23.293298
+830,475,Initial repairs complete. Proceeding with system calibration and testing.,2026-07-11 00:26:16.293298
+831,178,System pressure tested. No leaks detected at this time.,2025-12-20 08:38:42.293298
+832,343,Washing and detailing vehicle exterior before final release.,2026-02-03 03:13:51.293298
+833,137,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-01 04:40:22.293298
+834,273,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-24 13:53:53.293298
+835,503,Initial repairs complete. Proceeding with system calibration and testing.,2026-08-02 09:35:38.293298
+836,12,System pressure tested. No leaks detected at this time.,2026-03-29 11:19:49.293298
+837,194,Old components successfully removed. Cleaning mounting surfaces.,2026-03-18 23:46:00.293298
+838,126,Final reassembly in progress. Checking all torques and fittings.,2025-10-27 12:58:05.293298
+839,124,Waiting on customer approval for additional minor findings.,2026-05-12 05:37:12.293298
+840,116,Parts have arrived from the inventory/supplier. Beginning installation.,2025-10-20 23:06:46.293298
+841,298,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-19 06:07:39.293298
+842,207,System pressure tested. No leaks detected at this time.,2026-06-14 13:04:52.293298
+843,51,Road test completed successfully. Vehicle handles as expected.,2026-07-04 01:40:29.293298
+844,291,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-25 00:47:25.293298
+845,360,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-18 22:56:17.293298
+846,97,System pressure tested. No leaks detected at this time.,2026-03-28 00:22:03.293298
+847,102,Vehicle moved into the service bay. Preparing tools and equipment.,2025-11-12 07:49:21.293298
+848,300,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-16 16:23:05.293298
+849,72,Road test completed successfully. Vehicle handles as expected.,2026-04-02 20:49:52.293298
+850,221,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-06 18:11:58.293298
+851,256,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-03 07:37:46.293298
+852,311,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-02-15 00:08:21.293298
+853,158,Final reassembly in progress. Checking all torques and fittings.,2025-11-11 18:09:19.293298
+854,50,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-09 04:42:25.293298
+855,110,System pressure tested. No leaks detected at this time.,2026-01-12 01:33:07.293298
+856,270,Final reassembly in progress. Checking all torques and fittings.,2026-03-12 13:24:07.293298
+857,490,Final reassembly in progress. Checking all torques and fittings.,2026-04-03 20:58:31.293298
+858,248,Initial repairs complete. Proceeding with system calibration and testing.,2026-02-07 03:55:24.293298
+859,109,Final reassembly in progress. Checking all torques and fittings.,2025-11-18 04:07:57.293298
+860,75,Road test completed successfully. Vehicle handles as expected.,2026-01-06 21:20:29.293298
+861,261,System pressure tested. No leaks detected at this time.,2026-08-04 11:45:40.293298
+862,417,Final reassembly in progress. Checking all torques and fittings.,2026-01-18 18:49:46.293298
+863,220,Final reassembly in progress. Checking all torques and fittings.,2025-11-03 07:05:20.293298
+864,266,Waiting on customer approval for additional minor findings.,2025-11-05 02:07:05.293298
+865,46,Vehicle moved into the service bay. Preparing tools and equipment.,2025-08-31 02:36:16.293298
+866,421,Washing and detailing vehicle exterior before final release.,2025-09-29 17:10:42.293298
+867,389,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-25 14:28:25.293298
+868,49,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-15 14:43:03.293298
+869,270,Final reassembly in progress. Checking all torques and fittings.,2026-03-10 10:24:07.293298
+870,99,Final reassembly in progress. Checking all torques and fittings.,2026-07-25 07:11:53.293298
+871,79,Road test completed successfully. Vehicle handles as expected.,2025-09-13 18:33:16.293298
+872,513,Old components successfully removed. Cleaning mounting surfaces.,2026-07-07 18:35:38.293298
+873,344,Waiting on customer approval for additional minor findings.,2025-12-04 22:59:32.293298
+874,119,Parts have arrived from the inventory/supplier. Beginning installation.,2025-09-15 21:30:45.293298
+875,122,Old components successfully removed. Cleaning mounting surfaces.,2026-03-20 17:53:04.293298
+876,446,Parts have arrived from the inventory/supplier. Beginning installation.,2025-10-18 08:54:55.293298
+877,231,Road test completed successfully. Vehicle handles as expected.,2025-09-01 15:55:23.293298
+878,36,Old components successfully removed. Cleaning mounting surfaces.,2026-01-30 10:43:21.293298
+879,32,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-28 16:53:27.293298
+880,304,Vehicle moved into the service bay. Preparing tools and equipment.,2026-04-11 10:15:06.293298
+881,19,Vehicle moved into the service bay. Preparing tools and equipment.,2026-06-28 19:05:14.293298
+882,77,Initial repairs complete. Proceeding with system calibration and testing.,2026-02-09 05:50:45.293298
+883,186,Final reassembly in progress. Checking all torques and fittings.,2025-12-21 18:16:13.293298
+884,313,Waiting on customer approval for additional minor findings.,2026-06-25 06:31:49.293298
+885,86,Washing and detailing vehicle exterior before final release.,2025-11-05 13:07:18.293298
+886,396,System pressure tested. No leaks detected at this time.,2026-01-14 19:37:35.293298
+887,433,Washing and detailing vehicle exterior before final release.,2025-12-20 16:26:43.293298
+888,138,Final reassembly in progress. Checking all torques and fittings.,2025-08-07 20:23:17.293298
+889,29,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-07 14:49:30.293298
+890,414,Old components successfully removed. Cleaning mounting surfaces.,2026-05-02 11:33:08.293298
+891,214,Old components successfully removed. Cleaning mounting surfaces.,2025-09-13 03:55:26.293298
+892,316,Washing and detailing vehicle exterior before final release.,2026-02-02 22:09:20.293298
+893,215,Waiting on customer approval for additional minor findings.,2025-12-23 04:09:32.293298
+894,512,Road test completed successfully. Vehicle handles as expected.,2026-07-16 06:35:38.293298
+895,88,System pressure tested. No leaks detected at this time.,2026-01-14 03:46:13.293298
+896,60,Old components successfully removed. Cleaning mounting surfaces.,2026-01-02 07:01:08.293298
+897,404,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-12 07:08:43.293298
+898,356,System pressure tested. No leaks detected at this time.,2025-11-02 02:41:24.293298
+899,122,Final reassembly in progress. Checking all torques and fittings.,2026-03-22 10:53:04.293298
+900,46,Final reassembly in progress. Checking all torques and fittings.,2025-08-30 09:36:16.293298
+901,271,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-11 23:06:26.293298
+902,340,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-05-27 22:19:38.293298
+903,68,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-03-13 18:35:10.293298
+904,484,Old components successfully removed. Cleaning mounting surfaces.,2026-05-21 22:27:01.293298
+905,200,Vehicle moved into the service bay. Preparing tools and equipment.,2025-09-11 14:14:28.293298
+906,41,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-28 03:47:12.293298
+907,267,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-26 23:29:00.293298
+908,82,Waiting on customer approval for additional minor findings.,2026-02-13 20:41:43.293298
+909,422,Waiting on customer approval for additional minor findings.,2026-03-13 12:18:25.293298
+910,117,Waiting on customer approval for additional minor findings.,2026-02-08 07:08:46.293298
+911,487,System pressure tested. No leaks detected at this time.,2025-08-08 13:12:42.293298
+912,373,System pressure tested. No leaks detected at this time.,2026-01-04 05:17:23.293298
+913,479,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-12 14:55:59.293298
+914,97,Waiting on customer approval for additional minor findings.,2026-03-28 15:22:03.293298
+915,299,Old components successfully removed. Cleaning mounting surfaces.,2025-11-05 21:38:59.293298
+916,198,Waiting on customer approval for additional minor findings.,2025-08-12 09:37:25.293298
+917,358,Initial repairs complete. Proceeding with system calibration and testing.,2026-02-04 23:28:54.293298
+918,238,Vehicle moved into the service bay. Preparing tools and equipment.,2026-06-02 10:54:38.293298
+919,59,Final reassembly in progress. Checking all torques and fittings.,2026-03-21 17:20:32.293298
+920,349,Road test completed successfully. Vehicle handles as expected.,2025-08-09 09:16:23.293298
+921,299,System pressure tested. No leaks detected at this time.,2025-11-07 17:38:59.293298
+922,183,Old components successfully removed. Cleaning mounting surfaces.,2026-06-07 08:37:56.293298
+923,352,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-22 01:22:53.293298
+924,325,Final reassembly in progress. Checking all torques and fittings.,2026-03-04 18:52:53.293298
+925,252,Vehicle moved into the service bay. Preparing tools and equipment.,2026-01-09 13:02:10.293298
+926,308,Old components successfully removed. Cleaning mounting surfaces.,2026-08-01 15:39:11.293298
+927,93,Vehicle moved into the service bay. Preparing tools and equipment.,2026-04-29 14:05:57.293298
+928,513,Road test completed successfully. Vehicle handles as expected.,2026-07-06 19:35:38.293298
+929,4,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-05-05 04:31:27.293298
+930,235,Old components successfully removed. Cleaning mounting surfaces.,2025-11-22 04:10:25.293298
+931,443,Old components successfully removed. Cleaning mounting surfaces.,2025-10-12 21:40:12.293298
+932,442,Final reassembly in progress. Checking all torques and fittings.,2026-08-06 15:32:49.293298
+933,201,Washing and detailing vehicle exterior before final release.,2025-09-14 22:38:33.293298
+934,384,Waiting on customer approval for additional minor findings.,2026-03-01 16:07:15.293298
+935,289,Waiting on customer approval for additional minor findings.,2025-08-11 12:53:27.293298
+936,270,Final reassembly in progress. Checking all torques and fittings.,2026-03-10 16:24:07.293298
+937,310,Road test completed successfully. Vehicle handles as expected.,2026-01-24 11:43:18.293298
+938,511,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-12 19:35:38.293298
+939,81,Road test completed successfully. Vehicle handles as expected.,2026-01-04 18:51:44.293298
+940,326,Parts have arrived from the inventory/supplier. Beginning installation.,2025-10-16 23:09:57.293298
+941,422,Road test completed successfully. Vehicle handles as expected.,2026-03-14 03:18:25.293298
+942,72,Road test completed successfully. Vehicle handles as expected.,2026-04-02 19:49:52.293298
+943,50,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-09 20:42:25.293298
+944,436,Waiting on customer approval for additional minor findings.,2025-10-02 17:31:37.293298
+945,435,Washing and detailing vehicle exterior before final release.,2025-09-30 13:13:21.293298
+946,355,System pressure tested. No leaks detected at this time.,2026-02-05 20:13:29.293298
+947,392,Old components successfully removed. Cleaning mounting surfaces.,2026-07-03 02:41:08.293298
+948,466,Road test completed successfully. Vehicle handles as expected.,2026-07-14 15:01:59.293298
+949,316,Waiting on customer approval for additional minor findings.,2026-02-03 19:09:20.293298
+950,486,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-17 09:11:50.293298
+951,510,Final reassembly in progress. Checking all torques and fittings.,2026-07-07 16:35:38.293298
+952,476,Parts have arrived from the inventory/supplier. Beginning installation.,2026-07-27 03:32:05.293298
+953,369,Washing and detailing vehicle exterior before final release.,2026-03-22 00:56:09.293298
+954,218,Final reassembly in progress. Checking all torques and fittings.,2026-02-23 23:49:47.293298
+955,435,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-10-01 16:13:21.293298
+956,11,System pressure tested. No leaks detected at this time.,2026-07-07 19:53:25.293298
+957,359,Waiting on customer approval for additional minor findings.,2025-11-29 02:28:50.293298
+958,188,Vehicle moved into the service bay. Preparing tools and equipment.,2025-08-20 14:22:32.293298
+959,453,Washing and detailing vehicle exterior before final release.,2026-05-14 00:10:27.293298
+960,326,Old components successfully removed. Cleaning mounting surfaces.,2025-10-16 05:09:57.293298
+961,103,Waiting on customer approval for additional minor findings.,2026-05-03 17:23:16.293298
+962,369,Waiting on customer approval for additional minor findings.,2026-03-21 05:56:09.293298
+963,80,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-26 23:43:17.293298
+964,241,Road test completed successfully. Vehicle handles as expected.,2025-12-02 12:36:38.293298
+965,341,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-05-16 13:39:01.293298
+966,238,Final reassembly in progress. Checking all torques and fittings.,2026-06-02 01:54:38.293298
+967,259,Parts have arrived from the inventory/supplier. Beginning installation.,2026-04-06 00:47:00.293298
+968,9,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-06-28 01:47:38.293298
+969,299,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-06 21:38:59.293298
+970,425,Old components successfully removed. Cleaning mounting surfaces.,2026-06-24 07:56:11.293298
+971,99,System pressure tested. No leaks detected at this time.,2026-07-24 16:11:53.293298
+972,485,Road test completed successfully. Vehicle handles as expected.,2026-07-03 23:35:32.293298
+973,348,Washing and detailing vehicle exterior before final release.,2025-10-31 06:56:08.293298
+974,354,Old components successfully removed. Cleaning mounting surfaces.,2025-08-09 13:22:53.293298
+975,389,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-24 18:28:25.293298
+976,322,Initial repairs complete. Proceeding with system calibration and testing.,2025-10-12 09:46:02.293298
+977,284,System pressure tested. No leaks detected at this time.,2026-06-01 05:33:07.293298
+978,406,Waiting on customer approval for additional minor findings.,2025-10-16 16:22:51.293298
+979,253,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-07-20 21:11:50.293298
+980,480,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-19 03:52:54.293298
+981,1,Old components successfully removed. Cleaning mounting surfaces.,2026-01-18 07:52:19.293298
+982,242,Road test completed successfully. Vehicle handles as expected.,2026-06-16 11:51:31.293298
+983,498,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-27 12:25:35.293298
+984,507,Waiting on customer approval for additional minor findings.,2026-07-06 07:35:38.293298
+985,88,Waiting on customer approval for additional minor findings.,2026-01-15 21:46:13.293298
+986,177,Road test completed successfully. Vehicle handles as expected.,2026-05-02 11:05:20.293298
+987,149,Washing and detailing vehicle exterior before final release.,2026-03-30 03:25:19.293298
+988,114,Old components successfully removed. Cleaning mounting surfaces.,2026-01-14 23:17:53.293298
+989,350,Final reassembly in progress. Checking all torques and fittings.,2025-09-25 07:43:49.293298
+990,212,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-05 00:17:18.293298
+991,347,Vehicle moved into the service bay. Preparing tools and equipment.,2026-02-23 00:56:37.293298
+992,117,Old components successfully removed. Cleaning mounting surfaces.,2026-02-08 14:08:46.293298
+993,452,Final reassembly in progress. Checking all torques and fittings.,2025-09-14 17:49:47.293298
+994,81,Old components successfully removed. Cleaning mounting surfaces.,2026-01-03 18:51:44.293298
+995,423,Washing and detailing vehicle exterior before final release.,2026-01-29 04:27:55.293298
+996,61,Washing and detailing vehicle exterior before final release.,2026-03-17 04:07:12.293298
+997,322,Old components successfully removed. Cleaning mounting surfaces.,2025-10-12 07:46:02.293298
+998,41,Old components successfully removed. Cleaning mounting surfaces.,2026-01-28 03:47:12.293298
+999,57,Washing and detailing vehicle exterior before final release.,2026-07-27 08:12:49.293298
+1000,265,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-08 06:21:56.293298
+1001,40,Old components successfully removed. Cleaning mounting surfaces.,2025-09-19 15:08:33.293298
+1002,86,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-11-06 09:07:18.293298
+1003,14,System pressure tested. No leaks detected at this time.,2025-09-18 04:36:27.293298
+1004,291,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-12-24 06:47:25.293298
+1005,30,Old components successfully removed. Cleaning mounting surfaces.,2026-07-27 09:14:59.293298
+1006,490,Road test completed successfully. Vehicle handles as expected.,2026-04-01 19:58:31.293298
+1007,133,Initial repairs complete. Proceeding with system calibration and testing.,2025-10-11 00:56:21.293298
+1008,309,Waiting on customer approval for additional minor findings.,2026-03-20 04:21:58.293298
+1009,130,System pressure tested. No leaks detected at this time.,2026-03-11 09:00:58.293298
+1010,425,Washing and detailing vehicle exterior before final release.,2026-06-22 11:56:11.293298
+1011,206,Road test completed successfully. Vehicle handles as expected.,2025-11-01 08:30:32.293298
+1012,93,Road test completed successfully. Vehicle handles as expected.,2026-04-28 03:05:57.293298
+1013,156,Old components successfully removed. Cleaning mounting surfaces.,2026-02-12 20:41:07.293298
+1014,383,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-05-15 04:32:14.293298
+1015,4,Road test completed successfully. Vehicle handles as expected.,2026-05-05 04:31:27.293298
+1016,31,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-04-25 03:08:10.293298
+1017,265,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-07 03:21:56.293298
+1018,293,Parts have arrived from the inventory/supplier. Beginning installation.,2025-08-22 20:58:50.293298
+1019,161,Waiting on customer approval for additional minor findings.,2026-01-31 01:21:31.293298
+1020,336,Washing and detailing vehicle exterior before final release.,2025-09-23 22:37:31.293298
+1021,142,Waiting on customer approval for additional minor findings.,2026-06-28 15:40:44.293298
+1022,361,System pressure tested. No leaks detected at this time.,2025-12-01 04:26:48.293298
+1023,281,System pressure tested. No leaks detected at this time.,2026-01-18 15:56:01.293298
+1024,344,Final reassembly in progress. Checking all torques and fittings.,2025-12-05 16:59:32.293298
+1025,293,Final reassembly in progress. Checking all torques and fittings.,2025-08-25 01:58:50.293298
+1026,448,Final reassembly in progress. Checking all torques and fittings.,2026-01-19 17:27:05.293298
+1027,393,Final reassembly in progress. Checking all torques and fittings.,2026-03-19 20:16:07.293298
+1028,101,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-11 18:53:47.293298
+1029,408,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-13 14:51:51.293298
+1030,190,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-02-27 11:50:57.293298
+1031,198,Parts have arrived from the inventory/supplier. Beginning installation.,2025-08-12 10:37:25.293298
+1032,99,System pressure tested. No leaks detected at this time.,2026-07-24 03:11:53.293298
+1033,223,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-25 09:30:28.293298
+1034,297,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-12 08:47:40.293298
+1035,301,Washing and detailing vehicle exterior before final release.,2025-10-01 11:53:13.293298
+1036,255,Parts have arrived from the inventory/supplier. Beginning installation.,2025-08-14 17:43:14.293298
+1037,1,Final reassembly in progress. Checking all torques and fittings.,2026-01-18 16:52:19.293298
+1038,307,Road test completed successfully. Vehicle handles as expected.,2025-11-29 19:29:06.293298
+1039,459,Washing and detailing vehicle exterior before final release.,2025-08-19 03:31:32.293298
+1040,33,Washing and detailing vehicle exterior before final release.,2026-02-08 12:16:27.293298
+1041,10,Road test completed successfully. Vehicle handles as expected.,2025-09-19 18:27:40.293298
+1042,132,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-01 18:41:20.293298
+1043,9,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-06-26 14:47:38.293298
+1044,335,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-28 20:41:19.293298
+1045,220,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-04 21:05:20.293298
+1046,262,Initial repairs complete. Proceeding with system calibration and testing.,2025-09-07 05:09:04.293298
+1047,420,Waiting on customer approval for additional minor findings.,2026-03-26 22:08:39.293298
+1048,368,Waiting on customer approval for additional minor findings.,2025-11-09 05:51:04.293298
+1049,241,Initial repairs complete. Proceeding with system calibration and testing.,2025-12-01 04:36:38.293298
+1050,417,Waiting on customer approval for additional minor findings.,2026-01-18 04:49:46.293298
+1051,439,Waiting on customer approval for additional minor findings.,2026-01-21 18:52:23.293298
+1052,270,Vehicle moved into the service bay. Preparing tools and equipment.,2026-03-11 19:24:07.293298
+1053,194,Initial repairs complete. Proceeding with system calibration and testing.,2026-03-20 15:46:00.293298
+1054,154,Road test completed successfully. Vehicle handles as expected.,2025-09-04 17:01:53.293298
+1055,424,Washing and detailing vehicle exterior before final release.,2025-10-18 15:57:40.293298
+1056,416,System pressure tested. No leaks detected at this time.,2026-05-29 19:43:51.293298
+1057,109,System pressure tested. No leaks detected at this time.,2025-11-16 08:07:57.293298
+1058,270,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-03-12 12:24:07.293298
+1059,195,Road test completed successfully. Vehicle handles as expected.,2026-04-29 09:16:50.293298
+1060,41,System pressure tested. No leaks detected at this time.,2026-01-26 05:47:12.293298
+1061,232,Road test completed successfully. Vehicle handles as expected.,2025-08-21 03:55:54.293298
+1062,352,Vehicle moved into the service bay. Preparing tools and equipment.,2026-01-23 12:22:53.293298
+1063,377,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-09-19 01:14:37.293298
+1064,468,Waiting on customer approval for additional minor findings.,2026-03-24 04:42:30.293298
+1065,457,Final reassembly in progress. Checking all torques and fittings.,2026-07-16 23:35:30.293298
+1066,306,Old components successfully removed. Cleaning mounting surfaces.,2025-10-26 06:30:20.293298
+1067,198,Old components successfully removed. Cleaning mounting surfaces.,2025-08-13 11:37:25.293298
+1068,425,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-23 23:56:11.293298
+1069,333,Road test completed successfully. Vehicle handles as expected.,2025-11-05 19:53:29.293298
+1070,308,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-08-01 05:39:11.293298
+1071,245,Vehicle moved into the service bay. Preparing tools and equipment.,2026-06-03 08:25:13.293298
+1072,315,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-08 19:01:42.293298
+1073,152,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-04 20:27:22.293298
+1074,368,Old components successfully removed. Cleaning mounting surfaces.,2025-11-08 18:51:04.293298
+1075,182,Waiting on customer approval for additional minor findings.,2025-11-15 20:14:26.293298
+1076,434,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-08-19 13:45:07.293298
+1077,40,Final reassembly in progress. Checking all torques and fittings.,2025-09-18 15:08:33.293298
+1078,110,System pressure tested. No leaks detected at this time.,2026-01-12 21:33:07.293298
+1079,145,Washing and detailing vehicle exterior before final release.,2026-06-09 14:16:41.293298
+1080,34,Old components successfully removed. Cleaning mounting surfaces.,2026-08-03 07:11:36.293298
+1081,329,Vehicle moved into the service bay. Preparing tools and equipment.,2025-08-25 03:43:23.293298
+1082,413,Washing and detailing vehicle exterior before final release.,2026-06-04 15:34:59.293298
+1083,9,Old components successfully removed. Cleaning mounting surfaces.,2026-06-27 06:47:38.293298
+1084,459,Road test completed successfully. Vehicle handles as expected.,2025-08-19 11:31:32.293298
+1085,145,Washing and detailing vehicle exterior before final release.,2026-06-08 16:16:41.293298
+1086,199,System pressure tested. No leaks detected at this time.,2026-07-26 00:25:12.293298
+1087,297,Washing and detailing vehicle exterior before final release.,2026-05-13 09:47:40.293298
+1088,78,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-12-24 18:13:54.293298
+1089,260,Final reassembly in progress. Checking all torques and fittings.,2025-11-29 19:27:08.293298
+1090,372,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-06-09 11:56:47.293298
+1091,384,Parts have arrived from the inventory/supplier. Beginning installation.,2026-03-02 05:07:15.293298
+1092,102,Old components successfully removed. Cleaning mounting surfaces.,2025-11-12 14:49:21.293298
+1093,218,Road test completed successfully. Vehicle handles as expected.,2026-02-23 05:49:47.293298
+1094,418,Final reassembly in progress. Checking all torques and fittings.,2026-06-18 01:54:03.293298
+1095,42,Final reassembly in progress. Checking all torques and fittings.,2026-07-18 20:12:00.293298
+1096,147,Old components successfully removed. Cleaning mounting surfaces.,2026-05-28 11:53:01.293298
+1097,319,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-02 06:32:57.293298
+1098,456,System pressure tested. No leaks detected at this time.,2026-07-13 02:11:03.293298
+1099,77,Old components successfully removed. Cleaning mounting surfaces.,2026-02-09 15:50:45.293298
+1100,34,Vehicle moved into the service bay. Preparing tools and equipment.,2026-08-03 21:11:36.293298
+1101,192,System pressure tested. No leaks detected at this time.,2026-03-09 01:28:48.293298
+1102,232,Washing and detailing vehicle exterior before final release.,2025-08-22 23:55:54.293298
+1103,118,Final reassembly in progress. Checking all torques and fittings.,2025-12-30 01:16:19.293298
+1104,514,Road test completed successfully. Vehicle handles as expected.,2026-08-07 01:35:38.293298
+1105,399,System pressure tested. No leaks detected at this time.,2025-09-08 10:12:45.293298
+1106,200,Old components successfully removed. Cleaning mounting surfaces.,2025-09-12 00:14:28.293298
+1107,362,Washing and detailing vehicle exterior before final release.,2026-03-13 20:02:02.293298
+1108,129,Waiting on customer approval for additional minor findings.,2026-06-09 16:48:37.293298
+1109,329,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-26 01:43:23.293298
+1110,108,System pressure tested. No leaks detected at this time.,2026-07-22 14:26:16.293298
+1111,211,Initial repairs complete. Proceeding with system calibration and testing.,2026-02-18 04:41:19.293298
+1112,88,Vehicle moved into the service bay. Preparing tools and equipment.,2026-01-15 01:46:13.293298
+1113,319,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-02 13:32:57.293298
+1114,401,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-01 10:43:35.293298
+1115,225,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-30 03:08:36.293298
+1116,495,Road test completed successfully. Vehicle handles as expected.,2026-05-24 13:14:41.293298
+1117,240,Washing and detailing vehicle exterior before final release.,2025-11-25 07:30:51.293298
+1118,147,Final reassembly in progress. Checking all torques and fittings.,2026-05-27 03:53:01.293298
+1119,382,Final reassembly in progress. Checking all torques and fittings.,2025-11-11 21:15:28.293298
+1120,39,Road test completed successfully. Vehicle handles as expected.,2026-04-16 19:30:50.293298
+1121,511,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-10 10:35:38.293298
+1122,354,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-08-09 18:22:53.293298
+1123,173,Initial repairs complete. Proceeding with system calibration and testing.,2025-12-01 18:46:26.293298
+1124,329,Old components successfully removed. Cleaning mounting surfaces.,2025-08-27 09:43:23.293298
+1125,119,Washing and detailing vehicle exterior before final release.,2025-09-16 04:30:45.293298
+1126,308,System pressure tested. No leaks detected at this time.,2026-07-31 09:39:11.293298
+1127,60,System pressure tested. No leaks detected at this time.,2025-12-31 20:01:08.293298
+1128,478,Washing and detailing vehicle exterior before final release.,2025-09-02 20:37:44.293298
+1129,435,System pressure tested. No leaks detected at this time.,2025-10-02 02:13:21.293298
+1130,264,Final reassembly in progress. Checking all torques and fittings.,2026-04-22 20:34:52.293298
+1131,100,Final reassembly in progress. Checking all torques and fittings.,2026-06-03 01:21:05.293298
+1132,383,Vehicle moved into the service bay. Preparing tools and equipment.,2026-05-16 19:32:14.293298
+1133,345,Washing and detailing vehicle exterior before final release.,2025-08-10 13:37:59.293298
+1134,272,Road test completed successfully. Vehicle handles as expected.,2026-02-12 06:55:00.293298
+1135,213,Initial repairs complete. Proceeding with system calibration and testing.,2026-03-20 12:33:43.293298
+1136,251,Initial repairs complete. Proceeding with system calibration and testing.,2025-10-22 16:45:09.293298
+1137,9,Washing and detailing vehicle exterior before final release.,2026-06-26 14:47:38.293298
+1138,459,Old components successfully removed. Cleaning mounting surfaces.,2025-08-17 16:31:32.293298
+1139,236,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-24 13:23:40.293298
+1140,452,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-09-15 03:49:47.293298
+1141,377,System pressure tested. No leaks detected at this time.,2025-09-18 06:14:37.293298
+1142,180,Road test completed successfully. Vehicle handles as expected.,2025-10-02 21:34:51.293298
+1143,317,Washing and detailing vehicle exterior before final release.,2025-12-31 10:00:13.293298
+1144,258,Initial repairs complete. Proceeding with system calibration and testing.,2026-02-08 03:24:43.293298
+1145,428,System pressure tested. No leaks detected at this time.,2025-08-06 16:05:21.293298
+1146,66,Road test completed successfully. Vehicle handles as expected.,2025-08-24 11:06:36.293298
+1147,47,Final reassembly in progress. Checking all torques and fittings.,2026-04-29 13:30:50.293298
+1148,72,Vehicle moved into the service bay. Preparing tools and equipment.,2026-04-01 11:49:52.293298
+1149,124,Final reassembly in progress. Checking all torques and fittings.,2026-05-10 06:37:12.293298
+1150,452,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-09-14 12:49:47.293298
+1151,415,Road test completed successfully. Vehicle handles as expected.,2025-09-27 05:40:02.293298
+1152,190,Road test completed successfully. Vehicle handles as expected.,2026-03-01 05:50:57.293298
+1153,336,Initial repairs complete. Proceeding with system calibration and testing.,2025-09-24 12:37:31.293298
+1154,503,System pressure tested. No leaks detected at this time.,2026-08-02 17:35:38.293298
+1155,353,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-26 07:48:55.293298
+1156,106,Road test completed successfully. Vehicle handles as expected.,2026-01-08 06:33:23.293298
+1157,425,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-22 01:56:11.293298
+1158,146,Waiting on customer approval for additional minor findings.,2026-04-07 22:56:59.293298
+1159,211,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-18 02:41:19.293298
+1160,402,Waiting on customer approval for additional minor findings.,2025-08-25 09:06:49.293298
+1161,488,System pressure tested. No leaks detected at this time.,2025-11-26 15:11:51.293298
+1162,22,Vehicle moved into the service bay. Preparing tools and equipment.,2025-09-30 18:22:30.293298
+1163,311,Old components successfully removed. Cleaning mounting surfaces.,2026-02-17 10:08:21.293298
+1164,452,Vehicle moved into the service bay. Preparing tools and equipment.,2025-09-13 12:49:47.293298
+1165,156,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-12 19:41:07.293298
+1166,489,Old components successfully removed. Cleaning mounting surfaces.,2025-11-30 22:21:04.293298
+1167,333,Final reassembly in progress. Checking all torques and fittings.,2025-11-06 02:53:29.293298
+1168,127,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-09-03 06:56:01.293298
+1169,457,Parts have arrived from the inventory/supplier. Beginning installation.,2026-07-16 04:35:30.293298
+1170,36,Road test completed successfully. Vehicle handles as expected.,2026-01-30 23:43:21.293298
+1171,174,Washing and detailing vehicle exterior before final release.,2026-05-13 18:51:23.293298
+1172,89,Vehicle moved into the service bay. Preparing tools and equipment.,2025-09-12 13:41:39.293298
+1173,118,Washing and detailing vehicle exterior before final release.,2025-12-30 13:16:19.293298
+1174,208,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-19 13:57:04.293298
+1175,482,Waiting on customer approval for additional minor findings.,2026-02-25 19:27:28.293298
+1176,252,System pressure tested. No leaks detected at this time.,2026-01-07 21:02:10.293298
+1177,297,Washing and detailing vehicle exterior before final release.,2026-05-13 03:47:40.293298
+1178,125,Old components successfully removed. Cleaning mounting surfaces.,2026-04-07 10:34:28.293298
+1179,371,Road test completed successfully. Vehicle handles as expected.,2025-10-02 11:40:03.293298
+1180,479,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-13 19:55:59.293298
+1181,298,System pressure tested. No leaks detected at this time.,2026-06-21 06:07:39.293298
+1182,257,Final reassembly in progress. Checking all torques and fittings.,2026-07-26 09:14:33.293298
+1183,158,System pressure tested. No leaks detected at this time.,2025-11-13 03:09:19.293298
+1184,240,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-11-26 10:30:51.293298
+1185,14,Initial repairs complete. Proceeding with system calibration and testing.,2025-09-18 17:36:27.293298
+1186,404,Road test completed successfully. Vehicle handles as expected.,2026-06-10 17:08:43.293298
+1187,414,Waiting on customer approval for additional minor findings.,2026-04-30 16:33:08.293298
+1188,273,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-22 22:53:53.293298
+1189,38,System pressure tested. No leaks detected at this time.,2025-09-28 00:56:19.293298
+1190,402,System pressure tested. No leaks detected at this time.,2025-08-25 01:06:49.293298
+1191,207,Final reassembly in progress. Checking all torques and fittings.,2026-06-14 07:04:52.293298
+1192,294,Vehicle moved into the service bay. Preparing tools and equipment.,2025-09-18 20:59:29.293298
+1193,184,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-08 13:14:39.293298
+1194,51,Waiting on customer approval for additional minor findings.,2026-07-03 10:40:29.293298
+1195,160,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-17 22:41:44.293298
+1196,398,System pressure tested. No leaks detected at this time.,2025-09-20 11:15:30.293298
+1197,269,Final reassembly in progress. Checking all torques and fittings.,2025-08-12 18:48:28.293298
+1198,295,Old components successfully removed. Cleaning mounting surfaces.,2026-02-13 19:52:32.293298
+1199,213,Old components successfully removed. Cleaning mounting surfaces.,2026-03-20 05:33:43.293298
+1200,395,Parts have arrived from the inventory/supplier. Beginning installation.,2025-10-27 05:46:23.293298
+1201,401,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-30 16:43:35.293298
+1202,246,Old components successfully removed. Cleaning mounting surfaces.,2026-03-01 05:31:07.293298
+1203,14,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-09-18 08:36:27.293298
+1204,218,Vehicle moved into the service bay. Preparing tools and equipment.,2026-02-23 11:49:47.293298
+1205,125,Parts have arrived from the inventory/supplier. Beginning installation.,2026-04-06 06:34:28.293298
+1206,304,Parts have arrived from the inventory/supplier. Beginning installation.,2026-04-11 08:15:06.293298
+1207,442,Final reassembly in progress. Checking all torques and fittings.,2026-08-04 16:32:49.293298
+1280,139,System pressure tested. No leaks detected at this time.,2026-01-04 04:40:28.293298
+1208,477,Initial repairs complete. Proceeding with system calibration and testing.,2026-07-25 06:38:37.293298
+1209,295,Old components successfully removed. Cleaning mounting surfaces.,2026-02-13 22:52:32.293298
+1210,184,System pressure tested. No leaks detected at this time.,2026-06-09 11:14:39.293298
+1211,230,Washing and detailing vehicle exterior before final release.,2026-06-19 18:04:03.293298
+1212,439,Washing and detailing vehicle exterior before final release.,2026-01-23 22:52:23.293298
+1213,361,Final reassembly in progress. Checking all torques and fittings.,2025-11-30 11:26:48.293298
+1214,413,Road test completed successfully. Vehicle handles as expected.,2026-06-06 11:34:59.293298
+1215,331,System pressure tested. No leaks detected at this time.,2025-09-22 15:59:08.293298
+1216,16,Road test completed successfully. Vehicle handles as expected.,2026-04-02 20:23:16.293298
+1217,214,Waiting on customer approval for additional minor findings.,2025-09-13 14:55:26.293298
+1218,308,Final reassembly in progress. Checking all torques and fittings.,2026-07-31 07:39:11.293298
+1219,166,Road test completed successfully. Vehicle handles as expected.,2026-05-19 18:16:02.293298
+1220,248,Vehicle moved into the service bay. Preparing tools and equipment.,2026-02-07 21:55:24.293298
+1221,481,Old components successfully removed. Cleaning mounting surfaces.,2026-03-30 04:34:27.293298
+1222,229,Waiting on customer approval for additional minor findings.,2026-02-18 12:05:51.293298
+1223,207,Vehicle moved into the service bay. Preparing tools and equipment.,2026-06-13 16:04:52.293298
+1224,246,Final reassembly in progress. Checking all torques and fittings.,2026-03-01 12:31:07.293298
+1225,356,System pressure tested. No leaks detected at this time.,2025-11-01 02:41:24.293298
+1226,24,Waiting on customer approval for additional minor findings.,2025-12-30 08:19:50.293298
+1227,118,Final reassembly in progress. Checking all torques and fittings.,2025-12-29 07:16:19.293298
+1228,372,Vehicle moved into the service bay. Preparing tools and equipment.,2026-06-11 09:56:47.293298
+1229,113,Washing and detailing vehicle exterior before final release.,2026-05-25 10:25:02.293298
+1230,294,Vehicle moved into the service bay. Preparing tools and equipment.,2025-09-17 16:59:29.293298
+1231,152,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-06 18:27:22.293298
+1232,182,Final reassembly in progress. Checking all torques and fittings.,2025-11-17 14:14:26.293298
+1233,421,Parts have arrived from the inventory/supplier. Beginning installation.,2025-09-28 22:10:42.293298
+1234,119,Vehicle moved into the service bay. Preparing tools and equipment.,2025-09-14 18:30:45.293298
+1235,310,Road test completed successfully. Vehicle handles as expected.,2026-01-24 20:43:18.293298
+1236,46,Road test completed successfully. Vehicle handles as expected.,2025-08-29 19:36:16.293298
+1237,291,Waiting on customer approval for additional minor findings.,2025-12-24 13:47:25.293298
+1238,432,Final reassembly in progress. Checking all torques and fittings.,2025-10-18 03:28:02.293298
+1239,491,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-10-26 03:46:13.293298
+1240,185,Road test completed successfully. Vehicle handles as expected.,2026-08-07 00:23:50.293298
+1241,422,Road test completed successfully. Vehicle handles as expected.,2026-03-14 03:18:25.293298
+1242,454,Road test completed successfully. Vehicle handles as expected.,2025-10-07 06:29:27.293298
+1243,455,Initial repairs complete. Proceeding with system calibration and testing.,2026-02-24 06:22:58.293298
+1244,240,Old components successfully removed. Cleaning mounting surfaces.,2025-11-26 03:30:51.293298
+1245,432,Road test completed successfully. Vehicle handles as expected.,2025-10-19 15:28:02.293298
+1246,473,System pressure tested. No leaks detected at this time.,2026-05-08 04:53:08.293298
+1247,52,Road test completed successfully. Vehicle handles as expected.,2025-09-13 21:49:47.293298
+1248,332,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-12 19:40:11.293298
+1249,419,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-27 05:39:29.293298
+1250,3,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-15 05:42:39.293298
+1251,270,Waiting on customer approval for additional minor findings.,2026-03-12 06:24:07.293298
+1252,226,System pressure tested. No leaks detected at this time.,2026-04-21 08:21:21.293298
+1253,337,Washing and detailing vehicle exterior before final release.,2026-05-09 00:16:38.293298
+1254,369,System pressure tested. No leaks detected at this time.,2026-03-22 07:56:09.293298
+1255,179,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-27 09:05:36.293298
+1256,431,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-07-29 22:15:05.293298
+1257,298,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-19 07:07:39.293298
+1258,402,System pressure tested. No leaks detected at this time.,2025-08-25 18:06:49.293298
+1259,84,Waiting on customer approval for additional minor findings.,2026-03-08 20:35:39.293298
+1260,57,Road test completed successfully. Vehicle handles as expected.,2026-07-26 21:12:49.293298
+1261,182,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-18 12:14:26.293298
+1262,1,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-19 13:52:19.293298
+1263,426,System pressure tested. No leaks detected at this time.,2025-08-14 11:21:24.293298
+1264,410,System pressure tested. No leaks detected at this time.,2025-08-08 16:30:26.293298
+1265,354,Waiting on customer approval for additional minor findings.,2025-08-09 23:22:53.293298
+1266,324,Road test completed successfully. Vehicle handles as expected.,2026-02-21 06:42:42.293298
+1267,451,Initial repairs complete. Proceeding with system calibration and testing.,2025-12-24 17:34:42.293298
+1268,90,Waiting on customer approval for additional minor findings.,2025-09-21 04:09:48.293298
+1269,251,Washing and detailing vehicle exterior before final release.,2025-10-21 17:45:09.293298
+1270,36,Road test completed successfully. Vehicle handles as expected.,2026-01-31 06:43:21.293298
+1271,413,Old components successfully removed. Cleaning mounting surfaces.,2026-06-04 08:34:59.293298
+1272,88,Washing and detailing vehicle exterior before final release.,2026-01-14 19:46:13.293298
+1273,360,Road test completed successfully. Vehicle handles as expected.,2025-08-19 18:56:17.293298
+1274,185,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-08-06 12:23:50.293298
+1275,443,Initial repairs complete. Proceeding with system calibration and testing.,2025-10-13 19:40:12.293298
+1276,406,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-15 15:22:51.293298
+1277,37,Waiting on customer approval for additional minor findings.,2025-10-05 06:29:23.293298
+1278,208,Final reassembly in progress. Checking all torques and fittings.,2025-12-19 14:57:04.293298
+1279,326,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-17 00:09:57.293298
+1281,101,Initial repairs complete. Proceeding with system calibration and testing.,2025-10-12 14:53:47.293298
+1282,199,Washing and detailing vehicle exterior before final release.,2026-07-26 08:25:12.293298
+1283,279,Vehicle moved into the service bay. Preparing tools and equipment.,2026-02-03 02:53:26.293298
+1284,89,Final reassembly in progress. Checking all torques and fittings.,2025-09-11 23:41:39.293298
+1285,14,Old components successfully removed. Cleaning mounting surfaces.,2025-09-18 22:36:27.293298
+1286,481,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-03-29 03:34:27.293298
+1287,444,Final reassembly in progress. Checking all torques and fittings.,2025-09-18 07:08:59.293298
+1288,280,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-11 04:47:48.293298
+1289,263,Waiting on customer approval for additional minor findings.,2026-08-04 13:22:15.293298
+1290,181,Road test completed successfully. Vehicle handles as expected.,2025-09-06 03:31:49.293298
+1291,10,Waiting on customer approval for additional minor findings.,2025-09-22 08:27:40.293298
+1292,26,Washing and detailing vehicle exterior before final release.,2025-08-21 01:02:42.293298
+1293,51,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-03 04:40:29.293298
+1294,274,Road test completed successfully. Vehicle handles as expected.,2025-08-14 23:17:38.293298
+1295,181,Final reassembly in progress. Checking all torques and fittings.,2025-09-06 14:31:49.293298
+1296,174,Waiting on customer approval for additional minor findings.,2026-05-16 03:51:23.293298
+1297,172,Final reassembly in progress. Checking all torques and fittings.,2025-12-24 08:23:20.293298
+1298,382,Vehicle moved into the service bay. Preparing tools and equipment.,2025-11-12 10:15:28.293298
+1299,245,Washing and detailing vehicle exterior before final release.,2026-06-05 14:25:13.293298
+1300,454,Vehicle moved into the service bay. Preparing tools and equipment.,2025-10-05 03:29:27.293298
+1301,316,Washing and detailing vehicle exterior before final release.,2026-02-02 06:09:20.293298
+1302,501,Final reassembly in progress. Checking all torques and fittings.,2026-08-01 10:35:38.293298
+1303,453,Final reassembly in progress. Checking all torques and fittings.,2026-05-12 05:10:27.293298
+1304,109,Final reassembly in progress. Checking all torques and fittings.,2025-11-15 23:07:57.293298
+1305,36,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-01-31 14:43:21.293298
+1306,126,Waiting on customer approval for additional minor findings.,2025-10-27 22:58:05.293298
+1307,256,Vehicle moved into the service bay. Preparing tools and equipment.,2026-05-02 10:37:46.293298
+1308,513,System pressure tested. No leaks detected at this time.,2026-07-06 05:35:38.293298
+1309,332,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-15 08:40:11.293298
+1310,467,Road test completed successfully. Vehicle handles as expected.,2026-02-20 03:02:30.293298
+1311,290,System pressure tested. No leaks detected at this time.,2025-12-10 22:20:23.293298
+1312,287,Waiting on customer approval for additional minor findings.,2026-02-12 16:52:22.293298
+1313,363,System pressure tested. No leaks detected at this time.,2025-11-30 09:16:11.293298
+1314,112,Final reassembly in progress. Checking all torques and fittings.,2026-06-13 08:25:18.293298
+1315,35,Washing and detailing vehicle exterior before final release.,2026-05-04 00:18:51.293298
+1316,2,Washing and detailing vehicle exterior before final release.,2025-12-25 15:41:24.293298
+1317,244,Waiting on customer approval for additional minor findings.,2026-06-05 12:20:10.293298
+1318,32,Final reassembly in progress. Checking all torques and fittings.,2026-07-01 01:53:27.293298
+1319,105,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-07 08:51:42.293298
+1320,17,Road test completed successfully. Vehicle handles as expected.,2026-03-02 04:33:43.293298
+1321,4,Parts have arrived from the inventory/supplier. Beginning installation.,2026-05-07 08:31:27.293298
+1322,259,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-04-08 02:47:00.293298
+1323,160,Road test completed successfully. Vehicle handles as expected.,2025-12-20 06:41:44.293298
+1324,79,Washing and detailing vehicle exterior before final release.,2025-09-13 16:33:16.293298
+1325,37,System pressure tested. No leaks detected at this time.,2025-10-05 02:29:23.293298
+1326,41,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-26 18:47:12.293298
+1327,308,System pressure tested. No leaks detected at this time.,2026-07-30 20:39:11.293298
+1328,211,Initial repairs complete. Proceeding with system calibration and testing.,2026-02-19 07:41:19.293298
+1329,381,Old components successfully removed. Cleaning mounting surfaces.,2025-10-05 07:18:35.293298
+1330,142,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-28 00:40:44.293298
+1331,218,Final reassembly in progress. Checking all torques and fittings.,2026-02-25 00:49:47.293298
+1332,265,Washing and detailing vehicle exterior before final release.,2025-11-08 04:21:56.293298
+1333,375,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-04-01 18:16:47.293298
+1334,422,Parts have arrived from the inventory/supplier. Beginning installation.,2026-03-12 18:18:25.293298
+1335,107,Initial repairs complete. Proceeding with system calibration and testing.,2025-12-11 21:41:06.293298
+1336,215,Initial repairs complete. Proceeding with system calibration and testing.,2025-12-22 13:09:32.293298
+1337,137,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-01 14:40:22.293298
+1338,209,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-03 03:56:29.293298
+1339,266,Washing and detailing vehicle exterior before final release.,2025-11-06 23:07:05.293298
+1340,265,Road test completed successfully. Vehicle handles as expected.,2025-11-07 06:21:56.293298
+1341,294,Old components successfully removed. Cleaning mounting surfaces.,2025-09-18 11:59:29.293298
+1342,293,Final reassembly in progress. Checking all torques and fittings.,2025-08-22 19:58:50.293298
+1343,273,Final reassembly in progress. Checking all torques and fittings.,2026-06-24 14:53:53.293298
+1344,338,Waiting on customer approval for additional minor findings.,2026-07-18 22:43:36.293298
+1345,443,Waiting on customer approval for additional minor findings.,2025-10-12 23:40:12.293298
+1346,306,Washing and detailing vehicle exterior before final release.,2025-10-27 00:30:20.293298
+1347,9,Road test completed successfully. Vehicle handles as expected.,2026-06-27 02:47:38.293298
+1348,477,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-25 09:38:37.293298
+1349,201,Old components successfully removed. Cleaning mounting surfaces.,2025-09-15 23:38:33.293298
+1350,34,Waiting on customer approval for additional minor findings.,2026-08-04 12:11:36.293298
+1351,162,Parts have arrived from the inventory/supplier. Beginning installation.,2025-10-13 14:31:35.293298
+1352,12,System pressure tested. No leaks detected at this time.,2026-03-29 00:19:49.293298
+1353,200,Parts have arrived from the inventory/supplier. Beginning installation.,2025-09-11 03:14:28.293298
+1354,490,Parts have arrived from the inventory/supplier. Beginning installation.,2026-04-03 13:58:31.293298
+1355,142,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-06-26 14:40:44.293298
+1356,248,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-02-07 00:55:24.293298
+1357,92,Road test completed successfully. Vehicle handles as expected.,2025-11-15 22:38:22.293298
+1358,242,Waiting on customer approval for additional minor findings.,2026-06-17 07:51:31.293298
+1359,446,Initial repairs complete. Proceeding with system calibration and testing.,2025-10-20 15:54:55.293298
+1360,425,Parts have arrived from the inventory/supplier. Beginning installation.,2026-06-24 13:56:11.293298
+1361,317,Old components successfully removed. Cleaning mounting surfaces.,2025-12-29 23:00:13.293298
+1362,170,Washing and detailing vehicle exterior before final release.,2026-02-01 23:57:12.293298
+1363,362,Parts have arrived from the inventory/supplier. Beginning installation.,2026-03-13 05:02:02.293298
+1364,186,Road test completed successfully. Vehicle handles as expected.,2025-12-22 22:16:13.293298
+1365,287,Parts have arrived from the inventory/supplier. Beginning installation.,2026-02-13 16:52:22.293298
+1366,217,Waiting on customer approval for additional minor findings.,2025-09-30 16:55:40.293298
+1367,472,Road test completed successfully. Vehicle handles as expected.,2025-10-25 01:15:47.293298
+1368,442,System pressure tested. No leaks detected at this time.,2026-08-06 03:32:49.293298
+1369,223,Washing and detailing vehicle exterior before final release.,2026-01-26 10:30:28.293298
+1370,263,Parts have arrived from the inventory/supplier. Beginning installation.,2026-08-07 01:22:15.293298
+1371,298,Waiting on customer approval for additional minor findings.,2026-06-18 19:07:39.293298
+1372,48,Final reassembly in progress. Checking all torques and fittings.,2025-12-09 03:11:48.293298
+1373,377,Final reassembly in progress. Checking all torques and fittings.,2025-09-20 01:14:37.293298
+1374,86,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-05 04:07:18.293298
+1375,261,Old components successfully removed. Cleaning mounting surfaces.,2026-08-04 14:45:40.293298
+1376,408,Waiting on customer approval for additional minor findings.,2026-06-15 02:51:51.293298
+1377,204,Parts have arrived from the inventory/supplier. Beginning installation.,2026-04-20 07:48:10.293298
+1378,134,Old components successfully removed. Cleaning mounting surfaces.,2026-01-25 09:07:53.293298
+1379,250,System pressure tested. No leaks detected at this time.,2026-03-06 02:26:43.293298
+1380,60,Washing and detailing vehicle exterior before final release.,2026-01-03 10:01:08.293298
+1381,320,System pressure tested. No leaks detected at this time.,2026-01-31 16:50:48.293298
+1382,318,System pressure tested. No leaks detected at this time.,2025-12-15 07:36:17.293298
+1383,51,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-01 09:40:29.293298
+1384,273,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-06-21 23:53:53.293298
+1385,474,Old components successfully removed. Cleaning mounting surfaces.,2026-06-19 20:27:25.293298
+1386,364,Parts have arrived from the inventory/supplier. Beginning installation.,2026-05-17 16:36:47.293298
+1387,457,Road test completed successfully. Vehicle handles as expected.,2026-07-15 04:35:30.293298
+1388,92,Initial repairs complete. Proceeding with system calibration and testing.,2025-11-15 22:38:22.293298
+1389,15,Initial repairs complete. Proceeding with system calibration and testing.,2025-12-12 09:04:43.293298
+1390,355,System pressure tested. No leaks detected at this time.,2026-02-06 06:13:29.293298
+1391,473,Washing and detailing vehicle exterior before final release.,2026-05-08 01:53:08.293298
+1392,24,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-30 02:19:50.293298
+1393,232,Waiting on customer approval for additional minor findings.,2025-08-22 12:55:54.293298
+1394,90,Waiting on customer approval for additional minor findings.,2025-09-19 07:09:48.293298
+1395,252,Road test completed successfully. Vehicle handles as expected.,2026-01-09 03:02:10.293298
+1396,300,Waiting on customer approval for additional minor findings.,2025-08-17 07:23:05.293298
+1397,307,Washing and detailing vehicle exterior before final release.,2025-11-30 15:29:06.293298
+1398,496,Initial repairs complete. Proceeding with system calibration and testing.,2026-05-12 22:41:19.293298
+1399,284,Old components successfully removed. Cleaning mounting surfaces.,2026-05-29 11:33:07.293298
+1400,6,Waiting on customer approval for additional minor findings.,2025-12-21 11:29:02.293298
+1401,414,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-04-30 07:33:08.293298
+1402,488,System pressure tested. No leaks detected at this time.,2025-11-25 10:11:51.293298
+1403,227,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-06-02 03:57:42.293298
+1404,451,Vehicle moved into the service bay. Preparing tools and equipment.,2025-12-22 03:34:42.293298
+1405,325,Final reassembly in progress. Checking all torques and fittings.,2026-03-02 13:52:53.293298
+1406,39,Road test completed successfully. Vehicle handles as expected.,2026-04-18 06:30:50.293298
+1407,154,Final reassembly in progress. Checking all torques and fittings.,2025-09-03 03:01:53.293298
+1408,465,Washing and detailing vehicle exterior before final release.,2025-09-17 14:16:52.293298
+1409,465,Washing and detailing vehicle exterior before final release.,2025-09-15 02:16:52.293298
+1410,43,System pressure tested. No leaks detected at this time.,2025-11-06 11:40:50.293298
+1411,82,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-02-12 10:41:43.293298
+1412,278,Washing and detailing vehicle exterior before final release.,2025-10-11 20:25:49.293298
+1413,8,Initial repairs complete. Proceeding with system calibration and testing.,2025-10-11 02:21:17.293298
+1414,255,Washing and detailing vehicle exterior before final release.,2025-08-13 20:43:14.293298
+1415,53,Waiting on customer approval for additional minor findings.,2026-01-08 08:48:02.293298
+1416,62,Road test completed successfully. Vehicle handles as expected.,2026-02-19 11:15:27.293298
+1417,394,Final reassembly in progress. Checking all torques and fittings.,2025-08-19 14:09:33.293298
+1418,4,Old components successfully removed. Cleaning mounting surfaces.,2026-05-05 04:31:27.293298
+1419,94,Initial repairs complete. Proceeding with system calibration and testing.,2026-07-12 05:29:10.293298
+1420,263,Old components successfully removed. Cleaning mounting surfaces.,2026-08-04 13:22:15.293298
+1421,366,Parts have arrived from the inventory/supplier. Beginning installation.,2026-07-12 05:49:12.293298
+1422,371,Old components successfully removed. Cleaning mounting surfaces.,2025-10-03 11:40:03.293298
+1423,166,Vehicle moved into the service bay. Preparing tools and equipment.,2026-05-19 10:16:02.293298
+1424,333,Parts have arrived from the inventory/supplier. Beginning installation.,2025-11-05 07:53:29.293298
+1425,13,Parts have arrived from the inventory/supplier. Beginning installation.,2026-04-13 23:51:07.293298
+1426,485,Washing and detailing vehicle exterior before final release.,2026-07-01 07:35:32.293298
+1427,249,Initial repairs complete. Proceeding with system calibration and testing.,2025-12-27 14:32:27.293298
+1428,183,Waiting on customer approval for additional minor findings.,2026-06-06 17:37:56.293298
+1429,411,Old components successfully removed. Cleaning mounting surfaces.,2025-10-24 07:10:16.293298
+1430,60,Final reassembly in progress. Checking all torques and fittings.,2026-01-01 11:01:08.293298
+1431,113,Washing and detailing vehicle exterior before final release.,2026-05-26 03:25:02.293298
+1432,199,Initial repairs complete. Proceeding with system calibration and testing.,2026-07-25 08:25:12.293298
+1433,31,Waiting on customer approval for additional minor findings.,2026-04-25 09:08:10.293298
+1434,167,System pressure tested. No leaks detected at this time.,2025-08-12 11:42:47.293298
+1435,255,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-12 00:43:14.293298
+1436,21,Waiting on customer approval for additional minor findings.,2026-05-21 02:24:33.293298
+1437,255,Initial repairs complete. Proceeding with system calibration and testing.,2025-08-12 12:43:14.293298
+1438,45,Initial repairs complete. Proceeding with system calibration and testing.,2025-09-23 12:07:55.293298
+1439,369,Vehicle moved into the service bay. Preparing tools and equipment.,2026-03-22 07:56:09.293298
+1440,61,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-03-18 20:07:12.293298
+1441,240,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-11-24 08:30:51.293298
+1442,373,Final reassembly in progress. Checking all torques and fittings.,2026-01-04 01:17:23.293298
+1443,495,Parts have arrived from the inventory/supplier. Beginning installation.,2026-05-24 22:14:41.293298
+1444,216,Washing and detailing vehicle exterior before final release.,2025-12-28 02:05:28.293298
+1445,108,Parts have arrived from the inventory/supplier. Beginning installation.,2026-07-24 14:26:16.293298
+1446,463,System pressure tested. No leaks detected at this time.,2025-08-23 08:16:48.293298
+1447,508,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-15 23:35:38.293298
+1448,87,Vehicle moved into the service bay. Preparing tools and equipment.,2026-01-10 10:18:04.293298
+1449,224,Final reassembly in progress. Checking all torques and fittings.,2025-08-18 09:31:33.293298
+1450,293,System pressure tested. No leaks detected at this time.,2025-08-22 13:58:50.293298
+1451,1,Final reassembly in progress. Checking all torques and fittings.,2026-01-20 03:52:19.293298
+1452,263,Waiting on customer approval for additional minor findings.,2026-08-05 21:22:15.293298
+1453,43,Waiting on customer approval for additional minor findings.,2025-11-03 13:40:50.293298
+1454,149,System pressure tested. No leaks detected at this time.,2026-04-01 04:25:19.293298
+1455,285,Old components successfully removed. Cleaning mounting surfaces.,2026-02-23 10:01:08.293298
+1456,268,Road test completed successfully. Vehicle handles as expected.,2026-02-07 22:25:13.293298
+1457,377,Parts have arrived from the inventory/supplier. Beginning installation.,2025-09-19 12:14:37.293298
+1458,503,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-08-01 03:35:38.293298
+1459,253,Final reassembly in progress. Checking all torques and fittings.,2026-07-21 01:11:50.293298
+1460,104,Parts have arrived from the inventory/supplier. Beginning installation.,2026-01-08 06:25:49.293298
+1461,519,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-29 19:35:38.293298
+1462,493,System pressure tested. No leaks detected at this time.,2026-07-21 23:28:46.293298
+1463,72,Road test completed successfully. Vehicle handles as expected.,2026-04-02 04:49:52.293298
+1464,479,Parts have arrived from the inventory/supplier. Beginning installation.,2025-12-13 00:55:59.293298
+1465,189,Final reassembly in progress. Checking all torques and fittings.,2026-04-05 12:46:11.293298
+1466,248,Final reassembly in progress. Checking all torques and fittings.,2026-02-07 17:55:24.293298
+1467,280,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-12-10 21:47:48.293298
+1468,424,Waiting on customer approval for additional minor findings.,2025-10-21 01:57:40.293298
+1469,278,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-10-12 21:25:49.293298
+1470,72,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-04-01 22:49:52.293298
+1471,502,Waiting on customer approval for additional minor findings.,2026-06-27 11:35:38.293298
+1472,313,Old components successfully removed. Cleaning mounting surfaces.,2026-06-25 10:31:49.293298
+1473,435,Vehicle moved into the service bay. Preparing tools and equipment.,2025-09-30 16:13:21.293298
+1474,141,Washing and detailing vehicle exterior before final release.,2025-10-09 05:09:57.293298
+1475,356,Waiting on customer approval for additional minor findings.,2025-10-31 21:41:24.293298
+1476,464,Initial repairs complete. Proceeding with system calibration and testing.,2026-06-15 15:26:34.293298
+1477,44,Old components successfully removed. Cleaning mounting surfaces.,2025-12-22 12:11:55.293298
+1478,412,Vehicle moved into the service bay. Preparing tools and equipment.,2025-09-24 21:56:11.293298
+1479,302,Old components successfully removed. Cleaning mounting surfaces.,2025-10-20 09:28:09.293298
+1480,203,System pressure tested. No leaks detected at this time.,2026-05-20 03:36:07.293298
+1481,329,Waiting on customer approval for additional minor findings.,2025-08-25 01:43:23.293298
+1482,353,Waiting on customer approval for additional minor findings.,2025-12-24 08:48:55.293298
+1483,477,Vehicle moved into the service bay. Preparing tools and equipment.,2026-07-24 15:38:37.293298
+1484,109,Waiting on customer approval for additional minor findings.,2025-11-16 12:07:57.293298
+1485,12,System pressure tested. No leaks detected at this time.,2026-03-27 23:19:49.293298
+1486,333,Old components successfully removed. Cleaning mounting surfaces.,2025-11-06 11:53:29.293298
+1487,471,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-05-30 06:07:29.293298
+1488,21,Road test completed successfully. Vehicle handles as expected.,2026-05-20 12:24:33.293298
+1489,421,Parts have arrived from the inventory/supplier. Beginning installation.,2025-09-29 05:10:42.293298
+1490,364,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2026-05-19 12:36:47.293298
+1491,277,Parts have arrived from the inventory/supplier. Beginning installation.,2026-05-28 10:42:01.293298
+1492,106,Old components successfully removed. Cleaning mounting surfaces.,2026-01-10 08:33:23.293298
+1493,278,Waiting on customer approval for additional minor findings.,2025-10-11 06:25:49.293298
+1494,462,System pressure tested. No leaks detected at this time.,2026-02-26 13:10:53.293298
+1495,38,Final reassembly in progress. Checking all torques and fittings.,2025-09-27 15:56:19.293298
+1496,514,Final reassembly in progress. Checking all torques and fittings.,2026-08-04 05:35:38.293298
+1497,74,Parts have arrived from the inventory/supplier. Beginning installation.,2026-05-04 23:09:30.293298
+1498,28,Washing and detailing vehicle exterior before final release.,2026-01-19 17:18:04.293298
+1499,41,Initial repairs complete. Proceeding with system calibration and testing.,2026-01-28 01:47:12.293298
+1500,109,Encountered a stripped bolt during removal. Extracting carefully to avoid damage.,2025-11-15 14:07:57.293298

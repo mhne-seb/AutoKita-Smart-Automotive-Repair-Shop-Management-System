@@ -1,0 +1,1101 @@
+id,job_order_id,service_id,description_of_work,estimated_duration,actual_duration,estimated_hours,actual_hours,estimated_amount,actual_amount
+1,431,5,Service completed. Adjusted specifications to optimal levels.,02:44:38,02:58:42,,,7165.53,7961.70
+2,27,6,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:58:31,01:19:29,,,911.55,1012.83
+3,169,4,Performed standard service procedure as per manufacturer guidelines.,01:58:47,02:43:21,,,2567.30,2852.55
+4,509,4,Replaced consumables and tested system. Everything is operating normally.,01:13:56,01:25:07,,,1414.57,1571.74
+5,405,4,Replaced consumables and tested system. Everything is operating normally.,01:01:48,01:40:54,,,1895.23,2105.81
+6,360,5,Service completed. Adjusted specifications to optimal levels.,03:27:12,03:15:23,,,6885.23,7650.26
+7,347,8,"Found minor wear and tear during service, but within acceptable limits.",01:34:07,02:13:03,,,5180.52,5756.13
+8,381,5,Performed standard service procedure as per manufacturer guidelines.,03:20:28,03:50:45,,,1833.79,2037.54
+9,103,6,Replaced consumables and tested system. Everything is operating normally.,01:05:50,01:42:30,,,3189.63,3544.03
+10,476,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:07:46,01:38:22,,,4879.61,5421.79
+11,493,7,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:41:24,03:19:38,,,935.26,1039.18
+12,436,2,Service completed. Adjusted specifications to optimal levels.,01:47:47,01:52:26,,,4833.21,5370.23
+13,57,3,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:07:37,01:28:49,,,2568.43,2853.81
+14,120,5,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:02:25,03:18:24,,,4120.40,4578.22
+15,275,2,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:34:18,02:57:18,,,4571.90,5079.89
+16,496,5,Replaced consumables and tested system. Everything is operating normally.,00:45:44,00:38:37,,,1384.07,1537.86
+17,418,7,Performed standard service procedure as per manufacturer guidelines.,02:55:11,03:20:06,,,3255.17,3616.85
+18,182,7,"Found minor wear and tear during service, but within acceptable limits.",01:39:31,02:11:31,,,3745.53,4161.70
+19,423,3,Replaced consumables and tested system. Everything is operating normally.,02:00:30,02:28:28,,,1116.03,1240.03
+20,164,2,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:17:18,02:18:01,,,4137.10,4596.78
+21,107,1,Replaced consumables and tested system. Everything is operating normally.,02:17:58,02:12:42,,,2677.15,2974.61
+22,467,6,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:51:31,03:33:47,,,5184.38,5760.42
+23,187,5,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:30:28,01:21:20,,,3757.24,4174.71
+24,415,5,Service completed. Adjusted specifications to optimal levels.,02:48:47,02:50:42,,,4595.31,5105.90
+25,277,2,Service completed. Adjusted specifications to optimal levels.,02:44:04,03:12:33,,,1140.80,1267.55
+26,230,8,Service completed. Adjusted specifications to optimal levels.,00:45:41,01:05:24,,,2982.38,3313.76
+27,261,7,Performed standard service procedure as per manufacturer guidelines.,00:52:26,01:27:15,,,7164.95,7961.06
+28,376,1,Replaced consumables and tested system. Everything is operating normally.,02:22:17,02:12:34,,,4318.70,4798.55
+29,224,5,Service completed. Adjusted specifications to optimal levels.,01:20:07,01:56:32,,,4531.23,5034.70
+30,89,8,"Found minor wear and tear during service, but within acceptable limits.",03:08:12,03:31:00,,,3466.50,3851.67
+31,513,8,Service completed. Adjusted specifications to optimal levels.,00:32:23,00:39:29,,,4493.00,4992.22
+32,291,2,Replaced consumables and tested system. Everything is operating normally.,02:49:16,03:22:20,,,2045.83,2273.14
+33,81,5,Performed standard service procedure as per manufacturer guidelines.,03:42:45,03:56:45,,,1041.85,1157.61
+34,481,8,Service completed. Adjusted specifications to optimal levels.,01:04:02,01:34:55,,,2209.28,2454.76
+35,378,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:37:47,01:20:52,,,3030.27,3366.97
+36,510,1,Service completed. Adjusted specifications to optimal levels.,03:06:18,02:58:24,,,4044.08,4493.42
+37,307,5,Performed standard service procedure as per manufacturer guidelines.,02:26:05,02:23:03,,,1094.99,1216.66
+38,52,5,Service completed. Adjusted specifications to optimal levels.,01:39:57,01:44:02,,,6905.48,7672.76
+39,303,6,Replaced consumables and tested system. Everything is operating normally.,02:55:25,02:44:49,,,6393.08,7103.42
+40,355,2,Service completed. Adjusted specifications to optimal levels.,03:00:58,03:28:07,,,683.34,759.27
+41,386,5,Performed standard service procedure as per manufacturer guidelines.,01:37:29,02:18:11,,,5491.68,6101.87
+42,85,6,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:52:52,01:07:35,,,7085.19,7872.43
+43,15,2,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:41:44,03:55:21,,,5275.35,5861.50
+44,327,2,Performed standard service procedure as per manufacturer guidelines.,01:45:31,01:46:46,,,4588.58,5098.42
+45,7,8,Service completed. Adjusted specifications to optimal levels.,03:27:58,03:39:09,,,4289.23,4765.81
+46,89,1,Replaced consumables and tested system. Everything is operating normally.,03:37:34,04:12:38,,,4102.28,4558.09
+47,146,5,Replaced consumables and tested system. Everything is operating normally.,03:03:29,03:40:38,,,2044.72,2271.91
+48,209,8,"Found minor wear and tear during service, but within acceptable limits.",02:23:11,03:03:47,,,2973.77,3304.19
+49,53,7,Performed standard service procedure as per manufacturer guidelines.,01:37:47,01:24:26,,,5496.87,6107.63
+50,31,7,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:31:53,03:09:39,,,5703.86,6337.62
+51,83,4,"Found minor wear and tear during service, but within acceptable limits.",03:47:10,03:59:00,,,702.14,780.15
+52,43,3,Service completed. Adjusted specifications to optimal levels.,02:00:21,02:07:04,,,4938.62,5487.36
+53,299,6,Replaced consumables and tested system. Everything is operating normally.,03:18:29,03:35:59,,,6437.64,7152.93
+54,462,1,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:24:42,03:26:21,,,1841.60,2046.22
+55,258,8,Service completed. Adjusted specifications to optimal levels.,02:55:05,03:34:04,,,6217.68,6908.53
+56,29,8,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:47:29,00:57:48,,,2335.54,2595.04
+57,413,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:32:22,02:32:18,,,3969.89,4410.99
+58,409,6,Service completed. Adjusted specifications to optimal levels.,01:36:15,01:56:56,,,3400.11,3777.90
+59,103,8,Performed standard service procedure as per manufacturer guidelines.,03:46:48,04:04:43,,,3384.35,3760.39
+60,182,8,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:19:44,02:38:50,,,3163.89,3515.43
+61,241,2,Performed standard service procedure as per manufacturer guidelines.,02:28:56,02:14:07,,,5350.35,5944.83
+62,89,1,"Found minor wear and tear during service, but within acceptable limits.",02:34:01,02:58:54,,,769.73,855.26
+63,136,4,Replaced consumables and tested system. Everything is operating normally.,03:46:40,03:34:56,,,3887.89,4319.88
+64,310,1,Replaced consumables and tested system. Everything is operating normally.,02:36:42,02:25:36,,,2837.74,3153.04
+65,138,5,Performed standard service procedure as per manufacturer guidelines.,03:06:23,03:28:37,,,6452.96,7169.96
+66,452,3,Service completed. Adjusted specifications to optimal levels.,02:23:43,02:08:55,,,745.69,828.54
+67,467,8,Replaced consumables and tested system. Everything is operating normally.,02:07:13,02:09:39,,,4372.80,4858.67
+68,337,3,Service completed. Adjusted specifications to optimal levels.,00:40:34,00:33:38,,,4789.89,5322.10
+69,321,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:16:55,01:17:27,,,2804.43,3116.03
+70,34,6,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:26:25,02:11:32,,,4421.57,4912.86
+71,60,3,"Found minor wear and tear during service, but within acceptable limits.",01:41:32,02:13:25,,,5446.44,6051.60
+72,312,7,Performed standard service procedure as per manufacturer guidelines.,00:53:54,01:03:31,,,6357.83,7064.26
+73,225,2,"Found minor wear and tear during service, but within acceptable limits.",01:06:57,01:41:07,,,6433.66,7148.51
+74,424,3,Performed standard service procedure as per manufacturer guidelines.,01:22:30,01:08:10,,,3288.80,3654.22
+75,3,2,Performed standard service procedure as per manufacturer guidelines.,03:31:39,03:38:31,,,6188.55,6876.17
+76,374,7,"Found minor wear and tear during service, but within acceptable limits.",02:00:40,02:35:56,,,4530.80,5034.22
+77,403,6,Replaced consumables and tested system. Everything is operating normally.,02:06:00,02:01:35,,,939.23,1043.59
+78,12,5,Replaced consumables and tested system. Everything is operating normally.,00:45:55,00:33:43,,,4770.50,5300.55
+79,129,5,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:23:04,01:54:10,,,5680.52,6311.69
+80,335,8,"Found minor wear and tear during service, but within acceptable limits.",00:33:26,00:40:22,,,2470.93,2745.48
+81,495,1,Performed standard service procedure as per manufacturer guidelines.,00:57:16,00:49:00,,,4149.10,4610.11
+82,18,8,Replaced consumables and tested system. Everything is operating normally.,02:08:33,02:48:52,,,5338.78,5931.98
+83,279,3,Service completed. Adjusted specifications to optimal levels.,03:23:04,04:02:22,,,5207.54,5786.15
+84,22,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:43:13,04:01:29,,,769.47,854.97
+85,148,1,Performed standard service procedure as per manufacturer guidelines.,02:54:15,03:04:13,,,3756.63,4174.03
+86,339,6,Performed standard service procedure as per manufacturer guidelines.,02:58:41,03:36:59,,,6441.77,7157.52
+87,352,3,Replaced consumables and tested system. Everything is operating normally.,00:35:15,00:42:40,,,2939.88,3266.53
+88,238,5,Replaced consumables and tested system. Everything is operating normally.,01:21:48,01:39:34,,,5003.78,5559.76
+89,375,4,Service completed. Adjusted specifications to optimal levels.,01:57:36,02:34:32,,,4055.93,4506.59
+90,348,5,Service completed. Adjusted specifications to optimal levels.,01:37:15,01:48:27,,,2247.36,2497.07
+91,380,6,"Found minor wear and tear during service, but within acceptable limits.",03:53:03,04:28:52,,,4877.20,5419.11
+92,127,6,Replaced consumables and tested system. Everything is operating normally.,01:26:14,01:36:32,,,551.47,612.74
+93,55,8,Performed standard service procedure as per manufacturer guidelines.,02:48:29,03:27:50,,,3132.08,3480.09
+94,73,6,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:14:08,02:10:48,,,2711.91,3013.23
+95,398,3,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:04:15,01:35:20,,,4546.03,5051.14
+96,14,3,"Found minor wear and tear during service, but within acceptable limits.",02:23:55,02:50:43,,,3432.46,3813.84
+97,311,8,Performed standard service procedure as per manufacturer guidelines.,00:33:31,00:50:03,,,4772.88,5303.20
+98,173,2,"Found minor wear and tear during service, but within acceptable limits.",00:55:38,01:38:50,,,670.88,745.42
+99,496,3,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:37:31,02:48:41,,,3952.40,4391.56
+100,479,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:45:31,02:05:10,,,1281.02,1423.36
+101,46,5,Service completed. Adjusted specifications to optimal levels.,01:03:56,01:36:00,,,5880.00,6533.33
+102,499,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:17:56,01:29:48,,,2084.79,2316.43
+103,454,7,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:23:42,01:48:22,,,2179.31,2421.45
+104,67,1,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:42:25,01:15:11,,,2257.01,2507.79
+105,371,6,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:33:19,02:18:45,,,6577.31,7308.12
+106,474,8,"Found minor wear and tear during service, but within acceptable limits.",03:18:26,03:52:55,,,4671.48,5190.53
+107,96,8,Replaced consumables and tested system. Everything is operating normally.,02:52:16,03:31:40,,,3628.45,4031.61
+108,182,7,Performed standard service procedure as per manufacturer guidelines.,03:43:43,03:52:57,,,684.20,760.22
+109,415,4,Performed standard service procedure as per manufacturer guidelines.,03:41:43,03:37:45,,,1188.21,1320.23
+110,517,4,Performed standard service procedure as per manufacturer guidelines.,02:04:12,02:23:15,,,688.03,764.48
+111,305,8,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:11:07,02:59:13,,,5449.32,6054.80
+112,444,6,Replaced consumables and tested system. Everything is operating normally.,02:38:53,03:11:28,,,3308.74,3676.38
+113,2,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:17:27,03:19:33,,,4516.52,5018.36
+114,365,1,"Found minor wear and tear during service, but within acceptable limits.",01:09:48,00:55:32,,,4279.10,4754.56
+115,92,8,Service completed. Adjusted specifications to optimal levels.,03:55:44,04:31:44,,,1549.76,1721.96
+116,137,2,Replaced consumables and tested system. Everything is operating normally.,02:33:20,03:16:57,,,2594.03,2882.26
+117,225,6,Performed standard service procedure as per manufacturer guidelines.,02:34:20,03:08:23,,,3038.72,3376.36
+118,281,1,Service completed. Adjusted specifications to optimal levels.,02:30:58,03:14:06,,,1495.22,1661.35
+119,444,7,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:50:05,02:24:01,,,1508.00,1675.55
+120,291,2,Service completed. Adjusted specifications to optimal levels.,03:25:18,03:43:48,,,2743.34,3048.15
+121,245,1,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:43:45,04:23:43,,,3448.12,3831.24
+122,280,6,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:59:17,03:45:27,,,799.85,888.72
+123,261,3,Performed standard service procedure as per manufacturer guidelines.,02:25:12,02:40:17,,,3423.75,3804.17
+124,334,3,Service completed. Adjusted specifications to optimal levels.,03:26:07,04:04:49,,,5389.40,5988.22
+125,363,6,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:24:07,01:50:29,,,5854.48,6504.98
+126,59,8,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:16:17,02:38:53,,,3963.57,4403.97
+127,2,6,Performed standard service procedure as per manufacturer guidelines.,01:23:07,01:25:40,,,1460.39,1622.66
+128,139,7,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:34:02,04:03:47,,,3992.88,4436.53
+129,190,1,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:39:20,00:55:54,,,726.32,807.02
+130,472,4,Replaced consumables and tested system. Everything is operating normally.,02:02:42,02:06:16,,,5564.69,6182.99
+131,99,7,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:36:10,01:48:04,,,905.68,1006.31
+132,393,6,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:21:16,02:38:01,,,2806.92,3118.80
+133,77,7,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:36:35,02:28:52,,,5176.11,5751.23
+134,445,1,"Found minor wear and tear during service, but within acceptable limits.",03:50:09,03:38:13,,,5388.35,5987.05
+135,46,8,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:55:35,04:14:39,,,613.18,681.31
+136,175,1,Service completed. Adjusted specifications to optimal levels.,02:58:54,03:15:24,,,1619.28,1799.20
+137,371,2,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:52:30,03:51:40,,,3742.13,4157.92
+138,155,5,Replaced consumables and tested system. Everything is operating normally.,00:59:54,01:03:34,,,2565.76,2850.84
+139,160,1,"Found minor wear and tear during service, but within acceptable limits.",01:02:32,00:54:49,,,4819.34,5354.82
+140,296,1,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:20:03,03:32:53,,,7150.29,7944.77
+141,310,6,"Found minor wear and tear during service, but within acceptable limits.",00:34:23,01:02:23,,,1856.29,2062.54
+142,206,7,"Found minor wear and tear during service, but within acceptable limits.",02:29:44,02:34:17,,,1652.62,1836.24
+143,26,7,Replaced consumables and tested system. Everything is operating normally.,01:49:42,02:33:54,,,2232.25,2480.28
+144,214,6,Performed standard service procedure as per manufacturer guidelines.,02:48:26,02:49:52,,,1987.56,2208.40
+145,231,3,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:05:16,03:39:16,,,967.63,1075.14
+146,283,7,Replaced consumables and tested system. Everything is operating normally.,00:42:47,01:00:14,,,3140.03,3488.92
+147,21,6,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:21:18,03:01:08,,,4461.15,4956.83
+148,304,7,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:13:12,01:35:29,,,1433.26,1592.51
+149,9,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:12:22,02:51:53,,,4757.97,5286.63
+150,124,4,Service completed. Adjusted specifications to optimal levels.,01:02:29,01:21:13,,,968.85,1076.50
+151,334,2,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",00:32:22,01:08:17,,,4890.62,5434.02
+152,278,4,Service completed. Adjusted specifications to optimal levels.,01:57:34,02:09:25,,,5043.91,5604.34
+153,357,6,Performed standard service procedure as per manufacturer guidelines.,01:05:46,01:31:32,,,2042.00,2268.89
+154,293,4,Service completed. Adjusted specifications to optimal levels.,01:57:45,02:14:56,,,3221.47,3579.41
+155,77,8,Service completed. Adjusted specifications to optimal levels.,03:52:03,03:56:39,,,1531.24,1701.38
+156,376,3,Performed standard service procedure as per manufacturer guidelines.,01:46:50,01:35:00,,,3524.20,3915.78
+157,131,5,Service completed. Adjusted specifications to optimal levels.,01:30:57,02:06:23,,,4669.92,5188.80
+158,90,7,Performed standard service procedure as per manufacturer guidelines.,00:51:03,00:51:39,,,1031.52,1146.13
+159,407,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:39:39,02:37:24,,,2391.98,2657.76
+160,182,3,Performed standard service procedure as per manufacturer guidelines.,02:18:32,02:50:14,,,5135.16,5705.73
+161,261,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:27:22,03:49:41,,,3025.41,3361.57
+162,217,1,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:17:43,01:16:05,,,1121.67,1246.30
+163,205,4,"Found minor wear and tear during service, but within acceptable limits.",02:49:32,03:04:06,,,5410.93,6012.14
+164,438,2,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:49:47,02:22:37,,,5211.81,5790.90
+165,478,4,Replaced consumables and tested system. Everything is operating normally.,01:52:47,02:20:10,,,673.38,748.20
+166,518,2,Replaced consumables and tested system. Everything is operating normally.,02:01:49,02:44:46,,,4964.30,5515.89
+167,301,3,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:06:46,03:50:37,,,4197.35,4663.72
+168,115,7,Performed standard service procedure as per manufacturer guidelines.,01:20:03,01:31:02,,,5405.28,6005.87
+169,459,6,Replaced consumables and tested system. Everything is operating normally.,03:15:15,03:12:37,,,5890.10,6544.56
+170,497,3,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:30:13,02:41:56,,,6701.59,7446.21
+171,443,8,"Found minor wear and tear during service, but within acceptable limits.",02:48:40,02:43:37,,,2100.93,2334.37
+172,287,5,Replaced consumables and tested system. Everything is operating normally.,01:51:56,01:59:26,,,1894.89,2105.43
+173,3,5,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:01:19,03:21:23,,,3240.60,3600.67
+174,115,6,Performed standard service procedure as per manufacturer guidelines.,01:37:19,02:08:46,,,3924.94,4361.04
+175,483,5,Service completed. Adjusted specifications to optimal levels.,02:24:40,02:52:36,,,2959.13,3287.92
+176,316,6,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:39:20,01:08:23,,,1001.73,1113.03
+177,219,1,Service completed. Adjusted specifications to optimal levels.,02:28:25,02:41:29,,,2854.67,3171.85
+178,304,2,Performed standard service procedure as per manufacturer guidelines.,00:55:28,01:37:13,,,6494.55,7216.17
+179,295,4,Replaced consumables and tested system. Everything is operating normally.,03:55:24,04:21:12,,,3730.46,4144.96
+180,22,5,Service completed. Adjusted specifications to optimal levels.,01:48:55,02:23:38,,,6714.96,7461.07
+181,491,7,Service completed. Adjusted specifications to optimal levels.,01:44:39,02:24:28,,,6738.42,7487.13
+182,130,8,Service completed. Adjusted specifications to optimal levels.,03:17:51,03:20:11,,,7079.53,7866.14
+183,257,4,Replaced consumables and tested system. Everything is operating normally.,03:02:03,03:02:49,,,1747.59,1941.77
+184,338,2,"Found minor wear and tear during service, but within acceptable limits.",00:57:09,01:02:54,,,5484.74,6094.16
+185,474,3,Service completed. Adjusted specifications to optimal levels.,03:13:54,03:43:20,,,3652.07,4057.85
+186,35,6,Performed standard service procedure as per manufacturer guidelines.,02:01:17,02:03:00,,,3688.62,4098.47
+187,283,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:17:39,01:53:12,,,1822.58,2025.09
+188,113,1,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:04:07,01:48:45,,,6039.58,6710.64
+189,222,1,Performed standard service procedure as per manufacturer guidelines.,00:59:47,00:51:09,,,5580.86,6200.95
+190,492,2,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:35:26,02:57:48,,,3843.95,4271.05
+191,515,6,Performed standard service procedure as per manufacturer guidelines.,03:01:47,02:59:44,,,1150.17,1277.97
+192,359,5,Replaced consumables and tested system. Everything is operating normally.,02:07:05,01:55:22,,,5188.55,5765.06
+193,199,5,"Found minor wear and tear during service, but within acceptable limits.",02:45:54,02:46:17,,,1248.08,1386.76
+194,113,3,Replaced consumables and tested system. Everything is operating normally.,02:29:04,02:24:14,,,2735.65,3039.61
+195,294,4,Service completed. Adjusted specifications to optimal levels.,01:38:20,01:28:57,,,1651.00,1834.44
+196,246,1,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:46:13,01:33:09,,,2940.96,3267.73
+197,165,2,Performed standard service procedure as per manufacturer guidelines.,01:32:04,02:06:52,,,3243.00,3603.33
+198,114,3,Performed standard service procedure as per manufacturer guidelines.,03:12:14,03:40:50,,,612.45,680.50
+199,37,7,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:39:04,02:06:09,,,4023.28,4470.31
+200,153,6,Performed standard service procedure as per manufacturer guidelines.,03:37:16,03:23:26,,,5338.25,5931.39
+201,247,8,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:15:49,03:50:09,,,3132.97,3481.08
+202,262,7,Performed standard service procedure as per manufacturer guidelines.,01:16:13,01:17:21,,,947.14,1052.38
+203,330,5,Service completed. Adjusted specifications to optimal levels.,03:43:31,03:46:24,,,3821.02,4245.58
+204,55,6,Performed standard service procedure as per manufacturer guidelines.,01:19:07,01:43:32,,,1885.55,2095.06
+205,478,2,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:58:36,01:11:37,,,1988.64,2209.60
+206,279,8,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",00:48:36,00:46:00,,,5530.10,6144.56
+207,327,2,"Found minor wear and tear during service, but within acceptable limits.",01:29:21,01:35:28,,,2741.16,3045.73
+208,507,3,"Found minor wear and tear during service, but within acceptable limits.",02:58:41,03:41:26,,,6362.69,7069.65
+209,2,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:55:54,03:34:36,,,6436.08,7151.20
+210,439,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:28:11,02:52:42,,,2603.45,2892.72
+211,462,5,Performed standard service procedure as per manufacturer guidelines.,02:52:21,02:53:23,,,508.66,565.18
+212,462,1,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:55:18,02:27:11,,,6093.43,6770.48
+213,454,7,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:39:31,03:04:45,,,5447.29,6052.54
+214,254,5,Replaced consumables and tested system. Everything is operating normally.,00:33:06,00:19:10,,,5314.37,5904.86
+215,484,7,Performed standard service procedure as per manufacturer guidelines.,01:01:03,01:39:32,,,6140.93,6823.26
+216,206,4,Performed standard service procedure as per manufacturer guidelines.,02:25:07,02:22:51,,,545.77,606.41
+217,142,4,Replaced consumables and tested system. Everything is operating normally.,03:40:27,03:28:21,,,6018.69,6687.43
+218,129,5,Performed standard service procedure as per manufacturer guidelines.,03:20:13,03:12:10,,,2612.60,2902.89
+219,337,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:30:28,02:43:08,,,3088.15,3431.28
+220,460,3,Replaced consumables and tested system. Everything is operating normally.,00:55:27,01:11:45,,,1447.57,1608.41
+221,124,1,Replaced consumables and tested system. Everything is operating normally.,01:45:49,02:23:55,,,5952.39,6613.77
+222,1,8,Service completed. Adjusted specifications to optimal levels.,02:21:43,02:09:31,,,1750.61,1945.12
+223,72,4,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:41:41,03:57:31,,,641.02,712.24
+224,320,3,Replaced consumables and tested system. Everything is operating normally.,02:13:46,02:52:36,,,3836.06,4262.29
+225,206,8,Performed standard service procedure as per manufacturer guidelines.,02:59:08,02:57:08,,,4726.08,5251.20
+226,404,5,"Found minor wear and tear during service, but within acceptable limits.",02:35:37,02:50:19,,,5014.57,5571.74
+227,313,6,"Found minor wear and tear during service, but within acceptable limits.",03:03:27,03:17:26,,,3293.50,3659.44
+228,435,2,Service completed. Adjusted specifications to optimal levels.,02:16:12,02:25:19,,,1488.96,1654.40
+229,37,1,"Found minor wear and tear during service, but within acceptable limits.",02:11:54,02:43:12,,,4604.35,5115.94
+230,30,8,Performed standard service procedure as per manufacturer guidelines.,00:45:34,01:18:25,,,5694.65,6327.39
+231,341,8,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:44:02,03:47:52,,,7020.48,7800.53
+232,211,7,"Found minor wear and tear during service, but within acceptable limits.",02:23:57,02:31:27,,,6401.39,7112.66
+233,141,8,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:06:12,02:59:38,,,5315.81,5906.45
+234,199,4,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:28:21,01:58:07,,,4856.95,5396.61
+235,432,7,Service completed. Adjusted specifications to optimal levels.,03:35:26,03:33:13,,,6850.01,7611.12
+236,132,8,Performed standard service procedure as per manufacturer guidelines.,03:03:08,02:53:05,,,4875.22,5416.91
+237,424,2,"Found minor wear and tear during service, but within acceptable limits.",02:09:15,02:10:32,,,1285.77,1428.63
+238,366,1,Service completed. Adjusted specifications to optimal levels.,03:19:18,03:43:23,,,2969.38,3299.31
+239,127,4,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:54:23,01:44:25,,,5762.19,6402.43
+240,328,3,Replaced consumables and tested system. Everything is operating normally.,02:06:41,02:46:56,,,5586.49,6207.21
+241,194,1,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:49:38,02:45:51,,,7042.92,7825.47
+242,516,8,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:34:38,04:15:16,,,3763.80,4182.00
+243,240,6,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:05:54,01:05:55,,,3989.91,4433.23
+244,282,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:54:18,03:12:54,,,6166.21,6851.34
+245,255,3,Service completed. Adjusted specifications to optimal levels.,02:15:58,02:58:16,,,6232.90,6925.44
+246,406,4,"Found minor wear and tear during service, but within acceptable limits.",01:23:47,01:17:37,,,4094.57,4549.52
+247,393,8,Replaced consumables and tested system. Everything is operating normally.,03:29:40,03:51:29,,,905.73,1006.37
+248,196,2,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:23:54,03:22:49,,,6766.91,7518.79
+249,292,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:48:57,03:12:23,,,1542.11,1713.46
+250,254,1,Performed standard service procedure as per manufacturer guidelines.,00:43:17,00:41:24,,,4922.33,5469.26
+251,274,2,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:18:01,02:04:26,,,1815.26,2016.96
+252,17,5,"Found minor wear and tear during service, but within acceptable limits.",02:25:34,02:57:58,,,4617.60,5130.67
+253,270,1,Performed standard service procedure as per manufacturer guidelines.,01:40:41,01:44:11,,,729.84,810.93
+254,162,2,"Found minor wear and tear during service, but within acceptable limits.",01:41:36,02:06:19,,,6272.30,6969.22
+255,389,5,Replaced consumables and tested system. Everything is operating normally.,00:39:01,00:24:14,,,4816.40,5351.56
+256,15,1,Performed standard service procedure as per manufacturer guidelines.,02:29:42,03:06:33,,,3276.51,3640.57
+257,412,8,"Found minor wear and tear during service, but within acceptable limits.",03:36:04,04:01:26,,,3414.64,3794.04
+258,301,4,Replaced consumables and tested system. Everything is operating normally.,01:48:54,02:29:01,,,5829.14,6476.82
+259,350,2,Replaced consumables and tested system. Everything is operating normally.,02:54:56,03:07:31,,,5456.10,6062.33
+260,50,8,Performed standard service procedure as per manufacturer guidelines.,01:28:56,01:31:25,,,4204.32,4671.47
+261,435,6,Replaced consumables and tested system. Everything is operating normally.,03:56:47,04:25:04,,,2583.75,2870.83
+262,468,2,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:01:40,01:09:55,,,3718.15,4131.28
+263,36,5,Replaced consumables and tested system. Everything is operating normally.,01:13:56,01:16:27,,,3637.87,4042.08
+264,314,1,"Found minor wear and tear during service, but within acceptable limits.",03:33:57,03:56:23,,,4174.07,4637.85
+265,296,2,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:24:56,02:03:33,,,5399.44,5999.38
+266,321,5,Service completed. Adjusted specifications to optimal levels.,01:06:42,01:15:40,,,4069.45,4521.61
+267,420,6,Service completed. Adjusted specifications to optimal levels.,00:38:38,01:02:21,,,2964.70,3294.11
+268,227,1,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:40:39,02:54:19,,,4917.37,5463.74
+269,247,3,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:54:24,00:52:05,,,6523.77,7248.63
+270,270,4,Service completed. Adjusted specifications to optimal levels.,00:50:09,00:46:08,,,5290.38,5878.20
+271,243,4,"Found minor wear and tear during service, but within acceptable limits.",02:55:52,03:02:27,,,6385.11,7094.57
+272,257,7,Performed standard service procedure as per manufacturer guidelines.,00:40:05,01:11:47,,,1430.12,1589.02
+273,392,1,Service completed. Adjusted specifications to optimal levels.,00:57:13,00:45:06,,,7061.26,7845.84
+274,231,4,Replaced consumables and tested system. Everything is operating normally.,01:57:09,02:01:16,,,569.95,633.28
+275,324,5,Performed standard service procedure as per manufacturer guidelines.,01:16:22,01:10:08,,,3642.75,4047.50
+276,506,7,"Found minor wear and tear during service, but within acceptable limits.",01:09:39,01:00:52,,,1889.42,2099.36
+277,289,8,Service completed. Adjusted specifications to optimal levels.,00:31:07,01:13:15,,,929.75,1033.06
+278,416,3,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:57:00,02:00:07,,,1868.83,2076.48
+279,369,8,"Found minor wear and tear during service, but within acceptable limits.",00:44:38,01:16:56,,,5690.56,6322.84
+280,68,5,Replaced consumables and tested system. Everything is operating normally.,02:10:50,02:03:32,,,779.01,865.57
+281,7,3,Replaced consumables and tested system. Everything is operating normally.,03:56:02,04:02:03,,,4727.61,5252.90
+282,234,4,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:24:11,01:26:13,,,2845.82,3162.02
+283,82,1,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:54:39,04:18:37,,,2823.78,3137.53
+284,483,8,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:05:01,03:30:53,,,6579.02,7310.02
+285,337,7,Replaced consumables and tested system. Everything is operating normally.,02:49:52,02:49:54,,,3261.83,3624.26
+286,80,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:38:19,03:46:23,,,5938.15,6597.94
+287,82,8,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:19:14,02:19:06,,,2937.53,3263.92
+288,108,3,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:34:42,03:47:05,,,6364.38,7071.53
+289,6,1,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:16:53,01:47:49,,,924.99,1027.77
+290,317,6,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",00:56:29,01:32:41,,,5211.51,5790.57
+291,465,7,Performed standard service procedure as per manufacturer guidelines.,02:01:08,02:41:08,,,2340.34,2600.38
+292,217,6,Performed standard service procedure as per manufacturer guidelines.,03:38:40,03:35:14,,,6360.04,7066.71
+293,113,4,"Found minor wear and tear during service, but within acceptable limits.",02:58:25,03:08:34,,,1215.75,1350.83
+294,460,1,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:02:04,03:04:32,,,5806.18,6451.31
+295,3,7,"Found minor wear and tear during service, but within acceptable limits.",01:31:22,02:08:17,,,2642.99,2936.66
+296,439,2,"Found minor wear and tear during service, but within acceptable limits.",00:47:40,01:22:40,,,1472.92,1636.58
+297,405,3,"Found minor wear and tear during service, but within acceptable limits.",02:54:47,03:07:24,,,2328.42,2587.13
+298,192,4,Replaced consumables and tested system. Everything is operating normally.,02:04:27,02:28:05,,,3819.25,4243.61
+299,28,1,Service completed. Adjusted specifications to optimal levels.,01:14:56,01:19:16,,,1292.99,1436.66
+300,126,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:19:40,01:22:50,,,3937.47,4374.97
+301,336,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:36:16,02:09:19,,,2685.55,2983.94
+302,268,8,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:41:47,01:45:59,,,1021.46,1134.96
+303,119,6,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:03:02,02:22:43,,,3107.12,3452.35
+304,47,7,Performed standard service procedure as per manufacturer guidelines.,02:56:00,02:51:07,,,5434.63,6038.48
+305,519,2,Replaced consumables and tested system. Everything is operating normally.,03:08:47,03:48:03,,,3062.71,3403.01
+306,47,7,Service completed. Adjusted specifications to optimal levels.,03:06:20,03:43:07,,,3876.53,4307.26
+307,425,3,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:52:14,01:44:24,,,762.26,846.96
+308,48,3,"Found minor wear and tear during service, but within acceptable limits.",03:37:03,04:09:47,,,2220.02,2466.69
+309,385,2,"Found minor wear and tear during service, but within acceptable limits.",02:27:14,03:04:37,,,2624.22,2915.80
+310,258,6,Performed standard service procedure as per manufacturer guidelines.,01:04:58,01:49:13,,,1781.64,1979.60
+311,62,1,Performed standard service procedure as per manufacturer guidelines.,00:44:19,01:21:33,,,4208.42,4676.02
+312,6,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",00:43:46,00:56:30,,,1967.49,2186.10
+313,495,3,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:25:27,01:24:30,,,3362.45,3736.05
+314,362,7,Performed standard service procedure as per manufacturer guidelines.,03:45:47,03:37:13,,,2628.72,2920.80
+315,494,1,"Found minor wear and tear during service, but within acceptable limits.",00:30:18,01:06:13,,,2421.23,2690.26
+316,170,8,"Found minor wear and tear during service, but within acceptable limits.",00:37:49,01:15:34,,,5860.62,6511.80
+317,327,1,"Found minor wear and tear during service, but within acceptable limits.",00:51:13,00:45:27,,,4197.11,4663.46
+318,444,1,Performed standard service procedure as per manufacturer guidelines.,01:13:52,01:53:54,,,4480.30,4978.11
+319,349,3,Performed standard service procedure as per manufacturer guidelines.,02:19:31,02:17:53,,,3141.40,3490.44
+320,236,7,Performed standard service procedure as per manufacturer guidelines.,02:34:25,02:32:45,,,2403.83,2670.92
+321,243,2,Replaced consumables and tested system. Everything is operating normally.,03:39:53,03:40:31,,,3647.43,4052.70
+322,419,7,Service completed. Adjusted specifications to optimal levels.,01:56:22,01:44:36,,,2168.67,2409.63
+323,296,4,Service completed. Adjusted specifications to optimal levels.,01:20:59,01:35:40,,,6579.93,7311.03
+324,503,3,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:06:05,02:32:15,,,5737.70,6375.22
+325,479,1,Replaced consumables and tested system. Everything is operating normally.,02:23:27,02:21:51,,,2016.41,2240.45
+326,104,1,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:20:18,01:15:17,,,583.06,647.84
+327,279,4,Service completed. Adjusted specifications to optimal levels.,03:45:22,03:53:24,,,1132.10,1257.89
+328,261,3,Replaced consumables and tested system. Everything is operating normally.,03:19:38,03:50:38,,,5892.85,6547.61
+329,234,4,"Found minor wear and tear during service, but within acceptable limits.",02:13:56,02:42:47,,,1638.68,1820.76
+330,234,2,Service completed. Adjusted specifications to optimal levels.,02:54:37,02:40:11,,,5707.60,6341.78
+331,397,4,Replaced consumables and tested system. Everything is operating normally.,03:25:00,03:38:18,,,1810.31,2011.45
+332,263,1,Replaced consumables and tested system. Everything is operating normally.,02:26:43,03:06:29,,,5984.73,6649.70
+333,110,3,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:03:14,03:46:05,,,3041.11,3379.01
+334,114,8,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:07:12,02:15:35,,,5503.12,6114.58
+335,514,2,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:18:33,01:15:03,,,6748.51,7498.34
+336,8,2,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:58:44,02:16:29,,,7178.21,7975.79
+337,256,1,Performed standard service procedure as per manufacturer guidelines.,01:59:48,02:08:09,,,2717.32,3019.24
+338,258,4,Replaced consumables and tested system. Everything is operating normally.,00:40:05,01:09:41,,,2946.05,3273.39
+339,163,3,"Found minor wear and tear during service, but within acceptable limits.",02:55:30,02:59:16,,,5832.77,6480.86
+340,224,5,Service completed. Adjusted specifications to optimal levels.,02:54:09,03:03:12,,,5834.12,6482.36
+341,45,2,Service completed. Adjusted specifications to optimal levels.,02:28:50,03:12:40,,,2225.49,2472.77
+342,222,6,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:41:14,00:30:50,,,2061.31,2290.34
+343,417,1,Service completed. Adjusted specifications to optimal levels.,02:10:57,02:25:02,,,2578.13,2864.59
+344,248,4,Service completed. Adjusted specifications to optimal levels.,01:45:46,02:04:11,,,6327.59,7030.65
+345,197,1,"Found minor wear and tear during service, but within acceptable limits.",03:19:13,03:48:37,,,6893.50,7659.44
+346,102,4,"Found minor wear and tear during service, but within acceptable limits.",03:44:06,04:16:00,,,6036.18,6706.87
+347,368,8,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:23:06,02:43:18,,,2045.65,2272.94
+348,309,4,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:30:54,03:17:51,,,4282.77,4758.63
+349,226,8,Replaced consumables and tested system. Everything is operating normally.,01:41:16,01:35:26,,,3501.04,3890.04
+350,81,1,Replaced consumables and tested system. Everything is operating normally.,03:49:10,04:08:14,,,6159.35,6843.72
+351,99,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:05:52,02:25:00,,,3276.29,3640.32
+352,196,2,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:09:59,01:42:33,,,480.59,533.99
+353,263,1,Service completed. Adjusted specifications to optimal levels.,01:55:33,02:32:35,,,6390.77,7100.86
+354,442,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",00:58:22,00:48:09,,,496.37,551.52
+355,339,7,Performed standard service procedure as per manufacturer guidelines.,02:22:19,02:52:22,,,1125.29,1250.32
+356,201,8,"Found minor wear and tear during service, but within acceptable limits.",01:58:17,01:52:24,,,884.30,982.55
+357,292,5,"Found minor wear and tear during service, but within acceptable limits.",01:19:48,01:23:54,,,4672.12,5191.24
+358,28,6,Performed standard service procedure as per manufacturer guidelines.,01:38:10,02:03:56,,,1385.00,1538.89
+359,483,5,"Found minor wear and tear during service, but within acceptable limits.",00:49:57,00:59:05,,,2906.45,3229.39
+360,386,8,Replaced consumables and tested system. Everything is operating normally.,03:15:58,03:12:50,,,6180.02,6866.69
+361,71,3,Service completed. Adjusted specifications to optimal levels.,03:34:34,04:16:05,,,6665.16,7405.73
+362,221,3,Performed standard service procedure as per manufacturer guidelines.,02:47:05,02:49:04,,,6053.45,6726.05
+363,180,1,Replaced consumables and tested system. Everything is operating normally.,02:19:55,02:56:09,,,3943.51,4381.68
+364,241,6,"Found minor wear and tear during service, but within acceptable limits.",01:50:38,01:50:46,,,3474.20,3860.22
+365,353,8,Performed standard service procedure as per manufacturer guidelines.,01:53:05,02:15:42,,,1077.43,1197.14
+366,94,8,Service completed. Adjusted specifications to optimal levels.,00:35:33,01:14:27,,,1863.63,2070.70
+367,337,2,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:36:49,00:50:40,,,2430.65,2700.72
+368,188,6,Performed standard service procedure as per manufacturer guidelines.,01:16:39,01:42:47,,,4700.77,5223.08
+369,504,8,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:07:25,01:29:16,,,5631.76,6257.51
+370,39,4,Replaced consumables and tested system. Everything is operating normally.,03:20:22,03:33:33,,,6274.34,6971.49
+371,384,1,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:33:51,00:58:12,,,3934.21,4371.34
+372,17,4,Performed standard service procedure as per manufacturer guidelines.,00:36:11,01:15:27,,,6201.14,6890.16
+373,124,1,Replaced consumables and tested system. Everything is operating normally.,01:40:36,02:19:00,,,5655.42,6283.80
+374,376,6,Service completed. Adjusted specifications to optimal levels.,02:13:48,02:46:21,,,6950.39,7722.65
+375,370,5,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:06:24,02:25:43,,,4098.47,4553.86
+376,393,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:09:01,02:57:15,,,3007.75,3341.94
+377,456,2,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:51:09,03:05:20,,,5826.10,6473.44
+378,225,6,Replaced consumables and tested system. Everything is operating normally.,02:16:13,02:32:17,,,3258.00,3620.00
+379,450,2,Service completed. Adjusted specifications to optimal levels.,02:42:03,02:55:54,,,850.15,944.61
+380,464,8,Service completed. Adjusted specifications to optimal levels.,03:37:35,03:55:29,,,6503.91,7226.57
+381,444,3,"Found minor wear and tear during service, but within acceptable limits.",03:05:05,03:11:46,,,4443.12,4936.80
+382,441,2,"Found minor wear and tear during service, but within acceptable limits.",00:41:02,01:21:22,,,4781.87,5313.19
+383,11,5,Service completed. Adjusted specifications to optimal levels.,00:47:06,01:18:40,,,6383.17,7092.41
+384,168,8,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:17:18,02:45:03,,,4502.71,5003.01
+385,346,4,Replaced consumables and tested system. Everything is operating normally.,02:58:38,03:43:11,,,6807.56,7563.95
+386,231,2,Replaced consumables and tested system. Everything is operating normally.,01:11:14,01:02:55,,,6970.87,7745.41
+387,75,3,Service completed. Adjusted specifications to optimal levels.,03:11:24,03:37:01,,,3132.67,3480.74
+388,202,5,Performed standard service procedure as per manufacturer guidelines.,03:29:57,04:12:33,,,6986.16,7762.40
+389,413,7,"Found minor wear and tear during service, but within acceptable limits.",01:06:16,01:32:57,,,4087.97,4542.19
+390,171,6,Replaced consumables and tested system. Everything is operating normally.,02:16:47,02:46:04,,,4733.48,5259.42
+391,77,3,Performed standard service procedure as per manufacturer guidelines.,00:34:21,01:12:01,,,2007.12,2230.13
+392,336,2,"Found minor wear and tear during service, but within acceptable limits.",01:07:40,00:53:40,,,3652.55,4058.39
+393,72,3,Performed standard service procedure as per manufacturer guidelines.,00:31:54,00:30:42,,,4936.35,5484.83
+394,180,7,Performed standard service procedure as per manufacturer guidelines.,03:20:31,04:01:52,,,2488.01,2764.46
+395,243,5,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:27:54,02:51:15,,,2958.00,3286.67
+396,205,3,Service completed. Adjusted specifications to optimal levels.,01:54:52,02:22:17,,,6543.87,7270.97
+397,79,8,Service completed. Adjusted specifications to optimal levels.,02:50:04,02:55:28,,,2525.15,2805.72
+398,329,4,Replaced consumables and tested system. Everything is operating normally.,03:30:12,04:06:21,,,2992.37,3324.85
+399,46,4,Replaced consumables and tested system. Everything is operating normally.,03:38:06,03:25:49,,,6997.85,7775.39
+400,290,7,Replaced consumables and tested system. Everything is operating normally.,00:32:56,01:10:08,,,819.42,910.47
+401,370,7,Replaced consumables and tested system. Everything is operating normally.,01:21:35,02:04:42,,,5759.89,6399.88
+402,187,2,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:12:55,01:00:46,,,2476.98,2752.20
+403,436,4,Performed standard service procedure as per manufacturer guidelines.,02:06:18,02:26:34,,,6907.70,7675.22
+404,11,3,Replaced consumables and tested system. Everything is operating normally.,03:04:25,03:06:31,,,5362.05,5957.83
+405,368,2,"Found minor wear and tear during service, but within acceptable limits.",01:04:26,01:17:59,,,2900.21,3222.46
+406,118,6,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:53:05,01:58:59,,,2049.26,2276.95
+457,165,8,"Found minor wear and tear during service, but within acceptable limits.",03:48:28,04:04:56,,,2092.30,2324.78
+407,221,7,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:42:57,03:33:11,,,1512.86,1680.96
+408,403,2,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:45:07,03:20:53,,,7157.65,7952.94
+409,436,3,Replaced consumables and tested system. Everything is operating normally.,03:31:52,04:10:08,,,6110.26,6789.18
+410,187,3,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:28:11,03:14:26,,,6935.82,7706.47
+411,196,2,Performed standard service procedure as per manufacturer guidelines.,02:38:13,03:14:38,,,2484.84,2760.93
+412,155,6,"Found minor wear and tear during service, but within acceptable limits.",03:40:24,03:56:34,,,2834.29,3149.21
+413,299,2,Service completed. Adjusted specifications to optimal levels.,00:41:51,00:37:01,,,2582.30,2869.22
+414,49,7,Replaced consumables and tested system. Everything is operating normally.,01:23:44,01:59:21,,,938.16,1042.40
+415,14,7,Performed standard service procedure as per manufacturer guidelines.,02:45:15,02:42:42,,,6713.90,7459.89
+416,280,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:24:10,02:44:17,,,6659.92,7399.91
+417,201,3,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:05:08,03:17:13,,,4651.54,5168.38
+418,199,5,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:36:40,01:40:22,,,1986.62,2207.35
+419,65,6,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:41:56,03:19:47,,,867.00,963.33
+420,117,1,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:17:00,03:34:16,,,6986.68,7762.98
+421,319,5,Performed standard service procedure as per manufacturer guidelines.,00:38:36,00:55:32,,,3192.44,3547.16
+422,36,8,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:38:34,01:32:40,,,5933.04,6592.27
+423,236,7,Performed standard service procedure as per manufacturer guidelines.,03:25:17,03:24:44,,,7110.53,7900.59
+424,5,6,Replaced consumables and tested system. Everything is operating normally.,00:48:06,01:01:49,,,4178.01,4642.23
+425,124,4,Performed standard service procedure as per manufacturer guidelines.,01:57:13,02:14:02,,,6477.64,7197.38
+426,74,7,Performed standard service procedure as per manufacturer guidelines.,01:08:22,01:29:46,,,5453.67,6059.63
+427,292,4,"Found minor wear and tear during service, but within acceptable limits.",02:02:31,01:56:25,,,5880.93,6534.37
+428,302,3,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:24:33,02:13:26,,,930.11,1033.46
+429,473,6,Service completed. Adjusted specifications to optimal levels.,01:40:09,01:32:38,,,2550.47,2833.85
+430,13,6,Performed standard service procedure as per manufacturer guidelines.,01:18:46,01:43:06,,,7096.49,7884.99
+431,395,7,"Found minor wear and tear during service, but within acceptable limits.",01:09:24,01:10:45,,,5127.59,5697.32
+432,337,1,Performed standard service procedure as per manufacturer guidelines.,02:56:09,03:00:25,,,6174.32,6860.36
+433,499,8,Performed standard service procedure as per manufacturer guidelines.,02:54:22,03:13:19,,,4906.29,5451.43
+434,510,5,Replaced consumables and tested system. Everything is operating normally.,01:59:44,02:30:28,,,5736.31,6373.68
+435,397,7,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:55:28,02:54:59,,,540.59,600.66
+436,62,1,Service completed. Adjusted specifications to optimal levels.,03:21:12,03:20:57,,,1193.31,1325.90
+437,119,1,Replaced consumables and tested system. Everything is operating normally.,00:59:08,00:52:11,,,6770.65,7522.94
+438,81,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:20:00,02:50:43,,,1146.15,1273.50
+439,71,8,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:59:29,03:42:08,,,4260.42,4733.80
+440,261,6,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:34:01,03:10:46,,,2754.65,3060.72
+441,416,7,Service completed. Adjusted specifications to optimal levels.,02:37:45,03:22:44,,,6696.87,7440.97
+442,266,1,"Found minor wear and tear during service, but within acceptable limits.",03:13:55,03:21:09,,,6942.30,7713.67
+443,351,5,"Found minor wear and tear during service, but within acceptable limits.",03:17:30,03:03:06,,,1065.11,1183.46
+444,383,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:42:09,01:00:10,,,4516.45,5018.28
+445,485,2,Performed standard service procedure as per manufacturer guidelines.,02:43:17,02:51:33,,,4738.77,5265.30
+446,257,6,Service completed. Adjusted specifications to optimal levels.,00:44:56,01:07:55,,,5260.75,5845.28
+447,233,3,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:09:03,02:36:10,,,1523.87,1693.19
+448,16,5,Performed standard service procedure as per manufacturer guidelines.,03:40:20,03:47:37,,,1735.88,1928.76
+449,352,5,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:36:11,02:13:17,,,7177.98,7975.53
+450,270,8,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:26:30,01:46:45,,,1517.91,1686.57
+451,245,1,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:33:59,04:07:20,,,2062.31,2291.46
+452,497,8,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",01:08:13,01:14:47,,,6595.61,7328.46
+453,125,4,Performed standard service procedure as per manufacturer guidelines.,02:03:49,02:42:25,,,6826.53,7585.03
+454,13,7,Performed standard service procedure as per manufacturer guidelines.,01:33:13,01:56:24,,,3341.18,3712.42
+455,333,5,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:41:57,04:08:10,,,5821.21,6468.01
+456,155,6,Performed standard service procedure as per manufacturer guidelines.,00:47:56,00:50:21,,,3810.90,4234.33
+458,187,5,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:50:45,03:22:04,,,4910.08,5455.64
+459,405,7,Performed standard service procedure as per manufacturer guidelines.,01:15:59,01:58:33,,,862.04,957.82
+460,198,1,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",00:34:49,01:11:12,,,6735.25,7483.61
+461,509,6,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:45:01,02:12:46,,,6633.06,7370.07
+462,204,7,Performed standard service procedure as per manufacturer guidelines.,01:59:06,02:08:36,,,1358.92,1509.91
+463,63,4,"Found minor wear and tear during service, but within acceptable limits.",03:21:29,03:37:08,,,4555.48,5061.64
+464,59,8,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,02:37:56,02:24:50,,,2416.73,2685.25
+465,406,4,"Found minor wear and tear during service, but within acceptable limits.",00:37:24,00:32:05,,,2832.40,3147.11
+466,137,3,Service completed. Adjusted specifications to optimal levels.,01:47:45,01:55:49,,,1457.66,1619.62
+467,469,4,Performed standard service procedure as per manufacturer guidelines.,00:36:02,01:12:50,,,3432.17,3813.52
+468,50,5,Service completed. Adjusted specifications to optimal levels.,00:53:53,01:28:22,,,5932.80,6592.00
+469,104,7,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,00:30:37,01:10:55,,,3408.60,3787.33
+470,254,1,Performed standard service procedure as per manufacturer guidelines.,01:42:27,01:59:09,,,4564.13,5071.25
+471,195,1,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:26:36,02:45:32,,,4136.83,4596.48
+472,498,1,"Found minor wear and tear during service, but within acceptable limits.",03:13:56,03:38:42,,,2384.30,2649.22
+473,352,6,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:08:35,03:24:51,,,6811.95,7568.83
+474,108,1,Service completed. Adjusted specifications to optimal levels.,00:48:26,01:16:49,,,924.84,1027.60
+475,478,1,"Found minor wear and tear during service, but within acceptable limits.",00:38:30,00:55:26,,,2006.02,2228.91
+476,199,2,Performed standard service procedure as per manufacturer guidelines.,00:46:13,01:09:59,,,4702.31,5224.79
+477,187,8,Service completed. Adjusted specifications to optimal levels.,01:12:24,01:37:39,,,6317.06,7018.96
+478,204,4,Service completed. Adjusted specifications to optimal levels.,01:06:39,01:22:45,,,3769.26,4188.07
+479,266,7,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",03:14:48,03:30:50,,,6721.79,7468.65
+480,224,7,Performed standard service procedure as per manufacturer guidelines.,03:15:03,03:17:33,,,2995.43,3328.26
+481,37,1,Replaced consumables and tested system. Everything is operating normally.,00:44:57,00:46:49,,,6490.09,7211.21
+482,424,4,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,01:18:50,01:05:47,,,6276.30,6973.67
+483,244,4,Service completed. Adjusted specifications to optimal levels.,03:38:43,03:38:30,,,5684.80,6316.44
+484,56,4,Replaced consumables and tested system. Everything is operating normally.,03:47:00,04:12:56,,,2410.89,2678.77
+485,324,1,"Encountered slightly rusted bolts which delayed removal, but service completed successfully.",02:54:11,02:42:21,,,3403.47,3781.63
+486,450,7,Customer requested extra attention to this area. Cleaned and serviced thoroughly.,03:26:15,03:35:53,,,1197.50,1330.55
+487,448,4,Performed standard service procedure as per manufacturer guidelines.,02:55:32,03:14:37,,,741.47,823.85
+488,374,6,"Found minor wear and tear during service, but within acceptable limits.",02:13:10,01:59:08,,,547.47,608.30
+489,300,6,Replaced consumables and tested system. Everything is operating normally.,01:43:48,01:32:33,,,7071.04,7856.71
+490,29,4,Replaced consumables and tested system. Everything is operating normally.,03:18:43,03:45:20,,,760.46,844.95
+491,408,8,Replaced consumables and tested system. Everything is operating normally.,00:44:40,00:59:43,,,1214.41,1349.34
+492,183,2,Performed standard service procedure as per manufacturer guidelines.,02:54:58,03:00:10,,,2371.79,2635.32
+493,461,4,"Found minor wear and tear during service, but within acceptable limits.",00:36:21,01:09:52,,,2392.49,2658.32
+494,482,1,Service completed. Adjusted specifications to optimal levels.,01:12:12,01:04:32,,,2572.08,2857.87
+495,292,3,Service completed. Adjusted specifications to optimal levels.,00:44:22,00:32:17,,,4841.80,5379.78
+496,113,1,Service completed. Adjusted specifications to optimal levels.,01:12:02,01:24:32,,,1523.63,1692.92
+497,204,3,"Found minor wear and tear during service, but within acceptable limits.",03:47:50,04:11:24,,,1328.97,1476.63
+498,490,6,"Found minor wear and tear during service, but within acceptable limits.",01:22:06,01:29:30,,,5981.58,6646.20
+499,64,6,"Found minor wear and tear during service, but within acceptable limits.",03:42:15,04:24:27,,,2442.25,2713.61
+500,224,2,"Found minor wear and tear during service, but within acceptable limits.",01:26:01,01:58:38,,,6104.39,6782.65
+501,521,5,Windshield wiper blades replaced; washer fluid topped up.,00:33:25,00:33:32,0.42,0.35,924.77,859.07
+502,522,5,Cabin air filter replaced; A/C evaporator spray applied.,00:25:24,00:37:14,0.37,0.80,1070.34,660.22
+503,523,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:28:20,00:40:19,0.29,1.16,1084.11,626.18
+504,524,5,Engine bay wash and basic undercarriage inspection.,00:27:40,00:22:13,0.97,0.52,284.40,1198.02
+505,525,5,Battery terminals cleaned and coated; voltage test passed.,00:25:18,00:35:18,0.66,0.37,413.48,1499.94
+506,526,5,Tire rotation performed; all four corners swapped per pattern.,00:35:37,00:36:46,0.78,0.78,702.92,375.01
+507,527,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:28:57,00:26:49,0.62,1.05,1162.83,991.06
+508,528,5,Tire rotation performed; all four corners swapped per pattern.,00:29:33,00:59:27,0.30,0.78,788.01,925.71
+509,529,5,Windshield wiper blades replaced; washer fluid topped up.,00:16:00,00:37:05,0.59,0.70,1172.71,981.56
+510,530,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:15:25,00:40:23,0.35,0.53,844.25,1307.87
+511,531,5,Cabin air filter replaced; A/C evaporator spray applied.,00:17:52,00:55:57,0.85,1.05,983.96,660.44
+512,532,5,Windshield wiper blades replaced; washer fluid topped up.,00:31:55,00:46:56,0.30,1.05,401.95,1407.66
+513,533,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:29:11,00:48:30,0.30,0.85,317.98,1225.92
+514,534,5,Battery terminals cleaned and coated; voltage test passed.,00:24:55,00:53:24,0.69,1.20,159.17,1233.18
+515,535,5,Cabin air filter replaced; A/C evaporator spray applied.,00:18:08,00:52:04,1.00,1.16,615.75,777.62
+516,536,5,Tire rotation performed; all four corners swapped per pattern.,00:43:10,00:32:58,0.29,1.19,1131.16,808.89
+517,537,5,Windshield wiper blades replaced; washer fluid topped up.,00:23:47,00:50:08,0.57,0.71,1179.33,168.25
+518,538,5,Cabin air filter replaced; A/C evaporator spray applied.,00:34:39,00:58:16,0.44,0.99,606.49,790.11
+519,539,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:40:27,00:41:05,0.62,1.07,589.63,501.60
+520,540,5,Engine bay wash and basic undercarriage inspection.,00:36:08,00:56:43,0.68,0.74,160.71,1202.42
+521,541,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:42:22,00:36:22,0.85,0.40,414.67,668.36
+522,542,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:20:52,00:34:51,0.39,0.99,235.01,649.43
+523,543,5,Engine bay wash and basic undercarriage inspection.,00:24:31,00:26:30,0.77,0.51,562.71,494.48
+524,544,5,Cabin air filter replaced; A/C evaporator spray applied.,00:32:07,00:54:14,0.81,0.30,645.08,1079.46
+525,545,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:29:26,00:37:03,0.62,0.54,1043.94,1476.21
+526,546,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:39:00,00:36:39,0.33,1.01,490.74,250.84
+527,547,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:43:40,00:59:17,0.99,0.54,256.36,1251.53
+528,548,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:28:11,00:39:20,0.56,1.07,535.15,1208.54
+529,549,5,Windshield wiper blades replaced; washer fluid topped up.,00:37:39,00:48:51,0.49,1.08,405.14,779.87
+530,550,5,Engine bay wash and basic undercarriage inspection.,00:26:04,00:33:20,0.35,0.62,894.25,291.58
+531,551,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:43:32,00:33:24,0.92,0.54,892.56,1450.40
+532,552,5,Battery terminals cleaned and coated; voltage test passed.,00:22:20,00:59:32,0.47,0.63,988.16,207.53
+533,553,5,Windshield wiper blades replaced; washer fluid topped up.,00:42:50,00:20:00,0.86,0.65,1084.99,916.16
+534,554,5,Battery terminals cleaned and coated; voltage test passed.,00:40:51,00:30:14,0.48,0.80,1135.43,151.67
+535,555,5,Tire rotation performed; all four corners swapped per pattern.,00:35:30,00:47:08,0.70,0.49,1094.19,593.67
+536,556,5,Tire rotation performed; all four corners swapped per pattern.,00:19:29,00:43:13,0.97,1.10,627.02,1449.92
+537,557,5,Tire rotation performed; all four corners swapped per pattern.,00:21:41,00:23:50,0.79,1.21,1127.37,694.26
+538,558,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:25:11,00:39:06,0.43,0.42,1075.96,1227.03
+539,559,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:18:25,00:55:10,0.65,1.22,653.96,511.25
+540,560,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:34:07,00:51:20,0.89,1.05,824.40,255.88
+541,561,5,Windshield wiper blades replaced; washer fluid topped up.,00:39:41,00:28:29,0.52,0.88,256.72,1317.26
+542,562,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:19:30,00:56:34,1.00,0.52,124.06,430.05
+543,563,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:16:47,00:26:09,0.83,0.65,1039.30,970.19
+544,564,5,Cabin air filter replaced; A/C evaporator spray applied.,00:30:44,00:39:15,0.35,0.61,414.78,964.92
+545,565,5,Tire rotation performed; all four corners swapped per pattern.,00:20:45,00:46:43,0.97,1.30,780.69,1046.86
+546,566,5,Engine bay wash and basic undercarriage inspection.,00:28:41,00:30:17,0.31,1.17,401.80,962.49
+547,567,5,Windshield wiper blades replaced; washer fluid topped up.,00:35:49,00:47:20,0.98,1.15,914.13,1055.66
+548,568,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:35:16,00:35:44,0.33,0.42,514.19,411.32
+549,569,5,Quick oil and filter change — standard 4L synthetic oil used.,00:21:34,00:38:24,0.83,0.87,288.87,1377.56
+550,570,5,Battery terminals cleaned and coated; voltage test passed.,00:42:11,00:22:34,0.58,1.10,837.19,115.68
+551,571,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:39:19,00:44:03,0.28,1.09,642.58,426.91
+552,572,5,Battery terminals cleaned and coated; voltage test passed.,00:23:01,00:23:43,0.84,0.63,924.53,1161.81
+553,573,5,Engine bay wash and basic undercarriage inspection.,00:28:23,00:51:15,0.56,0.96,1110.43,608.64
+554,574,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:32:52,00:58:36,0.58,0.31,148.99,1180.35
+555,575,5,Windshield wiper blades replaced; washer fluid topped up.,00:28:51,00:56:52,0.82,0.35,433.21,946.17
+556,576,5,Engine bay wash and basic undercarriage inspection.,00:24:41,00:35:02,0.42,1.19,770.79,1101.30
+557,577,5,Tire rotation performed; all four corners swapped per pattern.,00:44:13,00:54:54,0.38,0.51,198.76,494.97
+558,578,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:34:34,00:48:47,0.68,0.65,988.54,815.05
+559,579,5,Battery terminals cleaned and coated; voltage test passed.,00:37:58,00:35:56,0.94,0.93,213.15,859.31
+560,580,5,Engine bay wash and basic undercarriage inspection.,00:31:41,00:58:03,0.80,1.01,1078.99,134.25
+561,581,5,Engine bay wash and basic undercarriage inspection.,00:41:00,00:32:40,0.47,0.65,888.16,1279.42
+562,582,5,Windshield wiper blades replaced; washer fluid topped up.,00:42:29,00:31:18,0.25,0.42,705.82,505.91
+563,583,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:42:03,00:56:13,0.79,1.10,173.77,1248.16
+564,584,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:34:52,00:29:24,0.94,0.59,741.25,358.98
+565,585,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:36:49,00:24:09,0.87,0.97,348.62,1050.17
+566,586,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:41:47,00:55:49,0.28,1.03,280.36,761.29
+567,587,5,Windshield wiper blades replaced; washer fluid topped up.,00:42:39,00:41:06,0.55,0.47,195.09,248.54
+568,588,5,Quick oil and filter change — standard 4L synthetic oil used.,00:37:08,00:37:58,0.62,0.55,952.60,619.75
+569,589,5,Windshield wiper blades replaced; washer fluid topped up.,00:22:46,00:20:12,0.94,0.49,167.74,785.38
+570,590,5,Quick oil and filter change — standard 4L synthetic oil used.,00:20:49,00:58:00,0.89,1.23,1133.10,715.87
+571,591,5,Windshield wiper blades replaced; washer fluid topped up.,00:19:31,00:22:41,0.26,0.94,1126.94,957.80
+572,592,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:26:11,00:25:14,0.85,1.00,610.40,327.13
+573,593,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:29:30,00:54:02,0.49,0.92,834.06,1198.10
+574,594,5,Tire rotation performed; all four corners swapped per pattern.,00:36:25,00:33:31,0.48,0.65,1198.36,562.06
+575,595,5,Quick oil and filter change — standard 4L synthetic oil used.,00:23:09,00:31:58,0.55,0.93,1194.89,256.93
+576,596,5,Windshield wiper blades replaced; washer fluid topped up.,00:43:17,00:48:12,0.25,0.55,904.18,817.24
+577,597,5,Battery terminals cleaned and coated; voltage test passed.,00:25:02,00:50:49,0.90,0.32,191.78,448.07
+578,598,5,Engine bay wash and basic undercarriage inspection.,00:31:39,00:51:14,0.36,0.53,611.85,1227.81
+579,599,5,Tire rotation performed; all four corners swapped per pattern.,00:26:09,00:23:53,0.41,1.18,533.80,1327.31
+580,600,5,Engine bay wash and basic undercarriage inspection.,00:32:26,00:27:44,0.50,0.49,910.07,604.43
+581,601,5,Quick oil and filter change — standard 4L synthetic oil used.,00:40:13,00:53:31,0.59,0.80,827.35,1147.93
+582,602,5,Tire rotation performed; all four corners swapped per pattern.,00:30:15,00:59:02,0.62,0.89,489.61,1398.85
+583,603,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:21:26,00:33:35,0.32,0.35,917.02,180.83
+584,604,5,Tire rotation performed; all four corners swapped per pattern.,00:16:01,00:40:27,0.34,0.59,721.54,655.66
+585,605,5,Battery terminals cleaned and coated; voltage test passed.,00:27:21,00:42:55,0.94,0.51,155.77,472.09
+586,606,5,Tire rotation performed; all four corners swapped per pattern.,00:38:15,00:46:04,0.95,0.88,1024.77,1373.46
+587,607,5,Engine bay wash and basic undercarriage inspection.,00:43:33,00:20:20,0.78,1.11,1172.47,505.32
+588,608,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:43:14,00:30:59,0.40,0.61,503.97,1349.23
+589,609,5,Cabin air filter replaced; A/C evaporator spray applied.,00:33:41,00:30:33,0.84,0.79,418.04,963.26
+590,610,5,Cabin air filter replaced; A/C evaporator spray applied.,00:34:15,00:56:54,0.86,0.93,922.00,212.14
+591,611,5,Cabin air filter replaced; A/C evaporator spray applied.,00:28:54,00:43:04,0.54,0.64,311.90,393.91
+592,612,5,Battery terminals cleaned and coated; voltage test passed.,00:37:18,00:52:14,0.34,0.71,777.43,251.12
+593,613,5,Cabin air filter replaced; A/C evaporator spray applied.,00:22:17,00:54:12,0.25,0.71,1041.85,1109.14
+594,614,5,Tire rotation performed; all four corners swapped per pattern.,00:31:24,00:31:27,0.59,1.09,975.97,776.07
+595,615,5,Battery terminals cleaned and coated; voltage test passed.,00:39:21,00:38:26,0.82,1.15,610.29,991.83
+596,616,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:39:21,00:44:09,0.58,0.47,333.72,847.33
+597,617,5,Tire rotation performed; all four corners swapped per pattern.,00:27:35,00:42:24,0.66,0.31,1007.08,1389.00
+598,618,5,Tire rotation performed; all four corners swapped per pattern.,00:20:12,00:47:35,0.45,0.72,660.87,490.09
+599,619,5,Windshield wiper blades replaced; washer fluid topped up.,00:17:01,00:42:05,0.82,1.19,998.73,127.18
+600,620,5,Battery terminals cleaned and coated; voltage test passed.,00:33:07,00:38:56,0.99,0.62,847.42,704.60
+601,621,5,Tire rotation performed; all four corners swapped per pattern.,00:40:29,00:38:56,0.82,0.83,1187.01,572.53
+602,622,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:44:42,00:45:06,0.80,0.41,547.53,1146.90
+603,623,5,Tire rotation performed; all four corners swapped per pattern.,00:33:26,00:52:57,0.84,1.27,633.17,969.05
+604,624,5,Windshield wiper blades replaced; washer fluid topped up.,00:17:51,00:32:26,0.93,0.89,419.95,1106.74
+605,625,5,Cabin air filter replaced; A/C evaporator spray applied.,00:33:33,00:44:39,0.70,0.35,258.43,407.42
+606,626,5,Tire rotation performed; all four corners swapped per pattern.,00:44:50,00:55:04,0.92,0.58,455.11,1083.86
+607,627,5,Battery terminals cleaned and coated; voltage test passed.,00:41:59,00:22:13,0.44,0.61,316.35,189.29
+608,628,5,Battery terminals cleaned and coated; voltage test passed.,00:17:04,00:34:09,0.54,1.30,1119.12,1134.75
+609,629,5,Battery terminals cleaned and coated; voltage test passed.,00:18:27,00:50:04,0.50,0.68,456.08,200.10
+610,630,5,Windshield wiper blades replaced; washer fluid topped up.,00:18:29,00:50:16,0.69,0.62,1120.07,1331.12
+611,631,5,Cabin air filter replaced; A/C evaporator spray applied.,00:42:21,00:59:20,0.96,0.87,505.62,488.84
+612,632,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:22:20,00:47:43,0.79,1.24,389.44,589.35
+613,633,5,Engine bay wash and basic undercarriage inspection.,00:36:45,00:34:36,0.36,1.20,371.44,428.75
+614,634,5,Quick oil and filter change — standard 4L synthetic oil used.,00:20:12,00:48:14,0.49,0.59,678.51,778.74
+615,635,5,Windshield wiper blades replaced; washer fluid topped up.,00:26:14,00:57:35,0.61,0.63,499.18,461.76
+616,636,5,Windshield wiper blades replaced; washer fluid topped up.,00:40:27,00:56:17,1.00,0.90,225.10,1272.78
+617,637,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:23:03,00:39:15,0.74,0.42,173.98,266.56
+618,638,5,Windshield wiper blades replaced; washer fluid topped up.,00:25:29,00:58:35,0.60,0.94,967.32,1293.06
+619,639,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:21:38,00:59:45,0.52,0.46,668.76,710.50
+620,640,5,Cabin air filter replaced; A/C evaporator spray applied.,00:27:27,00:45:20,0.38,1.26,737.03,673.85
+621,641,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:23:13,00:44:59,0.45,0.58,345.55,652.21
+622,642,5,Quick oil and filter change — standard 4L synthetic oil used.,00:34:53,00:37:14,0.42,0.45,1108.77,580.85
+623,643,5,Windshield wiper blades replaced; washer fluid topped up.,00:37:03,00:25:02,0.77,0.74,832.42,1016.17
+624,644,5,Engine bay wash and basic undercarriage inspection.,00:16:11,00:20:30,0.27,1.24,585.75,1485.43
+625,645,5,Cabin air filter replaced; A/C evaporator spray applied.,00:44:02,00:37:55,0.25,1.14,334.91,1037.30
+626,646,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:15:50,00:58:21,0.87,0.42,929.21,179.24
+627,647,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:27:06,00:51:25,0.31,0.36,874.32,480.60
+628,648,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:25:17,00:34:06,0.81,0.52,808.37,1467.72
+629,649,5,Windshield wiper blades replaced; washer fluid topped up.,00:20:34,00:25:43,0.80,1.12,260.35,1456.28
+630,650,5,Tire rotation performed; all four corners swapped per pattern.,00:30:18,00:24:25,0.73,0.74,236.27,1250.55
+631,651,5,Cabin air filter replaced; A/C evaporator spray applied.,00:26:13,00:36:53,0.98,0.88,1094.27,786.68
+632,652,5,Windshield wiper blades replaced; washer fluid topped up.,00:29:33,00:23:39,0.73,1.03,1133.02,295.98
+633,653,5,Cabin air filter replaced; A/C evaporator spray applied.,00:21:37,00:22:29,0.48,1.04,208.02,363.58
+634,654,5,Engine bay wash and basic undercarriage inspection.,00:33:16,00:27:27,0.36,0.94,557.97,236.34
+635,655,5,Engine bay wash and basic undercarriage inspection.,00:32:30,00:28:32,0.50,1.22,1067.37,871.97
+636,656,5,Battery terminals cleaned and coated; voltage test passed.,00:40:38,00:59:19,0.31,0.56,658.37,1355.26
+637,657,5,Tire rotation performed; all four corners swapped per pattern.,00:23:00,00:26:16,0.98,0.44,1116.83,1227.59
+638,658,5,Engine bay wash and basic undercarriage inspection.,00:39:22,00:58:47,0.39,0.40,172.65,539.11
+639,659,5,Quick oil and filter change — standard 4L synthetic oil used.,00:19:14,00:45:13,0.80,0.88,935.02,566.72
+640,660,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:33:30,00:44:02,0.95,0.90,605.43,474.68
+641,661,5,Tire rotation performed; all four corners swapped per pattern.,00:23:16,00:35:49,0.72,1.20,1026.93,161.21
+642,662,5,Cabin air filter replaced; A/C evaporator spray applied.,00:21:47,00:41:45,0.48,0.77,867.76,1200.05
+643,663,5,Tire rotation performed; all four corners swapped per pattern.,00:27:43,00:52:27,0.87,1.18,286.20,686.75
+644,664,5,Battery terminals cleaned and coated; voltage test passed.,00:29:45,00:34:35,0.42,0.79,128.77,1116.05
+645,665,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:30:27,00:53:05,0.74,0.74,438.05,175.78
+646,666,5,Quick oil and filter change — standard 4L synthetic oil used.,00:38:08,00:33:52,0.29,0.91,237.98,1278.61
+647,667,5,Quick oil and filter change — standard 4L synthetic oil used.,00:18:30,00:54:00,0.61,1.20,592.22,749.42
+648,668,5,Cabin air filter replaced; A/C evaporator spray applied.,00:44:37,00:28:47,0.64,0.37,109.33,1108.47
+649,669,5,Battery terminals cleaned and coated; voltage test passed.,00:43:55,00:38:59,0.35,1.08,871.30,1495.12
+650,670,5,Engine bay wash and basic undercarriage inspection.,00:23:02,00:36:10,0.85,0.95,1143.94,1026.76
+651,671,5,Engine bay wash and basic undercarriage inspection.,00:43:27,00:26:26,0.45,1.14,994.93,794.45
+652,672,5,Cabin air filter replaced; A/C evaporator spray applied.,00:23:34,00:42:52,0.25,0.49,382.03,1392.51
+653,673,5,Tire rotation performed; all four corners swapped per pattern.,00:18:02,00:32:25,0.91,0.42,1139.52,658.30
+654,674,5,Quick oil and filter change — standard 4L synthetic oil used.,00:29:14,00:24:15,0.97,0.91,268.23,1020.16
+655,675,5,Battery terminals cleaned and coated; voltage test passed.,00:43:51,00:43:58,0.54,0.73,975.51,763.32
+656,676,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:32:13,00:29:44,0.60,0.44,1030.41,579.89
+657,677,5,Quick oil and filter change — standard 4L synthetic oil used.,00:24:17,00:57:38,0.53,0.46,792.48,1074.87
+658,678,5,Battery terminals cleaned and coated; voltage test passed.,00:44:59,00:46:21,0.99,0.34,265.15,194.81
+659,679,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:23:23,00:24:30,0.44,0.75,1174.08,105.42
+660,680,5,Battery terminals cleaned and coated; voltage test passed.,00:33:29,00:43:36,0.85,0.86,652.78,1094.78
+661,681,5,Tire rotation performed; all four corners swapped per pattern.,00:35:35,00:56:59,0.75,0.43,1176.28,664.09
+662,682,5,Windshield wiper blades replaced; washer fluid topped up.,00:36:25,00:52:50,0.37,0.59,732.92,1029.34
+663,683,5,Windshield wiper blades replaced; washer fluid topped up.,00:28:15,00:48:54,0.40,1.23,363.22,295.02
+664,684,5,Cabin air filter replaced; A/C evaporator spray applied.,00:42:05,00:51:45,0.45,0.49,989.46,1444.61
+665,685,5,Tire rotation performed; all four corners swapped per pattern.,00:21:55,00:44:51,0.29,0.56,1063.20,1345.09
+666,686,5,Windshield wiper blades replaced; washer fluid topped up.,00:42:37,00:40:52,0.25,0.71,968.81,297.68
+667,687,5,Tire rotation performed; all four corners swapped per pattern.,00:15:31,00:31:44,0.33,0.64,352.99,150.29
+668,688,5,Engine bay wash and basic undercarriage inspection.,00:44:10,00:29:04,0.42,0.36,892.98,318.26
+669,689,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:23:33,00:59:37,0.28,0.77,588.84,588.66
+670,690,5,Engine bay wash and basic undercarriage inspection.,00:33:00,00:34:14,0.59,0.75,193.23,309.45
+671,691,5,Engine bay wash and basic undercarriage inspection.,00:19:23,00:44:21,0.51,0.50,802.47,608.00
+672,692,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:40:29,00:27:09,0.59,1.18,1043.72,152.04
+673,693,5,Windshield wiper blades replaced; washer fluid topped up.,00:36:45,00:57:54,0.70,0.55,302.68,1425.85
+674,694,5,Cabin air filter replaced; A/C evaporator spray applied.,00:37:44,00:52:31,0.49,0.52,719.37,1177.93
+675,695,5,Cabin air filter replaced; A/C evaporator spray applied.,00:42:10,00:55:51,0.77,1.05,1071.87,1010.93
+676,696,5,Windshield wiper blades replaced; washer fluid topped up.,00:39:45,00:57:17,0.31,1.04,1094.90,584.69
+677,697,5,Cabin air filter replaced; A/C evaporator spray applied.,00:36:59,00:50:25,0.67,0.60,1126.55,215.10
+678,698,5,Cabin air filter replaced; A/C evaporator spray applied.,00:30:53,00:59:41,0.84,0.76,505.29,1223.08
+679,699,5,Engine bay wash and basic undercarriage inspection.,00:40:41,00:31:22,0.49,1.28,327.06,274.55
+680,700,5,Cabin air filter replaced; A/C evaporator spray applied.,00:20:11,00:27:08,0.27,0.67,162.27,751.76
+681,701,5,Tire rotation performed; all four corners swapped per pattern.,00:41:06,00:32:55,0.98,1.04,244.19,761.17
+682,702,5,Tire rotation performed; all four corners swapped per pattern.,00:22:21,00:29:39,0.32,1.09,675.75,875.99
+683,703,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:39:57,00:47:23,0.92,1.03,1016.51,1355.99
+684,704,5,Quick oil and filter change — standard 4L synthetic oil used.,00:19:05,00:32:27,0.60,0.34,821.76,799.09
+685,705,5,Windshield wiper blades replaced; washer fluid topped up.,00:29:29,00:50:36,1.00,0.98,1106.21,903.20
+686,706,5,Battery terminals cleaned and coated; voltage test passed.,00:25:30,00:56:56,0.41,0.45,824.50,1061.72
+687,707,5,Battery terminals cleaned and coated; voltage test passed.,00:18:49,00:43:27,0.38,0.36,993.05,927.89
+688,708,5,Tire rotation performed; all four corners swapped per pattern.,00:28:35,00:45:18,0.50,0.46,448.56,898.41
+689,709,5,Battery terminals cleaned and coated; voltage test passed.,00:26:29,00:59:19,0.72,1.19,377.12,623.77
+690,710,5,Engine bay wash and basic undercarriage inspection.,00:34:18,00:59:51,0.71,0.79,548.56,1235.41
+691,711,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:30:37,00:51:15,0.37,0.94,562.65,397.61
+692,712,5,Engine bay wash and basic undercarriage inspection.,00:35:54,00:50:56,0.78,1.16,948.49,1193.76
+693,713,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:40:31,00:23:47,0.65,0.49,914.59,306.29
+694,714,5,Cabin air filter replaced; A/C evaporator spray applied.,00:20:00,00:30:21,0.40,0.71,751.33,1325.39
+695,715,5,Cabin air filter replaced; A/C evaporator spray applied.,00:20:26,00:21:50,0.51,0.63,931.34,948.98
+696,716,5,Tire rotation performed; all four corners swapped per pattern.,00:28:47,00:41:30,0.28,0.57,173.07,987.86
+697,717,5,Engine bay wash and basic undercarriage inspection.,00:19:21,00:43:32,0.79,0.97,670.75,1087.48
+698,718,5,Engine bay wash and basic undercarriage inspection.,00:19:55,00:32:48,0.55,0.59,126.55,731.18
+699,719,5,Quick oil and filter change — standard 4L synthetic oil used.,00:27:13,00:26:44,0.54,1.12,743.83,274.27
+700,720,5,Cabin air filter replaced; A/C evaporator spray applied.,00:32:34,00:43:35,0.65,0.72,842.00,895.96
+701,721,5,Cabin air filter replaced; A/C evaporator spray applied.,00:25:57,00:56:52,0.30,0.34,634.98,678.49
+702,722,5,Quick oil and filter change — standard 4L synthetic oil used.,00:15:10,00:56:32,0.30,0.49,1028.10,1278.26
+703,723,5,Battery terminals cleaned and coated; voltage test passed.,00:41:10,00:20:04,0.26,0.61,177.16,1155.38
+704,724,5,Battery terminals cleaned and coated; voltage test passed.,00:44:53,00:42:58,0.94,1.07,467.63,374.97
+705,725,5,Quick oil and filter change — standard 4L synthetic oil used.,00:33:30,00:57:25,0.44,0.32,391.51,629.00
+706,726,5,Battery terminals cleaned and coated; voltage test passed.,00:35:10,00:51:00,0.29,0.71,992.65,142.95
+707,727,5,Engine bay wash and basic undercarriage inspection.,00:33:21,00:21:21,0.55,0.52,891.67,776.45
+708,728,5,Engine bay wash and basic undercarriage inspection.,00:31:18,00:30:23,0.92,0.66,479.59,978.80
+709,729,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:17:30,00:34:11,0.31,1.12,289.44,303.56
+710,730,5,Tire rotation performed; all four corners swapped per pattern.,00:41:36,00:23:48,0.99,0.66,809.99,182.34
+711,731,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:40:36,00:40:44,0.74,0.81,862.93,1198.20
+712,732,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:16:08,00:21:50,0.96,1.12,862.78,421.69
+713,733,5,Quick oil and filter change — standard 4L synthetic oil used.,00:26:58,00:52:01,0.49,0.34,161.46,527.09
+714,734,5,Windshield wiper blades replaced; washer fluid topped up.,00:28:36,00:42:56,0.26,1.15,897.79,509.34
+715,735,5,Quick oil and filter change — standard 4L synthetic oil used.,00:35:10,00:55:01,0.71,1.14,1111.19,474.77
+716,736,5,Engine bay wash and basic undercarriage inspection.,00:21:16,00:37:20,0.81,1.00,927.45,1438.47
+717,737,5,Battery terminals cleaned and coated; voltage test passed.,00:38:13,00:54:26,0.41,1.06,677.38,473.59
+718,738,5,Battery terminals cleaned and coated; voltage test passed.,00:41:34,00:24:33,0.68,0.82,952.92,1022.72
+719,739,5,Cabin air filter replaced; A/C evaporator spray applied.,00:42:47,00:33:55,0.86,1.07,1025.50,1023.96
+720,740,5,Engine bay wash and basic undercarriage inspection.,00:40:58,00:40:47,0.45,1.10,249.09,892.38
+721,741,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:15:39,00:32:43,0.53,0.42,525.03,338.79
+722,742,5,Quick oil and filter change — standard 4L synthetic oil used.,00:25:55,00:39:55,0.28,0.39,608.42,593.40
+723,743,5,Battery terminals cleaned and coated; voltage test passed.,00:25:19,00:31:29,0.44,1.27,523.09,503.06
+724,744,5,Battery terminals cleaned and coated; voltage test passed.,00:35:01,00:24:47,0.49,0.88,752.93,610.26
+725,745,5,Engine bay wash and basic undercarriage inspection.,00:27:40,00:50:42,0.34,1.22,524.33,509.60
+726,746,5,Battery terminals cleaned and coated; voltage test passed.,00:23:56,00:58:16,0.40,0.70,782.52,1110.19
+727,747,5,Battery terminals cleaned and coated; voltage test passed.,00:18:13,00:59:29,0.59,0.84,142.47,853.65
+728,748,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:37:50,00:20:07,0.69,1.10,198.55,921.63
+729,749,5,Windshield wiper blades replaced; washer fluid topped up.,00:42:53,00:56:55,0.26,1.23,810.24,691.04
+730,750,5,Windshield wiper blades replaced; washer fluid topped up.,00:21:19,00:59:41,0.40,0.77,1175.90,1456.38
+731,751,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:39:36,00:52:20,0.98,0.56,790.29,1135.64
+732,752,5,Quick oil and filter change — standard 4L synthetic oil used.,00:22:05,00:47:12,0.72,0.37,888.73,699.42
+733,753,5,Quick oil and filter change — standard 4L synthetic oil used.,00:29:46,00:38:17,0.50,0.79,177.96,727.51
+734,754,5,Quick oil and filter change — standard 4L synthetic oil used.,00:25:19,00:21:00,0.72,0.38,241.31,712.65
+735,755,5,Tire rotation performed; all four corners swapped per pattern.,00:29:47,00:29:20,0.69,0.35,853.51,511.23
+736,756,5,Battery terminals cleaned and coated; voltage test passed.,00:16:16,00:47:00,0.54,0.34,965.68,608.98
+737,757,5,Battery terminals cleaned and coated; voltage test passed.,00:29:35,00:26:20,0.52,0.88,718.65,1015.76
+738,758,5,Engine bay wash and basic undercarriage inspection.,00:37:49,00:21:54,0.44,0.87,946.19,1175.50
+739,759,5,Windshield wiper blades replaced; washer fluid topped up.,00:22:26,00:43:37,0.25,1.19,552.16,1472.45
+740,760,5,Engine bay wash and basic undercarriage inspection.,00:32:20,00:57:37,0.89,1.26,666.86,956.29
+741,761,5,Engine bay wash and basic undercarriage inspection.,00:15:20,00:40:18,0.47,0.62,412.96,260.29
+742,762,5,Windshield wiper blades replaced; washer fluid topped up.,00:21:09,00:20:53,0.84,0.67,838.09,1258.85
+743,763,5,Quick oil and filter change — standard 4L synthetic oil used.,00:33:55,00:28:07,0.55,1.22,593.83,1145.61
+744,764,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:28:12,00:51:31,0.76,0.76,686.86,1215.76
+745,765,5,Battery terminals cleaned and coated; voltage test passed.,00:30:31,00:49:31,0.75,0.77,788.76,1044.43
+746,766,5,Quick oil and filter change — standard 4L synthetic oil used.,00:41:57,00:54:02,0.85,0.52,1117.18,481.56
+747,767,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:26:09,00:33:11,0.33,1.10,1040.66,1295.48
+748,768,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:20:03,00:35:03,0.59,0.92,1098.71,1491.12
+749,769,5,Battery terminals cleaned and coated; voltage test passed.,00:27:33,00:53:56,0.88,0.38,423.09,855.44
+750,770,5,Engine bay wash and basic undercarriage inspection.,00:39:34,00:25:49,0.96,0.93,395.55,793.68
+751,771,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:17:48,00:51:55,0.42,0.55,570.07,294.56
+752,772,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:17:51,00:56:47,0.39,0.33,1159.21,1006.10
+753,773,5,Windshield wiper blades replaced; washer fluid topped up.,00:43:46,00:27:50,0.56,0.82,591.62,194.22
+754,774,5,Engine bay wash and basic undercarriage inspection.,00:40:25,00:46:22,0.49,1.00,891.42,297.51
+755,775,5,Quick oil and filter change — standard 4L synthetic oil used.,00:33:30,00:47:56,0.70,0.66,686.81,1295.22
+756,776,5,Battery terminals cleaned and coated; voltage test passed.,00:42:38,00:51:36,0.66,0.62,884.97,235.46
+757,777,5,Engine bay wash and basic undercarriage inspection.,00:19:22,00:42:36,0.26,0.81,683.76,1086.78
+758,778,5,Tire rotation performed; all four corners swapped per pattern.,00:21:51,00:51:24,0.90,0.81,773.57,258.42
+759,779,5,Quick oil and filter change — standard 4L synthetic oil used.,00:34:11,00:57:34,0.65,1.29,758.88,477.56
+760,780,5,Cabin air filter replaced; A/C evaporator spray applied.,00:33:46,00:57:30,0.64,0.30,1156.73,1291.06
+761,781,5,Battery terminals cleaned and coated; voltage test passed.,00:23:07,00:45:59,0.66,0.64,117.76,1012.25
+762,782,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:43:09,00:34:24,0.86,1.16,299.04,163.11
+763,783,5,Windshield wiper blades replaced; washer fluid topped up.,00:32:29,00:53:52,0.85,1.18,753.03,1079.09
+764,784,5,Battery terminals cleaned and coated; voltage test passed.,00:43:43,00:59:35,0.95,0.84,594.90,1313.63
+765,785,5,Windshield wiper blades replaced; washer fluid topped up.,00:40:51,00:38:15,0.32,0.61,914.68,406.71
+766,786,5,Windshield wiper blades replaced; washer fluid topped up.,00:35:12,00:20:18,0.38,1.16,516.79,1234.18
+767,787,5,Engine bay wash and basic undercarriage inspection.,00:21:37,00:53:34,0.57,0.81,1080.39,262.03
+768,788,5,Engine bay wash and basic undercarriage inspection.,00:23:33,00:23:32,0.66,0.97,606.18,1320.64
+769,789,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:21:02,00:27:59,0.67,1.12,734.22,1086.70
+770,790,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:19:37,00:31:26,0.35,0.34,1162.93,571.60
+771,791,5,Engine bay wash and basic undercarriage inspection.,00:17:01,00:32:30,0.90,0.89,277.73,528.40
+772,792,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:33:50,00:44:13,0.56,0.56,574.31,932.90
+773,793,5,Quick oil and filter change — standard 4L synthetic oil used.,00:34:23,00:54:56,0.70,0.44,158.28,1073.99
+774,794,5,Tire rotation performed; all four corners swapped per pattern.,00:22:47,00:51:12,0.28,1.18,128.76,771.54
+775,795,5,Quick oil and filter change — standard 4L synthetic oil used.,00:33:25,00:32:03,0.29,0.44,961.19,1003.88
+776,796,5,Tire rotation performed; all four corners swapped per pattern.,00:21:50,00:31:29,0.85,1.01,651.15,686.96
+777,797,5,Tire rotation performed; all four corners swapped per pattern.,00:36:41,00:35:17,0.43,0.59,578.00,1262.69
+778,798,5,Battery terminals cleaned and coated; voltage test passed.,00:33:36,00:22:39,0.44,1.27,1142.87,1459.82
+779,799,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:37:26,00:51:09,0.42,0.95,814.86,910.30
+780,800,5,Quick oil and filter change — standard 4L synthetic oil used.,00:37:34,00:53:48,0.57,0.30,731.65,1082.12
+781,801,5,Cabin air filter replaced; A/C evaporator spray applied.,00:30:10,00:55:40,0.82,0.64,817.09,147.99
+782,802,5,Battery terminals cleaned and coated; voltage test passed.,00:19:28,00:25:34,0.91,0.95,1031.17,808.25
+783,803,5,Windshield wiper blades replaced; washer fluid topped up.,00:18:10,00:50:32,0.34,0.78,386.74,1034.03
+784,804,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:39:56,00:22:52,0.92,1.10,490.95,798.64
+785,805,5,Cabin air filter replaced; A/C evaporator spray applied.,00:44:52,00:44:47,0.91,0.37,652.40,489.68
+786,806,5,Battery terminals cleaned and coated; voltage test passed.,00:24:00,00:35:37,0.46,1.04,185.44,1229.67
+787,807,5,Tire rotation performed; all four corners swapped per pattern.,00:20:31,00:38:38,0.66,0.69,356.31,449.29
+788,808,5,Quick oil and filter change — standard 4L synthetic oil used.,00:21:55,00:51:20,0.41,0.52,1063.55,1207.42
+789,809,5,Cabin air filter replaced; A/C evaporator spray applied.,00:39:30,00:27:25,0.77,0.88,323.66,656.91
+790,810,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:40:12,00:47:43,0.42,0.33,552.08,240.09
+791,811,5,Windshield wiper blades replaced; washer fluid topped up.,00:44:07,00:53:11,0.48,0.95,1089.55,636.06
+792,812,5,Battery terminals cleaned and coated; voltage test passed.,00:42:20,00:56:37,0.61,0.60,650.92,797.67
+793,813,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:28:04,00:24:18,0.25,0.81,421.93,667.72
+794,814,5,Windshield wiper blades replaced; washer fluid topped up.,00:38:44,00:22:57,0.50,0.68,883.27,1133.45
+795,815,5,Tire rotation performed; all four corners swapped per pattern.,00:41:50,00:56:48,0.44,1.14,1072.86,1422.45
+796,816,5,Engine bay wash and basic undercarriage inspection.,00:26:42,00:51:29,0.28,0.46,562.19,1426.01
+797,817,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:17:10,00:58:20,0.70,0.43,713.62,664.86
+798,818,5,Tire rotation performed; all four corners swapped per pattern.,00:18:40,00:50:56,0.60,0.48,440.10,362.62
+799,819,5,Tire rotation performed; all four corners swapped per pattern.,00:25:22,00:30:01,0.91,0.82,171.75,1257.91
+800,820,5,Cabin air filter replaced; A/C evaporator spray applied.,00:34:29,00:43:02,0.26,1.30,260.32,708.93
+801,521,5,Engine bay wash and basic undercarriage inspection.,00:29:32,00:26:21,0.71,0.51,852.00,1408.62
+802,522,5,Cabin air filter replaced; A/C evaporator spray applied.,00:39:55,00:55:51,0.74,0.64,193.05,1179.54
+803,523,5,Engine bay wash and basic undercarriage inspection.,00:40:12,00:26:17,0.34,1.06,1024.93,606.00
+804,524,5,Windshield wiper blades replaced; washer fluid topped up.,00:43:58,00:22:12,0.43,1.12,529.50,1118.03
+805,525,5,Battery terminals cleaned and coated; voltage test passed.,00:31:32,00:57:15,0.89,0.75,826.62,728.32
+806,526,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:26:24,00:24:51,0.95,0.93,232.08,274.74
+807,527,5,Battery terminals cleaned and coated; voltage test passed.,00:29:32,00:55:10,0.79,1.26,269.47,688.50
+808,528,5,Cabin air filter replaced; A/C evaporator spray applied.,00:15:16,00:50:58,0.37,1.13,998.60,313.39
+809,529,5,Windshield wiper blades replaced; washer fluid topped up.,00:43:56,00:56:49,0.49,1.25,273.03,1168.20
+810,530,5,Windshield wiper blades replaced; washer fluid topped up.,00:20:54,00:32:24,0.86,1.18,247.55,1169.36
+811,531,5,Tire rotation performed; all four corners swapped per pattern.,00:42:46,00:49:46,0.90,0.98,904.47,716.44
+812,532,5,Quick oil and filter change — standard 4L synthetic oil used.,00:37:20,00:37:28,0.27,1.28,612.73,1199.08
+813,533,5,Windshield wiper blades replaced; washer fluid topped up.,00:36:41,00:42:11,0.75,0.97,471.58,194.03
+814,534,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:28:39,00:23:35,0.50,1.04,824.19,1452.01
+815,535,5,Tire rotation performed; all four corners swapped per pattern.,00:27:27,00:38:23,0.93,0.95,944.74,1210.22
+816,536,5,Tire rotation performed; all four corners swapped per pattern.,00:23:19,00:45:00,0.52,0.35,369.02,369.40
+817,537,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:32:27,00:26:58,0.56,0.49,172.97,1294.13
+818,538,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:28:26,00:20:12,0.26,0.53,183.61,952.50
+819,539,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:36:10,00:49:39,0.27,1.22,325.67,845.88
+820,540,5,Cabin air filter replaced; A/C evaporator spray applied.,00:44:33,00:46:12,0.29,1.09,1155.56,1073.82
+821,541,5,Tire rotation performed; all four corners swapped per pattern.,00:29:13,00:57:46,0.52,0.94,1070.95,1161.89
+822,542,5,Tire rotation performed; all four corners swapped per pattern.,00:24:53,00:40:23,0.72,1.25,253.75,1186.70
+823,543,5,Cabin air filter replaced; A/C evaporator spray applied.,00:25:40,00:24:43,0.88,1.30,836.16,1015.13
+824,544,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:39:24,00:59:05,0.75,0.76,135.41,1189.25
+825,545,5,Engine bay wash and basic undercarriage inspection.,00:16:32,00:35:07,0.81,0.74,693.05,1344.42
+826,546,5,Windshield wiper blades replaced; washer fluid topped up.,00:29:09,00:58:06,0.35,1.19,979.90,166.81
+827,547,5,Engine bay wash and basic undercarriage inspection.,00:36:53,00:21:24,0.92,0.93,830.35,478.48
+828,548,5,Battery terminals cleaned and coated; voltage test passed.,00:37:52,00:50:35,0.47,0.75,703.44,1100.60
+829,549,5,Engine bay wash and basic undercarriage inspection.,00:27:51,00:20:10,0.90,0.55,630.75,887.85
+830,550,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:22:29,00:50:28,0.87,1.15,267.69,562.93
+831,551,5,Windshield wiper blades replaced; washer fluid topped up.,00:23:39,00:50:43,0.31,1.07,1046.58,456.98
+832,552,5,Cabin air filter replaced; A/C evaporator spray applied.,00:35:43,00:42:47,0.37,0.52,1169.64,580.86
+833,553,5,Quick oil and filter change — standard 4L synthetic oil used.,00:16:00,00:51:49,0.99,0.61,610.80,1073.43
+834,554,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:16:32,00:22:57,0.59,1.30,832.14,593.65
+835,555,5,Engine bay wash and basic undercarriage inspection.,00:23:11,00:38:26,0.57,1.11,890.56,280.11
+836,556,5,Windshield wiper blades replaced; washer fluid topped up.,00:44:57,00:53:08,0.34,0.72,490.96,1148.33
+837,557,5,Engine bay wash and basic undercarriage inspection.,00:20:56,00:42:43,1.00,0.78,944.82,426.91
+838,558,5,Quick oil and filter change — standard 4L synthetic oil used.,00:42:42,00:36:31,0.33,0.63,797.47,815.97
+839,559,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:35:45,00:47:14,0.45,0.75,835.91,570.75
+840,560,5,Windshield wiper blades replaced; washer fluid topped up.,00:34:47,00:23:19,0.37,0.60,1015.35,1030.32
+841,561,5,Cabin air filter replaced; A/C evaporator spray applied.,00:37:59,00:31:03,0.68,0.72,668.13,885.41
+842,562,5,Battery terminals cleaned and coated; voltage test passed.,00:20:21,00:33:06,0.28,1.02,785.60,1296.79
+843,563,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:15:21,00:55:15,0.91,1.05,945.57,1480.90
+844,564,5,Windshield wiper blades replaced; washer fluid topped up.,00:31:04,00:44:15,0.60,0.83,478.72,636.93
+845,565,5,Tire rotation performed; all four corners swapped per pattern.,00:37:37,00:47:16,0.84,0.99,450.72,1365.98
+846,566,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:35:10,00:52:05,0.98,0.89,359.33,197.12
+847,567,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:32:31,00:52:34,0.75,0.92,730.41,477.40
+848,568,5,Engine bay wash and basic undercarriage inspection.,00:39:42,00:28:01,0.70,1.28,335.58,474.42
+849,569,5,Tire rotation performed; all four corners swapped per pattern.,00:42:27,00:40:21,0.43,0.38,1041.60,386.80
+850,570,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:33:19,00:35:58,0.50,0.48,616.76,1480.65
+851,571,5,Cabin air filter replaced; A/C evaporator spray applied.,00:22:34,00:21:55,0.45,0.85,657.27,1149.03
+852,572,5,Quick oil and filter change — standard 4L synthetic oil used.,00:16:38,00:44:54,0.64,0.97,1157.42,1320.67
+853,573,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:39:39,00:25:40,0.30,0.82,207.23,247.20
+854,574,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:42:38,00:24:31,0.68,1.21,114.50,1310.02
+855,575,5,Quick oil and filter change — standard 4L synthetic oil used.,00:23:10,00:43:00,0.56,0.33,497.73,1336.07
+856,576,5,Cabin air filter replaced; A/C evaporator spray applied.,00:17:42,00:46:52,0.66,0.39,320.86,371.78
+857,577,5,Quick oil and filter change — standard 4L synthetic oil used.,00:19:13,00:20:43,0.99,1.19,946.16,505.92
+858,578,5,Engine bay wash and basic undercarriage inspection.,00:39:41,00:59:31,0.27,1.02,1125.33,1104.93
+859,579,5,Cabin air filter replaced; A/C evaporator spray applied.,00:27:30,00:43:55,0.54,0.65,1171.39,562.17
+860,580,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:32:59,00:40:47,0.56,0.51,233.38,1150.01
+861,581,5,Windshield wiper blades replaced; washer fluid topped up.,00:31:59,00:49:02,0.54,1.20,476.39,368.59
+862,582,5,Quick oil and filter change — standard 4L synthetic oil used.,00:43:38,00:58:15,0.79,1.13,330.28,1444.87
+863,583,5,Tire rotation performed; all four corners swapped per pattern.,00:33:35,00:47:12,0.29,0.78,526.05,1221.50
+864,584,5,Windshield wiper blades replaced; washer fluid topped up.,00:27:31,00:21:08,0.38,0.75,849.30,1127.46
+865,585,5,Quick oil and filter change — standard 4L synthetic oil used.,00:27:28,00:50:14,0.52,0.80,992.40,1358.58
+866,586,5,Windshield wiper blades replaced; washer fluid topped up.,00:31:39,00:44:14,0.53,0.33,1020.60,146.32
+867,587,5,Windshield wiper blades replaced; washer fluid topped up.,00:38:07,00:39:00,0.56,1.16,349.63,1207.16
+868,588,5,Battery terminals cleaned and coated; voltage test passed.,00:20:59,00:41:25,0.95,0.44,527.52,1404.66
+869,589,5,Engine bay wash and basic undercarriage inspection.,00:38:49,00:59:51,0.75,0.97,896.28,1372.14
+870,590,5,Battery terminals cleaned and coated; voltage test passed.,00:29:16,00:30:47,0.42,0.31,343.26,1440.22
+871,591,5,Quick oil and filter change — standard 4L synthetic oil used.,00:31:21,00:37:13,0.44,0.36,124.40,195.42
+872,592,5,Tire rotation performed; all four corners swapped per pattern.,00:19:57,00:32:24,0.54,1.16,1137.66,1452.99
+873,593,5,Tire rotation performed; all four corners swapped per pattern.,00:41:56,00:29:09,0.64,0.92,806.08,465.79
+874,594,5,Battery terminals cleaned and coated; voltage test passed.,00:21:14,00:23:05,0.97,0.32,480.10,291.20
+875,595,5,Battery terminals cleaned and coated; voltage test passed.,00:18:51,00:24:07,0.93,0.47,341.49,1017.75
+876,596,5,Quick oil and filter change — standard 4L synthetic oil used.,00:19:52,00:47:55,0.94,1.01,290.76,120.40
+877,597,5,Windshield wiper blades replaced; washer fluid topped up.,00:37:38,00:46:03,0.84,1.28,877.13,1467.61
+878,598,5,Battery terminals cleaned and coated; voltage test passed.,00:39:23,00:37:37,0.46,1.17,821.30,639.41
+879,599,5,Engine bay wash and basic undercarriage inspection.,00:17:39,00:55:08,0.45,0.49,1093.22,917.24
+880,600,5,Battery terminals cleaned and coated; voltage test passed.,00:39:22,00:52:48,0.97,0.50,398.45,641.22
+881,601,5,Cabin air filter replaced; A/C evaporator spray applied.,00:33:07,00:49:55,0.78,1.04,615.87,1132.17
+882,602,5,Battery terminals cleaned and coated; voltage test passed.,00:43:39,00:44:52,0.97,0.45,713.45,665.19
+883,603,5,Cabin air filter replaced; A/C evaporator spray applied.,00:21:05,00:58:39,0.53,0.45,956.18,513.58
+884,604,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:29:35,00:29:15,0.82,0.35,295.52,1078.78
+885,605,5,Cabin air filter replaced; A/C evaporator spray applied.,00:36:52,00:26:46,0.55,1.28,517.47,352.35
+886,606,5,Windshield wiper blades replaced; washer fluid topped up.,00:16:52,00:30:01,0.69,1.22,1023.41,888.71
+887,607,5,Tire rotation performed; all four corners swapped per pattern.,00:42:27,00:32:29,0.82,0.67,863.54,1471.83
+888,608,5,Battery terminals cleaned and coated; voltage test passed.,00:35:36,00:40:07,0.71,0.95,109.16,114.77
+889,609,5,Battery terminals cleaned and coated; voltage test passed.,00:23:11,00:24:13,0.85,0.64,954.43,1110.72
+890,610,5,Quick oil and filter change — standard 4L synthetic oil used.,00:30:15,00:34:34,0.33,1.29,687.51,1147.10
+891,611,5,Battery terminals cleaned and coated; voltage test passed.,00:44:52,00:34:53,0.88,0.60,861.59,1065.65
+892,612,5,Engine bay wash and basic undercarriage inspection.,00:17:59,00:27:41,0.94,1.05,344.09,292.01
+893,613,5,Engine bay wash and basic undercarriage inspection.,00:25:11,00:55:07,0.86,1.00,513.50,703.07
+894,614,5,Windshield wiper blades replaced; washer fluid topped up.,00:29:58,00:48:49,0.45,0.93,857.50,1073.21
+895,615,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:40:06,00:48:23,0.43,0.64,584.86,816.35
+896,616,5,Engine bay wash and basic undercarriage inspection.,00:21:39,00:48:27,0.28,0.62,992.60,740.73
+897,617,5,Battery terminals cleaned and coated; voltage test passed.,00:28:28,00:56:08,0.54,0.55,351.05,851.09
+898,618,5,Quick oil and filter change — standard 4L synthetic oil used.,00:27:36,00:34:16,0.68,0.76,105.96,164.20
+899,619,5,Tire rotation performed; all four corners swapped per pattern.,00:33:13,00:40:54,0.46,0.99,1024.67,649.57
+900,620,5,Cabin air filter replaced; A/C evaporator spray applied.,00:21:23,00:20:16,0.57,0.57,541.17,1465.50
+901,621,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:16:48,00:41:07,0.90,1.20,594.48,630.23
+902,622,5,Tire rotation performed; all four corners swapped per pattern.,00:41:33,00:22:46,0.68,0.61,999.42,1260.19
+903,623,5,Quick oil and filter change — standard 4L synthetic oil used.,00:25:12,00:58:53,0.63,1.20,966.85,832.66
+904,624,5,Tire rotation performed; all four corners swapped per pattern.,00:19:55,00:26:45,0.67,1.19,958.59,178.74
+905,625,5,Battery terminals cleaned and coated; voltage test passed.,00:16:04,00:50:47,0.85,0.73,1013.91,1225.26
+906,626,5,Cabin air filter replaced; A/C evaporator spray applied.,00:25:48,00:39:14,0.31,0.81,938.99,1002.04
+907,627,5,Windshield wiper blades replaced; washer fluid topped up.,00:27:52,00:20:42,0.59,0.99,657.73,225.13
+908,628,5,Engine bay wash and basic undercarriage inspection.,00:18:20,00:38:35,0.91,1.14,509.11,728.82
+909,629,5,Battery terminals cleaned and coated; voltage test passed.,00:23:47,00:59:24,0.80,0.62,1062.40,1408.51
+910,630,5,Cabin air filter replaced; A/C evaporator spray applied.,00:15:15,00:51:45,0.81,0.37,474.61,1171.28
+911,631,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:42:02,00:32:39,0.57,1.02,859.06,258.06
+912,632,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:21:19,00:56:34,0.93,0.33,1191.29,739.63
+913,633,5,Engine bay wash and basic undercarriage inspection.,00:25:33,00:59:36,0.88,1.06,384.05,1498.68
+914,634,5,Engine bay wash and basic undercarriage inspection.,00:23:40,00:24:33,0.74,0.80,1068.00,931.61
+915,635,5,Tire rotation performed; all four corners swapped per pattern.,00:39:22,00:28:08,0.85,0.40,703.44,1365.41
+916,636,5,Windshield wiper blades replaced; washer fluid topped up.,00:44:57,00:56:40,0.46,1.05,847.28,945.35
+917,637,5,Tire rotation performed; all four corners swapped per pattern.,00:20:49,00:45:17,0.99,0.53,805.54,598.17
+918,638,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:20:37,00:45:34,0.76,0.65,349.79,1283.55
+919,639,5,Windshield wiper blades replaced; washer fluid topped up.,00:16:35,00:30:26,0.92,0.67,1171.40,665.53
+920,640,5,Engine bay wash and basic undercarriage inspection.,00:39:26,00:21:22,0.87,1.07,446.83,460.66
+921,641,5,Cabin air filter replaced; A/C evaporator spray applied.,00:19:23,00:53:11,0.26,1.24,484.41,910.68
+922,642,5,Engine bay wash and basic undercarriage inspection.,00:21:25,00:20:41,0.72,0.69,857.52,1443.86
+923,643,5,Tire rotation performed; all four corners swapped per pattern.,00:17:35,00:47:01,0.55,0.86,388.60,1279.18
+924,644,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:44:25,00:44:54,0.66,1.12,1051.77,613.83
+925,645,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:36:44,00:33:21,0.29,1.22,589.61,347.84
+926,646,5,Windshield wiper blades replaced; washer fluid topped up.,00:44:33,00:24:31,0.76,0.90,861.12,785.75
+927,647,5,Tire rotation performed; all four corners swapped per pattern.,00:16:01,00:46:10,0.53,0.51,806.51,1479.21
+928,648,5,Windshield wiper blades replaced; washer fluid topped up.,00:43:51,00:59:12,0.58,1.18,688.93,745.90
+929,649,5,Cabin air filter replaced; A/C evaporator spray applied.,00:18:04,00:36:01,0.99,0.99,1018.21,757.64
+930,650,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:40:38,00:30:02,0.39,0.55,974.79,1370.17
+931,651,5,Quick oil and filter change — standard 4L synthetic oil used.,00:17:44,00:40:10,0.60,0.52,532.20,984.88
+932,652,5,Windshield wiper blades replaced; washer fluid topped up.,00:44:29,00:54:10,0.68,1.24,201.62,1019.36
+933,653,5,Tire rotation performed; all four corners swapped per pattern.,00:38:29,00:47:25,0.25,1.13,1032.73,543.35
+934,654,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:26:24,00:21:36,0.44,0.35,361.68,138.54
+935,655,5,Quick oil and filter change — standard 4L synthetic oil used.,00:35:40,00:30:45,0.36,0.92,589.98,1133.08
+936,656,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:28:31,00:56:54,0.57,1.08,963.97,890.59
+937,657,5,Engine bay wash and basic undercarriage inspection.,00:20:27,00:59:31,0.60,1.13,519.14,1101.96
+938,658,5,Windshield wiper blades replaced; washer fluid topped up.,00:21:02,00:41:47,0.33,0.93,308.17,237.04
+939,659,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:22:06,00:42:06,0.33,0.71,623.72,1129.26
+940,660,5,Engine bay wash and basic undercarriage inspection.,00:23:14,00:41:49,0.89,0.60,855.87,327.40
+941,661,5,Tire rotation performed; all four corners swapped per pattern.,00:38:23,00:29:18,0.74,1.09,772.80,1015.41
+942,662,5,Windshield wiper blades replaced; washer fluid topped up.,00:44:34,00:57:06,0.99,1.15,1114.64,275.59
+943,663,5,Tire rotation performed; all four corners swapped per pattern.,00:24:23,00:56:03,0.85,1.21,1046.96,1368.33
+944,664,5,Cabin air filter replaced; A/C evaporator spray applied.,00:27:26,00:25:41,0.30,0.82,1165.81,1403.44
+945,665,5,Engine bay wash and basic undercarriage inspection.,00:19:33,00:59:57,0.74,0.83,1135.07,203.30
+946,666,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:39:39,00:48:24,0.93,1.17,403.42,1291.26
+947,667,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:20:01,00:21:40,0.63,0.50,401.13,745.88
+948,668,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:30:34,00:41:15,0.44,1.00,108.56,1322.03
+949,669,5,Windshield wiper blades replaced; washer fluid topped up.,00:40:00,00:57:53,0.67,1.26,154.31,330.00
+950,670,5,Quick oil and filter change — standard 4L synthetic oil used.,00:31:26,00:51:43,0.45,0.52,307.11,1015.21
+951,671,5,Windshield wiper blades replaced; washer fluid topped up.,00:29:03,00:43:38,0.86,0.74,790.04,1016.34
+952,672,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:25:34,00:21:28,0.60,0.40,476.21,506.83
+953,673,5,Quick oil and filter change — standard 4L synthetic oil used.,00:40:07,00:38:31,0.35,0.90,743.09,1392.61
+954,674,5,Tire rotation performed; all four corners swapped per pattern.,00:15:55,00:54:18,0.90,0.91,227.43,1244.83
+955,675,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:32:57,00:31:17,0.56,0.50,496.56,1417.78
+956,676,5,Cabin air filter replaced; A/C evaporator spray applied.,00:35:11,00:37:36,0.47,0.81,485.87,1347.48
+957,677,5,Cabin air filter replaced; A/C evaporator spray applied.,00:33:23,00:49:36,0.55,0.66,719.18,395.84
+958,678,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:36:35,00:24:27,0.36,0.53,700.35,394.08
+959,679,5,Windshield wiper blades replaced; washer fluid topped up.,00:42:57,00:21:41,0.82,0.57,905.29,934.11
+960,680,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:28:54,00:58:54,1.00,0.88,269.33,645.42
+961,681,5,Engine bay wash and basic undercarriage inspection.,00:19:57,00:59:10,0.58,0.58,671.84,826.54
+962,682,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:43:15,00:51:40,0.25,1.02,1114.10,302.56
+963,683,5,Battery terminals cleaned and coated; voltage test passed.,00:24:29,00:59:47,0.94,1.01,724.99,714.60
+964,684,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:28:16,00:20:02,0.52,0.93,854.19,1291.84
+965,685,5,Engine bay wash and basic undercarriage inspection.,00:22:10,00:37:53,0.98,0.95,986.56,1269.45
+966,686,5,Battery terminals cleaned and coated; voltage test passed.,00:27:19,00:58:44,0.53,0.97,1016.91,397.75
+967,687,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:16:26,00:21:18,0.79,0.90,917.25,1419.93
+968,688,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:31:43,00:55:03,0.32,0.34,513.37,1046.55
+969,689,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:22:29,00:41:39,0.36,0.41,668.66,644.56
+970,690,5,Engine bay wash and basic undercarriage inspection.,00:19:16,00:48:25,0.30,1.27,543.55,1084.98
+971,691,5,Windshield wiper blades replaced; washer fluid topped up.,00:33:39,00:48:37,0.52,0.67,1049.92,1141.25
+972,692,5,Engine bay wash and basic undercarriage inspection.,00:15:51,00:52:09,0.65,0.44,878.59,1475.28
+973,693,5,Quick oil and filter change — standard 4L synthetic oil used.,00:28:39,00:52:05,0.72,0.52,342.20,1224.00
+974,694,5,Battery terminals cleaned and coated; voltage test passed.,00:30:07,00:43:23,0.60,1.12,961.49,810.15
+975,695,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:43:13,00:49:46,0.71,1.07,120.23,1067.56
+976,696,5,Quick oil and filter change — standard 4L synthetic oil used.,00:24:41,00:21:36,0.61,0.56,775.43,651.84
+977,697,5,Windshield wiper blades replaced; washer fluid topped up.,00:41:57,00:31:05,0.56,0.42,791.87,1466.95
+978,698,5,Tire rotation performed; all four corners swapped per pattern.,00:34:29,00:35:13,0.95,0.88,979.44,787.58
+979,699,5,Battery terminals cleaned and coated; voltage test passed.,00:39:14,00:59:31,0.67,0.63,711.45,1164.84
+980,700,5,Engine bay wash and basic undercarriage inspection.,00:39:27,00:21:13,0.93,0.95,123.81,1060.12
+981,701,5,Windshield wiper blades replaced; washer fluid topped up.,00:15:17,00:53:46,0.41,1.17,1190.30,854.18
+982,702,5,Battery terminals cleaned and coated; voltage test passed.,00:42:24,00:26:44,0.56,0.75,362.35,1266.77
+983,703,5,Engine bay wash and basic undercarriage inspection.,00:22:10,00:40:39,0.59,0.85,1185.98,563.70
+984,704,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:39:28,00:45:57,0.73,1.03,469.45,437.99
+985,705,5,Quick oil and filter change — standard 4L synthetic oil used.,00:36:54,00:46:05,0.89,0.91,666.48,324.25
+986,706,5,Tire rotation performed; all four corners swapped per pattern.,00:41:52,00:21:39,0.66,0.55,985.12,862.15
+987,707,5,Battery terminals cleaned and coated; voltage test passed.,00:31:27,00:57:08,0.84,0.41,538.49,1249.79
+988,708,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:24:49,00:38:33,0.80,0.32,904.09,201.03
+989,709,5,Quick oil and filter change — standard 4L synthetic oil used.,00:17:13,00:26:55,0.41,0.99,126.43,1194.00
+990,710,5,Battery terminals cleaned and coated; voltage test passed.,00:31:14,00:55:10,0.54,0.45,703.18,821.95
+991,711,5,Battery terminals cleaned and coated; voltage test passed.,00:42:24,00:52:55,0.89,1.01,711.81,1112.02
+992,712,5,Tire rotation performed; all four corners swapped per pattern.,00:41:04,00:42:02,0.41,0.59,746.99,293.35
+993,713,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:26:58,00:47:12,0.28,0.88,1029.25,281.67
+994,714,5,Tire rotation performed; all four corners swapped per pattern.,00:43:03,00:53:09,0.70,1.13,151.77,393.42
+995,715,5,Cabin air filter replaced; A/C evaporator spray applied.,00:39:00,00:59:17,0.66,0.78,1110.97,1388.92
+996,716,5,Windshield wiper blades replaced; washer fluid topped up.,00:32:36,00:23:20,0.78,0.35,128.19,819.01
+997,717,5,Windshield wiper blades replaced; washer fluid topped up.,00:39:06,00:23:19,0.71,0.96,655.48,505.55
+998,718,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:39:07,00:29:01,0.65,1.17,521.94,930.60
+999,719,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:35:52,00:34:00,0.48,0.56,1144.34,509.10
+1000,720,5,Windshield wiper blades replaced; washer fluid topped up.,00:16:10,00:53:31,0.27,0.85,808.71,423.67
+1001,721,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:34:07,00:30:18,0.56,0.78,552.20,1389.80
+1002,722,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:25:26,00:56:42,0.45,0.87,1091.78,1103.95
+1003,723,5,Battery terminals cleaned and coated; voltage test passed.,00:32:58,00:30:35,0.47,1.26,569.10,391.69
+1004,724,5,Engine bay wash and basic undercarriage inspection.,00:16:13,00:48:24,0.70,1.11,490.61,945.54
+1005,725,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:32:34,00:39:55,0.48,1.03,470.23,1008.73
+1006,726,5,Cabin air filter replaced; A/C evaporator spray applied.,00:21:11,00:42:30,0.57,0.44,554.60,671.78
+1007,727,5,Tire rotation performed; all four corners swapped per pattern.,00:37:49,00:39:13,0.81,0.48,690.71,883.37
+1008,728,5,Tire rotation performed; all four corners swapped per pattern.,00:38:03,00:24:34,0.47,1.06,174.82,382.79
+1009,729,5,Cabin air filter replaced; A/C evaporator spray applied.,00:27:27,00:56:36,0.59,0.97,708.59,1097.21
+1010,730,5,Cabin air filter replaced; A/C evaporator spray applied.,00:37:06,00:37:28,0.31,0.67,1001.27,1108.38
+1011,731,5,Cabin air filter replaced; A/C evaporator spray applied.,00:33:20,00:44:31,0.88,1.24,926.34,1118.10
+1012,732,5,Quick oil and filter change — standard 4L synthetic oil used.,00:37:11,00:51:50,0.81,0.37,1187.63,409.82
+1013,733,5,Tire rotation performed; all four corners swapped per pattern.,00:20:56,00:33:51,0.37,0.46,118.02,1460.87
+1014,734,5,Battery terminals cleaned and coated; voltage test passed.,00:21:49,00:52:47,0.53,0.68,762.86,381.00
+1015,735,5,Battery terminals cleaned and coated; voltage test passed.,00:19:33,00:46:13,0.75,1.18,294.79,710.14
+1016,736,5,Quick oil and filter change — standard 4L synthetic oil used.,00:23:21,00:38:14,0.39,0.80,857.88,242.98
+1017,737,5,Tire rotation performed; all four corners swapped per pattern.,00:40:38,00:33:46,0.99,0.70,484.67,703.18
+1018,738,5,Cabin air filter replaced; A/C evaporator spray applied.,00:22:18,00:33:24,0.66,0.64,997.69,992.56
+1019,739,5,Quick oil and filter change — standard 4L synthetic oil used.,00:22:12,00:24:44,0.25,0.70,1167.28,1208.81
+1020,740,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:44:34,00:34:12,0.31,0.94,275.65,902.49
+1021,741,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:40:47,00:29:02,0.87,0.35,585.44,1349.23
+1022,742,5,Windshield wiper blades replaced; washer fluid topped up.,00:22:10,00:27:18,0.52,1.02,1164.37,1040.85
+1023,743,5,Quick oil and filter change — standard 4L synthetic oil used.,00:25:14,00:34:36,0.71,0.84,1019.39,1067.69
+1024,744,5,Battery terminals cleaned and coated; voltage test passed.,00:27:10,00:35:22,0.77,0.33,997.31,1237.86
+1025,745,5,Windshield wiper blades replaced; washer fluid topped up.,00:42:12,00:40:13,0.33,0.68,357.55,475.91
+1026,746,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:27:35,00:49:43,0.47,0.86,153.35,256.43
+1027,747,5,Engine bay wash and basic undercarriage inspection.,00:18:24,00:27:12,0.40,0.55,222.99,621.78
+1028,748,5,Tire rotation performed; all four corners swapped per pattern.,00:27:06,00:35:24,0.42,1.03,590.65,905.87
+1029,749,5,Cabin air filter replaced; A/C evaporator spray applied.,00:34:01,00:41:39,0.40,1.13,962.98,662.14
+1030,750,5,Quick oil and filter change — standard 4L synthetic oil used.,00:39:20,00:34:18,0.56,0.43,827.97,155.59
+1031,751,5,Cabin air filter replaced; A/C evaporator spray applied.,00:28:53,00:47:32,0.31,0.51,1134.82,398.26
+1032,752,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:22:44,00:42:59,0.70,1.27,580.44,168.58
+1033,753,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:25:02,00:40:16,0.40,0.81,352.26,848.46
+1034,754,5,Tire rotation performed; all four corners swapped per pattern.,00:31:07,00:51:49,0.66,0.45,723.49,304.12
+1035,755,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:34:15,00:49:41,0.43,1.29,910.18,660.59
+1036,756,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:38:32,00:33:54,0.99,0.54,952.65,1445.31
+1037,757,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:27:23,00:56:29,0.70,0.53,1139.85,138.32
+1038,758,5,Windshield wiper blades replaced; washer fluid topped up.,00:17:21,00:40:12,0.52,0.84,807.01,607.92
+1039,759,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:25:11,00:54:52,0.57,1.29,407.98,419.55
+1040,760,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:17:58,00:55:00,0.96,0.50,137.47,286.91
+1041,761,5,Cabin air filter replaced; A/C evaporator spray applied.,00:29:46,00:42:44,0.93,0.79,255.65,997.79
+1042,762,5,Cabin air filter replaced; A/C evaporator spray applied.,00:32:45,00:28:30,0.77,0.39,138.29,160.95
+1043,763,5,Windshield wiper blades replaced; washer fluid topped up.,00:38:28,00:52:14,0.91,0.90,545.38,274.04
+1044,764,5,Quick oil and filter change — standard 4L synthetic oil used.,00:38:05,00:57:07,0.50,0.31,807.36,1278.30
+1045,765,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:41:19,00:38:40,0.64,1.02,660.82,911.57
+1046,766,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:35:56,00:41:29,0.65,0.85,466.31,1031.55
+1047,767,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:15:00,00:54:21,0.67,1.13,249.01,1090.41
+1048,768,5,Windshield wiper blades replaced; washer fluid topped up.,00:26:46,00:48:43,0.42,0.47,677.89,480.59
+1049,769,5,Tire rotation performed; all four corners swapped per pattern.,00:42:02,00:36:08,0.69,1.20,931.00,644.72
+1050,770,5,Windshield wiper blades replaced; washer fluid topped up.,00:28:18,00:38:21,0.76,0.92,745.09,166.04
+1051,771,5,Windshield wiper blades replaced; washer fluid topped up.,00:16:23,00:56:04,0.72,0.61,583.93,974.40
+1052,772,5,Windshield wiper blades replaced; washer fluid topped up.,00:38:31,00:29:27,0.92,0.30,437.54,374.90
+1053,773,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:21:18,00:23:48,0.43,0.44,493.03,538.50
+1054,774,5,Tire rotation performed; all four corners swapped per pattern.,00:17:05,00:29:04,0.75,1.22,685.49,828.30
+1055,775,5,Tire rotation performed; all four corners swapped per pattern.,00:44:01,00:31:12,0.96,1.27,185.22,1025.49
+1056,776,5,Engine bay wash and basic undercarriage inspection.,00:30:18,00:30:02,0.46,0.80,702.94,230.41
+1057,777,5,Tire rotation performed; all four corners swapped per pattern.,00:15:23,00:47:26,0.86,1.23,279.46,1201.38
+1058,778,5,Windshield wiper blades replaced; washer fluid topped up.,00:19:06,00:27:12,0.67,0.40,553.63,1184.30
+1059,779,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:28:25,00:28:33,0.28,0.91,819.15,358.73
+1060,780,5,Windshield wiper blades replaced; washer fluid topped up.,00:28:43,00:43:15,0.74,1.02,317.18,415.33
+1061,781,5,Battery terminals cleaned and coated; voltage test passed.,00:15:54,00:57:29,0.68,1.27,526.53,1497.29
+1062,782,5,Windshield wiper blades replaced; washer fluid topped up.,00:15:08,00:32:05,0.45,0.63,326.58,976.34
+1063,783,5,Cabin air filter replaced; A/C evaporator spray applied.,00:38:52,00:37:38,0.43,0.36,500.78,1404.75
+1064,784,5,Tire rotation performed; all four corners swapped per pattern.,00:17:39,00:45:37,0.45,0.76,874.38,1108.55
+1065,785,5,Battery terminals cleaned and coated; voltage test passed.,00:16:22,00:31:41,0.70,0.57,925.30,1121.04
+1066,786,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:20:12,00:27:44,0.41,1.22,553.98,1472.97
+1067,787,5,Cabin air filter replaced; A/C evaporator spray applied.,00:35:27,00:49:16,0.54,0.47,876.13,893.19
+1068,788,5,Engine bay wash and basic undercarriage inspection.,00:40:02,00:28:26,0.34,0.67,815.80,942.04
+1069,789,5,Tire rotation performed; all four corners swapped per pattern.,00:31:10,00:56:48,0.94,1.27,277.60,1322.63
+1070,790,5,Quick oil and filter change — standard 4L synthetic oil used.,00:16:55,00:49:21,0.44,1.05,813.04,469.78
+1071,791,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:25:59,00:34:35,0.54,0.34,372.41,1443.58
+1072,792,5,Windshield wiper blades replaced; washer fluid topped up.,00:17:31,00:43:42,1.00,0.49,147.98,334.67
+1073,793,5,"All fluid levels checked and topped up: coolant, brake, power steering.",00:40:59,00:24:24,0.34,0.46,870.08,456.47
+1074,794,5,Tire rotation performed; all four corners swapped per pattern.,00:22:43,00:24:51,0.37,0.38,764.00,1152.98
+1075,795,5,Engine bay wash and basic undercarriage inspection.,00:24:21,00:39:39,0.49,0.76,962.04,330.32
+1076,796,5,Tire rotation performed; all four corners swapped per pattern.,00:31:05,00:41:32,0.75,0.77,1100.68,832.04
+1077,797,5,Tire rotation performed; all four corners swapped per pattern.,00:18:19,00:48:20,0.97,1.14,401.62,1232.57
+1078,798,5,Windshield wiper blades replaced; washer fluid topped up.,00:29:47,00:28:37,0.51,0.83,392.11,156.32
+1079,799,5,Engine bay wash and basic undercarriage inspection.,00:15:10,00:22:14,0.35,1.02,1130.65,162.91
+1080,800,5,Engine bay wash and basic undercarriage inspection.,00:24:00,00:40:50,0.99,0.41,394.40,1131.50
+1081,801,5,Cabin air filter replaced; A/C evaporator spray applied.,00:18:54,00:23:42,0.49,0.49,882.78,708.64
+1082,802,5,Engine bay wash and basic undercarriage inspection.,00:17:47,00:32:09,0.96,0.65,1080.82,534.87
+1083,803,5,Engine bay wash and basic undercarriage inspection.,00:18:33,00:35:05,0.69,0.93,1105.71,675.00
+1084,804,5,Engine bay wash and basic undercarriage inspection.,00:24:21,00:34:06,0.44,0.88,960.62,1348.82
+1085,805,5,Quick oil and filter change — standard 4L synthetic oil used.,00:17:49,00:30:39,0.45,0.45,302.40,131.01
+1086,806,5,Battery terminals cleaned and coated; voltage test passed.,00:16:32,00:28:45,0.74,1.01,358.31,466.36
+1087,807,5,Engine bay wash and basic undercarriage inspection.,00:42:13,00:24:33,0.97,0.90,845.86,325.57
+1088,808,5,Tire rotation performed; all four corners swapped per pattern.,00:38:37,00:23:47,0.79,0.36,367.83,362.51
+1089,809,5,Tire rotation performed; all four corners swapped per pattern.,00:18:37,00:45:12,0.45,0.98,1003.87,1479.13
+1090,810,5,Windshield wiper blades replaced; washer fluid topped up.,00:15:31,00:42:18,0.50,1.19,500.96,770.63
+1091,811,5,Windshield wiper blades replaced; washer fluid topped up.,00:21:35,00:47:25,0.47,0.31,1119.32,374.74
+1092,812,5,Battery terminals cleaned and coated; voltage test passed.,00:36:55,00:30:55,0.97,0.77,361.79,548.04
+1093,813,5,Tire rotation performed; all four corners swapped per pattern.,00:39:53,00:23:40,0.31,0.57,859.02,1176.46
+1094,814,5,Quick oil and filter change — standard 4L synthetic oil used.,00:37:16,00:37:20,0.58,1.16,1022.61,1446.92
+1095,815,5,Quick oil and filter change — standard 4L synthetic oil used.,00:24:31,00:26:15,0.38,0.43,191.07,1299.41
+1096,816,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:40:01,00:39:45,0.78,0.60,716.03,712.43
+1097,817,5,Tire pressure adjusted to manufacturer spec; tread depth recorded.,00:30:20,00:43:07,0.68,1.03,1125.37,1457.90
+1098,818,5,Cabin air filter replaced; A/C evaporator spray applied.,00:22:51,00:34:21,0.97,0.58,569.25,243.20
+1099,819,5,Windshield wiper blades replaced; washer fluid topped up.,00:29:09,00:54:15,0.99,1.00,127.21,444.13
+1100,820,5,Engine bay wash and basic undercarriage inspection.,00:42:01,00:52:06,0.59,0.73,1071.81,731.01

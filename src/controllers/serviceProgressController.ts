@@ -70,6 +70,9 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
       time: formatTaskTime(row.completed_at),
       status: mapDbTaskStatus(row.task_status),
       scheduledDate: row.scheduled_date ? new Date(row.scheduled_date).toISOString() : undefined,
+      mechanicId: row.mechanic_id ?? undefined,
+      mechanicName: row.mechanic_name ?? undefined,
+      estimatedFinish: row.estimated_finish ? new Date(row.estimated_finish).toISOString() : undefined,
     }
     if (!sectionMap.has(sectionId)) sectionMap.set(sectionId, [])
     sectionMap.get(sectionId)!.push(task)
@@ -97,13 +100,14 @@ export async function getServiceProgressForJobOrder(jobOrderId: string): Promise
   return (await getServiceProgressById(jobOrderId)) ?? null
 }
 
-export async function scheduleTask(jobOrderId: string, taskId: string, scheduledDate: string | null, status: string) {
+export async function scheduleTask(jobOrderId: string, taskId: string, scheduledDate: string | null, status: string, mechanicId?: number, note?: string) {
+  const dbStatus = status === 'active' ? 'in_progress' : status;
   const res = await fetch(`/api/job-orders/${jobOrderId}/progress/schedule`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ taskId, scheduledDate, status }),
+    body: JSON.stringify({ taskId, scheduledDate, status: dbStatus, mechanicId, note }),
   })
   return await res.json()
 }

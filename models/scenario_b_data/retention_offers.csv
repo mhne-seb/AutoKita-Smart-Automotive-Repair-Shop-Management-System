@@ -1,0 +1,301 @@
+id,user_id,promo_code,offer_type,discount_value,description,issue_date,expiration_date,is_claimed,claimed_on_job_order_id
+1,13,FREE-1-D128,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-06-20,2026-07-20,False,
+2,229,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-13,2026-06-12,False,
+3,149,PCT-3-0DCE,percentage_discount,15.26,Enjoy a percentage off your total bill on your next visit.,2026-02-15,2026-03-17,False,
+4,216,FREE-4-AD37,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-03-22,2026-04-21,False,
+5,257,PCT-5-B486,percentage_discount,24.15,Enjoy a percentage off your total bill on your next visit.,2026-06-20,2026-07-20,False,
+6,440,FIX-6-6168,fixed_discount,1818.36,Use this voucher to get a fixed amount deducted from your total cost.,2026-06-15,2026-07-15,True,230
+7,280,VIP-7-4CE9,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-04-21,2026-05-21,False,
+8,457,VIP-8-0F3B,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-06-16,2026-07-16,False,
+9,435,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-20,2026-04-19,False,
+10,39,FREE-10-09A3,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-04-09,2026-05-09,False,
+11,365,FREE-11-18EF,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-07-12,2026-08-11,False,
+12,45,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-02-08,2026-03-10,False,
+13,129,PCT-13-9F4C,percentage_discount,12.08,Enjoy a percentage off your total bill on your next visit.,2026-02-27,2026-03-29,False,
+14,163,FREE-14-FC32,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-06-02,2026-07-02,False,
+15,493,FREE-15-6ECD,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-03-20,2026-04-19,False,
+16,109,PCT-16-69A5,percentage_discount,15.81,Enjoy a percentage off your total bill on your next visit.,2026-03-11,2026-04-10,False,
+17,481,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-16,2026-06-15,False,
+18,337,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-22,2026-04-21,False,
+19,301,PCT-19-3D2D,percentage_discount,13.52,Enjoy a percentage off your total bill on your next visit.,2026-05-13,2026-06-12,False,
+20,359,PCT-20-5B6D,percentage_discount,22.19,Enjoy a percentage off your total bill on your next visit.,2026-08-04,2026-09-03,False,
+21,181,VIP-21-2ABD,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-05-18,2026-06-17,False,
+22,45,FIX-22-683A,fixed_discount,1825.83,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-21,2026-04-20,False,
+23,71,VIP-23-ECAF,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-07-29,2026-08-28,True,215
+24,128,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-12,2026-04-11,False,
+25,183,PCT-25-A7C2,percentage_discount,15.87,Enjoy a percentage off your total bill on your next visit.,2026-07-28,2026-08-27,False,
+26,452,VIP-26-FE55,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-03-23,2026-04-22,False,
+27,116,FREE-27-485A,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-05-27,2026-06-26,False,
+28,370,PCT-28-93BD,percentage_discount,16.54,Enjoy a percentage off your total bill on your next visit.,2026-03-26,2026-04-25,True,323
+29,392,FIX-29-CE4B,fixed_discount,1143.22,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-24,2026-06-23,False,
+30,156,FIX-30-EC00,fixed_discount,714.34,Use this voucher to get a fixed amount deducted from your total cost.,2026-04-21,2026-05-21,True,35
+31,56,FIX-31-4A46,fixed_discount,1145.83,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-22,2026-04-21,True,78
+32,460,VIP-32-A220,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-05-30,2026-06-29,False,
+33,451,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-06-16,2026-07-16,False,
+34,473,PCT-34-DD92,percentage_discount,23.16,Enjoy a percentage off your total bill on your next visit.,2026-05-31,2026-06-30,False,
+35,202,FIX-35-1F3E,fixed_discount,1497.89,Use this voucher to get a fixed amount deducted from your total cost.,2026-02-22,2026-03-24,False,
+36,87,FREE-36-7E3D,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-05-02,2026-06-01,False,
+37,443,FIX-37-9251,fixed_discount,1298.33,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-19,2026-06-18,True,494
+38,68,PCT-38-5512,percentage_discount,18.51,Enjoy a percentage off your total bill on your next visit.,2026-06-08,2026-07-08,False,
+39,463,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-02-12,2026-03-14,True,12
+40,108,FREE-40-E524,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-04-30,2026-05-30,False,
+41,470,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-04-14,2026-05-14,False,
+42,440,FIX-42-6823,fixed_discount,1260.36,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-11,2026-06-10,True,203
+43,121,VIP-43-8251,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-06-29,2026-07-29,False,
+44,135,FREE-44-7D63,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-04-03,2026-05-03,False,
+45,490,VIP-45-FE50,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-02-18,2026-03-20,False,
+46,34,PCT-46-0B12,percentage_discount,11.72,Enjoy a percentage off your total bill on your next visit.,2026-06-01,2026-07-01,True,105
+47,401,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-30,2026-04-29,False,
+48,461,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-16,2026-04-15,False,
+49,488,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-04,2026-04-03,False,
+50,382,PCT-50-3BB6,percentage_discount,15.20,Enjoy a percentage off your total bill on your next visit.,2026-03-31,2026-04-30,True,115
+51,222,PCT-51-39C2,percentage_discount,21.42,Enjoy a percentage off your total bill on your next visit.,2026-06-07,2026-07-07,False,
+52,345,FIX-52-E90D,fixed_discount,1728.70,Use this voucher to get a fixed amount deducted from your total cost.,2026-07-31,2026-08-30,False,
+53,115,FIX-53-83BA,fixed_discount,1417.74,Use this voucher to get a fixed amount deducted from your total cost.,2026-06-12,2026-07-12,False,
+54,204,FREE-54-473E,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-04-06,2026-05-06,False,
+55,266,FREE-55-181D,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-02-28,2026-03-30,False,
+56,207,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-25,2026-04-24,True,13
+57,167,FREE-57-FC41,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-04-12,2026-05-12,False,
+58,83,FREE-58-5499,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-07-25,2026-08-24,True,143
+59,282,PCT-59-0A02,percentage_discount,23.17,Enjoy a percentage off your total bill on your next visit.,2026-05-12,2026-06-11,False,
+60,403,FREE-60-F488,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-06-04,2026-07-04,False,
+61,111,PCT-61-60FD,percentage_discount,13.36,Enjoy a percentage off your total bill on your next visit.,2026-07-28,2026-08-27,False,
+62,302,PCT-62-744A,percentage_discount,15.10,Enjoy a percentage off your total bill on your next visit.,2026-06-15,2026-07-15,False,
+63,91,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-02-16,2026-03-18,True,237
+64,36,VIP-64-40FB,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-07-10,2026-08-09,False,
+65,110,FREE-65-1B15,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-03-12,2026-04-11,False,
+66,242,VIP-66-335F,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-06-16,2026-07-16,False,
+67,48,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-19,2026-06-18,False,
+68,354,VIP-68-404C,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-07-19,2026-08-18,False,
+69,229,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-13,2026-06-12,True,197
+70,242,PCT-70-C233,percentage_discount,19.54,Enjoy a percentage off your total bill on your next visit.,2026-05-18,2026-06-17,False,
+71,439,PCT-71-1E46,percentage_discount,21.23,Enjoy a percentage off your total bill on your next visit.,2026-05-08,2026-06-07,False,
+72,387,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-04-17,2026-05-17,False,
+73,192,VIP-73-4037,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-02-20,2026-03-22,False,
+74,337,FIX-74-4728,fixed_discount,1958.74,Use this voucher to get a fixed amount deducted from your total cost.,2026-04-26,2026-05-26,True,367
+75,261,VIP-75-D70D,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-02-07,2026-03-09,False,
+76,423,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-08,2026-04-07,False,
+77,259,VIP-77-07E9,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-07-26,2026-08-25,False,
+78,306,VIP-78-720E,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-02-07,2026-03-09,False,
+79,316,FIX-79-0FFD,fixed_discount,1689.25,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-29,2026-04-28,True,292
+80,305,FIX-80-ABDD,fixed_discount,1780.01,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-28,2026-04-27,False,
+81,15,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-06-25,2026-07-25,False,
+82,482,PCT-82-F15A,percentage_discount,17.35,Enjoy a percentage off your total bill on your next visit.,2026-02-20,2026-03-22,False,
+83,383,PCT-83-BF16,percentage_discount,23.27,Enjoy a percentage off your total bill on your next visit.,2026-03-29,2026-04-28,True,65
+84,150,FIX-84-CF2E,fixed_discount,1185.21,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-30,2026-04-29,False,
+85,419,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-23,2026-06-22,True,165
+86,187,FREE-86-6FFA,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-05-03,2026-06-02,False,
+87,295,VIP-87-9479,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-03-18,2026-04-17,True,113
+88,132,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-07-28,2026-08-27,False,
+89,170,VIP-89-8718,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-04-17,2026-05-17,False,
+90,264,FIX-90-827F,fixed_discount,1135.59,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-02,2026-06-01,True,295
+91,250,FREE-91-ABD4,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-07-12,2026-08-11,False,
+92,397,FREE-92-86A9,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-04-19,2026-05-19,False,
+93,12,FREE-93-9624,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-04-16,2026-05-16,False,
+94,356,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-13,2026-06-12,False,
+95,215,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-30,2026-06-29,True,343
+96,248,FIX-96-B92B,fixed_discount,1253.73,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-09,2026-04-08,False,
+97,207,PCT-97-E54C,percentage_discount,15.24,Enjoy a percentage off your total bill on your next visit.,2026-04-05,2026-05-05,True,13
+98,200,FIX-98-D739,fixed_discount,1041.90,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-28,2026-04-27,False,
+99,119,FREE-99-8398,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-03-26,2026-04-25,False,
+100,288,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-05,2026-04-04,False,
+101,99,FIX-101-BCC7,fixed_discount,1664.38,Use this voucher to get a fixed amount deducted from your total cost.,2026-07-28,2026-08-27,True,54
+102,99,FIX-102-0B37,fixed_discount,1778.26,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-27,2026-06-26,True,54
+103,450,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-22,2026-06-21,False,
+104,209,FIX-104-BC57,fixed_discount,794.10,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-20,2026-04-19,False,
+105,239,PCT-105-DA7C,percentage_discount,15.45,Enjoy a percentage off your total bill on your next visit.,2026-07-14,2026-08-13,False,
+106,277,PCT-106-6DB2,percentage_discount,22.68,Enjoy a percentage off your total bill on your next visit.,2026-06-29,2026-07-29,True,377
+107,371,PCT-107-C26A,percentage_discount,15.26,Enjoy a percentage off your total bill on your next visit.,2026-05-10,2026-06-09,True,456
+108,195,FREE-108-E6C8,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-06-22,2026-07-22,False,
+109,186,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-14,2026-04-13,False,
+110,428,PCT-110-F34E,percentage_discount,15.38,Enjoy a percentage off your total bill on your next visit.,2026-04-08,2026-05-08,False,
+111,273,VIP-111-0E58,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-06-20,2026-07-20,False,
+112,171,VIP-112-3AAC,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-03-01,2026-03-31,False,
+113,134,FIX-113-96E0,fixed_discount,1784.69,Use this voucher to get a fixed amount deducted from your total cost.,2026-04-13,2026-05-13,True,380
+114,2,FREE-114-701E,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-05-04,2026-06-03,False,
+115,115,PCT-115-C646,percentage_discount,22.68,Enjoy a percentage off your total bill on your next visit.,2026-03-10,2026-04-09,False,
+116,89,PCT-116-D392,percentage_discount,14.95,Enjoy a percentage off your total bill on your next visit.,2026-06-26,2026-07-26,False,
+117,383,FIX-117-F9F7,fixed_discount,1129.20,Use this voucher to get a fixed amount deducted from your total cost.,2026-04-29,2026-05-29,True,65
+118,487,FIX-118-118D,fixed_discount,1035.90,Use this voucher to get a fixed amount deducted from your total cost.,2026-04-20,2026-05-20,False,
+119,333,PCT-119-3A00,percentage_discount,18.45,Enjoy a percentage off your total bill on your next visit.,2026-07-30,2026-08-29,False,
+120,193,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-06-16,2026-07-16,False,
+121,283,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-15,2026-06-14,True,97
+122,430,FIX-122-ECD8,fixed_discount,1437.25,Use this voucher to get a fixed amount deducted from your total cost.,2026-08-04,2026-09-03,False,
+123,423,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-02-17,2026-03-19,False,
+124,2,VIP-124-A347,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-08-01,2026-08-31,False,
+125,285,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-07-11,2026-08-10,False,
+126,7,PCT-126-4D2B,percentage_discount,11.74,Enjoy a percentage off your total bill on your next visit.,2026-03-16,2026-04-15,False,
+127,47,FIX-127-5553,fixed_discount,1141.32,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-05,2026-04-04,False,
+128,456,VIP-128-8D96,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-04-22,2026-05-22,False,
+129,306,FREE-129-F417,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-06-17,2026-07-17,False,
+130,392,VIP-130-1370,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-04-09,2026-05-09,False,
+131,425,PCT-131-44C1,percentage_discount,23.01,Enjoy a percentage off your total bill on your next visit.,2026-07-01,2026-07-31,False,
+132,342,PCT-132-99E3,percentage_discount,21.85,Enjoy a percentage off your total bill on your next visit.,2026-06-17,2026-07-17,False,
+133,35,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-02-27,2026-03-29,False,
+134,83,PCT-134-D0D5,percentage_discount,16.27,Enjoy a percentage off your total bill on your next visit.,2026-06-09,2026-07-09,True,484
+135,134,PCT-135-EC09,percentage_discount,24.29,Enjoy a percentage off your total bill on your next visit.,2026-07-08,2026-08-07,False,
+136,113,VIP-136-7F22,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-04-16,2026-05-16,False,
+137,348,FIX-137-07CC,fixed_discount,1977.30,Use this voucher to get a fixed amount deducted from your total cost.,2026-02-18,2026-03-20,True,123
+138,83,FREE-138-C461,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-04-06,2026-05-06,True,484
+139,165,PCT-139-3031,percentage_discount,12.84,Enjoy a percentage off your total bill on your next visit.,2026-05-19,2026-06-18,False,
+140,48,VIP-140-4D12,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-07-14,2026-08-13,False,
+141,219,FIX-141-F675,fixed_discount,737.29,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-30,2026-04-29,False,
+142,6,FREE-142-EB26,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-03-03,2026-04-02,False,
+143,256,PCT-143-69AE,percentage_discount,20.51,Enjoy a percentage off your total bill on your next visit.,2026-02-23,2026-03-25,False,
+144,415,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-05,2026-04-04,False,
+145,405,FREE-145-EC8B,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-05-27,2026-06-26,False,
+146,455,PCT-146-7B74,percentage_discount,13.94,Enjoy a percentage off your total bill on your next visit.,2026-04-02,2026-05-02,False,
+147,156,FIX-147-DDD4,fixed_discount,1495.57,Use this voucher to get a fixed amount deducted from your total cost.,2026-02-10,2026-03-12,False,
+148,416,FREE-148-71AC,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-05-12,2026-06-11,False,
+149,219,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-07-09,2026-08-08,True,220
+150,84,FIX-150-CACB,fixed_discount,938.71,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-23,2026-04-22,False,
+151,305,FREE-151-1086,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-07-22,2026-08-21,False,
+152,100,VIP-152-791D,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-05-18,2026-06-17,False,
+153,290,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-23,2026-06-22,True,23
+154,183,VIP-154-8226,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-06-01,2026-07-01,False,
+155,273,VIP-155-156F,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-04-03,2026-05-03,False,
+156,69,VIP-156-0076,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-04-16,2026-05-16,False,
+157,346,FREE-157-793D,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-03-14,2026-04-13,False,
+158,231,FIX-158-8F0D,fixed_discount,920.36,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-16,2026-04-15,False,
+159,348,FREE-159-164C,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-07-03,2026-08-02,False,
+160,489,VIP-160-01D2,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-03-16,2026-04-15,False,
+161,277,FIX-161-3BDD,fixed_discount,1806.44,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-04,2026-04-03,False,
+162,43,FIX-162-43EE,fixed_discount,906.25,Use this voucher to get a fixed amount deducted from your total cost.,2026-06-17,2026-07-17,True,98
+163,197,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-08-03,2026-09-02,False,
+164,162,FIX-164-9EF1,fixed_discount,1740.93,Use this voucher to get a fixed amount deducted from your total cost.,2026-06-16,2026-07-16,False,
+165,182,FREE-165-C439,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-03-26,2026-04-25,False,
+166,103,FIX-166-CD0A,fixed_discount,926.50,Use this voucher to get a fixed amount deducted from your total cost.,2026-06-14,2026-07-14,False,
+167,240,FIX-167-8C00,fixed_discount,752.24,Use this voucher to get a fixed amount deducted from your total cost.,2026-06-28,2026-07-28,False,
+168,191,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-06-21,2026-07-21,False,
+169,455,PCT-169-EB15,percentage_discount,16.11,Enjoy a percentage off your total bill on your next visit.,2026-02-19,2026-03-21,False,
+170,26,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-02-16,2026-03-18,False,
+171,458,FIX-171-960E,fixed_discount,1574.22,Use this voucher to get a fixed amount deducted from your total cost.,2026-02-16,2026-03-18,False,
+172,413,VIP-172-0EB2,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-06-24,2026-07-24,True,282
+173,18,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-04-12,2026-05-12,True,128
+174,273,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-07-24,2026-08-23,False,
+175,204,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-04-26,2026-05-26,True,452
+176,445,VIP-176-E192,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-02-07,2026-03-09,True,386
+177,280,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-06-03,2026-07-03,False,
+178,482,FIX-178-8AED,fixed_discount,508.52,Use this voucher to get a fixed amount deducted from your total cost.,2026-06-17,2026-07-17,False,
+179,279,FIX-179-186D,fixed_discount,1757.83,Use this voucher to get a fixed amount deducted from your total cost.,2026-02-12,2026-03-14,False,
+180,130,FIX-180-7DA2,fixed_discount,915.43,Use this voucher to get a fixed amount deducted from your total cost.,2026-07-07,2026-08-06,False,
+181,340,PCT-181-8302,percentage_discount,21.75,Enjoy a percentage off your total bill on your next visit.,2026-06-02,2026-07-02,True,279
+182,27,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-04-08,2026-05-08,True,46
+183,482,VIP-183-B550,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-05-08,2026-06-07,False,
+184,144,PCT-184-5123,percentage_discount,20.00,Enjoy a percentage off your total bill on your next visit.,2026-07-03,2026-08-02,False,
+185,171,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-24,2026-04-23,False,
+186,268,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-06-07,2026-07-07,False,
+187,228,PCT-187-BFBB,percentage_discount,12.14,Enjoy a percentage off your total bill on your next visit.,2026-06-10,2026-07-10,False,
+188,21,VIP-188-2A8E,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-02-27,2026-03-29,True,118
+189,74,FREE-189-F141,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-06-21,2026-07-21,False,
+190,34,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-07-10,2026-08-09,False,
+191,263,VIP-191-7764,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-05-18,2026-06-17,False,
+192,213,FREE-192-09CC,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-03-15,2026-04-14,False,
+193,457,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-02-21,2026-03-23,False,
+194,49,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-12,2026-06-11,True,96
+195,119,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-08,2026-06-07,False,
+196,110,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-07-28,2026-08-27,False,
+197,285,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-06-29,2026-07-29,False,
+198,393,FIX-198-46D0,fixed_discount,1224.88,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-26,2026-06-25,False,
+199,292,FIX-199-131C,fixed_discount,1185.47,Use this voucher to get a fixed amount deducted from your total cost.,2026-06-13,2026-07-13,True,420
+200,491,VIP-200-2FA8,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-04-14,2026-05-14,False,
+201,336,VIP-201-A750,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-03-25,2026-04-24,True,239
+202,474,FREE-202-384D,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-05-12,2026-06-11,True,87
+203,250,VIP-203-1A22,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-02-20,2026-03-22,False,
+204,73,VIP-204-CC91,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-04-17,2026-05-17,False,
+205,330,VIP-205-991A,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-03-18,2026-04-17,False,
+206,328,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-06-23,2026-07-23,False,
+207,239,FREE-207-8C27,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-08-04,2026-09-03,True,346
+208,65,FIX-208-293E,fixed_discount,879.85,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-01,2026-03-31,False,
+209,5,FIX-209-32FC,fixed_discount,1781.79,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-28,2026-06-27,False,
+210,205,FREE-210-4622,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-03-12,2026-04-11,False,
+211,473,FIX-211-1740,fixed_discount,1016.37,Use this voucher to get a fixed amount deducted from your total cost.,2026-04-30,2026-05-30,False,
+212,42,PCT-212-FB78,percentage_discount,15.89,Enjoy a percentage off your total bill on your next visit.,2026-04-09,2026-05-09,False,
+213,242,FIX-213-7CB9,fixed_discount,1928.28,Use this voucher to get a fixed amount deducted from your total cost.,2026-08-01,2026-08-31,False,
+214,446,PCT-214-9AC3,percentage_discount,11.29,Enjoy a percentage off your total bill on your next visit.,2026-05-05,2026-06-04,False,
+215,339,FIX-215-63B1,fixed_discount,1095.10,Use this voucher to get a fixed amount deducted from your total cost.,2026-07-14,2026-08-13,True,360
+216,178,PCT-216-335F,percentage_discount,23.07,Enjoy a percentage off your total bill on your next visit.,2026-03-16,2026-04-15,False,
+217,49,FIX-217-D52A,fixed_discount,915.23,Use this voucher to get a fixed amount deducted from your total cost.,2026-02-27,2026-03-29,False,
+218,381,PCT-218-5B73,percentage_discount,21.36,Enjoy a percentage off your total bill on your next visit.,2026-07-02,2026-08-01,False,
+219,118,FREE-219-84E6,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-06-10,2026-07-10,False,
+220,310,VIP-220-3868,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-04-02,2026-05-02,True,108
+221,53,PCT-221-FFEC,percentage_discount,20.31,Enjoy a percentage off your total bill on your next visit.,2026-02-21,2026-03-23,False,
+222,457,FIX-222-7C3C,fixed_discount,791.48,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-11,2026-06-10,False,
+223,91,FIX-223-AB9F,fixed_discount,1472.34,Use this voucher to get a fixed amount deducted from your total cost.,2026-04-13,2026-05-13,False,
+224,465,PCT-224-E70B,percentage_discount,18.67,Enjoy a percentage off your total bill on your next visit.,2026-04-01,2026-05-01,False,
+225,425,PCT-225-2C1C,percentage_discount,20.29,Enjoy a percentage off your total bill on your next visit.,2026-05-11,2026-06-10,False,
+226,121,PCT-226-39EF,percentage_discount,20.99,Enjoy a percentage off your total bill on your next visit.,2026-05-29,2026-06-28,False,
+227,343,FIX-227-FA7B,fixed_discount,1809.99,Use this voucher to get a fixed amount deducted from your total cost.,2026-07-17,2026-08-16,False,
+228,489,PCT-228-9B2C,percentage_discount,19.76,Enjoy a percentage off your total bill on your next visit.,2026-05-03,2026-06-02,True,369
+229,365,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-10,2026-06-09,False,
+230,120,FREE-230-3C42,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-04-28,2026-05-28,False,
+231,435,PCT-231-4397,percentage_discount,21.89,Enjoy a percentage off your total bill on your next visit.,2026-05-07,2026-06-06,True,482
+232,487,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-17,2026-04-16,False,
+233,343,PCT-233-C6CA,percentage_discount,18.75,Enjoy a percentage off your total bill on your next visit.,2026-07-14,2026-08-13,False,
+234,332,PCT-234-0E05,percentage_discount,13.90,Enjoy a percentage off your total bill on your next visit.,2026-04-06,2026-05-06,False,
+235,312,FREE-235-0E56,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-04-29,2026-05-29,False,
+236,343,FIX-236-C396,fixed_discount,678.81,Use this voucher to get a fixed amount deducted from your total cost.,2026-04-05,2026-05-05,False,
+237,276,FREE-237-25E8,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-07-17,2026-08-16,False,
+238,213,FREE-238-4492,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-05-31,2026-06-30,False,
+239,220,FREE-239-C09F,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-03-23,2026-04-22,False,
+240,445,PCT-240-A84C,percentage_discount,13.22,Enjoy a percentage off your total bill on your next visit.,2026-03-07,2026-04-06,True,319
+241,72,FIX-241-B52A,fixed_discount,841.22,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-06,2026-06-05,False,
+242,300,FREE-242-254B,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-06-02,2026-07-02,True,331
+243,376,VIP-243-7C74,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-02-16,2026-03-18,False,
+244,101,FIX-244-93AA,fixed_discount,822.69,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-18,2026-04-17,False,
+245,162,PCT-245-E6BD,percentage_discount,22.29,Enjoy a percentage off your total bill on your next visit.,2026-02-20,2026-03-22,False,
+246,447,FREE-246-400D,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-06-06,2026-07-06,False,
+247,176,PCT-247-3827,percentage_discount,21.93,Enjoy a percentage off your total bill on your next visit.,2026-07-03,2026-08-02,True,76
+248,61,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-07-24,2026-08-23,False,
+249,156,PCT-249-948C,percentage_discount,21.43,Enjoy a percentage off your total bill on your next visit.,2026-05-05,2026-06-04,False,
+250,459,FREE-250-BD2F,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-05-31,2026-06-30,True,221
+251,336,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-07-04,2026-08-03,True,239
+252,300,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-26,2026-04-25,False,
+253,412,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-02,2026-06-01,True,321
+254,408,PCT-254-EC50,percentage_discount,20.94,Enjoy a percentage off your total bill on your next visit.,2026-05-04,2026-06-03,True,261
+255,103,VIP-255-199E,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-04-13,2026-05-13,False,
+256,448,FREE-256-33B4,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-07-08,2026-08-07,False,
+257,75,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-06-19,2026-07-19,False,
+258,385,FIX-258-958E,fixed_discount,899.50,Use this voucher to get a fixed amount deducted from your total cost.,2026-04-06,2026-05-06,False,
+259,475,VIP-259-37EF,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-05-01,2026-05-31,False,
+260,96,FREE-260-608D,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-06-26,2026-07-26,False,
+261,138,FIX-261-DFB0,fixed_discount,775.23,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-24,2026-06-23,False,
+262,227,PCT-262-522D,percentage_discount,16.80,Enjoy a percentage off your total bill on your next visit.,2026-07-29,2026-08-28,False,
+263,345,FIX-263-07B3,fixed_discount,947.89,Use this voucher to get a fixed amount deducted from your total cost.,2026-07-25,2026-08-24,False,
+264,226,FIX-264-1C94,fixed_discount,937.98,Use this voucher to get a fixed amount deducted from your total cost.,2026-07-10,2026-08-09,True,70
+265,84,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-06-14,2026-07-14,False,
+266,17,FIX-266-24FC,fixed_discount,652.69,Use this voucher to get a fixed amount deducted from your total cost.,2026-02-11,2026-03-13,True,409
+267,462,FIX-267-319A,fixed_discount,1605.22,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-05,2026-04-04,False,
+268,274,FREE-268-1C8E,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-02-23,2026-03-25,False,
+269,119,FREE-269-530C,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-04-26,2026-05-26,False,
+270,258,PCT-270-B285,percentage_discount,21.63,Enjoy a percentage off your total bill on your next visit.,2026-07-27,2026-08-26,False,
+271,78,FIX-271-8152,fixed_discount,909.32,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-17,2026-06-16,True,483
+272,110,FIX-272-9BF4,fixed_discount,1941.48,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-20,2026-04-19,False,
+273,144,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-02,2026-06-01,False,
+274,276,PCT-274-3E1E,percentage_discount,21.75,Enjoy a percentage off your total bill on your next visit.,2026-05-02,2026-06-01,False,
+275,334,FIX-275-AA0E,fixed_discount,801.35,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-08,2026-06-07,False,
+276,417,PCT-276-65CA,percentage_discount,16.01,Enjoy a percentage off your total bill on your next visit.,2026-07-21,2026-08-20,True,338
+277,135,FIX-277-6B70,fixed_discount,915.65,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-30,2026-06-29,False,
+278,332,FIX-278-3F79,fixed_discount,838.93,Use this voucher to get a fixed amount deducted from your total cost.,2026-07-30,2026-08-29,False,
+279,321,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-02-17,2026-03-19,True,342
+280,85,VIP-280-B422,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-05-15,2026-06-14,True,431
+281,347,FIX-281-A8E8,fixed_discount,640.70,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-11,2026-06-10,False,
+282,326,FIX-282-F9CE,fixed_discount,1199.05,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-08,2026-04-07,False,
+283,346,VIP-283-F5AA,loyalty_reward,0.00,Thank you for your continued trust! Enjoy this exclusive loyalty reward.,2026-05-25,2026-06-24,False,
+284,219,FIX-284-4FE4,fixed_discount,635.31,Use this voucher to get a fixed amount deducted from your total cost.,2026-04-27,2026-05-27,True,220
+285,284,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-08-05,2026-09-04,False,
+286,497,FIX-286-594C,fixed_discount,1132.26,Use this voucher to get a fixed amount deducted from your total cost.,2026-07-06,2026-08-05,False,
+287,18,FREE-287-CFC2,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-06-29,2026-07-29,True,128
+288,30,FREE-288-1EBF,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-07-26,2026-08-25,False,
+289,283,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-05-28,2026-06-27,False,
+290,90,PCT-290-3EA8,percentage_discount,21.25,Enjoy a percentage off your total bill on your next visit.,2026-07-31,2026-08-30,True,501
+291,65,FREE-291-5ADE,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-04-30,2026-05-30,False,
+292,140,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-02-22,2026-03-24,False,
+293,213,FIX-293-2CB6,fixed_discount,1695.30,Use this voucher to get a fixed amount deducted from your total cost.,2026-05-08,2026-06-07,False,
+294,492,FIX-294-1C64,fixed_discount,1116.67,Use this voucher to get a fixed amount deducted from your total cost.,2026-04-28,2026-05-28,False,
+295,479,,service_reminder,0.00,Friendly reminder: Your vehicle is due for its periodic maintenance.,2026-03-20,2026-04-19,False,
+296,93,FIX-296-E347,fixed_discount,1447.10,Use this voucher to get a fixed amount deducted from your total cost.,2026-03-29,2026-04-28,True,49
+297,16,PCT-297-1DAC,percentage_discount,13.91,Enjoy a percentage off your total bill on your next visit.,2026-02-28,2026-03-30,True,91
+298,205,FREE-298-B4A8,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-04-08,2026-05-08,False,
+299,341,PCT-299-F823,percentage_discount,16.44,Enjoy a percentage off your total bill on your next visit.,2026-06-15,2026-07-15,False,
+300,387,FREE-300-1D56,free_service,0.00,Come in for a complimentary multipoint vehicle inspection.,2026-05-22,2026-06-21,True,277

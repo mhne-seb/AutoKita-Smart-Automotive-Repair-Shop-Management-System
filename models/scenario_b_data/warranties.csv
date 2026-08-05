@@ -1,0 +1,401 @@
+id,job_order_id,coverage_description,start_date,expiration_date,status
+1,278,30-day limited warranty on workmanship and minor adjustments.,2025-11-11,2026-05-10,expired
+2,207,1-year comprehensive warranty on engine overhaul labor and parts.,2026-07-20,2026-10-18,voided
+3,145,1-year warranty on all installed electrical parts and wiring.,2025-11-04,2026-11-04,active
+4,427,1-year comprehensive warranty on engine overhaul labor and parts.,2026-03-21,2026-09-17,active
+5,482,1-year comprehensive warranty on engine overhaul labor and parts.,2025-11-21,2026-02-19,expired
+6,407,6-month warranty on air conditioning compressor and freon leaks.,2026-05-22,2027-05-22,active
+7,79,1-year warranty on all installed electrical parts and wiring.,2026-07-06,2027-07-06,claimed
+8,372,1-year warranty on all installed electrical parts and wiring.,2026-02-08,2026-05-09,voided
+9,95,90-day warranty on replaced suspension components.,2025-08-16,2026-02-12,expired
+10,20,1-year warranty on all installed electrical parts and wiring.,2026-03-20,2026-09-16,active
+11,37,1-year comprehensive warranty on engine overhaul labor and parts.,2026-02-25,2026-08-24,nearing_expiration
+12,284,1-year warranty on all installed electrical parts and wiring.,2025-11-11,2026-11-11,active
+13,214,1-year comprehensive warranty on engine overhaul labor and parts.,2025-11-25,2026-05-24,expired
+14,21,90-day warranty on replaced suspension components.,2025-08-23,2025-11-21,expired
+15,294,1-year comprehensive warranty on engine overhaul labor and parts.,2025-12-07,2026-06-05,expired
+16,270,6-month warranty on air conditioning compressor and freon leaks.,2025-10-20,2026-10-20,active
+17,351,90-day warranty on replaced suspension components.,2026-07-03,2026-10-01,voided
+18,390,1-year warranty on all installed electrical parts and wiring.,2026-03-06,2026-09-02,nearing_expiration
+19,50,1-year comprehensive warranty on engine overhaul labor and parts.,2026-04-11,2027-04-11,active
+20,122,6-month warranty on air conditioning compressor and freon leaks.,2025-11-22,2026-11-22,active
+21,341,1-year warranty on all installed electrical parts and wiring.,2026-03-26,2026-04-25,voided
+22,301,90-day warranty on replaced suspension components.,2026-05-26,2026-08-24,nearing_expiration
+23,464,30-day limited warranty on workmanship and minor adjustments.,2025-12-27,2026-06-25,expired
+24,367,30-day limited warranty on workmanship and minor adjustments.,2026-05-26,2026-11-22,active
+25,360,6-month warranty on air conditioning compressor and freon leaks.,2026-05-09,2027-05-09,active
+26,462,90-day warranty on replaced suspension components.,2026-01-30,2026-03-01,expired
+27,399,90-day warranty on replaced suspension components.,2026-07-01,2026-07-31,expired
+28,100,30-day limited warranty on workmanship and minor adjustments.,2025-10-23,2026-04-21,expired
+29,398,1-year comprehensive warranty on engine overhaul labor and parts.,2026-02-24,2026-03-26,expired
+30,203,1-year comprehensive warranty on engine overhaul labor and parts.,2025-12-28,2026-01-27,expired
+31,38,90-day warranty on replaced suspension components.,2025-08-20,2026-02-16,expired
+32,114,1-year warranty on all installed electrical parts and wiring.,2026-06-20,2026-12-17,active
+33,15,90-day warranty on replaced suspension components.,2026-07-24,2027-01-20,active
+34,463,6-month warranty on air conditioning compressor and freon leaks.,2026-06-17,2026-07-17,expired
+35,259,1-year warranty on all installed electrical parts and wiring.,2026-04-29,2026-10-26,active
+36,165,90-day warranty on replaced suspension components.,2026-03-03,2027-03-03,active
+37,251,30-day limited warranty on workmanship and minor adjustments.,2026-07-21,2027-01-17,active
+38,422,30-day limited warranty on workmanship and minor adjustments.,2026-01-05,2027-01-05,active
+39,98,1-year comprehensive warranty on engine overhaul labor and parts.,2026-05-07,2026-08-05,nearing_expiration
+40,344,6-month warranty on air conditioning compressor and freon leaks.,2025-10-23,2026-04-21,expired
+41,51,1-year warranty on all installed electrical parts and wiring.,2026-03-02,2026-04-01,claimed
+42,342,6-month warranty on air conditioning compressor and freon leaks.,2026-01-20,2026-04-20,expired
+43,68,1-year warranty on all installed electrical parts and wiring.,2026-02-03,2026-05-04,expired
+44,339,90-day warranty on replaced suspension components.,2026-01-10,2026-02-09,expired
+45,183,1-year comprehensive warranty on engine overhaul labor and parts.,2026-01-28,2026-07-27,expired
+46,381,1-year warranty on all installed electrical parts and wiring.,2025-12-01,2025-12-31,expired
+47,155,1-year warranty on all installed electrical parts and wiring.,2026-04-15,2026-10-12,active
+48,394,6-month warranty on air conditioning compressor and freon leaks.,2026-05-18,2027-05-18,active
+49,228,1-year comprehensive warranty on engine overhaul labor and parts.,2026-02-14,2027-02-14,active
+50,392,1-year warranty on all installed electrical parts and wiring.,2026-04-24,2026-05-24,expired
+51,509,90-day warranty on replaced suspension components.,2026-07-16,2027-07-16,active
+52,125,6-month warranty on air conditioning compressor and freon leaks.,2026-03-17,2026-09-13,active
+53,31,1-year comprehensive warranty on engine overhaul labor and parts.,2026-07-25,2027-01-21,claimed
+54,126,1-year warranty on all installed electrical parts and wiring.,2026-01-27,2027-01-27,active
+55,21,6-month warranty on air conditioning compressor and freon leaks.,2025-08-23,2026-02-19,expired
+56,376,1-year warranty on all installed electrical parts and wiring.,2026-01-13,2026-07-12,expired
+57,455,1-year warranty on all installed electrical parts and wiring.,2025-11-16,2026-11-16,active
+58,345,6-month warranty on air conditioning compressor and freon leaks.,2026-03-28,2026-06-26,claimed
+59,272,6-month warranty on air conditioning compressor and freon leaks.,2025-08-12,2026-08-12,nearing_expiration
+60,482,90-day warranty on replaced suspension components.,2025-11-21,2026-02-19,claimed
+61,77,1-year comprehensive warranty on engine overhaul labor and parts.,2025-12-11,2026-06-09,expired
+62,251,1-year warranty on all installed electrical parts and wiring.,2026-07-21,2026-10-19,active
+63,120,6-month warranty on air conditioning compressor and freon leaks.,2026-07-27,2026-10-25,active
+64,189,1-year warranty on all installed electrical parts and wiring.,2026-05-17,2026-06-16,expired
+65,482,90-day warranty on replaced suspension components.,2025-11-21,2026-02-19,expired
+66,203,6-month warranty on air conditioning compressor and freon leaks.,2025-12-28,2026-06-26,expired
+67,73,1-year comprehensive warranty on engine overhaul labor and parts.,2025-10-29,2026-10-29,active
+68,474,6-month warranty on air conditioning compressor and freon leaks.,2026-06-28,2026-12-25,active
+69,114,30-day limited warranty on workmanship and minor adjustments.,2026-06-20,2026-12-17,active
+70,313,1-year comprehensive warranty on engine overhaul labor and parts.,2026-02-22,2026-03-24,expired
+71,343,6-month warranty on air conditioning compressor and freon leaks.,2025-09-13,2026-09-13,active
+72,252,6-month warranty on air conditioning compressor and freon leaks.,2025-12-03,2026-01-02,expired
+73,75,30-day limited warranty on workmanship and minor adjustments.,2026-05-28,2026-06-27,expired
+74,293,6-month warranty on air conditioning compressor and freon leaks.,2026-02-22,2026-05-23,expired
+75,267,1-year comprehensive warranty on engine overhaul labor and parts.,2025-11-26,2025-12-26,claimed
+76,334,90-day warranty on replaced suspension components.,2026-04-29,2026-05-29,expired
+77,24,1-year warranty on all installed electrical parts and wiring.,2025-10-08,2026-04-06,expired
+78,79,1-year comprehensive warranty on engine overhaul labor and parts.,2026-07-06,2026-10-04,active
+79,339,30-day limited warranty on workmanship and minor adjustments.,2026-01-10,2026-07-09,expired
+80,369,6-month warranty on air conditioning compressor and freon leaks.,2025-11-29,2026-05-28,expired
+81,248,90-day warranty on replaced suspension components.,2026-07-04,2026-08-03,expired
+82,225,1-year comprehensive warranty on engine overhaul labor and parts.,2025-10-03,2025-11-02,claimed
+83,73,6-month warranty on air conditioning compressor and freon leaks.,2025-10-29,2026-10-29,voided
+84,395,1-year comprehensive warranty on engine overhaul labor and parts.,2025-08-15,2026-08-15,nearing_expiration
+85,395,30-day limited warranty on workmanship and minor adjustments.,2025-08-15,2025-09-14,expired
+86,372,90-day warranty on replaced suspension components.,2026-02-08,2026-08-07,nearing_expiration
+87,31,30-day limited warranty on workmanship and minor adjustments.,2026-07-25,2027-01-21,active
+88,442,90-day warranty on replaced suspension components.,2026-03-12,2026-06-10,expired
+89,433,1-year comprehensive warranty on engine overhaul labor and parts.,2026-01-10,2027-01-10,active
+90,97,30-day limited warranty on workmanship and minor adjustments.,2025-08-22,2026-08-22,nearing_expiration
+91,454,6-month warranty on air conditioning compressor and freon leaks.,2026-02-27,2027-02-27,active
+92,83,1-year comprehensive warranty on engine overhaul labor and parts.,2025-08-07,2025-09-06,expired
+93,451,1-year comprehensive warranty on engine overhaul labor and parts.,2025-09-21,2026-03-20,expired
+94,281,1-year comprehensive warranty on engine overhaul labor and parts.,2026-03-04,2026-04-03,expired
+95,316,1-year comprehensive warranty on engine overhaul labor and parts.,2026-01-28,2026-07-27,expired
+96,110,6-month warranty on air conditioning compressor and freon leaks.,2025-12-22,2026-01-21,expired
+97,458,30-day limited warranty on workmanship and minor adjustments.,2026-02-26,2026-03-28,claimed
+98,435,6-month warranty on air conditioning compressor and freon leaks.,2025-08-12,2026-02-08,expired
+99,266,1-year comprehensive warranty on engine overhaul labor and parts.,2025-12-14,2026-01-13,expired
+100,11,1-year warranty on all installed electrical parts and wiring.,2025-10-17,2026-01-15,expired
+101,176,1-year comprehensive warranty on engine overhaul labor and parts.,2026-06-28,2026-09-26,active
+102,26,90-day warranty on replaced suspension components.,2026-06-30,2026-09-28,active
+103,295,30-day limited warranty on workmanship and minor adjustments.,2026-06-23,2026-12-20,active
+104,5,6-month warranty on air conditioning compressor and freon leaks.,2025-09-25,2025-12-24,expired
+105,237,90-day warranty on replaced suspension components.,2025-11-20,2026-11-20,active
+106,185,30-day limited warranty on workmanship and minor adjustments.,2025-11-28,2026-05-27,expired
+107,335,6-month warranty on air conditioning compressor and freon leaks.,2026-05-05,2026-06-04,expired
+108,490,1-year warranty on all installed electrical parts and wiring.,2025-12-25,2026-03-25,expired
+109,185,90-day warranty on replaced suspension components.,2025-11-28,2025-12-28,expired
+110,343,1-year comprehensive warranty on engine overhaul labor and parts.,2025-09-13,2026-03-12,expired
+111,190,6-month warranty on air conditioning compressor and freon leaks.,2025-08-22,2025-11-20,voided
+112,289,1-year warranty on all installed electrical parts and wiring.,2026-06-29,2027-06-29,voided
+113,364,1-year comprehensive warranty on engine overhaul labor and parts.,2026-06-12,2026-07-12,expired
+114,113,6-month warranty on air conditioning compressor and freon leaks.,2025-11-30,2026-05-29,expired
+115,425,6-month warranty on air conditioning compressor and freon leaks.,2026-01-18,2026-04-18,expired
+116,403,6-month warranty on air conditioning compressor and freon leaks.,2025-12-18,2026-12-18,active
+117,361,90-day warranty on replaced suspension components.,2025-09-02,2025-12-01,expired
+118,241,1-year warranty on all installed electrical parts and wiring.,2026-05-17,2026-06-16,expired
+119,122,90-day warranty on replaced suspension components.,2025-11-22,2026-02-20,claimed
+120,33,1-year comprehensive warranty on engine overhaul labor and parts.,2025-12-24,2026-03-24,expired
+121,463,1-year comprehensive warranty on engine overhaul labor and parts.,2026-06-17,2026-09-15,active
+122,389,1-year warranty on all installed electrical parts and wiring.,2026-03-14,2027-03-14,active
+123,415,1-year warranty on all installed electrical parts and wiring.,2026-06-27,2026-07-27,expired
+124,287,1-year comprehensive warranty on engine overhaul labor and parts.,2026-07-17,2027-01-13,active
+125,273,30-day limited warranty on workmanship and minor adjustments.,2026-05-28,2026-06-27,claimed
+126,91,1-year warranty on all installed electrical parts and wiring.,2026-01-30,2027-01-30,claimed
+127,68,1-year comprehensive warranty on engine overhaul labor and parts.,2026-02-03,2027-02-03,active
+128,47,1-year comprehensive warranty on engine overhaul labor and parts.,2026-02-15,2026-03-17,expired
+129,450,1-year warranty on all installed electrical parts and wiring.,2025-12-26,2026-06-24,expired
+130,288,6-month warranty on air conditioning compressor and freon leaks.,2025-09-02,2025-10-02,expired
+131,299,90-day warranty on replaced suspension components.,2025-08-09,2026-08-09,nearing_expiration
+132,418,6-month warranty on air conditioning compressor and freon leaks.,2025-12-07,2026-06-05,expired
+133,379,6-month warranty on air conditioning compressor and freon leaks.,2026-04-27,2026-05-27,expired
+134,481,6-month warranty on air conditioning compressor and freon leaks.,2025-08-13,2025-11-11,expired
+135,35,90-day warranty on replaced suspension components.,2025-09-23,2026-03-22,expired
+136,103,1-year warranty on all installed electrical parts and wiring.,2025-11-19,2025-12-19,expired
+137,306,6-month warranty on air conditioning compressor and freon leaks.,2026-02-14,2026-08-13,nearing_expiration
+138,54,30-day limited warranty on workmanship and minor adjustments.,2026-04-20,2026-07-19,expired
+139,53,30-day limited warranty on workmanship and minor adjustments.,2026-01-01,2026-06-30,expired
+140,71,30-day limited warranty on workmanship and minor adjustments.,2026-03-28,2027-03-28,active
+141,289,90-day warranty on replaced suspension components.,2026-06-29,2027-06-29,active
+142,142,1-year warranty on all installed electrical parts and wiring.,2026-01-08,2026-04-08,claimed
+143,391,6-month warranty on air conditioning compressor and freon leaks.,2025-11-16,2026-11-16,active
+144,207,90-day warranty on replaced suspension components.,2026-07-20,2026-08-19,nearing_expiration
+145,327,1-year comprehensive warranty on engine overhaul labor and parts.,2026-05-16,2026-06-15,expired
+146,255,1-year comprehensive warranty on engine overhaul labor and parts.,2026-01-17,2026-07-16,expired
+147,253,30-day limited warranty on workmanship and minor adjustments.,2025-12-06,2026-01-05,expired
+148,325,6-month warranty on air conditioning compressor and freon leaks.,2025-11-17,2025-12-17,expired
+149,135,1-year warranty on all installed electrical parts and wiring.,2026-01-24,2026-02-23,expired
+150,464,30-day limited warranty on workmanship and minor adjustments.,2025-12-27,2026-01-26,voided
+151,479,30-day limited warranty on workmanship and minor adjustments.,2026-05-27,2026-06-26,voided
+152,315,1-year warranty on all installed electrical parts and wiring.,2025-12-25,2026-06-23,expired
+153,333,6-month warranty on air conditioning compressor and freon leaks.,2026-07-24,2027-01-20,active
+154,362,1-year warranty on all installed electrical parts and wiring.,2025-08-12,2026-02-08,expired
+155,339,6-month warranty on air conditioning compressor and freon leaks.,2026-01-10,2027-01-10,active
+156,461,90-day warranty on replaced suspension components.,2025-11-14,2026-11-14,active
+157,404,6-month warranty on air conditioning compressor and freon leaks.,2026-02-07,2026-05-08,expired
+158,324,1-year warranty on all installed electrical parts and wiring.,2025-08-31,2026-08-31,nearing_expiration
+159,107,1-year comprehensive warranty on engine overhaul labor and parts.,2025-11-18,2026-02-16,claimed
+160,210,1-year warranty on all installed electrical parts and wiring.,2025-10-02,2026-10-02,active
+161,123,1-year comprehensive warranty on engine overhaul labor and parts.,2025-09-05,2025-12-04,expired
+162,253,1-year comprehensive warranty on engine overhaul labor and parts.,2025-12-06,2026-06-04,expired
+163,215,30-day limited warranty on workmanship and minor adjustments.,2026-02-10,2026-08-09,claimed
+164,497,1-year comprehensive warranty on engine overhaul labor and parts.,2025-12-03,2026-01-02,expired
+165,377,30-day limited warranty on workmanship and minor adjustments.,2025-11-19,2026-11-19,active
+166,165,1-year comprehensive warranty on engine overhaul labor and parts.,2026-03-03,2026-08-30,nearing_expiration
+167,311,90-day warranty on replaced suspension components.,2026-02-17,2027-02-17,active
+168,397,1-year warranty on all installed electrical parts and wiring.,2025-10-27,2026-10-27,active
+169,29,6-month warranty on air conditioning compressor and freon leaks.,2025-10-19,2025-11-18,expired
+170,24,90-day warranty on replaced suspension components.,2025-10-08,2025-11-07,expired
+171,119,1-year warranty on all installed electrical parts and wiring.,2025-08-07,2025-09-06,expired
+172,444,6-month warranty on air conditioning compressor and freon leaks.,2026-06-25,2026-09-23,active
+173,173,1-year comprehensive warranty on engine overhaul labor and parts.,2025-10-08,2025-11-07,voided
+174,133,1-year warranty on all installed electrical parts and wiring.,2025-12-24,2026-03-24,expired
+175,198,1-year comprehensive warranty on engine overhaul labor and parts.,2026-05-04,2027-05-04,claimed
+176,2,30-day limited warranty on workmanship and minor adjustments.,2026-02-19,2026-08-18,nearing_expiration
+177,392,6-month warranty on air conditioning compressor and freon leaks.,2026-04-24,2026-05-24,expired
+178,409,90-day warranty on replaced suspension components.,2026-06-08,2026-12-05,active
+179,295,6-month warranty on air conditioning compressor and freon leaks.,2026-06-23,2027-06-23,active
+180,192,6-month warranty on air conditioning compressor and freon leaks.,2025-11-09,2025-12-09,voided
+181,195,1-year warranty on all installed electrical parts and wiring.,2026-02-27,2026-05-28,expired
+182,347,30-day limited warranty on workmanship and minor adjustments.,2026-03-18,2026-06-16,expired
+183,216,6-month warranty on air conditioning compressor and freon leaks.,2025-10-17,2026-04-15,expired
+184,56,6-month warranty on air conditioning compressor and freon leaks.,2026-01-24,2026-04-24,expired
+185,143,6-month warranty on air conditioning compressor and freon leaks.,2026-03-11,2026-09-07,active
+186,131,1-year warranty on all installed electrical parts and wiring.,2026-07-21,2026-08-20,nearing_expiration
+187,124,6-month warranty on air conditioning compressor and freon leaks.,2026-06-15,2026-09-13,claimed
+188,419,1-year comprehensive warranty on engine overhaul labor and parts.,2025-11-07,2025-12-07,voided
+189,168,30-day limited warranty on workmanship and minor adjustments.,2025-10-01,2026-10-01,active
+190,117,90-day warranty on replaced suspension components.,2026-03-11,2026-04-10,expired
+191,203,1-year comprehensive warranty on engine overhaul labor and parts.,2025-12-28,2026-06-26,expired
+192,116,1-year warranty on all installed electrical parts and wiring.,2026-06-03,2027-06-03,active
+193,399,30-day limited warranty on workmanship and minor adjustments.,2026-07-01,2026-09-29,active
+194,261,1-year comprehensive warranty on engine overhaul labor and parts.,2026-03-30,2026-06-28,voided
+195,268,1-year comprehensive warranty on engine overhaul labor and parts.,2026-03-25,2026-09-21,active
+196,194,90-day warranty on replaced suspension components.,2025-12-22,2026-12-22,active
+197,335,6-month warranty on air conditioning compressor and freon leaks.,2026-05-05,2026-06-04,voided
+198,97,1-year warranty on all installed electrical parts and wiring.,2025-08-22,2025-11-20,expired
+199,323,1-year warranty on all installed electrical parts and wiring.,2026-05-17,2026-08-15,nearing_expiration
+200,218,6-month warranty on air conditioning compressor and freon leaks.,2026-05-05,2026-06-04,expired
+201,9,6-month warranty on air conditioning compressor and freon leaks.,2026-05-21,2027-05-21,active
+202,295,90-day warranty on replaced suspension components.,2026-06-23,2026-07-23,expired
+203,241,30-day limited warranty on workmanship and minor adjustments.,2026-05-17,2026-08-15,nearing_expiration
+204,466,1-year comprehensive warranty on engine overhaul labor and parts.,2025-09-07,2025-12-06,expired
+205,283,6-month warranty on air conditioning compressor and freon leaks.,2026-06-04,2026-07-04,voided
+206,20,6-month warranty on air conditioning compressor and freon leaks.,2026-03-20,2026-04-19,expired
+207,86,90-day warranty on replaced suspension components.,2026-04-15,2026-07-14,voided
+208,268,6-month warranty on air conditioning compressor and freon leaks.,2026-03-25,2026-04-24,claimed
+209,36,1-year warranty on all installed electrical parts and wiring.,2026-04-14,2026-10-11,active
+210,232,90-day warranty on replaced suspension components.,2025-09-20,2026-09-20,active
+211,232,6-month warranty on air conditioning compressor and freon leaks.,2025-09-20,2026-09-20,active
+212,182,1-year comprehensive warranty on engine overhaul labor and parts.,2026-03-09,2026-09-05,active
+213,418,90-day warranty on replaced suspension components.,2025-12-07,2026-12-07,active
+214,106,90-day warranty on replaced suspension components.,2026-01-31,2027-01-31,active
+215,137,1-year comprehensive warranty on engine overhaul labor and parts.,2026-01-21,2026-04-21,expired
+216,4,6-month warranty on air conditioning compressor and freon leaks.,2026-02-07,2026-08-06,claimed
+217,345,1-year comprehensive warranty on engine overhaul labor and parts.,2026-03-28,2027-03-28,active
+218,128,1-year comprehensive warranty on engine overhaul labor and parts.,2025-09-18,2025-12-17,expired
+219,50,90-day warranty on replaced suspension components.,2026-04-11,2027-04-11,active
+220,65,1-year warranty on all installed electrical parts and wiring.,2026-02-08,2026-03-10,expired
+221,59,30-day limited warranty on workmanship and minor adjustments.,2026-06-07,2026-12-04,active
+222,133,90-day warranty on replaced suspension components.,2025-12-24,2026-01-23,expired
+223,446,6-month warranty on air conditioning compressor and freon leaks.,2025-11-19,2026-05-18,expired
+224,347,1-year warranty on all installed electrical parts and wiring.,2026-03-18,2026-06-16,expired
+225,351,30-day limited warranty on workmanship and minor adjustments.,2026-07-03,2027-07-03,active
+226,370,90-day warranty on replaced suspension components.,2026-03-20,2026-06-18,claimed
+227,519,30-day limited warranty on workmanship and minor adjustments.,2026-07-03,2026-08-02,expired
+228,283,1-year comprehensive warranty on engine overhaul labor and parts.,2026-06-04,2026-07-04,claimed
+229,195,1-year warranty on all installed electrical parts and wiring.,2026-02-27,2027-02-27,active
+230,191,1-year comprehensive warranty on engine overhaul labor and parts.,2026-03-08,2026-06-06,expired
+231,520,30-day limited warranty on workmanship and minor adjustments.,2026-07-08,2027-01-04,active
+232,43,90-day warranty on replaced suspension components.,2026-07-21,2027-01-17,active
+233,112,6-month warranty on air conditioning compressor and freon leaks.,2025-10-31,2026-01-29,expired
+234,368,90-day warranty on replaced suspension components.,2026-04-14,2026-05-14,expired
+235,247,90-day warranty on replaced suspension components.,2025-12-27,2026-06-25,claimed
+236,446,1-year comprehensive warranty on engine overhaul labor and parts.,2025-11-19,2026-02-17,expired
+237,237,30-day limited warranty on workmanship and minor adjustments.,2025-11-20,2026-11-20,active
+238,223,6-month warranty on air conditioning compressor and freon leaks.,2026-05-21,2027-05-21,active
+239,488,90-day warranty on replaced suspension components.,2025-12-20,2026-12-20,active
+240,498,30-day limited warranty on workmanship and minor adjustments.,2026-02-20,2026-03-22,expired
+241,6,90-day warranty on replaced suspension components.,2026-01-08,2027-01-08,active
+242,495,30-day limited warranty on workmanship and minor adjustments.,2026-06-21,2026-09-19,claimed
+243,7,30-day limited warranty on workmanship and minor adjustments.,2026-03-22,2026-04-21,expired
+244,71,6-month warranty on air conditioning compressor and freon leaks.,2026-03-28,2027-03-28,active
+245,17,1-year comprehensive warranty on engine overhaul labor and parts.,2026-01-19,2027-01-19,claimed
+246,183,1-year comprehensive warranty on engine overhaul labor and parts.,2026-01-28,2026-04-28,expired
+247,220,90-day warranty on replaced suspension components.,2025-09-27,2026-09-27,active
+248,99,90-day warranty on replaced suspension components.,2026-04-12,2026-05-12,expired
+249,362,1-year warranty on all installed electrical parts and wiring.,2025-08-12,2026-08-12,nearing_expiration
+250,160,6-month warranty on air conditioning compressor and freon leaks.,2025-08-30,2025-09-29,expired
+251,29,6-month warranty on air conditioning compressor and freon leaks.,2025-10-19,2026-04-17,expired
+252,27,90-day warranty on replaced suspension components.,2025-11-18,2026-02-16,expired
+253,462,90-day warranty on replaced suspension components.,2026-01-30,2027-01-30,active
+254,130,1-year comprehensive warranty on engine overhaul labor and parts.,2026-01-17,2026-02-16,expired
+255,388,90-day warranty on replaced suspension components.,2026-01-11,2026-02-10,expired
+256,144,30-day limited warranty on workmanship and minor adjustments.,2026-05-01,2027-05-01,active
+257,64,1-year warranty on all installed electrical parts and wiring.,2026-03-17,2026-09-13,claimed
+258,114,1-year comprehensive warranty on engine overhaul labor and parts.,2026-06-20,2026-07-20,expired
+259,346,6-month warranty on air conditioning compressor and freon leaks.,2026-06-26,2027-06-26,active
+260,197,90-day warranty on replaced suspension components.,2025-10-16,2026-01-14,expired
+261,182,1-year comprehensive warranty on engine overhaul labor and parts.,2026-03-09,2026-09-05,active
+262,149,1-year comprehensive warranty on engine overhaul labor and parts.,2026-05-07,2026-11-03,active
+263,249,90-day warranty on replaced suspension components.,2026-01-17,2027-01-17,active
+264,200,1-year comprehensive warranty on engine overhaul labor and parts.,2025-11-02,2026-01-31,expired
+265,412,6-month warranty on air conditioning compressor and freon leaks.,2025-08-23,2025-09-22,expired
+266,85,90-day warranty on replaced suspension components.,2026-01-23,2026-02-22,expired
+267,520,30-day limited warranty on workmanship and minor adjustments.,2026-07-08,2027-07-08,active
+268,49,30-day limited warranty on workmanship and minor adjustments.,2026-01-16,2026-02-15,expired
+269,135,1-year warranty on all installed electrical parts and wiring.,2026-01-24,2027-01-24,voided
+270,429,30-day limited warranty on workmanship and minor adjustments.,2026-03-24,2026-09-20,claimed
+271,506,1-year warranty on all installed electrical parts and wiring.,2026-07-09,2026-08-08,nearing_expiration
+272,467,1-year warranty on all installed electrical parts and wiring.,2026-04-08,2027-04-08,active
+273,133,90-day warranty on replaced suspension components.,2025-12-24,2026-01-23,voided
+274,295,90-day warranty on replaced suspension components.,2026-06-23,2026-12-20,claimed
+275,445,1-year comprehensive warranty on engine overhaul labor and parts.,2026-03-16,2026-04-15,expired
+276,121,1-year comprehensive warranty on engine overhaul labor and parts.,2025-09-07,2025-10-07,claimed
+277,1,1-year comprehensive warranty on engine overhaul labor and parts.,2026-01-06,2026-07-05,expired
+278,225,30-day limited warranty on workmanship and minor adjustments.,2025-10-03,2026-10-03,active
+279,332,1-year warranty on all installed electrical parts and wiring.,2026-07-31,2026-08-30,nearing_expiration
+280,248,6-month warranty on air conditioning compressor and freon leaks.,2026-07-04,2026-12-31,voided
+281,420,1-year warranty on all installed electrical parts and wiring.,2025-11-07,2026-05-06,voided
+282,393,30-day limited warranty on workmanship and minor adjustments.,2025-08-08,2025-11-06,expired
+283,41,6-month warranty on air conditioning compressor and freon leaks.,2026-05-24,2026-11-20,active
+284,433,30-day limited warranty on workmanship and minor adjustments.,2026-01-10,2026-02-09,expired
+285,47,1-year comprehensive warranty on engine overhaul labor and parts.,2026-02-15,2026-05-16,expired
+286,96,1-year comprehensive warranty on engine overhaul labor and parts.,2026-06-19,2026-12-16,claimed
+287,347,1-year comprehensive warranty on engine overhaul labor and parts.,2026-03-18,2026-06-16,expired
+288,64,1-year warranty on all installed electrical parts and wiring.,2026-03-17,2027-03-17,active
+289,471,30-day limited warranty on workmanship and minor adjustments.,2026-05-29,2026-06-28,claimed
+290,199,1-year comprehensive warranty on engine overhaul labor and parts.,2026-07-14,2027-01-10,active
+291,355,6-month warranty on air conditioning compressor and freon leaks.,2026-01-29,2026-07-28,expired
+292,211,1-year warranty on all installed electrical parts and wiring.,2026-02-24,2026-05-25,expired
+293,120,1-year comprehensive warranty on engine overhaul labor and parts.,2026-07-27,2027-01-23,active
+294,455,1-year comprehensive warranty on engine overhaul labor and parts.,2025-11-16,2026-05-15,expired
+295,99,90-day warranty on replaced suspension components.,2026-04-12,2026-07-11,expired
+296,491,1-year comprehensive warranty on engine overhaul labor and parts.,2026-02-27,2027-02-27,active
+297,189,30-day limited warranty on workmanship and minor adjustments.,2026-05-17,2027-05-17,active
+298,289,1-year warranty on all installed electrical parts and wiring.,2026-06-29,2026-09-27,active
+299,382,1-year comprehensive warranty on engine overhaul labor and parts.,2026-06-04,2026-09-02,nearing_expiration
+300,491,1-year comprehensive warranty on engine overhaul labor and parts.,2026-02-27,2026-08-26,nearing_expiration
+301,42,30-day limited warranty on workmanship and minor adjustments.,2026-08-02,2026-09-01,claimed
+302,230,1-year comprehensive warranty on engine overhaul labor and parts.,2025-10-04,2026-04-02,expired
+303,493,30-day limited warranty on workmanship and minor adjustments.,2026-03-11,2026-09-07,voided
+304,310,90-day warranty on replaced suspension components.,2026-02-24,2026-03-26,expired
+305,31,30-day limited warranty on workmanship and minor adjustments.,2026-07-25,2027-01-21,active
+306,30,90-day warranty on replaced suspension components.,2026-04-17,2027-04-17,claimed
+307,200,1-year comprehensive warranty on engine overhaul labor and parts.,2025-11-02,2026-05-01,expired
+308,381,90-day warranty on replaced suspension components.,2025-12-01,2026-03-01,expired
+309,86,90-day warranty on replaced suspension components.,2026-04-15,2026-10-12,active
+310,138,1-year warranty on all installed electrical parts and wiring.,2026-06-20,2027-06-20,active
+311,120,1-year warranty on all installed electrical parts and wiring.,2026-07-27,2026-10-25,active
+312,269,6-month warranty on air conditioning compressor and freon leaks.,2025-12-18,2026-06-16,expired
+313,482,90-day warranty on replaced suspension components.,2025-11-21,2025-12-21,expired
+314,206,6-month warranty on air conditioning compressor and freon leaks.,2026-07-12,2026-08-11,nearing_expiration
+315,261,90-day warranty on replaced suspension components.,2026-03-30,2026-04-29,claimed
+316,100,30-day limited warranty on workmanship and minor adjustments.,2025-10-23,2025-11-22,expired
+317,282,6-month warranty on air conditioning compressor and freon leaks.,2026-03-28,2026-04-27,expired
+318,129,1-year warranty on all installed electrical parts and wiring.,2026-07-08,2027-07-08,claimed
+319,130,30-day limited warranty on workmanship and minor adjustments.,2026-01-17,2026-04-17,expired
+320,451,1-year comprehensive warranty on engine overhaul labor and parts.,2025-09-21,2026-09-21,active
+321,482,90-day warranty on replaced suspension components.,2025-11-21,2026-02-19,expired
+322,134,6-month warranty on air conditioning compressor and freon leaks.,2025-08-10,2025-09-09,expired
+323,110,1-year warranty on all installed electrical parts and wiring.,2025-12-22,2026-06-20,expired
+324,267,6-month warranty on air conditioning compressor and freon leaks.,2025-11-26,2026-05-25,expired
+325,341,6-month warranty on air conditioning compressor and freon leaks.,2026-03-26,2026-06-24,expired
+326,137,30-day limited warranty on workmanship and minor adjustments.,2026-01-21,2027-01-21,active
+327,199,1-year comprehensive warranty on engine overhaul labor and parts.,2026-07-14,2026-08-13,claimed
+328,175,6-month warranty on air conditioning compressor and freon leaks.,2025-09-27,2026-03-26,expired
+329,446,30-day limited warranty on workmanship and minor adjustments.,2025-11-19,2026-02-17,expired
+330,172,90-day warranty on replaced suspension components.,2026-03-17,2026-09-13,claimed
+331,234,90-day warranty on replaced suspension components.,2025-10-29,2026-01-27,expired
+332,169,6-month warranty on air conditioning compressor and freon leaks.,2026-05-10,2026-06-09,expired
+333,277,1-year comprehensive warranty on engine overhaul labor and parts.,2026-02-04,2026-08-03,expired
+334,174,30-day limited warranty on workmanship and minor adjustments.,2026-03-27,2027-03-27,active
+335,452,1-year comprehensive warranty on engine overhaul labor and parts.,2025-10-29,2026-10-29,active
+336,310,1-year warranty on all installed electrical parts and wiring.,2026-02-24,2027-02-24,active
+337,380,1-year warranty on all installed electrical parts and wiring.,2026-01-10,2027-01-10,active
+338,149,1-year comprehensive warranty on engine overhaul labor and parts.,2026-05-07,2026-11-03,claimed
+339,157,6-month warranty on air conditioning compressor and freon leaks.,2025-11-05,2026-11-05,active
+340,200,6-month warranty on air conditioning compressor and freon leaks.,2025-11-02,2026-01-31,expired
+341,105,90-day warranty on replaced suspension components.,2026-03-02,2026-08-29,nearing_expiration
+342,64,6-month warranty on air conditioning compressor and freon leaks.,2026-03-17,2026-04-16,expired
+343,244,6-month warranty on air conditioning compressor and freon leaks.,2025-08-20,2026-02-16,expired
+344,466,30-day limited warranty on workmanship and minor adjustments.,2025-09-07,2026-09-07,active
+345,498,90-day warranty on replaced suspension components.,2026-02-20,2026-05-21,expired
+346,474,30-day limited warranty on workmanship and minor adjustments.,2026-06-28,2027-06-28,active
+347,459,90-day warranty on replaced suspension components.,2025-11-09,2026-11-09,active
+348,390,90-day warranty on replaced suspension components.,2026-03-06,2026-06-04,expired
+349,203,1-year warranty on all installed electrical parts and wiring.,2025-12-28,2026-03-28,expired
+350,419,90-day warranty on replaced suspension components.,2025-11-07,2026-05-06,expired
+351,438,6-month warranty on air conditioning compressor and freon leaks.,2026-06-18,2026-07-18,expired
+352,240,1-year comprehensive warranty on engine overhaul labor and parts.,2025-12-01,2026-03-01,expired
+353,350,1-year warranty on all installed electrical parts and wiring.,2026-02-22,2026-05-23,expired
+354,424,6-month warranty on air conditioning compressor and freon leaks.,2026-07-02,2026-09-30,active
+355,12,90-day warranty on replaced suspension components.,2026-07-22,2027-07-22,active
+356,361,1-year warranty on all installed electrical parts and wiring.,2025-09-02,2026-09-02,nearing_expiration
+357,387,90-day warranty on replaced suspension components.,2025-10-12,2026-01-10,expired
+358,44,90-day warranty on replaced suspension components.,2025-08-23,2025-09-22,voided
+359,307,90-day warranty on replaced suspension components.,2026-03-21,2026-09-17,active
+360,217,1-year warranty on all installed electrical parts and wiring.,2025-08-16,2026-08-16,nearing_expiration
+361,74,1-year comprehensive warranty on engine overhaul labor and parts.,2025-10-18,2026-04-16,expired
+362,213,1-year comprehensive warranty on engine overhaul labor and parts.,2025-10-01,2026-10-01,active
+363,265,6-month warranty on air conditioning compressor and freon leaks.,2026-05-31,2026-11-27,active
+364,263,30-day limited warranty on workmanship and minor adjustments.,2025-11-27,2026-05-26,expired
+365,130,1-year warranty on all installed electrical parts and wiring.,2026-01-17,2026-07-16,expired
+366,30,1-year warranty on all installed electrical parts and wiring.,2026-04-17,2026-05-17,expired
+367,319,90-day warranty on replaced suspension components.,2025-09-26,2025-12-25,expired
+368,116,1-year comprehensive warranty on engine overhaul labor and parts.,2026-06-03,2026-09-01,nearing_expiration
+369,304,30-day limited warranty on workmanship and minor adjustments.,2026-04-03,2026-07-02,expired
+370,186,1-year comprehensive warranty on engine overhaul labor and parts.,2026-02-15,2026-05-16,expired
+371,373,6-month warranty on air conditioning compressor and freon leaks.,2026-03-14,2026-04-13,expired
+372,329,30-day limited warranty on workmanship and minor adjustments.,2025-09-04,2025-10-04,expired
+373,51,30-day limited warranty on workmanship and minor adjustments.,2026-03-02,2026-08-29,nearing_expiration
+374,151,1-year comprehensive warranty on engine overhaul labor and parts.,2026-01-30,2026-07-29,expired
+375,192,90-day warranty on replaced suspension components.,2025-11-09,2025-12-09,expired
+376,153,1-year comprehensive warranty on engine overhaul labor and parts.,2025-10-22,2026-10-22,active
+377,99,90-day warranty on replaced suspension components.,2026-04-12,2026-05-12,expired
+378,83,6-month warranty on air conditioning compressor and freon leaks.,2025-08-07,2025-11-05,expired
+379,293,6-month warranty on air conditioning compressor and freon leaks.,2026-02-22,2026-05-23,expired
+380,146,30-day limited warranty on workmanship and minor adjustments.,2026-05-02,2027-05-02,active
+381,218,1-year warranty on all installed electrical parts and wiring.,2026-05-05,2026-08-03,expired
+382,230,1-year warranty on all installed electrical parts and wiring.,2025-10-04,2026-10-04,claimed
+383,305,1-year comprehensive warranty on engine overhaul labor and parts.,2026-04-13,2027-04-13,active
+384,375,1-year comprehensive warranty on engine overhaul labor and parts.,2025-09-06,2026-09-06,active
+385,21,90-day warranty on replaced suspension components.,2025-08-23,2025-11-21,expired
+386,5,6-month warranty on air conditioning compressor and freon leaks.,2025-09-25,2026-03-24,expired
+387,111,1-year comprehensive warranty on engine overhaul labor and parts.,2026-07-09,2026-10-07,active
+388,43,6-month warranty on air conditioning compressor and freon leaks.,2026-07-21,2026-10-19,active
+389,179,6-month warranty on air conditioning compressor and freon leaks.,2026-05-29,2026-06-28,expired
+390,58,30-day limited warranty on workmanship and minor adjustments.,2025-11-04,2026-02-02,expired
+391,183,1-year warranty on all installed electrical parts and wiring.,2026-01-28,2026-04-28,expired
+392,57,30-day limited warranty on workmanship and minor adjustments.,2026-05-01,2027-05-01,active
+393,47,30-day limited warranty on workmanship and minor adjustments.,2026-02-15,2027-02-15,active
+394,102,6-month warranty on air conditioning compressor and freon leaks.,2026-01-31,2026-05-01,expired
+395,320,1-year comprehensive warranty on engine overhaul labor and parts.,2025-09-14,2026-09-14,active
+396,215,1-year comprehensive warranty on engine overhaul labor and parts.,2026-02-10,2026-03-12,expired
+397,71,6-month warranty on air conditioning compressor and freon leaks.,2026-03-28,2026-09-24,active
+398,11,90-day warranty on replaced suspension components.,2025-10-17,2025-11-16,expired
+399,490,1-year warranty on all installed electrical parts and wiring.,2025-12-25,2026-06-23,expired
+400,362,6-month warranty on air conditioning compressor and freon leaks.,2025-08-12,2025-11-10,expired

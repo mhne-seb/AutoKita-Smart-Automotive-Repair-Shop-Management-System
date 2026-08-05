@@ -1,0 +1,1001 @@
+id,session_id,sender,message_text,sent_at
+1,194,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-01-24 23:33:01.293298
+2,10,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-11-06 20:01:46.293298
+3,184,employee,Does the OEM part number fit this specific trim variant?,2025-12-03 14:11:51.293298
+4,242,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-04-05 22:14:56.293298
+5,65,employee,Does the OEM part number fit this specific trim variant?,2025-10-31 11:13:27.293298
+6,217,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-05-08 07:49:55.293298
+7,139,employee,Does the OEM part number fit this specific trim variant?,2026-07-02 10:23:25.293298
+8,131,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-08-02 01:20:47.293298
+9,44,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-09-19 02:48:17.293298
+10,300,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-12-08 17:20:09.293298
+11,63,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-04-21 15:15:23.293298
+12,187,employee,What is the torque spec for the cylinder head bolts?,2026-01-25 23:46:03.293298
+13,47,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-06-29 01:20:25.293298
+14,69,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-03-27 22:12:48.293298
+15,8,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-02-18 06:13:32.293298
+16,25,employee,What is the torque spec for the cylinder head bolts?,2026-07-16 20:09:14.293298
+17,72,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-21 23:08:36.293298
+18,182,employee,What is the torque spec for the cylinder head bolts?,2025-11-14 17:14:28.293298
+19,298,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-02-14 19:37:44.293298
+20,220,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-09-04 00:33:22.293298
+21,108,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-22 23:51:22.293298
+22,79,employee,What is the torque spec for the cylinder head bolts?,2026-06-10 06:24:19.293298
+23,47,employee,Show me the wiring diagram for the alternator and main relay.,2026-06-29 01:11:09.293298
+24,214,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-05-09 15:17:59.293298
+25,9,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-07-14 16:46:45.293298
+26,4,employee,What is the torque spec for the cylinder head bolts?,2026-05-01 16:49:12.293298
+27,14,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-10-25 02:16:08.293298
+28,191,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-07-12 18:16:53.293298
+29,60,employee,Does the OEM part number fit this specific trim variant?,2026-05-16 09:12:57.293298
+30,198,employee,Does the OEM part number fit this specific trim variant?,2026-04-24 18:02:23.293298
+31,297,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-09-02 00:08:00.293298
+32,169,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-05-05 20:19:23.293298
+33,143,employee,Does the OEM part number fit this specific trim variant?,2025-12-28 20:52:35.293298
+34,130,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-11-30 01:46:39.293298
+35,185,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-12-04 09:49:26.293298
+36,33,employee,Does the OEM part number fit this specific trim variant?,2025-08-12 15:43:33.293298
+37,62,employee,Show me the wiring diagram for the alternator and main relay.,2025-09-11 07:39:15.293298
+38,182,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-11-14 16:48:27.293298
+39,184,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-12-03 14:17:37.293298
+40,198,employee,How much transmission fluid is required for a complete flush on this model?,2026-04-24 18:05:14.293298
+41,96,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-02-06 09:35:39.293298
+42,176,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-01-18 00:51:57.293298
+43,224,employee,What is the torque spec for the cylinder head bolts?,2026-04-14 22:07:13.293298
+44,29,employee,Does the OEM part number fit this specific trim variant?,2026-03-18 08:17:19.293298
+45,164,employee,Show me the wiring diagram for the alternator and main relay.,2026-06-17 18:28:50.293298
+46,123,employee,How much transmission fluid is required for a complete flush on this model?,2025-08-16 00:13:45.293298
+47,214,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-09 15:41:23.293298
+48,141,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-10-06 14:51:20.293298
+49,98,employee,Does the OEM part number fit this specific trim variant?,2026-06-04 20:07:18.293298
+50,132,employee,What is the torque spec for the cylinder head bolts?,2026-08-02 10:15:24.293298
+51,10,employee,How much transmission fluid is required for a complete flush on this model?,2025-11-06 19:48:29.293298
+52,117,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-11-22 15:40:41.293298
+53,245,employee,How much transmission fluid is required for a complete flush on this model?,2025-08-31 17:55:21.293298
+54,226,employee,What is the torque spec for the cylinder head bolts?,2026-04-14 05:27:03.293298
+55,208,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-28 22:36:25.293298
+56,188,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-06-30 00:20:16.293298
+57,101,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-15 06:37:19.293298
+58,282,employee,What is the torque spec for the cylinder head bolts?,2026-02-28 13:35:05.293298
+59,164,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-06-17 18:25:46.293298
+60,149,employee,How much transmission fluid is required for a complete flush on this model?,2026-05-26 22:29:56.293298
+61,109,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-04-09 03:11:10.293298
+62,272,employee,What is the torque spec for the cylinder head bolts?,2026-03-02 02:06:15.293298
+63,212,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-01-11 07:20:03.293298
+64,134,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-03-23 10:58:35.293298
+65,35,employee,How much transmission fluid is required for a complete flush on this model?,2025-12-10 12:29:46.293298
+66,190,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-03-26 12:34:36.293298
+67,10,employee,What is the torque spec for the cylinder head bolts?,2025-11-06 20:14:49.293298
+68,91,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-05-17 05:16:14.293298
+69,268,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-01-27 03:17:32.293298
+70,128,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-12-07 22:06:23.293298
+71,134,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-03-23 11:03:31.293298
+72,230,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-02-09 04:39:15.293298
+73,229,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-03-05 13:20:27.293298
+74,212,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-01-11 07:25:18.293298
+75,228,employee,How much transmission fluid is required for a complete flush on this model?,2026-06-06 14:38:40.293298
+76,227,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-08-25 01:29:38.293298
+77,18,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-01-01 21:51:20.293298
+78,126,employee,Show me the wiring diagram for the alternator and main relay.,2026-05-16 21:02:56.293298
+79,64,employee,Show me the wiring diagram for the alternator and main relay.,2026-04-27 11:26:53.293298
+80,123,employee,What is the torque spec for the cylinder head bolts?,2025-08-16 00:03:04.293298
+81,293,employee,How much transmission fluid is required for a complete flush on this model?,2026-07-17 23:27:23.293298
+82,20,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-10-10 13:13:50.293298
+83,65,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-10-31 11:38:27.293298
+84,13,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-12-17 09:59:06.293298
+85,11,employee,Show me the wiring diagram for the alternator and main relay.,2025-09-02 17:55:18.293298
+86,9,employee,What is the torque spec for the cylinder head bolts?,2026-07-14 16:45:51.293298
+87,272,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-03-02 02:09:35.293298
+88,15,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-07-29 18:11:37.293298
+89,268,employee,How much transmission fluid is required for a complete flush on this model?,2026-01-27 02:55:38.293298
+90,3,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-04-30 20:01:36.293298
+91,68,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-10-03 10:50:43.293298
+92,222,employee,Does the OEM part number fit this specific trim variant?,2026-06-01 15:29:03.293298
+93,114,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-04-02 07:36:53.293298
+94,258,employee,Show me the wiring diagram for the alternator and main relay.,2026-06-19 21:41:56.293298
+95,69,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-03-27 21:24:56.293298
+96,183,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-31 19:23:35.293298
+97,299,employee,Does the OEM part number fit this specific trim variant?,2025-11-22 07:49:29.293298
+98,158,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-11-16 03:13:41.293298
+99,115,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-10-04 00:10:48.293298
+100,273,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-11-01 01:42:05.293298
+101,81,employee,What is the torque spec for the cylinder head bolts?,2026-02-05 08:38:58.293298
+102,54,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-09-04 02:42:44.293298
+103,227,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-08-25 01:25:26.293298
+104,47,employee,What is the torque spec for the cylinder head bolts?,2026-06-29 01:41:02.293298
+105,272,employee,How much transmission fluid is required for a complete flush on this model?,2026-03-02 02:30:37.293298
+106,150,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-11-24 19:34:56.293298
+107,55,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-05-23 09:40:51.293298
+108,178,employee,What is the torque spec for the cylinder head bolts?,2026-02-04 09:48:51.293298
+109,174,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-06-11 10:19:31.293298
+110,288,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-06-15 11:51:31.293298
+111,287,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-09-17 13:40:42.293298
+112,121,employee,Does the OEM part number fit this specific trim variant?,2026-06-12 10:02:52.293298
+113,166,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-25 13:12:25.293298
+114,75,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-03-22 20:36:15.293298
+115,251,employee,What is the torque spec for the cylinder head bolts?,2025-12-30 21:49:14.293298
+116,207,employee,What is the torque spec for the cylinder head bolts?,2025-11-13 13:29:58.293298
+117,167,employee,How much transmission fluid is required for a complete flush on this model?,2026-04-13 12:35:14.293298
+118,173,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-03 12:48:54.293298
+119,128,employee,Does the OEM part number fit this specific trim variant?,2025-12-07 21:43:15.293298
+120,219,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-04-16 21:51:46.293298
+121,118,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-01-28 22:03:45.293298
+122,72,employee,Does the OEM part number fit this specific trim variant?,2026-05-21 23:08:42.293298
+123,73,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-09-06 11:49:06.293298
+124,22,employee,How much transmission fluid is required for a complete flush on this model?,2026-04-07 22:41:19.293298
+125,248,employee,What is the torque spec for the cylinder head bolts?,2025-08-23 14:45:28.293298
+126,18,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-01-01 21:41:08.293298
+127,45,employee,Show me the wiring diagram for the alternator and main relay.,2026-01-27 18:22:13.293298
+128,78,employee,What is the torque spec for the cylinder head bolts?,2026-07-26 06:56:24.293298
+129,227,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-08-25 01:36:38.293298
+130,108,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-22 23:37:12.293298
+131,138,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-02-22 14:32:53.293298
+132,243,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-08-30 10:22:39.293298
+133,213,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-07-09 12:30:54.293298
+134,84,employee,What is the torque spec for the cylinder head bolts?,2026-02-12 00:04:01.293298
+135,217,employee,What is the torque spec for the cylinder head bolts?,2026-05-08 07:54:52.293298
+136,144,employee,Does the OEM part number fit this specific trim variant?,2026-04-06 23:26:56.293298
+137,231,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-06-07 19:06:44.293298
+138,73,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-09-06 11:21:46.293298
+139,277,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-02-26 09:14:04.293298
+140,265,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-12-13 20:49:52.293298
+141,244,employee,How much transmission fluid is required for a complete flush on this model?,2026-01-01 17:55:22.293298
+142,57,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-05-16 19:44:42.293298
+143,156,employee,What is the torque spec for the cylinder head bolts?,2026-04-09 21:04:29.293298
+144,24,employee,Does the OEM part number fit this specific trim variant?,2026-05-18 15:49:48.293298
+145,24,employee,Show me the wiring diagram for the alternator and main relay.,2026-05-18 16:06:18.293298
+146,181,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-01-01 15:33:02.293298
+147,52,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-08-30 14:28:23.293298
+148,111,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-02-11 05:35:19.293298
+149,298,employee,What is the torque spec for the cylinder head bolts?,2026-02-14 19:32:14.293298
+150,51,employee,How much transmission fluid is required for a complete flush on this model?,2025-11-23 06:25:33.293298
+151,102,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-06-18 05:45:43.293298
+152,289,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-12-24 21:08:35.293298
+153,124,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-23 20:56:57.293298
+154,178,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-02-04 09:35:24.293298
+155,8,employee,What is the torque spec for the cylinder head bolts?,2026-02-18 06:12:55.293298
+156,74,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-02-23 01:48:57.293298
+157,161,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-09-27 09:37:44.293298
+158,201,employee,Show me the wiring diagram for the alternator and main relay.,2026-08-03 00:56:51.293298
+159,155,employee,What is the torque spec for the cylinder head bolts?,2026-07-05 23:03:01.293298
+160,43,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-03-29 19:20:25.293298
+161,170,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-12-25 14:46:24.293298
+162,24,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-05-18 15:58:16.293298
+163,151,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-10-19 19:28:13.293298
+164,197,employee,Show me the wiring diagram for the alternator and main relay.,2025-08-19 21:29:57.293298
+165,292,employee,What is the torque spec for the cylinder head bolts?,2026-06-01 20:11:32.293298
+166,223,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-01 12:42:27.293298
+167,267,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-10-19 20:44:37.293298
+168,268,employee,What is the torque spec for the cylinder head bolts?,2026-01-27 03:12:22.293298
+169,47,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-06-29 01:41:08.293298
+170,48,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-09-30 22:20:31.293298
+171,201,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-08-03 00:35:08.293298
+172,268,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-27 03:09:48.293298
+173,212,employee,Show me the wiring diagram for the alternator and main relay.,2026-01-11 07:35:39.293298
+174,182,employee,What is the torque spec for the cylinder head bolts?,2025-11-14 16:22:03.293298
+175,238,employee,Show me the wiring diagram for the alternator and main relay.,2026-07-18 12:32:14.293298
+176,174,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-11 10:33:58.293298
+177,136,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-11-12 20:28:25.293298
+178,51,employee,What is the torque spec for the cylinder head bolts?,2025-11-23 05:44:16.293298
+179,37,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-05-17 02:57:29.293298
+180,200,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-01 08:52:57.293298
+181,141,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-06 14:41:22.293298
+182,82,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-06-02 07:28:19.293298
+183,101,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-05-15 06:25:34.293298
+184,239,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-02-09 03:23:37.293298
+185,102,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-06-18 05:50:57.293298
+186,164,employee,What is the torque spec for the cylinder head bolts?,2026-06-17 18:24:03.293298
+187,222,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-06-01 15:28:34.293298
+188,139,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-07-02 10:48:45.293298
+189,243,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-08-30 10:25:27.293298
+190,229,employee,What is the torque spec for the cylinder head bolts?,2026-03-05 13:37:20.293298
+191,255,employee,How much transmission fluid is required for a complete flush on this model?,2026-05-05 22:14:56.293298
+192,35,employee,What is the torque spec for the cylinder head bolts?,2025-12-10 12:37:10.293298
+193,69,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-03-27 21:48:18.293298
+194,89,employee,Does the OEM part number fit this specific trim variant?,2025-11-18 17:48:00.293298
+195,237,employee,Show me the wiring diagram for the alternator and main relay.,2025-09-09 22:42:12.293298
+196,70,employee,Show me the wiring diagram for the alternator and main relay.,2025-11-10 00:58:19.293298
+197,73,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-09-06 10:55:17.293298
+198,59,employee,Does the OEM part number fit this specific trim variant?,2025-09-01 20:41:07.293298
+199,2,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-11-25 05:34:36.293298
+200,134,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-03-23 10:10:30.293298
+201,150,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-11-24 20:00:44.293298
+202,103,employee,What is the torque spec for the cylinder head bolts?,2026-07-28 04:44:03.293298
+203,259,employee,Does the OEM part number fit this specific trim variant?,2025-12-13 02:01:09.293298
+204,173,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-11-03 12:37:50.293298
+205,13,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-12-17 10:12:30.293298
+206,123,employee,Does the OEM part number fit this specific trim variant?,2025-08-15 23:56:01.293298
+207,100,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-11-22 08:21:39.293298
+208,292,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-06-01 20:19:24.293298
+209,222,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-06-01 15:54:35.293298
+210,103,employee,Does the OEM part number fit this specific trim variant?,2026-07-28 05:18:57.293298
+211,298,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-02-14 19:02:28.293298
+212,147,employee,How much transmission fluid is required for a complete flush on this model?,2026-02-12 19:44:32.293298
+213,54,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-09-04 02:25:30.293298
+214,87,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-02 04:05:29.293298
+215,252,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-08-11 08:03:33.293298
+216,289,employee,What is the torque spec for the cylinder head bolts?,2025-12-24 21:11:55.293298
+217,23,employee,How much transmission fluid is required for a complete flush on this model?,2026-04-28 20:29:47.293298
+218,102,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-06-18 06:19:25.293298
+219,9,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-07-14 16:30:05.293298
+220,122,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-04-25 04:25:08.293298
+221,295,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-09-05 05:32:16.293298
+222,5,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-11-13 21:42:51.293298
+223,22,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-04-07 23:06:29.293298
+224,254,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-02-12 13:19:48.293298
+225,267,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-10-19 20:45:50.293298
+226,279,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-05-17 03:49:48.293298
+227,179,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-10-26 15:21:23.293298
+228,195,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-12 16:50:10.293298
+229,181,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-01-01 16:18:40.293298
+230,274,employee,Does the OEM part number fit this specific trim variant?,2025-12-18 23:22:03.293298
+231,225,employee,What is the torque spec for the cylinder head bolts?,2026-05-24 04:11:11.293298
+232,109,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-04-09 03:19:49.293298
+233,183,employee,Show me the wiring diagram for the alternator and main relay.,2026-05-31 19:09:57.293298
+234,216,employee,Show me the wiring diagram for the alternator and main relay.,2026-03-29 23:20:29.293298
+235,20,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-10 12:54:39.293298
+236,200,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-11-01 08:59:35.293298
+237,178,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-02-04 10:03:48.293298
+238,271,employee,What is the torque spec for the cylinder head bolts?,2025-11-27 16:55:59.293298
+239,107,employee,How much transmission fluid is required for a complete flush on this model?,2025-08-07 01:58:48.293298
+240,103,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-07-28 05:00:09.293298
+241,161,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-09-27 09:09:48.293298
+242,101,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-15 06:29:46.293298
+243,69,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-03-27 22:02:36.293298
+244,191,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-07-12 17:56:22.293298
+245,279,employee,What is the torque spec for the cylinder head bolts?,2026-05-17 03:28:30.293298
+246,125,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-10-07 06:49:58.293298
+247,18,employee,Show me the wiring diagram for the alternator and main relay.,2026-01-01 21:40:48.293298
+248,155,employee,Does the OEM part number fit this specific trim variant?,2026-07-05 23:46:42.293298
+249,257,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-31 22:56:04.293298
+250,225,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-05-24 04:08:09.293298
+251,59,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-09-01 20:48:30.293298
+252,275,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-01-12 03:51:11.293298
+253,134,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-03-23 10:44:52.293298
+254,181,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-01-01 15:41:40.293298
+255,171,employee,How much transmission fluid is required for a complete flush on this model?,2026-06-29 12:54:28.293298
+256,27,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-03-28 11:41:07.293298
+257,75,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-03-22 20:43:53.293298
+258,233,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-11-04 23:25:08.293298
+259,120,employee,What is the torque spec for the cylinder head bolts?,2026-06-04 06:17:27.293298
+260,56,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-24 05:52:12.293298
+261,208,employee,Does the OEM part number fit this specific trim variant?,2026-01-28 22:21:30.293298
+262,116,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-07-25 11:25:47.293298
+263,240,employee,Does the OEM part number fit this specific trim variant?,2026-06-08 02:19:21.293298
+264,50,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-02-25 08:49:23.293298
+265,55,employee,What is the torque spec for the cylinder head bolts?,2026-05-23 09:23:24.293298
+266,134,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-03-23 10:32:50.293298
+267,124,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-10-23 21:33:40.293298
+268,250,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-19 10:52:01.293298
+269,299,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-11-22 07:46:15.293298
+270,291,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-16 16:15:05.293298
+271,291,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-11-16 16:57:24.293298
+272,30,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-28 09:50:13.293298
+273,9,employee,What is the torque spec for the cylinder head bolts?,2026-07-14 16:30:07.293298
+274,20,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-10-10 13:00:13.293298
+275,149,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-05-26 22:59:22.293298
+276,232,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-01-04 08:41:30.293298
+277,205,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-10-20 20:13:03.293298
+278,40,employee,How much transmission fluid is required for a complete flush on this model?,2026-04-15 10:01:02.293298
+279,94,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-04-19 13:12:18.293298
+280,257,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-01-31 22:48:17.293298
+281,142,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-10-16 12:47:40.293298
+282,92,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-05 08:58:29.293298
+283,30,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-06-28 10:29:28.293298
+284,219,employee,Does the OEM part number fit this specific trim variant?,2026-04-16 21:34:29.293298
+285,120,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-04 07:04:51.293298
+286,296,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-01-06 22:08:14.293298
+287,206,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-04-26 06:38:39.293298
+288,139,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-07-02 10:52:15.293298
+289,106,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-08-15 11:54:56.293298
+290,98,employee,Show me the wiring diagram for the alternator and main relay.,2026-06-04 20:13:48.293298
+291,201,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-08-03 01:22:45.293298
+292,47,employee,Show me the wiring diagram for the alternator and main relay.,2026-06-29 01:10:16.293298
+293,213,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-07-09 11:37:03.293298
+294,8,employee,Does the OEM part number fit this specific trim variant?,2026-02-18 06:29:54.293298
+295,142,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-16 12:49:32.293298
+296,69,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-03-27 21:32:15.293298
+297,17,employee,What is the torque spec for the cylinder head bolts?,2026-05-01 17:18:15.293298
+298,200,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-11-01 09:01:19.293298
+299,277,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-02-26 08:44:13.293298
+300,176,employee,Show me the wiring diagram for the alternator and main relay.,2026-01-18 00:32:32.293298
+301,188,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-06-29 23:45:22.293298
+302,218,employee,What is the torque spec for the cylinder head bolts?,2025-10-14 14:13:11.293298
+303,283,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-27 15:49:51.293298
+304,190,employee,What is the torque spec for the cylinder head bolts?,2026-03-26 12:29:23.293298
+305,278,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-06-20 05:17:41.293298
+306,91,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-17 05:16:45.293298
+307,56,employee,Does the OEM part number fit this specific trim variant?,2025-10-24 05:41:57.293298
+308,67,employee,Does the OEM part number fit this specific trim variant?,2025-09-04 23:55:10.293298
+309,233,employee,Show me the wiring diagram for the alternator and main relay.,2025-11-04 23:20:33.293298
+310,103,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-07-28 05:33:25.293298
+311,121,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-06-12 10:14:16.293298
+312,278,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-06-20 05:28:11.293298
+313,129,employee,Show me the wiring diagram for the alternator and main relay.,2026-06-13 22:46:24.293298
+314,52,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-08-30 14:40:11.293298
+315,190,employee,Show me the wiring diagram for the alternator and main relay.,2026-03-26 12:25:09.293298
+316,4,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-05-01 16:31:41.293298
+317,284,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-11-07 10:05:46.293298
+318,284,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-11-07 10:38:37.293298
+319,230,employee,Show me the wiring diagram for the alternator and main relay.,2026-02-09 05:02:53.293298
+320,92,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-10-05 08:59:00.293298
+321,260,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-04-30 03:00:35.293298
+322,98,employee,How much transmission fluid is required for a complete flush on this model?,2026-06-04 19:30:36.293298
+323,163,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-22 23:08:00.293298
+324,166,employee,What is the torque spec for the cylinder head bolts?,2025-10-25 13:03:00.293298
+325,272,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-03-02 02:38:26.293298
+326,160,employee,How much transmission fluid is required for a complete flush on this model?,2025-10-03 01:45:24.293298
+327,187,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-01-26 00:24:21.293298
+328,191,employee,What is the torque spec for the cylinder head bolts?,2026-07-12 17:26:18.293298
+329,252,employee,Does the OEM part number fit this specific trim variant?,2025-08-11 08:27:17.293298
+330,199,employee,Does the OEM part number fit this specific trim variant?,2026-04-09 16:52:51.293298
+331,229,employee,How much transmission fluid is required for a complete flush on this model?,2026-03-05 13:28:41.293298
+332,212,employee,How much transmission fluid is required for a complete flush on this model?,2026-01-11 06:39:03.293298
+333,217,employee,How much transmission fluid is required for a complete flush on this model?,2026-05-08 07:21:26.293298
+334,166,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-10-25 13:18:53.293298
+335,33,employee,Show me the wiring diagram for the alternator and main relay.,2025-08-12 16:34:11.293298
+336,28,employee,Does the OEM part number fit this specific trim variant?,2026-06-06 15:51:29.293298
+337,28,employee,What is the torque spec for the cylinder head bolts?,2026-06-06 15:59:40.293298
+338,79,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-06-10 06:38:18.293298
+339,122,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-04-25 03:58:28.293298
+340,110,employee,Does the OEM part number fit this specific trim variant?,2025-11-25 23:35:35.293298
+341,180,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-13 08:03:56.293298
+342,243,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-08-30 10:32:14.293298
+343,73,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-09-06 11:47:28.293298
+344,124,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-23 20:44:54.293298
+345,286,employee,How much transmission fluid is required for a complete flush on this model?,2025-10-27 12:40:10.293298
+346,198,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-04-24 18:33:16.293298
+347,76,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-08-22 16:36:58.293298
+348,246,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-09-27 16:04:09.293298
+349,76,employee,How much transmission fluid is required for a complete flush on this model?,2025-08-22 16:11:31.293298
+350,124,employee,Does the OEM part number fit this specific trim variant?,2025-10-23 21:04:30.293298
+351,233,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-11-04 23:42:06.293298
+352,269,employee,How much transmission fluid is required for a complete flush on this model?,2025-08-29 10:56:08.293298
+353,167,employee,How much transmission fluid is required for a complete flush on this model?,2026-04-13 12:53:21.293298
+354,72,employee,How much transmission fluid is required for a complete flush on this model?,2026-05-21 23:44:55.293298
+355,114,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-04-02 07:33:48.293298
+356,56,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-24 05:51:02.293298
+357,42,employee,Show me the wiring diagram for the alternator and main relay.,2026-06-23 01:20:34.293298
+358,142,employee,Does the OEM part number fit this specific trim variant?,2025-10-16 12:26:08.293298
+359,238,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-07-18 12:04:27.293298
+360,47,employee,Show me the wiring diagram for the alternator and main relay.,2026-06-29 01:19:22.293298
+361,79,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-10 06:34:00.293298
+362,278,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-06-20 04:41:11.293298
+363,229,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-03-05 13:50:24.293298
+364,20,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-10-10 13:23:01.293298
+365,138,employee,Does the OEM part number fit this specific trim variant?,2026-02-22 14:24:54.293298
+366,127,employee,How much transmission fluid is required for a complete flush on this model?,2025-08-15 22:34:50.293298
+367,119,employee,Does the OEM part number fit this specific trim variant?,2026-06-03 23:50:18.293298
+368,32,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-29 19:04:25.293298
+369,284,employee,Show me the wiring diagram for the alternator and main relay.,2025-11-07 10:41:00.293298
+370,178,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-02-04 09:59:06.293298
+371,43,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-03-29 19:44:07.293298
+372,5,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-11-13 22:14:10.293298
+373,76,employee,Show me the wiring diagram for the alternator and main relay.,2025-08-22 16:49:39.293298
+374,205,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-10-20 19:33:14.293298
+375,26,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-02-01 07:29:17.293298
+376,23,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-04-28 20:55:22.293298
+377,290,employee,How much transmission fluid is required for a complete flush on this model?,2026-06-23 10:59:23.293298
+378,74,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-02-23 01:50:40.293298
+379,270,employee,What is the torque spec for the cylinder head bolts?,2026-03-24 13:08:54.293298
+380,118,employee,Show me the wiring diagram for the alternator and main relay.,2026-01-28 21:29:16.293298
+381,264,employee,How much transmission fluid is required for a complete flush on this model?,2026-03-17 03:45:19.293298
+382,84,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-02-11 23:50:08.293298
+383,63,employee,Does the OEM part number fit this specific trim variant?,2026-04-21 14:51:35.293298
+384,97,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-09-14 08:11:26.293298
+385,123,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-08-16 00:19:09.293298
+386,298,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-02-14 19:42:40.293298
+387,199,employee,What is the torque spec for the cylinder head bolts?,2026-04-09 17:14:55.293298
+388,11,employee,Show me the wiring diagram for the alternator and main relay.,2025-09-02 17:44:52.293298
+389,228,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-06 14:52:01.293298
+390,216,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-03-30 00:02:22.293298
+391,194,employee,Does the OEM part number fit this specific trim variant?,2026-01-24 23:15:12.293298
+392,158,employee,Does the OEM part number fit this specific trim variant?,2025-11-16 02:40:13.293298
+393,101,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-05-15 06:34:05.293298
+394,54,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-09-04 02:25:31.293298
+395,239,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-02-09 03:32:02.293298
+396,116,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-07-25 10:53:40.293298
+397,15,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-07-29 17:37:16.293298
+398,227,employee,What is the torque spec for the cylinder head bolts?,2025-08-25 01:40:36.293298
+399,97,employee,Show me the wiring diagram for the alternator and main relay.,2025-09-14 08:57:00.293298
+400,83,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-08-22 15:50:18.293298
+401,110,employee,Does the OEM part number fit this specific trim variant?,2025-11-25 22:42:45.293298
+402,291,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-11-16 16:22:23.293298
+403,123,employee,What is the torque spec for the cylinder head bolts?,2025-08-15 23:53:22.293298
+404,94,employee,Does the OEM part number fit this specific trim variant?,2026-04-19 13:36:57.293298
+405,179,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-10-26 15:58:37.293298
+406,235,employee,Does the OEM part number fit this specific trim variant?,2026-05-25 05:47:10.293298
+407,291,employee,Show me the wiring diagram for the alternator and main relay.,2025-11-16 17:07:23.293298
+408,201,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-08-03 00:34:46.293298
+409,36,employee,What is the torque spec for the cylinder head bolts?,2026-05-02 18:14:19.293298
+410,293,employee,How much transmission fluid is required for a complete flush on this model?,2026-07-17 23:52:22.293298
+411,130,employee,Show me the wiring diagram for the alternator and main relay.,2025-11-30 01:14:33.293298
+412,107,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-08-07 02:12:16.293298
+413,152,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-01-27 09:33:04.293298
+414,284,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-07 09:53:16.293298
+415,266,employee,Show me the wiring diagram for the alternator and main relay.,2026-01-20 22:06:22.293298
+416,33,employee,What is the torque spec for the cylinder head bolts?,2025-08-12 16:03:16.293298
+417,279,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-05-17 03:19:32.293298
+418,41,employee,Show me the wiring diagram for the alternator and main relay.,2026-03-12 17:41:36.293298
+419,203,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-02-21 21:59:31.293298
+420,82,employee,How much transmission fluid is required for a complete flush on this model?,2026-06-02 07:44:14.293298
+421,50,employee,Does the OEM part number fit this specific trim variant?,2026-02-25 09:24:48.293298
+422,248,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-08-23 14:23:02.293298
+423,267,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-19 21:19:31.293298
+424,99,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-11-27 11:22:25.293298
+425,293,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-07-18 00:02:51.293298
+426,72,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-05-21 23:29:00.293298
+427,80,employee,Does the OEM part number fit this specific trim variant?,2026-03-14 01:47:01.293298
+428,186,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-05 13:03:42.293298
+429,59,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-09-01 20:39:27.293298
+430,179,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-10-26 16:06:10.293298
+431,274,employee,Does the OEM part number fit this specific trim variant?,2025-12-18 23:51:44.293298
+432,62,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-09-11 07:51:07.293298
+433,122,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-04-25 04:31:53.293298
+434,53,employee,What is the torque spec for the cylinder head bolts?,2025-08-25 20:00:27.293298
+435,192,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-12-10 14:33:13.293298
+436,2,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-25 05:41:08.293298
+437,62,employee,Show me the wiring diagram for the alternator and main relay.,2025-09-11 07:40:15.293298
+438,163,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-05-22 23:31:01.293298
+439,58,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-06-20 09:11:39.293298
+440,138,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-02-22 13:59:08.293298
+441,39,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-07-02 01:07:56.293298
+442,235,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-05-25 05:05:30.293298
+443,80,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-03-14 01:26:44.293298
+444,105,employee,How much transmission fluid is required for a complete flush on this model?,2026-05-29 02:45:25.293298
+445,193,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-26 09:02:16.293298
+446,238,employee,How much transmission fluid is required for a complete flush on this model?,2026-07-18 12:45:15.293298
+447,160,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-03 02:11:43.293298
+448,125,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-10-07 06:53:34.293298
+449,11,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-09-02 17:45:59.293298
+450,277,employee,How much transmission fluid is required for a complete flush on this model?,2026-02-26 09:07:52.293298
+451,84,employee,Show me the wiring diagram for the alternator and main relay.,2026-02-11 23:37:57.293298
+452,252,employee,Does the OEM part number fit this specific trim variant?,2025-08-11 08:38:40.293298
+453,248,employee,How much transmission fluid is required for a complete flush on this model?,2025-08-23 14:51:24.293298
+454,294,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-10-02 07:48:56.293298
+455,154,employee,How much transmission fluid is required for a complete flush on this model?,2026-03-24 20:27:27.293298
+456,262,employee,Show me the wiring diagram for the alternator and main relay.,2026-01-21 01:25:24.293298
+457,268,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-01-27 03:23:55.293298
+458,258,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-06-19 22:27:36.293298
+459,62,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-09-11 07:59:23.293298
+460,121,employee,Does the OEM part number fit this specific trim variant?,2026-06-12 10:03:30.293298
+461,267,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-19 20:58:29.293298
+462,99,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-11-27 10:50:40.293298
+463,255,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-05-05 21:42:52.293298
+464,115,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-03 23:45:17.293298
+465,161,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-09-27 09:36:52.293298
+466,80,employee,Does the OEM part number fit this specific trim variant?,2026-03-14 02:03:30.293298
+467,280,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-31 06:17:28.293298
+468,58,employee,Show me the wiring diagram for the alternator and main relay.,2026-06-20 08:46:33.293298
+469,14,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-10-25 02:55:49.293298
+470,192,employee,How much transmission fluid is required for a complete flush on this model?,2025-12-10 14:14:17.293298
+471,284,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-11-07 10:33:18.293298
+472,189,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-01-15 12:55:18.293298
+473,292,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-06-01 19:34:57.293298
+474,272,employee,Does the OEM part number fit this specific trim variant?,2026-03-02 02:37:17.293298
+475,270,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-03-24 13:03:07.293298
+476,148,employee,What is the torque spec for the cylinder head bolts?,2026-06-11 02:37:05.293298
+477,168,employee,What is the torque spec for the cylinder head bolts?,2026-07-02 20:51:15.293298
+478,165,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-03-20 01:14:51.293298
+479,166,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-10-25 13:31:02.293298
+480,292,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-06-01 20:15:57.293298
+481,283,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-27 15:16:31.293298
+482,277,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-02-26 08:36:11.293298
+483,50,employee,Does the OEM part number fit this specific trim variant?,2026-02-25 09:16:59.293298
+484,277,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-02-26 08:58:24.293298
+485,259,employee,Does the OEM part number fit this specific trim variant?,2025-12-13 01:57:51.293298
+486,186,employee,Show me the wiring diagram for the alternator and main relay.,2025-11-05 13:30:15.293298
+487,231,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-06-07 19:41:14.293298
+488,202,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-02-03 01:22:52.293298
+489,218,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-14 13:55:51.293298
+490,42,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-06-23 01:54:55.293298
+491,217,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-05-08 07:54:03.293298
+492,232,employee,Show me the wiring diagram for the alternator and main relay.,2026-01-04 09:23:08.293298
+493,284,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-11-07 10:48:48.293298
+494,299,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-11-22 08:28:42.293298
+495,50,employee,What is the torque spec for the cylinder head bolts?,2026-02-25 09:10:09.293298
+496,155,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-07-05 23:38:12.293298
+497,248,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-08-23 14:51:11.293298
+498,238,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-07-18 12:32:46.293298
+499,127,employee,Show me the wiring diagram for the alternator and main relay.,2025-08-15 22:30:50.293298
+500,218,employee,How much transmission fluid is required for a complete flush on this model?,2025-10-14 14:14:59.293298
+501,291,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-11-16 16:25:11.293298
+502,69,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-03-27 21:40:40.293298
+503,294,employee,How much transmission fluid is required for a complete flush on this model?,2025-10-02 08:09:08.293298
+504,72,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-21 23:41:30.293298
+505,222,employee,Does the OEM part number fit this specific trim variant?,2026-06-01 15:49:52.293298
+506,133,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-08-09 11:15:45.293298
+507,85,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-11-03 12:37:03.293298
+508,225,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-05-24 04:05:00.293298
+509,223,employee,Does the OEM part number fit this specific trim variant?,2026-06-01 12:52:29.293298
+510,295,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-09-05 04:44:11.293298
+511,77,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-01-01 09:46:52.293298
+512,270,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-03-24 13:48:47.293298
+513,274,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-12-18 23:38:17.293298
+514,253,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-01-08 09:17:14.293298
+515,105,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-05-29 03:41:03.293298
+516,126,employee,Does the OEM part number fit this specific trim variant?,2026-05-16 21:17:55.293298
+517,194,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-01-24 23:08:06.293298
+518,182,employee,Show me the wiring diagram for the alternator and main relay.,2025-11-14 16:30:30.293298
+519,30,employee,How much transmission fluid is required for a complete flush on this model?,2026-06-28 09:53:20.293298
+520,271,employee,What is the torque spec for the cylinder head bolts?,2025-11-27 16:42:18.293298
+521,240,employee,What is the torque spec for the cylinder head bolts?,2026-06-08 02:18:37.293298
+522,248,employee,How much transmission fluid is required for a complete flush on this model?,2025-08-23 14:17:11.293298
+523,95,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-30 19:06:36.293298
+524,40,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-04-15 09:24:23.293298
+525,218,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-10-14 13:54:33.293298
+526,269,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-08-29 10:25:35.293298
+527,274,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-12-18 23:38:41.293298
+528,258,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-19 22:10:15.293298
+529,118,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-01-28 22:06:46.293298
+530,146,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-05-15 22:09:30.293298
+531,29,employee,How much transmission fluid is required for a complete flush on this model?,2026-03-18 07:49:43.293298
+532,90,employee,How much transmission fluid is required for a complete flush on this model?,2025-11-30 11:47:57.293298
+533,138,employee,How much transmission fluid is required for a complete flush on this model?,2026-02-22 14:40:13.293298
+534,8,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-02-18 05:48:34.293298
+535,215,employee,How much transmission fluid is required for a complete flush on this model?,2026-04-04 07:59:05.293298
+536,124,employee,How much transmission fluid is required for a complete flush on this model?,2025-10-23 21:01:32.293298
+537,297,employee,Does the OEM part number fit this specific trim variant?,2025-09-02 00:32:05.293298
+538,136,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-11-12 20:13:20.293298
+539,60,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-05-16 09:26:50.293298
+540,12,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-01-02 07:15:43.293298
+541,181,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-01-01 16:07:52.293298
+542,264,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-03-17 03:59:45.293298
+543,177,employee,How much transmission fluid is required for a complete flush on this model?,2025-12-20 07:59:52.293298
+544,10,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-06 20:32:04.293298
+545,64,employee,What is the torque spec for the cylinder head bolts?,2026-04-27 11:20:58.293298
+546,19,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-07-18 09:35:13.293298
+547,299,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-22 08:10:25.293298
+548,125,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-10-07 06:30:27.293298
+549,206,employee,What is the torque spec for the cylinder head bolts?,2026-04-26 05:58:01.293298
+550,67,employee,How much transmission fluid is required for a complete flush on this model?,2025-09-04 23:41:52.293298
+551,236,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-04-06 02:19:40.293298
+552,242,employee,What is the torque spec for the cylinder head bolts?,2026-04-05 21:36:54.293298
+553,195,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-10-12 16:37:03.293298
+554,139,employee,Show me the wiring diagram for the alternator and main relay.,2026-07-02 10:16:51.293298
+555,24,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-05-18 16:01:00.293298
+556,281,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-04-06 13:36:04.293298
+557,25,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-07-16 20:25:05.293298
+558,273,employee,Show me the wiring diagram for the alternator and main relay.,2025-11-01 01:51:40.293298
+559,217,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-05-08 07:50:04.293298
+560,215,employee,What is the torque spec for the cylinder head bolts?,2026-04-04 08:26:29.293298
+561,253,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-01-08 09:26:36.293298
+562,160,employee,How much transmission fluid is required for a complete flush on this model?,2025-10-03 01:50:46.293298
+563,188,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-06-29 23:59:32.293298
+564,291,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-11-16 16:12:48.293298
+565,137,employee,Does the OEM part number fit this specific trim variant?,2025-09-15 14:28:24.293298
+566,11,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-09-02 17:53:55.293298
+567,290,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-06-23 11:11:54.293298
+568,145,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-10-16 20:02:09.293298
+569,29,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-03-18 08:33:20.293298
+570,224,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-04-14 22:28:54.293298
+571,40,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-04-15 09:17:35.293298
+572,250,employee,Does the OEM part number fit this specific trim variant?,2026-05-19 11:17:47.293298
+573,96,employee,What is the torque spec for the cylinder head bolts?,2026-02-06 09:12:48.293298
+574,148,employee,How much transmission fluid is required for a complete flush on this model?,2026-06-11 02:02:13.293298
+575,179,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-10-26 15:30:50.293298
+576,85,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-11-03 13:07:11.293298
+577,206,employee,Show me the wiring diagram for the alternator and main relay.,2026-04-26 06:38:59.293298
+578,58,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-06-20 08:39:16.293298
+579,194,employee,What is the torque spec for the cylinder head bolts?,2026-01-24 23:51:52.293298
+580,204,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-12-14 18:21:56.293298
+581,120,employee,What is the torque spec for the cylinder head bolts?,2026-06-04 06:58:22.293298
+582,110,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-11-25 23:21:39.293298
+583,209,employee,What is the torque spec for the cylinder head bolts?,2026-02-26 13:08:49.293298
+584,242,employee,Does the OEM part number fit this specific trim variant?,2026-04-05 22:01:51.293298
+585,213,employee,Does the OEM part number fit this specific trim variant?,2026-07-09 12:11:13.293298
+586,69,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-03-27 21:42:15.293298
+651,19,employee,Show me the wiring diagram for the alternator and main relay.,2026-07-18 09:44:56.293298
+587,147,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-02-12 19:38:58.293298
+588,243,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-08-30 10:03:00.293298
+589,169,employee,Show me the wiring diagram for the alternator and main relay.,2026-05-05 20:26:43.293298
+590,208,employee,Show me the wiring diagram for the alternator and main relay.,2026-01-28 22:25:55.293298
+591,136,employee,How much transmission fluid is required for a complete flush on this model?,2025-11-12 20:02:48.293298
+592,26,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-02-01 06:52:54.293298
+593,10,employee,Does the OEM part number fit this specific trim variant?,2025-11-06 20:01:45.293298
+594,295,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-09-05 05:35:26.293298
+595,226,employee,What is the torque spec for the cylinder head bolts?,2026-04-14 05:54:38.293298
+596,288,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-06-15 11:31:12.293298
+597,142,employee,Does the OEM part number fit this specific trim variant?,2025-10-16 13:00:09.293298
+598,258,employee,How much transmission fluid is required for a complete flush on this model?,2026-06-19 22:01:56.293298
+599,246,employee,What is the torque spec for the cylinder head bolts?,2025-09-27 16:37:37.293298
+600,115,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-10-03 23:56:50.293298
+601,107,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-08-07 02:34:50.293298
+602,193,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-26 08:29:27.293298
+603,242,employee,Does the OEM part number fit this specific trim variant?,2026-04-05 22:08:35.293298
+604,50,employee,Does the OEM part number fit this specific trim variant?,2026-02-25 09:15:36.293298
+605,27,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-03-28 11:40:09.293298
+606,100,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-22 07:36:49.293298
+607,249,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-29 11:27:23.293298
+608,83,employee,Does the OEM part number fit this specific trim variant?,2025-08-22 16:16:38.293298
+609,204,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-12-14 17:57:33.293298
+610,201,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-08-03 00:37:59.293298
+611,150,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-11-24 19:53:53.293298
+612,13,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-12-17 09:54:57.293298
+613,132,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-08-02 09:53:13.293298
+614,56,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-10-24 05:15:29.293298
+615,228,employee,What is the torque spec for the cylinder head bolts?,2026-06-06 14:41:23.293298
+616,77,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-01 10:05:31.293298
+617,73,employee,Does the OEM part number fit this specific trim variant?,2025-09-06 11:16:37.293298
+618,55,employee,Show me the wiring diagram for the alternator and main relay.,2026-05-23 09:26:01.293298
+619,162,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-09-26 22:49:03.293298
+620,163,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-05-22 23:27:04.293298
+621,224,employee,What is the torque spec for the cylinder head bolts?,2026-04-14 22:36:32.293298
+622,300,employee,What is the torque spec for the cylinder head bolts?,2025-12-08 16:41:15.293298
+623,39,employee,How much transmission fluid is required for a complete flush on this model?,2026-07-02 01:48:16.293298
+624,287,employee,Show me the wiring diagram for the alternator and main relay.,2025-09-17 13:17:25.293298
+625,71,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-08-24 18:01:15.293298
+626,256,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-11-23 20:21:21.293298
+627,207,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-11-13 13:37:19.293298
+628,78,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-07-26 07:37:02.293298
+629,289,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-12-24 21:43:33.293298
+630,85,employee,How much transmission fluid is required for a complete flush on this model?,2025-11-03 12:50:35.293298
+631,11,employee,Show me the wiring diagram for the alternator and main relay.,2025-09-02 17:48:37.293298
+632,18,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-01-01 21:53:16.293298
+633,233,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-11-05 00:14:28.293298
+634,52,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-08-30 15:00:19.293298
+635,66,employee,How much transmission fluid is required for a complete flush on this model?,2025-12-04 13:00:54.293298
+636,287,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-09-17 13:00:21.293298
+637,55,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-05-23 09:07:57.293298
+638,75,employee,Show me the wiring diagram for the alternator and main relay.,2026-03-22 20:29:19.293298
+639,257,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-01-31 22:34:02.293298
+640,84,employee,How much transmission fluid is required for a complete flush on this model?,2026-02-12 00:22:46.293298
+641,54,employee,Does the OEM part number fit this specific trim variant?,2025-09-04 02:47:11.293298
+642,87,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-06-02 03:31:53.293298
+643,128,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-12-07 22:08:38.293298
+644,116,employee,Show me the wiring diagram for the alternator and main relay.,2026-07-25 11:18:11.293298
+645,94,employee,What is the torque spec for the cylinder head bolts?,2026-04-19 13:56:01.293298
+646,17,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-05-01 16:38:53.293298
+647,119,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-03 23:29:01.293298
+648,175,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-04-02 12:03:38.293298
+649,182,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-11-14 16:38:57.293298
+650,271,employee,What is the torque spec for the cylinder head bolts?,2025-11-27 16:40:39.293298
+652,27,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-03-28 12:02:46.293298
+653,153,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-01-04 10:19:34.293298
+654,31,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-11-30 15:47:22.293298
+655,216,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-03-29 23:51:20.293298
+656,203,employee,What is the torque spec for the cylinder head bolts?,2026-02-21 22:06:29.293298
+657,214,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-05-09 15:22:04.293298
+658,98,employee,Show me the wiring diagram for the alternator and main relay.,2026-06-04 19:53:38.293298
+659,232,employee,How much transmission fluid is required for a complete flush on this model?,2026-01-04 08:33:37.293298
+660,182,employee,Does the OEM part number fit this specific trim variant?,2025-11-14 16:30:12.293298
+661,127,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-08-15 22:21:26.293298
+662,232,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-04 09:25:25.293298
+663,212,employee,Does the OEM part number fit this specific trim variant?,2026-01-11 06:41:07.293298
+664,20,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-10 12:38:02.293298
+665,128,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-12-07 22:03:21.293298
+666,204,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-12-14 18:36:53.293298
+667,68,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-03 11:11:15.293298
+668,2,employee,What is the torque spec for the cylinder head bolts?,2025-11-25 06:05:34.293298
+669,125,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-10-07 06:02:29.293298
+670,8,employee,What is the torque spec for the cylinder head bolts?,2026-02-18 06:08:27.293298
+671,176,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-18 00:55:04.293298
+672,78,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-07-26 07:31:36.293298
+673,196,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-04-05 00:51:16.293298
+674,281,employee,What is the torque spec for the cylinder head bolts?,2026-04-06 13:25:30.293298
+675,88,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-11-23 11:56:11.293298
+676,76,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-08-22 16:40:09.293298
+677,216,employee,How much transmission fluid is required for a complete flush on this model?,2026-03-29 23:41:51.293298
+678,155,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-07-05 23:52:27.293298
+679,272,employee,Does the OEM part number fit this specific trim variant?,2026-03-02 02:34:57.293298
+680,247,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-09-09 07:14:48.293298
+681,260,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-04-30 03:12:25.293298
+682,279,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-05-17 04:00:01.293298
+683,117,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-22 15:51:14.293298
+684,55,employee,Does the OEM part number fit this specific trim variant?,2026-05-23 09:00:42.293298
+685,189,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-01-15 12:49:19.293298
+686,202,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-02-03 00:56:18.293298
+687,212,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-11 06:48:14.293298
+688,209,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-02-26 13:29:51.293298
+689,273,employee,Show me the wiring diagram for the alternator and main relay.,2025-11-01 01:40:45.293298
+690,225,employee,How much transmission fluid is required for a complete flush on this model?,2026-05-24 04:07:53.293298
+691,131,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-08-02 01:23:47.293298
+692,181,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-01-01 15:49:25.293298
+693,39,employee,How much transmission fluid is required for a complete flush on this model?,2026-07-02 01:54:26.293298
+694,297,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-09-02 00:34:29.293298
+695,281,employee,Does the OEM part number fit this specific trim variant?,2026-04-06 13:18:15.293298
+696,273,employee,Does the OEM part number fit this specific trim variant?,2025-11-01 02:31:05.293298
+697,229,employee,How much transmission fluid is required for a complete flush on this model?,2026-03-05 13:05:35.293298
+698,178,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-02-04 09:24:15.293298
+699,199,employee,What is the torque spec for the cylinder head bolts?,2026-04-09 17:32:17.293298
+700,128,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-12-07 21:42:03.293298
+701,69,employee,Show me the wiring diagram for the alternator and main relay.,2026-03-27 21:35:59.293298
+702,157,employee,Does the OEM part number fit this specific trim variant?,2025-10-13 05:44:49.293298
+703,222,employee,How much transmission fluid is required for a complete flush on this model?,2026-06-01 15:10:54.293298
+704,264,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-03-17 04:10:22.293298
+705,80,employee,How much transmission fluid is required for a complete flush on this model?,2026-03-14 01:31:55.293298
+706,194,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-01-24 23:33:23.293298
+707,75,employee,What is the torque spec for the cylinder head bolts?,2026-03-22 21:00:31.293298
+708,64,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-04-27 11:23:19.293298
+709,29,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-03-18 08:23:17.293298
+710,24,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-05-18 15:35:37.293298
+711,158,employee,How much transmission fluid is required for a complete flush on this model?,2025-11-16 02:28:24.293298
+712,273,employee,Does the OEM part number fit this specific trim variant?,2025-11-01 01:41:47.293298
+713,40,employee,Show me the wiring diagram for the alternator and main relay.,2026-04-15 09:45:01.293298
+714,12,employee,Show me the wiring diagram for the alternator and main relay.,2026-01-02 06:16:30.293298
+715,108,employee,How much transmission fluid is required for a complete flush on this model?,2025-10-23 00:06:01.293298
+783,174,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-06-11 10:49:36.293298
+716,160,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-10-03 02:04:10.293298
+717,78,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-07-26 07:38:24.293298
+718,133,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-08-09 11:16:10.293298
+719,15,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-07-29 18:00:58.293298
+720,1,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-03-11 04:39:58.293298
+721,103,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-07-28 05:09:26.293298
+722,216,employee,How much transmission fluid is required for a complete flush on this model?,2026-03-29 23:36:25.293298
+723,2,employee,Does the OEM part number fit this specific trim variant?,2025-11-25 05:28:20.293298
+724,167,employee,What is the torque spec for the cylinder head bolts?,2026-04-13 13:28:36.293298
+725,166,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-10-25 13:20:34.293298
+726,53,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-08-25 19:40:33.293298
+727,151,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-10-19 19:21:39.293298
+728,267,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-19 20:45:49.293298
+729,51,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-23 06:27:59.293298
+730,12,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-02 06:24:29.293298
+731,75,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-03-22 21:19:36.293298
+732,99,employee,How much transmission fluid is required for a complete flush on this model?,2025-11-27 11:10:02.293298
+733,184,employee,How much transmission fluid is required for a complete flush on this model?,2025-12-03 13:42:25.293298
+734,2,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-25 05:32:32.293298
+735,280,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-01-31 06:31:08.293298
+736,61,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-08-26 19:28:21.293298
+737,126,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-05-16 20:23:54.293298
+738,59,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-09-01 20:32:35.293298
+739,228,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-06-06 14:38:05.293298
+740,163,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-05-22 23:02:09.293298
+741,256,employee,What is the torque spec for the cylinder head bolts?,2025-11-23 20:31:58.293298
+742,5,employee,What is the torque spec for the cylinder head bolts?,2025-11-13 21:33:54.293298
+743,58,employee,What is the torque spec for the cylinder head bolts?,2026-06-20 08:46:38.293298
+744,79,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-06-10 05:58:09.293298
+745,186,employee,What is the torque spec for the cylinder head bolts?,2025-11-05 13:34:16.293298
+746,268,employee,How much transmission fluid is required for a complete flush on this model?,2026-01-27 02:59:56.293298
+747,71,employee,Show me the wiring diagram for the alternator and main relay.,2025-08-24 18:02:10.293298
+748,46,employee,How much transmission fluid is required for a complete flush on this model?,2026-06-26 10:24:05.293298
+749,83,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-08-22 15:47:11.293298
+750,220,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-09-04 00:08:38.293298
+751,20,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-10 13:01:03.293298
+752,55,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-23 09:31:24.293298
+753,149,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-05-26 22:10:58.293298
+754,42,employee,What is the torque spec for the cylinder head bolts?,2026-06-23 01:48:49.293298
+755,104,employee,What is the torque spec for the cylinder head bolts?,2026-04-15 09:14:32.293298
+756,123,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-08-15 23:53:07.293298
+757,229,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-03-05 13:02:11.293298
+758,123,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-08-16 00:13:50.293298
+759,241,employee,Show me the wiring diagram for the alternator and main relay.,2025-12-07 06:24:28.293298
+760,162,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-09-26 23:05:38.293298
+761,248,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-08-23 14:20:51.293298
+762,59,employee,Does the OEM part number fit this specific trim variant?,2025-09-01 21:06:43.293298
+763,223,employee,What is the torque spec for the cylinder head bolts?,2026-06-01 13:07:52.293298
+764,98,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-06-04 20:01:26.293298
+765,11,employee,What is the torque spec for the cylinder head bolts?,2025-09-02 17:48:18.293298
+766,282,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-02-28 13:03:57.293298
+767,212,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-11 07:06:44.293298
+768,144,employee,How much transmission fluid is required for a complete flush on this model?,2026-04-06 22:49:01.293298
+769,18,employee,Does the OEM part number fit this specific trim variant?,2026-01-01 21:47:18.293298
+770,20,employee,How much transmission fluid is required for a complete flush on this model?,2025-10-10 12:52:46.293298
+771,196,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-04-05 01:29:01.293298
+772,286,employee,Does the OEM part number fit this specific trim variant?,2025-10-27 11:50:23.293298
+773,283,employee,What is the torque spec for the cylinder head bolts?,2025-10-27 15:46:39.293298
+774,138,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-02-22 14:25:13.293298
+775,77,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-01-01 09:50:50.293298
+776,289,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-12-24 21:19:40.293298
+777,7,employee,How much transmission fluid is required for a complete flush on this model?,2026-04-13 05:40:32.293298
+778,112,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-04-07 22:03:10.293298
+779,284,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-11-07 10:16:32.293298
+780,145,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-16 20:09:49.293298
+781,188,employee,How much transmission fluid is required for a complete flush on this model?,2026-06-30 00:00:00.293298
+782,77,employee,What is the torque spec for the cylinder head bolts?,2026-01-01 10:00:11.293298
+784,102,employee,What is the torque spec for the cylinder head bolts?,2026-06-18 06:18:54.293298
+785,92,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-10-05 08:57:20.293298
+786,233,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-11-04 23:53:49.293298
+787,45,employee,What is the torque spec for the cylinder head bolts?,2026-01-27 18:29:14.293298
+788,180,employee,How much transmission fluid is required for a complete flush on this model?,2026-05-13 08:26:39.293298
+789,257,employee,Show me the wiring diagram for the alternator and main relay.,2026-01-31 22:31:08.293298
+790,138,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-02-22 14:17:48.293298
+791,223,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-01 13:20:13.293298
+792,181,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-01 15:42:15.293298
+793,88,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-11-23 12:08:58.293298
+794,164,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-06-17 18:02:30.293298
+795,106,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-08-15 11:27:39.293298
+796,1,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-03-11 05:31:03.293298
+797,167,employee,Does the OEM part number fit this specific trim variant?,2026-04-13 13:14:26.293298
+798,59,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-09-01 20:55:13.293298
+799,106,employee,Show me the wiring diagram for the alternator and main relay.,2025-08-15 11:28:26.293298
+800,276,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-01-13 07:59:28.293298
+801,174,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-06-11 10:27:38.293298
+802,249,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-05-29 11:43:17.293298
+803,121,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-06-12 09:40:36.293298
+804,228,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-06-06 15:16:11.293298
+805,254,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-02-12 13:17:54.293298
+806,181,employee,What is the torque spec for the cylinder head bolts?,2026-01-01 15:27:13.293298
+807,111,employee,Does the OEM part number fit this specific trim variant?,2026-02-11 06:18:24.293298
+808,160,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-10-03 02:29:14.293298
+809,231,employee,How much transmission fluid is required for a complete flush on this model?,2026-06-07 19:24:22.293298
+810,251,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-12-30 22:08:32.293298
+811,16,employee,How much transmission fluid is required for a complete flush on this model?,2025-10-03 17:46:17.293298
+812,231,employee,What is the torque spec for the cylinder head bolts?,2026-06-07 19:33:23.293298
+813,300,employee,Show me the wiring diagram for the alternator and main relay.,2025-12-08 17:23:04.293298
+814,163,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-05-22 22:48:48.293298
+815,4,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-05-01 16:47:02.293298
+816,180,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-05-13 07:56:59.293298
+817,40,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-04-15 10:03:32.293298
+818,65,employee,How much transmission fluid is required for a complete flush on this model?,2025-10-31 11:13:56.293298
+819,204,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-12-14 18:30:32.293298
+820,252,employee,How much transmission fluid is required for a complete flush on this model?,2025-08-11 08:58:26.293298
+821,70,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-11-10 01:22:26.293298
+822,74,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-02-23 01:53:09.293298
+823,224,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-04-14 21:55:07.293298
+824,191,employee,What is the torque spec for the cylinder head bolts?,2026-07-12 17:41:38.293298
+825,70,employee,Does the OEM part number fit this specific trim variant?,2025-11-10 00:30:16.293298
+826,125,employee,Does the OEM part number fit this specific trim variant?,2025-10-07 06:25:50.293298
+827,270,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-03-24 13:52:58.293298
+828,108,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-10-22 23:34:53.293298
+829,43,employee,What is the torque spec for the cylinder head bolts?,2026-03-29 19:33:11.293298
+830,209,employee,What is the torque spec for the cylinder head bolts?,2026-02-26 13:03:27.293298
+831,184,employee,Does the OEM part number fit this specific trim variant?,2025-12-03 14:04:30.293298
+832,177,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-12-20 08:14:25.293298
+833,250,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-05-19 11:07:34.293298
+834,260,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-04-30 03:29:42.293298
+835,298,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-02-14 19:39:04.293298
+836,45,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-01-27 19:01:45.293298
+837,195,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-10-12 16:44:03.293298
+838,53,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-08-25 19:40:28.293298
+839,161,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-09-27 09:32:59.293298
+840,47,employee,How much transmission fluid is required for a complete flush on this model?,2026-06-29 00:50:55.293298
+841,215,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-04-04 08:46:31.293298
+842,47,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-06-29 01:37:57.293298
+843,67,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-09-05 00:10:26.293298
+844,152,employee,Show me the wiring diagram for the alternator and main relay.,2026-01-27 09:53:28.293298
+845,86,employee,Does the OEM part number fit this specific trim variant?,2026-05-27 03:26:16.293298
+846,132,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-08-02 10:09:36.293298
+847,248,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-08-23 14:05:32.293298
+848,226,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-04-14 05:53:25.293298
+849,54,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-09-04 03:03:36.293298
+850,139,employee,How much transmission fluid is required for a complete flush on this model?,2026-07-02 10:04:30.293298
+851,7,employee,What is the torque spec for the cylinder head bolts?,2026-04-13 06:11:56.293298
+852,232,employee,How much transmission fluid is required for a complete flush on this model?,2026-01-04 09:03:52.293298
+853,41,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-03-12 17:29:50.293298
+854,195,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-10-12 17:29:27.293298
+855,267,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-10-19 21:20:45.293298
+856,22,employee,How much transmission fluid is required for a complete flush on this model?,2026-04-07 23:23:57.293298
+857,47,employee,Show me the wiring diagram for the alternator and main relay.,2026-06-29 01:17:14.293298
+858,66,employee,Show me the wiring diagram for the alternator and main relay.,2025-12-04 12:52:16.293298
+859,276,employee,Does the OEM part number fit this specific trim variant?,2026-01-13 07:20:15.293298
+860,281,employee,What is the torque spec for the cylinder head bolts?,2026-04-06 13:23:52.293298
+861,200,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-11-01 08:48:21.293298
+862,92,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-10-05 08:59:19.293298
+863,14,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-10-25 02:53:05.293298
+864,298,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-02-14 19:20:01.293298
+865,39,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-07-02 00:57:18.293298
+866,204,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-12-14 18:41:46.293298
+867,229,employee,Does the OEM part number fit this specific trim variant?,2026-03-05 13:19:56.293298
+868,159,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-02-05 09:49:42.293298
+869,239,employee,Does the OEM part number fit this specific trim variant?,2026-02-09 03:34:41.293298
+870,292,employee,What is the torque spec for the cylinder head bolts?,2026-06-01 19:58:05.293298
+871,71,employee,What is the torque spec for the cylinder head bolts?,2025-08-24 18:26:50.293298
+872,66,employee,Show me the wiring diagram for the alternator and main relay.,2025-12-04 13:43:10.293298
+873,46,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-06-26 10:28:36.293298
+874,279,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-05-17 03:43:48.293298
+875,35,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-12-10 11:56:18.293298
+876,185,employee,Does the OEM part number fit this specific trim variant?,2025-12-04 10:03:02.293298
+877,193,employee,How much transmission fluid is required for a complete flush on this model?,2026-05-26 08:11:09.293298
+878,270,employee,What is the torque spec for the cylinder head bolts?,2026-03-24 13:09:22.293298
+879,141,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-06 14:56:32.293298
+880,177,employee,What is the torque spec for the cylinder head bolts?,2025-12-20 08:17:56.293298
+881,22,employee,Does the OEM part number fit this specific trim variant?,2026-04-07 23:03:10.293298
+882,117,employee,What is the torque spec for the cylinder head bolts?,2025-11-22 15:55:28.293298
+883,104,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-04-15 09:32:15.293298
+884,284,employee,How much transmission fluid is required for a complete flush on this model?,2025-11-07 10:20:27.293298
+885,282,employee,How much transmission fluid is required for a complete flush on this model?,2026-02-28 13:19:47.293298
+886,74,employee,What is the torque spec for the cylinder head bolts?,2026-02-23 01:22:49.293298
+887,119,employee,What is the torque spec for the cylinder head bolts?,2026-06-03 23:01:26.293298
+888,157,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-13 05:38:09.293298
+889,89,employee,Does the OEM part number fit this specific trim variant?,2025-11-18 17:38:50.293298
+890,68,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-10-03 11:26:45.293298
+891,116,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-07-25 11:15:37.293298
+892,174,employee,Does the OEM part number fit this specific trim variant?,2026-06-11 10:59:58.293298
+893,296,employee,Does the OEM part number fit this specific trim variant?,2026-01-06 22:00:09.293298
+894,151,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-10-19 20:02:24.293298
+895,4,employee,Show me the wiring diagram for the alternator and main relay.,2026-05-01 17:04:12.293298
+896,10,employee,What is the torque spec for the cylinder head bolts?,2025-11-06 19:47:15.293298
+897,123,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-08-15 23:46:47.293298
+898,134,employee,Show me the wiring diagram for the alternator and main relay.,2026-03-23 10:52:42.293298
+899,247,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-09-09 07:15:22.293298
+900,106,employee,Show me the wiring diagram for the alternator and main relay.,2025-08-15 11:50:17.293298
+901,283,employee,What is the torque spec for the cylinder head bolts?,2025-10-27 15:41:03.293298
+902,37,employee,How much transmission fluid is required for a complete flush on this model?,2026-05-17 02:42:36.293298
+903,271,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-11-27 16:52:44.293298
+904,178,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-02-04 09:32:51.293298
+905,286,employee,What is the torque spec for the cylinder head bolts?,2025-10-27 12:05:42.293298
+906,82,employee,What is the torque spec for the cylinder head bolts?,2026-06-02 07:42:56.293298
+907,244,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-01-01 17:54:17.293298
+908,15,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-07-29 17:44:29.293298
+909,93,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-18 20:03:09.293298
+910,141,employee,What is the torque spec for the cylinder head bolts?,2025-10-06 15:11:40.293298
+911,296,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-01-06 21:47:31.293298
+912,62,employee,How much transmission fluid is required for a complete flush on this model?,2025-09-11 08:08:40.293298
+913,125,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2025-10-07 06:37:24.293298
+914,183,employee,How much transmission fluid is required for a complete flush on this model?,2026-05-31 19:14:58.293298
+915,193,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-26 08:50:07.293298
+916,28,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-06 15:12:21.293298
+917,181,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-01 15:48:18.293298
+918,164,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-06-17 17:59:05.293298
+919,137,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-09-15 13:59:44.293298
+920,114,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-04-02 07:12:33.293298
+921,14,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-25 02:46:06.293298
+922,250,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-19 11:21:20.293298
+923,187,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-26 00:21:21.293298
+924,268,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-01-27 03:17:13.293298
+925,35,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-12-10 11:56:29.293298
+926,113,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-12-24 01:14:26.293298
+927,20,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-10-10 13:16:12.293298
+928,142,employee,What is the torque spec for the cylinder head bolts?,2025-10-16 13:12:10.293298
+929,82,employee,What is the torque spec for the cylinder head bolts?,2026-06-02 07:25:55.293298
+930,117,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-11-22 16:08:36.293298
+931,74,employee,What is the torque spec for the cylinder head bolts?,2026-02-23 01:15:10.293298
+932,227,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-08-25 02:10:27.293298
+933,160,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-10-03 02:11:20.293298
+934,22,employee,What is the torque spec for the cylinder head bolts?,2026-04-07 22:48:34.293298
+935,80,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-03-14 01:25:08.293298
+936,170,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-12-25 14:16:17.293298
+937,12,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-01-02 06:50:15.293298
+938,147,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-02-12 19:33:13.293298
+939,4,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-05-01 16:30:33.293298
+940,140,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-11-05 12:16:13.293298
+941,34,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-03 04:58:12.293298
+942,238,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-07-18 11:46:41.293298
+943,71,employee,Does the OEM part number fit this specific trim variant?,2025-08-24 18:43:27.293298
+944,189,employee,What is the torque spec for the cylinder head bolts?,2026-01-15 13:31:16.293298
+945,185,employee,How much transmission fluid is required for a complete flush on this model?,2025-12-04 09:54:49.293298
+946,120,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-06-04 07:09:16.293298
+947,57,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-05-16 19:40:01.293298
+948,247,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-09-09 07:10:22.293298
+949,63,employee,Show me the wiring diagram for the alternator and main relay.,2026-04-21 14:27:30.293298
+950,25,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-07-16 20:27:35.293298
+951,19,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-07-18 09:23:18.293298
+952,253,employee,Show me the wiring diagram for the alternator and main relay.,2026-01-08 09:20:26.293298
+953,197,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-08-19 21:48:21.293298
+954,59,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-09-01 21:11:44.293298
+955,247,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-09-09 07:12:00.293298
+956,77,employee,How much transmission fluid is required for a complete flush on this model?,2026-01-01 10:04:32.293298
+957,231,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-06-07 19:14:53.293298
+958,185,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-12-04 09:36:40.293298
+959,181,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-01-01 15:28:46.293298
+960,202,employee,Does the OEM part number fit this specific trim variant?,2026-02-03 00:59:12.293298
+961,141,employee,Show me the wiring diagram for the alternator and main relay.,2025-10-06 15:29:04.293298
+962,6,employee,How much transmission fluid is required for a complete flush on this model?,2026-04-12 04:26:52.293298
+963,1,employee,Does the OEM part number fit this specific trim variant?,2026-03-11 04:44:53.293298
+964,202,employee,What is the torque spec for the cylinder head bolts?,2026-02-03 01:22:27.293298
+965,100,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-11-22 08:22:23.293298
+966,217,employee,How much transmission fluid is required for a complete flush on this model?,2026-05-08 08:04:06.293298
+967,97,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-09-14 08:57:13.293298
+968,42,employee,Show me the wiring diagram for the alternator and main relay.,2026-06-23 01:46:16.293298
+969,49,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-05-19 14:44:35.293298
+970,100,employee,How much transmission fluid is required for a complete flush on this model?,2025-11-22 08:03:21.293298
+971,42,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-06-23 01:51:57.293298
+972,150,employee,"Vehicle is throwing code P0300, what are the top three causes?",2025-11-24 19:38:35.293298
+973,153,employee,Does the OEM part number fit this specific trim variant?,2026-01-04 09:35:33.293298
+974,17,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-05-01 16:46:28.293298
+975,220,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-09-04 00:29:31.293298
+976,240,employee,Show me the wiring diagram for the alternator and main relay.,2026-06-08 02:24:33.293298
+977,271,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-11-27 16:10:44.293298
+978,218,employee,What is the torque spec for the cylinder head bolts?,2025-10-14 14:21:55.293298
+979,17,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-05-01 17:13:52.293298
+980,247,employee,How much transmission fluid is required for a complete flush on this model?,2025-09-09 07:11:28.293298
+981,112,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-04-07 22:06:27.293298
+982,269,employee,What is the torque spec for the cylinder head bolts?,2025-08-29 10:55:52.293298
+983,241,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2025-12-07 06:31:09.293298
+984,90,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2025-11-30 11:13:43.293298
+985,148,employee,"Vehicle is throwing code P0300, what are the top three causes?",2026-06-11 02:03:50.293298
+986,122,employee,What is the torque spec for the cylinder head bolts?,2026-04-25 04:26:53.293298
+987,84,bot,"The recommended torque is 35 Nm, followed by a 90-degree turn.",2026-02-12 00:27:44.293298
+988,236,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-04-06 02:41:36.293298
+989,104,bot,"Yes, based on the vehicle catalog, that part is a direct fit.",2026-04-15 09:42:27.293298
+990,187,bot,Pulling up the diagram... I recommend checking the main ground strap first.,2026-01-25 23:43:37.293298
+991,290,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2026-06-23 10:52:44.293298
+992,11,bot,"P0300 indicates a random misfire. Start by inspecting spark plugs, ignition coils, and fuel pressure.",2025-09-02 17:47:01.293298
+993,67,employee,How much transmission fluid is required for a complete flush on this model?,2025-09-05 00:00:58.293298
+994,214,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-05-09 15:49:29.293298
+995,213,employee,How much transmission fluid is required for a complete flush on this model?,2026-07-09 11:43:38.293298
+996,177,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2025-12-20 08:22:34.293298
+997,171,bot,"The capacity is 4.5 liters for a standard drain/fill, or 8.0 liters for a dry fill/flush.",2026-06-29 12:54:12.293298
+998,74,employee,What is the torque spec for the cylinder head bolts?,2026-02-23 01:10:44.293298
+999,61,employee,Does the OEM part number fit this specific trim variant?,2025-08-26 19:20:19.293298
+1000,198,employee,What is the torque spec for the cylinder head bolts?,2026-04-24 18:56:58.293298

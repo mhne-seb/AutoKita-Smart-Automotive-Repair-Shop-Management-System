@@ -1,0 +1,32 @@
+id,job_order_id,job_order_service_id,purchase_order_id,status,part_number,description,quantity,retail_unit_price,total_retail_amount,supplier_unit_cost
+1,168,384,13,in_transit,PN-3490-A,Oil Filter - Premium,3,6068.55,18205.66,4334.68
+2,82,283,20,ordered,PN-8338-C,Spark Plug (Iridium),1,6483.72,6483.72,4631.23
+3,438,164,,in_stock,PN-2840-T,Ceramic Brake Pad Set,1,6596.58,6596.58,4711.84
+4,378,35,6,ordered,PN-3541-T,Oil Filter - Premium,1,2756.84,2756.84,1969.17
+5,443,171,4,installed,PN-1994-M,Ceramic Brake Pad Set,3,1280.57,3841.70,914.69
+6,270,253,,in_stock,PN-3529-K,Radiator Coolant (1 Gallon),4,6323.07,25292.29,4516.48
+7,85,42,20,installed,PN-2214-Q,Fuel Filter,2,5436.35,10872.71,3883.11
+8,300,489,19,received,PN-2593-P,Ceramic Brake Pad Set,4,5038.45,20153.78,3598.89
+9,413,57,,to_order,PN-2489-D,Spark Plug (Iridium),3,3858.69,11576.08,2756.21
+10,55,204,8,received,PN-8525-G,Radiator Coolant (1 Gallon),1,5852.03,5852.03,4180.02
+11,21,147,8,ordered,PN-9342-K,Air Intake Filter,3,5307.25,15921.74,3790.89
+12,244,483,19,in_transit,PN-2956-A,Alternator Belt,4,4828.39,19313.56,3448.85
+13,190,129,19,received,PN-6681-R,Cabin Air Filter,2,588.90,1177.79,420.64
+14,125,453,11,in_transit,PN-3895-S,Spark Plug (Iridium),1,3126.56,3126.56,2233.26
+15,360,6,20,received,PN-8247-D,Spark Plug (Iridium),3,3715.92,11147.77,2654.23
+16,165,197,,to_order,PN-1274-A,Radiator Coolant (1 Gallon),4,402.25,1608.99,287.32
+17,194,241,,to_order,PN-6249-Z,Wiper Blade Set,3,1463.43,4390.30,1045.31
+18,124,150,,in_stock,PN-5769-N,Spark Plug (Iridium),4,5117.22,20468.90,3655.16
+19,120,14,,to_order,PN-3435-J,Synthetic Engine Oil (1L),2,4981.84,9963.69,3558.46
+20,336,392,,to_order,PN-6351-N,Alternator Belt,1,5170.55,5170.55,3693.25
+21,514,335,,in_stock,PN-2631-A,Spark Plug (Iridium),4,1805.22,7220.86,1289.44
+22,57,13,18,received,PN-9711-Y,Radiator Coolant (1 Gallon),2,5197.84,10395.67,3712.74
+23,334,124,,to_order,PN-1453-A,Cabin Air Filter,4,4080.89,16323.55,2914.92
+24,450,486,,in_stock,PN-7043-S,Spark Plug (Iridium),3,675.53,2026.58,482.52
+25,110,333,14,in_transit,PN-8944-S,Alternator Belt,3,3029.26,9087.79,2163.76
+26,211,232,10,installed,PN-3182-G,Wiper Blade Set,1,5615.05,5615.05,4010.75
+27,317,290,16,in_transit,PN-4535-Z,Cabin Air Filter,3,1050.67,3152.02,750.48
+28,481,34,,to_order,PN-3662-P,Wiper Blade Set,4,1709.23,6836.93,1220.88
+29,175,136,15,received,PN-4892-T,Spark Plug (Iridium),1,1515.95,1515.95,1082.82
+30,314,264,3,received,PN-2263-J,Spark Plug (Iridium),2,2094.62,4189.25,1496.16
+31,495,313,,in_stock,PN-2532-S,Ceramic Brake Pad Set,3,6614.15,19842.44,4724.39

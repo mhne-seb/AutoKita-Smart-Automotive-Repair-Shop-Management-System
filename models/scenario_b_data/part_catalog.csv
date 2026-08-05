@@ -1,0 +1,201 @@
+id,oem_part_number,brand,part_category,part_name,is_oem,description
+1,FOR-00001-46,Ford,Brakes,Brake Caliper,True,Premium quality brake caliper manufactured by Ford. Designed to meet or exceed original equipment specifications.
+2,AIS-00002-50,Aisin,Filters,Oil Filter,False,Premium quality oil filter manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+3,NGK-00003-63,NGK,Filters,Cabin Air Filter,False,Premium quality cabin air filter manufactured by NGK. Designed to meet or exceed original equipment specifications.
+4,DEN-00004-61,Denso,Filters,Air Filter,False,Premium quality air filter manufactured by Denso. Designed to meet or exceed original equipment specifications.
+5,AIS-00005-45,Aisin,Electrical,Spark Plug,False,Premium quality spark plug manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+6,KYB-00006-90,KYB,Brakes,Brake Caliper,False,Premium quality brake caliper manufactured by KYB. Designed to meet or exceed original equipment specifications.
+7,NGK-00007-18,NGK,Filters,Fuel Filter,False,Premium quality fuel filter manufactured by NGK. Designed to meet or exceed original equipment specifications.
+8,MIT-00008-24,Mitsubishi,Transmission,Transmission Fluid Filter,True,Premium quality transmission fluid filter manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+9,DEN-00009-54,Denso,Electrical,Starter Motor,False,Premium quality starter motor manufactured by Denso. Designed to meet or exceed original equipment specifications.
+10,DEN-00010-54,Denso,Electrical,Starter Motor,False,Premium quality starter motor manufactured by Denso. Designed to meet or exceed original equipment specifications.
+11,MIT-00011-38,Mitsubishi,Suspension,Control Arm,True,Premium quality control arm manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+12,AIS-00012-81,Aisin,Transmission,CV Axle,False,Premium quality cv axle manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+13,AIS-00013-38,Aisin,Transmission,Flywheel,False,Premium quality flywheel manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+14,FOR-00014-38,Ford,Engine,Head Gasket,True,Premium quality head gasket manufactured by Ford. Designed to meet or exceed original equipment specifications.
+15,KYB-00015-28,KYB,Suspension,Shock Absorber,False,Premium quality shock absorber manufactured by KYB. Designed to meet or exceed original equipment specifications.
+16,BOS-00016-82,Bosch,Suspension,Control Arm,False,Premium quality control arm manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+17,AIS-00017-83,Aisin,Filters,Cabin Air Filter,False,Premium quality cabin air filter manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+18,BOS-00018-27,Bosch,Engine,Oil Pan,False,Premium quality oil pan manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+19,MIT-00019-21,Mitsubishi,Suspension,Control Arm,True,Premium quality control arm manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+20,NGK-00020-24,NGK,Electrical,Alternator,False,Premium quality alternator manufactured by NGK. Designed to meet or exceed original equipment specifications.
+21,FOR-00021-48,Ford,Suspension,Tie Rod End,True,Premium quality tie rod end manufactured by Ford. Designed to meet or exceed original equipment specifications.
+22,KYB-00022-84,KYB,Filters,Air Filter,False,Premium quality air filter manufactured by KYB. Designed to meet or exceed original equipment specifications.
+23,MIT-00023-81,Mitsubishi,Brakes,Brake Caliper,True,Premium quality brake caliper manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+24,KYB-00024-14,KYB,Brakes,Brake Rotor,False,Premium quality brake rotor manufactured by KYB. Designed to meet or exceed original equipment specifications.
+25,FOR-00025-86,Ford,Filters,Fuel Filter,True,Premium quality fuel filter manufactured by Ford. Designed to meet or exceed original equipment specifications.
+26,BOS-00026-36,Bosch,Transmission,CV Axle,False,Premium quality cv axle manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+27,TOY-00027-27,Toyota,Brakes,Brake Shoe,True,Premium quality brake shoe manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+28,NGK-00028-63,NGK,Filters,Oil Filter,False,Premium quality oil filter manufactured by NGK. Designed to meet or exceed original equipment specifications.
+29,BOS-00029-11,Bosch,Electrical,Starter Motor,False,Premium quality starter motor manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+30,MIT-00030-83,Mitsubishi,Filters,Cabin Air Filter,True,Premium quality cabin air filter manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+31,AIS-00031-91,Aisin,Brakes,Brake Pads (Front),False,Premium quality brake pads (front) manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+32,FOR-00032-13,Ford,Filters,Air Filter,True,Premium quality air filter manufactured by Ford. Designed to meet or exceed original equipment specifications.
+33,BOS-00033-37,Bosch,Engine,Timing Belt,False,Premium quality timing belt manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+34,TOY-00034-86,Toyota,Transmission,Flywheel,True,Premium quality flywheel manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+35,NGK-00035-12,NGK,Electrical,Starter Motor,False,Premium quality starter motor manufactured by NGK. Designed to meet or exceed original equipment specifications.
+36,MIT-00036-84,Mitsubishi,Filters,Air Filter,True,Premium quality air filter manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+37,MIT-00037-81,Mitsubishi,Suspension,Tie Rod End,True,Premium quality tie rod end manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+38,KYB-00038-35,KYB,Brakes,Brake Caliper,False,Premium quality brake caliper manufactured by KYB. Designed to meet or exceed original equipment specifications.
+39,AIS-00039-63,Aisin,Filters,Fuel Filter,False,Premium quality fuel filter manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+40,AIS-00040-59,Aisin,Electrical,Alternator,False,Premium quality alternator manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+41,NGK-00041-20,NGK,Suspension,Shock Absorber,False,Premium quality shock absorber manufactured by NGK. Designed to meet or exceed original equipment specifications.
+42,BOS-00042-76,Bosch,Engine,Timing Belt,False,Premium quality timing belt manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+43,MIT-00043-89,Mitsubishi,Suspension,Sway Bar Link,True,Premium quality sway bar link manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+44,DEN-00044-71,Denso,Filters,Air Filter,False,Premium quality air filter manufactured by Denso. Designed to meet or exceed original equipment specifications.
+45,AIS-00045-65,Aisin,Transmission,CV Axle,False,Premium quality cv axle manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+46,FOR-00046-45,Ford,Transmission,CV Axle,True,Premium quality cv axle manufactured by Ford. Designed to meet or exceed original equipment specifications.
+47,NGK-00047-47,NGK,Filters,Oil Filter,False,Premium quality oil filter manufactured by NGK. Designed to meet or exceed original equipment specifications.
+48,FOR-00048-24,Ford,Suspension,Control Arm,True,Premium quality control arm manufactured by Ford. Designed to meet or exceed original equipment specifications.
+49,AIS-00049-11,Aisin,Suspension,Shock Absorber,False,Premium quality shock absorber manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+50,KYB-00050-96,KYB,Brakes,Brake Caliper,False,Premium quality brake caliper manufactured by KYB. Designed to meet or exceed original equipment specifications.
+51,AIS-00051-43,Aisin,Filters,Cabin Air Filter,False,Premium quality cabin air filter manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+52,MIT-00052-44,Mitsubishi,Transmission,Flywheel,True,Premium quality flywheel manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+53,MIT-00053-16,Mitsubishi,Engine,Timing Belt,True,Premium quality timing belt manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+54,KYB-00054-43,KYB,Transmission,Clutch Kit,False,Premium quality clutch kit manufactured by KYB. Designed to meet or exceed original equipment specifications.
+55,TOY-00055-88,Toyota,Brakes,Brake Caliper,True,Premium quality brake caliper manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+56,NGK-00056-28,NGK,Filters,Cabin Air Filter,False,Premium quality cabin air filter manufactured by NGK. Designed to meet or exceed original equipment specifications.
+57,TOY-00057-16,Toyota,Electrical,Alternator,True,Premium quality alternator manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+58,AIS-00058-63,Aisin,Transmission,Clutch Kit,False,Premium quality clutch kit manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+59,AIS-00059-47,Aisin,Filters,Oil Filter,False,Premium quality oil filter manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+60,MIT-00060-88,Mitsubishi,Suspension,Tie Rod End,True,Premium quality tie rod end manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+61,FOR-00061-89,Ford,Engine,Timing Belt,True,Premium quality timing belt manufactured by Ford. Designed to meet or exceed original equipment specifications.
+62,FOR-00062-34,Ford,Brakes,Brake Caliper,True,Premium quality brake caliper manufactured by Ford. Designed to meet or exceed original equipment specifications.
+63,BOS-00063-71,Bosch,Filters,Cabin Air Filter,False,Premium quality cabin air filter manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+64,MIT-00064-69,Mitsubishi,Filters,Air Filter,True,Premium quality air filter manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+65,TOY-00065-37,Toyota,Engine,Timing Belt,True,Premium quality timing belt manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+66,NGK-00066-28,NGK,Electrical,Spark Plug,False,Premium quality spark plug manufactured by NGK. Designed to meet or exceed original equipment specifications.
+67,MIT-00067-39,Mitsubishi,Electrical,Ignition Coil,True,Premium quality ignition coil manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+68,TOY-00068-20,Toyota,Transmission,Transmission Fluid Filter,True,Premium quality transmission fluid filter manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+69,DEN-00069-73,Denso,Transmission,Flywheel,False,Premium quality flywheel manufactured by Denso. Designed to meet or exceed original equipment specifications.
+70,TOY-00070-24,Toyota,Filters,Cabin Air Filter,True,Premium quality cabin air filter manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+71,DEN-00071-72,Denso,Engine,Oil Pan,False,Premium quality oil pan manufactured by Denso. Designed to meet or exceed original equipment specifications.
+72,TOY-00072-98,Toyota,Suspension,Shock Absorber,True,Premium quality shock absorber manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+73,FOR-00073-74,Ford,Electrical,Ignition Coil,True,Premium quality ignition coil manufactured by Ford. Designed to meet or exceed original equipment specifications.
+74,FOR-00074-60,Ford,Brakes,Brake Caliper,True,Premium quality brake caliper manufactured by Ford. Designed to meet or exceed original equipment specifications.
+75,FOR-00075-83,Ford,Suspension,Control Arm,True,Premium quality control arm manufactured by Ford. Designed to meet or exceed original equipment specifications.
+76,AIS-00076-14,Aisin,Transmission,Flywheel,False,Premium quality flywheel manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+77,MIT-00077-86,Mitsubishi,Suspension,Tie Rod End,True,Premium quality tie rod end manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+78,FOR-00078-48,Ford,Engine,Oil Pan,True,Premium quality oil pan manufactured by Ford. Designed to meet or exceed original equipment specifications.
+79,NGK-00079-79,NGK,Transmission,CV Axle,False,Premium quality cv axle manufactured by NGK. Designed to meet or exceed original equipment specifications.
+80,AIS-00080-80,Aisin,Suspension,Sway Bar Link,False,Premium quality sway bar link manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+81,FOR-00081-72,Ford,Suspension,Tie Rod End,True,Premium quality tie rod end manufactured by Ford. Designed to meet or exceed original equipment specifications.
+82,DEN-00082-42,Denso,Brakes,Brake Pads (Front),False,Premium quality brake pads (front) manufactured by Denso. Designed to meet or exceed original equipment specifications.
+83,KYB-00083-27,KYB,Suspension,Shock Absorber,False,Premium quality shock absorber manufactured by KYB. Designed to meet or exceed original equipment specifications.
+84,MIT-00084-46,Mitsubishi,Suspension,Shock Absorber,True,Premium quality shock absorber manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+85,DEN-00085-91,Denso,Transmission,Clutch Kit,False,Premium quality clutch kit manufactured by Denso. Designed to meet or exceed original equipment specifications.
+86,KYB-00086-25,KYB,Engine,Head Gasket,False,Premium quality head gasket manufactured by KYB. Designed to meet or exceed original equipment specifications.
+87,FOR-00087-79,Ford,Engine,Oil Pan,True,Premium quality oil pan manufactured by Ford. Designed to meet or exceed original equipment specifications.
+88,KYB-00088-42,KYB,Brakes,Brake Rotor,False,Premium quality brake rotor manufactured by KYB. Designed to meet or exceed original equipment specifications.
+89,NGK-00089-83,NGK,Electrical,Spark Plug,False,Premium quality spark plug manufactured by NGK. Designed to meet or exceed original equipment specifications.
+90,FOR-00090-41,Ford,Electrical,Starter Motor,True,Premium quality starter motor manufactured by Ford. Designed to meet or exceed original equipment specifications.
+91,TOY-00091-49,Toyota,Suspension,Shock Absorber,True,Premium quality shock absorber manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+92,FOR-00092-99,Ford,Electrical,Spark Plug,True,Premium quality spark plug manufactured by Ford. Designed to meet or exceed original equipment specifications.
+93,BOS-00093-67,Bosch,Brakes,Brake Pads (Front),False,Premium quality brake pads (front) manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+94,TOY-00094-36,Toyota,Brakes,Brake Rotor,True,Premium quality brake rotor manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+95,FOR-00095-27,Ford,Brakes,Brake Rotor,True,Premium quality brake rotor manufactured by Ford. Designed to meet or exceed original equipment specifications.
+96,MIT-00096-72,Mitsubishi,Filters,Air Filter,True,Premium quality air filter manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+97,TOY-00097-84,Toyota,Suspension,Shock Absorber,True,Premium quality shock absorber manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+98,FOR-00098-76,Ford,Suspension,Sway Bar Link,True,Premium quality sway bar link manufactured by Ford. Designed to meet or exceed original equipment specifications.
+99,AIS-00099-75,Aisin,Suspension,Sway Bar Link,False,Premium quality sway bar link manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+100,TOY-00100-97,Toyota,Brakes,Brake Rotor,True,Premium quality brake rotor manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+101,AIS-00101-32,Aisin,Suspension,Tie Rod End,False,Premium quality tie rod end manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+102,BOS-00102-55,Bosch,Brakes,Brake Caliper,False,Premium quality brake caliper manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+103,FOR-00103-82,Ford,Transmission,Transmission Fluid Filter,True,Premium quality transmission fluid filter manufactured by Ford. Designed to meet or exceed original equipment specifications.
+104,KYB-00104-37,KYB,Electrical,Alternator,False,Premium quality alternator manufactured by KYB. Designed to meet or exceed original equipment specifications.
+105,DEN-00105-42,Denso,Brakes,Brake Shoe,False,Premium quality brake shoe manufactured by Denso. Designed to meet or exceed original equipment specifications.
+106,FOR-00106-26,Ford,Engine,Timing Belt,True,Premium quality timing belt manufactured by Ford. Designed to meet or exceed original equipment specifications.
+107,FOR-00107-76,Ford,Brakes,Brake Pads (Front),True,Premium quality brake pads (front) manufactured by Ford. Designed to meet or exceed original equipment specifications.
+108,NGK-00108-13,NGK,Engine,Head Gasket,False,Premium quality head gasket manufactured by NGK. Designed to meet or exceed original equipment specifications.
+109,DEN-00109-92,Denso,Engine,Head Gasket,False,Premium quality head gasket manufactured by Denso. Designed to meet or exceed original equipment specifications.
+110,FOR-00110-52,Ford,Electrical,Spark Plug,True,Premium quality spark plug manufactured by Ford. Designed to meet or exceed original equipment specifications.
+111,BOS-00111-74,Bosch,Filters,Oil Filter,False,Premium quality oil filter manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+112,FOR-00112-20,Ford,Transmission,Flywheel,True,Premium quality flywheel manufactured by Ford. Designed to meet or exceed original equipment specifications.
+113,KYB-00113-12,KYB,Brakes,Brake Rotor,False,Premium quality brake rotor manufactured by KYB. Designed to meet or exceed original equipment specifications.
+114,DEN-00114-23,Denso,Transmission,Clutch Kit,False,Premium quality clutch kit manufactured by Denso. Designed to meet or exceed original equipment specifications.
+115,MIT-00115-15,Mitsubishi,Brakes,Brake Rotor,True,Premium quality brake rotor manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+116,AIS-00116-40,Aisin,Brakes,Brake Rotor,False,Premium quality brake rotor manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+117,MIT-00117-98,Mitsubishi,Electrical,Ignition Coil,True,Premium quality ignition coil manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+118,BOS-00118-27,Bosch,Transmission,Flywheel,False,Premium quality flywheel manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+119,KYB-00119-59,KYB,Suspension,Control Arm,False,Premium quality control arm manufactured by KYB. Designed to meet or exceed original equipment specifications.
+120,FOR-00120-90,Ford,Brakes,Brake Rotor,True,Premium quality brake rotor manufactured by Ford. Designed to meet or exceed original equipment specifications.
+121,KYB-00121-41,KYB,Suspension,Sway Bar Link,False,Premium quality sway bar link manufactured by KYB. Designed to meet or exceed original equipment specifications.
+122,TOY-00122-86,Toyota,Transmission,CV Axle,True,Premium quality cv axle manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+123,DEN-00123-97,Denso,Brakes,Brake Rotor,False,Premium quality brake rotor manufactured by Denso. Designed to meet or exceed original equipment specifications.
+124,KYB-00124-63,KYB,Electrical,Ignition Coil,False,Premium quality ignition coil manufactured by KYB. Designed to meet or exceed original equipment specifications.
+125,BOS-00125-13,Bosch,Transmission,Clutch Kit,False,Premium quality clutch kit manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+126,MIT-00126-91,Mitsubishi,Brakes,Brake Rotor,True,Premium quality brake rotor manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+127,MIT-00127-39,Mitsubishi,Transmission,Flywheel,True,Premium quality flywheel manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+128,FOR-00128-68,Ford,Engine,Head Gasket,True,Premium quality head gasket manufactured by Ford. Designed to meet or exceed original equipment specifications.
+129,MIT-00129-86,Mitsubishi,Suspension,Control Arm,True,Premium quality control arm manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+130,NGK-00130-36,NGK,Suspension,Control Arm,False,Premium quality control arm manufactured by NGK. Designed to meet or exceed original equipment specifications.
+131,FOR-00131-93,Ford,Suspension,Shock Absorber,True,Premium quality shock absorber manufactured by Ford. Designed to meet or exceed original equipment specifications.
+132,AIS-00132-55,Aisin,Brakes,Brake Pads (Front),False,Premium quality brake pads (front) manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+133,AIS-00133-71,Aisin,Electrical,Spark Plug,False,Premium quality spark plug manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+134,KYB-00134-85,KYB,Filters,Air Filter,False,Premium quality air filter manufactured by KYB. Designed to meet or exceed original equipment specifications.
+135,DEN-00135-92,Denso,Brakes,Brake Shoe,False,Premium quality brake shoe manufactured by Denso. Designed to meet or exceed original equipment specifications.
+136,BOS-00136-93,Bosch,Electrical,Ignition Coil,False,Premium quality ignition coil manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+137,FOR-00137-83,Ford,Transmission,Clutch Kit,True,Premium quality clutch kit manufactured by Ford. Designed to meet or exceed original equipment specifications.
+138,MIT-00138-22,Mitsubishi,Transmission,Clutch Kit,True,Premium quality clutch kit manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+139,AIS-00139-83,Aisin,Electrical,Spark Plug,False,Premium quality spark plug manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+140,FOR-00140-24,Ford,Electrical,Alternator,True,Premium quality alternator manufactured by Ford. Designed to meet or exceed original equipment specifications.
+141,MIT-00141-92,Mitsubishi,Suspension,Sway Bar Link,True,Premium quality sway bar link manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+142,KYB-00142-77,KYB,Transmission,CV Axle,False,Premium quality cv axle manufactured by KYB. Designed to meet or exceed original equipment specifications.
+143,DEN-00143-27,Denso,Electrical,Starter Motor,False,Premium quality starter motor manufactured by Denso. Designed to meet or exceed original equipment specifications.
+144,NGK-00144-66,NGK,Brakes,Brake Pads (Front),False,Premium quality brake pads (front) manufactured by NGK. Designed to meet or exceed original equipment specifications.
+145,TOY-00145-60,Toyota,Transmission,Flywheel,True,Premium quality flywheel manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+146,KYB-00146-63,KYB,Electrical,Alternator,False,Premium quality alternator manufactured by KYB. Designed to meet or exceed original equipment specifications.
+147,KYB-00147-76,KYB,Suspension,Tie Rod End,False,Premium quality tie rod end manufactured by KYB. Designed to meet or exceed original equipment specifications.
+148,BOS-00148-90,Bosch,Transmission,Flywheel,False,Premium quality flywheel manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+149,BOS-00149-53,Bosch,Transmission,Transmission Fluid Filter,False,Premium quality transmission fluid filter manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+150,AIS-00150-17,Aisin,Transmission,Flywheel,False,Premium quality flywheel manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+151,TOY-00151-59,Toyota,Brakes,Brake Rotor,True,Premium quality brake rotor manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+152,KYB-00152-26,KYB,Filters,Air Filter,False,Premium quality air filter manufactured by KYB. Designed to meet or exceed original equipment specifications.
+153,MIT-00153-97,Mitsubishi,Suspension,Shock Absorber,True,Premium quality shock absorber manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+154,NGK-00154-38,NGK,Transmission,Flywheel,False,Premium quality flywheel manufactured by NGK. Designed to meet or exceed original equipment specifications.
+155,FOR-00155-20,Ford,Suspension,Sway Bar Link,True,Premium quality sway bar link manufactured by Ford. Designed to meet or exceed original equipment specifications.
+156,AIS-00156-33,Aisin,Brakes,Brake Shoe,False,Premium quality brake shoe manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+157,FOR-00157-43,Ford,Brakes,Brake Caliper,True,Premium quality brake caliper manufactured by Ford. Designed to meet or exceed original equipment specifications.
+158,KYB-00158-91,KYB,Transmission,Transmission Fluid Filter,False,Premium quality transmission fluid filter manufactured by KYB. Designed to meet or exceed original equipment specifications.
+159,AIS-00159-15,Aisin,Suspension,Control Arm,False,Premium quality control arm manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+160,KYB-00160-14,KYB,Brakes,Brake Shoe,False,Premium quality brake shoe manufactured by KYB. Designed to meet or exceed original equipment specifications.
+161,NGK-00161-57,NGK,Brakes,Brake Shoe,False,Premium quality brake shoe manufactured by NGK. Designed to meet or exceed original equipment specifications.
+162,FOR-00162-71,Ford,Filters,Fuel Filter,True,Premium quality fuel filter manufactured by Ford. Designed to meet or exceed original equipment specifications.
+163,FOR-00163-81,Ford,Engine,Head Gasket,True,Premium quality head gasket manufactured by Ford. Designed to meet or exceed original equipment specifications.
+164,MIT-00164-59,Mitsubishi,Transmission,Transmission Fluid Filter,True,Premium quality transmission fluid filter manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+165,FOR-00165-14,Ford,Brakes,Brake Rotor,True,Premium quality brake rotor manufactured by Ford. Designed to meet or exceed original equipment specifications.
+166,NGK-00166-27,NGK,Filters,Oil Filter,False,Premium quality oil filter manufactured by NGK. Designed to meet or exceed original equipment specifications.
+167,FOR-00167-30,Ford,Engine,Timing Belt,True,Premium quality timing belt manufactured by Ford. Designed to meet or exceed original equipment specifications.
+168,KYB-00168-58,KYB,Electrical,Starter Motor,False,Premium quality starter motor manufactured by KYB. Designed to meet or exceed original equipment specifications.
+169,MIT-00169-33,Mitsubishi,Engine,Head Gasket,True,Premium quality head gasket manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+170,KYB-00170-62,KYB,Brakes,Brake Shoe,False,Premium quality brake shoe manufactured by KYB. Designed to meet or exceed original equipment specifications.
+171,FOR-00171-89,Ford,Filters,Fuel Filter,True,Premium quality fuel filter manufactured by Ford. Designed to meet or exceed original equipment specifications.
+172,FOR-00172-91,Ford,Suspension,Tie Rod End,True,Premium quality tie rod end manufactured by Ford. Designed to meet or exceed original equipment specifications.
+173,BOS-00173-94,Bosch,Suspension,Tie Rod End,False,Premium quality tie rod end manufactured by Bosch. Designed to meet or exceed original equipment specifications.
+174,MIT-00174-43,Mitsubishi,Suspension,Control Arm,True,Premium quality control arm manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+175,AIS-00175-31,Aisin,Suspension,Sway Bar Link,False,Premium quality sway bar link manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+176,AIS-00176-36,Aisin,Suspension,Control Arm,False,Premium quality control arm manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+177,KYB-00177-98,KYB,Transmission,Clutch Kit,False,Premium quality clutch kit manufactured by KYB. Designed to meet or exceed original equipment specifications.
+178,DEN-00178-21,Denso,Brakes,Brake Pads (Front),False,Premium quality brake pads (front) manufactured by Denso. Designed to meet or exceed original equipment specifications.
+179,MIT-00179-15,Mitsubishi,Suspension,Shock Absorber,True,Premium quality shock absorber manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+180,FOR-00180-41,Ford,Brakes,Brake Rotor,True,Premium quality brake rotor manufactured by Ford. Designed to meet or exceed original equipment specifications.
+181,MIT-00181-73,Mitsubishi,Electrical,Alternator,True,Premium quality alternator manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+182,FOR-00182-51,Ford,Electrical,Starter Motor,True,Premium quality starter motor manufactured by Ford. Designed to meet or exceed original equipment specifications.
+183,NGK-00183-28,NGK,Suspension,Tie Rod End,False,Premium quality tie rod end manufactured by NGK. Designed to meet or exceed original equipment specifications.
+184,KYB-00184-59,KYB,Filters,Oil Filter,False,Premium quality oil filter manufactured by KYB. Designed to meet or exceed original equipment specifications.
+185,NGK-00185-24,NGK,Engine,Timing Belt,False,Premium quality timing belt manufactured by NGK. Designed to meet or exceed original equipment specifications.
+186,TOY-00186-89,Toyota,Suspension,Shock Absorber,True,Premium quality shock absorber manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+187,MIT-00187-78,Mitsubishi,Electrical,Spark Plug,True,Premium quality spark plug manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+188,FOR-00188-26,Ford,Transmission,Clutch Kit,True,Premium quality clutch kit manufactured by Ford. Designed to meet or exceed original equipment specifications.
+189,DEN-00189-62,Denso,Filters,Fuel Filter,False,Premium quality fuel filter manufactured by Denso. Designed to meet or exceed original equipment specifications.
+190,DEN-00190-98,Denso,Electrical,Ignition Coil,False,Premium quality ignition coil manufactured by Denso. Designed to meet or exceed original equipment specifications.
+191,DEN-00191-45,Denso,Brakes,Brake Caliper,False,Premium quality brake caliper manufactured by Denso. Designed to meet or exceed original equipment specifications.
+192,AIS-00192-54,Aisin,Transmission,CV Axle,False,Premium quality cv axle manufactured by Aisin. Designed to meet or exceed original equipment specifications.
+193,NGK-00193-57,NGK,Filters,Air Filter,False,Premium quality air filter manufactured by NGK. Designed to meet or exceed original equipment specifications.
+194,DEN-00194-95,Denso,Engine,Timing Belt,False,Premium quality timing belt manufactured by Denso. Designed to meet or exceed original equipment specifications.
+195,TOY-00195-45,Toyota,Electrical,Starter Motor,True,Premium quality starter motor manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+196,FOR-00196-26,Ford,Transmission,Transmission Fluid Filter,True,Premium quality transmission fluid filter manufactured by Ford. Designed to meet or exceed original equipment specifications.
+197,DEN-00197-11,Denso,Filters,Oil Filter,False,Premium quality oil filter manufactured by Denso. Designed to meet or exceed original equipment specifications.
+198,TOY-00198-52,Toyota,Transmission,Transmission Fluid Filter,True,Premium quality transmission fluid filter manufactured by Toyota. Designed to meet or exceed original equipment specifications.
+199,MIT-00199-94,Mitsubishi,Filters,Oil Filter,True,Premium quality oil filter manufactured by Mitsubishi. Designed to meet or exceed original equipment specifications.
+200,TOY-00200-17,Toyota,Transmission,Transmission Fluid Filter,True,Premium quality transmission fluid filter manufactured by Toyota. Designed to meet or exceed original equipment specifications.

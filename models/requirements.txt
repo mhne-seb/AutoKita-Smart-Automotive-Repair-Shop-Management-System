@@ -3,3 +3,6 @@ Flask-Cors
 joblib
 numpy
 scikit-learn
+waitress
+psycopg2-binary
+pandas

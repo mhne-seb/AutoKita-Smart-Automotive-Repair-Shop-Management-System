@@ -454,7 +454,12 @@ CREATE TABLE "service_progress_tasks" (
   "task_title" varchar(100) NOT NULL,
   "note" TEXT,
   "task_status" VARCHAR DEFAULT 'pending',
-  "completed_at" TIMESTAMP
+  "completed_at" TIMESTAMP,
+  "price" DECIMAL(10,2),
+  "billable" BOOLEAN DEFAULT true,
+  "scheduled_date" TIMESTAMP,
+  "mechanic_id" INT REFERENCES employees(id),
+  "estimated_finish" TIMESTAMP
 );
 
 COMMENT ON COLUMN "users"."password" IS 'We will create their password';

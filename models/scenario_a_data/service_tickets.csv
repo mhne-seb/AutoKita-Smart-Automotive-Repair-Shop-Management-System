@@ -1,0 +1,801 @@
+id,user_id,vehicle_id,service_mode,home_service_address,customer_concern,ticket_status,request_date
+1,152,419,walk_in,None,Car pulls heavily to the right while driving.,pending,2026-01-17 00:52:19.293298
+2,298,980,walk_in,None,Car pulls heavily to the right while driving.,approved,2025-12-24 04:41:24.293298
+3,386,468,home_service,"15 Bonifacio St., Makati City",Brakes are squeaking loudly when coming to a stop.,pending,2025-11-12 09:42:39.293298
+4,387,145,home_service,"74 Taft St., Taguig",Brakes are squeaking loudly when coming to a stop.,pending,2026-05-04 13:31:27.293298
+5,372,32,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,approved,2025-08-17 00:10:35.293298
+6,111,811,walk_in,None,"Battery seems weak, it struggles to start in the morning.",cancelled,2025-12-20 09:29:02.293298
+7,18,800,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,inspection_scheduled,2025-10-16 20:32:42.293298
+8,461,161,home_service,"110 Rizal St., Pasig City","Battery seems weak, it struggles to start in the morning.",cancelled,2025-10-06 19:21:17.293298
+9,172,662,walk_in,None,Air conditioning is blowing warm air.,approved,2026-06-25 15:47:38.293298
+10,353,326,home_service,"901 Taft St., Taguig","Battery seems weak, it struggles to start in the morning.",pending,2025-09-18 14:27:40.293298
+11,88,459,home_service,"478 Luna St., Manila",Car pulls heavily to the right while driving.,inspection_scheduled,2026-07-04 11:53:25.293298
+12,21,3,home_service,"521 Bonifacio St., Quezon City",Brakes are squeaking loudly when coming to a stop.,cancelled,2026-03-27 06:19:49.293298
+13,68,928,walk_in,None,Check engine light has been on for two days.,declined,2026-04-10 03:51:07.293298
+14,109,964,walk_in,None,"Battery seems weak, it struggles to start in the morning.",inspection_scheduled,2025-09-16 22:36:27.293298
+15,237,606,walk_in,None,Need a routine maintenance check and oil change.,inspection_scheduled,2025-12-10 20:04:43.293298
+16,490,326,walk_in,None,Engine makes a rattling noise on cold starts.,inspection_scheduled,2026-04-01 01:23:16.293298
+17,303,881,home_service,"201 Taft St., Pasig City",Check engine light has been on for two days.,approved,2026-02-27 10:33:43.293298
+18,266,132,walk_in,None,Engine makes a rattling noise on cold starts.,cancelled,2025-12-14 07:53:57.293298
+19,8,545,home_service,"239 Taft St., Makati City",Engine makes a rattling noise on cold starts.,inspection_scheduled,2026-06-25 00:05:14.293298
+20,268,869,walk_in,None,Check engine light has been on for two days.,declined,2026-03-26 23:09:06.293298
+21,320,921,walk_in,None,Car pulls heavily to the right while driving.,pending,2026-05-19 03:24:33.293298
+22,261,152,walk_in,None,Check engine light has been on for two days.,pending,2025-09-28 01:22:30.293298
+23,415,488,walk_in,None,Check engine light has been on for two days.,inspection_scheduled,2026-01-15 06:08:05.293298
+24,120,543,walk_in,None,Air conditioning is blowing warm air.,cancelled,2025-12-27 12:19:50.293298
+25,383,330,home_service,"648 Luna St., Manila",Check engine light has been on for two days.,inspection_scheduled,2026-07-22 04:51:52.293298
+26,311,631,home_service,"398 Bonifacio St., Pasig City",Brakes are squeaking loudly when coming to a stop.,inspection_scheduled,2025-08-20 08:02:42.293298
+27,213,693,home_service,"885 Taft St., Manila",Air conditioning is blowing warm air.,cancelled,2026-08-04 04:20:24.293298
+28,97,237,walk_in,None,Check engine light has been on for two days.,pending,2026-01-18 10:18:04.293298
+29,32,416,home_service,"121 Bonifacio St., Makati City",Transmission shifts roughly between 2nd and 3rd gear.,declined,2025-08-05 04:49:30.293298
+30,301,698,home_service,"241 Taft St., Makati City",Need a routine maintenance check and oil change.,queued,2026-07-26 05:14:59.293298
+31,219,334,walk_in,None,Need a routine maintenance check and oil change.,approved,2026-04-21 23:08:10.293298
+32,278,867,home_service,"714 Bonifacio St., Taguig",Car pulls heavily to the right while driving.,pending,2026-06-27 09:53:27.293298
+33,72,139,home_service,"435 Luna St., Manila",Brakes are squeaking loudly when coming to a stop.,approved,2026-02-05 13:16:27.293298
+34,213,505,home_service,"346 Bonifacio St., Pasig City",Brakes are squeaking loudly when coming to a stop.,inspection_scheduled,2026-08-01 19:11:36.293298
+35,403,488,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,approved,2026-05-01 20:18:51.293298
+36,194,38,walk_in,None,Check engine light has been on for two days.,declined,2026-01-28 05:43:21.293298
+37,375,822,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,declined,2025-10-02 14:29:23.293298
+38,424,348,home_service,"389 Rizal St., Manila",Need a routine maintenance check and oil change.,queued,2025-09-26 04:56:19.293298
+39,463,335,home_service,"575 Bonifacio St., Taguig",Engine makes a rattling noise on cold starts.,declined,2026-04-15 20:30:50.293298
+40,6,925,home_service,"131 Taft St., Makati City",Brakes are squeaking loudly when coming to a stop.,approved,2025-09-15 13:08:33.293298
+41,402,96,walk_in,None,Air conditioning is blowing warm air.,cancelled,2026-01-24 15:47:12.293298
+42,312,973,home_service,"777 Mabini St., Makati City",Engine makes a rattling noise on cold starts.,approved,2026-07-17 11:12:00.293298
+43,116,57,walk_in,None,Brakes are squeaking loudly when coming to a stop.,approved,2025-11-02 22:40:50.293298
+44,320,327,home_service,"5 Taft St., Pasig City","Battery seems weak, it struggles to start in the morning.",pending,2025-12-20 18:11:55.293298
+45,142,730,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,pending,2025-09-21 13:07:55.293298
+46,152,544,walk_in,None,Check engine light has been on for two days.,pending,2025-08-28 18:36:16.293298
+47,135,586,home_service,"262 Mabini St., Manila",Engine makes a rattling noise on cold starts.,cancelled,2026-04-27 09:30:50.293298
+48,386,907,home_service,"689 Bonifacio St., Pasig City","Battery seems weak, it struggles to start in the morning.",pending,2025-12-06 04:11:48.293298
+49,284,633,home_service,"523 Bonifacio St., Taguig",Need a routine maintenance check and oil change.,inspection_scheduled,2026-01-13 21:43:03.293298
+50,343,596,home_service,"517 Rizal St., Manila",Air conditioning is blowing warm air.,cancelled,2026-06-05 22:42:25.293298
+51,70,278,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,cancelled,2026-06-30 04:40:29.293298
+52,250,31,walk_in,None,Need a routine maintenance check and oil change.,pending,2025-09-12 05:49:47.293298
+53,362,609,home_service,"290 Mabini St., Quezon City","Battery seems weak, it struggles to start in the morning.",declined,2026-01-06 12:48:02.293298
+54,351,685,home_service,"752 Bonifacio St., Manila",Need a routine maintenance check and oil change.,inspection_scheduled,2026-07-10 14:39:48.293298
+55,51,861,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,approved,2025-12-11 15:50:42.293298
+56,156,2,home_service,"143 Rizal St., Quezon City",Car pulls heavily to the right while driving.,inspection_scheduled,2026-02-28 00:31:02.293298
+57,18,850,home_service,"445 Bonifacio St., Quezon City","Battery seems weak, it struggles to start in the morning.",approved,2026-07-25 15:12:49.293298
+58,61,972,home_service,"628 Rizal St., Quezon City",Transmission shifts roughly between 2nd and 3rd gear.,inspection_scheduled,2026-04-06 13:33:57.293298
+59,400,76,home_service,"847 Rizal St., Manila",Transmission shifts roughly between 2nd and 3rd gear.,approved,2026-03-18 09:20:32.293298
+60,324,690,home_service,"167 Mabini St., Makati City",Car pulls heavily to the right while driving.,queued,2025-12-30 15:01:08.293298
+61,178,104,walk_in,None,Check engine light has been on for two days.,declined,2026-03-15 10:07:12.293298
+62,148,372,walk_in,None,Car pulls heavily to the right while driving.,pending,2026-02-17 19:15:27.293298
+63,407,968,walk_in,None,Car pulls heavily to the right while driving.,inspection_scheduled,2026-06-19 23:33:17.293298
+64,131,602,home_service,"401 Bonifacio St., Pasig City",Check engine light has been on for two days.,declined,2026-05-09 19:33:16.293298
+65,254,550,walk_in,None,Air conditioning is blowing warm air.,pending,2025-12-01 16:37:58.293298
+66,107,216,walk_in,None,Need a routine maintenance check and oil change.,approved,2025-08-21 18:06:36.293298
+67,318,520,walk_in,None,Engine makes a rattling noise on cold starts.,cancelled,2026-07-15 19:33:07.293298
+68,244,505,walk_in,None,Car pulls heavily to the right while driving.,pending,2026-03-11 15:35:10.293298
+69,90,285,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,queued,2026-07-08 08:12:01.293298
+70,408,797,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,inspection_scheduled,2026-03-23 10:17:00.293298
+71,34,448,home_service,"891 Rizal St., Manila",Engine makes a rattling noise on cold starts.,cancelled,2025-10-24 21:24:29.293298
+72,308,763,walk_in,None,Check engine light has been on for two days.,approved,2026-03-31 04:49:52.293298
+73,399,263,home_service,"507 Taft St., Makati City",Brakes are squeaking loudly when coming to a stop.,approved,2025-12-09 05:31:28.293298
+74,290,971,walk_in,None,Engine makes a rattling noise on cold starts.,inspection_scheduled,2026-05-03 06:09:30.293298
+75,68,507,home_service,"153 Rizal St., Quezon City",Air conditioning is blowing warm air.,declined,2026-01-04 08:20:29.293298
+76,413,631,home_service,"607 Luna St., Taguig",Air conditioning is blowing warm air.,approved,2026-05-03 20:41:05.293298
+77,452,964,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,cancelled,2026-02-07 16:50:45.293298
+78,176,66,walk_in,None,"Battery seems weak, it struggles to start in the morning.",pending,2025-12-24 02:13:54.293298
+79,341,769,home_service,"697 Rizal St., Quezon City","Battery seems weak, it struggles to start in the morning.",cancelled,2025-09-12 15:33:16.293298
+80,379,63,home_service,"774 Bonifacio St., Manila",Car pulls heavily to the right while driving.,cancelled,2026-05-24 15:43:17.293298
+81,67,486,home_service,"740 Mabini St., Taguig","Battery seems weak, it struggles to start in the morning.",pending,2026-01-01 20:51:44.293298
+82,76,236,home_service,"472 Bonifacio St., Makati City",Air conditioning is blowing warm air.,cancelled,2026-02-10 03:41:43.293298
+83,72,385,home_service,"445 Mabini St., Makati City",Transmission shifts roughly between 2nd and 3rd gear.,inspection_scheduled,2025-11-12 23:42:25.293298
+84,108,755,walk_in,None,Air conditioning is blowing warm air.,approved,2026-03-07 03:35:39.293298
+85,12,7,home_service,"382 Luna St., Manila",Check engine light has been on for two days.,declined,2025-09-16 09:45:46.293298
+86,316,669,home_service,"734 Bonifacio St., Taguig",Transmission shifts roughly between 2nd and 3rd gear.,queued,2025-11-03 17:07:18.293298
+87,117,597,home_service,"670 Taft St., Taguig",Need a routine maintenance check and oil change.,cancelled,2026-01-07 22:18:04.293298
+88,475,256,home_service,"423 Luna St., Manila",Check engine light has been on for two days.,queued,2026-01-12 14:46:13.293298
+89,118,112,walk_in,None,Check engine light has been on for two days.,cancelled,2025-09-09 14:41:39.293298
+90,212,328,walk_in,None,Brakes are squeaking loudly when coming to a stop.,queued,2025-09-17 14:09:48.293298
+91,397,804,home_service,"239 Taft St., Taguig","Battery seems weak, it struggles to start in the morning.",approved,2026-01-11 13:27:15.293298
+92,76,887,home_service,"549 Taft St., Makati City",Check engine light has been on for two days.,inspection_scheduled,2025-11-14 04:38:22.293298
+93,7,662,home_service,"691 Mabini St., Taguig","Battery seems weak, it struggles to start in the morning.",queued,2026-04-25 19:05:57.293298
+94,364,466,walk_in,None,Brakes are squeaking loudly when coming to a stop.,declined,2026-07-10 21:29:10.293298
+95,207,684,walk_in,None,Air conditioning is blowing warm air.,approved,2026-02-26 15:05:36.293298
+96,378,190,walk_in,None,"Battery seems weak, it struggles to start in the morning.",pending,2026-05-07 01:33:12.293298
+97,49,394,walk_in,None,"Battery seems weak, it struggles to start in the morning.",pending,2026-03-26 04:22:03.293298
+98,132,230,home_service,"373 Rizal St., Quezon City",Car pulls heavily to the right while driving.,cancelled,2025-12-03 11:15:43.293298
+99,35,927,walk_in,None,Need a routine maintenance check and oil change.,inspection_scheduled,2026-07-23 04:11:53.293298
+100,99,569,home_service,"272 Luna St., Pasig City",Engine makes a rattling noise on cold starts.,pending,2026-05-31 05:21:05.293298
+101,379,338,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,declined,2025-10-09 02:53:47.293298
+102,395,805,home_service,"291 Bonifacio St., Pasig City",Need a routine maintenance check and oil change.,inspection_scheduled,2025-11-11 01:49:21.293298
+103,471,730,home_service,"850 Taft St., Quezon City",Air conditioning is blowing warm air.,queued,2026-05-01 18:23:16.293298
+104,236,773,walk_in,None,Need a routine maintenance check and oil change.,inspection_scheduled,2026-01-03 22:25:49.293298
+105,112,45,home_service,"333 Bonifacio St., Quezon City",Car pulls heavily to the right while driving.,pending,2025-12-03 15:51:42.293298
+106,287,836,walk_in,None,Brakes are squeaking loudly when coming to a stop.,declined,2026-01-06 20:33:23.293298
+107,481,845,walk_in,None,Car pulls heavily to the right while driving.,approved,2025-12-09 20:41:06.293298
+108,32,520,walk_in,None,Brakes are squeaking loudly when coming to a stop.,declined,2026-07-21 04:26:16.293298
+109,476,809,walk_in,None,Air conditioning is blowing warm air.,cancelled,2025-11-14 17:07:57.293298
+110,495,540,home_service,"798 Taft St., Pasig City",Brakes are squeaking loudly when coming to a stop.,inspection_scheduled,2026-01-09 08:33:07.293298
+111,440,519,home_service,"826 Bonifacio St., Makati City","Battery seems weak, it struggles to start in the morning.",inspection_scheduled,2026-05-15 14:38:07.293298
+112,72,988,home_service,"893 Taft St., Quezon City",Engine makes a rattling noise on cold starts.,declined,2026-06-10 02:25:18.293298
+113,382,703,home_service,"232 Luna St., Quezon City","Battery seems weak, it struggles to start in the morning.",cancelled,2026-05-22 21:25:02.293298
+114,8,275,home_service,"286 Luna St., Manila",Transmission shifts roughly between 2nd and 3rd gear.,cancelled,2026-01-12 18:17:53.293298
+115,42,571,walk_in,None,"Battery seems weak, it struggles to start in the morning.",declined,2026-03-03 14:16:44.293298
+116,378,563,home_service,"883 Taft St., Makati City",Car pulls heavily to the right while driving.,approved,2025-10-17 18:06:46.293298
+117,375,356,home_service,"998 Luna St., Quezon City",Need a routine maintenance check and oil change.,pending,2026-02-06 07:08:46.293298
+118,153,224,walk_in,None,Engine makes a rattling noise on cold starts.,queued,2025-12-28 23:16:19.293298
+119,79,376,home_service,"144 Taft St., Makati City","Battery seems weak, it struggles to start in the morning.",approved,2025-09-12 10:30:45.293298
+120,427,389,home_service,"211 Rizal St., Pasig City",Car pulls heavily to the right while driving.,inspection_scheduled,2025-12-02 17:08:19.293298
+121,344,936,home_service,"443 Mabini St., Taguig",Engine makes a rattling noise on cold starts.,cancelled,2025-08-13 07:20:04.293298
+122,346,433,walk_in,None,Air conditioning is blowing warm air.,cancelled,2026-03-20 00:53:04.293298
+123,4,316,home_service,"333 Rizal St., Makati City",Engine makes a rattling noise on cold starts.,inspection_scheduled,2026-07-26 10:02:43.293298
+124,212,662,walk_in,None,Engine makes a rattling noise on cold starts.,declined,2026-05-09 06:37:12.293298
+125,357,160,home_service,"15 Bonifacio St., Manila",Car pulls heavily to the right while driving.,inspection_scheduled,2026-04-03 18:34:28.293298
+126,390,505,walk_in,None,Brakes are squeaking loudly when coming to a stop.,approved,2025-10-25 12:58:05.293298
+127,110,240,home_service,"211 Taft St., Quezon City",Check engine light has been on for two days.,approved,2025-08-31 06:56:01.293298
+128,207,155,walk_in,None,Engine makes a rattling noise on cold starts.,declined,2026-01-17 18:16:38.293298
+129,140,971,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,cancelled,2026-06-06 00:48:37.293298
+130,227,215,walk_in,None,Air conditioning is blowing warm air.,approved,2026-03-07 09:00:58.293298
+131,428,474,home_service,"765 Rizal St., Quezon City","Battery seems weak, it struggles to start in the morning.",approved,2026-06-10 14:41:05.293298
+132,282,560,home_service,"876 Mabini St., Manila",Check engine light has been on for two days.,cancelled,2026-05-30 13:41:20.293298
+133,297,915,walk_in,None,Check engine light has been on for two days.,approved,2025-10-10 05:56:21.293298
+134,359,993,home_service,"500 Mabini St., Pasig City",Need a routine maintenance check and oil change.,pending,2026-01-23 02:07:53.293298
+135,354,647,home_service,"68 Rizal St., Taguig",Air conditioning is blowing warm air.,approved,2026-03-21 03:22:56.293298
+136,299,54,home_service,"276 Rizal St., Quezon City",Air conditioning is blowing warm air.,pending,2026-03-03 18:19:42.293298
+137,284,447,home_service,"844 Mabini St., Manila",Brakes are squeaking loudly when coming to a stop.,cancelled,2026-05-30 02:40:22.293298
+138,493,690,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,declined,2025-08-06 23:23:17.293298
+139,372,342,walk_in,None,Car pulls heavily to the right while driving.,inspection_scheduled,2025-12-31 19:40:28.293298
+140,30,811,walk_in,None,Check engine light has been on for two days.,cancelled,2025-11-20 10:30:49.293298
+141,110,69,home_service,"436 Rizal St., Pasig City",Engine makes a rattling noise on cold starts.,cancelled,2025-10-05 18:09:57.293298
+142,161,423,home_service,"547 Luna St., Manila",Car pulls heavily to the right while driving.,pending,2026-06-25 09:40:44.293298
+143,358,147,walk_in,None,Engine makes a rattling noise on cold starts.,cancelled,2026-07-11 16:02:39.293298
+144,393,188,walk_in,None,Brakes are squeaking loudly when coming to a stop.,declined,2026-06-16 16:27:47.293298
+145,476,214,home_service,"328 Mabini St., Pasig City",Engine makes a rattling noise on cold starts.,pending,2026-06-06 06:16:41.293298
+146,390,397,walk_in,None,Brakes are squeaking loudly when coming to a stop.,approved,2026-04-07 07:56:59.293298
+147,392,330,walk_in,None,Check engine light has been on for two days.,cancelled,2026-05-26 02:53:01.293298
+148,37,360,home_service,"16 Mabini St., Quezon City",Brakes are squeaking loudly when coming to a stop.,queued,2026-01-13 03:38:37.293298
+149,469,558,walk_in,None,Brakes are squeaking loudly when coming to a stop.,pending,2026-03-29 02:25:19.293298
+150,303,673,home_service,"15 Bonifacio St., Pasig City",Car pulls heavily to the right while driving.,queued,2025-08-31 01:01:16.293298
+151,228,400,walk_in,None,Check engine light has been on for two days.,declined,2025-11-04 05:59:09.293298
+152,122,779,walk_in,None,Engine makes a rattling noise on cold starts.,inspection_scheduled,2026-01-03 14:27:22.293298
+153,306,694,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,pending,2026-02-13 01:08:25.293298
+154,477,577,home_service,"139 Taft St., Quezon City",Air conditioning is blowing warm air.,declined,2025-09-01 14:01:53.293298
+155,406,787,walk_in,None,Need a routine maintenance check and oil change.,pending,2026-01-25 23:39:01.293298
+156,426,874,home_service,"1 Rizal St., Manila",Car pulls heavily to the right while driving.,approved,2026-02-09 14:41:07.293298
+157,394,62,home_service,"879 Rizal St., Quezon City",Car pulls heavily to the right while driving.,pending,2025-12-18 01:15:57.293298
+158,160,959,home_service,"350 Bonifacio St., Manila",Check engine light has been on for two days.,inspection_scheduled,2025-11-09 23:09:19.293298
+159,131,245,home_service,"662 Rizal St., Makati City",Brakes are squeaking loudly when coming to a stop.,cancelled,2025-12-28 09:20:35.293298
+160,133,871,walk_in,None,"Battery seems weak, it struggles to start in the morning.",cancelled,2025-12-16 18:41:44.293298
+161,452,114,home_service,"914 Luna St., Quezon City","Battery seems weak, it struggles to start in the morning.",queued,2026-01-27 23:21:31.293298
+162,485,273,walk_in,None,Car pulls heavily to the right while driving.,declined,2025-10-10 19:31:35.293298
+163,58,499,home_service,"125 Luna St., Makati City","Battery seems weak, it struggles to start in the morning.",cancelled,2026-02-08 01:25:59.293298
+164,16,586,home_service,"678 Luna St., Quezon City",Transmission shifts roughly between 2nd and 3rd gear.,approved,2025-12-23 06:13:08.293298
+165,236,775,walk_in,None,Air conditioning is blowing warm air.,cancelled,2026-08-03 22:04:27.293298
+166,106,438,walk_in,None,Engine makes a rattling noise on cold starts.,pending,2026-05-16 07:16:02.293298
+167,197,558,walk_in,None,Need a routine maintenance check and oil change.,inspection_scheduled,2025-08-10 17:42:47.293298
+168,105,13,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,queued,2026-03-11 22:20:48.293298
+169,205,500,walk_in,None,Brakes are squeaking loudly when coming to a stop.,inspection_scheduled,2025-12-10 21:27:32.293298
+170,463,714,home_service,"717 Bonifacio St., Pasig City","Battery seems weak, it struggles to start in the morning.",cancelled,2026-02-01 03:57:12.293298
+171,279,468,walk_in,None,Engine makes a rattling noise on cold starts.,pending,2026-08-03 04:59:42.293298
+172,445,836,walk_in,None,Air conditioning is blowing warm air.,declined,2025-12-20 09:23:20.293298
+173,203,999,home_service,"688 Taft St., Makati City",Air conditioning is blowing warm air.,inspection_scheduled,2025-12-01 00:46:26.293298
+174,472,598,home_service,"613 Mabini St., Manila",Air conditioning is blowing warm air.,approved,2026-05-12 07:51:23.293298
+175,383,667,home_service,"472 Luna St., Pasig City",Air conditioning is blowing warm air.,queued,2026-05-03 09:49:51.293298
+176,11,528,home_service,"847 Luna St., Makati City",Brakes are squeaking loudly when coming to a stop.,declined,2025-11-09 11:33:13.293298
+177,215,247,home_service,"968 Luna St., Pasig City",Check engine light has been on for two days.,pending,2026-04-30 09:05:20.293298
+178,231,321,walk_in,None,"Battery seems weak, it struggles to start in the morning.",pending,2025-12-18 06:38:42.293298
+179,280,343,home_service,"847 Luna St., Makati City",Car pulls heavily to the right while driving.,declined,2026-01-25 05:05:36.293298
+180,205,958,home_service,"832 Luna St., Pasig City",Brakes are squeaking loudly when coming to a stop.,cancelled,2025-10-01 23:34:51.293298
+181,380,932,walk_in,None,Engine makes a rattling noise on cold starts.,cancelled,2025-09-03 04:31:49.293298
+182,363,517,home_service,"352 Luna St., Pasig City",Transmission shifts roughly between 2nd and 3rd gear.,declined,2025-11-14 18:14:26.293298
+183,220,738,walk_in,None,Check engine light has been on for two days.,declined,2026-06-04 06:37:56.293298
+184,439,426,walk_in,None,Brakes are squeaking loudly when coming to a stop.,queued,2026-06-07 04:14:39.293298
+185,295,525,walk_in,None,Engine makes a rattling noise on cold starts.,declined,2026-08-04 22:23:50.293298
+186,226,465,walk_in,None,Brakes are squeaking loudly when coming to a stop.,approved,2025-12-20 22:16:13.293298
+187,337,405,walk_in,None,Car pulls heavily to the right while driving.,pending,2026-03-23 05:54:28.293298
+188,277,265,walk_in,None,Engine makes a rattling noise on cold starts.,inspection_scheduled,2025-08-17 09:22:32.293298
+189,479,747,walk_in,None,Brakes are squeaking loudly when coming to a stop.,queued,2026-04-04 03:46:11.293298
+190,204,846,walk_in,None,"Battery seems weak, it struggles to start in the morning.",declined,2026-02-26 10:50:57.293298
+191,47,375,home_service,"923 Mabini St., Taguig",Engine makes a rattling noise on cold starts.,pending,2026-06-26 01:06:58.293298
+192,301,489,home_service,"627 Rizal St., Quezon City",Transmission shifts roughly between 2nd and 3rd gear.,inspection_scheduled,2026-03-08 08:28:48.293298
+193,333,603,walk_in,None,Check engine light has been on for two days.,inspection_scheduled,2025-09-03 00:56:13.293298
+194,221,464,home_service,"849 Bonifacio St., Manila",Check engine light has been on for two days.,cancelled,2026-03-17 20:46:00.293298
+195,31,128,home_service,"876 Mabini St., Makati City","Battery seems weak, it struggles to start in the morning.",inspection_scheduled,2026-04-27 16:16:50.293298
+196,56,92,home_service,"105 Rizal St., Quezon City",Check engine light has been on for two days.,inspection_scheduled,2026-07-30 12:59:54.293298
+197,62,396,walk_in,None,"Battery seems weak, it struggles to start in the morning.",pending,2025-08-13 17:28:59.293298
+198,380,373,walk_in,None,Engine makes a rattling noise on cold starts.,approved,2025-08-10 00:37:25.293298
+199,296,76,walk_in,None,Engine makes a rattling noise on cold starts.,declined,2026-07-24 16:25:12.293298
+200,368,224,walk_in,None,Engine makes a rattling noise on cold starts.,cancelled,2025-09-09 09:14:28.293298
+201,361,522,home_service,"857 Bonifacio St., Manila",Need a routine maintenance check and oil change.,inspection_scheduled,2025-09-13 23:38:33.293298
+202,142,162,walk_in,None,"Battery seems weak, it struggles to start in the morning.",cancelled,2025-12-08 18:03:13.293298
+203,112,779,home_service,"169 Bonifacio St., Pasig City",Car pulls heavily to the right while driving.,cancelled,2026-05-16 23:36:07.293298
+204,208,135,home_service,"484 Taft St., Quezon City",Need a routine maintenance check and oil change.,cancelled,2026-04-18 01:48:10.293298
+205,442,636,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,queued,2026-06-19 06:49:07.293298
+206,405,61,walk_in,None,"Battery seems weak, it struggles to start in the morning.",approved,2025-10-28 15:30:32.293298
+207,420,784,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,queued,2026-06-11 20:04:52.293298
+208,299,709,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,queued,2025-12-18 05:57:04.293298
+209,235,391,walk_in,None,Need a routine maintenance check and oil change.,approved,2026-01-01 01:56:29.293298
+210,232,50,home_service,"859 Rizal St., Taguig",Car pulls heavily to the right while driving.,pending,2026-01-30 19:33:17.293298
+211,122,326,walk_in,None,Air conditioning is blowing warm air.,inspection_scheduled,2026-02-17 07:41:19.293298
+212,125,660,walk_in,None,Check engine light has been on for two days.,inspection_scheduled,2026-02-02 14:17:18.293298
+213,174,684,walk_in,None,Car pulls heavily to the right while driving.,inspection_scheduled,2026-03-18 05:33:43.293298
+214,304,870,home_service,"166 Luna St., Manila",Need a routine maintenance check and oil change.,cancelled,2025-09-12 04:55:26.293298
+215,130,588,home_service,"516 Taft St., Manila",Brakes are squeaking loudly when coming to a stop.,inspection_scheduled,2025-12-21 06:09:32.293298
+216,268,883,home_service,"298 Bonifacio St., Manila","Battery seems weak, it struggles to start in the morning.",approved,2025-12-25 12:05:28.293298
+217,478,884,walk_in,None,"Battery seems weak, it struggles to start in the morning.",cancelled,2025-09-30 05:55:40.293298
+218,356,763,walk_in,None,Check engine light has been on for two days.,cancelled,2026-02-22 02:49:47.293298
+219,82,188,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,pending,2026-02-05 09:32:44.293298
+220,461,276,home_service,"464 Mabini St., Makati City",Transmission shifts roughly between 2nd and 3rd gear.,inspection_scheduled,2025-11-02 15:05:20.293298
+221,379,792,walk_in,None,Engine makes a rattling noise on cold starts.,declined,2025-12-03 06:11:58.293298
+222,244,103,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,approved,2025-12-28 05:52:44.293298
+223,195,910,home_service,"197 Luna St., Makati City",Check engine light has been on for two days.,declined,2026-01-22 18:30:28.293298
+224,462,935,home_service,"558 Rizal St., Manila",Air conditioning is blowing warm air.,queued,2025-08-16 08:31:33.293298
+225,38,216,walk_in,None,Brakes are squeaking loudly when coming to a stop.,queued,2026-06-26 14:08:36.293298
+226,353,737,home_service,"631 Taft St., Makati City",Air conditioning is blowing warm air.,pending,2026-04-20 14:21:21.293298
+227,268,974,walk_in,None,Need a routine maintenance check and oil change.,queued,2026-05-29 17:57:42.293298
+228,98,54,walk_in,None,Car pulls heavily to the right while driving.,pending,2026-02-08 05:40:33.293298
+229,299,912,home_service,"771 Rizal St., Quezon City",Car pulls heavily to the right while driving.,approved,2026-02-16 22:05:51.293298
+230,78,565,walk_in,None,Check engine light has been on for two days.,pending,2026-06-18 20:04:03.293298
+231,416,877,home_service,"410 Mabini St., Quezon City",Brakes are squeaking loudly when coming to a stop.,cancelled,2025-08-31 08:55:23.293298
+232,148,574,walk_in,None,Engine makes a rattling noise on cold starts.,queued,2025-08-19 18:55:54.293298
+233,130,49,walk_in,None,Car pulls heavily to the right while driving.,approved,2025-09-23 14:39:02.293298
+234,272,1,home_service,"354 Rizal St., Makati City",Car pulls heavily to the right while driving.,queued,2025-12-17 03:53:24.293298
+235,286,924,home_service,"4 Rizal St., Pasig City",Check engine light has been on for two days.,inspection_scheduled,2025-11-20 14:10:25.293298
+236,203,376,home_service,"187 Luna St., Quezon City",Car pulls heavily to the right while driving.,cancelled,2025-12-23 18:23:40.293298
+237,183,531,home_service,"158 Luna St., Manila",Check engine light has been on for two days.,queued,2025-11-27 13:31:21.293298
+238,140,66,walk_in,None,Engine makes a rattling noise on cold starts.,pending,2026-05-30 04:54:38.293298
+239,11,380,home_service,"381 Bonifacio St., Quezon City",Air conditioning is blowing warm air.,approved,2026-07-22 21:01:18.293298
+240,275,440,walk_in,None,Need a routine maintenance check and oil change.,inspection_scheduled,2025-11-22 23:30:51.293298
+241,396,814,home_service,"863 Rizal St., Taguig",Air conditioning is blowing warm air.,pending,2025-11-30 15:36:38.293298
+242,355,202,home_service,"765 Taft St., Taguig",Air conditioning is blowing warm air.,cancelled,2026-06-14 16:51:31.293298
+243,294,71,walk_in,None,"Battery seems weak, it struggles to start in the morning.",pending,2026-02-14 08:17:00.293298
+244,256,163,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,pending,2026-06-03 19:20:10.293298
+245,292,406,walk_in,None,Need a routine maintenance check and oil change.,pending,2026-06-01 11:25:13.293298
+246,113,436,walk_in,None,Air conditioning is blowing warm air.,cancelled,2026-02-27 03:31:07.293298
+247,58,216,home_service,"471 Rizal St., Makati City",Air conditioning is blowing warm air.,cancelled,2025-12-02 09:51:13.293298
+248,391,529,walk_in,None,Engine makes a rattling noise on cold starts.,queued,2026-02-05 03:55:24.293298
+249,173,268,walk_in,None,Car pulls heavily to the right while driving.,declined,2025-12-26 04:32:27.293298
+250,249,958,walk_in,None,Engine makes a rattling noise on cold starts.,queued,2026-03-02 19:26:43.293298
+251,189,35,walk_in,None,Need a routine maintenance check and oil change.,inspection_scheduled,2025-10-21 03:45:09.293298
+252,247,163,walk_in,None,Car pulls heavily to the right while driving.,declined,2026-01-05 14:02:10.293298
+253,159,459,walk_in,None,"Battery seems weak, it struggles to start in the morning.",inspection_scheduled,2026-07-18 02:11:50.293298
+254,468,207,home_service,"495 Mabini St., Makati City",Brakes are squeaking loudly when coming to a stop.,cancelled,2026-01-18 16:16:47.293298
+255,161,630,walk_in,None,Air conditioning is blowing warm air.,queued,2025-08-11 07:43:14.293298
+256,56,883,walk_in,None,Brakes are squeaking loudly when coming to a stop.,declined,2026-05-01 10:37:46.293298
+257,37,212,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,pending,2026-07-24 09:14:33.293298
+258,203,814,walk_in,None,Car pulls heavily to the right while driving.,approved,2026-02-06 03:24:43.293298
+259,251,479,walk_in,None,"Battery seems weak, it struggles to start in the morning.",approved,2026-04-05 09:47:00.293298
+260,91,262,walk_in,None,Need a routine maintenance check and oil change.,cancelled,2025-11-28 04:27:08.293298
+261,263,293,home_service,"872 Rizal St., Pasig City",Need a routine maintenance check and oil change.,inspection_scheduled,2026-08-01 12:45:40.293298
+262,240,909,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,cancelled,2025-09-03 17:09:04.293298
+263,475,61,home_service,"82 Luna St., Makati City","Battery seems weak, it struggles to start in the morning.",queued,2026-08-03 23:22:15.293298
+264,211,342,home_service,"938 Bonifacio St., Quezon City",Car pulls heavily to the right while driving.,pending,2026-04-21 00:34:52.293298
+265,343,603,home_service,"732 Luna St., Quezon City","Battery seems weak, it struggles to start in the morning.",inspection_scheduled,2025-11-04 19:21:56.293298
+266,274,826,home_service,"659 Luna St., Pasig City",Engine makes a rattling noise on cold starts.,queued,2025-11-04 05:07:05.293298
+267,350,757,home_service,"909 Taft St., Makati City",Air conditioning is blowing warm air.,queued,2025-08-25 04:29:00.293298
+268,190,487,walk_in,None,Need a routine maintenance check and oil change.,approved,2026-02-07 03:25:13.293298
+269,134,198,walk_in,None,Engine makes a rattling noise on cold starts.,cancelled,2025-08-11 01:48:28.293298
+270,359,809,home_service,"975 Rizal St., Makati City",Need a routine maintenance check and oil change.,approved,2026-03-09 15:24:07.293298
+271,273,347,home_service,"400 Bonifacio St., Quezon City",Air conditioning is blowing warm air.,declined,2025-10-09 20:06:26.293298
+272,148,478,walk_in,None,Air conditioning is blowing warm air.,approved,2026-02-10 01:55:00.293298
+273,484,977,walk_in,None,Brakes are squeaking loudly when coming to a stop.,inspection_scheduled,2026-06-21 06:53:53.293298
+274,205,694,home_service,"599 Bonifacio St., Manila",Need a routine maintenance check and oil change.,inspection_scheduled,2025-08-11 10:17:38.293298
+275,146,975,walk_in,None,Check engine light has been on for two days.,pending,2026-05-28 11:10:24.293298
+276,19,796,home_service,"102 Mabini St., Taguig",Air conditioning is blowing warm air.,queued,2026-07-27 13:48:42.293298
+277,72,466,home_service,"580 Taft St., Pasig City",Engine makes a rattling noise on cold starts.,declined,2026-05-24 14:42:01.293298
+278,127,148,home_service,"654 Taft St., Manila",Brakes are squeaking loudly when coming to a stop.,pending,2025-10-09 09:25:49.293298
+279,243,427,walk_in,None,Car pulls heavily to the right while driving.,declined,2026-01-30 10:53:26.293298
+280,320,196,walk_in,None,Brakes are squeaking loudly when coming to a stop.,approved,2025-12-09 16:47:48.293298
+281,310,222,walk_in,None,Car pulls heavily to the right while driving.,approved,2026-01-15 10:56:01.293298
+282,468,291,home_service,"300 Taft St., Manila",Air conditioning is blowing warm air.,cancelled,2026-01-05 15:22:01.293298
+283,320,493,home_service,"99 Bonifacio St., Pasig City",Transmission shifts roughly between 2nd and 3rd gear.,queued,2026-01-17 22:36:16.293298
+284,439,577,home_service,"124 Mabini St., Makati City",Check engine light has been on for two days.,pending,2026-05-28 06:33:07.293298
+285,355,680,home_service,"561 Bonifacio St., Pasig City",Check engine light has been on for two days.,queued,2026-02-22 11:01:08.293298
+286,161,146,home_service,"95 Rizal St., Quezon City",Air conditioning is blowing warm air.,inspection_scheduled,2026-03-15 14:09:02.293298
+287,346,878,home_service,"334 Bonifacio St., Pasig City","Battery seems weak, it struggles to start in the morning.",inspection_scheduled,2026-02-11 14:52:22.293298
+288,33,960,home_service,"778 Rizal St., Taguig",Brakes are squeaking loudly when coming to a stop.,inspection_scheduled,2026-07-04 14:13:35.293298
+289,489,851,home_service,"76 Mabini St., Quezon City",Transmission shifts roughly between 2nd and 3rd gear.,cancelled,2025-08-10 08:53:27.293298
+290,326,597,walk_in,None,Air conditioning is blowing warm air.,approved,2025-12-09 13:20:23.293298
+291,303,107,walk_in,None,Need a routine maintenance check and oil change.,cancelled,2025-12-23 00:47:25.293298
+292,336,995,home_service,"136 Bonifacio St., Pasig City",Need a routine maintenance check and oil change.,declined,2026-05-20 01:54:36.293298
+293,236,407,home_service,"929 Taft St., Pasig City","Battery seems weak, it struggles to start in the morning.",inspection_scheduled,2025-08-20 20:58:50.293298
+294,335,434,home_service,"798 Mabini St., Makati City","Battery seems weak, it struggles to start in the morning.",cancelled,2025-09-15 09:59:29.293298
+295,467,183,home_service,"69 Taft St., Makati City",Air conditioning is blowing warm air.,declined,2026-02-10 13:52:32.293298
+296,227,431,walk_in,None,Engine makes a rattling noise on cold starts.,approved,2026-03-04 19:51:12.293298
+297,197,394,walk_in,None,"Battery seems weak, it struggles to start in the morning.",cancelled,2026-05-10 13:47:40.293298
+298,446,436,home_service,"852 Luna St., Quezon City",Engine makes a rattling noise on cold starts.,declined,2026-06-17 19:07:39.293298
+299,81,927,walk_in,None,Need a routine maintenance check and oil change.,cancelled,2025-11-04 22:38:59.293298
+300,466,980,home_service,"879 Rizal St., Makati City","Battery seems weak, it struggles to start in the morning.",approved,2025-08-15 07:23:05.293298
+301,294,452,walk_in,None,Engine makes a rattling noise on cold starts.,approved,2025-09-28 04:53:13.293298
+302,21,878,walk_in,None,Need a routine maintenance check and oil change.,declined,2025-10-16 11:28:09.293298
+303,232,437,home_service,"235 Bonifacio St., Pasig City",Transmission shifts roughly between 2nd and 3rd gear.,inspection_scheduled,2026-02-07 22:30:40.293298
+304,486,453,home_service,"524 Taft St., Makati City",Air conditioning is blowing warm air.,inspection_scheduled,2026-04-08 12:15:06.293298
+305,268,612,walk_in,None,Engine makes a rattling noise on cold starts.,cancelled,2026-05-25 17:43:09.293298
+306,62,889,walk_in,None,Engine makes a rattling noise on cold starts.,declined,2025-10-24 08:30:20.293298
+307,179,16,home_service,"622 Luna St., Taguig",Air conditioning is blowing warm air.,declined,2025-11-27 18:29:06.293298
+308,365,527,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,pending,2026-07-29 23:39:11.293298
+309,305,556,home_service,"242 Taft St., Makati City",Need a routine maintenance check and oil change.,queued,2026-03-18 17:21:58.293298
+310,26,290,walk_in,None,Engine makes a rattling noise on cold starts.,cancelled,2026-01-22 18:43:18.293298
+311,169,145,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,approved,2026-02-14 00:08:21.293298
+312,147,832,home_service,"314 Mabini St., Taguig",Check engine light has been on for two days.,approved,2026-03-07 17:31:42.293298
+313,175,569,walk_in,None,"Battery seems weak, it struggles to start in the morning.",inspection_scheduled,2026-06-21 13:31:49.293298
+314,427,702,walk_in,None,Check engine light has been on for two days.,queued,2026-01-01 14:27:07.293298
+315,78,598,home_service,"537 Luna St., Quezon City",Car pulls heavily to the right while driving.,pending,2026-06-06 22:01:42.293298
+316,500,148,home_service,"174 Mabini St., Makati City",Engine makes a rattling noise on cold starts.,cancelled,2026-01-31 17:09:20.293298
+317,39,631,home_service,"292 Rizal St., Quezon City",Need a routine maintenance check and oil change.,cancelled,2025-12-28 22:00:13.293298
+318,368,646,walk_in,None,"Battery seems weak, it struggles to start in the morning.",inspection_scheduled,2025-12-11 20:36:17.293298
+319,238,996,home_service,"956 Bonifacio St., Quezon City",Air conditioning is blowing warm air.,queued,2026-02-01 00:32:57.293298
+320,233,935,walk_in,None,Air conditioning is blowing warm air.,approved,2026-01-30 11:50:48.293298
+321,152,514,home_service,"724 Bonifacio St., Pasig City",Engine makes a rattling noise on cold starts.,approved,2026-04-23 15:56:21.293298
+322,84,611,walk_in,None,Engine makes a rattling noise on cold starts.,declined,2025-10-10 18:46:02.293298
+323,382,274,home_service,"888 Mabini St., Manila",Brakes are squeaking loudly when coming to a stop.,cancelled,2026-05-02 19:22:21.293298
+324,379,728,walk_in,None,Engine makes a rattling noise on cold starts.,queued,2026-02-18 12:42:42.293298
+325,343,635,home_service,"540 Taft St., Pasig City",Air conditioning is blowing warm air.,pending,2026-03-01 14:52:53.293298
+326,433,266,walk_in,None,Need a routine maintenance check and oil change.,inspection_scheduled,2025-10-13 14:09:57.293298
+327,245,708,walk_in,None,Air conditioning is blowing warm air.,approved,2026-06-25 04:23:25.293298
+328,267,538,walk_in,None,Air conditioning is blowing warm air.,queued,2026-01-27 01:12:37.293298
+329,352,975,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,declined,2025-08-23 21:43:23.293298
+330,69,999,home_service,"811 Bonifacio St., Quezon City",Need a routine maintenance check and oil change.,queued,2025-10-20 06:41:58.293298
+331,144,21,home_service,"260 Bonifacio St., Makati City",Need a routine maintenance check and oil change.,inspection_scheduled,2025-09-18 17:59:08.293298
+332,194,391,home_service,"550 Bonifacio St., Taguig",Car pulls heavily to the right while driving.,queued,2026-01-11 02:40:11.293298
+333,169,768,home_service,"904 Rizal St., Taguig",Brakes are squeaking loudly when coming to a stop.,inspection_scheduled,2025-11-04 15:53:29.293298
+334,309,159,walk_in,None,"Battery seems weak, it struggles to start in the morning.",approved,2026-06-30 15:21:35.293298
+335,148,44,home_service,"869 Luna St., Quezon City",Check engine light has been on for two days.,pending,2026-01-25 21:41:19.293298
+336,396,600,walk_in,None,"Battery seems weak, it struggles to start in the morning.",pending,2025-09-20 06:37:31.293298
+337,90,850,walk_in,None,"Battery seems weak, it struggles to start in the morning.",inspection_scheduled,2026-05-07 15:16:38.293298
+338,280,273,walk_in,None,Check engine light has been on for two days.,approved,2026-07-18 09:43:36.293298
+339,67,603,home_service,"711 Rizal St., Pasig City",Transmission shifts roughly between 2nd and 3rd gear.,approved,2025-10-15 08:54:44.293298
+340,104,346,walk_in,None,Need a routine maintenance check and oil change.,cancelled,2026-05-26 11:19:38.293298
+341,369,462,walk_in,None,Brakes are squeaking loudly when coming to a stop.,approved,2026-05-15 02:39:01.293298
+342,71,144,walk_in,None,Brakes are squeaking loudly when coming to a stop.,queued,2025-11-25 13:31:46.293298
+343,97,382,walk_in,None,Check engine light has been on for two days.,queued,2026-01-31 02:13:51.293298
+344,57,502,home_service,"481 Bonifacio St., Makati City",Need a routine maintenance check and oil change.,approved,2025-12-02 03:59:32.293298
+345,344,95,walk_in,None,Need a routine maintenance check and oil change.,pending,2025-08-08 06:37:59.293298
+346,317,598,home_service,"233 Mabini St., Quezon City",Need a routine maintenance check and oil change.,approved,2025-08-15 14:06:08.293298
+347,474,342,walk_in,None,Check engine light has been on for two days.,queued,2026-02-20 11:56:37.293298
+348,192,454,walk_in,None,Brakes are squeaking loudly when coming to a stop.,pending,2025-10-27 18:56:08.293298
+349,317,818,walk_in,None,Brakes are squeaking loudly when coming to a stop.,approved,2025-08-05 09:16:23.293298
+350,438,436,home_service,"646 Rizal St., Taguig",Car pulls heavily to the right while driving.,declined,2025-09-21 22:43:49.293298
+351,17,625,walk_in,None,"Battery seems weak, it struggles to start in the morning.",queued,2026-03-15 19:00:38.293298
+352,427,308,home_service,"648 Mabini St., Quezon City",Brakes are squeaking loudly when coming to a stop.,pending,2026-01-20 08:22:53.293298
+353,86,594,home_service,"654 Taft St., Manila",Air conditioning is blowing warm air.,approved,2025-12-23 02:48:55.293298
+354,451,312,home_service,"315 Luna St., Quezon City",Air conditioning is blowing warm air.,queued,2025-08-05 22:22:53.293298
+355,467,446,home_service,"221 Rizal St., Manila",Car pulls heavily to the right while driving.,pending,2026-02-04 04:13:29.293298
+356,241,973,home_service,"832 Luna St., Taguig",Engine makes a rattling noise on cold starts.,declined,2025-10-29 12:41:24.293298
+357,381,950,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,declined,2026-03-13 20:16:54.293298
+358,66,777,walk_in,None,Need a routine maintenance check and oil change.,inspection_scheduled,2026-02-01 18:28:54.293298
+359,345,194,walk_in,None,Brakes are squeaking loudly when coming to a stop.,declined,2025-11-26 12:28:50.293298
+360,483,707,home_service,"602 Bonifacio St., Quezon City",Brakes are squeaking loudly when coming to a stop.,inspection_scheduled,2025-08-17 09:56:17.293298
+361,245,895,walk_in,None,Engine makes a rattling noise on cold starts.,queued,2025-11-28 22:26:48.293298
+362,364,4,home_service,"925 Luna St., Quezon City",Check engine light has been on for two days.,pending,2026-03-12 02:02:02.293298
+363,471,909,home_service,"450 Rizal St., Makati City",Engine makes a rattling noise on cold starts.,inspection_scheduled,2025-11-28 22:16:11.293298
+364,264,127,home_service,"146 Bonifacio St., Taguig",Car pulls heavily to the right while driving.,inspection_scheduled,2026-05-16 07:36:47.293298
+365,258,776,home_service,"647 Mabini St., Quezon City",Brakes are squeaking loudly when coming to a stop.,declined,2026-07-16 03:26:34.293298
+366,121,957,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,approved,2026-07-10 17:49:12.293298
+367,468,705,walk_in,None,"Battery seems weak, it struggles to start in the morning.",pending,2025-11-10 16:16:32.293298
+368,84,219,walk_in,None,Check engine light has been on for two days.,queued,2025-11-04 23:51:04.293298
+369,237,436,walk_in,None,Air conditioning is blowing warm air.,pending,2026-03-19 16:56:09.293298
+370,304,791,home_service,"820 Bonifacio St., Pasig City",Need a routine maintenance check and oil change.,pending,2025-08-14 19:40:40.293298
+371,368,925,walk_in,None,Car pulls heavily to the right while driving.,queued,2025-09-30 22:40:03.293298
+372,436,360,walk_in,None,Air conditioning is blowing warm air.,pending,2026-06-08 10:56:47.293298
+373,169,105,walk_in,None,"Battery seems weak, it struggles to start in the morning.",queued,2026-01-02 04:17:23.293298
+374,285,216,home_service,"138 Mabini St., Makati City",Check engine light has been on for two days.,pending,2026-02-25 17:03:36.293298
+375,301,351,walk_in,None,Check engine light has been on for two days.,cancelled,2026-03-30 09:16:47.293298
+376,461,985,walk_in,None,Air conditioning is blowing warm air.,approved,2026-06-02 18:33:25.293298
+377,293,377,walk_in,None,Engine makes a rattling noise on cold starts.,approved,2025-09-16 14:14:37.293298
+378,443,155,home_service,"924 Taft St., Taguig",Check engine light has been on for two days.,approved,2025-12-30 02:30:57.293298
+379,209,658,home_service,"522 Taft St., Manila",Car pulls heavily to the right while driving.,declined,2025-12-31 21:00:53.293298
+380,252,696,walk_in,None,Car pulls heavily to the right while driving.,approved,2025-10-14 21:53:08.293298
+381,131,423,walk_in,None,Car pulls heavily to the right while driving.,pending,2025-10-04 00:18:35.293298
+382,344,515,walk_in,None,Air conditioning is blowing warm air.,declined,2025-11-09 02:15:28.293298
+383,89,337,home_service,"508 Bonifacio St., Makati City",Air conditioning is blowing warm air.,inspection_scheduled,2026-05-13 22:32:14.293298
+384,397,296,walk_in,None,Check engine light has been on for two days.,declined,2026-02-28 06:07:15.293298
+385,333,344,home_service,"761 Taft St., Pasig City",Transmission shifts roughly between 2nd and 3rd gear.,queued,2026-04-19 02:22:38.293298
+386,129,181,home_service,"346 Luna St., Quezon City",Need a routine maintenance check and oil change.,declined,2025-12-30 08:23:18.293298
+387,144,807,home_service,"158 Luna St., Manila","Battery seems weak, it struggles to start in the morning.",cancelled,2026-05-03 15:54:19.293298
+388,421,284,home_service,"521 Rizal St., Makati City",Check engine light has been on for two days.,pending,2026-01-16 16:17:59.293298
+389,423,686,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,declined,2026-02-22 00:28:25.293298
+390,16,70,walk_in,None,Need a routine maintenance check and oil change.,approved,2026-06-27 06:26:23.293298
+391,70,363,walk_in,None,Need a routine maintenance check and oil change.,approved,2026-07-17 19:33:25.293298
+392,486,352,walk_in,None,Engine makes a rattling noise on cold starts.,pending,2026-07-01 15:41:08.293298
+393,420,235,walk_in,None,Check engine light has been on for two days.,cancelled,2026-03-18 08:16:07.293298
+394,365,694,home_service,"453 Mabini St., Makati City","Battery seems weak, it struggles to start in the morning.",queued,2025-08-17 09:09:33.293298
+395,360,726,home_service,"121 Mabini St., Taguig",Air conditioning is blowing warm air.,declined,2025-10-26 00:46:23.293298
+396,171,341,home_service,"968 Luna St., Manila",Brakes are squeaking loudly when coming to a stop.,pending,2026-01-12 09:37:35.293298
+397,49,657,walk_in,None,Car pulls heavily to the right while driving.,approved,2026-01-14 11:37:20.293298
+398,318,521,home_service,"61 Mabini St., Makati City",Engine makes a rattling noise on cold starts.,pending,2025-09-19 15:15:30.293298
+399,159,776,walk_in,None,Car pulls heavily to the right while driving.,declined,2025-09-06 19:12:45.293298
+400,153,803,home_service,"190 Luna St., Pasig City",Check engine light has been on for two days.,inspection_scheduled,2026-01-21 02:13:24.293298
+401,229,177,walk_in,None,Brakes are squeaking loudly when coming to a stop.,declined,2026-01-29 08:43:35.293298
+402,66,740,walk_in,None,Check engine light has been on for two days.,declined,2025-08-22 20:06:49.293298
+403,165,598,walk_in,None,Brakes are squeaking loudly when coming to a stop.,queued,2025-12-16 12:21:22.293298
+404,10,89,walk_in,None,Check engine light has been on for two days.,declined,2026-06-09 13:08:43.293298
+405,216,544,home_service,"270 Luna St., Pasig City","Battery seems weak, it struggles to start in the morning.",declined,2026-01-16 15:04:45.293298
+406,296,131,walk_in,None,Air conditioning is blowing warm air.,pending,2025-10-13 10:22:51.293298
+407,189,282,home_service,"319 Rizal St., Quezon City",Transmission shifts roughly between 2nd and 3rd gear.,inspection_scheduled,2026-05-08 20:09:58.293298
+408,247,431,home_service,"583 Luna St., Makati City",Transmission shifts roughly between 2nd and 3rd gear.,inspection_scheduled,2026-06-11 18:51:51.293298
+409,131,616,walk_in,None,Engine makes a rattling noise on cold starts.,declined,2025-10-08 05:34:43.293298
+410,148,890,walk_in,None,"Battery seems weak, it struggles to start in the morning.",declined,2025-08-07 05:30:26.293298
+411,367,586,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,pending,2025-10-21 05:10:16.293298
+412,71,467,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,declined,2025-09-22 01:56:11.293298
+413,186,898,home_service,"387 Bonifacio St., Pasig City",Brakes are squeaking loudly when coming to a stop.,queued,2026-06-02 16:34:59.293298
+414,493,779,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,cancelled,2026-04-28 23:33:08.293298
+415,370,296,walk_in,None,Check engine light has been on for two days.,approved,2025-09-25 12:40:02.293298
+416,266,442,home_service,"457 Mabini St., Taguig",Need a routine maintenance check and oil change.,declined,2026-05-28 03:43:51.293298
+417,290,364,walk_in,None,Brakes are squeaking loudly when coming to a stop.,pending,2026-01-17 17:49:46.293298
+418,240,690,home_service,"811 Rizal St., Manila",Car pulls heavily to the right while driving.,cancelled,2026-06-15 08:54:03.293298
+419,342,525,home_service,"89 Mabini St., Quezon City",Air conditioning is blowing warm air.,cancelled,2025-08-26 03:39:29.293298
+420,381,803,home_service,"486 Mabini St., Pasig City",Brakes are squeaking loudly when coming to a stop.,approved,2026-03-25 04:08:39.293298
+421,194,912,home_service,"226 Bonifacio St., Pasig City",Transmission shifts roughly between 2nd and 3rd gear.,approved,2025-09-27 22:10:42.293298
+422,444,483,walk_in,None,Check engine light has been on for two days.,cancelled,2026-03-11 22:18:25.293298
+423,315,428,home_service,"463 Bonifacio St., Makati City",Car pulls heavily to the right while driving.,declined,2026-01-27 14:27:55.293298
+424,471,842,walk_in,None,Car pulls heavily to the right while driving.,inspection_scheduled,2025-10-17 13:57:40.293298
+425,267,644,walk_in,None,Check engine light has been on for two days.,inspection_scheduled,2026-06-21 17:56:11.293298
+426,44,787,walk_in,None,Engine makes a rattling noise on cold starts.,cancelled,2025-08-12 10:21:24.293298
+427,171,35,walk_in,None,"Battery seems weak, it struggles to start in the morning.",pending,2026-01-12 10:21:27.293298
+428,398,176,walk_in,None,Air conditioning is blowing warm air.,pending,2025-08-05 16:05:21.293298
+429,313,648,home_service,"383 Bonifacio St., Taguig",Car pulls heavily to the right while driving.,inspection_scheduled,2026-04-03 11:08:10.293298
+430,31,387,walk_in,None,Brakes are squeaking loudly when coming to a stop.,pending,2026-05-17 00:19:42.293298
+431,408,524,home_service,"937 Mabini St., Taguig",Need a routine maintenance check and oil change.,cancelled,2026-07-27 19:15:05.293298
+432,209,319,home_service,"336 Rizal St., Manila",Check engine light has been on for two days.,inspection_scheduled,2025-10-17 04:28:02.293298
+433,79,674,home_service,"596 Luna St., Taguig","Battery seems weak, it struggles to start in the morning.",inspection_scheduled,2025-12-18 21:26:43.293298
+434,128,595,walk_in,None,Car pulls heavily to the right while driving.,inspection_scheduled,2025-08-17 15:45:07.293298
+435,14,253,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,pending,2025-09-29 13:13:21.293298
+436,467,105,home_service,"295 Luna St., Pasig City",Need a routine maintenance check and oil change.,cancelled,2025-09-29 14:31:37.293298
+437,351,684,home_service,"612 Bonifacio St., Makati City",Transmission shifts roughly between 2nd and 3rd gear.,queued,2025-11-17 08:26:06.293298
+438,330,3,home_service,"923 Mabini St., Makati City",Car pulls heavily to the right while driving.,queued,2025-12-20 01:27:10.293298
+439,10,510,walk_in,None,Car pulls heavily to the right while driving.,declined,2026-01-20 09:52:23.293298
+440,268,679,walk_in,None,Brakes are squeaking loudly when coming to a stop.,queued,2025-12-17 19:01:31.293298
+441,428,673,home_service,"163 Taft St., Quezon City",Transmission shifts roughly between 2nd and 3rd gear.,declined,2025-10-13 13:42:41.293298
+442,103,889,home_service,"763 Rizal St., Pasig City","Battery seems weak, it struggles to start in the morning.",pending,2026-08-04 02:32:49.293298
+443,318,80,home_service,"889 Mabini St., Makati City",Need a routine maintenance check and oil change.,pending,2025-10-12 03:40:12.293298
+444,411,311,home_service,"253 Taft St., Makati City",Need a routine maintenance check and oil change.,queued,2025-09-16 06:08:59.293298
+445,111,395,walk_in,None,Air conditioning is blowing warm air.,inspection_scheduled,2026-01-14 10:30:16.293298
+446,461,401,walk_in,None,Engine makes a rattling noise on cold starts.,queued,2025-10-16 21:54:55.293298
+447,9,347,walk_in,None,Need a routine maintenance check and oil change.,pending,2026-05-15 16:28:26.293298
+448,235,655,home_service,"760 Taft St., Makati City",Engine makes a rattling noise on cold starts.,inspection_scheduled,2026-01-17 04:27:05.293298
+449,337,111,walk_in,None,Car pulls heavily to the right while driving.,queued,2026-01-03 07:20:04.293298
+450,36,41,home_service,"489 Bonifacio St., Makati City",Air conditioning is blowing warm air.,declined,2025-08-28 02:04:19.293298
+451,479,356,walk_in,None,Car pulls heavily to the right while driving.,queued,2025-12-20 11:34:42.293298
+452,27,346,home_service,"188 Bonifacio St., Makati City",Air conditioning is blowing warm air.,declined,2025-09-11 02:49:47.293298
+453,483,270,home_service,"851 Bonifacio St., Makati City",Need a routine maintenance check and oil change.,queued,2026-05-10 23:10:27.293298
+454,413,855,home_service,"440 Taft St., Quezon City","Battery seems weak, it struggles to start in the morning.",approved,2025-10-03 22:29:27.293298
+455,34,933,home_service,"29 Luna St., Makati City",Air conditioning is blowing warm air.,inspection_scheduled,2026-02-21 12:22:58.293298
+456,440,586,home_service,"659 Taft St., Makati City",Need a routine maintenance check and oil change.,inspection_scheduled,2026-07-11 21:11:03.293298
+457,117,1000,walk_in,None,Car pulls heavily to the right while driving.,pending,2026-07-14 01:35:30.293298
+458,55,517,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,cancelled,2026-04-11 05:23:56.293298
+459,494,93,home_service,"150 Bonifacio St., Pasig City",Engine makes a rattling noise on cold starts.,approved,2025-08-15 12:31:32.293298
+460,386,533,home_service,"468 Rizal St., Manila","Battery seems weak, it struggles to start in the morning.",approved,2026-07-13 07:45:01.293298
+461,266,990,walk_in,None,Need a routine maintenance check and oil change.,cancelled,2026-01-30 16:11:45.293298
+462,7,810,home_service,"881 Taft St., Makati City",Check engine light has been on for two days.,inspection_scheduled,2026-02-25 11:10:53.293298
+463,491,692,home_service,"475 Rizal St., Manila",Car pulls heavily to the right while driving.,cancelled,2025-08-22 05:16:48.293298
+464,111,898,home_service,"806 Rizal St., Quezon City","Battery seems weak, it struggles to start in the morning.",pending,2026-06-14 11:26:34.293298
+465,488,16,home_service,"562 Rizal St., Makati City",Check engine light has been on for two days.,cancelled,2025-09-14 11:16:52.293298
+466,310,912,walk_in,None,Engine makes a rattling noise on cold starts.,queued,2026-07-12 11:01:59.293298
+467,37,564,home_service,"683 Rizal St., Taguig",Need a routine maintenance check and oil change.,cancelled,2026-02-17 02:02:30.293298
+468,54,352,walk_in,None,Air conditioning is blowing warm air.,approved,2026-03-21 19:42:30.293298
+469,317,576,home_service,"979 Mabini St., Quezon City",Need a routine maintenance check and oil change.,declined,2026-05-11 13:32:35.293298
+470,412,649,home_service,"373 Luna St., Taguig","Battery seems weak, it struggles to start in the morning.",approved,2025-11-30 23:42:11.293298
+471,452,248,home_service,"534 Luna St., Pasig City",Need a routine maintenance check and oil change.,pending,2026-05-27 09:07:29.293298
+472,44,899,walk_in,None,Air conditioning is blowing warm air.,inspection_scheduled,2025-10-22 00:15:47.293298
+473,163,383,walk_in,None,Car pulls heavily to the right while driving.,queued,2026-05-04 21:53:08.293298
+474,292,830,home_service,"54 Taft St., Quezon City",Engine makes a rattling noise on cold starts.,pending,2026-06-18 00:27:25.293298
+475,200,826,home_service,"874 Mabini St., Pasig City","Battery seems weak, it struggles to start in the morning.",queued,2026-07-07 16:26:16.293298
+476,76,399,home_service,"875 Taft St., Pasig City",Brakes are squeaking loudly when coming to a stop.,queued,2026-07-26 07:32:05.293298
+477,6,686,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,cancelled,2026-07-21 17:38:37.293298
+478,41,589,home_service,"79 Mabini St., Makati City",Engine makes a rattling noise on cold starts.,pending,2025-08-31 20:37:44.293298
+479,390,39,walk_in,None,Car pulls heavily to the right while driving.,approved,2025-12-12 02:55:59.293298
+480,108,539,walk_in,None,"Battery seems weak, it struggles to start in the morning.",approved,2026-05-18 12:52:54.293298
+481,464,947,walk_in,None,"Battery seems weak, it struggles to start in the morning.",inspection_scheduled,2026-03-27 00:34:27.293298
+482,302,598,walk_in,None,Need a routine maintenance check and oil change.,inspection_scheduled,2026-02-23 14:27:28.293298
+483,373,413,home_service,"599 Rizal St., Taguig","Battery seems weak, it struggles to start in the morning.",pending,2026-02-03 18:52:20.293298
+484,220,244,walk_in,None,Check engine light has been on for two days.,pending,2026-05-18 20:27:01.293298
+485,344,751,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,approved,2026-06-30 21:35:32.293298
+486,230,669,walk_in,None,Brakes are squeaking loudly when coming to a stop.,pending,2025-12-13 20:11:50.293298
+487,159,910,walk_in,None,"Battery seems weak, it struggles to start in the morning.",declined,2025-08-06 21:12:42.293298
+488,369,216,home_service,"981 Luna St., Taguig",Engine makes a rattling noise on cold starts.,inspection_scheduled,2025-11-24 16:11:51.293298
+489,98,842,home_service,"687 Luna St., Taguig","Battery seems weak, it struggles to start in the morning.",inspection_scheduled,2025-11-28 02:21:04.293298
+490,232,299,walk_in,None,Transmission shifts roughly between 2nd and 3rd gear.,declined,2026-04-01 06:58:31.293298
+491,130,173,walk_in,None,Need a routine maintenance check and oil change.,queued,2025-10-24 06:46:13.293298
+492,162,493,home_service,"173 Luna St., Manila",Check engine light has been on for two days.,approved,2026-01-20 21:04:39.293298
+493,66,193,walk_in,None,Need a routine maintenance check and oil change.,pending,2026-07-20 15:28:46.293298
+494,101,135,walk_in,None,Check engine light has been on for two days.,cancelled,2025-09-06 07:18:54.293298
+495,483,518,walk_in,None,Need a routine maintenance check and oil change.,declined,2026-05-22 20:14:41.293298
+496,173,406,walk_in,None,Air conditioning is blowing warm air.,pending,2026-05-10 14:41:19.293298
+497,261,147,walk_in,None,Car pulls heavily to the right while driving.,cancelled,2025-12-14 08:56:23.293298
+498,338,699,walk_in,None,Need a routine maintenance check and oil change.,approved,2025-08-26 11:25:35.293298
+499,154,217,home_service,"395 Taft St., Quezon City",Need a routine maintenance check and oil change.,approved,2026-04-13 17:24:06.293298
+500,156,164,walk_in,None,Engine makes a rattling noise on cold starts.,declined,2026-03-09 05:00:33.293298
+501,501,1001,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2022-12-16 02:35:39.789989
+502,502,1003,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2023-02-10 02:35:39.789989
+503,503,1005,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2018-05-03 02:35:39.789989
+504,504,1007,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2025-09-15 02:35:39.789989
+505,505,1009,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2023-10-28 02:35:39.789989
+506,506,1011,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2024-01-19 02:35:39.789989
+507,507,1013,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2022-12-20 02:35:39.789989
+508,508,1015,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2021-01-26 02:35:39.789989
+509,509,1017,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2017-07-15 02:35:39.789989
+510,510,1019,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2017-01-30 02:35:39.789989
+511,511,1021,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2023-01-11 02:35:39.789989
+512,512,1023,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2026-06-04 02:35:39.789989
+513,513,1025,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2021-08-08 02:35:39.789989
+514,514,1027,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2022-01-23 02:35:39.789989
+515,515,1029,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2023-01-07 02:35:39.789989
+516,516,1031,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2024-08-24 02:35:39.789989
+517,517,1033,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2024-04-21 02:35:39.789989
+518,518,1035,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2016-12-10 02:35:39.789989
+519,519,1037,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2021-08-04 02:35:39.789989
+520,520,1039,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2021-09-01 02:35:39.789989
+521,521,1041,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2023-11-30 02:35:39.789989
+522,522,1043,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2024-01-11 02:35:39.789989
+523,523,1045,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2025-02-18 02:35:39.789989
+524,524,1047,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2024-04-13 02:35:39.789989
+525,525,1049,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2021-03-23 02:35:39.789989
+526,526,1051,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2019-04-13 02:35:39.789989
+527,527,1053,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2018-03-04 02:35:39.789989
+528,528,1055,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2022-06-14 02:35:39.789989
+529,529,1057,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2018-07-04 02:35:39.789989
+530,530,1059,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2022-11-13 02:35:39.789989
+531,531,1061,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2023-07-30 02:35:39.789989
+532,532,1063,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2023-07-17 02:35:39.789989
+533,533,1065,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2019-02-17 02:35:39.789989
+534,534,1067,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2023-02-18 02:35:39.789989
+535,535,1069,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2023-07-14 02:35:39.789989
+536,536,1071,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2023-02-06 02:35:39.789989
+537,537,1073,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2024-10-23 02:35:39.789989
+538,538,1075,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2024-11-15 02:35:39.789989
+539,539,1077,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2018-05-19 02:35:39.789989
+540,540,1079,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2025-03-11 02:35:39.789989
+541,541,1081,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2022-01-21 02:35:39.789989
+542,542,1083,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2024-07-26 02:35:39.789989
+543,543,1085,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2020-09-18 02:35:39.789989
+544,544,1087,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2026-04-23 02:35:39.789989
+545,545,1089,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2023-04-05 02:35:39.789989
+546,546,1091,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2020-05-03 02:35:39.789989
+547,547,1093,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2024-06-22 02:35:39.789989
+548,548,1095,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2021-03-20 02:35:39.789989
+549,549,1097,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2022-12-06 02:35:39.789989
+550,550,1099,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2022-07-20 02:35:39.789989
+551,551,1101,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2025-05-14 02:35:39.789989
+552,552,1103,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2020-06-09 02:35:39.789989
+553,553,1105,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2023-02-28 02:35:39.789989
+554,554,1107,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2018-01-19 02:35:39.789989
+555,555,1109,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2024-04-22 02:35:39.789989
+556,556,1111,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2018-06-06 02:35:39.789989
+557,557,1113,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2019-06-17 02:35:39.789989
+558,558,1115,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2026-01-19 02:35:39.789989
+559,559,1117,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2022-07-14 02:35:39.789989
+560,560,1119,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2025-02-11 02:35:39.789989
+561,561,1121,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2025-10-10 02:35:39.789989
+562,562,1123,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2025-11-18 02:35:39.789989
+563,563,1125,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2022-08-26 02:35:39.789989
+564,564,1127,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2026-04-19 02:35:39.789989
+565,565,1129,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2019-03-03 02:35:39.789989
+566,566,1131,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2023-07-25 02:35:39.789989
+567,567,1133,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2025-11-04 02:35:39.789989
+568,568,1135,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2022-08-26 02:35:39.789989
+569,569,1137,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2025-03-11 02:35:39.789989
+570,570,1139,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2021-05-24 02:35:39.789989
+571,571,1141,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2021-04-22 02:35:39.789989
+572,572,1143,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2023-09-22 02:35:39.789989
+573,573,1145,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2022-03-21 02:35:39.789989
+574,574,1147,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2024-04-28 02:35:39.789989
+575,575,1149,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2017-05-30 02:35:39.789989
+576,576,1151,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2016-10-31 02:35:39.789989
+577,577,1153,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2022-05-09 02:35:39.789989
+578,578,1155,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2021-08-24 02:35:39.789989
+579,579,1157,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2020-01-27 02:35:39.789989
+580,580,1159,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2019-07-09 02:35:39.789989
+581,581,1161,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2025-11-08 02:35:39.789989
+582,582,1163,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2023-01-01 02:35:39.789989
+583,583,1165,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2016-11-08 02:35:39.789989
+584,584,1167,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2018-04-16 02:35:39.789989
+585,585,1169,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2021-08-08 02:35:39.789989
+586,586,1171,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2026-02-01 02:35:39.789989
+587,587,1173,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2020-08-03 02:35:39.789989
+588,588,1175,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2022-12-27 02:35:39.789989
+589,589,1177,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2019-04-20 02:35:39.789989
+590,590,1179,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2019-11-21 02:35:39.789989
+591,591,1181,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2018-09-19 02:35:39.789989
+592,592,1183,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2018-02-12 02:35:39.789989
+593,593,1185,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2018-12-12 02:35:39.789989
+594,594,1187,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2023-09-30 02:35:39.789989
+595,595,1189,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2018-08-14 02:35:39.789989
+596,596,1191,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2023-04-28 02:35:39.789989
+597,597,1193,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2024-03-04 02:35:39.789989
+598,598,1195,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2018-07-22 02:35:39.789989
+599,599,1197,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2026-02-24 02:35:39.789989
+600,600,1199,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2022-09-27 02:35:39.789989
+601,601,1201,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2025-04-18 02:35:39.789989
+602,602,1203,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2016-11-25 02:35:39.789989
+603,603,1205,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2024-02-29 02:35:39.789989
+604,604,1207,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2025-12-22 02:35:39.789989
+605,605,1209,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2017-07-06 02:35:39.789989
+606,606,1211,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2024-07-04 02:35:39.789989
+607,607,1213,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2019-01-11 02:35:39.789989
+608,608,1215,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2020-08-29 02:35:39.789989
+609,609,1217,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2026-04-25 02:35:39.789989
+610,610,1219,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2023-04-20 02:35:39.789989
+611,611,1221,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2020-04-22 02:35:39.789989
+612,612,1223,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2022-11-08 02:35:39.789989
+613,613,1225,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2025-05-31 02:35:39.789989
+614,614,1227,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2017-10-01 02:35:39.789989
+615,615,1229,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2018-06-18 02:35:39.789989
+616,616,1231,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2018-10-03 02:35:39.789989
+617,617,1233,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2023-05-18 02:35:39.789989
+618,618,1235,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2024-09-02 02:35:39.789989
+619,619,1237,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2025-01-18 02:35:39.789989
+620,620,1239,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2018-05-12 02:35:39.789989
+621,621,1241,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2017-07-08 02:35:39.789989
+622,622,1243,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2022-02-04 02:35:39.789989
+623,623,1245,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2018-11-26 02:35:39.789989
+624,624,1247,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2017-02-10 02:35:39.789989
+625,625,1249,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2018-06-25 02:35:39.789989
+626,626,1251,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2021-04-28 02:35:39.789989
+627,627,1253,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2026-04-04 02:35:39.789989
+628,628,1255,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2018-08-28 02:35:39.789989
+629,629,1257,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2020-02-23 02:35:39.789989
+630,630,1259,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2022-05-23 02:35:39.789989
+631,631,1261,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2016-10-25 02:35:39.789989
+632,632,1263,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2021-12-10 02:35:39.789989
+633,633,1265,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2017-07-14 02:35:39.789989
+634,634,1267,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2023-09-25 02:35:39.789989
+635,635,1269,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2017-07-05 02:35:39.789989
+636,636,1271,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2025-10-06 02:35:39.789989
+637,637,1273,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2017-03-27 02:35:39.789989
+638,638,1275,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2020-05-13 02:35:39.789989
+639,639,1277,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2017-02-28 02:35:39.789989
+640,640,1279,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2025-02-18 02:35:39.789989
+641,641,1281,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2020-05-18 02:35:39.789989
+642,642,1283,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2019-05-09 02:35:39.789989
+643,643,1285,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2023-03-07 02:35:39.789989
+644,644,1287,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2020-11-24 02:35:39.789989
+645,645,1289,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2017-05-14 02:35:39.789989
+646,646,1291,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2021-12-20 02:35:39.789989
+647,647,1293,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2025-11-18 02:35:39.789989
+648,648,1295,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2023-08-07 02:35:39.789989
+649,649,1297,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2024-11-09 02:35:39.789989
+650,650,1299,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2023-06-19 02:35:39.789989
+651,651,1301,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2023-03-25 02:35:39.789989
+652,652,1303,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2021-11-07 02:35:39.789989
+653,653,1305,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2021-06-22 02:35:39.789989
+654,654,1307,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2021-03-24 02:35:39.789989
+655,655,1309,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2022-08-01 02:35:39.789989
+656,656,1311,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2020-03-07 02:35:39.789989
+657,657,1313,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2020-09-22 02:35:39.789989
+658,658,1315,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2018-02-12 02:35:39.789989
+659,659,1317,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2025-06-14 02:35:39.789989
+660,660,1319,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2020-10-12 02:35:39.789989
+661,661,1321,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2020-01-27 02:35:39.789989
+662,662,1323,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2017-01-10 02:35:39.789989
+663,663,1325,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2019-03-09 02:35:39.789989
+664,664,1327,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2019-07-23 02:35:39.789989
+665,665,1329,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2022-03-07 02:35:39.789989
+666,666,1331,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2020-06-06 02:35:39.789989
+667,667,1333,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2023-07-05 02:35:39.789989
+668,668,1335,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2018-08-01 02:35:39.789989
+669,669,1337,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2018-07-02 02:35:39.789989
+670,670,1339,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2020-03-02 02:35:39.789989
+671,671,1341,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2016-10-06 02:35:39.789989
+672,672,1343,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2019-12-15 02:35:39.789989
+673,673,1345,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2018-01-25 02:35:39.789989
+674,674,1347,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2020-02-19 02:35:39.789989
+675,675,1349,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2017-01-11 02:35:39.789989
+676,676,1351,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2018-12-15 02:35:39.789989
+677,677,1353,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2021-10-27 02:35:39.789989
+678,678,1355,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2020-07-03 02:35:39.789989
+679,679,1357,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2025-07-15 02:35:39.789989
+680,680,1359,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2017-10-14 02:35:39.789989
+681,681,1361,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2020-09-11 02:35:39.789989
+682,682,1363,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2025-03-22 02:35:39.789989
+683,683,1365,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2021-11-06 02:35:39.789989
+684,684,1367,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2022-02-21 02:35:39.789989
+685,685,1369,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2017-07-07 02:35:39.789989
+686,686,1371,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2020-04-04 02:35:39.789989
+687,687,1373,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2020-10-05 02:35:39.789989
+688,688,1375,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2020-12-05 02:35:39.789989
+689,689,1377,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2020-03-06 02:35:39.789989
+690,690,1379,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2025-09-24 02:35:39.789989
+691,691,1381,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2019-09-20 02:35:39.789989
+692,692,1383,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2024-12-15 02:35:39.789989
+693,693,1385,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2021-01-19 02:35:39.789989
+694,694,1387,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2023-08-28 02:35:39.789989
+695,695,1389,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2017-11-27 02:35:39.789989
+696,696,1391,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2018-05-06 02:35:39.789989
+697,697,1393,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2023-10-14 02:35:39.789989
+698,698,1395,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2023-10-05 02:35:39.789989
+699,699,1397,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2019-06-26 02:35:39.789989
+700,700,1399,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2018-10-15 02:35:39.789989
+701,701,1401,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2023-10-22 02:35:39.789989
+702,702,1403,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2018-04-30 02:35:39.789989
+703,703,1405,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2018-05-04 02:35:39.789989
+704,704,1407,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2018-02-25 02:35:39.789989
+705,705,1409,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2018-03-12 02:35:39.789989
+706,706,1411,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2021-01-02 02:35:39.789989
+707,707,1413,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2017-11-11 02:35:39.789989
+708,708,1415,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2023-11-27 02:35:39.789989
+709,709,1417,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2018-11-30 02:35:39.789989
+710,710,1419,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2016-11-03 02:35:39.789989
+711,711,1421,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2022-01-09 02:35:39.789989
+712,712,1423,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2023-07-03 02:35:39.789989
+713,713,1425,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2023-08-03 02:35:39.789989
+714,714,1427,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2018-02-02 02:35:39.789989
+715,715,1429,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2024-08-18 02:35:39.789989
+716,716,1431,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2023-07-15 02:35:39.789989
+717,717,1433,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2020-03-09 02:35:39.789989
+718,718,1435,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2018-05-11 02:35:39.789989
+719,719,1437,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2025-06-21 02:35:39.789989
+720,720,1439,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2024-09-29 02:35:39.789989
+721,721,1441,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2021-03-07 02:35:39.789989
+722,722,1443,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2019-10-22 02:35:39.789989
+723,723,1445,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2021-02-23 02:35:39.789989
+724,724,1447,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2025-03-16 02:35:39.789989
+725,725,1449,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2018-04-28 02:35:39.789989
+726,726,1451,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2021-04-14 02:35:39.789989
+727,727,1453,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2022-12-23 02:35:39.789989
+728,728,1455,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2018-11-13 02:35:39.789989
+729,729,1457,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2023-09-25 02:35:39.789989
+730,730,1459,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2019-11-07 02:35:39.789989
+731,731,1461,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2022-06-29 02:35:39.789989
+732,732,1463,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2018-05-22 02:35:39.789989
+733,733,1465,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2023-03-24 02:35:39.789989
+734,734,1467,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2025-06-29 02:35:39.789989
+735,735,1469,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2026-04-19 02:35:39.789989
+736,736,1471,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2021-10-14 02:35:39.789989
+737,737,1473,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2024-09-06 02:35:39.789989
+738,738,1475,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2019-08-02 02:35:39.789989
+739,739,1477,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2018-11-29 02:35:39.789989
+740,740,1479,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2020-08-04 02:35:39.789989
+741,741,1481,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2020-08-05 02:35:39.789989
+742,742,1483,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2016-10-28 02:35:39.789989
+743,743,1485,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2019-02-22 02:35:39.789989
+744,744,1487,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2022-11-07 02:35:39.789989
+745,745,1489,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2026-03-08 02:35:39.789989
+746,746,1491,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2020-10-19 02:35:39.789989
+747,747,1493,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2025-03-20 02:35:39.789989
+748,748,1495,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2018-06-18 02:35:39.789989
+749,749,1497,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2018-11-04 02:35:39.789989
+750,750,1499,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2023-12-08 02:35:39.789989
+751,751,1501,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2020-05-02 02:35:39.789989
+752,752,1503,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2017-02-08 02:35:39.789989
+753,753,1505,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2019-05-12 02:35:39.789989
+754,754,1507,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2016-10-14 02:35:39.789989
+755,755,1509,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2021-07-29 02:35:39.789989
+756,756,1511,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2024-07-27 02:35:39.789989
+757,757,1513,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2019-06-20 02:35:39.789989
+758,758,1515,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2024-05-26 02:35:39.789989
+759,759,1517,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2019-08-14 02:35:39.789989
+760,760,1519,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2020-07-08 02:35:39.789989
+761,761,1521,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2020-11-04 02:35:39.789989
+762,762,1523,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2017-11-13 02:35:39.789989
+763,763,1525,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2020-07-03 02:35:39.789989
+764,764,1527,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2025-12-15 02:35:39.789989
+765,765,1529,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2017-10-09 02:35:39.789989
+766,766,1531,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2020-04-01 02:35:39.789989
+767,767,1533,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2024-02-10 02:35:39.789989
+768,768,1535,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2019-04-28 02:35:39.789989
+769,769,1537,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2024-03-19 02:35:39.789989
+770,770,1539,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2021-07-12 02:35:39.789989
+771,771,1541,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2025-04-05 02:35:39.789989
+772,772,1543,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2021-07-21 02:35:39.789989
+773,773,1545,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2023-09-28 02:35:39.789989
+774,774,1547,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2024-07-25 02:35:39.789989
+775,775,1549,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2019-07-25 02:35:39.789989
+776,776,1551,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2018-04-28 02:35:39.789989
+777,777,1553,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2018-10-24 02:35:39.789989
+778,778,1555,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2022-04-22 02:35:39.789989
+779,779,1557,walk_in,None,"Full engine overhaul requested; vehicle has 120,000 km on it.",approved,2025-09-03 02:35:39.789989
+780,780,1559,walk_in,None,Suspension is completely collapsed on the rear driver side.,approved,2017-05-26 02:35:39.789989
+781,781,1561,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2023-06-29 02:35:39.789989
+782,782,1563,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2025-03-17 02:35:39.789989
+783,783,1565,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2020-06-02 02:35:39.789989
+784,784,1567,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2020-09-28 02:35:39.789989
+785,785,1569,walk_in,None,Brakes grinding metal-on-metal; stopping distance is dangerously long.,approved,2022-08-29 02:35:39.789989
+786,786,1571,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2016-10-29 02:35:39.789989
+787,787,1573,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2016-10-16 02:35:39.789989
+788,788,1575,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2022-09-03 02:35:39.789989
+789,789,1577,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2018-10-25 02:35:39.789989
+790,790,1579,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2024-08-31 02:35:39.789989
+791,791,1581,walk_in,None,A/C compressor seized — blowing only hot air.,approved,2017-11-25 02:35:39.789989
+792,792,1583,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2024-04-04 02:35:39.789989
+793,793,1585,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2020-10-15 02:35:39.789989
+794,794,1587,walk_in,None,Engine knocking heavily under load — needs urgent diagnosis.,approved,2017-01-12 02:35:39.789989
+795,795,1589,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2022-12-07 02:35:39.789989
+796,796,1591,walk_in,None,Complete timing belt + water pump replacement due at high mileage.,approved,2017-03-18 02:35:39.789989
+797,797,1593,walk_in,None,Fuel injectors clogged; very poor fuel economy and rough idle.,approved,2018-02-20 02:35:39.789989
+798,798,1595,walk_in,None,Severe oil leak underneath — puddles forming overnight.,approved,2021-12-09 02:35:39.789989
+799,799,1597,walk_in,None,Check engine light on; multiple fault codes found during scan.,approved,2023-07-23 02:35:39.789989
+800,800,1599,walk_in,None,Transmission slipping between gears; vehicle jerks at highway speed.,approved,2023-11-24 02:35:39.789989

@@ -63,6 +63,8 @@ function toJobOrderCard(row: any): JobOrderCard {
     mechanic: 'Unassigned', // no mechanic-assignment table exists in the schema yet
     stepsDone: STAGE_STEP_NUMBER[stage],
     stepsTotal: 4,
+    mileage: row.mileage ? Number(row.mileage) : undefined,
+    vehicleYear: row.vehicle_year ? Number(row.vehicle_year) : undefined,
   }
 }
 

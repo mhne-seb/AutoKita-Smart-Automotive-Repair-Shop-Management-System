@@ -16,6 +16,7 @@ type Task = {
   price: string;
   billable: boolean;
   scheduled_date?: string;
+  estimated_finish?: string;
 };
 
 type JobOrder = {
@@ -193,11 +194,19 @@ function InProgress() {
                       >
                         <div className="min-w-0 flex-1">
                           <div className="truncate text-sm font-semibold">{t.task_title}</div>
-                          <p className="mt-0.5 truncate text-xs text-muted-foreground">{t.note}</p>
+                          {t.note && t.note !== 'Describe the service...' && (
+                            <p className="mt-0.5 truncate text-xs text-muted-foreground">{t.note}</p>
+                          )}
                           {t.completed_at && !isOpen && (
                             <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
                               <Clock className="h-3 w-3" />
                               {t.completed_at}
+                            </div>
+                          )}
+                          {t.estimated_finish && tag !== 'completed' && !isOpen && (
+                            <div className="mt-1 flex items-center gap-1 text-[11px] text-amber-600 font-medium">
+                              <Clock className="h-3 w-3" />
+                              Est. Finish: {new Date(t.estimated_finish).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                             </div>
                           )}
                         </div>
@@ -223,7 +232,9 @@ function InProgress() {
                             <span>{t.completed_at}</span>
                             <span className="text-success">Verified</span>
                           </div>
-                          <p className="mt-2 text-xs text-muted-foreground">{t.note}</p>
+                          {t.note && t.note !== 'Describe the service...' && (
+                            <p className="mt-2 text-xs text-muted-foreground">{t.note}</p>
+                          )}
                         </div>
                       )}
                     </div>

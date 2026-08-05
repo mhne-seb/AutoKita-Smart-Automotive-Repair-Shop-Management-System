@@ -1,0 +1,9 @@
+id,shop_id,service_name,description,base_price,base_duration_hours,is_price_fixed,is_active
+1,1,Oil Change,Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.,1500.00,1.00,True,True
+2,1,Brake Pad Replacement,Description: repair performed by the mechanics to ensure vehicle safety and reliability.,3500.00,2.00,False,True
+3,1,Tire Rotation & Balance,Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.,800.00,0.50,True,True
+4,1,Wheel Alignment,Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.,1200.00,1.00,True,True
+5,1,Engine Diagnostics,Description: inspection performed by the mechanics to ensure vehicle safety and reliability.,2000.00,1.50,False,True
+6,1,Battery Testing & Replacement,Description: repair performed by the mechanics to ensure vehicle safety and reliability.,4500.00,0.50,True,True
+7,1,A/C System Recharge,Description: maintenance performed by the mechanics to ensure vehicle safety and reliability.,2500.00,1.00,True,True
+8,1,Transmission Fluid Flush,Description: servicing performed by the mechanics to ensure vehicle safety and reliability.,4000.00,2.00,False,True

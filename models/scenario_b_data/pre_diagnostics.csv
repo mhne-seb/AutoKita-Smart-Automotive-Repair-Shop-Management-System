@@ -1,0 +1,301 @@
+id,job_order_id,mechanic_notes,customer_approval_status,datetime_created,datetime_approved
+1,291,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-12-17 09:25:57.312132,2025-12-19 01:25:57.312132
+2,514,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-09-20 18:05:36.312132,2025-09-22 00:05:36.312132
+3,136,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-04-01 19:13:44.312132,2026-04-02 21:13:44.312132
+4,207,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-02-11 15:32:13.312132,2026-02-13 06:32:13.312132
+5,228,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-07-03 21:04:45.312132,2026-07-04 16:04:45.312132
+6,238,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-11-30 06:18:31.312132,2025-12-02 05:18:31.312132
+7,353,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-09-06 19:13:55.312132,2025-09-08 13:13:55.312132
+8,429,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-01-20 06:50:46.312132,2026-01-21 03:50:46.312132
+9,198,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,disputed,2026-06-04 06:49:46.312132,2026-06-05 02:49:46.312132
+10,478,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-12-17 14:11:56.312132,2025-12-19 03:11:56.312132
+11,65,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-02-09 18:19:54.312132,2026-02-11 07:19:54.312132
+12,308,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,pending,2026-05-12 00:40:43.312132,
+13,26,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-05-15 18:15:29.312132,2026-05-15 21:15:29.312132
+14,364,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-06-01 20:47:02.312132,2026-06-03 20:47:02.312132
+15,488,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,disputed,2025-08-25 22:33:00.312132,2025-08-27 16:33:00.312132
+16,247,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-10-12 15:31:49.312132,2025-10-12 16:31:49.312132
+17,483,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,pending,2025-11-05 05:57:36.312132,
+18,157,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-05-09 11:51:54.312132,2026-05-10 03:51:54.312132
+19,433,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-05-03 13:59:52.312132,2026-05-04 17:59:52.312132
+20,117,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,pending,2025-08-14 00:01:30.312132,
+21,33,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-09-16 06:45:50.312132,2025-09-16 09:45:50.312132
+22,168,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-09-11 03:41:22.312132,2025-09-12 10:41:22.312132
+23,284,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-08-10 07:03:49.312132,2025-08-10 21:03:49.312132
+24,180,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-04-02 04:11:07.312132,2026-04-03 16:11:07.312132
+25,439,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2026-01-03 11:01:08.312132,2026-01-04 17:01:08.312132
+26,175,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,disputed,2026-01-29 16:42:20.312132,2026-01-30 09:42:20.312132
+27,266,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-10-09 02:10:22.312132,2025-10-09 14:10:22.312132
+28,209,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,disputed,2025-09-11 14:43:51.312132,2025-09-12 06:43:51.312132
+29,15,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-04-10 05:51:25.312132,2026-04-11 03:51:25.312132
+30,283,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-07-13 22:05:30.312132,2026-07-14 23:05:30.312132
+31,420,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-03-25 17:30:34.312132,2026-03-27 16:30:34.312132
+32,293,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,disputed,2025-10-20 23:11:23.312132,2025-10-21 21:11:23.312132
+33,171,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-11-01 22:37:34.312132,2025-11-03 13:37:34.312132
+34,308,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-04-30 15:31:27.312132,2026-04-30 20:31:27.312132
+35,268,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-10-21 15:56:12.312132,2025-10-21 20:56:12.312132
+36,294,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-02-24 20:24:59.312132,2026-02-24 23:24:59.312132
+37,353,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-06-30 03:44:54.312132,2026-07-01 19:44:54.312132
+38,179,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-07-09 12:49:57.312132,2026-07-10 19:49:57.312132
+39,85,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,disputed,2026-07-12 18:13:16.312132,2026-07-13 06:13:16.312132
+40,363,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-10-29 12:50:50.312132,2025-10-30 23:50:50.312132
+41,78,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-11-06 11:02:35.312132,2025-11-07 02:02:35.312132
+42,413,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-09-10 03:37:33.312132,2025-09-11 20:37:33.312132
+43,271,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,pending,2025-09-24 20:39:14.312132,
+44,165,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-04-08 05:09:45.312132,2026-04-09 21:09:45.312132
+45,53,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-11-01 11:33:19.312132,2025-11-03 02:33:19.312132
+46,425,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,pending,2025-08-19 02:56:51.312132,
+47,324,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-10-14 17:13:39.312132,2025-10-14 23:13:39.312132
+48,101,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,disputed,2025-08-21 09:57:32.312132,2025-08-23 09:57:32.312132
+49,411,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,disputed,2026-05-25 05:38:42.312132,2026-05-26 17:38:42.312132
+50,432,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2025-08-16 09:08:43.312132,2025-08-17 06:08:43.312132
+51,405,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-10-02 04:55:22.312132,2025-10-03 03:55:22.312132
+52,9,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,pending,2026-07-09 12:46:36.312132,
+53,454,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-06-16 22:46:43.312132,2026-06-18 08:46:43.312132
+54,140,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,pending,2025-12-16 11:22:35.312132,
+55,246,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,pending,2026-03-05 08:11:40.312132,
+56,226,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-08-25 12:27:06.312132,2025-08-25 18:27:06.312132
+57,362,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,pending,2026-05-15 06:41:00.312132,
+58,298,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,pending,2026-03-29 20:22:11.312132,
+59,242,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-07-19 22:24:46.312132,2026-07-21 16:24:46.312132
+60,179,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,disputed,2026-06-08 05:39:47.312132,2026-06-08 09:39:47.312132
+61,210,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-11-06 08:37:27.312132,2025-11-08 07:37:27.312132
+62,329,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-09-29 15:21:08.312132,2025-09-30 08:21:08.312132
+63,227,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-05-26 09:12:49.312132,2026-05-28 01:12:49.312132
+64,415,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-05-03 20:27:06.312132,2026-05-03 21:27:06.312132
+65,360,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-11-08 19:38:49.312132,2025-11-10 14:38:49.312132
+66,249,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-04-24 04:43:28.312132,2026-04-24 17:43:28.312132
+67,139,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-01-16 05:03:46.312132,2026-01-17 12:03:46.312132
+68,364,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-01-17 20:04:59.312132,2026-01-19 01:04:59.312132
+69,449,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-07-23 06:18:44.312132,2026-07-23 19:18:44.312132
+70,82,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-09-24 17:38:34.312132,2025-09-26 11:38:34.312132
+71,237,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-07-11 03:38:04.312132,2026-07-11 18:38:04.312132
+72,23,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-02-01 17:21:12.312132,2026-02-02 08:21:12.312132
+73,504,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-07-24 09:20:44.312132,2026-07-25 10:20:44.312132
+74,15,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,disputed,2026-05-05 00:35:30.312132,2026-05-05 03:35:30.312132
+75,172,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,pending,2026-07-26 10:32:56.312132,
+76,259,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,pending,2026-07-06 17:13:27.312132,
+77,36,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-06-29 05:58:11.312132,2026-06-30 09:58:11.312132
+78,92,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-06-28 06:10:56.312132,2026-06-29 01:10:56.312132
+79,302,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,pending,2026-03-15 10:02:35.312132,
+80,213,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-08-18 15:25:13.312132,2025-08-20 02:25:13.312132
+81,482,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-05-13 17:37:18.312132,2026-05-14 06:37:18.312132
+82,26,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-11-02 13:37:02.312132,2025-11-04 08:37:02.312132
+83,395,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,pending,2026-08-03 03:16:30.312132,
+84,244,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-07-24 12:49:39.312132,2026-07-26 00:49:39.312132
+85,97,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-07-22 02:07:25.312132,2026-07-22 16:07:25.312132
+86,114,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,disputed,2025-09-26 06:46:02.312132,2025-09-26 20:46:02.312132
+87,312,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-03-22 11:13:02.312132,2026-03-24 08:13:02.312132
+88,83,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,pending,2026-02-02 11:59:05.312132,
+89,344,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-09-13 11:45:21.312132,2025-09-15 08:45:21.312132
+90,339,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,pending,2026-03-14 15:01:22.312132,
+91,133,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-07-12 09:50:50.312132,2026-07-12 12:50:50.312132
+92,235,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2026-03-20 17:12:43.312132,2026-03-20 22:12:43.312132
+93,360,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,pending,2026-01-20 08:33:20.312132,
+94,200,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,pending,2026-01-20 22:50:24.312132,
+95,127,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-05-02 22:21:35.312132,2026-05-04 11:21:35.312132
+96,391,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-09-20 17:58:14.312132,2025-09-21 03:58:14.312132
+97,313,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-11-19 05:43:13.312132,2025-11-19 10:43:13.312132
+98,362,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-06-28 08:06:49.312132,2026-06-30 06:06:49.312132
+99,232,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,pending,2026-01-30 13:54:55.312132,
+100,438,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,pending,2025-09-26 00:10:02.312132,
+101,99,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-08-08 06:51:53.312132,2025-08-10 06:51:53.312132
+102,142,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-02-02 18:02:58.312132,2026-02-04 14:02:58.312132
+103,394,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,disputed,2026-03-31 09:53:49.312132,2026-04-01 20:53:49.312132
+104,387,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2026-02-24 03:20:45.312132,2026-02-25 01:20:45.312132
+105,495,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-08-22 23:04:35.312132,2025-08-24 08:04:35.312132
+106,270,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-11-14 19:11:28.312132,2025-11-16 18:11:28.312132
+107,86,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-04-21 19:00:20.312132,2026-04-22 21:00:20.312132
+108,199,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,disputed,2026-03-27 15:27:01.312132,2026-03-28 06:27:01.312132
+109,375,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-12-29 06:03:14.312132,2025-12-30 01:03:14.312132
+110,311,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-08-21 14:04:42.312132,2025-08-22 23:04:42.312132
+111,52,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-06-14 14:09:31.312132,2026-06-16 00:09:31.312132
+112,510,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-07-09 09:16:33.312132,2026-07-11 04:16:33.312132
+113,265,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-04-22 16:33:41.312132,2026-04-22 22:33:41.312132
+114,325,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-04-18 04:02:11.312132,2026-04-18 17:02:11.312132
+115,456,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,pending,2026-05-09 14:32:31.312132,
+116,282,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-11-22 04:38:35.312132,2025-11-22 11:38:35.312132
+117,288,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2026-02-17 21:22:34.312132,2026-02-19 01:22:34.312132
+118,291,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-04-11 21:46:36.312132,2026-04-12 10:46:36.312132
+119,380,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-06-02 06:23:37.312132,2026-06-04 00:23:37.312132
+120,195,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-03-08 09:13:07.312132,2026-03-10 03:13:07.312132
+121,13,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-11-12 12:52:47.312132,2025-11-12 19:52:47.312132
+122,199,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-09-30 17:40:53.312132,2025-10-02 07:40:53.312132
+123,453,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-11-19 17:31:14.312132,2025-11-20 17:31:14.312132
+124,482,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-03-14 07:19:52.312132,2026-03-14 12:19:52.312132
+125,169,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,pending,2025-11-26 03:12:01.312132,
+126,327,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,disputed,2026-04-02 01:43:25.312132,2026-04-02 23:43:25.312132
+127,273,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-05-29 02:12:17.312132,2026-05-30 22:12:17.312132
+128,10,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,disputed,2025-12-11 20:01:27.312132,2025-12-13 13:01:27.312132
+129,31,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,pending,2026-03-19 20:56:21.312132,
+130,344,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-02-27 16:29:04.312132,2026-02-28 11:29:04.312132
+131,281,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-06-16 23:20:26.312132,2026-06-18 13:20:26.312132
+132,243,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2025-08-31 16:00:43.312132,2025-09-01 12:00:43.312132
+133,83,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-01-05 22:44:21.312132,2026-01-07 19:44:21.312132
+134,468,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,pending,2026-01-03 14:50:01.312132,
+135,144,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2026-07-01 23:12:14.312132,2026-07-02 06:12:14.312132
+136,105,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,pending,2026-05-29 03:22:28.312132,
+137,391,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-12-01 12:32:57.312132,2025-12-01 23:32:57.312132
+138,476,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-10-16 09:59:33.312132,2025-10-17 09:59:33.312132
+139,295,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,disputed,2025-12-01 04:02:04.312132,2025-12-02 22:02:04.312132
+140,463,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-09-28 13:51:03.312132,2025-09-30 07:51:03.312132
+141,119,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-08-16 13:49:48.312132,2025-08-17 22:49:48.312132
+142,400,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-03-06 00:23:30.312132,2026-03-07 11:23:30.312132
+143,370,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,pending,2025-09-08 19:43:13.312132,
+144,516,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-06-14 09:20:16.312132,2026-06-15 04:20:16.312132
+145,193,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-05-30 21:22:03.312132,2026-06-01 13:22:03.312132
+146,51,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-02-15 15:08:22.312132,2026-02-17 05:08:22.312132
+147,238,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,pending,2025-08-31 06:00:40.312132,
+148,387,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-03-22 19:35:21.312132,2026-03-24 08:35:21.312132
+149,193,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,disputed,2025-10-09 07:03:21.312132,2025-10-10 18:03:21.312132
+150,130,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-01-05 13:54:37.312132,2026-01-06 03:54:37.312132
+151,290,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-02-16 05:26:55.312132,2026-02-16 20:26:55.312132
+152,519,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-11-02 23:53:04.312132,2025-11-04 15:53:04.312132
+153,487,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-06-20 11:01:51.312132,2026-06-22 05:01:51.312132
+154,148,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-10-09 15:47:42.312132,2025-10-10 03:47:42.312132
+155,219,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-04-14 19:18:17.312132,2026-04-15 00:18:17.312132
+156,353,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-12-18 06:46:39.312132,2025-12-19 17:46:39.312132
+157,136,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-10-27 09:57:14.312132,2025-10-28 14:57:14.312132
+158,177,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,disputed,2026-03-25 11:02:55.312132,2026-03-25 16:02:55.312132
+159,328,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-04-12 23:36:15.312132,2026-04-14 19:36:15.312132
+160,242,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-02-08 20:23:25.312132,2026-02-09 14:23:25.312132
+161,159,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,disputed,2025-12-13 15:32:27.312132,2025-12-14 05:32:27.312132
+162,53,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2025-12-22 05:26:38.312132,2025-12-23 02:26:38.312132
+163,138,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-09-04 13:28:27.312132,2025-09-05 14:28:27.312132
+164,155,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-05-09 01:23:50.312132,2026-05-10 03:23:50.312132
+165,368,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-09-09 09:25:17.312132,2025-09-10 14:25:17.312132
+166,308,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,disputed,2025-09-21 15:59:50.312132,2025-09-22 07:59:50.312132
+167,323,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-04-10 14:49:01.312132,2026-04-10 15:49:01.312132
+168,124,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-11-23 16:46:06.312132,2025-11-23 22:46:06.312132
+169,29,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-10-19 18:20:59.312132,2025-10-20 22:20:59.312132
+170,440,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-08-07 10:34:37.312132,2025-08-07 17:34:37.312132
+171,413,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-08-02 08:46:57.312132,2026-08-03 11:46:57.312132
+172,256,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2026-05-12 02:52:06.312132,2026-05-12 17:52:06.312132
+173,159,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-02-09 04:46:40.312132,2026-02-10 19:46:40.312132
+174,377,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-02-24 09:42:56.312132,2026-02-25 17:42:56.312132
+175,318,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-05-02 22:49:13.312132,2026-05-03 18:49:13.312132
+176,297,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-12-13 15:10:29.312132,2025-12-13 17:10:29.312132
+177,257,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-04-28 20:30:20.312132,2026-04-30 19:30:20.312132
+178,45,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,pending,2026-05-07 13:49:29.312132,
+179,107,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-03-07 08:56:42.312132,2026-03-08 01:56:42.312132
+180,213,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-10-08 05:54:41.312132,2025-10-10 01:54:41.312132
+181,83,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,pending,2025-09-07 20:31:21.312132,
+182,112,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-07-29 05:10:23.312132,2026-07-29 21:10:23.312132
+183,227,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2026-07-19 11:26:41.312132,2026-07-21 01:26:41.312132
+184,363,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-07-19 22:19:41.312132,2026-07-20 11:19:41.312132
+185,488,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-09-01 08:14:08.312132,2025-09-02 00:14:08.312132
+186,69,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-07-29 07:58:39.312132,2026-07-29 16:58:39.312132
+187,84,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,pending,2026-03-06 18:41:08.312132,
+188,470,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2026-04-30 12:14:09.312132,2026-05-01 02:14:09.312132
+189,359,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-07-16 03:02:44.312132,2026-07-16 15:02:44.312132
+190,478,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-03-10 02:53:42.312132,2026-03-10 08:53:42.312132
+191,362,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,pending,2025-10-20 22:24:32.312132,
+192,357,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,pending,2026-04-12 20:49:41.312132,
+193,226,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,disputed,2025-09-13 11:50:11.312132,2025-09-14 13:50:11.312132
+194,208,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-12-13 09:08:06.312132,2025-12-15 09:08:06.312132
+195,131,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-10-19 04:05:48.312132,2025-10-19 12:05:48.312132
+196,280,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-12-06 21:59:56.312132,2025-12-07 07:59:56.312132
+197,355,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-04-10 00:08:09.312132,2026-04-11 20:08:09.312132
+198,353,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-12-07 10:26:08.312132,2025-12-09 01:26:08.312132
+199,436,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,pending,2025-11-07 05:07:36.312132,
+200,156,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-03-20 01:34:32.312132,2026-03-21 15:34:32.312132
+201,382,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,disputed,2025-09-04 06:19:53.312132,2025-09-06 04:19:53.312132
+202,392,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-12-03 10:03:52.312132,2025-12-04 20:03:52.312132
+203,451,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-06-30 08:38:40.312132,2026-07-01 21:38:40.312132
+204,79,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2025-11-20 02:54:04.312132,2025-11-21 08:54:04.312132
+205,519,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-09-02 06:37:31.312132,2025-09-03 11:37:31.312132
+206,398,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-11-09 22:54:23.312132,2025-11-11 17:54:23.312132
+207,17,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-05-14 08:10:28.312132,2026-05-15 20:10:28.312132
+208,389,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-04-20 16:05:58.312132,2026-04-21 00:05:58.312132
+209,402,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-12-02 01:20:16.312132,2025-12-02 17:20:16.312132
+210,97,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-10-30 18:14:24.312132,2025-10-31 01:14:24.312132
+211,282,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-11-02 05:57:05.312132,2025-11-02 08:57:05.312132
+212,236,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-05-12 16:40:15.312132,2026-05-13 16:40:15.312132
+213,87,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-09-02 01:58:52.312132,2025-09-02 11:58:52.312132
+214,90,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-09-30 04:52:34.312132,2025-10-01 07:52:34.312132
+215,85,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,pending,2025-11-13 20:09:14.312132,
+216,53,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-07-09 19:19:53.312132,2026-07-11 18:19:53.312132
+217,454,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-06-10 17:38:47.312132,2026-06-11 14:38:47.312132
+218,148,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-10-03 22:35:52.312132,2025-10-05 03:35:52.312132
+219,496,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-08-15 07:01:10.312132,2025-08-16 14:01:10.312132
+220,503,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,disputed,2025-12-23 22:35:43.312132,2025-12-25 10:35:43.312132
+221,157,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,disputed,2025-11-18 12:57:18.312132,2025-11-18 16:57:18.312132
+222,305,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-10-21 11:07:36.312132,2025-10-23 06:07:36.312132
+223,38,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-03-13 10:47:54.312132,2026-03-14 03:47:54.312132
+224,242,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-08-25 06:00:10.312132,2025-08-27 01:00:10.312132
+225,512,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,disputed,2026-02-17 02:12:51.312132,2026-02-17 13:12:51.312132
+226,390,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,pending,2026-03-01 09:15:37.312132,
+227,121,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-02-15 11:38:54.312132,2026-02-16 20:38:54.312132
+228,381,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-01-28 05:15:39.312132,2026-01-28 23:15:39.312132
+229,432,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-08-12 13:52:31.312132,2025-08-14 07:52:31.312132
+230,42,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,pending,2025-09-22 06:15:43.312132,
+231,204,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2025-08-14 20:40:21.312132,2025-08-15 17:40:21.312132
+232,226,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-04-20 12:28:54.312132,2026-04-21 20:28:54.312132
+233,218,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-04-24 10:45:06.312132,2026-04-25 22:45:06.312132
+234,85,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,pending,2025-12-11 15:04:17.312132,
+235,205,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-08-01 21:58:44.312132,2026-08-02 11:58:44.312132
+236,340,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,pending,2025-08-15 09:15:03.312132,
+237,341,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-04-04 20:54:15.312132,2026-04-06 05:54:15.312132
+238,26,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-09-24 21:58:09.312132,2025-09-26 19:58:09.312132
+239,414,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-08-01 15:21:31.312132,2026-08-02 03:21:31.312132
+240,499,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,pending,2026-05-06 01:47:41.312132,
+241,123,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,disputed,2025-08-30 10:46:55.312132,2025-08-31 04:46:55.312132
+242,395,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-07-21 22:44:13.312132,2026-07-22 09:44:13.312132
+243,336,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,pending,2025-12-15 21:56:26.312132,
+244,162,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-07-17 15:55:13.312132,2026-07-18 02:55:13.312132
+245,22,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,pending,2026-01-08 05:06:26.312132,
+246,492,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-03-20 20:42:28.312132,2026-03-22 17:42:28.312132
+295,318,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-04-26 11:47:36.312132,2026-04-27 15:47:36.312132
+247,238,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-05-27 17:33:57.312132,2026-05-28 18:33:57.312132
+248,11,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-01-15 13:45:48.312132,2026-01-16 16:45:48.312132
+249,300,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2025-09-25 16:29:51.312132,2025-09-27 05:29:51.312132
+250,43,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-10-17 16:38:51.312132,2025-10-18 13:38:51.312132
+251,441,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-05-10 18:57:29.312132,2026-05-12 13:57:29.312132
+252,391,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,approved,2026-08-03 06:34:09.312132,2026-08-03 10:34:09.312132
+253,294,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-06-20 06:45:56.312132,2026-06-21 09:45:56.312132
+254,493,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,pending,2026-07-26 13:28:07.312132,
+255,220,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-01-22 07:54:58.312132,2026-01-22 11:54:58.312132
+256,334,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-07-19 07:14:26.312132,2026-07-20 03:14:26.312132
+257,280,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2025-11-11 17:04:14.312132,2025-11-12 09:04:14.312132
+258,306,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-12-09 09:02:22.312132,2025-12-10 03:02:22.312132
+259,494,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-11-11 09:12:45.312132,2025-11-11 23:12:45.312132
+260,273,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-04-14 00:24:46.312132,2026-04-16 00:24:46.312132
+261,409,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-06-17 01:35:34.312132,2026-06-17 15:35:34.312132
+262,386,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,pending,2025-12-06 16:27:28.312132,
+263,476,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-12-09 06:47:06.312132,2025-12-10 20:47:06.312132
+264,432,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-08-20 06:10:59.312132,2025-08-21 18:10:59.312132
+265,347,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2026-02-11 03:27:45.312132,2026-02-12 18:27:45.312132
+266,13,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-01-13 10:55:12.312132,2026-01-15 00:55:12.312132
+267,258,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,pending,2026-06-20 14:29:22.312132,
+268,497,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,disputed,2026-03-04 00:49:24.312132,2026-03-05 17:49:24.312132
+269,303,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-09-22 04:00:29.312132,2025-09-23 06:00:29.312132
+270,492,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-12-29 10:30:00.312132,2025-12-30 05:30:00.312132
+271,437,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-12-08 22:57:37.312132,2025-12-09 04:57:37.312132
+272,491,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,disputed,2026-06-09 09:11:53.312132,2026-06-10 03:11:53.312132
+273,225,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,disputed,2026-05-02 04:56:55.312132,2026-05-03 02:56:55.312132
+274,141,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-02-26 18:36:42.312132,2026-02-27 11:36:42.312132
+275,231,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-10-14 00:08:23.312132,2025-10-14 23:08:23.312132
+276,337,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,pending,2026-06-08 05:25:53.312132,
+277,492,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2026-01-29 01:45:37.312132,2026-01-30 07:45:37.312132
+278,291,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2026-05-28 05:56:18.312132,2026-05-29 01:56:18.312132
+279,373,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,disputed,2026-03-21 05:41:30.312132,2026-03-22 18:41:30.312132
+280,60,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-11-03 06:17:38.312132,2025-11-03 17:17:38.312132
+281,138,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2026-06-08 15:54:29.312132,2026-06-09 16:54:29.312132
+282,509,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-10-03 04:56:04.312132,2025-10-03 16:56:04.312132
+283,267,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-12-03 18:43:54.312132,2025-12-05 12:43:54.312132
+284,358,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,disputed,2025-09-20 16:27:24.312132,2025-09-21 21:27:24.312132
+285,269,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,disputed,2026-01-07 03:49:58.312132,2026-01-08 15:49:58.312132
+286,189,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-11-10 23:57:23.312132,2025-11-11 20:57:23.312132
+287,486,Engine oil leak traced to the valve cover gasket. Spark plug wells show oil pooling.,disputed,2025-12-02 20:14:31.312132,2025-12-04 01:14:31.312132
+288,52,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-09-01 19:28:12.312132,2025-09-03 01:28:12.312132
+289,209,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-08-06 00:12:43.312132,2025-08-06 09:12:43.312132
+290,74,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-08-10 00:47:18.312132,2025-08-11 09:47:18.312132
+291,448,Scan tool indicates P0420 (Catalytic Converter Efficiency). O2 sensors are reading within normal range; suspect cat failure.,approved,2025-12-05 06:20:12.312132,2025-12-06 22:20:12.312132
+292,65,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,disputed,2026-01-14 11:52:23.312132,2026-01-15 19:52:23.312132
+293,433,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-09-03 17:49:38.312132,2025-09-05 15:49:38.312132
+294,342,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,disputed,2025-10-08 03:39:55.312132,2025-10-08 13:39:55.312132
+296,160,Battery failed load test (reading 9.5V under load). Alternator charging output is good at 14.2V.,approved,2025-11-16 22:33:10.312132,2025-11-18 08:33:10.312132
+297,448,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,disputed,2025-10-11 10:05:05.312132,2025-10-13 10:05:05.312132
+298,318,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2025-10-19 00:00:10.312132,2025-10-20 04:00:10.312132
+299,200,Visual inspection shows severe wear on front brake pads (2mm remaining). Rotors require resurfacing.,approved,2025-09-19 23:44:48.312132,2025-09-20 22:44:48.312132
+300,87,Customer complaint of clunking over bumps verified. Found excessive play in front sway bar links and passenger tie rod.,approved,2026-02-16 23:53:16.312132,2026-02-17 07:53:16.312132

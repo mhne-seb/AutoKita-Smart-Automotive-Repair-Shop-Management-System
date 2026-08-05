@@ -1,0 +1,27 @@
+id,job_order_id,job_order_service_id,purchase_order_id,status,part_number,description,quantity,retail_unit_price,total_retail_amount,supplier_unit_cost
+1,415,293,17,in_transit,PN-9670-M,Ceramic Brake Pad Set,1,3534.86,3534.86,2524.90
+2,204,55,,to_order,PN-2617-Z,Wiper Blade Set,2,424.17,848.34,302.98
+3,468,198,18,in_transit,PN-8306-Q,Alternator Belt,1,2036.36,2036.36,1454.54
+4,319,1,6,ordered,PN-9111-A,Air Intake Filter,3,555.98,1667.95,397.13
+5,254,343,1,ordered,PN-6424-O,Air Intake Filter,2,2806.33,5612.66,2004.52
+6,135,324,10,in_transit,PN-8528-I,Cabin Air Filter,4,1870.44,7481.77,1336.03
+7,212,133,20,received,PN-4827-C,Oil Filter - Premium,3,3740.53,11221.60,2671.81
+8,360,220,2,ordered,PN-6443-H,Cabin Air Filter,4,3996.13,15984.53,2854.38
+9,41,225,,to_order,PN-5863-D,Alternator Belt,3,1147.45,3442.36,819.61
+10,414,215,18,received,PN-4604-V,Ceramic Brake Pad Set,1,5526.67,5526.67,3947.62
+11,324,112,2,installed,PN-4140-P,Spark Plug (Iridium),1,5732.20,5732.20,4094.43
+12,287,12,4,in_transit,PN-7193-Q,Wiper Blade Set,4,1628.73,6514.93,1163.38
+13,201,413,11,ordered,PN-9530-V,Radiator Coolant (1 Gallon),3,351.01,1053.02,250.72
+14,440,422,,in_stock,PN-7677-C,Synthetic Engine Oil (1L),1,3707.24,3707.24,2648.03
+15,455,255,1,installed,PN-3097-D,Oil Filter - Premium,1,397.26,397.26,283.76
+16,500,100,5,installed,PN-7985-G,Alternator Belt,3,3319.79,9959.38,2371.28
+17,259,186,19,installed,PN-2562-O,Wiper Blade Set,1,6121.95,6121.95,4372.82
+18,29,275,20,ordered,PN-6587-I,Radiator Coolant (1 Gallon),3,2776.00,8328.01,1982.86
+19,345,114,,to_order,PN-6949-W,Air Intake Filter,3,3565.24,10695.72,2546.60
+20,102,179,,in_stock,PN-6753-R,Synthetic Engine Oil (1L),1,4227.58,4227.58,3019.70
+21,96,395,20,installed,PN-2768-X,Oil Filter - Premium,3,5354.66,16063.99,3824.76
+22,419,154,,to_order,PN-1363-O,Air Intake Filter,4,5387.21,21548.86,3848.01
+23,373,390,,in_stock,PN-4606-V,Wiper Blade Set,1,1284.22,1284.22,917.30
+24,53,82,,in_stock,PN-6297-X,Radiator Coolant (1 Gallon),3,3184.24,9552.73,2274.46
+25,319,1,,to_order,PN-4601-N,Wiper Blade Set,4,5184.55,20738.20,3703.25
+26,194,367,,in_stock,PN-9066-K,Oil Filter - Premium,2,283.28,566.55,202.34

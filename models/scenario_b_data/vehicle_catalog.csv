@@ -1,0 +1,201 @@
+id,make,model,year_start,year_end,trim_variant,engine_type,transmission,drive_type,fuel_type
+1,Ford,Ranger,2018,2024,XLT,2.0L Bi-Turbo,MT,RWD,Gasoline
+2,Ford,Ranger,2014,2020,XLT,2.0L Bi-Turbo,CVT,4x2,Diesel
+3,Toyota,Fortuner,2011,2014,1.5 G,2.8L 1GD-FTV,CVT,4x4,Diesel
+4,Mitsubishi,Montero Sport,2019,2020,Premium,2.4L 4N15 MIVEC,MT,AWD,Gasoline
+5,Toyota,Fortuner,2014,2023,GR-S,2.0L Bi-Turbo,MT,FWD,Gasoline
+6,Toyota,Fortuner,2020,2023,GR-S,2.4L 2GD-FTV,CVT,FWD,Diesel
+7,Ford,Ranger,2019,2025,Titanium,2.0L Bi-Turbo,10-speed AT,FWD,Diesel
+8,Ford,Ranger,2013,2021,Wildtrak,2.0L Bi-Turbo,AT,FWD,Hybrid
+9,Ford,Ranger,2018,2026,Titanium,2.0L Bi-Turbo,6-speed AT,RWD,Diesel
+10,Toyota,Fortuner,2014,2017,1.5 G,2.8L 1GD-FTV,10-speed AT,AWD,PHEV
+11,Mitsubishi,Montero Sport,2020,2026,GLS,2.4L 4N15 MIVEC,CVT,4x2,Diesel
+12,Mitsubishi,Montero Sport,2025,2026,Premium,2.4L 4N15 MIVEC,10-speed AT,4x2,Diesel
+13,Mitsubishi,Montero Sport,2012,2016,GLS,2.4L 4N15 MIVEC,MT,RWD,Hybrid
+14,Toyota,Fortuner,2013,2020,TRD Sportivo,2.8L 1GD-FTV,10-speed AT,RWD,Hybrid
+15,Toyota,Fortuner,2016,2024,2.8 V,2.8L 1GD-FTV,CVT,RWD,Gasoline
+16,Mitsubishi,Montero Sport,2020,2023,Premium,2.4L 4N15 MIVEC,CVT,FWD,PHEV
+17,Mitsubishi,Montero Sport,2017,2018,GT,2.4L 4N15 MIVEC,DCT,4x2,EV
+18,Toyota,Fortuner,2018,2020,1.5 G,2.4L 2GD-FTV,MT,4WD,Gasoline
+19,Ford,Ranger,2025,2026,Wildtrak,2.0L Bi-Turbo,CVT,AWD,Diesel
+20,Mitsubishi,Montero Sport,2018,2018,GT,2.4L 4N15 MIVEC,10-speed AT,RWD,PHEV
+21,Ford,Ranger,2015,2023,Titanium,2.0L Bi-Turbo,10-speed AT,RWD,Diesel
+22,Mitsubishi,Montero Sport,2022,2026,Premium,2.4L 4N15 MIVEC,MT,AWD,Diesel
+23,Toyota,Fortuner,2011,2011,TRD Sportivo,2.0L Bi-Turbo,6-speed AT,FWD,EV
+24,Ford,Ranger,2010,2012,Titanium,2.0L Bi-Turbo,MT,4x4,EV
+25,Mitsubishi,Montero Sport,2016,2019,GLS,2.4L 4N15 MIVEC,AT,AWD,Gasoline
+26,Toyota,Fortuner,2022,2026,2.8 V,2.0L Bi-Turbo,MT,AWD,Diesel
+27,Toyota,Fortuner,2010,2016,1.5 G,2.0L Bi-Turbo,10-speed AT,2WD,Hybrid
+28,Mitsubishi,Montero Sport,2013,2013,Premium,2.4L 4N15 MIVEC,DCT,4WD,PHEV
+29,Ford,Ranger,2024,2026,Wildtrak,2.0L Bi-Turbo,MT,4x4,Gasoline
+30,Ford,Ranger,2018,2026,XLT,2.0L Bi-Turbo,DCT,4WD,Hybrid
+31,Mitsubishi,Montero Sport,2012,2017,Premium,2.4L 4N15 MIVEC,AT,RWD,Gasoline
+32,Toyota,Fortuner,2020,2026,1.5 G,2.0L Bi-Turbo,AT,4x2,Gasoline
+33,Mitsubishi,Montero Sport,2013,2021,Premium,2.4L 4N15 MIVEC,AT,AWD,EV
+34,Toyota,Fortuner,2023,2026,GR-S,2.8L 1GD-FTV,DCT,FWD,Diesel
+35,Toyota,Fortuner,2010,2017,2.8 V,2.8L 1GD-FTV,AT,4WD,Gasoline
+36,Mitsubishi,Montero Sport,2013,2019,Premium,2.4L 4N15 MIVEC,6-speed AT,2WD,PHEV
+37,Toyota,Fortuner,2020,2026,GR-S,2.8L 1GD-FTV,CVT,4x2,EV
+38,Toyota,Fortuner,2011,2015,GR-S,2.4L 2GD-FTV,MT,FWD,Gasoline
+39,Ford,Ranger,2024,2026,XLT,2.0L Bi-Turbo,DCT,RWD,Diesel
+40,Toyota,Fortuner,2014,2023,1.5 G,2.8L 1GD-FTV,6-speed AT,FWD,Gasoline
+41,Ford,Ranger,2020,2024,Titanium,2.0L Bi-Turbo,10-speed AT,4x2,Gasoline
+42,Ford,Ranger,2020,2026,XLT,2.0L Bi-Turbo,10-speed AT,4x2,Diesel
+43,Toyota,Fortuner,2024,2025,GR-S,2.0L Bi-Turbo,CVT,4x4,Gasoline
+44,Ford,Ranger,2024,2026,Wildtrak,2.0L Bi-Turbo,CVT,2WD,Diesel
+45,Mitsubishi,Montero Sport,2024,2026,Premium,2.4L 4N15 MIVEC,DCT,FWD,Gasoline
+46,Ford,Ranger,2020,2024,Wildtrak,2.0L Bi-Turbo,6-speed AT,2WD,Diesel
+47,Toyota,Fortuner,2012,2015,TRD Sportivo,2.0L Bi-Turbo,6-speed AT,FWD,Hybrid
+48,Ford,Ranger,2020,2024,XLT,2.0L Bi-Turbo,6-speed AT,FWD,Gasoline
+49,Toyota,Fortuner,2014,2018,GR-S,2.4L 2GD-FTV,10-speed AT,4WD,Diesel
+50,Mitsubishi,Montero Sport,2024,2026,Premium,2.4L 4N15 MIVEC,6-speed AT,AWD,Gasoline
+51,Toyota,Fortuner,2018,2026,TRD Sportivo,2.4L 2GD-FTV,AT,4WD,Diesel
+52,Toyota,Fortuner,2022,2024,TRD Sportivo,2.0L Bi-Turbo,MT,FWD,Gasoline
+53,Mitsubishi,Montero Sport,2018,2020,Premium,2.4L 4N15 MIVEC,DCT,AWD,Hybrid
+54,Ford,Ranger,2010,2014,XLT,2.0L Bi-Turbo,MT,4x4,PHEV
+55,Mitsubishi,Montero Sport,2017,2018,GLS,2.4L 4N15 MIVEC,AT,2WD,Gasoline
+56,Mitsubishi,Montero Sport,2019,2020,Premium,2.4L 4N15 MIVEC,10-speed AT,4x2,PHEV
+57,Ford,Ranger,2015,2022,XLT,2.0L Bi-Turbo,MT,4WD,Diesel
+58,Mitsubishi,Montero Sport,2022,2026,Premium,2.4L 4N15 MIVEC,MT,4x4,EV
+59,Toyota,Fortuner,2010,2018,2.8 V,2.0L Bi-Turbo,CVT,2WD,Diesel
+60,Toyota,Fortuner,2012,2021,1.5 G,2.8L 1GD-FTV,DCT,RWD,Diesel
+61,Toyota,Fortuner,2010,2017,2.8 V,2.4L 2GD-FTV,MT,4WD,EV
+62,Toyota,Fortuner,2019,2025,GR-S,2.0L Bi-Turbo,AT,4x2,Gasoline
+63,Mitsubishi,Montero Sport,2025,2026,GLS,2.4L 4N15 MIVEC,MT,FWD,EV
+64,Ford,Ranger,2014,2017,Wildtrak,2.0L Bi-Turbo,DCT,FWD,Gasoline
+65,Mitsubishi,Montero Sport,2025,2026,GLS,2.4L 4N15 MIVEC,MT,2WD,Gasoline
+66,Mitsubishi,Montero Sport,2020,2024,GT,2.4L 4N15 MIVEC,MT,2WD,EV
+67,Mitsubishi,Montero Sport,2021,2023,Premium,2.4L 4N15 MIVEC,6-speed AT,2WD,EV
+68,Ford,Ranger,2010,2018,Wildtrak,2.0L Bi-Turbo,MT,4x2,PHEV
+69,Mitsubishi,Montero Sport,2013,2019,Premium,2.4L 4N15 MIVEC,DCT,4x4,Gasoline
+70,Toyota,Fortuner,2013,2017,GR-S,2.0L Bi-Turbo,AT,RWD,Hybrid
+71,Ford,Ranger,2016,2019,Titanium,2.0L Bi-Turbo,10-speed AT,4x2,Diesel
+72,Toyota,Fortuner,2016,2024,1.5 G,2.0L Bi-Turbo,10-speed AT,4x2,Hybrid
+73,Ford,Ranger,2024,2026,Titanium,2.0L Bi-Turbo,6-speed AT,FWD,Hybrid
+74,Toyota,Fortuner,2011,2018,GR-S,2.8L 1GD-FTV,10-speed AT,4x4,Gasoline
+75,Mitsubishi,Montero Sport,2021,2026,GLS,2.4L 4N15 MIVEC,10-speed AT,4WD,PHEV
+76,Mitsubishi,Montero Sport,2022,2026,Premium,2.4L 4N15 MIVEC,DCT,4x2,Gasoline
+77,Ford,Ranger,2013,2018,Wildtrak,2.0L Bi-Turbo,DCT,4WD,EV
+78,Ford,Ranger,2017,2021,Wildtrak,2.0L Bi-Turbo,AT,4x4,Hybrid
+79,Ford,Ranger,2011,2012,Wildtrak,2.0L Bi-Turbo,6-speed AT,RWD,PHEV
+80,Toyota,Fortuner,2016,2020,GR-S,2.4L 2GD-FTV,CVT,4WD,Gasoline
+81,Mitsubishi,Montero Sport,2014,2016,GT,2.4L 4N15 MIVEC,DCT,4x2,Diesel
+82,Ford,Ranger,2011,2020,Titanium,2.0L Bi-Turbo,6-speed AT,4x4,EV
+83,Ford,Ranger,2012,2012,XLT,2.0L Bi-Turbo,CVT,FWD,PHEV
+84,Ford,Ranger,2023,2026,XLT,2.0L Bi-Turbo,AT,AWD,Gasoline
+85,Toyota,Fortuner,2022,2024,GR-S,2.8L 1GD-FTV,6-speed AT,4x2,Hybrid
+86,Ford,Ranger,2014,2015,Wildtrak,2.0L Bi-Turbo,10-speed AT,4x4,Hybrid
+87,Mitsubishi,Montero Sport,2024,2026,GT,2.4L 4N15 MIVEC,DCT,AWD,EV
+88,Ford,Ranger,2012,2016,Titanium,2.0L Bi-Turbo,6-speed AT,2WD,Gasoline
+89,Mitsubishi,Montero Sport,2017,2020,GLS,2.4L 4N15 MIVEC,10-speed AT,4WD,Hybrid
+90,Mitsubishi,Montero Sport,2025,2026,GLS,2.4L 4N15 MIVEC,10-speed AT,4WD,EV
+91,Mitsubishi,Montero Sport,2012,2017,Premium,2.4L 4N15 MIVEC,DCT,4x4,EV
+92,Ford,Ranger,2011,2014,Titanium,2.0L Bi-Turbo,CVT,4x4,EV
+93,Toyota,Fortuner,2011,2011,TRD Sportivo,2.8L 1GD-FTV,DCT,2WD,Gasoline
+94,Toyota,Fortuner,2014,2018,GR-S,2.0L Bi-Turbo,AT,AWD,Gasoline
+95,Toyota,Fortuner,2020,2022,GR-S,2.8L 1GD-FTV,DCT,2WD,PHEV
+96,Toyota,Fortuner,2013,2021,TRD Sportivo,2.0L Bi-Turbo,AT,FWD,EV
+97,Ford,Ranger,2014,2021,XLT,2.0L Bi-Turbo,DCT,4x4,PHEV
+98,Ford,Ranger,2024,2026,Titanium,2.0L Bi-Turbo,CVT,RWD,PHEV
+99,Toyota,Fortuner,2024,2026,TRD Sportivo,2.8L 1GD-FTV,6-speed AT,AWD,Hybrid
+100,Mitsubishi,Montero Sport,2024,2026,GLS,2.4L 4N15 MIVEC,AT,2WD,Gasoline
+101,Toyota,Fortuner,2017,2021,TRD Sportivo,2.0L Bi-Turbo,DCT,4x4,Gasoline
+102,Mitsubishi,Montero Sport,2024,2026,GLS,2.4L 4N15 MIVEC,10-speed AT,4x4,Gasoline
+103,Mitsubishi,Montero Sport,2017,2017,Premium,2.4L 4N15 MIVEC,CVT,2WD,Hybrid
+104,Mitsubishi,Montero Sport,2014,2018,GT,2.4L 4N15 MIVEC,6-speed AT,RWD,EV
+105,Mitsubishi,Montero Sport,2025,2026,GT,2.4L 4N15 MIVEC,AT,2WD,Diesel
+106,Ford,Ranger,2011,2019,Wildtrak,2.0L Bi-Turbo,AT,4x4,Gasoline
+107,Toyota,Fortuner,2019,2026,GR-S,2.4L 2GD-FTV,6-speed AT,4x2,Hybrid
+108,Ford,Ranger,2024,2026,Wildtrak,2.0L Bi-Turbo,AT,2WD,Diesel
+109,Mitsubishi,Montero Sport,2017,2023,GLS,2.4L 4N15 MIVEC,DCT,FWD,Gasoline
+110,Toyota,Fortuner,2014,2014,GR-S,2.4L 2GD-FTV,6-speed AT,RWD,Diesel
+111,Ford,Ranger,2011,2014,XLT,2.0L Bi-Turbo,MT,FWD,Diesel
+112,Toyota,Fortuner,2019,2026,GR-S,2.4L 2GD-FTV,MT,4x4,Diesel
+113,Toyota,Fortuner,2025,2026,GR-S,2.4L 2GD-FTV,10-speed AT,RWD,PHEV
+114,Toyota,Fortuner,2014,2016,TRD Sportivo,2.8L 1GD-FTV,AT,RWD,Diesel
+115,Mitsubishi,Montero Sport,2023,2025,GLS,2.4L 4N15 MIVEC,MT,4x2,Gasoline
+116,Ford,Ranger,2022,2026,XLT,2.0L Bi-Turbo,6-speed AT,RWD,PHEV
+117,Ford,Ranger,2025,2026,Wildtrak,2.0L Bi-Turbo,CVT,AWD,PHEV
+118,Ford,Ranger,2014,2014,Wildtrak,2.0L Bi-Turbo,6-speed AT,4x2,PHEV
+119,Mitsubishi,Montero Sport,2024,2026,GT,2.4L 4N15 MIVEC,AT,4x4,Diesel
+120,Mitsubishi,Montero Sport,2022,2026,GLS,2.4L 4N15 MIVEC,AT,4x4,PHEV
+121,Toyota,Fortuner,2013,2017,2.8 V,2.4L 2GD-FTV,MT,RWD,PHEV
+122,Mitsubishi,Montero Sport,2025,2026,GT,2.4L 4N15 MIVEC,AT,4WD,Diesel
+123,Mitsubishi,Montero Sport,2016,2017,GT,2.4L 4N15 MIVEC,AT,RWD,EV
+124,Ford,Ranger,2010,2012,Wildtrak,2.0L Bi-Turbo,6-speed AT,4WD,Diesel
+125,Mitsubishi,Montero Sport,2025,2026,GLS,2.4L 4N15 MIVEC,6-speed AT,4x2,Gasoline
+126,Toyota,Fortuner,2014,2018,GR-S,2.0L Bi-Turbo,10-speed AT,4x4,Hybrid
+127,Ford,Ranger,2018,2021,Wildtrak,2.0L Bi-Turbo,6-speed AT,4x4,EV
+128,Toyota,Fortuner,2017,2022,TRD Sportivo,2.0L Bi-Turbo,6-speed AT,4x4,EV
+129,Ford,Ranger,2017,2024,Wildtrak,2.0L Bi-Turbo,6-speed AT,AWD,Hybrid
+130,Ford,Ranger,2011,2016,Titanium,2.0L Bi-Turbo,10-speed AT,2WD,EV
+131,Mitsubishi,Montero Sport,2023,2026,Premium,2.4L 4N15 MIVEC,6-speed AT,2WD,PHEV
+132,Toyota,Fortuner,2012,2012,TRD Sportivo,2.4L 2GD-FTV,6-speed AT,AWD,Hybrid
+133,Toyota,Fortuner,2018,2025,TRD Sportivo,2.0L Bi-Turbo,MT,AWD,PHEV
+134,Ford,Ranger,2013,2015,XLT,2.0L Bi-Turbo,6-speed AT,AWD,PHEV
+135,Toyota,Fortuner,2013,2022,1.5 G,2.8L 1GD-FTV,MT,RWD,PHEV
+136,Ford,Ranger,2024,2026,XLT,2.0L Bi-Turbo,6-speed AT,RWD,Diesel
+137,Ford,Ranger,2011,2020,Titanium,2.0L Bi-Turbo,AT,AWD,PHEV
+138,Toyota,Fortuner,2016,2020,TRD Sportivo,2.0L Bi-Turbo,CVT,RWD,Hybrid
+139,Toyota,Fortuner,2018,2021,GR-S,2.4L 2GD-FTV,CVT,4WD,PHEV
+140,Ford,Ranger,2024,2026,Titanium,2.0L Bi-Turbo,MT,4x4,Diesel
+141,Toyota,Fortuner,2015,2022,GR-S,2.0L Bi-Turbo,MT,FWD,Hybrid
+142,Toyota,Fortuner,2018,2026,1.5 G,2.4L 2GD-FTV,CVT,4x4,PHEV
+143,Mitsubishi,Montero Sport,2021,2023,GT,2.4L 4N15 MIVEC,6-speed AT,4x4,Hybrid
+144,Ford,Ranger,2021,2024,Titanium,2.0L Bi-Turbo,DCT,AWD,Gasoline
+145,Ford,Ranger,2020,2023,Wildtrak,2.0L Bi-Turbo,MT,2WD,Diesel
+146,Mitsubishi,Montero Sport,2013,2019,GT,2.4L 4N15 MIVEC,10-speed AT,FWD,Diesel
+147,Toyota,Fortuner,2024,2026,GR-S,2.4L 2GD-FTV,CVT,AWD,PHEV
+148,Toyota,Fortuner,2020,2025,TRD Sportivo,2.0L Bi-Turbo,DCT,RWD,Diesel
+149,Mitsubishi,Montero Sport,2022,2026,Premium,2.4L 4N15 MIVEC,CVT,AWD,EV
+150,Mitsubishi,Montero Sport,2017,2025,GT,2.4L 4N15 MIVEC,MT,FWD,Gasoline
+151,Mitsubishi,Montero Sport,2023,2026,GLS,2.4L 4N15 MIVEC,DCT,4x4,EV
+152,Ford,Ranger,2019,2024,Titanium,2.0L Bi-Turbo,10-speed AT,RWD,PHEV
+153,Mitsubishi,Montero Sport,2015,2023,GLS,2.4L 4N15 MIVEC,MT,FWD,PHEV
+154,Ford,Ranger,2019,2024,XLT,2.0L Bi-Turbo,MT,AWD,EV
+155,Ford,Ranger,2018,2022,Wildtrak,2.0L Bi-Turbo,10-speed AT,4x4,Gasoline
+156,Ford,Ranger,2023,2026,XLT,2.0L Bi-Turbo,6-speed AT,AWD,Hybrid
+157,Toyota,Fortuner,2020,2021,1.5 G,2.8L 1GD-FTV,AT,4WD,PHEV
+158,Mitsubishi,Montero Sport,2020,2025,Premium,2.4L 4N15 MIVEC,10-speed AT,FWD,Diesel
+159,Mitsubishi,Montero Sport,2023,2026,GLS,2.4L 4N15 MIVEC,6-speed AT,FWD,PHEV
+160,Mitsubishi,Montero Sport,2017,2022,GT,2.4L 4N15 MIVEC,MT,2WD,Gasoline
+161,Ford,Ranger,2012,2019,Titanium,2.0L Bi-Turbo,10-speed AT,4x4,PHEV
+162,Toyota,Fortuner,2024,2026,2.8 V,2.0L Bi-Turbo,CVT,4x2,EV
+163,Ford,Ranger,2020,2022,XLT,2.0L Bi-Turbo,MT,AWD,Gasoline
+164,Mitsubishi,Montero Sport,2023,2026,GLS,2.4L 4N15 MIVEC,AT,AWD,EV
+165,Toyota,Fortuner,2011,2015,TRD Sportivo,2.0L Bi-Turbo,AT,4x2,Diesel
+166,Mitsubishi,Montero Sport,2024,2026,Premium,2.4L 4N15 MIVEC,AT,FWD,Gasoline
+167,Ford,Ranger,2025,2026,Titanium,2.0L Bi-Turbo,MT,FWD,PHEV
+168,Ford,Ranger,2016,2021,Titanium,2.0L Bi-Turbo,MT,4x4,Diesel
+169,Ford,Ranger,2016,2024,Titanium,2.0L Bi-Turbo,CVT,RWD,Diesel
+170,Toyota,Fortuner,2014,2018,TRD Sportivo,2.8L 1GD-FTV,MT,AWD,Gasoline
+171,Toyota,Fortuner,2018,2026,TRD Sportivo,2.8L 1GD-FTV,AT,4x2,Hybrid
+172,Ford,Ranger,2024,2026,Wildtrak,2.0L Bi-Turbo,AT,4x4,EV
+173,Toyota,Fortuner,2010,2014,1.5 G,2.8L 1GD-FTV,AT,4WD,PHEV
+174,Ford,Ranger,2012,2018,Wildtrak,2.0L Bi-Turbo,10-speed AT,RWD,EV
+175,Mitsubishi,Montero Sport,2022,2026,GT,2.4L 4N15 MIVEC,CVT,2WD,EV
+176,Toyota,Fortuner,2010,2013,GR-S,2.8L 1GD-FTV,AT,4WD,Gasoline
+177,Toyota,Fortuner,2012,2015,2.8 V,2.4L 2GD-FTV,AT,AWD,PHEV
+178,Toyota,Fortuner,2015,2016,TRD Sportivo,2.4L 2GD-FTV,10-speed AT,4x2,PHEV
+179,Ford,Ranger,2023,2026,Wildtrak,2.0L Bi-Turbo,10-speed AT,4x4,Diesel
+180,Mitsubishi,Montero Sport,2018,2025,Premium,2.4L 4N15 MIVEC,CVT,4x4,Hybrid
+181,Toyota,Fortuner,2025,2026,2.8 V,2.4L 2GD-FTV,10-speed AT,2WD,EV
+182,Mitsubishi,Montero Sport,2022,2026,GT,2.4L 4N15 MIVEC,MT,RWD,Hybrid
+183,Ford,Ranger,2020,2025,Wildtrak,2.0L Bi-Turbo,6-speed AT,4x2,Diesel
+184,Ford,Ranger,2015,2017,Wildtrak,2.0L Bi-Turbo,MT,4x2,Diesel
+185,Toyota,Fortuner,2012,2017,TRD Sportivo,2.8L 1GD-FTV,6-speed AT,FWD,Gasoline
+186,Ford,Ranger,2014,2021,Wildtrak,2.0L Bi-Turbo,DCT,4x4,Diesel
+187,Toyota,Fortuner,2021,2023,TRD Sportivo,2.8L 1GD-FTV,10-speed AT,RWD,Diesel
+188,Mitsubishi,Montero Sport,2018,2018,GT,2.4L 4N15 MIVEC,10-speed AT,4WD,PHEV
+189,Ford,Ranger,2023,2026,XLT,2.0L Bi-Turbo,10-speed AT,4x4,PHEV
+190,Toyota,Fortuner,2017,2025,GR-S,2.4L 2GD-FTV,CVT,FWD,Diesel
+191,Mitsubishi,Montero Sport,2016,2023,GT,2.4L 4N15 MIVEC,CVT,RWD,Diesel
+192,Toyota,Fortuner,2013,2019,GR-S,2.8L 1GD-FTV,CVT,4x4,Diesel
+193,Ford,Ranger,2024,2026,XLT,2.0L Bi-Turbo,CVT,AWD,PHEV
+194,Toyota,Fortuner,2014,2014,2.8 V,2.0L Bi-Turbo,DCT,4x2,PHEV
+195,Ford,Ranger,2020,2023,Titanium,2.0L Bi-Turbo,6-speed AT,AWD,EV
+196,Toyota,Fortuner,2024,2025,GR-S,2.0L Bi-Turbo,CVT,4x4,EV
+197,Ford,Ranger,2019,2026,Titanium,2.0L Bi-Turbo,MT,FWD,Hybrid
+198,Mitsubishi,Montero Sport,2024,2025,GLS,2.4L 4N15 MIVEC,CVT,4WD,Gasoline
+199,Mitsubishi,Montero Sport,2023,2026,GLS,2.4L 4N15 MIVEC,10-speed AT,RWD,Diesel
+200,Toyota,Fortuner,2024,2026,TRD Sportivo,2.0L Bi-Turbo,10-speed AT,4x2,Gasoline

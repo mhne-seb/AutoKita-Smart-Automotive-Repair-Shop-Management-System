@@ -1,0 +1,499 @@
+id,vehicle_catalog_id,part_catalog_id,notes
+1,1,5,
+2,1,193,
+3,3,44,Direct fit
+4,3,97,
+5,4,180,
+6,5,123,
+7,5,161,
+8,6,50,
+9,7,2,
+10,7,67,
+11,7,118,
+12,7,124,
+13,8,27,Requires professional installation
+14,9,33,Requires professional installation
+15,10,88,
+16,10,151,
+17,10,193,Requires professional installation
+18,11,93,
+19,11,166,
+20,12,29,
+21,13,116,
+22,13,177,
+23,14,122,Front driver and passenger side
+24,15,39,Direct fit
+25,17,32,Requires professional installation
+26,17,98,
+27,17,144,
+28,18,28,
+29,19,17,
+30,21,36,
+31,22,35,
+32,22,69,
+33,22,91,
+34,22,109,
+35,22,148,
+36,23,25,
+37,23,81,Front driver and passenger side
+38,24,6,
+39,24,33,
+40,24,149,
+41,24,157,
+42,25,20,
+43,25,22,
+44,25,103,
+45,25,144,
+46,25,183,
+47,25,184,
+48,27,78,Requires professional installation
+49,28,75,Direct fit
+50,28,138,
+51,29,94,
+52,29,115,Requires professional installation
+53,29,134,Front driver and passenger side
+54,29,145,For automatic transmissions only
+55,30,38,Front driver and passenger side
+56,30,92,
+57,30,118,
+58,31,30,
+59,31,111,Requires professional installation
+60,31,128,Requires professional installation
+61,31,177,
+62,32,38,Direct fit
+63,32,41,Verify VIN before installation
+64,32,190,
+65,33,21,
+66,33,107,Direct fit
+67,33,170,
+68,34,166,
+69,35,31,
+70,36,53,
+71,37,61,
+72,37,92,Requires professional installation
+73,37,164,Requires professional installation
+74,38,40,
+75,38,41,Front driver and passenger side
+76,38,41,
+77,38,95,
+78,41,159,
+79,41,170,Direct fit
+80,42,49,
+81,42,53,
+82,42,87,
+83,42,125,
+84,42,178,
+85,43,25,
+86,43,61,
+87,43,109,
+88,43,182,
+89,44,61,
+90,44,73,
+91,44,98,Direct fit
+92,44,125,For automatic transmissions only
+93,44,131,For automatic transmissions only
+94,44,174,Verify VIN before installation
+95,44,200,
+96,45,62,
+97,45,71,
+98,45,103,Requires professional installation
+99,45,115,
+100,45,193,Front driver and passenger side
+101,46,52,
+102,46,65,
+103,46,146,
+104,47,58,
+105,47,180,
+106,48,12,
+107,48,110,
+108,48,144,Verify VIN before installation
+109,49,96,
+110,49,140,
+111,49,145,For automatic transmissions only
+112,49,191,
+113,50,102,
+114,51,132,
+115,52,36,Front driver and passenger side
+116,52,112,
+117,52,121,
+118,53,80,
+119,53,107,
+120,53,113,
+121,53,199,Requires professional installation
+122,54,21,
+123,55,17,
+124,55,21,
+125,55,32,Direct fit
+126,55,54,
+127,55,65,
+128,55,97,
+129,55,125,
+130,56,33,
+131,56,138,
+132,56,173,
+133,57,54,
+134,57,84,
+135,57,173,
+136,57,187,Front driver and passenger side
+137,58,24,
+138,59,17,For automatic transmissions only
+139,59,19,
+140,59,72,
+141,59,79,
+142,59,119,
+143,59,125,
+144,60,82,
+145,60,175,
+146,61,79,
+147,61,199,
+148,62,73,For automatic transmissions only
+149,62,134,Requires professional installation
+150,62,196,
+151,63,21,Front driver and passenger side
+152,63,46,
+153,63,132,
+154,64,25,Verify VIN before installation
+155,66,10,For automatic transmissions only
+156,66,108,Front driver and passenger side
+157,66,144,Requires professional installation
+158,67,27,
+159,67,69,Requires professional installation
+160,68,59,
+161,68,77,
+162,69,17,
+163,69,109,For automatic transmissions only
+164,69,111,
+165,69,118,Requires professional installation
+166,69,147,
+167,69,165,
+168,71,2,
+169,71,44,Front driver and passenger side
+170,71,53,
+171,71,102,
+172,71,123,
+173,73,89,Requires professional installation
+174,73,161,
+175,73,169,
+176,73,172,Verify VIN before installation
+177,73,199,Requires professional installation
+178,74,10,
+179,74,73,
+180,74,149,Requires professional installation
+181,74,170,Requires professional installation
+182,75,4,
+183,76,33,
+184,76,59,For automatic transmissions only
+185,77,80,
+186,78,24,For automatic transmissions only
+187,78,27,
+188,78,101,Requires professional installation
+189,79,30,Verify VIN before installation
+190,79,62,
+191,79,113,
+192,80,21,
+193,80,99,Requires professional installation
+194,80,158,
+195,81,21,
+196,81,189,
+197,82,21,
+198,82,26,
+199,82,133,For automatic transmissions only
+200,83,29,
+201,83,80,
+202,83,89,
+203,83,101,
+204,83,132,
+205,83,170,
+206,84,157,Front driver and passenger side
+207,84,159,
+208,84,160,
+209,85,95,Direct fit
+210,85,133,Direct fit
+211,85,146,
+212,86,40,
+213,86,120,
+214,86,131,
+215,87,91,
+216,87,134,
+217,87,146,Verify VIN before installation
+218,88,88,Verify VIN before installation
+219,88,155,
+220,88,176,Direct fit
+221,89,177,
+222,91,23,
+223,91,91,
+224,91,109,
+225,91,160,Requires professional installation
+226,91,180,
+227,91,185,
+228,92,67,
+229,92,140,For automatic transmissions only
+230,92,146,
+231,92,150,For automatic transmissions only
+232,93,26,
+233,93,178,
+234,94,11,
+235,94,99,
+236,95,195,
+237,96,23,Verify VIN before installation
+238,96,36,Direct fit
+239,97,67,
+240,97,105,For automatic transmissions only
+241,98,21,
+242,98,106,
+243,99,126,
+244,99,163,Verify VIN before installation
+245,100,133,
+246,100,162,Requires professional installation
+247,101,99,Direct fit
+248,101,180,
+249,101,184,
+250,102,138,
+251,102,142,Direct fit
+252,102,178,
+253,103,78,
+254,103,178,Requires professional installation
+255,104,25,
+256,104,27,
+257,104,122,Direct fit
+258,104,129,Requires professional installation
+259,105,36,
+260,105,76,
+261,106,80,For automatic transmissions only
+262,106,123,For automatic transmissions only
+263,106,123,
+264,106,153,
+265,107,47,
+266,108,38,
+267,108,71,
+268,109,2,
+269,109,38,Front driver and passenger side
+270,109,79,
+271,109,93,
+272,109,135,
+273,109,197,Requires professional installation
+274,111,61,
+275,112,29,Verify VIN before installation
+276,112,58,
+277,112,91,
+278,113,99,Front driver and passenger side
+279,113,137,
+280,113,149,Verify VIN before installation
+281,114,1,Verify VIN before installation
+282,114,93,
+283,115,16,
+284,115,35,
+285,115,50,
+286,115,124,
+287,116,19,Requires professional installation
+288,116,96,
+289,116,148,
+290,117,22,
+291,117,42,
+292,117,144,
+293,117,183,
+294,117,194,
+295,118,77,For automatic transmissions only
+296,118,188,
+297,119,36,
+298,119,66,Requires professional installation
+299,120,126,Direct fit
+300,120,174,
+301,120,195,
+302,121,8,
+303,121,15,For automatic transmissions only
+304,121,30,
+305,121,42,
+306,122,81,
+307,123,77,
+308,124,58,
+309,124,69,Front driver and passenger side
+310,124,191,Requires professional installation
+311,125,155,Front driver and passenger side
+312,125,172,Front driver and passenger side
+313,126,23,
+314,126,52,
+315,126,97,
+316,127,118,
+317,128,18,Front driver and passenger side
+318,128,33,
+319,128,191,
+320,129,87,
+321,129,109,Front driver and passenger side
+322,130,112,
+323,130,122,Requires professional installation
+324,130,132,
+325,131,55,
+326,131,121,Verify VIN before installation
+327,131,163,
+328,131,164,Direct fit
+329,132,25,
+330,132,85,
+331,132,91,Requires professional installation
+332,133,34,Requires professional installation
+333,133,37,
+334,133,38,
+335,133,46,Direct fit
+336,134,62,
+337,134,99,
+338,134,135,
+339,134,196,
+340,135,140,Front driver and passenger side
+341,135,148,
+342,135,161,
+343,136,42,
+344,136,76,
+345,136,79,Direct fit
+346,136,88,Front driver and passenger side
+347,136,124,
+348,137,21,
+349,137,40,Requires professional installation
+350,137,60,Requires professional installation
+351,137,181,
+352,138,64,
+353,139,29,
+354,139,74,
+355,140,73,Requires professional installation
+356,140,81,
+357,140,99,
+358,140,136,
+359,141,166,
+360,142,25,Front driver and passenger side
+361,142,94,Direct fit
+362,142,124,Front driver and passenger side
+363,143,33,
+364,144,97,
+365,145,28,
+366,145,118,
+367,146,127,
+368,147,14,Front driver and passenger side
+369,147,22,
+370,147,70,
+371,147,132,Requires professional installation
+372,148,27,
+373,148,99,
+374,149,26,
+375,149,185,
+376,151,37,
+377,151,64,Verify VIN before installation
+378,151,178,
+379,152,76,Requires professional installation
+380,152,117,Front driver and passenger side
+381,152,145,
+382,152,146,Front driver and passenger side
+383,153,65,Requires professional installation
+384,153,78,Requires professional installation
+385,153,199,
+386,154,30,
+387,154,82,
+388,154,151,
+389,155,36,Verify VIN before installation
+390,156,24,
+391,156,60,
+392,156,156,
+393,157,158,Front driver and passenger side
+394,158,111,
+395,159,51,
+396,159,71,
+397,159,96,
+398,159,139,
+399,160,86,
+400,162,16,
+401,162,28,
+402,162,46,Requires professional installation
+403,162,86,
+404,162,127,
+405,164,31,
+406,164,85,
+407,164,92,
+408,164,113,
+409,164,136,
+410,165,152,
+411,166,13,
+412,166,142,
+413,166,178,Requires professional installation
+414,167,16,
+415,167,39,
+416,167,129,
+417,167,146,
+418,167,158,For automatic transmissions only
+419,167,198,
+420,168,60,
+421,169,33,
+422,169,58,
+423,169,87,Direct fit
+424,169,194,Requires professional installation
+425,170,23,Front driver and passenger side
+426,170,74,
+427,171,70,
+428,171,130,
+429,171,177,
+430,172,8,
+431,172,23,
+432,172,135,
+433,173,42,For automatic transmissions only
+434,173,85,For automatic transmissions only
+435,173,88,
+436,173,135,
+437,174,159,
+438,176,18,
+439,177,46,
+440,177,177,
+441,178,59,
+442,178,135,
+443,178,139,
+444,178,164,Front driver and passenger side
+445,179,64,
+446,179,107,
+447,179,139,Requires professional installation
+448,180,76,
+449,181,88,Verify VIN before installation
+450,181,139,Verify VIN before installation
+451,182,20,
+452,182,32,
+453,182,194,Front driver and passenger side
+454,183,1,Front driver and passenger side
+455,183,71,
+456,184,73,For automatic transmissions only
+457,185,16,
+458,186,151,
+459,186,160,
+460,186,165,
+461,187,16,Front driver and passenger side
+462,187,34,
+463,188,21,
+464,188,43,
+465,188,57,
+466,188,143,For automatic transmissions only
+467,188,161,
+468,188,178,Direct fit
+469,189,74,
+470,189,196,
+471,190,169,
+472,191,54,
+473,191,113,
+474,191,180,Requires professional installation
+475,192,3,
+476,192,39,
+477,192,129,
+478,193,22,
+479,193,173,
+480,193,176,
+481,193,182,
+482,194,162,Front driver and passenger side
+483,194,164,Front driver and passenger side
+484,195,7,Requires professional installation
+485,195,41,
+486,195,95,Requires professional installation
+487,195,108,
+488,195,145,
+489,196,54,
+490,196,105,
+491,196,107,
+492,196,149,
+493,197,137,
+494,197,156,For automatic transmissions only
+495,197,184,For automatic transmissions only
+496,198,15,
+497,198,120,Verify VIN before installation
+498,198,146,

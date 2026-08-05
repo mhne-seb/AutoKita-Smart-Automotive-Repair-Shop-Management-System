@@ -1,0 +1,11 @@
+id,supplier_name,contact_person,contact_number,email,address,is_active,description
+1,Manila Auto Parts Corp.,Juan Dela Cruz,09479638225,sales@manilaauto.com.ph,"1059 Rizal St., Taguig",True,Wholesale distributor of general OEM replacement parts for Japanese and Korean vehicles.
+2,Cebu Tires & Mags,Maria Santos,09277459858,sales@cebutires.com.ph,"8656 Bonifacio St., Quezon City",False,"Specializes in high-quality tires, rims, wheel weights, and alignment accessories."
+3,Luzon Battery Co.,Mark Reyes,09592654653,sales@luzonbatt.com.ph,"7238 Rizal St., Taguig",True,"Main supplier for automotive batteries, alternators, and electrical wiring components."
+4,Apex Performance Parts,Anna Lim,09777192794,sales@apexperf.com.ph,"7090 Luna St., Manila",True,"Retailer and wholesaler of aftermarket performance, racing, and tuning parts."
+5,Bosch Authorized Distributors,Jose Garcia,09939077588,sales@boschdist.com.ph,"9720 Taft St., Manila",True,"Authorized distributor of Bosch spark plugs, wipers, sensors, and brake pads."
+6,Denso Manila Trading,Grace Tan,09648654025,sales@densomnl.com.ph,"9476 Rizal St., Quezon City",True,"Authorized distributor of Denso air conditioning parts, compressors, and radiators."
+7,Makati Oils & Lubes,Peter Villanueva,09869944583,sales@makatioil.com.ph,"7291 Rizal St., Quezon City",True,"Bulk supplier of fully synthetic engine oils, transmission fluids, and coolants."
+8,QC Automotive Supplies,Sarah Cruz,09315331996,sales@qcauto.com.ph,"7092 Bonifacio St., Pasig City",True,"General auto supply store providing everyday consumables, clips, and shop rags."
+9,Pasig Tool & Die,David Bautista,09778575038,sales@pasigtool.com.ph,"2848 Luna St., Manila",True,Manufacturer and distributor of specialized mechanic hand tools and lifter equipment.
+10,Summit Suspension Systems,Elena Gomez,09774029859,sales@summitsusp.com.ph,"3709 Luna St., Taguig",True,"Supplier for heavy-duty shocks, struts, coil springs, and underchassis components."

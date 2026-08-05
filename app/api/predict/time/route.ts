@@ -15,13 +15,13 @@ export async function GET(req: NextRequest) {
       SELECT
         jos.service_id,
         s.service_name,
-        jos.actual_amount::float,
         EXTRACT(EPOCH FROM jos.estimated_duration) / 60.0 AS estimated_duration_mins,
         s.base_price::float,
         s.base_duration_hours::float,
         s.is_price_fixed::int AS is_price_fixed,
         EXTRACT(YEAR FROM CURRENT_DATE) - v.vehicle_year AS vehicle_age,
-        v.vehicle_type
+        v.vehicle_type,
+        v.mileage::float
       FROM job_order_services jos
       JOIN services s ON s.id = jos.service_id
       JOIN job_orders jo ON jo.id = jos.job_order_id
@@ -33,30 +33,36 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ predicted_duration_mins: null, message: 'No services found' })
     }
 
-    // Send each service to the ML server for time prediction
-    const predictions = await Promise.all(
-      result.rows.map(async (row: any) => {
-        const res = await fetch(`${ML_SERVER}/predict/time`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            estimated_duration_mins: row.estimated_duration_mins || 60,
-            amount: row.amount || 0,
-            service_id: row.service_id,
-            base_price: row.base_price || 0,
-            base_duration_hours: row.base_duration_hours || 1,
-            is_price_fixed: row.is_price_fixed || 0,
-            vehicle_age: row.vehicle_age || 5,
-            vehicle_type: row.vehicle_type || 'Sedan',
-          }),
-        })
-        const data = await res.json()
-        return {
-          service_name: row.service_name,
-          ...data
-        }
-      })
-    )
+    // 1. Prepare batch payload
+    const batchPayload = result.rows.map((row: any) => ({
+      estimated_duration_mins: row.estimated_duration_mins || 60,
+      service_id: row.service_id,
+      base_price: row.base_price || 0,
+      base_duration_hours: row.base_duration_hours || 1,
+      is_price_fixed: row.is_price_fixed || 0,
+      vehicle_age: row.vehicle_age || 5,
+      vehicle_type: row.vehicle_type || 'Sedan',
+      mileage: row.mileage || (row.vehicle_age || 5) * 15000,
+    }))
+
+    // 2. Send the entire array in a single fetch
+    const res = await fetch(`${ML_SERVER}/predict/time`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(batchPayload),
+    })
+
+    let data = await res.json()
+    // The predict_server returns a single dict if array len == 1, else an array
+    if (!Array.isArray(data)) {
+      data = [data]
+    }
+
+    // 3. Map the returned predictions back to the service names
+    const predictions = result.rows.map((row: any, i: number) => ({
+      service_name: row.service_name,
+      ...(data[i] || {})
+    }))
 
     // Sum up all service duration predictions
     const totalPredictedMins = predictions.reduce(

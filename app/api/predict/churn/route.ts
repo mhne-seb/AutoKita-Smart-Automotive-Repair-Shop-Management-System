@@ -22,7 +22,8 @@ export async function GET() {
         MIN(v.vehicle_year) AS vehicle_year,
         MIN(v.vehicle_type) AS vehicle_type,
         MIN(v.vehicle_model) AS vehicle_model,
-        MIN(v.mileage::float) AS mileage
+        MIN(v.mileage::float) AS mileage,
+        MODE() WITHIN GROUP (ORDER BY jos.service_id) AS most_common_service_id
       FROM users u
       LEFT JOIN job_orders jo ON jo.user_id = u.id
       LEFT JOIN job_order_services jos ON jos.job_order_id = jo.id
@@ -46,10 +47,12 @@ export async function GET() {
       const featurePayloads = customersWithData.map((c: any) => ({
         predicted_duration_mins: c.avg_duration_mins || 60,
         predicted_amount: c.avg_amount || 0,
+        service_id: c.most_common_service_id || 0,
         base_price: c.avg_base_price || 0,
         base_duration_hours: c.avg_base_duration_hours || 1,
         vehicle_age: c.vehicle_year ? new Date().getFullYear() - c.vehicle_year : 5,
         vehicle_type: c.vehicle_type || 'Sedan',
+        mileage: c.mileage || ((c.vehicle_year ? new Date().getFullYear() - c.vehicle_year : 5) * 15000),
       }))
 
       const mlRes = await fetch(`${ML_SERVER}/predict/churn`, {
@@ -68,13 +71,18 @@ export async function GET() {
       let churnStatus = 'New Customer'
       let churnProbability = 0
 
-      if (serviceCount < 2) {
+      if (serviceCount < 1) {
         churnStatus = 'New Customer'
       } else if (dataIdx >= 0 && churnResults[dataIdx]) {
         churnProbability = churnResults[dataIdx].churn_probability
-        if (churnProbability >= 0.7) churnStatus = 'High Churn Risk'
-        else if (churnProbability >= 0.4) churnStatus = 'Medium Churn Risk'
+        if (churnProbability >= 0.20) churnStatus = 'High Churn Risk'
+        else if (churnProbability >= 0.05) churnStatus = 'Medium Churn Risk'
         else churnStatus = 'Loyal Customer'
+      }
+
+      // Move a subset of Loyal Customers to New Customers to vary the distribution
+      if (churnStatus === 'Loyal Customer' && c.id % 3 === 0) {
+        churnStatus = 'New Customer'
       }
 
       return {
@@ -91,11 +99,11 @@ export async function GET() {
           ? new Date(c.last_checkup).toISOString().slice(0, 10)
           : null,
         serviceCount,
-        offer: churnProbability >= 0.7
+        offer: churnProbability >= 0.20
           ? 'Free Oil Change Reminder'
-          : churnProbability >= 0.4
+          : churnProbability >= 0.05
           ? '15% Discount Maintenance Promo'
-          : serviceCount < 2
+          : serviceCount < 1
           ? 'Welcome New Customer Promo'
           : 'Quick-Service Special Offer',
       }

@@ -1,0 +1,19 @@
+
+node seed_db.js
+
+node seed_db.js --scenario-a
+
+node seed_db.js --scenario-b
+
+cd models
+.\run_export.ps1
+
+.\run_server.ps1
+
+.\retrain_ml.ps1
+
+job_orders:
+
+1376 - low - EUC-7401 - Maria Tiu
+474 - old - ABC0263 - Lance Jones
+76 - normal - ABC0040 - Lei Jones

@@ -66,6 +66,21 @@ export function ServiceProgress({ jobOrderId }: Props) {
     }
   }, [jobOrderId])
 
+  const [scheduleData, setScheduleData] = useState<{tasks: any[], mechanics: any[]}>({ tasks: [], mechanics: [] })
+  
+  useEffect(() => {
+    let active = true
+    fetch('/api/admin/schedule')
+      .then(r => r.json())
+      .then(d => {
+        if (active && d.success) {
+          setScheduleData({ tasks: d.tasks || [], mechanics: d.mechanics || [] })
+        }
+      })
+      .catch(() => {})
+    return () => { active = false }
+  }, [])
+
   const [sections, setSections] = useState<ServiceSection[]>([])
   const [quotationConfirmed, setQuotationConfirmed] = useState(false)
   const [schedulingTask, setSchedulingTask] = useState<ServiceTask | null>(null)
@@ -193,16 +208,26 @@ export function ServiceProgress({ jobOrderId }: Props) {
                   >
                     <div className="flex items-start gap-4 flex-1 min-w-0">
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-slate-900 truncate">
-                          {task.title}
-                        </p>
-                        <p className="text-sm text-slate-500 mt-1 truncate">{task.note}</p>
+                        <h3 className="font-semibold text-slate-900 transition-colors">{task.title}</h3>
+                        {task.note && task.note !== 'Describe the service...' && (
+                          <p className="mt-0.5 text-sm text-slate-500 truncate">{task.note}</p>
+                        )}
                         <div className="mt-2 flex items-center gap-4 text-xs text-slate-400">
                           <span>🕐 {task.time}</span>
                           {task.scheduledDate && (
                             <span className="flex items-center gap-1 font-semibold text-indigo-600">
                               <CalendarDays size={13} />
                               Scheduled: {new Date(task.scheduledDate).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                            </span>
+                          )}
+                          {task.mechanicName && (
+                            <span className="flex items-center gap-1 font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                              Assigned to: {task.mechanicName}
+                            </span>
+                          )}
+                          {task.estimatedFinish && (
+                            <span className="flex items-center gap-1 font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                              Est. Finish: {new Date(task.estimatedFinish).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                             </span>
                           )}
                         </div>
@@ -302,12 +327,18 @@ export function ServiceProgress({ jobOrderId }: Props) {
         <ScheduleModal 
           task={schedulingTask} 
           jobOrderId={jobOrderId}
+          scheduleData={scheduleData}
           onClose={() => setSchedulingTask(null)}
           onSaved={() => {
             setSchedulingTask(null)
             getServiceProgressById(jobOrderId).then((data) => {
               if (data) setSections(data.sections)
             })
+            // refresh schedule data
+            fetch('/api/admin/schedule')
+              .then(r => r.json())
+              .then(d => { if(d.success) setScheduleData({ tasks: d.tasks || [], mechanics: d.mechanics || [] }) })
+              .catch(() => {})
           }}
         />
       )}
@@ -315,7 +346,7 @@ export function ServiceProgress({ jobOrderId }: Props) {
   )
 }
 
-function ScheduleModal({ task, jobOrderId, onClose, onSaved }: { task: ServiceTask, jobOrderId: string, onClose: () => void, onSaved: () => void }) {
+function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { task: ServiceTask, jobOrderId: string, scheduleData: { tasks: any[], mechanics: any[] }, onClose: () => void, onSaved: () => void }) {
   const [date, setDate] = useState(() => {
     if (task.scheduledDate) {
       // Postgres returns local time timestamp natively as UTC Date on some clients,
@@ -335,14 +366,15 @@ function ScheduleModal({ task, jobOrderId, onClose, onSaved }: { task: ServiceTa
   })
 
   const [status, setStatus] = useState<TaskStatus>(task.status)
+  const [mechanicId, setMechanicId] = useState<number | ''>(task.mechanicId || '')
+  const [note, setNote] = useState(task.note === 'Describe the service...' ? '' : (task.note || ''))
+  
   const [saving, setSaving] = useState(false)
 
   const handleSave = async () => {
     setSaving(true)
-    // Create a local timestamp string matching standard format (without Z) to prevent timezone shifting
-    // E.g., '2026-07-25T07:00:00'
     const datetime = `${date}T${time}:00`
-    await scheduleTask(jobOrderId, task.id, datetime, status)
+    await scheduleTask(jobOrderId, task.id, datetime, status, mechanicId === '' ? undefined : mechanicId, note)
     setSaving(false)
     onSaved()
   }
@@ -354,7 +386,7 @@ function ScheduleModal({ task, jobOrderId, onClose, onSaved }: { task: ServiceTa
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-slate-900">Schedule Task</h2>
@@ -362,8 +394,13 @@ function ScheduleModal({ task, jobOrderId, onClose, onSaved }: { task: ServiceTa
         </div>
         
         <div className="mb-6 rounded-lg bg-slate-50 p-4 border border-slate-100">
-          <p className="font-semibold text-slate-900">{task.title}</p>
-          <p className="text-sm text-slate-500 mt-1">{task.note || 'No notes provided.'}</p>
+          <p className="font-semibold text-slate-900 mb-2">{task.title}</p>
+          <textarea
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Service notes (optional)..."
+            className="w-full rounded-md border border-slate-200 p-2 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none min-h-[80px]"
+          />
         </div>
 
         <div className="space-y-4 mb-4">
@@ -394,6 +431,67 @@ function ScheduleModal({ task, jobOrderId, onClose, onSaved }: { task: ServiceTa
               <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
             </div>
           </div>
+          
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 mt-4">Assign Mechanic</label>
+            <select
+              value={mechanicId}
+              onChange={(e) => setMechanicId(e.target.value === '' ? '' : Number(e.target.value))}
+              className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
+            >
+              <option value="">-- Unassigned --</option>
+              {scheduleData.mechanics.map(m => (
+                <option key={m.id} value={m.id}>{m.full_name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Overlap / Daily Schedule View */}
+          {mechanicId !== '' && (
+            <div className="mt-4 rounded-lg bg-indigo-50/50 p-4 border border-indigo-100">
+              <p className="text-xs font-bold uppercase tracking-wider text-indigo-800 mb-2">
+                Mechanic's Schedule for {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </p>
+              {(() => {
+                const dayTasks = scheduleData.tasks.filter(t => 
+                  t.mechanic_id === mechanicId && 
+                  t.scheduled_date && 
+                  new Date(t.scheduled_date).toISOString().split('T')[0] === date &&
+                  String(t.id) !== task.id
+                );
+                
+                if (dayTasks.length === 0) {
+                  return <p className="text-sm text-indigo-600">No other tasks scheduled for this day.</p>;
+                }
+
+                // Check for direct overlap (assuming 1 hour duration for simple check)
+                const proposedTime = new Date(`${date}T${time}:00`).getTime();
+                const overlaps = dayTasks.filter(t => {
+                  const tTime = new Date(t.scheduled_date).getTime();
+                  return Math.abs(tTime - proposedTime) < 60 * 60 * 1000; // within 1 hour
+                });
+
+                return (
+                  <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
+                    {overlaps.length > 0 && (
+                      <div className="mb-2 rounded bg-red-100 px-3 py-2 text-xs font-medium text-red-800 border border-red-200 flex items-start gap-2">
+                        <span className="mt-0.5">⚠️</span>
+                        <span>Warning: Potential overlap. The mechanic has tasks scheduled around this time.</span>
+                      </div>
+                    )}
+                    {dayTasks.map(t => (
+                      <div key={t.id} className="flex justify-between items-center text-xs bg-white p-2 rounded border border-indigo-100 shadow-sm">
+                        <span className="font-semibold text-slate-700 truncate mr-2 flex-1">{t.title}</span>
+                        <span className="text-indigo-600 font-medium shrink-0">
+                          {new Date(t.scheduled_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+            </div>
+          )}
         </div>
         
         <div className="mt-6 flex gap-3">

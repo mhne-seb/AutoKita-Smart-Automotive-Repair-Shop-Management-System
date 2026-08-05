@@ -25,6 +25,8 @@ export interface JobOrderCard {
   mechanic: string
   stepsDone: number
   stepsTotal: number
+  mileage?: number
+  vehicleYear?: number
 }
 
 export type FindingStatus = 'ok' | 'needs-attention' | 'urgent'
@@ -117,6 +119,9 @@ export interface ServiceTask {
   time: string
   status: TaskStatus
   scheduledDate?: string
+  mechanicId?: number
+  mechanicName?: string
+  estimatedFinish?: string
 }
 
 export interface ServiceSection {

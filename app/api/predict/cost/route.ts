@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Fetch Cost prediction using the predicted time
+    // service_id and mileage are already in body and forwarded automatically
     const costRes = await fetch(`${ML_SERVER}/predict/cost`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -1351,7 +1351,9 @@ RETURNS TABLE (
     completed_at  TIMESTAMP,
     price         DECIMAL(10,2),
     billable      BOOLEAN,
-    scheduled_date TIMESTAMP
+    scheduled_date TIMESTAMP,
+    mechanic_id   INT,
+    estimated_finish TIMESTAMP
 )
 LANGUAGE SQL STABLE
 AS $$
@@ -1362,8 +1364,14 @@ AS $$
         spt.note,
         spt.task_status,
         spt.completed_at,
-        spt.scheduled_date
+        spt.price,
+        spt.billable,
+        spt.scheduled_date,
+        spt.mechanic_id,
+        spt.scheduled_date + (jos.estimated_hours * INTERVAL '1 hour') as estimated_finish
     FROM service_progress_tasks spt
+    LEFT JOIN services s ON s.service_name = spt.task_title
+    LEFT JOIN job_order_services jos ON jos.service_id = s.id AND jos.job_order_id = spt.job_order_id
     WHERE spt.job_order_id = p_job_order_id
     ORDER BY spt.section_id ASC, spt.id ASC;
 $$;
@@ -1390,7 +1398,9 @@ $$;
 CREATE OR REPLACE FUNCTION schedule_service_task_with_status(
     p_task_id INT,
     p_scheduled_date TIMESTAMP,
-    p_status  VARCHAR
+    p_status  VARCHAR,
+    p_mechanic_id INT DEFAULT NULL,
+    p_note TEXT DEFAULT NULL
 )
 RETURNS VOID
 LANGUAGE SQL VOLATILE
@@ -1398,6 +1408,8 @@ AS $$
     UPDATE service_progress_tasks
     SET task_status  = p_status,
         scheduled_date = p_scheduled_date,
+        mechanic_id = p_mechanic_id,
+        note = COALESCE(p_note, note),
         completed_at = CASE
             WHEN p_status = 'completed' THEN NOW()
             ELSE NULL
@@ -2082,26 +2094,7 @@ WHERE spt.job_order_id = p_job_order_id
 ORDER BY spt.id ASC;
 $$;
 
-DROP FUNCTION IF EXISTS get_service_progress_tasks(integer);
-CREATE OR REPLACE FUNCTION get_service_progress_tasks(p_job_order_id integer)
-RETURNS TABLE(id integer, section_id text, task_title text, note text, task_status text, completed_at timestamp without time zone, price numeric, billable boolean)
-LANGUAGE sql
-STABLE
-AS $$
-    SELECT
-        spt.id,
-        spt.section_id,
-        spt.task_title,
-        spt.note,
-        spt.task_status,
-        spt.completed_at,
-        spt.price,
-        spt.billable,
-        spt.scheduled_date
-    FROM service_progress_tasks spt
-    WHERE spt.job_order_id = p_job_order_id
-    ORDER BY spt.section_id ASC, spt.id ASC;
-$$;
+
 
 CREATE OR REPLACE FUNCTION get_job_order_ticket_notes(p_job_order_id integer)
 RETURNS TABLE (customer_concern TEXT)
