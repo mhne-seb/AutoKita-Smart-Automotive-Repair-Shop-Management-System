@@ -12,8 +12,18 @@ cd models
 
 .\retrain_ml.ps1
 
-job_orders:
-
+job_orders: (For R programming checking)
+Maria- low - GED-7926 - Maria Ang
 1376 - low - EUC-7401 - Maria Tiu
 474 - old - ABC0263 - Lance Jones
 76 - normal - ABC0040 - Lei Jones
+
+Customer:
+customer200@example.com
+password123_u200
+
+(If wanted different account just add 1 from 200 and so on)
+
+Employees:
+owner@autokita.com
+password123_e1

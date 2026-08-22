@@ -21,19 +21,15 @@ Get-CimInstance Win32_Process -Filter "Name = 'python.exe' OR Name = 'py.exe'" |
 Start-Sleep -Seconds 1
 
 Write-Host ' '
-Write-Host '[1/4] Normalizing ML training data based on vehicle age...' -ForegroundColor Yellow
-py -3 normalize_ml_data.py
+Write-Host '[1/4] Retraining Time Regression Model...' -ForegroundColor Yellow
+py -3 -m jupyter nbconvert --execute --to notebook --inplace time_regression.ipynb
 
 Write-Host ' '
-Write-Host '[2/4] Exporting database to CSV...' -ForegroundColor Yellow
-py -3 export_db_to_csv.py
+Write-Host '[2/4] Retraining Cost Regression Model...' -ForegroundColor Yellow
+py -3 -m jupyter nbconvert --execute --to notebook --inplace cost_regression.ipynb
 
 Write-Host ' '
-Write-Host '[3/4] Retraining ML Models (ratio-based approach)...' -ForegroundColor Yellow
-py -3 retrain_models.py
-
-Write-Host ' '
-Write-Host '  -> Training churn_classification (notebook)...' -ForegroundColor Yellow
+Write-Host '[3/4] Retraining Churn Classification Model...' -ForegroundColor Yellow
 py -3 -m jupyter nbconvert --execute --to notebook --inplace churn_classification.ipynb
 
 Write-Host ' '

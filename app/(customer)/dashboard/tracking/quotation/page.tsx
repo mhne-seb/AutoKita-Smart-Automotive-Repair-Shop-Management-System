@@ -274,10 +274,7 @@ function Quotation() {
                 {selectedCount === 0 && <p className="text-xs text-muted-foreground">No services selected yet.</p>}
               </div>
               <div className="mt-4 border-t pt-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Est. Duration</span>
-                  <b>{services.filter((s) => checked[s.id]).reduce((sum, s) => sum + Number(s.estimated_hours), 0).toFixed(2).replace(/\.00$/, '')} hrs</b>
-                </div>
+                {/* Est. Duration removed to avoid conflict with actual ML predicted timeline */}
               </div>
               <div className="mt-2 flex flex-col gap-1 items-end">
                 <div className="flex w-full items-center justify-between">

@@ -24,7 +24,7 @@ cost_model      = joblib.load(os.path.join(EXPORTED, 'cost_model.pkl'))
 churn_model     = joblib.load(os.path.join(EXPORTED, 'churn_model.pkl'))
 veh_encoder     = joblib.load(os.path.join(EXPORTED, 'veh_type_encoder.pkl'))
 
-# Load base-price lookup (service_id -> avg base_price) for ratio-based cost model
+# Load base-price lookup (service_id -> avg base_price) 
 _svc_bp_path = os.path.join(EXPORTED, 'service_base_prices.pkl')
 service_base_prices: dict = joblib.load(_svc_bp_path) if os.path.exists(_svc_bp_path) else {}
 
@@ -35,46 +35,57 @@ service_base_durations: dict = joblib.load(_svc_bd_path) if os.path.exists(_svc_
 KNOWN_TYPES = set(veh_encoder.classes_)
 
 def encode_vehicle_type(vtype):
-    """Safely encode a vehicle type, defaulting to 'Unknown' if unseen."""
     if vtype and vtype in KNOWN_TYPES:
         return int(veh_encoder.transform([vtype])[0])
-    # Use the most common type as fallback
     return int(veh_encoder.transform([veh_encoder.classes_[0]])[0])
-
 
 @app.route('/predict/time', methods=['POST'])
 def predict_time():
     """
     Predict actual service duration in minutes.
-    Expects JSON body with fields:
-      estimated_duration_mins, service_id, base_price,
-      base_duration_hours, is_price_fixed, vehicle_age, vehicle_type, mileage
-    Can also accept an array of objects for batch prediction.
-    NOTE: actual_amount is no longer a feature (data leakage fix).
     """
     data = request.json
     if isinstance(data, dict):
         data = [data]
 
     results = []
+    features_list = []
+    metadata = []
+    
     for item in data:
         vtype_enc = encode_vehicle_type(item.get('vehicle_type'))
-        features = np.array([[
-            int(item.get('service_id', 0)),
+        svc_id = int(item.get('service_id', 0))
+        base_dur_hrs = float(item.get('base_duration_hours', 0))
+        if base_dur_hrs <= 0:
+            base_dur_hrs = float(service_base_durations.get(svc_id, 1.0))
+            
+        base_price = float(item.get('base_price', 0))
+        if base_price <= 0:
+            base_price = float(service_base_prices.get(svc_id, 1500))
+
+        est_dur_mins = float(item.get('estimated_duration_mins', base_dur_hrs * 60))
+
+        features_list.append([
+            est_dur_mins,
+            svc_id,
+            base_price,
+            base_dur_hrs,
             int(item.get('is_price_fixed', 0)),
             int(item.get('vehicle_age', 5)),
             vtype_enc,
             float(item.get('mileage', item.get('vehicle_age', 5) * 15000)),
-        ]])
-        time_ratio = time_model.predict(features)[0]
+        ])
+        metadata.append({'base_dur_hrs': base_dur_hrs})
         
-        base_dur_hrs = float(item.get('base_duration_hours', 0))
-        if base_dur_hrs <= 0:
-            svc_id = int(item.get('service_id', 0))
-            base_dur_hrs = float(service_base_durations.get(svc_id, 1.0))
-            
-        predicted_mins = round(time_ratio * base_dur_hrs * 60, 2)
-        results.append({'predicted_duration_mins': predicted_mins, 'time_ratio': round(float(time_ratio), 4)})
+    if features_list:
+        features_arr = np.array(features_list)
+        preds = time_model.predict(features_arr)
+        
+        for i, pred in enumerate(preds):
+            predicted_mins = float(pred)
+            base_dur_hrs = metadata[i]['base_dur_hrs']
+            time_ratio = predicted_mins / (base_dur_hrs * 60) if base_dur_hrs > 0 else 1.0
+            results.append({'predicted_duration_mins': round(predicted_mins, 2), 'time_ratio': round(time_ratio, 4)})
 
     if len(results) == 1:
         return jsonify(results[0])
@@ -85,60 +96,75 @@ def predict_time():
 def predict_cost():
     """
     Predict labor cost AND time in a 2-stage pipeline.
-    Expects JSON body with fields:
-      service_id, base_price, base_duration_hours,
-      is_price_fixed, vehicle_age, vehicle_type, mileage
-    Can also accept an array for batch prediction.
     """
     data = request.json
     if isinstance(data, dict):
         data = [data]
 
     results = []
+    features_t_list = []
+    metadata = []
+    
     for item in data:
         vtype_enc = encode_vehicle_type(item.get('vehicle_type'))
-        
-        # 1. Predict Time Ratio using ONLY vehicle features
-        features_t = np.array([[
-            int(item.get('service_id', 0)),
-            int(item.get('is_price_fixed', 0)),
-            int(item.get('vehicle_age', 5)),
-            vtype_enc,
-            float(item.get('mileage', item.get('vehicle_age', 5) * 15000)),
-        ]])
-        time_ratio = time_model.predict(features_t)[0]
-        
+        svc_id = int(item.get('service_id', 0))
         base_dur_hrs = float(item.get('base_duration_hours', 0))
         if base_dur_hrs <= 0:
-            svc_id = int(item.get('service_id', 0))
             base_dur_hrs = float(service_base_durations.get(svc_id, 1.0))
-        
-        pred_time = round(time_ratio * base_dur_hrs * 60, 2)
+            
+        base_price = float(item.get('base_price', 0))
+        if base_price <= 0:
+            base_price = float(service_base_prices.get(svc_id, 1500))
 
-        # 2. Predict Cost Ratio using the PREDICTED TIME from step 1
-        features_c = np.array([[
-            float(pred_time), # The Cost Model now explicitly depends on the predicted time!
-            int(item.get('service_id', 0)),
+        est_dur_mins = float(item.get('estimated_duration_mins', base_dur_hrs * 60))
+
+        features_t_list.append([
+            est_dur_mins,
+            svc_id,
+            base_price,
+            base_dur_hrs,
             int(item.get('is_price_fixed', 0)),
             int(item.get('vehicle_age', 5)),
             vtype_enc,
             float(item.get('mileage', item.get('vehicle_age', 5) * 15000)),
-        ]])
-        ratio = cost_model.predict(features_c)[0]
+        ])
+        metadata.append({'item': item, 'vtype_enc': vtype_enc, 'svc_id': svc_id, 'base_dur_hrs': base_dur_hrs, 'base_price': base_price})
         
-        base_price = float(item.get('base_price', 0))
-        if base_price <= 0:
-            svc_id = int(item.get('service_id', 0))
-            base_price = float(service_base_prices.get(svc_id, 1500))
+    if features_t_list:
+        features_t_arr = np.array(features_t_list)
+        pred_times = time_model.predict(features_t_arr)
+        
+        features_c_list = []
+        for i, pred_time in enumerate(pred_times):
+            md = metadata[i]
+            features_c_list.append([
+                float(pred_time),
+                md['svc_id'],
+                md['base_price'],
+                md['base_dur_hrs'],
+                int(md['item'].get('is_price_fixed', 0)),
+                int(md['item'].get('vehicle_age', 5)),
+                md['vtype_enc'],
+                float(md['item'].get('mileage', md['item'].get('vehicle_age', 5) * 15000)),
+            ])
             
-        pred_cost = round(ratio * base_price, 2)
-
-        results.append({
-            'predicted_duration_mins': pred_time,
-            'predicted_amount': pred_cost,
-            'time_ratio': round(float(time_ratio), 4),
-            'price_ratio': round(float(ratio), 4)
-        })
+        features_c_arr = np.array(features_c_list)
+        pred_costs = cost_model.predict(features_c_arr)
+        
+        for i in range(len(pred_times)):
+            md = metadata[i]
+            pred_time = float(pred_times[i])
+            pred_cost = float(pred_costs[i])
+            
+            time_ratio = pred_time / (md['base_dur_hrs'] * 60) if md['base_dur_hrs'] > 0 else 1.0
+            price_ratio = pred_cost / md['base_price'] if md['base_price'] > 0 else 1.0
+            
+            results.append({
+                'predicted_duration_mins': round(pred_time, 2),
+                'predicted_amount': round(pred_cost, 2),
+                'time_ratio': round(time_ratio, 4),
+                'price_ratio': round(price_ratio, 4)
+            })
 
     if len(results) == 1:
         return jsonify(results[0])
@@ -149,36 +175,44 @@ def predict_cost():
 def predict_churn():
     """
     Classify churn risk for customers.
-    Expects JSON body as an array of objects with fields:
-      predicted_duration_mins, predicted_amount, service_id, base_price,
-      base_duration_hours, vehicle_age, vehicle_type, mileage
-    Returns array of { is_churned, churn_probability }.
     """
     data = request.json
     if not isinstance(data, list):
         data = [data]
 
     results = []
+    features_list = []
+    
     for item in data:
         vtype_enc = encode_vehicle_type(item.get('vehicle_type'))
-        features = np.array([[
+        svc_id = int(item.get('service_id', 0))
+        base_dur_hrs = float(item.get('base_duration_hours', 1.0))
+        base_price = float(item.get('base_price', 0))
+        
+        features_list.append([
             float(item.get('predicted_duration_mins', 60)),
             float(item.get('predicted_amount', 0)),
-            int(item.get('service_id', 0)),
-            float(item.get('base_price', 0)),
-            float(item.get('base_duration_hours', 1)),
+            svc_id,
+            base_price,
+            base_dur_hrs,
             int(item.get('vehicle_age', 5)),
             vtype_enc,
             float(item.get('mileage', item.get('vehicle_age', 5) * 15000)),
-        ]])
-        pred = int(churn_model.predict(features)[0])
-        proba = churn_model.predict_proba(features)[0]
-        # proba[1] = probability of churning
-        churn_prob = float(proba[1]) if len(proba) > 1 else 0.0
-        results.append({
-            'is_churned': pred,
-            'churn_probability': round(churn_prob, 4),
-        })
+        ])
+        
+    if features_list:
+        features_arr = np.array(features_list)
+        preds = churn_model.predict(features_arr)
+        probas = churn_model.predict_proba(features_arr)
+        
+        for i in range(len(preds)):
+            pred = int(preds[i])
+            proba = probas[i]
+            churn_prob = float(proba[1]) if len(proba) > 1 else 0.0
+            results.append({
+                'is_churned': pred,
+                'churn_probability': round(churn_prob, 4),
+            })
 
     return jsonify(results)
 
