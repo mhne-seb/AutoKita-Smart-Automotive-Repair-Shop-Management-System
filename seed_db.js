@@ -177,7 +177,8 @@ async function main() {
     console.log('✓ Seeding complete!');
 
     console.log(`\nNext steps:`);
-    console.log(`  1. .\\retrain_ml.ps1`);
+    console.log(`  1. .\\setup_ml.ps1 (do this if not done yet)`);
+    console.log(`  2. .\\retrain_ml.ps1`);
     console.log('='.repeat(60));
 
   } catch (err) {

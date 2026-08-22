@@ -5,7 +5,7 @@ Write-Host ' AutoKita ML Retraining Pipeline' -ForegroundColor Cyan
 Write-Host '=========================================' -ForegroundColor Cyan
 
 Write-Host ' '
-Write-Host '[0/3] Cleaning up lingering background processes...' -ForegroundColor Yellow
+Write-Host '[0/4] Cleaning up lingering background processes...' -ForegroundColor Yellow
 $port = 5001
 $pid_to_kill = (Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue).OwningProcess
 if ($pid_to_kill) {

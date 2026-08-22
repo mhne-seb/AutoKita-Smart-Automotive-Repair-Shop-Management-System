@@ -10,6 +10,10 @@ cd models
 
 .\run_server.ps1
 
+npm install
+
+.\setup_ml.ps1
+
 .\retrain_ml.ps1
 
 job_orders: (For R programming checking)
