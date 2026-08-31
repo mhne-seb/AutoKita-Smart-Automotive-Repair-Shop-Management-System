@@ -134,8 +134,8 @@ function LoginPage() {
             {/* Demo credential hint — this is mock data, safe to show for the capstone demo. */}
             <div className="mt-4 rounded-md border border-dashed bg-muted/40 p-3 text-[11px] leading-relaxed text-muted-foreground">
               <p className="font-semibold text-foreground">Demo accounts</p>
-              <p>Customer: customer@autocare.com / password</p>
-              <p>Admin: employee1@company.com / admin_placeholder1</p>
+              <p>Customer: customer200@example.com / password123_u200</p>
+              <p>Admin: owner@autokita.com / password123_e1</p>
             </div>
           </div>
           <Link href="/" className="mt-4 flex items-center justify-center gap-2 rounded-full border bg-background py-2.5 text-sm hover:bg-accent">
