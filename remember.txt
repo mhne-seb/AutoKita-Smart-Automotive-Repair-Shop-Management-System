@@ -22,6 +22,7 @@ npm install axios cheerio
 
 npm install -D @types/cheerio
 
+npx tsx scripts/seed_parts_catalog.ts
 
 .\setup_ml.ps1
 

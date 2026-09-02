@@ -12,7 +12,7 @@ const pool = new Pool({
   port:     parseInt(process.env.DB_PORT || '5432', 10),
   ssl: {
     rejectUnauthorized: true,
-    ca: fs.readFileSync('certs/prod-ca-2021.crt').toString(),
+    ca: fs.readFileSync(path.join(__dirname, 'certs', 'prod-ca-2021.crt')).toString(),
   },
 });
 

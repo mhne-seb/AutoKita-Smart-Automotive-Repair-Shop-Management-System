@@ -1,0 +1,310 @@
+TABLE: users
+  - id
+  - email
+  - nickname
+  - password
+  - first_name
+  - last_name
+  - contact_number
+  - address
+  - registration_date
+  - loyalty_points
+  - tier
+  - role
+
+TABLE: employees
+  - id
+  - full_name
+  - email
+  - password
+  - contact_number
+  - role
+  - hire_date
+  - EOC
+  - status
+
+TABLE: shops
+  - id
+  - name
+  - address
+  - contact_number
+  - email
+  - owner_id
+  - operating_hours
+
+TABLE: services
+  - id
+  - shop_id
+  - service_name
+  - description
+  - base_price
+  - base_duration_hours
+  - is_price_fixed
+  - is_active
+
+TABLE: vehicles
+  - id
+  - user_id
+  - vin
+  - plate_number
+  - vehicle_make
+  - vehicle_model
+  - vehicle_year
+  - mileage
+  - vehicle_type
+
+TABLE: service_tickets
+  - id
+  - user_id
+  - vehicle_id
+  - service_mode
+  - home_service_address
+  - customer_concern
+  - ticket_status
+  - request_date
+
+TABLE: job_orders
+  - id
+  - ticket_id
+  - user_id
+  - vehicle_id
+  - jo_date
+  - date_arrived
+  - date_promised
+  - started_at
+  - completed_at
+  - released_at
+  - estimated_duration
+  - actual_duration
+  - estimated_grand_total
+  - actual_grand_total
+  - partial_payment
+  - balance
+  - status
+  - quotation_notes
+  - quotation_approved
+
+TABLE: suppliers
+  - id
+  - supplier_name
+  - contact_person
+  - contact_number
+  - email
+  - address
+  - is_active
+  - description
+
+TABLE: subcontracted_services
+  - id
+  - job_order_id
+  - supplier_id
+  - description_of_work
+  - date_informed
+  - date_started
+  - date_ended
+  - supplier_cost
+  - retail_price
+
+TABLE: purchase_orders
+  - id
+  - supplier_id
+  - order_date
+  - expected_delivery_date
+  - actual_delivery_date
+  - total_supplier_cost
+  - status
+
+TABLE: job_order_parts
+  - id
+  - job_order_id
+  - job_order_service_id
+  - purchase_order_id
+  - status
+  - part_number
+  - description
+  - quantity
+  - retail_unit_price
+  - total_retail_amount
+  - supplier_unit_cost
+
+TABLE: job_order_services
+  - id
+  - job_order_id
+  - service_id
+  - description_of_work
+  - estimated_duration
+  - actual_duration
+  - estimated_hours
+  - actual_hours
+  - estimated_amount
+  - actual_amount
+
+TABLE: vehicle_inspections
+  - id
+  - job_order_id
+  - name
+  - notes
+  - status
+  - photo
+  - findings_description
+  - logged_date
+
+TABLE: repair_progress_logs
+  - id
+  - job_order_id
+  - activity_description
+  - log_time
+
+TABLE: payments
+  - id
+  - job_order_id
+  - payment_method
+  - proof_of_payment_image
+  - amount_paid
+  - payment_date
+  - verification_status
+
+TABLE: warranties
+  - id
+  - job_order_id
+  - coverage_description
+  - start_date
+  - expiration_date
+  - status
+
+TABLE: retention_offers
+  - id
+  - user_id
+  - promo_code
+  - offer_type
+  - discount_value
+  - description
+  - issue_date
+  - expiration_date
+  - is_claimed
+  - claimed_on_job_order_id
+
+TABLE: system_audit_logs
+  - id
+  - user_id
+  - employees_id
+  - action_performed
+  - entity_type
+  - entity_id
+  - old_values
+  - new_values
+  - action_date
+
+TABLE: payroll_summaries
+  - id
+  - employee_id
+  - period_start
+  - period_end
+  - base_pay
+  - commission_pay
+  - deductions
+  - net_pay
+  - status
+  - date_generated
+  - payment_date
+
+TABLE: chat_sessions
+  - id
+  - customer_user_id
+  - assigned_employee_id
+  - reference_type
+  - reference_id
+  - session_status
+  - started_at
+  - last_activity_at
+
+TABLE: chat_messages
+  - id
+  - session_id
+  - sender_type
+  - sender_id
+  - message_text
+  - sent_at
+  - is_read_by_customer
+  - is_read_by_admin
+
+TABLE: vehicle_catalog
+  - id
+  - make
+  - model
+  - year_start
+  - year_end
+  - trim_variant
+  - engine_type
+  - transmission
+  - drive_type
+  - fuel_type
+
+TABLE: part_catalog
+  - id
+  - oem_part_number
+  - brand
+  - part_category
+  - part_name
+  - is_oem
+  - description
+
+TABLE: part_fitments
+  - id
+  - vehicle_catalog_id
+  - part_catalog_id
+  - notes
+
+TABLE: internal_ai_sessions
+  - id
+  - employee_id
+  - query_category
+  - context_vehicle_id
+  - started_at
+
+TABLE: internal_ai_messages
+  - id
+  - session_id
+  - sender
+  - message_text
+  - sent_at
+
+TABLE: pre_diagnostics
+  - id
+  - job_order_id
+  - mechanic_notes
+  - customer_approval_status
+  - datetime_created
+  - datetime_approved
+
+TABLE: employee_profiles
+  - id
+  - employee_id
+  - shop_id
+  - branch
+  - location
+  - rank
+  - base_salary
+  - commission_percent
+  - jobs_capacity
+  - color
+
+TABLE: rewards_catalog
+  - id
+  - name
+  - cost_in_points
+  - image_url
+
+TABLE: service_progress_tasks
+  - id
+  - job_order_id
+  - section_id
+  - task_title
+  - note
+  - task_status
+  - completed_at
+  - price
+  - billable
+  - scheduled_date
+  - mechanic_id
+  - estimated_finish

@@ -1,5 +1,6 @@
-﻿
 
+
+import fs from "fs";
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
@@ -21,6 +22,10 @@ async function main() {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     port: Number(process.env.DB_PORT ?? 5432),
+    ssl: {
+      rejectUnauthorized: true,
+      ca: fs.readFileSync('certs/prod-ca-2021.crt').toString(),
+    },
   });
 
   const openai = new OpenAI({ apiKey });
