@@ -24,11 +24,38 @@ export async function getAnalytics(days?: number) {
 }
 
 export async function getRevenueTrend(): Promise<RevenuePoint[]> {
-  return simulateDelay(revenueTrend)
+  try {
+    const res = await fetch('/api/analytics')
+    const json = await res.json()
+
+    if (json.success && json.data?.chartData) {
+      return json.data.chartData.map((row: any) => ({
+        month: row.month,
+        revenue: Number(row.revenue) || 0,
+      }))
+    }
+
+    return revenueTrend // Fallback to mock data if table is empty
+  } catch (error) {
+    console.error('Network error fetching revenue trend:', error)
+    return revenueTrend
+  }
 }
 
 export async function getServiceMix(): Promise<ServiceMixSlice[]> {
-  return simulateDelay(serviceMix)
+  try {
+    const res = await fetch('/api/analytics')
+    const json = await res.json()
+
+    if (json.success && json.data?.serviceMix && json.data.serviceMix.length > 0) {
+      return json.data.serviceMix
+    }
+
+    return serviceMix
+  } catch (error) {
+    console.error('Network error fetching service mix:', error)
+    return serviceMix
+  }
 }
 
 export async function getChurnList() {

@@ -53,15 +53,81 @@ export async function GET(request: Request) {
       ORDER BY month_date ASC
     `)
 
+    // 5. Service Mix Query (Safely isolated)
+    let serviceMixData: any[] = []
+    let activeTableData: any[] = []
+
+    const COLOR_PALETTE = ['#1e3a5f', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
+
+    try {
+      const serviceMixRes = await db.query(`
+        WITH ranked_services AS (
+          SELECT 
+            s.service_name AS label,
+            COUNT(jos.id)::numeric AS cnt
+          FROM job_order_services jos
+          JOIN services s ON jos.service_id = s.id
+          GROUP BY s.service_name
+        ),
+        total AS (
+          SELECT COALESCE(SUM(cnt), 1) AS total_cnt FROM ranked_services
+        ),
+        bucketed AS (
+          SELECT 
+            CASE 
+              WHEN ROW_NUMBER() OVER (ORDER BY cnt DESC) <= 4 THEN label 
+              ELSE 'Other' 
+            END AS category,
+            cnt
+          FROM ranked_services
+        )
+        SELECT 
+          b.category AS label,
+          ROUND((SUM(b.cnt) / t.total_cnt) * 100, 1) AS percent
+        FROM bucketed b, total t
+        GROUP BY b.category, t.total_cnt
+        ORDER BY percent DESC
+      `)
+
+      const activeTableRes = await db.query(`
+      SELECT 
+        jo.id AS "jobOrderId",
+        COALESCE(u.first_name || ' ' || u.last_name, 'Unknown Customer') AS name,
+        COALESCE(v.vehicle_model, 'Unknown Vehicle') AS vehicle,
+        COALESCE(v.plate_number, 'N/A') AS plate,
+        COALESCE(jo.actual_grand_total, 0) AS "totalCost",
+        COALESCE(jo.balance, 0) AS "balanceDue",
+        jo.status
+      FROM job_orders jo
+      LEFT JOIN users u ON jo.user_id = u.id
+      LEFT JOIN vehicles v ON jo.vehicle_id = v.id
+      WHERE jo.status NOT IN ('completed', 'released')
+      ORDER BY jo.jo_date DESC, jo.id DESC
+      LIMIT 6
+    `)
+
+      activeTableData = activeTableRes.rows
+
+      serviceMixData = serviceMixRes.rows.map((row: any, index: number) => ({
+        label: row.label,
+        percent: parseFloat(row.percent) || 0,
+        color: COLOR_PALETTE[index % COLOR_PALETTE.length],
+      }))
+    } catch (mixErr) {
+      console.error('Service Mix SQL Error (falling back to mock for pie chart only):', mixErr)
+        ; (global as any).__lastMixError = mixErr instanceof Error ? mixErr.message : String(mixErr)
+
+    }
+
     // Calculations
     const currentRev = parseFloat(current.revenue) || 0
-    const prevRev = parseFloat(prev.revenue) || 1 // avoid div by zero
+    const prevRev = parseFloat(prev.revenue) || 1
     const revTrend = prevRev > 1 ? ((currentRev - prevRev) / prevRev) * 100 : 100
 
     const currentJobs = parseInt(current.jobs_completed) || 0
     const prevJobs = parseInt(prev.jobs_completed) || 1
     const jobTrend = prevJobs > 1 ? ((currentJobs - prevJobs) / prevJobs) * 100 : 100
-    
+
     const dailyJobs = days > 0 ? currentJobs / days : currentJobs
 
     const totalSafetyJobs = parseInt(safety.total_jobs) || 1
@@ -83,7 +149,10 @@ export async function GET(request: Request) {
           month: row.month,
           revenue: parseFloat(row.revenue),
           jobsCompleted: parseInt(row.jobs_completed)
-        }))
+        })),
+        serviceMix: serviceMixData,
+        activeTable: activeTableData,
+        _debugMixError: (global as any).__lastMixError || null
       }
     })
   } catch (error) {

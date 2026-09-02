@@ -32,27 +32,86 @@ import { TopBar } from '../components/TopBar'
 import { StatCard } from '../components/StatCard'
 import { StatusBadge } from '../components/StatusBadge'
 import { getCustomers, updateCustomerStatus } from '@/controllers/customerController'
+import { getJobOrders } from '@/controllers/jobOrderController'
+import { JobOrderCard } from '../data/types'
 import { getRevenueTrend, getServiceMix } from '@/controllers/reportController'
 import { currency, type Customer, type RevenuePoint, type ServiceMixSlice } from '../data/mockData'
 const heroImage = "/assets/ac/a1.jpg"; // static asset path
 
 export function Overview() {
   const router = useRouter()
-  const [customers, setCustomers] = useState<Customer[]>([])
+  const [activeTableOrders, setActiveTableOrders] = useState<any[]>([])
+  const [jobOrders, setJobOrders] = useState<JobOrderCard[]>([])
   const [revenueTrend, setRevenueTrend] = useState<RevenuePoint[]>([])
   const [serviceMix, setServiceMix] = useState<ServiceMixSlice[]>([])
+  const [pendingTicketsCount, setPendingTicketsCount] = useState<number>(0)
+  const [techniciansCount, setTechniciansCount] = useState<number>(0)
+  const totalRevenue = revenueTrend.reduce((sum, item) => sum + item.revenue, 0)
+  const activeJobOrders = jobOrders.filter(
+    (jobOrder) =>
+      jobOrder.stage === 'inspecting' ||
+      jobOrder.stage === 'quotation' ||
+      jobOrder.stage === 'in-progress'
+  ).length
 
   useEffect(() => {
     let active = true
-    getCustomers().then((data) => active && setCustomers(data))
-    getRevenueTrend().then((data) => active && setRevenueTrend(data))
-    getServiceMix().then((data) => active && setServiceMix(data))
+
+    // 2. Fetching dashboard table data for Active Job Orders
+    fetch('/api/analytics')
+      .then((res) => res.json())
+      .then((json) => {
+        if (active && json.success && json.data) {
+          // Update the table
+          if (json.data.activeTable) setActiveTableOrders(json.data.activeTable)
+
+          // Update the Pie Chart (Service Mix)
+          if (json.data.serviceMix) setServiceMix(json.data.serviceMix)
+
+          // Update the Area Chart (Revenue Trend)
+          if (json.data.chartData) setRevenueTrend(json.data.chartData)
+        }
+      })
+      .catch(console.error)
+
+    // 3. Fetching background job order counts for the stat cards
+    getJobOrders(1, 1000000).then((result) => {
+      if (active) {
+        setJobOrders(result.data)
+      }
+    })
+
+    // 4. Fetching job queue data for pending tickets & technicians count
+    fetch('/api/admin/job-queue')
+      .then((res) => res.json())
+      .then((data) => {
+        if (active && data.success && data.tickets) {
+          const pendingCount = data.tickets.filter(
+            (t: any) =>
+              t.ticket_status !== 'approved' &&
+              t.ticket_status !== 'declined' &&
+              t.ticket_status !== 'cancelled'
+          ).length
+
+          setPendingTicketsCount(pendingCount)
+        }
+
+        if (data.mechanics) {
+          setTechniciansCount(data.mechanics.length)
+        }
+      })
+      .catch(console.error)
+
     return () => {
       active = false
     }
   }, [])
 
-  const activeOrders = customers.filter((c) => c.status !== 'Cancelled')
+
+  const inProgressOrders = jobOrders.filter(
+    (jobOrder) => jobOrder.stage === 'in-progress'
+  ).length
+
   const [openRowMenu, setOpenRowMenu] = useState<string | null>(null)
 
   const handleRowAction = async (action: string, customerId: string) => {
@@ -77,7 +136,7 @@ export function Overview() {
 
   return (
     <div className="space-y-6 p-8">
-      <TopBar title="Dashboard Overview" subtitle="Real-time pulse of the shop floor." />
+      <TopBar title="Dashboard Overview" subtitle="Real-time pulse of the shop floor." showSearch={false} />
 
       {/* Welcome banner */}
       <div className="relative overflow-hidden rounded-2xl">
@@ -90,7 +149,7 @@ export function Overview() {
             </p>
             <h2 className="mt-1 text-2xl font-bold">Boss Boyet, here's today's shop floor.</h2>
             <p className="mt-1 max-w-md text-sm text-brand-foreground/80">
-              5 job orders in progress and 2 tickets waiting for triage.
+              {inProgressOrders} in progress and {pendingTicketsCount} {pendingTicketsCount === 1 ? 'ticket' : 'tickets'} tickets waiting for triage.
             </p>
           </div>
           <button
@@ -107,7 +166,7 @@ export function Overview() {
         <Link href="/job-queue" className="min-w-[220px] flex-1">
           <StatCard
             label="Pending Tickets"
-            value="2"
+            value={`${pendingTicketsCount} Pending`}
             icon={Car}
             iconBg="bg-brand/10"
             iconColor="text-brand"
@@ -117,7 +176,7 @@ export function Overview() {
         <Link href="/job-orders" className="min-w-[220px] flex-1">
           <StatCard
             label="Active Job Orders"
-            value="5"
+            value={activeJobOrders.toString()}
             icon={Wrench}
             iconBg="bg-amber-50"
             iconColor="text-amber-600"
@@ -127,7 +186,7 @@ export function Overview() {
         <Link href="/mechanics" className="min-w-[220px] flex-1">
           <StatCard
             label="Technicians"
-            value="15"
+            value={techniciansCount.toString()}
             icon={Users}
             iconBg="bg-emerald-50"
             iconColor="text-emerald-600"
@@ -137,7 +196,7 @@ export function Overview() {
         <Link href="/sales-payroll" className="min-w-[220px] flex-1">
           <StatCard
             label="6-Mo Revenue"
-            value={currency(1444900)}
+            value={currency(totalRevenue)}
             icon={Wallet}
             iconBg="bg-violet-50"
             iconColor="text-violet-600"
@@ -200,25 +259,34 @@ export function Overview() {
           <h3 className="text-lg font-bold text-foreground">Service Mix</h3>
           <p className="text-sm text-muted-foreground">Share of jobs this quarter</p>
           <div className="relative mt-4 h-44">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={serviceMix}
-                  dataKey="percent"
-                  innerRadius={50}
-                  outerRadius={70}
-                  paddingAngle={3}
-                >
-                  {serviceMix.map((slice) => (
-                    <Cell key={slice.label} fill={slice.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <p className="text-xs font-semibold uppercase text-muted-foreground">Total</p>
-              <p className="text-2xl font-bold text-foreground">100%</p>
-            </div>
+            {serviceMix.length === 0 ? (
+              <div className="flex h-full w-full flex-col items-center justify-center text-center">
+                <p className="text-sm font-medium text-muted-foreground">Cannot fetch live data.</p>
+                <p className="text-xs text-muted-foreground/70">No service records found.</p>
+              </div>
+            ) : (
+              <>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={serviceMix}
+                      dataKey="percent"
+                      innerRadius={50}
+                      outerRadius={70}
+                      paddingAngle={3}
+                    >
+                      {serviceMix.map((slice) => (
+                        <Cell key={slice.label} fill={slice.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                  <p className="text-xs font-semibold uppercase text-muted-foreground">Total</p>
+                  <p className="text-2xl font-bold text-foreground">100%</p>
+                </div>
+              </>
+            )}
           </div>
           <div className="mt-4 grid grid-cols-2 gap-y-2 text-sm">
             {serviceMix.map((slice) => (
@@ -258,60 +326,51 @@ export function Overview() {
               </tr>
             </thead>
             <tbody>
-              {activeOrders.map((c) => (
-                <tr key={c.customerId} className="border-b border-border/60 last:border-0">
-                  <td className="py-4 font-semibold text-foreground">{c.customerId}</td>
-                  <td className="py-4 text-foreground/90">{c.name}</td>
-                  <td className="py-4 text-muted-foreground">
-                    {c.vehicle} - {c.plate}
-                  </td>
-                  <td className="py-4 font-semibold text-foreground">{currency(c.totalCost)}</td>
-                  <td className="py-4 font-semibold text-destructive">
-                    {c.balanceDue > 0 ? currency(c.balanceDue) : currency(0)}
-                  </td>
-                  <td className="py-4">
-                    <StatusBadge status={c.status} />
-                  </td>
-                  <td className="relative py-4 text-right">
-                    <button
-                      aria-label="Row actions"
-                      onClick={() => setOpenRowMenu(openRowMenu === c.customerId ? null : c.customerId)}
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <MoreVertical size={16} />
-                    </button>
+              {activeTableOrders.map((c) => {
+                const idStr = String(c.jobOrderId)
+                return (
+                  <tr key={idStr} className="border-b border-border/60 last:border-0">
+                    <td className="py-4 font-semibold text-foreground">JO-{c.jobOrderId}</td>
+                    <td className="py-4 text-foreground/90">{c.name}</td>
+                    <td className="py-4 text-muted-foreground">
+                      {c.vehicle} - {c.plate}
+                    </td>
+                    <td className="py-4 font-semibold text-foreground">{currency(Number(c.totalCost))}</td>
+                    <td className="py-4 font-semibold text-destructive">
+                      {Number(c.balanceDue) > 0 ? currency(Number(c.balanceDue)) : currency(0)}
+                    </td>
+                    <td className="py-4">
+                      <StatusBadge status={c.status} />
+                    </td>
+                    <td className="relative py-4 text-right">
+                      <button
+                        aria-label="Row actions"
+                        onClick={() => setOpenRowMenu(openRowMenu === idStr ? null : idStr)}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <MoreVertical size={16} />
+                      </button>
 
-                    {openRowMenu === c.customerId && (
-                      <div className="absolute right-0 top-10 z-10 w-44 rounded-lg border border-border bg-card p-1 text-left shadow-lg">
-                        <button
-                          onClick={() => handleRowAction('View Details', c.customerId)}
-                          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent"
-                        >
-                          <Eye size={14} /> View Details
-                        </button>
-                        <button
-                          onClick={() => handleRowAction('Edit', c.customerId)}
-                          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent"
-                        >
-                          <Pencil size={14} /> Edit
-                        </button>
-                        <button
-                          onClick={() => handleRowAction('Mark Complete', c.customerId)}
-                          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent"
-                        >
-                          <CheckCircle2 size={14} /> Mark Complete
-                        </button>
-                        <button
-                          onClick={() => handleRowAction('Cancel Order', c.customerId)}
-                          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
-                        >
-                          <XCircle size={14} /> Cancel Order
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                      {openRowMenu === idStr && (
+                        <div className="absolute right-0 top-10 z-10 w-44 rounded-lg border border-border bg-card p-1 text-left shadow-lg">
+                          <button
+                            onClick={() => handleRowAction('View Details', idStr)}
+                            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent"
+                          >
+                            <Eye size={14} /> View Details
+                          </button>
+                          <button
+                            onClick={() => handleRowAction('Edit', idStr)}
+                            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent"
+                          >
+                            <Pencil size={14} /> Edit
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

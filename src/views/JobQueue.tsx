@@ -96,6 +96,7 @@ export function JobQueue() {
 
   const [tab, setTab] = useState<Tab>('All Jobs')
   const [currentPage, setCurrentPage] = useState(1)
+  const [searchQuery, setSearchQuery] = useState('')
   const itemsPerPage = 9
 
   const [showNewTicket, setShowNewTicket] = useState(false)
@@ -115,11 +116,29 @@ export function JobQueue() {
   )
 
   const filtered = jobs.filter((c) => {
-    if (tab === 'All Jobs') return true
-    if (tab === 'Pending') return c.status === 'Pending'
-    if (tab === 'Approved') return c.status === 'Approved' || c.status === 'In Progress'
-    if (tab === 'Cancelled') return c.status === 'Cancelled'
-    return true
+    const q = searchQuery.trim().toLowerCase()
+
+    const matchesSearch =
+      !q ||
+      c.name.toLowerCase().includes(q) ||
+      c.customerId.toLowerCase().includes(q) ||
+      c.phone.toLowerCase().includes(q) ||
+      c.email.toLowerCase().includes(q) ||
+      c.vehicle.toLowerCase().includes(q) ||
+      c.plate.toLowerCase().includes(q) ||
+      c.serviceMode.toLowerCase().includes(q) ||
+      c.servicesNeeded.some((service) =>
+        service.toLowerCase().includes(q)
+      )
+
+    const matchesTab =
+      tab === 'All Jobs' ||
+      (tab === 'Pending' && c.status === 'Pending') ||
+      (tab === 'Approved' &&
+        (c.status === 'Approved' || c.status === 'In Progress')) ||
+      (tab === 'Cancelled' && c.status === 'Cancelled')
+
+    return matchesSearch && matchesTab
   })
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage)
@@ -182,22 +201,27 @@ export function JobQueue() {
     fetchJobs();
   }
 
-  const addTicket = (data: NewTicketData) => {
-    const newJob: Job = {
-      customerId: `CUST-${Date.now().toString().slice(-6)}`,
-      name: data.fullName,
-      phone: data.contactNumber,
-      vehicle: `${data.vehicleModel} ${data.year}`,
-      plate: data.licensePlate,
-      serviceMode: data.pickupOption,
-      servicesNeeded: [data.serviceCategory],
-      assignedMechanic: undefined,
-      status: 'Pending' as JobStatus,
-      totalCost: 0,
-      balanceDue: 0,
-    } as unknown as Job
-    setJobs((prev) => [newJob, ...prev])
-    setShowNewTicket(false)
+  const addTicket = async (data: NewTicketData) => {
+   try {
+      // Pointing to our brand new dedicated API endpoint
+      const res = await fetch('/api/admin/booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticketData: data })
+      });
+      
+      const result = await res.json();
+      
+      if (result.success) {
+        setShowNewTicket(false);
+        fetchJobs(); // Refresh the table
+      } else {
+        alert('Failed to create ticket: ' + (result.debug || result.message));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred while creating the ticket.');
+    }
   }
 
   return (
@@ -205,6 +229,8 @@ export function JobQueue() {
       <TopBar
         title="Job Queueing"
         subtitle="Intake of customer service tickets — shop visits, home service, walk-ins."
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
         rightSlot={
           <button
             onClick={() => setShowNewTicket(true)}
@@ -227,15 +253,13 @@ export function JobQueue() {
           <button
             key={label}
             onClick={() => { setTab(label); setCurrentPage(1); }}
-            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-              tab === label ? 'bg-brand text-brand-foreground' : 'text-muted-foreground hover:text-foreground'
-            }`}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${tab === label ? 'bg-brand text-brand-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
           >
             {label}
             <span
-              className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs ${
-                tab === label ? 'bg-white/20 text-brand-foreground' : 'bg-accent text-muted-foreground'
-              }`}
+              className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs ${tab === label ? 'bg-white/20 text-brand-foreground' : 'bg-accent text-muted-foreground'
+                }`}
             >
               {count}
             </span>
@@ -330,9 +354,8 @@ export function JobQueue() {
                   <select
                     value={c.assignedMechanic ?? 'Unassigned'}
                     onChange={(e) => updateMechanic(c.ticketId, e.target.value)}
-                    className={`mt-0.5 w-full rounded-md border px-2 py-1 text-sm text-foreground ${
-                      unassigned ? 'border-amber-300 bg-amber-50' : 'border-border'
-                    }`}
+                    className={`mt-0.5 w-full rounded-md border px-2 py-1 text-sm text-foreground ${unassigned ? 'border-amber-300 bg-amber-50' : 'border-border'
+                      }`}
                   >
                     <option value="Unassigned">Unassigned</option>
                     {mechanics.map(m => (
@@ -530,9 +553,8 @@ function HoldModal({ job, onClose, onConfirm }: { job: Job; onClose: () => void;
             onChange={(e) => setReason(e.target.value)}
             rows={3}
             placeholder="e.g., Waiting for parts delivery"
-            className={`mt-1.5 w-full rounded-md border px-3 py-2 text-sm focus:outline-none ${
-              error ? 'border-destructive' : 'border-border focus:border-brand'
-            }`}
+            className={`mt-1.5 w-full rounded-md border px-3 py-2 text-sm focus:outline-none ${error ? 'border-destructive' : 'border-border focus:border-brand'
+              }`}
           />
           {error && (
             <p className="mt-1 flex items-center gap-1 text-xs text-destructive">
@@ -669,8 +691,7 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
   }
 
   const fieldClass = (key: keyof NewTicketData) =>
-    `w-full rounded-md border py-2 pl-9 pr-3 text-sm focus:outline-none ${
-      errors[key] ? 'border-destructive' : 'border-border focus:border-brand'
+    `w-full rounded-md border py-2 pl-9 pr-3 text-sm focus:outline-none ${errors[key] ? 'border-destructive' : 'border-border focus:border-brand'
     }`
 
   const ErrorText = ({ field }: { field: keyof NewTicketData }) =>
@@ -965,16 +986,14 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
                   <button
                     type="button"
                     onClick={() => set('pickupOption', 'Shop Visit')}
-                    className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium ${
-                      form.pickupOption === 'Shop Visit'
-                        ? 'border-brand bg-brand/5 text-brand'
-                        : 'border-border text-muted-foreground hover:bg-accent'
-                    }`}
+                    className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium ${form.pickupOption === 'Shop Visit'
+                      ? 'border-brand bg-brand/5 text-brand'
+                      : 'border-border text-muted-foreground hover:bg-accent'
+                      }`}
                   >
                     <span
-                      className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
-                        form.pickupOption === 'Shop Visit' ? 'border-brand' : 'border-border'
-                      }`}
+                      className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${form.pickupOption === 'Shop Visit' ? 'border-brand' : 'border-border'
+                        }`}
                     >
                       {form.pickupOption === 'Shop Visit' && <span className="h-2 w-2 rounded-full bg-brand" />}
                     </span>
@@ -983,16 +1002,14 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
                   <button
                     type="button"
                     onClick={() => set('pickupOption', 'Home Service')}
-                    className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium ${
-                      form.pickupOption === 'Home Service'
-                        ? 'border-brand bg-brand/5 text-brand'
-                        : 'border-border text-muted-foreground hover:bg-accent'
-                    }`}
+                    className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium ${form.pickupOption === 'Home Service'
+                      ? 'border-brand bg-brand/5 text-brand'
+                      : 'border-border text-muted-foreground hover:bg-accent'
+                      }`}
                   >
                     <span
-                      className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
-                        form.pickupOption === 'Home Service' ? 'border-brand' : 'border-border'
-                      }`}
+                      className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${form.pickupOption === 'Home Service' ? 'border-brand' : 'border-border'
+                        }`}
                     >
                       {form.pickupOption === 'Home Service' && <span className="h-2 w-2 rounded-full bg-brand" />}
                     </span>

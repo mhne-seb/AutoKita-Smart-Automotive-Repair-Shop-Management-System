@@ -10,6 +10,10 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port:     parseInt(process.env.DB_PORT || '5432', 10),
+  ssl: {
+    rejectUnauthorized: true,
+    ca: fs.readFileSync('certs/prod-ca-2021.crt').toString(),
+  },
 });
 
 const SQL_DIR = path.join(__dirname, 'sql', 'Other');

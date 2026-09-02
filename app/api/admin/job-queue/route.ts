@@ -3,7 +3,7 @@ import { db } from '@/lib/db'
 
 export async function GET(req: NextRequest) {
   try {
-    
+
     const query = `
       SELECT 
           st.id as ticket_id,
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     `
     const result = await db.query(query)
 
-   
+
     const mechanicsQuery = `SELECT id, full_name, email FROM employees WHERE role = 'mechanic'`
     const mechanicsResult = await db.query(mechanicsQuery)
     const mechanics = mechanicsResult.rows
@@ -58,25 +58,30 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { action, ticketId, mechanicId, holdReason } = body
 
-    if (!ticketId || !action) {
-      return NextResponse.json({ success: false, message: 'Missing parameters' }, { status: 400 })
+    if (!action) {
+      return NextResponse.json({ success: false, message: 'Missing action parameter' }, { status: 400 })
+    }
+
+    // 2. If the action is NOT 'create', then we absolutely need a ticketId
+    if (action !== 'create' && !ticketId) {
+      return NextResponse.json({ success: false, message: 'Missing ticketId' }, { status: 400 })
     }
 
     if (action === 'approve') {
-     
+
       const joQuery = `SELECT * FROM create_job_order_from_ticket($1, $2)`
       const joResult = await db.query(joQuery, [ticketId, mechanicId || null])
-      
+
       const newJo = joResult.rows[0]
 
-     
+
       if (mechanicId && newJo) {
         const assignQuery = `SELECT assign_mechanic_to_job_order($1, $2)`
         await db.query(assignQuery, [newJo.id, mechanicId])
       }
-      
+
       return NextResponse.json({ success: true, jobOrder: newJo })
-    } 
+    }
     else if (action === 'reject') {
       // update_ticket_status
       const rejectQuery = `SELECT update_ticket_status($1, 'declined')`
@@ -91,9 +96,7 @@ export async function POST(req: NextRequest) {
       await db.query(holdQuery, [ticketId])
       return NextResponse.json({ success: true, reason: holdReason })
     }
-    
     return NextResponse.json({ success: false, message: 'Invalid action' }, { status: 400 })
-    
   } catch (err: any) {
     console.error('Job queue POST error:', err)
     return NextResponse.json(
