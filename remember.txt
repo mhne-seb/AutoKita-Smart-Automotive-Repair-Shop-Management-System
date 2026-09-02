@@ -31,3 +31,40 @@ password123_u200
 Employees:
 owner@autokita.com
 password123_e1
+
+.env.local should be: 
+DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
+DB_USER=postgres.regcfvjcztbxewgpoijo
+DB_PASSWORD=autokita@PUP
+DB_NAME=postgres
+DB_PORT=6543
+
+src\lib\db.ts should be 
+import { Pool } from 'pg';
+import fs from 'fs';
+
+export const db = new Pool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: parseInt(process.env.DB_PORT || '5432', 10),
+  ssl: {
+    rejectUnauthorized: true,
+    ca: fs.readFileSync('certs/prod-ca-2021.crt').toString(),
+  }
+});
+
+
+seed_db.js should be (lines 21-31):
+const pool = new Pool({
+  host:     process.env.DB_HOST,
+  user:     process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port:     parseInt(process.env.DB_PORT || '5432', 10),
+  ssl: {
+    rejectUnauthorized: true,
+    ca: fs.readFileSync('certs/prod-ca-2021.crt').toString(),
+  },
+});
