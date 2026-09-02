@@ -1,23 +1,9 @@
-/**
- * seed_db.js
- *
- * Usage:
- *   node seed_db.js                  → Baseline + Scenario A + Scenario B
- *
- * The script always:
- *   1. Truncates all tables
- *   2. Runs the 500-record baseline migration
- *   3. Runs the 500-record Scenario A (Old cars / High Cost)
- *   4. Runs the 500-record Scenario B (New cars / Low Cost)
- */
-
 const { Pool } = require('pg');
 const fs   = require('fs');
 const path = require('path');
 
 require('dotenv').config({ path: path.join(__dirname, '.env.local') });
 
-// ── Database connection ──────────────────────────────────────────────────────
 const pool = new Pool({
   host:     process.env.DB_HOST,
   user:     process.env.DB_USER,
@@ -26,7 +12,6 @@ const pool = new Pool({
   port:     parseInt(process.env.DB_PORT || '5432', 10),
 });
 
-// ── File paths ───────────────────────────────────────────────────────────────
 const SQL_DIR = path.join(__dirname, 'sql', 'Other');
 
 const FILES = {
@@ -36,11 +21,8 @@ const FILES = {
   scenario_b:  path.join(SQL_DIR, 'Scenario_B_low_cost_time.sql'),
 };
 
-// ── Argument parsing ─────────────────────────────────────────────────────────
-// Flags are no longer needed; we seed everything.
 const args = process.argv.slice(2);
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
 function readSQL(filePath) {
   if (!fs.existsSync(filePath)) {
     throw new Error(`SQL file not found: ${filePath}`);
@@ -52,9 +34,6 @@ async function runSQL(client, filePath, label) {
   console.log(`\n[${label}] Running: ${path.basename(filePath)}`);
   let sql = readSQL(filePath);
 
-  // The baseline file (Migrations_postgresSQL.sql) has bare ALTER TABLE statements
-  // at the very end that fail if the columns already exist in the schema.
-  // We pull them out and re-wrap them with IF NOT EXISTS guards.
   const alterPattern = /ALTER TABLE\s+(\S+)\s+ADD COLUMN\s+([^;]+);/gi;
   const alters = [];
   sql = sql.replace(alterPattern, (match, table, columnDef) => {
@@ -62,10 +41,8 @@ async function runSQL(client, filePath, label) {
     return ''; // remove from main SQL
   });
 
-  // Run the main SQL body
   await client.query(sql);
 
-  // Re-run each ALTER TABLE safely
   for (const { table, columnDef } of alters) {
     const colName = columnDef.split(/\s+/)[0].replace(/"/g, '');
     const safeSql = `
@@ -85,7 +62,6 @@ async function runSQL(client, filePath, label) {
   console.log(`[${label}] ✓ Done`);
 }
 
-// ── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   console.log('='.repeat(60));
   console.log('AutoKita Database Seeder');
@@ -112,6 +88,65 @@ async function main() {
     
     // 4. Scenario B (New Cars)
     await runSQL(client, FILES.scenario_b, '4/4 SCENARIO B');
+
+    
+    console.log('\n[POST-SEED FIX] Backfilling vehicle_make from vehicle_model...');
+    await client.query(`
+      UPDATE vehicles
+      SET vehicle_make = CASE
+        WHEN vehicle_model ILIKE '%toyota%' OR vehicle_model ILIKE '%hilux%' OR vehicle_model ILIKE '%vios%'
+          OR vehicle_model ILIKE '%fortuner%' OR vehicle_model ILIKE '%innova%' OR vehicle_model ILIKE '%wigo%'
+          OR vehicle_model ILIKE '%avanza%' OR vehicle_model ILIKE '%rush%' OR vehicle_model ILIKE '%camry%'
+          OR vehicle_model ILIKE '%corolla%' OR vehicle_model ILIKE '%land cruiser%' OR vehicle_model ILIKE '%rav4%'
+          THEN 'Toyota'
+        WHEN vehicle_model ILIKE '%honda%' OR vehicle_model ILIKE '%civic%' OR vehicle_model ILIKE '%jazz%'
+          OR vehicle_model ILIKE '%city%' OR vehicle_model ILIKE '%brio%' OR vehicle_model ILIKE '%crv%'
+          OR vehicle_model ILIKE '%hrv%' OR vehicle_model ILIKE '%brv%' OR vehicle_model ILIKE '%mobilio%'
+          THEN 'Honda'
+        WHEN vehicle_model ILIKE '%mitsubishi%' OR vehicle_model ILIKE '%montero%' OR vehicle_model ILIKE '%strada%'
+          OR vehicle_model ILIKE '%mirage%' OR vehicle_model ILIKE '%outlander%' OR vehicle_model ILIKE '%xpander%'
+          OR vehicle_model ILIKE '%eclipse%' OR vehicle_model ILIKE '%adventure%'
+          THEN 'Mitsubishi'
+        WHEN vehicle_model ILIKE '%ford%' OR vehicle_model ILIKE '%ranger%' OR vehicle_model ILIKE '%everest%'
+          OR vehicle_model ILIKE '%explorer%' OR vehicle_model ILIKE '%ecosport%' OR vehicle_model ILIKE '%territory%'
+          THEN 'Ford'
+        WHEN vehicle_model ILIKE '%nissan%' OR vehicle_model ILIKE '%navara%' OR vehicle_model ILIKE '%terra%'
+          OR vehicle_model ILIKE '%almera%' OR vehicle_model ILIKE '%juke%' OR vehicle_model ILIKE '%x-trail%'
+          OR vehicle_model ILIKE '%patrol%' OR vehicle_model ILIKE '%nv350%'
+          THEN 'Nissan'
+        WHEN vehicle_model ILIKE '%hyundai%' OR vehicle_model ILIKE '%tucson%' OR vehicle_model ILIKE '%santa fe%'
+          OR vehicle_model ILIKE '%accent%' OR vehicle_model ILIKE '%reina%' OR vehicle_model ILIKE '%staria%'
+          OR vehicle_model ILIKE '%kona%' OR vehicle_model ILIKE '%creta%'
+          THEN 'Hyundai'
+        WHEN vehicle_model ILIKE '%kia%' OR vehicle_model ILIKE '%picanto%' OR vehicle_model ILIKE '%soluto%'
+          OR vehicle_model ILIKE '%sportage%' OR vehicle_model ILIKE '%carnival%' OR vehicle_model ILIKE '%seltos%'
+          OR vehicle_model ILIKE '%stinger%'
+          THEN 'Kia'
+        WHEN vehicle_model ILIKE '%suzuki%' OR vehicle_model ILIKE '%swift%' OR vehicle_model ILIKE '%jimny%'
+          OR vehicle_model ILIKE '%celerio%' OR vehicle_model ILIKE '%ertiga%' OR vehicle_model ILIKE '%xl7%'
+          OR vehicle_model ILIKE '%vitara%' OR vehicle_model ILIKE '%dzire%'
+          THEN 'Suzuki'
+        WHEN vehicle_model ILIKE '%isuzu%' OR vehicle_model ILIKE '%d-max%' OR vehicle_model ILIKE '%mu-x%'
+          OR vehicle_model ILIKE '%crosswind%' OR vehicle_model ILIKE '%sportivo%'
+          THEN 'Isuzu'
+        WHEN vehicle_model ILIKE '%mazda%' OR vehicle_model ILIKE '%cx-3%' OR vehicle_model ILIKE '%cx-5%'
+          OR vehicle_model ILIKE '%cx-8%' OR vehicle_model ILIKE '%bt-50%'
+          THEN 'Mazda'
+        WHEN vehicle_model ILIKE '%chevrolet%' OR vehicle_model ILIKE '%trailblazer%' OR vehicle_model ILIKE '%colorado%'
+          OR vehicle_model ILIKE '%spin%'
+          THEN 'Chevrolet'
+        WHEN vehicle_model ILIKE '%subaru%' OR vehicle_model ILIKE '%forester%' OR vehicle_model ILIKE '%outback%'
+          OR vehicle_model ILIKE '%wrx%' OR vehicle_model ILIKE '%brz%' OR vehicle_model ILIKE '%xv%'
+          THEN 'Subaru'
+        WHEN vehicle_model ILIKE '%geely%' OR vehicle_model ILIKE '%coolray%' OR vehicle_model ILIKE '%okavango%'
+          THEN 'Geely'
+        WHEN vehicle_model ILIKE '%mg%' OR vehicle_model ILIKE '%zs%' OR vehicle_model ILIKE '%hs%'
+          THEN 'MG'
+        ELSE 'Toyota'  -- sensible default for seeded data
+      END
+      WHERE vehicle_make IS NULL OR vehicle_make = '';
+    `);
+    console.log('[POST-SEED FIX] ✔ vehicle_make backfill done');
 
     console.log('\n[POST-SEED FIX] Anchoring job order costs to base prices realistically...');
     await client.query('SELECT setseed(0.42);');

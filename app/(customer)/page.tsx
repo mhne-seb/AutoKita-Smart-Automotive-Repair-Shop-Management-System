@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Wrench, Cog, Search, Clock, Zap, ShieldCheck, ChevronRight, Star } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { ChatWidget } from "@/components/dashboard/ChatWidget";
 const heroWorkshop = "/assets/hero-workshop.jpg"; 
 const heroEngine = "/assets/engine.jpg"; 
 const heroDiagnostic = "/assets/diagnostic.jpg"; 
@@ -218,6 +219,7 @@ function Home() {
       </section>
 
       <Footer />
+      <ChatWidget />
     </div>
   );
 }

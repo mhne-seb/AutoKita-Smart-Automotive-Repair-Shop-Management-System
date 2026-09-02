@@ -1,7 +1,8 @@
 'use client'
 
-// hard coded
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { X, Maximize2, MoreVertical, Paperclip, Send, ShieldCheck, Clock, Calendar, HelpCircle, Wrench, Bot } from "lucide-react";
 import { Logo } from "@/components/site/Logo";
 
@@ -34,6 +35,9 @@ export function ChatWidget() {
   const [expanded, setExpanded] = useState(false);
   const [messages, setMessages] = useState<Msg[]>(INITIAL);
   const [input, setInput] = useState("");
+  const [waiting, setWaiting] = useState(false);
+  // Multi-turn conversation history sent to the API
+  const conversationHistory = useRef<{ role: 'user' | 'assistant'; content: string }[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -47,21 +51,55 @@ export function ChatWidget() {
 
   function send() {
     const t = input.trim();
-    if (!t) return;
+    if (!t || waiting) return;
     const now = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     setMessages((m) => [...m, { id: crypto.randomUUID(), role: "user", text: t, time: now }]);
     setInput("");
-    setTimeout(() => {
-      setMessages((m) => [
-        ...m,
-        {
-          id: crypto.randomUUID(),
-          role: "bot",
-          text: "Thanks! I'll look into that. In the meantime, you can track your active service or book a new appointment using the quick actions below.",
-          time: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
-        },
-      ]);
-    }, 700);
+    setWaiting(true);
+
+    conversationHistory.current = [
+      ...conversationHistory.current,
+      { role: 'user', content: t },
+    ];
+
+    fetch('/api/chat/customer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: conversationHistory.current }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        const reply: string = res.ok
+          ? (data.reply ?? '')
+          : (data.error ?? 'Something went wrong. Please try again.');
+        if (res.ok) {
+          conversationHistory.current = [
+            ...conversationHistory.current,
+            { role: 'assistant', content: reply },
+          ];
+        }
+        setMessages((m) => [
+          ...m,
+          {
+            id: crypto.randomUUID(),
+            role: 'bot',
+            text: reply,
+            time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+          },
+        ]);
+      })
+      .catch(() => {
+        setMessages((m) => [
+          ...m,
+          {
+            id: crypto.randomUUID(),
+            role: 'bot',
+            text: 'Network error. Please check your connection and try again.',
+            time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+          },
+        ]);
+      })
+      .finally(() => setWaiting(false));
   }
 
   return (
@@ -107,6 +145,18 @@ export function ChatWidget() {
               {messages.map((m) => (
                 <MessageBubble key={m.id} msg={m} />
               ))}
+              {waiting && (
+                <div className="flex gap-2">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
+                    <Bot className="h-4 w-4" />
+                  </div>
+                  <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm border bg-card px-4 py-2.5">
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Quick actions */}
@@ -157,7 +207,12 @@ function MessageBubble({ msg }: { msg: Msg }) {
     <div className="flex gap-2">
       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand"><Bot className="h-4 w-4" /></div>
       <div className="flex max-w-[80%] flex-col">
-        <div className="rounded-2xl rounded-tl-sm bg-card border px-4 py-2.5 text-sm">{msg.text}</div>
+        <div className="rounded-2xl rounded-tl-sm bg-card border px-4 py-2.5 text-sm prose prose-sm max-w-none
+          [&_strong]:font-semibold [&_ul]:my-1 [&_ul]:pl-4 [&_li]:my-0
+          [&_p]:my-1 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0
+          [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text ?? ''}</ReactMarkdown>
+        </div>
         {msg.card && <StatusCard />}
         <span className="mt-1 text-[10px] text-muted-foreground">{msg.time}</span>
       </div>

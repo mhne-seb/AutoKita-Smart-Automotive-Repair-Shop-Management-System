@@ -8,12 +8,19 @@ import numpy as np
 
 # Suppress sklearn's valid feature names warnings when predicting with numpy arrays
 warnings.filterwarnings("ignore", message="X does not have valid feature names")
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from waitress import serve
+from fastapi import FastAPI, Body
+from fastapi.middleware.cors import CORSMiddleware
+from typing import Union, List, Dict, Any
+import uvicorn
 
-app = Flask(__name__)
-CORS(app)
+app = FastAPI(title="AutoKita ML Predict API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Loading
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -39,12 +46,11 @@ def encode_vehicle_type(vtype):
         return int(veh_encoder.transform([vtype])[0])
     return int(veh_encoder.transform([veh_encoder.classes_[0]])[0])
 
-@app.route('/predict/time', methods=['POST'])
-def predict_time():
+@app.post('/predict/time')
+def predict_time(data: Union[Dict[str, Any], List[Dict[str, Any]]] = Body(...)):
     """
     Predict actual service duration in minutes.
     """
-    data = request.json
     if isinstance(data, dict):
         data = [data]
 
@@ -88,16 +94,15 @@ def predict_time():
             results.append({'predicted_duration_mins': round(predicted_mins, 2), 'time_ratio': round(time_ratio, 4)})
 
     if len(results) == 1:
-        return jsonify(results[0])
-    return jsonify(results)
+        return results[0]
+    return results
 
 
-@app.route('/predict/cost', methods=['POST'])
-def predict_cost():
+@app.post('/predict/cost')
+def predict_cost(data: Union[Dict[str, Any], List[Dict[str, Any]]] = Body(...)):
     """
     Predict labor cost AND time in a 2-stage pipeline.
     """
-    data = request.json
     if isinstance(data, dict):
         data = [data]
 
@@ -167,16 +172,15 @@ def predict_cost():
             })
 
     if len(results) == 1:
-        return jsonify(results[0])
-    return jsonify(results)
+        return results[0]
+    return results
 
 
-@app.route('/predict/churn', methods=['POST'])
-def predict_churn():
+@app.post('/predict/churn')
+def predict_churn(data: Union[Dict[str, Any], List[Dict[str, Any]]] = Body(...)):
     """
     Classify churn risk for customers.
     """
-    data = request.json
     if not isinstance(data, list):
         data = [data]
 
@@ -214,16 +218,16 @@ def predict_churn():
                 'churn_probability': round(churn_prob, 4),
             })
 
-    return jsonify(results)
+    return results
 
 
-@app.route('/health', methods=['GET'])
+@app.get('/health')
 def health():
-    return jsonify({'status': 'ok', 'models_loaded': True})
+    return {'status': 'ok', 'models_loaded': True}
 
 
 if __name__ == '__main__':
     print("ML Prediction Server starting on http://localhost:5001")
     print(f"   Models loaded from: {EXPORTED}")
     print(f"   Known vehicle types: {sorted(KNOWN_TYPES)}")
-    serve(app, host='0.0.0.0', port=5001, threads=8)
+    uvicorn.run(app, host='0.0.0.0', port=5001)

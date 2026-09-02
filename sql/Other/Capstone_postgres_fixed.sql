@@ -175,6 +175,7 @@ CREATE TABLE "vehicles" (
   "user_id" int,
   "vin" char(17) UNIQUE,
   "plate_number" varchar(10) UNIQUE,
+  "vehicle_make" varchar(40),
   "vehicle_model" varchar(40),
   "vehicle_year" int,
   "mileage" decimal(10,2),

@@ -69,7 +69,11 @@ function InProgress() {
   // "Pull Out Vehicle" action no longer makes sense and must stay disabled.
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
 
-  const [aiTime, setAiTime] = useState<{ predicted_hours: number; predicted_duration_mins: number } | null>(null);
+  const [aiTime, setAiTime] = useState<{
+    predicted_hours: number;
+    predicted_duration_mins: number;
+    services?: { service_name: string; predicted_duration_mins: number }[];
+  } | null>(null);
 
   useEffect(() => {
     if (!jobOrder) return;

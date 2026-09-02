@@ -1,20 +1,33 @@
 
 node seed_db.js
 
-node seed_db.js --scenario-a
-
-node seed_db.js --scenario-b
+npx tsx scripts/seed_parts_catalog.ts (Always do this after node seed_db.js)
 
 cd models
 .\run_export.ps1
 
-.\run_server.ps1
+.\models\run_server.ps1
 
 npm install
+
+npm install openai
+
+npm install @pinecone-database/pinecone
+
+npm install react-markdown
+
+npm install remark-gfm
+
+npm install axios cheerio
+
+npm install -D @types/cheerio
+
 
 .\setup_ml.ps1
 
 .\retrain_ml.ps1
+
+http://localhost:5001/docs
 
 job_orders: (For R programming checking)
 Maria- low - GED-7926 - Maria Ang
@@ -31,3 +44,27 @@ password123_u200
 Employees:
 owner@autokita.com
 password123_e1
+
+Scraping guide:
+1st:
+cd Chatbot
+pip install playwright beautifulsoup4 -> Setup
+python -m playwright install chromium -> Setup
+
+2nd:
+python scrape_partsouq.py "URL" --all-categories 
+--outdir "../src/data/automotive_knowledge"
+
+# or just a single category 
+python scrape_partsouq.py "URL" --outdir 
+"../src/data/automotive_knowledge"
+
+
+C:\Users\Snow\AppData\Local\Programs\Python\Python313\python.exe scrape_partsouq.py "https://partsouq.com/en/catalog/toyota/vehicle/GENERAL/2011/HILUX/KUN15R-TRMDYT/catalog/672370/category/1" --all-categories --outdir "../src/data/automotive_knowledge"
+
+
+3rd:
+npx tsx scripts/ingest_knowledge.ts
+
+JO #1883 (Toyota Vios 2011, Plate: VIO-2011)
+JO #1884 (Toyota Hilux 2011, Plate: HIL-2011)

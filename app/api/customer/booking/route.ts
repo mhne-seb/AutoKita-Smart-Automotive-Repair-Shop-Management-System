@@ -24,19 +24,20 @@ export async function POST(req: NextRequest) {
 
     // Insert new vehicle if necessary
     if (newVehicleDetails) {
-      const { model, year, plate, type, mileage } = newVehicleDetails
+      const { make, model, year, plate, type, mileage } = newVehicleDetails
       // Ensure plate is provided
       if (!plate) {
         return NextResponse.json({ success: false, message: 'License plate is required for new vehicles' }, { status: 400 })
       }
       
       const insertQuery = `
-        INSERT INTO vehicles (user_id, vehicle_model, vehicle_year, plate_number, vehicle_type, mileage)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO vehicles (user_id, vehicle_make, vehicle_model, vehicle_year, plate_number, vehicle_type, mileage)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING id
       `
       const vehicleResult = await db.query(insertQuery, [
         userId,
+        make || null,
         model || 'Unknown',
         parseInt(year) || 2026,
         plate,
