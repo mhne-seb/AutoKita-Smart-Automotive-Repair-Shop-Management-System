@@ -110,6 +110,11 @@ const CATEGORIES = [
   "Oil Change", "Brake Service", "Engine Diagnostics", "Tire Replacement",
   "Aircon Repair", "General Maintenance", "Car Wash & Detailing",
 ];
+const VEHICLE_MAKES = [
+  "Toyota", "Honda", "Mitsubishi", "Ford", "Nissan", "Hyundai", "Kia",
+  "Suzuki", "Isuzu", "Mazda", "Chevrolet", "Subaru", "Volkswagen",
+  "BMW", "Mercedes-Benz", "Peugeot", "Geely", "Chery", "MG",
+];
 
 /* --- date helpers (real-time, based on the user's current device clock) --- */
 
@@ -195,6 +200,7 @@ type Form = {
   province: string; provinceOther: string;
   city: string; cityOther: string;
   barangay: string; barangayOther: string;
+  make: string; makeOther: string;
   model: string;
   year: string; yearOther: string;
   transmission: string; transmissionOther: string;
@@ -220,6 +226,7 @@ function isStepValid(step: number, f: Form): boolean {
       );
     case 2:
       return (
+        isSelectValid(f.make, f.makeOther) &&
         isFilled(f.model) &&
         isSelectValid(f.year, f.yearOther) &&
         isSelectValid(f.transmission, f.transmissionOther) &&
@@ -252,6 +259,7 @@ function BookPage() {
     province: "", provinceOther: "",
     city: "", cityOther: "",
     barangay: "", barangayOther: "",
+    make: "", makeOther: "",
     model: "",
     year: "", yearOther: "",
     transmission: "", transmissionOther: "",
@@ -478,9 +486,16 @@ function BookPage() {
             <>
               <Section icon={Car} title="Vehicle Details" subtitle="Help our team prepare the right tools.">
                 <div className="grid gap-4 md:grid-cols-2">
+                  <SelectField
+                    icon={Car} label="Vehicle Make (Brand)" required value={f.make}
+                    onChange={(v) => set("make", v)} options={VEHICLE_MAKES}
+                    placeholder="Select brand"
+                    otherValue={f.makeOther} onOtherChange={(v) => set("makeOther", v)}
+                    error={showError && !isSelectValid(f.make, f.makeOther) ? "Vehicle make is required" : undefined}
+                  />
                   <IField
                     icon={Car} label="Vehicle Model" required value={f.model} onChange={(v) => set("model", v)}
-                    placeholder="e.g., Toyota Camry 2022"
+                    placeholder="e.g., Vios, Civic, Montero"
                     error={showError && !isFilled(f.model) ? "Vehicle model is required" : undefined}
                   />
                   <SelectField
@@ -868,6 +883,7 @@ function ReviewGrid({ f, compact }: { f: Form; compact?: boolean }) {
   const province = f.province === OTHERS ? f.provinceOther : f.province;
   const city = f.city === OTHERS ? f.cityOther : f.city;
   const barangay = f.barangay === OTHERS ? f.barangayOther : f.barangay;
+  const make = f.make === OTHERS ? f.makeOther : f.make;
   const year = f.year === OTHERS ? f.yearOther : f.year;
   const transmission = f.transmission === OTHERS ? f.transmissionOther : f.transmission;
   const category = f.category === OTHERS ? f.categoryOther : f.category;
@@ -878,7 +894,7 @@ function ReviewGrid({ f, compact }: { f: Form; compact?: boolean }) {
     [Phone, "Contact", f.phone || "—"],
     [Mail, "Email", f.email || "—"],
     [MapPin, "Location", [barangay, city, province].filter(Boolean).join(", ") || "—"],
-    [Car, "Vehicle", [f.model, year].filter(Boolean).join(" · ") || "—"],
+    [Car, "Vehicle", [make, f.model, year].filter(Boolean).join(" ") || "—"],
     [Settings2Icon, "Transmission", transmission || "—"],
     [Hash, "License Plate", f.plate || "—"],
     [Wrench, "Service", category || "—"],

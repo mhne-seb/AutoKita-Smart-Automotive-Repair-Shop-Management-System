@@ -20,6 +20,7 @@ function RegisterVehicle() {
   
   // Form state
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>("new");
+  const [vehicleMake, setVehicleMake] = useState("");
   const [vehicleModel, setVehicleModel] = useState("");
   const [vehicleYear, setVehicleYear] = useState("");
   const [vehicleTransmission, setVehicleTransmission] = useState("");
@@ -78,6 +79,7 @@ function RegisterVehicle() {
         return;
       }
       reqBody.newVehicleDetails = {
+        make: vehicleMake || null,
         model: vehicleModel,
         year: vehicleYear || new Date().getFullYear().toString(),
         type: vehicleTransmission || "Sedan",
@@ -175,7 +177,8 @@ function RegisterVehicle() {
               <>
                 <div className="mb-4 h-px bg-border" />
                 <div className="grid gap-3 md:grid-cols-2">
-                  <F label="Vehicle Model" placeholder="e.g., Toyota Camry 2022" value={vehicleModel} onChange={(e) => setVehicleModel(e.target.value)} />
+                  <S label="Vehicle Make (Brand)" placeholder="Select Brand" value={vehicleMake} onChange={(e) => setVehicleMake(e.target.value)} options={["Toyota", "Honda", "Mitsubishi", "Ford", "Nissan", "Hyundai", "Kia", "Suzuki", "Isuzu", "Mazda", "Chevrolet", "Subaru", "Volkswagen", "BMW", "Mercedes-Benz", "Peugeot", "Geely", "Chery", "MG"]} />
+                  <F label="Vehicle Model" placeholder="e.g., Vios, Civic, Montero" value={vehicleModel} onChange={(e) => setVehicleModel(e.target.value)} />
                   <S label="Year" placeholder="Select Year" value={vehicleYear} onChange={(e) => setVehicleYear(e.target.value)} options={["2025", "2024", "2023", "2022", "2021", "2020", "2019"]} />
                   <S label="Transmission" placeholder="Select Transmission" value={vehicleTransmission} onChange={(e) => setVehicleTransmission(e.target.value)} options={["Automatic", "Manual"]} />
                   <F label="Mileage" placeholder="e.g., 50000" type="number" value={vehicleMileage} onChange={(e) => setVehicleMileage(e.target.value)} />

@@ -5413,3 +5413,9 @@ SELECT setval('service_tickets_id_seq', (SELECT MAX(id) FROM service_tickets));
 SELECT setval('job_orders_id_seq', (SELECT MAX(id) FROM job_orders));
 SELECT setval('job_order_services_id_seq', (SELECT MAX(id) FROM job_order_services));
 SELECT setval('service_progress_tasks_id_seq', (SELECT MAX(id) FROM service_progress_tasks));
+
+-- ─── Migration: Add vehicle_make to vehicles table ───────────────────────────
+-- Required by the Admin AI bot's get_vehicle_info tool so it can filter by
+-- car brand (e.g. "all Toyota vehicles this month").
+-- Run this once against your database. Safe to re-run (IF NOT EXISTS guard).
+ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS vehicle_make varchar(40);

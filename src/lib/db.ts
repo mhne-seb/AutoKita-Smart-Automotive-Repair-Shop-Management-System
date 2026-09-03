@@ -1,6 +1,7 @@
 // src/lib/db.ts
 import { Pool } from 'pg';
 import fs from 'fs';
+import path from 'path';
 
 export const db = new Pool({
   host: process.env.DB_HOST,
@@ -10,7 +11,7 @@ export const db = new Pool({
   port: parseInt(process.env.DB_PORT || '5432', 10),
   ssl: {
     rejectUnauthorized: true,
-    ca: fs.readFileSync('certs/prod-ca-2021.crt').toString(),
+    ca: fs.readFileSync(path.join(process.cwd(), 'certs', 'prod-ca-2021.crt')).toString(),
   }
 });
 
