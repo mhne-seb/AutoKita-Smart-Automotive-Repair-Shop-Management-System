@@ -68,3 +68,9 @@ const pool = new Pool({
     ca: fs.readFileSync('certs/prod-ca-2021.crt').toString(),
   },
 });
+
+
+node seed_db.js
+.\setup_ml.ps1
+.\retrain_ml.ps1
+
