@@ -1,5 +1,6 @@
 'use client'
 
+import { uid } from '@/lib/utils'
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -53,7 +54,7 @@ export function ChatWidget() {
     const t = input.trim();
     if (!t || waiting) return;
     const now = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-    setMessages((m) => [...m, { id: crypto.randomUUID(), role: "user", text: t, time: now }]);
+    setMessages((m) => [...m, { id: uid(), role: "user", text: t, time: now }]);
     setInput("");
     setWaiting(true);
 
@@ -81,7 +82,7 @@ export function ChatWidget() {
         setMessages((m) => [
           ...m,
           {
-            id: crypto.randomUUID(),
+            id: uid(),
             role: 'bot',
             text: reply,
             time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
@@ -92,7 +93,7 @@ export function ChatWidget() {
         setMessages((m) => [
           ...m,
           {
-            id: crypto.randomUUID(),
+            id: uid(),
             role: 'bot',
             text: 'Network error. Please check your connection and try again.',
             time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
