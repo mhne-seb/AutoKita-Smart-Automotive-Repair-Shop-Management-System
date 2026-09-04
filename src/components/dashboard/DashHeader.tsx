@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Calendar, History, ShieldCheck, Bell, User, LogOut, Settings, X } from "lucide-react";
+import { Calendar, History, ShieldCheck, User, LogOut, Settings, X } from "lucide-react";
 import { Logo } from "@/components/site/Logo";
 import { useScrolled } from "@/hooks/use-scrolled";
+import { NotificationBell, type NotificationItem } from '@/components/NotificationBell'
 
 const TABS = [
   { to: "/dashboard", label: "Book Service", icon: Calendar },
@@ -13,55 +14,27 @@ const TABS = [
   { to: "/dashboard/history", label: "History", icon: History },
 ] as const;
 
-const NOTIFICATIONS = [
-  {
-    id: 1,
-    title: "Service reminder",
-    message: "Your next PMS is due in 3 days.",
-    time: "2h ago",
-    unread: true,
-  },
-  {
-    id: 2,
-    title: "Warranty update",
-    message: "Your extended warranty has been approved.",
-    time: "1d ago",
-    unread: true,
-  },
-  {
-    id: 3,
-    title: "Booking confirmed",
-    message: "Your service appointment on July 8 is confirmed.",
-    time: "3d ago",
-    unread: false,
-  },
-];
+const NOTIFICATIONS: NotificationItem[] = [
+ { key: 'svc-reminder-1', title: 'Service reminder', message: 'Your next PMS is due in 3 days.', time: '2h ago' },
+  { key: 'warranty-1', title: 'Warranty update', message: 'Your extended warranty has been approved.', time: '1d ago' },
+  { key: 'booking-1', title: 'Booking confirmed', message: 'Your service appointment on July 8 is confirmed.', time: '3d ago' },
+]
 
 export function DashHeader() {
   const pathname = usePathname();
   const scrolled = useScrolled(20);
-  const [open, setOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
+   const [open, setOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
-  const [notifications, setNotifications] = useState(NOTIFICATIONS);
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
-  const notifRef = useRef<HTMLDivElement>(null);
-
-  const unreadCount = notifications.filter((n) => n.unread).length;
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
     }
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
-
-  function markAllRead() {
-    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
-  }
 
   function confirmLogout() {
     setLogoutConfirmOpen(false);
@@ -73,9 +46,8 @@ export function DashHeader() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass-nav ${
-          scrolled ? "glass-nav-scrolled" : ""
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass-nav ${scrolled ? "glass-nav-scrolled" : ""
+          }`}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link href="/dashboard"><Logo /></Link>
@@ -86,11 +58,10 @@ export function DashHeader() {
                 <Link
                   key={t.to}
                   href={t.to}
-                  className={`flex items-center gap-1.5 border-b-2 px-3 py-1.5 text-sm transition-colors ${
-                    active
+                  className={`flex items-center gap-1.5 border-b-2 px-3 py-1.5 text-sm transition-colors ${active
                       ? "border-brand font-semibold text-foreground"
                       : "border-transparent text-muted-foreground hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   <t.icon className="h-4 w-4" />
                   {t.label}
@@ -99,64 +70,7 @@ export function DashHeader() {
             })}
           </nav>
           <div className="flex items-center gap-3">
-            <div ref={notifRef} className="relative">
-              <button
-                onClick={() => setNotifOpen((v) => !v)}
-                className="relative rounded-md p-2 hover:bg-accent"
-              >
-                <Bell className="h-4 w-4" />
-                {unreadCount > 0 && (
-                  <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive" />
-                )}
-              </button>
-              {notifOpen && (
-                <div className="animate-fade-up absolute right-0 mt-2 w-80 origin-top-right overflow-hidden rounded-lg border bg-card shadow-xl">
-                  <div className="flex items-center justify-between border-b px-4 py-3">
-                    <span className="text-sm font-semibold">Notifications</span>
-                    {unreadCount > 0 && (
-                      <button
-                        onClick={markAllRead}
-                        className="text-xs text-brand hover:underline"
-                      >
-                        Mark all as read
-                      </button>
-                    )}
-                  </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-                        No notifications
-                      </div>
-                    ) : (
-                      notifications.map((n) => (
-                        <button
-                          key={n.id}
-                          onClick={() =>
-                            setNotifications((prev) =>
-                              prev.map((item) =>
-                                item.id === n.id ? { ...item, unread: false } : item
-                              )
-                            )
-                          }
-                          className={`flex w-full flex-col gap-0.5 border-b px-4 py-3 text-left last:border-b-0 hover:bg-accent ${
-                            n.unread ? "bg-accent/40" : ""
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            {n.unread && (
-                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-destructive" />
-                            )}
-                            <span className="text-sm font-medium">{n.title}</span>
-                          </div>
-                          <span className="text-xs text-muted-foreground">{n.message}</span>
-                          <span className="text-[11px] text-muted-foreground">{n.time}</span>
-                        </button>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            <NotificationBell notifications={NOTIFICATIONS} storageKey="autokita-customer-notifs" />
             <div ref={ref} className="relative">
               <button
                 onClick={() => setOpen((v) => !v)}
