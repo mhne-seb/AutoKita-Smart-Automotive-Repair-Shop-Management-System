@@ -31,7 +31,6 @@ import {
 import { TopBar } from '@/components/TopBar'
 import { StatCard } from '@/components/StatCard'
 import { StatusBadge } from '@/components/StatusBadge'
-import { getCustomers, updateCustomerStatus } from '@/controllers/customerController'
 import { getJobOrders } from '@/controllers/jobOrderController'
 import { JobOrderCard } from '@/data/types'
 import { getRevenueTrend, getServiceMix } from '@/controllers/reportController'
@@ -114,23 +113,15 @@ export default function page() {
 
   const [openRowMenu, setOpenRowMenu] = useState<string | null>(null)
 
-  const handleRowAction = async (action: string, customerId: string) => {
+  const handleRowAction = async (action: string, jobOrderId: string) => {
     setOpenRowMenu(null)
 
     if (action === 'View Details') {
-      router.push(`/job-orders?customerId=${encodeURIComponent(customerId)}`)
+      router.push(`/job-orders?customerId=${encodeURIComponent(jobOrderId)}`)
       return
     }
     if (action === 'Edit') {
-      const customer = customers.find((c) => c.customerId === customerId)
-      if (customer) router.push(`/job-orders/${customer.jobOrderId}`)
-      return
-    }
-    // "Mark Complete" / "Cancel Order" write through the controller (
-    const nextStatus = action === 'Mark Complete' ? 'Completed' : 'Cancelled'
-    const updated = await updateCustomerStatus(customerId, nextStatus)
-    if (updated) {
-      setCustomers((prev) => prev.map((c) => (c.customerId === customerId ? { ...c, status: nextStatus } : c)))
+      router.push(`/job-orders/${jobOrderId}`)
     }
   }
 
