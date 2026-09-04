@@ -7,7 +7,6 @@ import { ArrowLeft, FileText, ShieldCheck, Plus, Pencil, Trash2, RefreshCw, Send
 import { currency } from '@/data/mockData'
 import { getWorkOrderTemplate } from '@/controllers/jobOrderController'
 import type { ServiceLine, PartLine } from '@/data/jobOrderWorkOrder'
-import { AdminNotificationBell } from '@/components/AdminNotificationBell'
 
 const SERVICE_PRESETS_FALLBACK = ['Others', 'Oil Change', 'Brake Service']
 
@@ -325,7 +324,7 @@ export default function page() {
               className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-3 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
               disabled={updateSent}
             >
-              <RefreshCw size={15} /> {updateSent ? 'Customer Notified' : 'Update Customer of Changes'} <AdminNotificationBell />
+              <RefreshCw size={15} /> {updateSent ? 'Customer Notified' : 'Update Customer of Changes'}
             </button>
             <p className="mt-2 text-xs text-slate-400">
               Notifies customer to confirm pending additional parts &amp; services
