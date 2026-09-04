@@ -1,5 +1,6 @@
 'use client'
 
+import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from "next/link";
 import { Camera, Plus, Pencil, Trash2, Check, X, Cloud, Clock, ChevronRight, CheckCircle2 } from 'lucide-react'
@@ -10,11 +11,8 @@ import { getInspectionById, addInspectionFinding, updateInspectionFinding, delet
 import { getLatestPreDiagnostic, sendForApproval, type PreDiagnosticRound } from '@/controllers/preDiagnosticController'
 import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData } from '@/data/types'
 
-interface Props {
-  jobOrderId: string
-}
-
-export default function page({ jobOrderId }: Props) {
+export default function page() {
+  const jobOrderId = String(useParams().id)
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)
 
   // Inspection data now comes from the real database, which is an async

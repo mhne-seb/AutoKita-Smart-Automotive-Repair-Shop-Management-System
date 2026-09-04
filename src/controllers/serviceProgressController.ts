@@ -61,10 +61,15 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
 
   // Group raw rows by section
   const sectionMap = new Map<string, ServiceTask[]>()
+  const seenTaskIds = new Set<string>()
   for (const row of rows) {
+    const taskId = String(row.id)
+    if (seenTaskIds.has(taskId)) continue // guard against JOIN fan-out in the progress query
+    seenTaskIds.add(taskId)
+
     const sectionId = SECTION_ID_MAP[row.section_id] ?? row.section_id
     const task: ServiceTask = {
-      id: String(row.id),
+      id: taskId,
       title: row.task_title,
       note: row.note ?? '',
       time: formatTaskTime(row.completed_at),

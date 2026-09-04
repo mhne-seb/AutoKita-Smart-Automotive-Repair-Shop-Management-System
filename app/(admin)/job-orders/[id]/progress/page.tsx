@@ -1,6 +1,7 @@
 'use client'
 
 // Admin "Service Progress" page — the final step of the job-order workflow. Shows a section-by-section task checklist; once every task is marked done the job order is written back to "completed" (see jobOrderController.advanceJobOrderStage).
+import { useParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import { Check, ListChecks, CalendarDays, Clock, X } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
@@ -11,10 +12,6 @@ import { getServiceProgressById, scheduleTask } from '@/controllers/serviceProgr
 import { currency } from '@/data/mockData'
 import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask } from '@/data/types'
 
-interface Props {
-  jobOrderId: string
-}
-
 const sectionColors: Record<string, string> = {
   received: 'text-emerald-600',
   inspecting: 'text-emerald-600',
@@ -23,7 +20,8 @@ const sectionColors: Record<string, string> = {
   complete: 'text-slate-500',
 }
 
-export default function page({ jobOrderId }: Props) {
+export default function page() {
+  const jobOrderId = String(useParams().id)
   // Loaded through the controller (mock API) — see jobOrderController.ts.
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)
 
