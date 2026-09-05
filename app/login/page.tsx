@@ -1,17 +1,22 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Mail, Lock, Eye, ArrowRight, ArrowLeft, X, KeyRound, CheckCircle2 } from 'lucide-react'
+import {
+  Mail, Lock, Eye, EyeOff, ArrowRight, X, KeyRound,
+  CheckCircle2, Loader2, AlertCircle,
+} from 'lucide-react'
 import { Logo } from '@/components/site/Logo'
+import { Header } from '@/components/site/Header'
 import { login, startSession } from '@/controllers/authController'
 
 const loginBg = '/assets/login-workshop.jpg' // static asset path
 
-//   - role "customer" -> /dashboard
-//   - role "admin"    -> /overview
-// No separate "Admin Login" page/route exists anymore
+const demoAccounts = [
+  { label: 'Customer', email: 'customer200@example.com', password: 'password123_u200' },
+  { label: 'Admin', email: 'owner@autokita.com', password: 'password123_e1' },
+]
 
 function LoginPage() {
   useEffect(() => {
@@ -21,6 +26,7 @@ function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('customer@autocare.com')
   const [password, setPassword] = useState('password')
+  const [showPassword, setShowPassword] = useState(false)
   const [remember, setRemember] = useState(true)
   const [forgot, setForgot] = useState(false)
   const [error, setError] = useState('')
@@ -40,42 +46,52 @@ function LoginPage() {
       return
     }
 
-    // Automatically detect the account's role and route to the right dashboard.
     startSession(result.role, result.user!.id)
     router.push(result.role === 'customer' ? '/dashboard' : '/overview')
   }
 
-  return (
-    <div className="min-h-screen bg-background lg:grid lg:grid-cols-2">
-      <section className="relative hidden overflow-hidden lg:block">
-        <img src={loginBg} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-brand/75" />
-        <div className="relative flex h-full flex-col justify-between p-12 text-white">
-          <div className="h-8 w-8 rounded-full bg-white/10" />
-          <div>
-            <h1 className="text-5xl font-bold leading-tight">
-              Precision Management for <span className="text-brand-soft/80">Modern Automotive</span> Care.
-            </h1>
-            <p className="mt-6 max-w-md text-sm text-white/80">
-              One login for everyone — customers track their vehicle, admins run the shop. We detect
-              your role automatically and take you to the right dashboard.
-            </p>
-          </div>
-          <div className="flex gap-10 border-t border-white/20 pt-6">
-            <div><div className="text-2xl font-bold">99.9%</div><div className="text-xs uppercase tracking-wide text-white/70">Uptime</div></div>
-            <div><div className="text-2xl font-bold">256-bit</div><div className="text-xs uppercase tracking-wide text-white/70">Encryption</div></div>
-            <div><div className="text-2xl font-bold">ISO 27001</div><div className="text-xs uppercase tracking-wide text-white/70">Certified</div></div>
-          </div>
-        </div>
-      </section>
+  const fillDemo = (acc: (typeof demoAccounts)[number]) => {
+    setEmail(acc.email)
+    setPassword(acc.password)
+    setError('')
+  }
 
-      <section className="flex min-h-screen flex-col justify-between bg-background px-6 py-8">
-        <div className="flex justify-center"><Link href="/"><Logo /></Link></div>
-        <div className="mx-auto w-full max-w-sm">
-          <div className="rounded-xl border bg-card p-8 shadow-sm">
-            <h2 className="text-center text-2xl font-bold">Log in</h2>
+  return (
+    <div className="relative min-h-screen overflow-y-auto">
+      <style>{`
+        @keyframes shakeX {
+          10%, 90% { transform: translateX(-1px); }
+          20%, 80% { transform: translateX(2px); }
+          30%, 50%, 70% { transform: translateX(-4px); }
+          40%, 60% { transform: translateX(4px); }
+        }
+      `}</style>
+
+      <img
+        src={loginBg}
+        alt=""
+        className="fixed inset-0 h-full w-full scale-105 object-cover transition-transform duration-[4000ms] ease-out"
+      />
+      <div className="fixed inset-0 bg-gradient-to-b from-brand/55 via-brand/45 to-brand/65" />
+      <div className="pointer-events-none fixed -right-32 -top-32 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
+      <div className="pointer-events-none fixed -bottom-24 -left-24 h-96 w-96 rounded-full bg-teal/20 blur-3xl" />
+
+      <Header variant="transparent" />
+
+      <div className="relative z-10 flex min-h-[calc(100vh-4rem)] flex-col items-center justify-start px-6 pt-16 pb-10">
+        <div className="w-full max-w-sm animate-fade-up" style={{ animationDelay: '0.1s' }}>
+          <div
+            className={`rounded-xl border border-white/10 bg-card/95 p-8 shadow-2xl transition-all duration-300 ${
+              forgot ? 'blur-[2px] scale-[0.98]' : 'hover:shadow-[0_0_60px_rgba(0,0,0,0.25)]'
+            }`}
+          >
+            <div className="mb-5 flex justify-center">
+              <Logo />
+            </div>
+
+            <h2 className="text-center text-2xl font-bold">Welcome Back!</h2>
             <p className="mt-2 text-center text-sm text-muted-foreground">
-              Enter your credentials
+              Sign in to track your vehicle's service
             </p>
             <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
               <div>
@@ -85,8 +101,8 @@ function LoginPage() {
                   <input
                     type="text"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm focus:border-brand focus:outline-none"
+                    onChange={(e) => { setEmail(e.target.value); if (error) setError('') }}
+                    className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
                   />
                 </div>
               </div>
@@ -95,12 +111,19 @@ function LoginPage() {
                 <div className="mt-1.5 relative">
                   <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-md border bg-background py-2 pl-9 pr-9 text-sm focus:border-brand focus:outline-none"
+                    onChange={(e) => { setPassword(e.target.value); if (error) setError('') }}
+                    className="w-full rounded-md border bg-background py-2 pl-9 pr-9 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
                   />
-                  <Eye className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
               </div>
               <div className="flex items-center justify-between text-sm">
@@ -113,44 +136,67 @@ function LoginPage() {
                   />
                   Remember me
                 </label>
-                <button type="button" onClick={() => setForgot(true)} className="text-brand hover:underline">
+                <button type="button" onClick={() => setForgot(true)} className="text-brand transition-colors hover:underline">
                   Forgot password?
                 </button>
               </div>
 
               {error && (
-                <p className="rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p>
+                <p
+                  className="flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive"
+                  style={{ animation: 'shakeX 0.4s ease-in-out' }}
+                >
+                  <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                  {error}
+                </p>
               )}
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
               >
-                {submitting ? 'Signing in…' : 'Sign In'} <ArrowRight className="h-4 w-4" />
+                {submitting ? (
+                  <>Signing in… <Loader2 className="h-4 w-4 animate-spin" /></>
+                ) : (
+                  <>Sign In <ArrowRight className="h-4 w-4" /></>
+                )}
               </button>
             </form>
 
-            {/* Demo credential hint — this is mock data, safe to show for the capstone demo. */}
-            <div className="mt-4 rounded-md border border-dashed bg-muted/40 p-3 text-[11px] leading-relaxed text-muted-foreground">
-              <p className="font-semibold text-foreground">Demo accounts</p>
-              <p>Customer: customer200@example.com / password123_u200</p>
-              <p>Admin: owner@autokita.com / password123_e1</p>
+            <div className="my-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              <span className="h-px flex-1 bg-border" /> Quick Demo Access <span className="h-px flex-1 bg-border" />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {demoAccounts.map((acc) => (
+                <button
+                  key={acc.label}
+                  type="button"
+                  onClick={() => fillDemo(acc)}
+                  className="flex items-center justify-between rounded-md border bg-muted/30 px-3 py-2 text-left text-xs transition-colors hover:border-brand/30 hover:bg-brand-soft"
+                >
+                  <span className="text-muted-foreground">
+                    <span className="font-semibold text-foreground">{acc.label}</span> — {acc.email}
+                  </span>
+                  <ArrowRight className="h-3 w-3 flex-shrink-0 text-brand" />
+                </button>
+              ))}
             </div>
           </div>
-          <Link href="/" className="mt-4 flex items-center justify-center gap-2 rounded-full border bg-background py-2.5 text-sm hover:bg-accent">
-            <ArrowLeft className="h-4 w-4" /> Back to Public Website
-          </Link>
         </div>
-        <p className="text-center text-xs text-muted-foreground">
-          © 2026 AutoKita. All rights reserved.
+
+        <p className="mt-8 animate-fade-up text-center text-xs text-white/70" style={{ animationDelay: '0.2s' }}>
+          © 2026 AutoKita: A Smart Automotive Repair Shop Management. All rights reserved.
         </p>
-      </section>
+      </div>
 
       {forgot && <ForgotPasswordModal onClose={() => setForgot(false)} />}
     </div>
   )
 }
+
+const forgotSteps = ['Email', 'Verify', 'Reset', 'Done']
 
 function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<0 | 1 | 2 | 3>(0)
@@ -159,9 +205,13 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
   const [pw, setPw] = useState('')
   const [pw2, setPw2] = useState('')
   const [err, setErr] = useState('')
+  const firstCodeRef = useRef<HTMLInputElement | null>(null)
 
-  // Mock verification code shown to the user for demo purposes
   const [mockCode] = useState(() => String(Math.floor(100000 + Math.random() * 900000)))
+
+  useEffect(() => {
+    if (step === 1) firstCodeRef.current?.focus()
+  }, [step])
 
   const submitEmail = (e: React.FormEvent) => {
     e.preventDefault()
@@ -181,8 +231,23 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 animate-fade-up">
-      <div className="w-full max-w-md overflow-hidden rounded-xl bg-background shadow-2xl">
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+      style={{ animation: 'fadeIn 0.25s ease-out' }}
+      onClick={onClose}
+    >
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalPop {
+          from { opacity: 0; transform: scale(0.95) translateY(8px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+      `}</style>
+      <div
+        className="w-full max-w-md overflow-hidden rounded-xl bg-background shadow-2xl"
+        style={{ animation: 'modalPop 0.3s cubic-bezier(0.22,1,0.36,1)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b bg-brand px-5 py-3.5 text-white">
           <div className="flex items-center gap-2">
             <KeyRound className="h-4 w-4" />
@@ -193,30 +258,45 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
               {step === 3 && 'Password Updated'}
             </h3>
           </div>
-          <button onClick={onClose} className="rounded p-1 hover:bg-white/10"><X className="h-4 w-4" /></button>
+          <button onClick={onClose} className="rounded p-1 transition-colors hover:bg-white/10"><X className="h-4 w-4" /></button>
+        </div>
+
+        <div className="flex gap-1.5 px-5 pt-4">
+          {forgotSteps.map((label, i) => (
+            <div key={label} className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-brand transition-all duration-500 ease-out"
+                style={{ width: i <= step ? '100%' : '0%' }}
+              />
+            </div>
+          ))}
         </div>
 
         <div className="p-6">
           {step === 0 && (
-            <form onSubmit={submitEmail} className="space-y-4">
+            <form onSubmit={submitEmail} className="space-y-4 animate-fade-up">
               <p className="text-sm text-muted-foreground">Enter your registered email. We'll send a 6-digit verification code.</p>
               <div>
                 <label className="text-xs font-medium">Email address</label>
                 <div className="mt-1.5 relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
-                    className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm focus:border-brand focus:outline-none" />
+                  <input value={email} onChange={(e) => { setEmail(e.target.value); if (err) setErr('') }} placeholder="you@example.com"
+                    className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
                 </div>
               </div>
-              {err && <p className="text-xs text-destructive">{err}</p>}
-              <button className="w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90">
+              {err && (
+                <p className="flex items-center gap-2 text-xs text-destructive" style={{ animation: 'shakeX 0.4s ease-in-out' }}>
+                  <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" /> {err}
+                </p>
+              )}
+              <button className="w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01]">
                 Send Verification Code
               </button>
             </form>
           )}
 
           {step === 1 && (
-            <form onSubmit={submitCode} className="space-y-4">
+            <form onSubmit={submitCode} className="space-y-4 animate-fade-up">
               <p className="text-sm text-muted-foreground">
                 We sent a 6-digit code to <b>{email}</b>. Enter it below to continue.
               </p>
@@ -227,6 +307,7 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
                 {code.map((c, i) => (
                   <input
                     key={i}
+                    ref={i === 0 ? firstCodeRef : undefined}
                     id={`code-${i}`}
                     value={c}
                     inputMode="numeric"
@@ -236,54 +317,67 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
                       setCode((prev) => prev.map((x, ix) => (ix === i ? v : x)))
                       if (v && i < 5) document.getElementById(`code-${i + 1}`)?.focus()
                     }}
-                    className="h-11 w-10 rounded-md border bg-background text-center text-lg font-bold focus:border-brand focus:outline-none"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Backspace' && !code[i] && i > 0) {
+                        document.getElementById(`code-${i - 1}`)?.focus()
+                      }
+                    }}
+                    className="h-11 w-10 rounded-md border bg-background text-center text-lg font-bold transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
                   />
                 ))}
               </div>
-              {err && <p className="text-center text-xs text-destructive">{err}</p>}
-              <button className="w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90">
+              {err && (
+                <p className="flex items-center justify-center gap-2 text-center text-xs text-destructive" style={{ animation: 'shakeX 0.4s ease-in-out' }}>
+                  <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" /> {err}
+                </p>
+              )}
+              <button className="w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01]">
                 Verify Code
               </button>
-              <button type="button" onClick={() => setStep(0)} className="w-full text-xs text-muted-foreground hover:text-foreground">
+              <button type="button" onClick={() => setStep(0)} className="w-full text-xs text-muted-foreground transition-colors hover:text-foreground">
                 ← Change email
               </button>
             </form>
           )}
 
           {step === 2 && (
-            <form onSubmit={submitPw} className="space-y-4">
+            <form onSubmit={submitPw} className="space-y-4 animate-fade-up">
               <p className="text-sm text-muted-foreground">Choose a strong new password (min. 8 characters).</p>
               <div>
                 <label className="text-xs font-medium">New password</label>
                 <div className="mt-1.5 relative">
                   <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input type="password" value={pw} onChange={(e) => setPw(e.target.value)}
-                    className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm focus:border-brand focus:outline-none" />
+                  <input type="password" value={pw} onChange={(e) => { setPw(e.target.value); if (err) setErr('') }}
+                    className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
                 </div>
               </div>
               <div>
                 <label className="text-xs font-medium">Confirm new password</label>
                 <div className="mt-1.5 relative">
                   <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input type="password" value={pw2} onChange={(e) => setPw2(e.target.value)}
-                    className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm focus:border-brand focus:outline-none" />
+                  <input type="password" value={pw2} onChange={(e) => { setPw2(e.target.value); if (err) setErr('') }}
+                    className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
                 </div>
               </div>
-              {err && <p className="text-xs text-destructive">{err}</p>}
-              <button className="w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90">
+              {err && (
+                <p className="flex items-center gap-2 text-xs text-destructive" style={{ animation: 'shakeX 0.4s ease-in-out' }}>
+                  <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" /> {err}
+                </p>
+              )}
+              <button className="w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01]">
                 Update Password
               </button>
             </form>
           )}
 
           {step === 3 && (
-            <div className="space-y-4 text-center">
+            <div className="space-y-4 text-center animate-fade-up">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-success/15 text-success">
                 <CheckCircle2 className="h-8 w-8" />
               </div>
               <h4 className="text-lg font-bold">Password successfully updated</h4>
               <p className="text-sm text-muted-foreground">You can now sign in with your new password.</p>
-              <button onClick={onClose} className="w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90">
+              <button onClick={onClose} className="w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01]">
                 Back to Log In
               </button>
             </div>

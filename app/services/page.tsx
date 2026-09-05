@@ -16,27 +16,55 @@ export default function ServicesPage() {
     <div className="min-h-screen bg-background">
       <Header />
       <section className="mx-auto max-w-7xl px-6 py-16 text-center">
-        <span className="inline-flex items-center rounded-full bg-brand-soft px-3 py-1 text-xs font-medium text-brand">Our Professional Services</span>
-        <h1 className="mx-auto mt-5 max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
-          Elite Care for Your <br />
-          <span className="text-brand">Premium Vehicle</span>
-        </h1>
-        <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground">
-          Comprehensive solutions tailored to keep your vehicle running at its absolute peak performance. Experience transparency, precision, and world-class craftsmanship.
-        </p>
+        {/* Section heading: dash + eyebrow label, gradient accent word — matches Home/About/Contact styling. */}
+        <div className="relative">
+          <div
+            className="pointer-events-none absolute -inset-x-6 -inset-y-8 -z-10 opacity-[0.5]"
+            style={{
+              backgroundImage: "radial-gradient(circle, rgba(11,23,48,0.14) 1px, transparent 1px)",
+              backgroundSize: "18px 18px",
+              maskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
+              WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
+            }}
+          />
+          <div className="inline-flex items-center justify-center gap-2 animate-fade-up">
+            <span className="h-[3px] w-6 rounded-full" style={{ backgroundColor: "#0b1730" }} />
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              OUR SERVICES
+            </span>
+          </div>
+          <h1
+            className="mx-auto mt-5 max-w-3xl text-4xl font-extrabold leading-tight tracking-tight md:text-5xl animate-fade-up"
+            style={{ color: "#0b1730", animationDelay: "0.1s" }}
+          >
+            Elite Care for Your <br />
+            <span
+              className="bg-clip-text text-transparent"
+              style={{
+                backgroundImage: "linear-gradient(90deg, #0b1730 0%, #1d3a68 50%, #3b6cb4 100%)",
+                textShadow: "0 1px 24px rgba(11,23,48,0.12)",
+              }}
+            >
+              Premium Vehicle
+            </span>
+          </h1>
+          <p
+            className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground animate-fade-up"
+            style={{ animationDelay: "0.2s" }}
+          >
+            Comprehensive solutions tailored to keep your vehicle running at its absolute peak performance. Experience transparency, precision, and world-class craftsmanship.
+          </p>
+        </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 pb-20">
-        <div className="mb-8 text-center text-xs text-muted-foreground">
-          
-        </div>
         <div className="grid items-start gap-6 md:grid-cols-2 lg:grid-cols-3">
           {groups.map((g, gi) => (
             <Link
               key={g.name}
               href={`/services/${g.code.toLowerCase()}`}
               className="group relative block overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-up"
-              style={{ animationDelay: `${gi * 0.08}s` }}
+              style={{ animationDelay: `${0.3 + gi * 0.08}s` }}
             >
               <div className="relative h-40 overflow-hidden">
                 <img
