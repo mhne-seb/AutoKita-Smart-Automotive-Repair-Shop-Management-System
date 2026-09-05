@@ -1,15 +1,13 @@
 'use client'
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect} from "react";
 import {
   Calendar, User, MapPin, Car, Wrench, ChevronRight, ChevronLeft, ChevronDown, Check, X,
-  Mail, Phone, Hash, FileText, ClipboardCheck, AlertCircle,
+  Mail, Phone, Hash, FileText, ClipboardCheck, AlertCircle, Clock, ShieldCheck,
 } from "lucide-react";
-import { Logo } from "@/components/site/Logo";
+import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { useScrolled } from "@/hooks/use-scrolled";
 
 const TIMES = ["08:00 AM", "09:30 AM", "10:30 AM", "01:00 PM", "02:30 PM", "04:00 PM"];
 const DAYS_PER_PAGE = 5;
@@ -194,6 +192,12 @@ function isValidPhone(v: string) {
   return /^(\+?63|0)9\d{9}$/.test(v.replace(/[\s-]/g, ""));
 }
 
+// Generates a friendly booking reference, e.g. AC-48213-2026
+function makeBookingId() {
+  const rand = Math.floor(10000 + Math.random() * 90000);
+  return `AC-${rand}-${new Date().getFullYear()}`;
+}
+
 type Form = {
   date: Date; time: string;
   name: string; phone: string; email: string;
@@ -244,10 +248,14 @@ function BookPage() {
   useEffect(() => { document.title = "Book a Service — AutoKita"; }, []);
 
   const router = useRouter();
-  const scrolled = useScrolled(20);
   const [step, setStep] = useState(0); 
   const [showReview, setShowReview] = useState(false);
   const [attemptedNext, setAttemptedNext] = useState(false);
+
+  // Set once the customer confirms — swaps the modal from "review" to "submitted" state.
+  // We deliberately do NOT navigate to a separate route: the confirmation lives right here.
+  const [submitted, setSubmitted] = useState(false);
+  const [bookingId, setBookingId] = useState("");
 
   // How many days forward from today the visible window starts (paged by DAYS_PER_PAGE)
   const [dayOffset, setDayOffset] = useState(0);
@@ -322,21 +330,41 @@ function BookPage() {
   const currentStepValid = isStepValid(step, f);
   const showError = attemptedNext && !currentStepValid;
 
+  // Called from the review modal's "Confirm Booking" button.
+  // Stays on /book — swaps the modal content to the "under review" confirmation instead of routing away.
+  const confirmBooking = () => {
+    setBookingId(makeBookingId());
+    setSubmitted(true);
+  };
+
+  // Resets everything so the customer can book another service without leaving the page.
+  const startNewBooking = () => {
+    setShowReview(false);
+    setSubmitted(false);
+    setAttemptedNext(false);
+    setStep(0);
+    setDayOffset(0);
+    setF({
+      date: startOfToday(),
+      time: TIMES.find((t) => !isPastSlot(startOfToday(), t)) ?? TIMES[0],
+      name: "", phone: "", email: "",
+      province: "", provinceOther: "",
+      city: "", cityOther: "",
+      barangay: "", barangayOther: "",
+      make: "", makeOther: "",
+      model: "",
+      year: "", yearOther: "",
+      transmission: "", transmissionOther: "",
+      mileage: "", plate: "",
+      pickup: "shop",
+      category: "", categoryOther: "",
+      concern: "",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <header className={`fixed top-0 left-0 right-0 z-50 glass-nav ${scrolled ? "glass-nav-scrolled" : ""}`}>
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link href="/" className="text-foreground"><Logo /></Link>
-          <nav className="hidden gap-8 text-sm md:flex">
-            <Link href="/" className="text-muted-foreground">Home</Link>
-            <Link href="/about" className="text-muted-foreground">About</Link>
-            <Link href="/contact" className="text-muted-foreground">Contact</Link>
-            <Link href="/services" className="text-muted-foreground">Services</Link>
-          </nav>
-          <Link href="/login" className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-foreground">Log in</Link>
-        </div>
-      </header>
-      <div className="h-16" />
+      <Header />
 
       <section className="mx-auto max-w-4xl px-6 py-12">
         <div className="text-center">
@@ -613,32 +641,44 @@ function BookPage() {
       {showReview && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 animate-fade-up">
           <div className="w-full max-w-2xl overflow-hidden rounded-xl bg-background shadow-2xl">
-            <div className="flex items-center justify-between border-b bg-brand px-6 py-4 text-white">
-              <div className="flex items-center gap-2">
-                <ClipboardCheck className="h-5 w-5" />
-                <h3 className="font-semibold">Please Review Your Booking</h3>
-              </div>
-              <button onClick={() => setShowReview(false)} className="rounded p-1 hover:bg-white/10">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="max-h-[60vh] overflow-y-auto px-6 py-5">
-              <ReviewGrid f={f} />
-            </div>
-            <div className="flex items-center justify-end gap-2 border-t bg-muted/30 px-6 py-4">
-              <button
-                onClick={() => setShowReview(false)}
-                className="rounded-md border px-4 py-2 text-sm hover:bg-accent"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => router.push("/booking-confirmed")}
-                className="flex items-center gap-2 rounded-md bg-brand px-5 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90"
-              >
-                <Check className="h-4 w-4" /> Confirm Booking
-              </button>
-            </div>
+            {!submitted ? (
+              <>
+                <div className="flex items-center justify-between border-b bg-brand px-6 py-4 text-white">
+                  <div className="flex items-center gap-2">
+                    <ClipboardCheck className="h-5 w-5" />
+                    <h3 className="font-semibold">Please Review Your Booking</h3>
+                  </div>
+                  <button onClick={() => setShowReview(false)} className="rounded p-1 hover:bg-white/10">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="max-h-[65vh] overflow-y-auto bg-muted/20 px-6 py-5">
+                  <ReviewGrid f={f} />
+                </div>
+                <div className="flex items-center justify-end gap-2 border-t bg-background px-6 py-4">
+                  <button
+                    onClick={() => setShowReview(false)}
+                    className="rounded-md border px-4 py-2 text-sm hover:bg-accent"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={confirmBooking}
+                    className="flex items-center gap-2 rounded-md bg-brand px-5 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90"
+                  >
+                    <Check className="h-4 w-4" /> Confirm Booking
+                  </button>
+                </div>
+              </>
+            ) : (
+              <BookingSubmittedPanel
+                f={f}
+                bookingId={bookingId}
+                onClose={() => setShowReview(false)}
+                onBackHome={() => router.push("/")}
+                onNewBooking={startNewBooking}
+              />
+            )}
           </div>
         </div>
       )}
@@ -879,7 +919,16 @@ function RadioTile({ icon: Icon, label, active, onClick }: { icon: any; label: s
   );
 }
 
-function ReviewGrid({ f, compact }: { f: Form; compact?: boolean }) {
+/* --- Review (redesigned) ---
+   Groups the booking into labeled sections (Schedule / Customer / Vehicle / Service)
+   instead of one flat wall of identical boxes, so the reader can scan by category.
+   `compact` (used in the inline "Quick Review" step) collapses each section down to
+   one summary line; the full version (used in the modal) shows every field. */
+
+type ReviewItem = { icon: any; label: string; value: string };
+type ReviewSection = { title: string; icon: any; items: ReviewItem[] };
+
+function buildReviewSections(f: Form): ReviewSection[] {
   const province = f.province === OTHERS ? f.provinceOther : f.province;
   const city = f.city === OTHERS ? f.cityOther : f.city;
   const barangay = f.barangay === OTHERS ? f.barangayOther : f.barangay;
@@ -888,33 +937,167 @@ function ReviewGrid({ f, compact }: { f: Form; compact?: boolean }) {
   const transmission = f.transmission === OTHERS ? f.transmissionOther : f.transmission;
   const category = f.category === OTHERS ? f.categoryOther : f.category;
 
-  const rows: [any, string, string][] = [
-    [Calendar, "Date & Time", `${formatFullDate(f.date)} · ${f.time}`],
-    [User, "Customer", f.name || "—"],
-    [Phone, "Contact", f.phone || "—"],
-    [Mail, "Email", f.email || "—"],
-    [MapPin, "Location", [barangay, city, province].filter(Boolean).join(", ") || "—"],
-    [Car, "Vehicle", [make, f.model, year].filter(Boolean).join(" ") || "—"],
-    [Settings2Icon, "Transmission", transmission || "—"],
-    [Hash, "License Plate", f.plate || "—"],
-    [Wrench, "Service", category || "—"],
-    [MapPin, "Pick Up", f.pickup === "shop" ? "Shop Visit" : "Home Service"],
-    [FileText, "Concern", f.concern || "—"],
+  return [
+    {
+      title: "Schedule",
+      icon: Calendar,
+      items: [
+        { icon: Calendar, label: "Date & Time", value: `${formatFullDate(f.date)} · ${f.time}` },
+      ],
+    },
+    {
+      title: "Customer",
+      icon: User,
+      items: [
+        { icon: User, label: "Full Name", value: f.name || "—" },
+        { icon: Phone, label: "Contact Number", value: f.phone || "—" },
+        { icon: Mail, label: "Email Address", value: f.email || "—" },
+        { icon: MapPin, label: "Location", value: [barangay, city, province].filter(Boolean).join(", ") || "—" },
+      ],
+    },
+    {
+      title: "Vehicle",
+      icon: Car,
+      items: [
+        { icon: Car, label: "Make & Model", value: [make, f.model].filter(Boolean).join(" ") || "—" },
+        { icon: Calendar, label: "Year", value: year || "—" },
+        { icon: Settings2Icon, label: "Transmission", value: transmission || "—" },
+        { icon: Hash, label: "Mileage", value: f.mileage || "—" },
+        { icon: Hash, label: "License Plate", value: f.plate || "—" },
+      ],
+    },
+    {
+      title: "Service",
+      icon: Wrench,
+      items: [
+        { icon: Wrench, label: "Category", value: category || "—" },
+        { icon: MapPin, label: "Pick Up", value: f.pickup === "shop" ? "Shop Visit" : "Home Service" },
+        { icon: FileText, label: "Concern", value: f.concern || "—" },
+      ],
+    },
   ];
-  return (
-    <div className={`grid gap-3 ${compact ? "md:grid-cols-2" : "md:grid-cols-2"}`}>
-      {rows.map(([Icon, label, val]) => (
-        <div key={label} className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand">
-            <Icon className="h-4 w-4" />
+}
+
+function ReviewGrid({ f, compact }: { f: Form; compact?: boolean }) {
+  const sections = buildReviewSections(f);
+
+  if (compact) {
+    return (
+      <div className="grid gap-3 sm:grid-cols-2">
+        {sections.map((sec) => (
+          <div key={sec.title} className="rounded-lg border p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand">
+                <sec.icon className="h-3.5 w-3.5" />
+              </div>
+              <h4 className="text-xs font-semibold text-foreground">{sec.title}</h4>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {sec.items.map((i) => i.value).filter((v) => v && v !== "—").join(" · ") || "—"}
+            </p>
           </div>
-          <div className="min-w-0">
-            <div className="text-[10px] font-semibold uppercase text-muted-foreground">{label}</div>
-            <div className="truncate text-sm font-medium">{val}</div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {sections.map((sec) => (
+        <div key={sec.title} className="overflow-hidden rounded-lg border bg-background">
+          <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-2.5">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-brand-soft text-brand">
+              <sec.icon className="h-3.5 w-3.5" />
+            </div>
+            <h4 className="text-sm font-semibold text-foreground">{sec.title}</h4>
+          </div>
+          <div className="grid divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+            {sec.items.map((item) => (
+              <div key={item.label} className="flex items-start gap-3 p-3.5">
+                <item.icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                <div className="min-w-0">
+                  <div className="text-[10px] font-semibold uppercase text-muted-foreground">{item.label}</div>
+                  <div className="break-words text-sm font-medium">{item.value}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       ))}
     </div>
+  );
+}
+
+/* --- Booking submitted (replaces the old /booking-confirmed redirect) ---
+   Swapped into the same modal shell once the customer confirms. No route change,
+   so the customer's place in the flow — and the data they just entered — never leaves the page. */
+
+function BookingSubmittedPanel({
+  f, bookingId, onClose, onBackHome, onNewBooking,
+}: {
+  f: Form; bookingId: string; onClose: () => void; onBackHome: () => void; onNewBooking: () => void;
+}) {
+  return (
+    <>
+      <div className="flex items-center justify-between border-b bg-brand px-6 py-4 text-white">
+        <div className="flex items-center gap-2">
+          <Clock className="h-5 w-5" />
+          <h3 className="font-semibold">Booking Request Submitted</h3>
+        </div>
+        <button onClick={onClose} className="rounded p-1 hover:bg-white/10">
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="max-h-[65vh] overflow-y-auto px-6 py-6">
+        <div className="flex flex-col items-center text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-emerald-500">
+            <Check className="h-7 w-7 text-emerald-500" strokeWidth={3} />
+          </div>
+          <h4 className="mt-4 text-xl font-bold">Your booking schedule request is under review</h4>
+          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+            We've received your details. Our team will contact you shortly to confirm your appointment.
+          </p>
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-soft px-4 py-1.5 text-xs font-semibold text-brand">
+            <Hash className="h-3.5 w-3.5" /> Booking Reference: #{bookingId}
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-lg border bg-muted/20 p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ClipboardCheck className="h-4 w-4 text-brand" />
+              <h5 className="text-sm font-semibold">Booking Summary</h5>
+            </div>
+            <span className="flex items-center gap-1 rounded-full bg-amber-100 px-3 py-0.5 text-xs font-medium text-amber-700">
+              <Clock className="h-3 w-3" /> Pending Review
+            </span>
+          </div>
+          <ReviewGrid f={f} />
+        </div>
+
+        <div className="mt-4 flex items-start gap-2 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
+          <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand" />
+          You'll get a confirmation call or SMS once your booking is approved. You can reschedule or cancel up to
+          24 hours before the scheduled time.
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2 border-t bg-background px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <button
+          onClick={onNewBooking}
+          className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent"
+        >
+          Book Another Service
+        </button>
+        <button
+          onClick={onBackHome}
+          className="flex items-center justify-center gap-2 rounded-md bg-brand px-5 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90"
+        >
+          Back to Home <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+    </>
   );
 }
 
