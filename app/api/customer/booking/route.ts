@@ -28,10 +28,17 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, message: 'Missing customer email' }, { status: 400 })
       }
 
-      const found = await db.query(`SELECT id FROM users WHERE email = $1`, [customer.email])
+      const found = await db.query(`SELECT id FROM users WHERE email = LOWER($1)`, [customer.email])
 
       if (found.rows.length > 0) {
-        finalUserId = found.rows[0].id
+        return NextResponse.json(
+          {
+            success: false,
+            code: 'EMAIL_REGISTERED',
+            message: 'This email already has an account. Please log in to book.',
+          },
+          {status: 409 }
+        )
       } else {
         const nameParts = (customer.name || '').trim().split(' ')
         const firstName = nameParts[0] || 'Unknown'
