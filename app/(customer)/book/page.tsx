@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from "sonner"; 
 import { useRouter } from "next/navigation";
 import { useState, useEffect} from "react";
 import {
@@ -8,6 +9,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { fy } from "date-fns/locale";
 
 const TIMES = ["08:00 AM", "09:30 AM", "10:30 AM", "01:00 PM", "02:30 PM", "04:00 PM"];
 const DAYS_PER_PAGE = 5;
@@ -256,6 +258,7 @@ function BookPage() {
   // We deliberately do NOT navigate to a separate route: the confirmation lives right here.
   const [submitted, setSubmitted] = useState(false);
   const [bookingId, setBookingId] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   // How many days forward from today the visible window starts (paged by DAYS_PER_PAGE)
   const [dayOffset, setDayOffset] = useState(0);
@@ -332,9 +335,51 @@ function BookPage() {
 
   // Called from the review modal's "Confirm Booking" button.
   // Stays on /book — swaps the modal content to the "under review" confirmation instead of routing away.
-  const confirmBooking = () => {
-    setBookingId(makeBookingId());
-    setSubmitted(true);
+  const confirmBooking = async () => {
+    setSubmitting(true);
+
+    try {
+      const slot = `${f.date.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })} ${f.time}`;
+      const category = f.category === OTHERS ? f.categoryOther : f.category;
+      const address = [
+        f.barangay === OTHERS ? f.barangayOther : f.barangay,
+        f.city === OTHERS ? f.cityOther : f.city,
+        f.province === OTHERS ? f.provinceOther : f.province,
+      ].filter(Boolean).join(",");
+
+      const res = await fetch("/api/customer/booking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify({
+          customer: { name: f.name, email: f.email, phone: f.phone },
+          newVehicleDetails: {
+            make: f.make === OTHERS ? f.makeOther : f.make,
+            model: f.model,
+            year: f.year === OTHERS ? f.yearOther : f.year, 
+            plate: f.plate,
+            type: f.transmission === OTHERS ? f.transmissionOther : f.transmission,
+            mileage: f.mileage,
+          },
+          serviceMode: f.pickup === "home" ? "Home Service" : "Walk In",
+          homeAddress: address, 
+          customerConcern: `Requested: ${slot} | Service: ${category} | ${f.concern || "No specific concerns"}`,
+        }),
+      });
+
+      const result = await res.json();
+
+      if(result.success) {
+        setBookingId(`AC-${result.ticket.id}-${new Date().getFullYear()}`);
+        setSubmitted(true);
+      } else {
+        console.error("Booking failed:", result.debug || result.message);
+        toast.error("Could not submit your booking. Pleaes try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not reach the server. Check your connection and try again.");
+    }
+    setSubmitting(false);
   };
 
   // Resets everything so the customer can book another service without leaving the page.
@@ -664,9 +709,10 @@ function BookPage() {
                   </button>
                   <button
                     onClick={confirmBooking}
+                    disabled={submitting}
                     className="flex items-center gap-2 rounded-md bg-brand px-5 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90"
                   >
-                    <Check className="h-4 w-4" /> Confirm Booking
+                    <Check className="h-4 w-4" /> {submitting ? "Submitting..." : "Confirm Booking"}
                   </button>
                 </div>
               </>

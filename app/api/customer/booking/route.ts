@@ -3,9 +3,10 @@ import { db } from '@/lib/db'
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
+      const body = await req.json()
     const {
       userId,
+      customer,          // { name, email, phone } — used when nobody is logged in
       vehicleId,
       newVehicleDetails,
       serviceMode,
@@ -13,38 +14,62 @@ export async function POST(req: NextRequest) {
       customerConcern
     } = body
 
-    if (!userId) {
-      return NextResponse.json({ success: false, message: 'Missing user ID' }, { status: 400 })
-    }
     if (!vehicleId && !newVehicleDetails) {
       return NextResponse.json({ success: false, message: 'Missing vehicle information' }, { status: 400 })
     }
 
+    // Resolve the customer: use the logged-in id when we have one, otherwise
+    // find them by email or create the account — same as the admin booking route.
+    let finalUserId = userId
+    let tempPassword: string | null = null
+
+    if (!finalUserId) {
+      if (!customer?.email) {
+        return NextResponse.json({ success: false, message: 'Missing customer email' }, { status: 400 })
+      }
+
+      const found = await db.query(`SELECT id FROM users WHERE email = $1`, [customer.email])
+
+      if (found.rows.length > 0) {
+        finalUserId = found.rows[0].id
+      } else {
+        const nameParts = (customer.name || '').trim().split(' ')
+        const firstName = nameParts[0] || 'Unknown'
+        const lastName = nameParts.slice(1).join(' ') || 'Customer'
+
+        // users.password is UNIQUE, so every new account needs its own value.
+        tempPassword = `temp-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString().slice(-6)}`
+
+        const created = await db.query(
+          `INSERT INTO users (first_name, last_name, nickname, contact_number, email, password, registration_date)
+           VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING id`,
+          [firstName, lastName, firstName, customer.phone || '', customer.email, tempPassword]
+        )
+        finalUserId = created.rows[0].id
+      }
+    }
+
     let finalVehicleId = vehicleId
 
-    // Insert new vehicle if necessary
-    if (newVehicleDetails) {
+    // Insert the vehicle only if this plate is not already registered.
+    if (!finalVehicleId && newVehicleDetails) {
       const { make, model, year, plate, type, mileage } = newVehicleDetails
-      // Ensure plate is provided
       if (!plate) {
         return NextResponse.json({ success: false, message: 'License plate is required for new vehicles' }, { status: 400 })
       }
-      
-      const insertQuery = `
-        INSERT INTO vehicles (user_id, vehicle_make, vehicle_model, vehicle_year, plate_number, vehicle_type, mileage)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING id
-      `
-      const vehicleResult = await db.query(insertQuery, [
-        userId,
-        make || null,
-        model || 'Unknown',
-        parseInt(year) || 2026,
-        plate,
-        type || 'Sedan',
-        parseFloat(mileage) || 0
-      ])
-      finalVehicleId = vehicleResult.rows[0].id
+
+      const existingVeh = await db.query(`SELECT id FROM vehicles WHERE plate_number = $1`, [plate])
+
+      if (existingVeh.rows.length > 0) {
+        finalVehicleId = existingVeh.rows[0].id
+      } else {
+        const vehicleResult = await db.query(
+          `INSERT INTO vehicles (user_id, vehicle_make, vehicle_model, vehicle_year, plate_number, vehicle_type, mileage)
+           VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+          [finalUserId, make || null, model || 'Unknown', parseInt(year) || 2026, plate, type || 'Sedan', parseFloat(mileage) || 0]
+        )
+        finalVehicleId = vehicleResult.rows[0].id
+      }
     }
 
     const mappedServiceMode = serviceMode === 'Home Service' ? 'home_service' : 'walk_in'
@@ -53,7 +78,7 @@ export async function POST(req: NextRequest) {
     // Call SQL function to create ticket
     const ticketQuery = `SELECT * FROM create_service_ticket($1, $2, $3, $4, $5)`
     const ticketResult = await db.query(ticketQuery, [
-      userId,
+      finalUserId,
       finalVehicleId,
       mappedServiceMode,
       address,
@@ -62,7 +87,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      ticket: ticketResult.rows[0]
+      ticket: ticketResult.rows[0],
+      tempPassword
     })
   } catch (err: any) {
     console.error('Booking error:', err)
