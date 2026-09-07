@@ -12,7 +12,7 @@ import { Footer } from "@/components/site/Footer";
 import { fy } from "date-fns/locale";
 
 const TIMES = ["08:00 AM", "09:30 AM", "10:30 AM", "01:00 PM", "02:30 PM", "04:00 PM"];
-const DAYS_PER_PAGE = 5;
+const DAYS_TO_SHOW = 30;
 
 const STEPS = ["SCHEDULE", "CUSTOMER", "VEHICLE", "REVIEW"];
 
@@ -171,6 +171,34 @@ function formatFullDate(d: Date) {
   return d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 }
 
+function toDateValue(d: Date) {
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+function fromDateValue(v: string) {
+  const [y, m, d] = v.split("-").map(Number);
+  const out = new Date(y, m -1, d);
+  out.setHours(0, 0, 0, 0);
+  return out;
+}
+
+function to12h(hhmm: string) {
+  const [h, m] = hhmm.split(":").map(Number);
+  const ap = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${String(h12).padStart(2, "0")}:${String(m).padStart(2,"0")} ${ap}`;
+}
+
+function to24h(t: string) {
+  const match = t.match(/(\d+):(\d+)\s?(AM|PM)/i);
+  if (!match) return "";
+  let h = parseInt(match[1], 10);
+  const ap = match[3].toUpperCase();
+  if (ap === "PM" && h !== 12) h += 12;
+  if (ap === "AM" && h === 12) h = 0;
+  return `${String(h).padStart(2, "0")}:${match[2]}`;
+}
 /* --- validation helpers --- */
 
 function isFilled(v: string) {
@@ -220,7 +248,7 @@ function isStepValid(step: number, f: Form): boolean {
   switch (step) {
     case 0:
       // date/time always have a default selection, nothing to block here
-      return !!f.date && !!f.time;
+      return !!f.date && !!f.time && !isPastSlot(f.date, f.time);
     case 1:
       return (
         isFilled(f.name) &&
@@ -261,9 +289,6 @@ function BookPage() {
   const [submitted, setSubmitted] = useState(false);
   const [bookingId, setBookingId] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  // How many days forward from today the visible window starts (paged by DAYS_PER_PAGE)
-  const [dayOffset, setDayOffset] = useState(0);
 
   const [f, setF] = useState<Form>({
     date: startOfToday(),
@@ -339,7 +364,7 @@ function BookPage() {
     setStep((s) => Math.max(0, s - 1));
   };
 
-  const visibleDays = Array.from({ length: DAYS_PER_PAGE }, (_, i) => addDays(startOfToday(), dayOffset + i));
+  const visibleDays = Array.from({ length: DAYS_TO_SHOW }, (_, i) => addDays(startOfToday(), i));
 
   const selectDate = (d: Date) => {
     set("date", d);
@@ -418,7 +443,6 @@ function BookPage() {
     setSubmitted(false);
     setAttemptedNext(false);
     setStep(0);
-    setDayOffset(0);
     setF({
       date: startOfToday(),
       time: TIMES.find((t) => !isPastSlot(startOfToday(), t)) ?? TIMES[0],
@@ -456,23 +480,22 @@ function BookPage() {
           {step === 0 && (
             <>
               <Section icon={Calendar} title="Schedule Visit" subtitle="Pick a convenient day and time.">
-                <div className="mb-3 flex items-center justify-between">
-                  <button
-                    onClick={() => setDayOffset((o) => Math.max(0, o - DAYS_PER_PAGE))}
-                    disabled={dayOffset === 0}
-                    className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-30"
-                  >
-                    <ChevronLeft className="h-3.5 w-3.5" /> Prev
-                  </button>
-                  <button
-                    onClick={() => setDayOffset((o) => o + DAYS_PER_PAGE)}
-                    className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-accent"
-                  >
-                    Next <ChevronRight className="h-3.5 w-3.5" />
-                  </button>
+                {/* Pick any date — calendar popup or type it */}
+                <div className="mb-3">
+                  <label className="text-[10px] font-semibold uppercase text-muted-foreground">
+                    Pick a date
+                  </label>
+                  <input
+                    type="date"
+                    min={toDateValue(startOfToday())}
+                    value={toDateValue(f.date)}
+                    onChange={(e) => e.target.value && selectDate(fromDateValue(e.target.value))}
+                    className="mt-1.5 block rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
+                  />
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                {/* Quick day strip — scrolls sideways, shows every day */}
+                <div className="flex gap-2 overflow-x-auto pb-2">
                   {visibleDays.map((day) => {
                     const sel = isSameDay(day, f.date);
                     const today = isToday(day);
@@ -481,8 +504,8 @@ function BookPage() {
                       <button
                         key={day.toISOString()}
                         onClick={() => selectDate(day)}
-                        className={`relative rounded-lg border p-3 text-center transition ${
-                          sel ? "border-brand bg-brand text-brand-foreground scale-105 shadow-lg" : "hover:bg-accent"
+                        className={`relative w-[4.5rem] flex-shrink-0 rounded-lg border p-3 text-center transition ${
+                          sel ? "border-brand bg-brand text-brand-foreground shadow-lg" : "hover:bg-accent"
                         }`}
                       >
                         {today && (
@@ -498,6 +521,7 @@ function BookPage() {
                   })}
                 </div>
 
+                {/* Preset time slots */}
                 <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {TIMES.map((t) => {
                     const sel = f.time === t;
@@ -520,6 +544,24 @@ function BookPage() {
                       </button>
                     );
                   })}
+                </div>
+
+                {/* Or enter an exact time */}
+                <div className="mt-3">
+                  <label className="text-[10px] font-semibold uppercase text-muted-foreground">
+                    Or enter a specific time
+                  </label>
+                  <input
+                    type="time"
+                    value={to24h(f.time)}
+                    onChange={(e) => e.target.value && set("time", to12h(e.target.value))}
+                    className="mt-1.5 block rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
+                  />
+                  {isPastSlot(f.date, f.time) && (
+                    <p className="mt-1 text-[11px] text-amber-600">
+                      That time has already passed for today — pick a later one.
+                    </p>
+                  )}
                 </div>
               </Section>
             </>
