@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { sendTempPasswordEmail } from '@/lib/mail'
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,6 +23,8 @@ export async function POST(req: NextRequest) {
     // find them by email or create the account — same as the admin booking route.
     let finalUserId = userId
     let tempPassword: string | null = null
+    let accountEmailed = false
+    let newCustomerName = ''
 
     if (!finalUserId) {
       if (!customer?.email) {
@@ -43,6 +46,8 @@ export async function POST(req: NextRequest) {
         const nameParts = (customer.name || '').trim().split(' ')
         const firstName = nameParts[0] || 'Unknown'
         const lastName = nameParts.slice(1).join(' ') || 'Customer'
+        newCustomerName = firstName
+      
 
         // users.password is UNIQUE, so every new account needs its own value.
         tempPassword = `temp-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString().slice(-6)}`
@@ -97,10 +102,34 @@ export async function POST(req: NextRequest) {
       customerConcern || 'No specific concerns'
     ])
 
+     const ticket = ticketResult.rows[0]
+
+    // New guest customer — email the temp password together with a booking copy.
+    if (tempPassword) {
+      try {
+        await sendTempPasswordEmail({
+          to: customer.email,
+          name: newCustomerName,
+          tempPassword,
+          booking: {
+            reference: `AC-${ticket.id}-${new Date().getFullYear()}`,
+            vehicle: newVehicleDetails
+              ? `${newVehicleDetails.make || ''} ${newVehicleDetails.model || ''} ${newVehicleDetails.year || ''} — ${newVehicleDetails.plate || ''}`.trim()
+              : '—',
+            serviceMode: serviceMode || '—',
+            details: customerConcern || 'No specific concerns',
+          },
+        })
+        accountEmailed = true
+      } catch (mailErr) {
+        console.error('Temp password email failed:', mailErr)
+      }
+    }
+  
     return NextResponse.json({
       success: true,
-      ticket: ticketResult.rows[0],
-      tempPassword
+      ticket,
+      accountEmailed,
     })
   } catch (err: any) {
     console.error('Booking error:', err)

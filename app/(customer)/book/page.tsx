@@ -289,6 +289,7 @@ function BookPage() {
   // Set once the customer confirms — swaps the modal from "review" to "submitted" state.
   // We deliberately do NOT navigate to a separate route: the confirmation lives right here.
   const [submitted, setSubmitted] = useState(false);
+  const [accountEmailed, setAccountEmailed] = useState(false);
   const [bookingId, setBookingId] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -439,6 +440,7 @@ function BookPage() {
 
       if (result.success) {
         setBookingId(`AC-${result.ticket.id}-${new Date().getFullYear()}`);
+        setAccountEmailed(!!result.accountEmailed);
         setSubmitted(true);
       } else if (result.code === "EMAIL_REGISTERED") {
         setShowReview(false);
@@ -446,6 +448,12 @@ function BookPage() {
         setEmailTaken(true);
         setAttemptedNext(true);
         toast.error("This email already has an account. Please log in to book.")
+      } else if (result.code === "PLATE_REGISTERED") {
+        setShowReview(false);
+        setStep(2);
+        setPlateTaken(true);
+        setAttemptedNext(true);
+        toast.error("This vehicle is already registered. Please log in to book service for it.");
       }
       else {
         console.error("Booking failed:", result.debug || result.message);
@@ -462,6 +470,7 @@ function BookPage() {
   const startNewBooking = () => {
     setShowReview(false);
     setSubmitted(false);
+    setAccountEmailed(false);
     setAttemptedNext(false);
     setStep(0);
     setF({
@@ -817,6 +826,7 @@ function BookPage() {
               <BookingSubmittedPanel
                 f={f}
                 bookingId={bookingId}
+                accountEmailed={accountEmailed}
                 onClose={() => setShowReview(false)}
                 onBackHome={() => router.push("/")}
                 onNewBooking={startNewBooking}
@@ -1171,9 +1181,9 @@ function ReviewGrid({ f, compact }: { f: Form; compact?: boolean }) {
    so the customer's place in the flow — and the data they just entered — never leaves the page. */
 
 function BookingSubmittedPanel({
-  f, bookingId, onClose, onBackHome, onNewBooking,
+  f, bookingId, accountEmailed, onClose, onBackHome, onNewBooking,
 }: {
-  f: Form; bookingId: string; onClose: () => void; onBackHome: () => void; onNewBooking: () => void;
+  f: Form; bookingId: string; accountEmailed: boolean;  onClose: () => void; onBackHome: () => void; onNewBooking: () => void;
 }) {
   return (
     <>
@@ -1199,6 +1209,14 @@ function BookingSubmittedPanel({
           <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-soft px-4 py-1.5 text-xs font-semibold text-brand">
             <Hash className="h-3.5 w-3.5" /> Booking Reference: #{bookingId}
           </div>
+
+          {accountEmailed && (
+            <p className="mx-auto mt-3 flex max-w-md items-center justify-center gap-1.5 text-xs text-muted-foreground">
+              <Mail className="h-3.5 w-3.5 flex-shrink-0 text-brand" />
+              We've emailed a temporary password to{" "}
+              <span className="font-medium text-foreground">{f.email}</span> so you can track this booking.
+            </p>
+          )}
         </div>
 
         <div className="mt-6 rounded-lg border bg-muted/20 p-4">
