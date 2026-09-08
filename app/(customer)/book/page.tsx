@@ -230,7 +230,9 @@ function makeBookingId() {
 
 type Form = {
   date: Date; time: string;
-  name: string; phone: string; email: string;
+  firstName: string; lastName: string; nickname: string;
+  phone: string; email: string;
+  street: string;
   province: string; provinceOther: string;
   city: string; cityOther: string;
   barangay: string; barangayOther: string;
@@ -251,9 +253,11 @@ function isStepValid(step: number, f: Form): boolean {
       return !!f.date && !!f.time && !isPastSlot(f.date, f.time);
     case 1:
       return (
-        isFilled(f.name) &&
+        isFilled(f.firstName) &&
+        isFilled(f.lastName) &&
         isValidPhone(f.phone) &&
         isValidEmail(f.email) &&
+        isFilled(f.street) &&
         isSelectValid(f.province, f.provinceOther) &&
         isSelectValid(f.city, f.cityOther) &&
         isSelectValid(f.barangay, f.barangayOther)
@@ -296,7 +300,9 @@ function BookPage() {
   const [f, setF] = useState<Form>({
     date: startOfToday(),
     time: TIMES.find((t) => !isPastSlot(startOfToday(), t)) ?? TIMES[0],
-    name: "", phone: "", email: "",
+    firstName: "", lastName: "", nickname: "",
+    phone: "", email: "",
+    street: "",
     province: "", provinceOther: "",
     city: "", cityOther: "",
     barangay: "", barangayOther: "",
@@ -412,6 +418,7 @@ function BookPage() {
       const slot = `${f.date.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })} ${f.time}`;
       const category = f.category === OTHERS ? f.categoryOther : f.category;
       const address = [
+        f.street,
         f.barangay === OTHERS ? f.barangayOther : f.barangay,
         f.city === OTHERS ? f.cityOther : f.city,
         f.province === OTHERS ? f.provinceOther : f.province,
@@ -421,7 +428,13 @@ function BookPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customer: { name: f.name, email: f.email, phone: f.phone },
+          customer: { firstName: f.firstName,
+                      lastName: f.lastName,
+                      nickname: f.nickname,
+                      email: f.email,
+                      phone: f.phone,
+                      address,
+                   },
           newVehicleDetails: {
             make: f.make === OTHERS ? f.makeOther : f.make,
             model: f.model,
@@ -476,7 +489,9 @@ function BookPage() {
     setF({
       date: startOfToday(),
       time: TIMES.find((t) => !isPastSlot(startOfToday(), t)) ?? TIMES[0],
-      name: "", phone: "", email: "",
+      firstName: "", lastName: "", nickname: "",
+      phone: "", email: "",
+      street: "",
       province: "", provinceOther: "",
       city: "", cityOther: "",
       barangay: "", barangayOther: "",
@@ -562,10 +577,10 @@ function BookPage() {
                         disabled={past}
                         title={past ? "This time has already passed for today" : undefined}
                         className={`rounded-md border py-2.5 text-sm transition ${past
-                            ? "cursor-not-allowed border-dashed text-muted-foreground/40"
-                            : sel
-                              ? "border-brand bg-brand text-brand-foreground"
-                              : "hover:border-brand hover:bg-brand-soft"
+                          ? "cursor-not-allowed border-dashed text-muted-foreground/40"
+                          : sel
+                            ? "border-brand bg-brand text-brand-foreground"
+                            : "hover:border-brand hover:bg-brand-soft"
                           }`}
                       >
                         {t}
@@ -599,10 +614,21 @@ function BookPage() {
             <>
               <Section icon={User} title="Customer Details" subtitle="Tell us how to reach you.">
                 <div className="space-y-4 rounded-lg border p-5">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <IField
+                      icon={User} label="First Name" required value={f.firstName} onChange={(v) => set("firstName", v)}
+                      placeholder="e.g., Juan"
+                      error={showError && !isFilled(f.firstName) ? "First name is required" : undefined}
+                    />
+                    <IField
+                      icon={User} label="Last Name" required value={f.lastName} onChange={(v) => set("lastName", v)}
+                      placeholder="e.g., Dela Cruz"
+                      error={showError && !isFilled(f.lastName) ? "Last name is required" : undefined}
+                    />
+                  </div>
                   <IField
-                    icon={User} label="Full Name" required value={f.name} onChange={(v) => set("name", v)}
-                    placeholder="Enter name"
-                    error={showError && !isFilled(f.name) ? "Full name is required" : undefined}
+                    icon={User} label="Nickname" value={f.nickname} onChange={(v) => set("nickname", v)}
+                    placeholder="Optional — defaults to your first name"
                   />
                   <div className="grid gap-4 md:grid-cols-2">
                     <IField
@@ -619,7 +645,13 @@ function BookPage() {
                 </div>
               </Section>
               <Section icon={MapPin} title="Location Information" subtitle="Where should we serve you?">
-                <div className="rounded-lg border p-5">
+                <div className="space-y-4 rounded-lg border p-5">
+                  <IField
+                    icon={MapPin} label="House No. / Street / Subdivision" required value={f.street}
+                    onChange={(v) => set("street", v)}
+                    placeholder="e.g., 123 Mabini St., Green Village"
+                    error={showError && !isFilled(f.street) ? "Street address is required" : undefined}
+                  />
                   <div className="grid gap-4 md:grid-cols-3">
                     <SelectField
                       icon={MapPin} label="Province" required value={f.province}
@@ -770,8 +802,8 @@ function BookPage() {
                   onClick={next}
                   disabled={checkingEmail || checkingPlate}
                   className={`flex items-center gap-2 rounded-md px-6 py-2.5 text-sm font-semibold transition ${currentStepValid && !checkingEmail && !checkingPlate
-                      ? "bg-brand text-brand-foreground hover:opacity-90"
-                      : "cursor-not-allowed bg-muted text-muted-foreground"
+                    ? "bg-brand text-brand-foreground hover:opacity-90"
+                    : "cursor-not-allowed bg-muted text-muted-foreground"
                     }`}
                 >
                   {checkingEmail || checkingPlate ? "Checking..." : "Next"} <ChevronRight className="h-4 w-4" />
@@ -933,10 +965,10 @@ function CarProgressTracker({ step }: { step: number }) {
             <div key={label} className="flex flex-1 flex-col items-center gap-1.5">
               <div
                 className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${active
-                    ? "border-brand bg-brand text-brand-foreground scale-110 shadow-md shadow-brand/30"
-                    : done
-                      ? "border-brand/60 bg-brand-soft text-brand"
-                      : "border-border bg-muted text-muted-foreground"
+                  ? "border-brand bg-brand text-brand-foreground scale-110 shadow-md shadow-brand/30"
+                  : done
+                    ? "border-brand/60 bg-brand-soft text-brand"
+                    : "border-border bg-muted text-muted-foreground"
                   }`}
               >
                 <Icon className="h-3.5 w-3.5" />
@@ -1097,7 +1129,8 @@ function buildReviewSections(f: Form): ReviewSection[] {
       title: "Customer",
       icon: User,
       items: [
-        { icon: User, label: "Full Name", value: f.name || "—" },
+        { icon: User, label: "Name", value: [f.firstName, f.lastName].filter(Boolean).join(" ") || "—" },
+        { icon: User, label: "Nickname", value: f.nickname || f.firstName || "-" },
         { icon: Phone, label: "Contact Number", value: f.phone || "—" },
         { icon: Mail, label: "Email Address", value: f.email || "—" },
         { icon: MapPin, label: "Location", value: [barangay, city, province].filter(Boolean).join(", ") || "—" },
@@ -1183,7 +1216,7 @@ function ReviewGrid({ f, compact }: { f: Form; compact?: boolean }) {
 function BookingSubmittedPanel({
   f, bookingId, accountEmailed, onClose, onBackHome, onNewBooking,
 }: {
-  f: Form; bookingId: string; accountEmailed: boolean;  onClose: () => void; onBackHome: () => void; onNewBooking: () => void;
+  f: Form; bookingId: string; accountEmailed: boolean; onClose: () => void; onBackHome: () => void; onNewBooking: () => void;
 }) {
   return (
     <>
