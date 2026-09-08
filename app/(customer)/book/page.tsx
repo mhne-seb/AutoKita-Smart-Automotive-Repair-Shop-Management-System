@@ -1,8 +1,8 @@
 'use client'
 
-import { toast } from "sonner"; 
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar, User, MapPin, Car, Wrench, ChevronRight, ChevronLeft, ChevronDown, Check, X,
   Mail, Phone, Hash, FileText, ClipboardCheck, AlertCircle, Clock, ShieldCheck,
@@ -12,7 +12,7 @@ import { Footer } from "@/components/site/Footer";
 import { fy } from "date-fns/locale";
 
 const TIMES = ["08:00 AM", "09:30 AM", "10:30 AM", "01:00 PM", "02:30 PM", "04:00 PM"];
-const DAYS_PER_PAGE = 5;
+const DAYS_TO_SHOW = 30;
 
 const STEPS = ["SCHEDULE", "CUSTOMER", "VEHICLE", "REVIEW"];
 
@@ -171,6 +171,34 @@ function formatFullDate(d: Date) {
   return d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 }
 
+function toDateValue(d: Date) {
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+function fromDateValue(v: string) {
+  const [y, m, d] = v.split("-").map(Number);
+  const out = new Date(y, m - 1, d);
+  out.setHours(0, 0, 0, 0);
+  return out;
+}
+
+function to12h(hhmm: string) {
+  const [h, m] = hhmm.split(":").map(Number);
+  const ap = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${String(h12).padStart(2, "0")}:${String(m).padStart(2, "0")} ${ap}`;
+}
+
+function to24h(t: string) {
+  const match = t.match(/(\d+):(\d+)\s?(AM|PM)/i);
+  if (!match) return "";
+  let h = parseInt(match[1], 10);
+  const ap = match[3].toUpperCase();
+  if (ap === "PM" && h !== 12) h += 12;
+  if (ap === "AM" && h === 12) h = 0;
+  return `${String(h).padStart(2, "0")}:${match[2]}`;
+}
 /* --- validation helpers --- */
 
 function isFilled(v: string) {
@@ -220,7 +248,7 @@ function isStepValid(step: number, f: Form): boolean {
   switch (step) {
     case 0:
       // date/time always have a default selection, nothing to block here
-      return !!f.date && !!f.time;
+      return !!f.date && !!f.time && !isPastSlot(f.date, f.time);
     case 1:
       return (
         isFilled(f.name) &&
@@ -250,20 +278,19 @@ function BookPage() {
   useEffect(() => { document.title = "Book a Service — AutoKita"; }, []);
 
   const router = useRouter();
-  const [step, setStep] = useState(0); 
+  const [step, setStep] = useState(0);
   const [showReview, setShowReview] = useState(false);
   const [attemptedNext, setAttemptedNext] = useState(false);
   const [emailTaken, setEmailTaken] = useState(false);
   const [checkingEmail, setCheckingEmail] = useState(false);
+  const [plateTaken, setPlateTaken] = useState(false);
+  const [checkingPlate, setCheckingPlate] = useState(false);
 
   // Set once the customer confirms — swaps the modal from "review" to "submitted" state.
   // We deliberately do NOT navigate to a separate route: the confirmation lives right here.
   const [submitted, setSubmitted] = useState(false);
   const [bookingId, setBookingId] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  // How many days forward from today the visible window starts (paged by DAYS_PER_PAGE)
-  const [dayOffset, setDayOffset] = useState(0);
 
   const [f, setF] = useState<Form>({
     date: startOfToday(),
@@ -312,13 +339,13 @@ function BookPage() {
     }
 
     //leaving the customer step:block the customer if this eamil already has an account. they must log in first instead of booking as a guest.
-    if(step === 1) {
+    if (step === 1) {
       setCheckingEmail(true);
-      try{
+      try {
         const res = await fetch(
-          `api/customer/check-email?email=${encodeURIComponent(f.email)}`
+          `/api/customer/check-email?email=${encodeURIComponent(f.email)}`
         );
-        
+
         const data = await res.json();
         if (data.exists) {
           setEmailTaken(true);
@@ -326,11 +353,30 @@ function BookPage() {
           setCheckingEmail(false);
           return;
         }
-      } catch {}
+      } catch { }
       setCheckingEmail(false);
     }
 
+    // Leaving the Vehicle step: block if this plate is already registered.
+    if (step === 2) {
+      setCheckingPlate(true);
+      try {
+        const res = await fetch(
+          `/api/customer/check-plate?plate=${encodeURIComponent(f.plate)}`
+        );
+        const data = await res.json();
+        if (data.exists) {
+          setPlateTaken(true);
+          setAttemptedNext(true);
+          setCheckingPlate(false);
+          return;
+        }
+      } catch { }
+      setCheckingPlate(false);
+    }
+
     setEmailTaken(false);
+    setPlateTaken(false);
     setAttemptedNext(false);
     setStep((s) => Math.min(3, s + 1));
   };
@@ -339,7 +385,7 @@ function BookPage() {
     setStep((s) => Math.max(0, s - 1));
   };
 
-  const visibleDays = Array.from({ length: DAYS_PER_PAGE }, (_, i) => addDays(startOfToday(), dayOffset + i));
+  const visibleDays = Array.from({ length: DAYS_TO_SHOW }, (_, i) => addDays(startOfToday(), i));
 
   const selectDate = (d: Date) => {
     set("date", d);
@@ -372,32 +418,32 @@ function BookPage() {
 
       const res = await fetch("/api/customer/booking", {
         method: "POST",
-        headers: { "Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customer: { name: f.name, email: f.email, phone: f.phone },
           newVehicleDetails: {
             make: f.make === OTHERS ? f.makeOther : f.make,
             model: f.model,
-            year: f.year === OTHERS ? f.yearOther : f.year, 
+            year: f.year === OTHERS ? f.yearOther : f.year,
             plate: f.plate,
             type: f.transmission === OTHERS ? f.transmissionOther : f.transmission,
             mileage: f.mileage,
           },
           serviceMode: f.pickup === "home" ? "Home Service" : "Walk In",
-          homeAddress: address, 
+          homeAddress: address,
           customerConcern: `Requested: ${slot} | Service: ${category} | ${f.concern || "No specific concerns"}`,
         }),
       });
 
       const result = await res.json();
 
-      if(result.success) {
+      if (result.success) {
         setBookingId(`AC-${result.ticket.id}-${new Date().getFullYear()}`);
         setSubmitted(true);
       } else if (result.code === "EMAIL_REGISTERED") {
         setShowReview(false);
         setStep(1);
-        setEmailTaken(true); 
+        setEmailTaken(true);
         setAttemptedNext(true);
         toast.error("This email already has an account. Please log in to book.")
       }
@@ -418,7 +464,6 @@ function BookPage() {
     setSubmitted(false);
     setAttemptedNext(false);
     setStep(0);
-    setDayOffset(0);
     setF({
       date: startOfToday(),
       time: TIMES.find((t) => !isPastSlot(startOfToday(), t)) ?? TIMES[0],
@@ -456,23 +501,22 @@ function BookPage() {
           {step === 0 && (
             <>
               <Section icon={Calendar} title="Schedule Visit" subtitle="Pick a convenient day and time.">
-                <div className="mb-3 flex items-center justify-between">
-                  <button
-                    onClick={() => setDayOffset((o) => Math.max(0, o - DAYS_PER_PAGE))}
-                    disabled={dayOffset === 0}
-                    className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-30"
-                  >
-                    <ChevronLeft className="h-3.5 w-3.5" /> Prev
-                  </button>
-                  <button
-                    onClick={() => setDayOffset((o) => o + DAYS_PER_PAGE)}
-                    className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-accent"
-                  >
-                    Next <ChevronRight className="h-3.5 w-3.5" />
-                  </button>
+                {/* Pick any date — calendar popup or type it */}
+                <div className="mb-3">
+                  <label className="text-[10px] font-semibold uppercase text-muted-foreground">
+                    Pick a date
+                  </label>
+                  <input
+                    type="date"
+                    min={toDateValue(startOfToday())}
+                    value={toDateValue(f.date)}
+                    onChange={(e) => e.target.value && selectDate(fromDateValue(e.target.value))}
+                    className="mt-1.5 block rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
+                  />
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                {/* Quick day strip — scrolls sideways, shows every day */}
+                <div className="flex gap-2 overflow-x-auto pb-2">
                   {visibleDays.map((day) => {
                     const sel = isSameDay(day, f.date);
                     const today = isToday(day);
@@ -481,9 +525,8 @@ function BookPage() {
                       <button
                         key={day.toISOString()}
                         onClick={() => selectDate(day)}
-                        className={`relative rounded-lg border p-3 text-center transition ${
-                          sel ? "border-brand bg-brand text-brand-foreground scale-105 shadow-lg" : "hover:bg-accent"
-                        }`}
+                        className={`relative w-[4.5rem] flex-shrink-0 rounded-lg border p-3 text-center transition ${sel ? "border-brand bg-brand text-brand-foreground shadow-lg" : "hover:bg-accent"
+                          }`}
                       >
                         {today && (
                           <span className={`absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full ${sel ? "bg-white" : "bg-brand"}`} />
@@ -498,6 +541,7 @@ function BookPage() {
                   })}
                 </div>
 
+                {/* Preset time slots */}
                 <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {TIMES.map((t) => {
                     const sel = f.time === t;
@@ -508,18 +552,35 @@ function BookPage() {
                         onClick={() => !past && set("time", t)}
                         disabled={past}
                         title={past ? "This time has already passed for today" : undefined}
-                        className={`rounded-md border py-2.5 text-sm transition ${
-                          past
+                        className={`rounded-md border py-2.5 text-sm transition ${past
                             ? "cursor-not-allowed border-dashed text-muted-foreground/40"
                             : sel
-                            ? "border-brand bg-brand text-brand-foreground"
-                            : "hover:border-brand hover:bg-brand-soft"
-                        }`}
+                              ? "border-brand bg-brand text-brand-foreground"
+                              : "hover:border-brand hover:bg-brand-soft"
+                          }`}
                       >
                         {t}
                       </button>
                     );
                   })}
+                </div>
+
+                {/* Or enter an exact time */}
+                <div className="mt-3">
+                  <label className="text-[10px] font-semibold uppercase text-muted-foreground">
+                    Or enter a specific time
+                  </label>
+                  <input
+                    type="time"
+                    value={to24h(f.time)}
+                    onChange={(e) => e.target.value && set("time", to12h(e.target.value))}
+                    className="mt-1.5 block rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
+                  />
+                  {isPastSlot(f.date, f.time) && (
+                    <p className="mt-1 text-[11px] text-amber-600">
+                      That time has already passed for today — pick a later one.
+                    </p>
+                  )}
                 </div>
               </Section>
             </>
@@ -541,7 +602,7 @@ function BookPage() {
                       error={showError && !isValidPhone(f.phone) ? "Enter a valid PH mobile number" : undefined}
                     />
                     <IField
-                      icon={Mail} label="Email Address" required value={f.email} onChange={(v) => {set("email", v); setEmailTaken(false);}}
+                      icon={Mail} label="Email Address" required value={f.email} onChange={(v) => { set("email", v); setEmailTaken(false); }}
                       placeholder="you@email.com"
                       error={showError && !isValidEmail(f.email) ? "Enter a valid email address" : emailTaken ? "This email already has an account. Please log in first" : undefined}
                     />
@@ -621,9 +682,16 @@ function BookPage() {
                     error={showError && !isFilled(f.mileage) ? "Mileage is required" : undefined}
                   />
                   <IField
-                    icon={Hash} label="License Plate" required value={f.plate} onChange={(v) => set("plate", v)}
+                    icon={Hash} label="License Plate" required value={f.plate}
+                    onChange={(v) => { set("plate", v); setPlateTaken(false); }}
                     placeholder="e.g., ABC-1234"
-                    error={showError && !isFilled(f.plate) ? "License plate is required" : undefined}
+                    error={
+                      showError && !isFilled(f.plate)
+                        ? "License plate is required"
+                        : plateTaken
+                          ? "This vehicle is already registered. Please log in to book service for it."
+                          : undefined
+                    }
                   />
                 </div>
               </Section>
@@ -651,9 +719,8 @@ function BookPage() {
                     rows={4}
                     value={f.concern}
                     onChange={(e) => set("concern", e.target.value)}
-                    className={`mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none ${
-                      showError && !isFilled(f.concern) ? "border-red-400 focus:border-red-400" : "focus:border-brand"
-                    }`}
+                    className={`mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none ${showError && !isFilled(f.concern) ? "border-red-400 focus:border-red-400" : "focus:border-brand"
+                      }`}
                     placeholder="Describe the issue…"
                   />
                   {showError && !isFilled(f.concern) && (
@@ -692,14 +759,13 @@ function BookPage() {
               {step < 3 ? (
                 <button
                   onClick={next}
-                  disabled={checkingEmail}
-                  className={`flex items-center gap-2 rounded-md px-6 py-2.5 text-sm font-semibold transition ${
-                    currentStepValid && !checkingEmail
+                  disabled={checkingEmail || checkingPlate}
+                  className={`flex items-center gap-2 rounded-md px-6 py-2.5 text-sm font-semibold transition ${currentStepValid && !checkingEmail && !checkingPlate
                       ? "bg-brand text-brand-foreground hover:opacity-90"
                       : "cursor-not-allowed bg-muted text-muted-foreground"
-                  }`}
+                    }`}
                 >
-                  {checkingEmail ? "Checking..." : "Next"} <ChevronRight className="h-4 w-4" />
+                  {checkingEmail || checkingPlate ? "Checking..." : "Next"} <ChevronRight className="h-4 w-4" />
                 </button>
               ) : (
                 <button
@@ -856,20 +922,18 @@ function CarProgressTracker({ step }: { step: number }) {
           return (
             <div key={label} className="flex flex-1 flex-col items-center gap-1.5">
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${
-                  active
+                className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${active
                     ? "border-brand bg-brand text-brand-foreground scale-110 shadow-md shadow-brand/30"
                     : done
-                    ? "border-brand/60 bg-brand-soft text-brand"
-                    : "border-border bg-muted text-muted-foreground"
-                }`}
+                      ? "border-brand/60 bg-brand-soft text-brand"
+                      : "border-border bg-muted text-muted-foreground"
+                  }`}
               >
                 <Icon className="h-3.5 w-3.5" />
               </div>
               <div
-                className={`text-[10px] font-semibold tracking-wide transition-colors ${
-                  active ? "text-brand" : done ? "text-foreground" : "text-muted-foreground"
-                }`}
+                className={`text-[10px] font-semibold tracking-wide transition-colors ${active ? "text-brand" : done ? "text-foreground" : "text-muted-foreground"
+                  }`}
               >
                 {label}
               </div>
@@ -915,9 +979,8 @@ function IField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className={`w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm focus:outline-none ${
-            error ? "border-red-400 focus:border-red-400" : "focus:border-brand"
-          }`}
+          className={`w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm focus:outline-none ${error ? "border-red-400 focus:border-red-400" : "focus:border-brand"
+            }`}
         />
       </div>
       {error && (
@@ -950,9 +1013,8 @@ function SelectField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          className={`w-full appearance-none rounded-md border bg-background py-2 pl-9 pr-9 text-sm focus:outline-none disabled:opacity-60 ${
-            error ? "border-red-400 focus:border-red-400" : "focus:border-brand"
-          }`}
+          className={`w-full appearance-none rounded-md border bg-background py-2 pl-9 pr-9 text-sm focus:outline-none disabled:opacity-60 ${error ? "border-red-400 focus:border-red-400" : "focus:border-brand"
+            }`}
         >
           <option value="" disabled>{placeholder || "Select an option"}</option>
           {options.map((o) => (
@@ -984,9 +1046,8 @@ function RadioTile({ icon: Icon, label, active, onClick }: { icon: any; label: s
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-md border p-3 text-sm transition ${
-        active ? "border-brand bg-brand-soft/40" : "hover:bg-accent"
-      }`}
+      className={`flex items-center gap-3 rounded-md border p-3 text-sm transition ${active ? "border-brand bg-brand-soft/40" : "hover:bg-accent"
+        }`}
     >
       <span className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${active ? "border-brand" : "border-muted-foreground"}`}>
         {active && <span className="h-2 w-2 rounded-full bg-brand" />}

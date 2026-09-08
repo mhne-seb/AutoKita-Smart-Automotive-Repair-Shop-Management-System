@@ -65,10 +65,15 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, message: 'License plate is required for new vehicles' }, { status: 400 })
       }
 
-      const existingVeh = await db.query(`SELECT id FROM vehicles WHERE plate_number = $1`, [plate])
+      const existingVeh = await db.query(`SELECT id FROM vehicles WHERE UPPER(plate_number) = UPPER($1)`, [plate])
 
       if (existingVeh.rows.length > 0) {
-        finalVehicleId = existingVeh.rows[0].id
+        return NextResponse.json ({
+          success: false,
+          code: 'PLATE_REGISTERED',
+          message: 'This vehicle is already registered. Please log in to book service for it.',
+        },
+      { status: 409 })
       } else {
         const vehicleResult = await db.query(
           `INSERT INTO vehicles (user_id, vehicle_make, vehicle_model, vehicle_year, plate_number, vehicle_type, mileage)
