@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useEffect, useMemo, useState } from 'react'
 import {
   Wrench,
@@ -202,25 +203,27 @@ export default function page() {
   }
 
   const addTicket = async (data: NewTicketData) => {
-   try {
-      // Pointing to our brand new dedicated API endpoint
+    try {
       const res = await fetch('/api/admin/booking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ticketData: data })
       });
-      
+
       const result = await res.json();
-      
+
       if (result.success) {
         setShowNewTicket(false);
-        fetchJobs(); // Refresh the table
+        fetchJobs();
+        toast.success('Ticket created');
       } else {
-        alert('Failed to create ticket: ' + (result.debug || result.message));
+        // Technical detail stays in the console for us; the user gets plain English.
+        console.error('Create ticket failed:', result.debug || result.message);
+        toast.error('Could not create the ticket. Please check the details and try again.');
       }
     } catch (err) {
       console.error(err);
-      alert('An error occurred while creating the ticket.');
+      toast.error('Could not reach the server. Check your connection and try again.');
     }
   }
 
