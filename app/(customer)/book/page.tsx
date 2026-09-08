@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import phAddress from "@/data/ph-address.json";
 import { fy } from "date-fns/locale";
 
 const TIMES = ["08:00 AM", "09:30 AM", "10:30 AM", "01:00 PM", "02:30 PM", "04:00 PM"];
@@ -18,91 +19,8 @@ const STEPS = ["SCHEDULE", "CUSTOMER", "VEHICLE", "REVIEW"];
 
 const OTHERS = "Others";
 
-/* --- PH address data (cascading Province -> City -> Barangay) --- */
-/* NOTE: the Philippines has ~42,000 barangays across ~1,600 cities/municipalities,
-   so a fully exhaustive barangay list for every city isn't realistic to hardcode.
-   Cities/municipalities per province below are complete for the provinces we serve.
-   Barangays are filled in for the areas we most commonly service (Rizal + parts of
-   Metro Manila) — any city without a hardcoded barangay list will simply show
-   "Others" so the customer can type it in manually instead of guessing wrong. */
-
-const PROVINCES = ["Metro Manila", "Rizal", "Cavite", "Laguna", "Bulacan", "Batangas", "Cebu", "Davao del Sur"];
-
-const CITIES_BY_PROVINCE: Record<string, string[]> = {
-  "Metro Manila": [
-    "Manila", "Quezon City", "Makati", "Pasig", "Taguig", "Mandaluyong", "San Juan",
-    "Marikina", "Pasay", "Parañaque", "Las Piñas", "Muntinlupa", "Caloocan",
-    "Malabon", "Navotas", "Valenzuela", "Pateros",
-  ],
-  "Rizal": [
-    "Antipolo", "Cainta", "Taytay", "Angono", "Binangonan", "Cardona", "Jalajala",
-    "Morong", "Pililla", "Rodriguez (Montalban)", "San Mateo", "Tanay", "Teresa", "Baras",
-  ],
-  "Cavite": [
-    "Bacoor", "Imus", "Dasmariñas", "General Trias", "Trece Martires", "Tagaytay",
-    "Cavite City", "Tanza", "Naic", "Silang", "Carmona", "General Mariano Alvarez",
-    "Kawit", "Noveleta", "Rosario",
-  ],
-  "Laguna": [
-    "Calamba", "Santa Rosa", "San Pedro", "Biñan", "Cabuyao", "Los Baños",
-    "San Pablo", "Santa Cruz", "Pagsanjan", "Pila",
-  ],
-  "Bulacan": [
-    "Malolos", "Meycauayan", "San Jose del Monte", "Baliwag", "Marilao", "Bocaue",
-    "Plaridel", "Guiguinto", "Pandi", "Santa Maria",
-  ],
-  "Batangas": [
-    "Batangas City", "Lipa", "Tanauan", "Santo Tomas", "Bauan", "Nasugbu",
-    "Lemery", "San Juan", "Taal",
-  ],
-  "Cebu": [
-    "Cebu City", "Mandaue", "Lapu-Lapu", "Talisay", "Toledo", "Danao", "Carcar", "Naga",
-  ],
-  "Davao del Sur": [
-    "Davao City", "Digos", "Bansalan", "Hagonoy", "Kiblawan", "Magsaysay",
-    "Malalag", "Matanao", "Padada", "Santa Cruz", "Sulop",
-  ],
-};
-
-const BARANGAYS_BY_CITY: Record<string, string[]> = {
-  "Antipolo": [
-    "Bagong Nayon", "Beverly Hills", "Calawis", "Cupang", "Dalig", "Dela Paz",
-    "Inarawan", "Mambugan", "Mayamot", "Muntindilaw", "San Isidro", "San Jose",
-    "San Juan", "San Luis", "San Roque", "Santa Cruz",
-  ],
-  "Cainta": [
-    "San Andres", "San Isidro", "San Juan", "San Roque", "Santa Rosa", "Santo Domingo", "Santo Niño",
-  ],
-  "Taytay": [
-    "San Juan", "San Isidro", "Santa Ana", "Dolores", "Muzon", "San Andres",
-  ],
-  "San Mateo": [
-    "Ampid I", "Ampid II", "Banaba", "Dulong Bayan", "Guitnang Bayan I", "Malanday", "Santa Ana",
-  ],
-  "Angono": [
-    "San Isidro", "San Roque", "Santo Niño", "Poblacion Ibaba", "Poblacion Itaas",
-  ],
-  "Binangonan": [
-    "Layunan", "Libid", "Pantok", "Poblacion", "Tatala",
-  ],
-  "Quezon City": [
-    "Bagong Pag-asa", "Batasan Hills", "Commonwealth", "Cubao", "Diliman",
-    "Fairview", "Holy Spirit", "Kamuning", "Novaliches Proper", "Payatas",
-    "Project 6", "Tandang Sora", "UP Campus",
-  ],
-  "Manila": [
-    "Binondo", "Ermita", "Intramuros", "Malate", "Paco", "Pandacan", "Quiapo",
-    "Sampaloc", "San Andres", "Santa Ana", "Santa Cruz", "Tondo",
-  ],
-  "Makati": [
-    "Bel-Air", "Bangkal", "Guadalupe Nuevo", "Magallanes", "Poblacion",
-    "San Antonio", "San Lorenzo", "Urdaneta",
-  ],
-  "Pasig": [
-    "Kapitolyo", "Kapasigan", "Malinao", "Manggahan", "Maybunga", "Pinagbuhatan",
-    "San Antonio", "San Joaquin", "Santolan", "Ugong",
-  ],
-};
+const PROVINCES: string[] = phAddress.provinces;
+const CITIES_BY_PROVINCE: Record<string, string[]> = phAddress.citiesByProvince;
 
 const YEARS = Array.from({ length: 20 }, (_, i) => String(new Date().getFullYear() - i));
 const TRANSMISSIONS = ["Automatic", "Manual", "CVT", "Semi-Automatic"];
@@ -232,10 +150,10 @@ type Form = {
   date: Date; time: string;
   firstName: string; lastName: string; nickname: string;
   phone: string; email: string;
-  street: string;
   province: string; provinceOther: string;
   city: string; cityOther: string;
-  barangay: string; barangayOther: string;
+  barangay: string;
+  street: string;
   make: string; makeOther: string;
   model: string;
   year: string; yearOther: string;
@@ -260,7 +178,7 @@ function isStepValid(step: number, f: Form): boolean {
         isFilled(f.street) &&
         isSelectValid(f.province, f.provinceOther) &&
         isSelectValid(f.city, f.cityOther) &&
-        isSelectValid(f.barangay, f.barangayOther)
+        isFilled(f.barangay)
       );
     case 2:
       return (
@@ -305,7 +223,7 @@ function BookPage() {
     street: "",
     province: "", provinceOther: "",
     city: "", cityOther: "",
-    barangay: "", barangayOther: "",
+    barangay: "",
     make: "", makeOther: "",
     model: "",
     year: "", yearOther: "",
@@ -325,7 +243,7 @@ function BookPage() {
       province: v,
       provinceOther: v === OTHERS ? p.provinceOther : "",
       city: "", cityOther: "",
-      barangay: "", barangayOther: "",
+      barangay: "",
     }));
   };
 
@@ -335,7 +253,6 @@ function BookPage() {
       ...p,
       city: v,
       cityOther: v === OTHERS ? p.cityOther : "",
-      barangay: "", barangayOther: "",
     }));
   };
 
@@ -404,7 +321,6 @@ function BookPage() {
   };
 
   const cityOptions = f.province && f.province !== OTHERS ? CITIES_BY_PROVINCE[f.province] ?? [] : [];
-  const barangayOptions = f.city && f.city !== OTHERS ? BARANGAYS_BY_CITY[f.city] ?? [] : [];
 
   const currentStepValid = isStepValid(step, f);
   const showError = attemptedNext && !currentStepValid;
@@ -419,22 +335,23 @@ function BookPage() {
       const category = f.category === OTHERS ? f.categoryOther : f.category;
       const address = [
         f.street,
-        f.barangay === OTHERS ? f.barangayOther : f.barangay,
+        f.barangay,
         f.city === OTHERS ? f.cityOther : f.city,
         f.province === OTHERS ? f.provinceOther : f.province,
-      ].filter(Boolean).join(",");
+      ].filter(Boolean).join(", ");
 
       const res = await fetch("/api/customer/booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customer: { firstName: f.firstName,
-                      lastName: f.lastName,
-                      nickname: f.nickname,
-                      email: f.email,
-                      phone: f.phone,
-                      address,
-                   },
+          customer: {
+            firstName: f.firstName,
+            lastName: f.lastName,
+            nickname: f.nickname,
+            email: f.email,
+            phone: f.phone,
+            address,
+          },
           newVehicleDetails: {
             make: f.make === OTHERS ? f.makeOther : f.make,
             model: f.model,
@@ -494,7 +411,7 @@ function BookPage() {
       street: "",
       province: "", provinceOther: "",
       city: "", cityOther: "",
-      barangay: "", barangayOther: "",
+      barangay: "",
       make: "", makeOther: "",
       model: "",
       year: "", yearOther: "",
@@ -668,20 +585,13 @@ function BookPage() {
                       otherValue={f.cityOther} onOtherChange={(v) => set("cityOther", v)}
                       error={showError && !isSelectValid(f.city, f.cityOther) ? "City is required" : undefined}
                     />
-                    <SelectField
+                    <IField
                       icon={MapPin} label="Barangay" required value={f.barangay}
-                      onChange={(v) => set("barangay", v)} options={barangayOptions}
-                      placeholder={f.city ? "Select barangay" : "Select city first"}
-                      disabled={!f.city || f.city === OTHERS}
-                      otherValue={f.barangayOther} onOtherChange={(v) => set("barangayOther", v)}
-                      error={showError && !isSelectValid(f.barangay, f.barangayOther) ? "Barangay is required" : undefined}
+                      onChange={(v) => set("barangay", v)}
+                      placeholder="Type your barangay"
+                      error={showError && !isFilled(f.barangay) ? "Barangay is required" : undefined}
                     />
                   </div>
-                  {f.city && barangayOptions.length === 0 && f.city !== OTHERS && (
-                    <p className="mt-2 text-[11px] text-muted-foreground">
-                      We don't have a barangay list for {f.city} yet — choose "Others" and type it in.
-                    </p>
-                  )}
                 </div>
               </Section>
             </>
@@ -1111,7 +1021,7 @@ type ReviewSection = { title: string; icon: any; items: ReviewItem[] };
 function buildReviewSections(f: Form): ReviewSection[] {
   const province = f.province === OTHERS ? f.provinceOther : f.province;
   const city = f.city === OTHERS ? f.cityOther : f.city;
-  const barangay = f.barangay === OTHERS ? f.barangayOther : f.barangay;
+  const barangay = f.barangay;
   const make = f.make === OTHERS ? f.makeOther : f.make;
   const year = f.year === OTHERS ? f.yearOther : f.year;
   const transmission = f.transmission === OTHERS ? f.transmissionOther : f.transmission;
@@ -1133,7 +1043,7 @@ function buildReviewSections(f: Form): ReviewSection[] {
         { icon: User, label: "Nickname", value: f.nickname || f.firstName || "-" },
         { icon: Phone, label: "Contact Number", value: f.phone || "—" },
         { icon: Mail, label: "Email Address", value: f.email || "—" },
-        { icon: MapPin, label: "Location", value: [barangay, city, province].filter(Boolean).join(", ") || "—" },
+        { icon: MapPin, label: "Address", value: [f.street, barangay, city, province].filter(Boolean).join(", ") || "—" },
       ],
     },
     {
