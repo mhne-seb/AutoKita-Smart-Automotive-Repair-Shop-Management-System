@@ -1,4 +1,7 @@
-import { Bell, Search, SlidersHorizontal } from 'lucide-react'
+'use client'
+
+import { Search, SlidersHorizontal } from 'lucide-react'
+import { AdminNotificationBell } from '@/components/AdminNotificationBell'
 
 interface TopBarProps {
   title: string
@@ -46,14 +49,7 @@ export function TopBar({ title, subtitle, rightSlot, showFilters, showSearch = t
         </button>
       )}
 
-      <button
-        type="button"
-        aria-label="Notifications"
-        className="relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white hover:bg-slate-50"
-      >
-        <Bell size={16} className="text-slate-600" />
-        <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-rose-500" />
-      </button>
+      <AdminNotificationBell />
 
       {rightSlot}
     </div>

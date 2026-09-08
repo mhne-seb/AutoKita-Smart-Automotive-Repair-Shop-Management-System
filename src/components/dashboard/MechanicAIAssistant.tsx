@@ -1,5 +1,6 @@
 'use client'
 
+import { uid } from '@/lib/utils'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -235,7 +236,7 @@ export function MechanicAIAssistant() {
       setMessages((prev) => [
         ...prev,
         {
-          id: crypto.randomUUID(),
+          id: uid(),
           role: 'bot' as const,
           kind: 'text' as const,
           time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
@@ -255,7 +256,7 @@ export function MechanicAIAssistant() {
     setMessages((prev) => [
       ...prev,
       {
-        id: crypto.randomUUID(),
+        id: uid(),
         role: 'bot' as const,
         kind: 'text' as const,
         time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
@@ -273,12 +274,12 @@ export function MechanicAIAssistant() {
   }
 
   function pushBotText(text: string) {
-    setMessages((m) => [...m, { id: crypto.randomUUID(), role: 'bot', kind: 'text', time: botTime(), text }])
+    setMessages((m) => [...m, { id: uid(), role: 'bot', kind: 'text', time: botTime(), text }])
   }
 
   const pushUser = useCallback((text: string) => {
     const now = botTime()
-    setMessages((m) => [...m, { id: crypto.randomUUID(), role: 'user', kind: 'text', text, time: now }])
+    setMessages((m) => [...m, { id: uid(), role: 'user', kind: 'text', text, time: now }])
     setInput('')
     setWaiting(true)
     setToolStatus('none')
@@ -317,7 +318,7 @@ export function MechanicAIAssistant() {
 
   function clearConversation() {
     setMessages([{
-      id: crypto.randomUUID(),
+      id: uid(),
       role: 'bot',
       kind: 'text',
       time: botTime(),
