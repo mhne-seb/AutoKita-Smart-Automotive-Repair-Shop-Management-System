@@ -4,7 +4,7 @@ import { sendTempPasswordEmail } from '@/lib/mail'
 
 export async function POST(req: NextRequest) {
   try {
-      const body = await req.json()
+    const body = await req.json()
     const {
       userId,
       customer,          // { name, email, phone } — used when nobody is logged in
@@ -40,22 +40,22 @@ export async function POST(req: NextRequest) {
             code: 'EMAIL_REGISTERED',
             message: 'This email already has an account. Please log in to book.',
           },
-          {status: 409 }
+          { status: 409 }
         )
       } else {
-        const nameParts = (customer.name || '').trim().split(' ')
-        const firstName = nameParts[0] || 'Unknown'
-        const lastName = nameParts.slice(1).join(' ') || 'Customer'
+        const firstName = (customer.firstName || '').trim() || 'Unknown'
+        const lastName = (customer.lastName || '').trim() || 'Customer'
+        const nickname = (customer.nickname || '').trim() || firstName
         newCustomerName = firstName
-      
+
 
         // users.password is UNIQUE, so every new account needs its own value.
         tempPassword = `temp-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString().slice(-6)}`
 
         const created = await db.query(
-          `INSERT INTO users (first_name, last_name, nickname, contact_number, email, password, registration_date)
-           VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING id`,
-          [firstName, lastName, firstName, customer.phone || '', customer.email, tempPassword]
+         `INSERT INTO users (first_name, last_name, nickname, contact_number, email, address, password, registration_date)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING id`,
+          [firstName, lastName, nickname, customer.phone || '', customer.email, customer.address || null, tempPassword]
         )
         finalUserId = created.rows[0].id
       }
@@ -73,12 +73,12 @@ export async function POST(req: NextRequest) {
       const existingVeh = await db.query(`SELECT id FROM vehicles WHERE UPPER(plate_number) = UPPER($1)`, [plate])
 
       if (existingVeh.rows.length > 0) {
-        return NextResponse.json ({
+        return NextResponse.json({
           success: false,
           code: 'PLATE_REGISTERED',
           message: 'This vehicle is already registered. Please log in to book service for it.',
         },
-      { status: 409 })
+          { status: 409 })
       } else {
         const vehicleResult = await db.query(
           `INSERT INTO vehicles (user_id, vehicle_make, vehicle_model, vehicle_year, plate_number, vehicle_type, mileage)
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
       customerConcern || 'No specific concerns'
     ])
 
-     const ticket = ticketResult.rows[0]
+    const ticket = ticketResult.rows[0]
 
     // New guest customer — email the temp password together with a booking copy.
     if (tempPassword) {
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
         console.error('Temp password email failed:', mailErr)
       }
     }
-  
+
     return NextResponse.json({
       success: true,
       ticket,
