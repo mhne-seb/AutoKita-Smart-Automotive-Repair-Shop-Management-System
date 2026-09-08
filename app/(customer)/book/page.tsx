@@ -253,6 +253,8 @@ function BookPage() {
   const [step, setStep] = useState(0); 
   const [showReview, setShowReview] = useState(false);
   const [attemptedNext, setAttemptedNext] = useState(false);
+  const [emailTaken, setEmailTaken] = useState(false);
+  const [checkingEmail, setCheckingEmail] = useState(false);
 
   // Set once the customer confirms — swaps the modal from "review" to "submitted" state.
   // We deliberately do NOT navigate to a separate route: the confirmation lives right here.
@@ -303,11 +305,32 @@ function BookPage() {
     }));
   };
 
-  const next = () => {
+  const next = async () => {
     if (!isStepValid(step, f)) {
       setAttemptedNext(true);
       return;
     }
+
+    //leaving the customer step:block the customer if this eamil already has an account. they must log in first instead of booking as a guest.
+    if(step === 1) {
+      setCheckingEmail(true);
+      try{
+        const res = await fetch(
+          `api/customer/check-email?email=${encodeURIComponent(f.email)}`
+        );
+        
+        const data = await res.json();
+        if (data.exists) {
+          setEmailTaken(true);
+          setAttemptedNext(true);
+          setCheckingEmail(false);
+          return;
+        }
+      } catch {}
+      setCheckingEmail(false);
+    }
+
+    setEmailTaken(false);
     setAttemptedNext(false);
     setStep((s) => Math.min(3, s + 1));
   };
@@ -371,7 +394,14 @@ function BookPage() {
       if(result.success) {
         setBookingId(`AC-${result.ticket.id}-${new Date().getFullYear()}`);
         setSubmitted(true);
-      } else {
+      } else if (result.code === "EMAIL_REGISTERED") {
+        setShowReview(false);
+        setStep(1);
+        setEmailTaken(true); 
+        setAttemptedNext(true);
+        toast.error("This email already has an account. Please log in to book.")
+      }
+      else {
         console.error("Booking failed:", result.debug || result.message);
         toast.error("Could not submit your booking. Pleaes try again.");
       }
@@ -511,9 +541,9 @@ function BookPage() {
                       error={showError && !isValidPhone(f.phone) ? "Enter a valid PH mobile number" : undefined}
                     />
                     <IField
-                      icon={Mail} label="Email Address" required value={f.email} onChange={(v) => set("email", v)}
+                      icon={Mail} label="Email Address" required value={f.email} onChange={(v) => {set("email", v); setEmailTaken(false);}}
                       placeholder="you@email.com"
-                      error={showError && !isValidEmail(f.email) ? "Enter a valid email address" : undefined}
+                      error={showError && !isValidEmail(f.email) ? "Enter a valid email address" : emailTaken ? "This email already has an account. Please log in first" : undefined}
                     />
                   </div>
                 </div>
@@ -662,13 +692,14 @@ function BookPage() {
               {step < 3 ? (
                 <button
                   onClick={next}
+                  disabled={checkingEmail}
                   className={`flex items-center gap-2 rounded-md px-6 py-2.5 text-sm font-semibold transition ${
-                    currentStepValid
+                    currentStepValid && !checkingEmail
                       ? "bg-brand text-brand-foreground hover:opacity-90"
                       : "cursor-not-allowed bg-muted text-muted-foreground"
                   }`}
                 >
-                  Next <ChevronRight className="h-4 w-4" />
+                  {checkingEmail ? "Checking..." : "Next"} <ChevronRight className="h-4 w-4" />
                 </button>
               ) : (
                 <button
