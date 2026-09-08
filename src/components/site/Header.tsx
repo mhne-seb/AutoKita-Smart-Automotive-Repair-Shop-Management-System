@@ -20,6 +20,10 @@ export function Header({ variant = "light" }: { variant?: "light" | "transparent
   const scrolled = useScrolled(20);
   const [servicesOpen, setServicesOpen] = useState(false);
 
+  // Auto-hide the matching action button when you're already on that page
+  const isLoginPage = pathname?.startsWith("/login");
+  const isBookingPage = pathname?.startsWith("/book");
+
   const base = "fixed top-0 left-0 right-0 z-50 transition-all duration-300";
   const surface =
     variant === "transparent" && !scrolled
@@ -122,24 +126,28 @@ export function Header({ variant = "light" }: { variant?: "light" | "transparent
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
-            <Link
-              href="/login"
-              className="inline-flex items-center rounded-md bg-[#1e3a5f] px-5 py-2.5 text-base font-semibold text-white shadow-md shadow-black/10 transition-all duration-300 hover:scale-[1.03] hover:bg-[#254a75] active:scale-[0.98]"
-            >
-              Log in
-            </Link>
+            {!isLoginPage && (
+              <Link
+                href="/login"
+                className="inline-flex items-center rounded-md bg-[#1e3a5f] px-5 py-2.5 text-base font-semibold text-white shadow-md shadow-black/10 transition-all duration-300 hover:scale-[1.03] hover:bg-[#254a75] active:scale-[0.98]"
+              >
+                Log in
+              </Link>
+            )}
 
-            <Link
-              href="/book"
-              className={`relative inline-flex items-center overflow-hidden rounded-md px-5 py-2.5 text-base font-medium transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] ${
-                textOnDark
-                  ? "bg-white text-brand shadow-md shadow-black/10 hover:shadow-lg hover:bg-white/90"
-                  : "bg-brand text-brand-foreground shadow-md shadow-brand/20 hover:shadow-lg hover:opacity-90"
-              }`}
-            >
-              <span className="relative z-10">Book Service</span>
-              <span className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-500 ease-out hover:translate-x-0" />
-            </Link>
+            {!isBookingPage && (
+              <Link
+                href="/book"
+                className={`relative inline-flex items-center overflow-hidden rounded-md px-5 py-2.5 text-base font-medium transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] ${
+                  textOnDark
+                    ? "bg-white text-brand shadow-md shadow-black/10 hover:shadow-lg hover:bg-white/90"
+                    : "bg-brand text-brand-foreground shadow-md shadow-brand/20 hover:shadow-lg hover:opacity-90"
+                }`}
+              >
+                <span className="relative z-10">Book Service</span>
+                <span className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-500 ease-out hover:translate-x-0" />
+              </Link>
+            )}
           </div>
         </div>
       </header>
