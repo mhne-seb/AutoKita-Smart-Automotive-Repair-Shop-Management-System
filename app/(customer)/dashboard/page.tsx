@@ -25,6 +25,7 @@ import type {
   DashboardData,
   DashboardActivity,
   DashboardJobOrder,
+  DashboardPendingTicket,
   DashboardShop,
 } from "@/controllers/dashboardController";
 
@@ -49,6 +50,13 @@ const STATUS_LABEL: Record<string, string> = {
   in_progress:                "In Progress",
   completed:                  "Completed",
   released:                   "Released",
+};
+
+// Labels for a submitted booking that hasn't become a job order yet.
+const TICKET_STATUS_LABEL: Record<string, string> = {
+  pending:              "Awaiting Confirmation",
+  queued:               "In Queue",
+  inspection_scheduled: "Inspection Scheduled",
 };
 
 // The currently "logged in" demo customer — matches user_id 280 in the DB.
@@ -104,6 +112,8 @@ function Dashboard() {
         return { icon: Wrench, color: "text-brand" };
       case "status_change":
         return { icon: RefreshCw, color: "text-warning" };
+      case "booking_accepted":
+        return { icon: CheckCircle2, color: "text-success"};
       default:
         return { icon: FileText, color: "text-muted-foreground" };
     }
@@ -133,7 +143,7 @@ function Dashboard() {
     );
   }
 
-  const { user, vehicles, activeJobOrders, recentActivity, shop } = data;
+  const { user, vehicles, activeJobOrders, pendingTickets, recentActivity, shop } = data;
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
@@ -173,7 +183,38 @@ function Dashboard() {
             </div>
           </section>
 
-         
+          {pendingTickets.length > 0 && (
+            <section>
+              <h2 className="text-lg font-semibold">Pending Requests</h2>
+              <p className="text-xs text-muted-foreground">
+                Submitted bookings waiting for the shop to confirm.
+              </p>
+              <div className="mt-3 grid gap-4 md:grid-cols-2">
+                {pendingTickets.map((t) => (
+                  <div key={t.id} className="rounded-xl border border-dashed bg-card p-5">
+                    <div className="flex items-center justify-between">
+                      <span className="rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-medium text-warning">
+                        {TICKET_STATUS_LABEL[t.ticket_status] ?? t.ticket_status}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">#TKT-{t.id}</span>
+                    </div>
+                    <div className="mt-3 text-lg font-bold">
+                      {t.vehicle_year} {t.vehicle_model}
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">{t.plate_number}</div>
+                    <div className="mt-3 flex items-start gap-1.5 text-xs text-muted-foreground">
+                      <Clock className="mt-0.5 h-3 w-3 flex-shrink-0" />
+                      <span>
+                        Requested {formatRelativeTime(t.request_date)} ·{" "}
+                        {t.service_mode === "home_service" ? "Home Service" : "Walk-in"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          
           <section>
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">My Services</h2>
@@ -293,7 +334,7 @@ function Dashboard() {
                   const tone: "destructive" | "neutral" | "success" =
                     act.type === "status_change"
                       ? "destructive"
-                      : act.type === "payment"
+                      : act.type === "payment" || act.type === "booking_accepted"
                         ? "success"
                         : "neutral";
                   return (

@@ -14,17 +14,27 @@ const TABS = [
   { to: "/dashboard/history", label: "History", icon: History },
 ] as const;
 
-const NOTIFICATIONS: NotificationItem[] = [
- { key: 'svc-reminder-1', title: 'Service reminder', message: 'Your next PMS is due in 3 days.', time: '2h ago' },
-  { key: 'warranty-1', title: 'Warranty update', message: 'Your extended warranty has been approved.', time: '1d ago' },
-  { key: 'booking-1', title: 'Booking confirmed', message: 'Your service appointment on July 8 is confirmed.', time: '3d ago' },
-]
+const FALLBACK_USER_ID = 280
+
+function timeAgo(iso: string): string {
+  const then = new Date(iso).getTime()
+  if (isNaN(then)) return ''
+  const mins = Math.floor((Date.now() - then) / 60_000)
+  if (mins < 1) return 'Just now'
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  const days = Math.floor(hrs / 24)
+  if (days < 7) return `${days}d ago`
+  return new Date(iso).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })
+}
 
 export function DashHeader() {
   const pathname = usePathname();
   const scrolled = useScrolled(20);
-   const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
 
@@ -34,6 +44,27 @@ export function DashHeader() {
     }
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
+  useEffect(() => {
+    const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
+    const userId = stored ? parseInt(stored, 10) : FALLBACK_USER_ID;
+    fetch(`/api/customer/notifications?userId=${userId}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((json) => {
+        const items: NotificationItem[] = (json.notifications ?? []).map(
+          (a: { type: string; id: number; title: string; description: string; time: string }) => ({
+            key: `${a.type}-${a.id}`,
+            title: a.title,
+            message: a.description,
+            time: timeAgo(a.time),
+          }),
+        );
+        setNotifications(items);
+      })
+      .catch(() => {
+        /* leave the bell empty if the fetch fails */
+      });
   }, []);
 
   function confirmLogout() {
@@ -70,7 +101,7 @@ export function DashHeader() {
             })}
           </nav>
           <div className="flex items-center gap-3">
-            <NotificationBell notifications={NOTIFICATIONS} storageKey="autokita-customer-notifs" />
+            <NotificationBell notifications={notifications} storageKey="autokita-customer-notifs" />
             <div ref={ref} className="relative">
               <button
                 onClick={() => setOpen((v) => !v)}
