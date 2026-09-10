@@ -102,6 +102,7 @@ export default function page() {
 
   const [showNewTicket, setShowNewTicket] = useState(false)
   const [approveTarget, setApproveTarget] = useState<Job | null>(null)
+  const [approving, setApproving] = useState(false)
   const [holdTarget, setHoldTarget] = useState<Job | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Job | null>(null)
   const [rejectTarget, setRejectTarget] = useState<Job | null>(null)
@@ -159,10 +160,13 @@ export default function page() {
   }
 
   const confirmApprove = async (job: Job) => {
+    if (approving) return;
     if (!job.assignedMechanic || job.assignedMechanic === 'Unassigned') {
       alert("Please assign a mechanic first");
       return;
     }
+    setApproving(true);
+    try{
     await fetch('/api/admin/job-queue', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -170,6 +174,9 @@ export default function page() {
     });
     setApproveTarget(null);
     fetchJobs();
+  } finally {
+    setApproving(false);
+  }
   }
 
   const confirmReject = async (job: Job) => {
@@ -412,7 +419,7 @@ export default function page() {
       {showNewTicket && <NewTicketModal onClose={() => setShowNewTicket(false)} onSubmit={addTicket} />}
 
       {approveTarget && (
-        <ApproveModal job={approveTarget} onClose={() => setApproveTarget(null)} onConfirm={() => confirmApprove(approveTarget)} />
+        <ApproveModal job={approveTarget} busy={approving} onClose={() => setApproveTarget(null)} onConfirm={() => confirmApprove(approveTarget)} />
       )}
 
       {rejectTarget && (
@@ -449,7 +456,7 @@ export default function page() {
 // mechanic is assigned.
 // ---------------------------------------------------------------------------
 
-function ApproveModal({ job, onClose, onConfirm }: { job: Job; onClose: () => void; onConfirm: () => void }) {
+function ApproveModal({ job, busy, onClose, onConfirm }: { job: Job; busy: boolean; onClose: () => void; onConfirm: () => void }) {
   const unassigned = !job.assignedMechanic || job.assignedMechanic === 'Unassigned'
 
   return (
@@ -504,10 +511,10 @@ function ApproveModal({ job, onClose, onConfirm }: { job: Job; onClose: () => vo
           </button>
           <button
             onClick={onConfirm}
-            disabled={unassigned}
+            disabled={unassigned || busy}
             className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Confirm Approval
+            {busy ? 'Approving...' : 'Confirm Approval'}
           </button>
         </div>
       </div>
