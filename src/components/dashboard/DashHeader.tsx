@@ -35,6 +35,7 @@ export function DashHeader() {
   const [open, setOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [me, setMe] = useState<{ name: string; email: string } >({ name: "Customer", email: ""});
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
 
@@ -47,7 +48,7 @@ export function DashHeader() {
   }, []);
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
+   const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
     const userId = stored ? parseInt(stored, 10) : FALLBACK_USER_ID;
     fetch(`/api/customer/notifications?userId=${userId}`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
@@ -64,6 +65,23 @@ export function DashHeader() {
       })
       .catch(() => {
         /* leave the bell empty if the fetch fails */
+      });
+  }, []);
+
+    useEffect(() => {
+    const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
+    const userId = stored ? parseInt(stored, 10) : FALLBACK_USER_ID;
+    fetch(`/api/customer/profile?userId=${userId}`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.success) {
+          const name =
+            [j.user.first_name, j.user.last_name].filter(Boolean).join(" ") || j.user.nickname || "Customer";
+          setMe({ name, email: j.user.email ?? "" });
+        }
+      })
+      .catch(() => {
+        /* keep the placeholder if it fails */
       });
   }, []);
 
@@ -112,8 +130,8 @@ export function DashHeader() {
               {open && (
                 <div className="animate-fade-up absolute right-0 mt-2 w-56 origin-top-right overflow-hidden rounded-lg border bg-card shadow-xl">
                   <div className="border-b px-4 py-3">
-                    <div className="text-sm font-semibold">Juan Dela Cruz</div>
-                    <div className="text-xs text-muted-foreground">juand.cruz@example.com</div>
+                    <div className="text-sm font-semibold">{me.name}</div>
+                    <div className="text-xs text-muted-foreground">{me.email}</div>
                   </div>
                   <button
                     onClick={() => { setOpen(false); router.push("/dashboard/profile"); }}
