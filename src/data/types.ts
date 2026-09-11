@@ -59,6 +59,11 @@ export interface InspectionPhotoSlot {
   url?: string
 }
 
+// Walkaround photos are stored as vehicle_inspections rows to reuse the
+// existing `photo` column (no new table). This marker in `status` is what
+// tells them apart from real mechanical findings.
+export const REFERENCE_PHOTO_STATUS = 'reference-photo'
+
 export interface InspectionData {
   jobOrderId: string
   vehicleTitle: string
