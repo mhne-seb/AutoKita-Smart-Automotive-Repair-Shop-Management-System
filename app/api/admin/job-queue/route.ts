@@ -69,6 +69,19 @@ export async function POST(req: NextRequest) {
 
     if (action === 'approve') {
 
+      const existing = await db.query(
+        `SELECT id FROM job_orders WHERE ticket_id = $1 LIMIT 1`,
+        [ticketId]
+      )
+      if (existing.rows.length > 0 ){
+        return NextResponse.json({
+          success: true,
+          alreadyApproved: true,
+          jobOrder: existing.rows[0],
+          message: 'This ticket already has a job order.',
+        })
+      }
+
       const joQuery = `SELECT * FROM create_job_order_from_ticket($1, $2)`
       const joResult = await db.query(joQuery, [ticketId, mechanicId || null])
 

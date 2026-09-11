@@ -61,10 +61,15 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
 
   // Group raw rows by section
   const sectionMap = new Map<string, ServiceTask[]>()
+  const seenTaskIds = new Set<string>()
   for (const row of rows) {
+    const taskId = String(row.id)
+    if (seenTaskIds.has(taskId)) continue // guard against JOIN fan-out in the progress query
+    seenTaskIds.add(taskId)
+
     const sectionId = SECTION_ID_MAP[row.section_id] ?? row.section_id
     const task: ServiceTask = {
-      id: String(row.id),
+      id: taskId,
       title: row.task_title,
       note: row.note ?? '',
       time: formatTaskTime(row.completed_at),
@@ -165,7 +170,11 @@ export async function getInspectingData(userId: number, jobOrderId?: number) {
       vehicle_year: number
       plate_number: string
     } | null
-    preDiagnostic: { mechanic_notes: string | null; datetime_created: string | null } | null
+    preDiagnostic: { 
+      mechanic_notes: string | null
+      datetime_created: string | null
+      approval_status: string| null
+  } | null
     findings: {
       id: number
       name: string | null
@@ -176,6 +185,21 @@ export async function getInspectingData(userId: number, jobOrderId?: number) {
     }[]
     shop: { name: string; address: string } | null
   }>
+}
+
+/** Customer approves or disputes the inspection findings. Approving is what
+ *  advances the job order to the quotation stage. */
+export async function respondToInspection(
+  userId: number,
+  jobOrderId: number,
+  decision: 'approved' | 'disputed',
+) {
+  const res = await fetch('/api/tracking/inspecting/respond', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, jobOrderId, decision }),
+  })
+  return res.json() as Promise<{ success: boolean; message?: string; decision?: string }>
 }
 
 export async function getInProgressData(userId: number, jobOrderId?: number) {

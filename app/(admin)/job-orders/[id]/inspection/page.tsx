@@ -1,20 +1,18 @@
 'use client'
 
+import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from "next/link";
 import { Camera, Plus, Pencil, Trash2, Check, X, Cloud, Clock, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
-import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
+import { getJobOrderById } from '@/controllers/jobOrderController'
 import { getInspectionById, addInspectionFinding, updateInspectionFinding, deleteInspectionFinding } from '@/controllers/inspectionController'
 import { getLatestPreDiagnostic, sendForApproval, type PreDiagnosticRound } from '@/controllers/preDiagnosticController'
 import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData } from '@/data/types'
 
-interface Props {
-  jobOrderId: string
-}
-
-export default function page({ jobOrderId }: Props) {
+export default function page() {
+  const jobOrderId = String(useParams().id)
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)
 
   // Inspection data now comes from the real database, which is an async
@@ -161,8 +159,8 @@ export default function page({ jobOrderId }: Props) {
     const round = await sendForApproval(jobOrderId, summary)
     if (round) {
       setPreDiagnostic(round)
-      // Marks the job order as awaiting customer approval in the real database.
-      void advanceJobOrderStage(jobOrderId, 'quotation')
+      // The job order stays in `inspecting` until the CUSTOMER approves the
+      // round from their portal — that's what advances it to quotation.
     }
     setSending(false)
   }
