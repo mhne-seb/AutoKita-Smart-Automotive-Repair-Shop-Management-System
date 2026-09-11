@@ -301,7 +301,7 @@ export default function page() {
 
             <div className="space-y-3">
               {findings.map((f) => {
-                const meta = findingStatusMeta[f.status]
+                const meta = findingStatusMeta[f.status] ?? findingStatusMeta['needs-attention']
                 const editing = editingFindingId === f.id
                 return (
                   <div
