@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { LayoutGrid, FileText, Wrench, ChevronRight, Loader2, Camera, AlertCircle, Check } from "lucide-react";
 import { toast } from "sonner";
 import { StageStepper } from "@/components/dashboard/StageStepper";
+import { Lightbox } from "@/components/Lightbox";
 import { getInspectingData, respondToInspection } from "@/controllers/serviceProgressController";
 
 function toneClass(status: string | null) {
@@ -49,6 +50,7 @@ function Inspecting() {
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
 
   const [responding, setResponding] = useState(false);
+  const [lightbox, setLightbox] = useState<{ url: string; label: string } | null>(null);
 
   const respond = async (decision: "approved" | "disputed") => {
     if (!jobOrder) return;
@@ -197,7 +199,15 @@ function Inspecting() {
               <div className="mt-4 grid grid-cols-3 gap-4">
                 {findings.filter((f) => f.photo).map((f) => (
                   <div key={f.id} className="text-center">
-                    <img src={f.photo!} alt={f.name ?? "Inspection photo"} className="aspect-video w-full rounded-lg object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setLightbox({ url: f.photo!, label: f.name ?? "Inspection photo" })}
+                      className="group relative block w-full overflow-hidden rounded-lg"
+                      title="Click to enlarge"
+                    >
+                      <img src={f.photo!} alt={f.name ?? "Inspection photo"} className="aspect-video w-full object-cover" />
+                      <span className="absolute inset-0 bg-black/30 opacity-0 transition-opacity group-hover:opacity-100" />
+                    </button>
                     <div className="mt-2 text-xs">{f.name ?? "Inspection photo"}</div>
                   </div>
                 ))}
@@ -254,6 +264,10 @@ function Inspecting() {
           </aside>
         )}
       </div>
+
+      {lightbox && (
+        <Lightbox url={lightbox.url} label={lightbox.label} onClose={() => setLightbox(null)} />
+      )}
     </div>
   );
 }
