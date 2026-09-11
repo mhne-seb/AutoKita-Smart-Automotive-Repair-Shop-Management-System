@@ -148,7 +148,7 @@ export function Header({ variant = "light" }: { variant?: "light" | "transparent
                 <span className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-500 ease-out hover:translate-x-0" />
               </Link>
             )}
-          </div>
+          </div> 
         </div>
       </header>
       {variant !== "transparent" && <div className="h-16" />}
