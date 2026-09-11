@@ -10,7 +10,7 @@ import {
   Home,
   Store,
   Trash2,
-  Pause,
+  Eye,
   Check,
   X,
   User,
@@ -21,6 +21,7 @@ import {
   Calendar,
   SlidersHorizontal,
   Hash,
+  UserCog,
   AlertCircle,
   CheckCircle2,
   ChevronLeft,
@@ -47,13 +48,26 @@ export interface Job {
   servicesNeeded: string[]
   assignedMechanic?: string
   total?: number
-  holdReason?: string
 }
 
 type Tab = 'All Jobs' | 'Pending' | 'Approved' | 'Cancelled'
 
 const validEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 const validPhone = (v: string) => /^(09\d{9}|\+639\d{9})$/.test(v.replace(/\s|-/g, ''))
+
+// The raw `customer_concern` string sometimes carries extra notes tacked on
+// by the customer, e.g. "Category: General Repair. Notes: helppp" or
+// "Requested: Sep 11, 2026 09:30 AM | Service: Oil Change | asdf". For the
+// table's "Service Needed" column we only want the actual service — the
+// notes are still visible in full in the View modal.
+const getServiceLabel = (raw: string): string => {
+  if (!raw) return 'N/A'
+  const serviceMatch = raw.match(/Service:\s*([^|]+)/i)
+  if (serviceMatch) return serviceMatch[1].trim()
+  const categoryMatch = raw.match(/Category:\s*([^.]+)/i)
+  if (categoryMatch) return categoryMatch[1].trim()
+  return raw.trim()
+}
 
 export default function page() {
   const [jobs, setJobs] = useState<Job[]>([])
@@ -101,7 +115,7 @@ export default function page() {
 
   const [showNewTicket, setShowNewTicket] = useState(false)
   const [approveTarget, setApproveTarget] = useState<Job | null>(null)
-  const [holdTarget, setHoldTarget] = useState<Job | null>(null)
+  const [viewTarget, setViewTarget] = useState<Job | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Job | null>(null)
   const [rejectTarget, setRejectTarget] = useState<Job | null>(null)
 
@@ -144,11 +158,11 @@ export default function page() {
   const totalPages = Math.ceil(filtered.length / itemsPerPage)
   const paginatedJobs = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
-  const tabs: { label: Tab; count: number }[] = [
-    { label: 'All Jobs', count: counts.all },
-    { label: 'Pending', count: counts.pending },
-    { label: 'Approved', count: counts.approved },
-    { label: 'Cancelled', count: counts.cancelled },
+  const tabs: { label: Tab; count: number; icon: typeof Wrench }[] = [
+    { label: 'All Jobs', count: counts.all, icon: Wrench },
+    { label: 'Pending', count: counts.pending, icon: ShieldAlert },
+    { label: 'Approved', count: counts.approved, icon: Package },
+    { label: 'Cancelled', count: counts.cancelled, icon: XCircle },
   ]
 
   const updateMechanic = (ticketId: number, mechanic: string) => {
@@ -178,16 +192,6 @@ export default function page() {
       body: JSON.stringify({ action: 'reject', ticketId: job.ticketId })
     });
     setRejectTarget(null);
-    fetchJobs();
-  }
-
-  const confirmHold = async (job: Job, reason: string) => {
-    await fetch('/api/admin/job-queue', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'hold', ticketId: job.ticketId, holdReason: reason })
-    });
-    setHoldTarget(null);
     fetchJobs();
   }
 
@@ -234,7 +238,7 @@ export default function page() {
         rightSlot={
           <button
             onClick={() => setShowNewTicket(true)}
-            className="flex items-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90"
+            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm hover:opacity-90"
           >
             <Plus size={15} /> New Ticket
           </button>
@@ -242,20 +246,21 @@ export default function page() {
       />
 
       <div className="flex flex-wrap gap-5">
-        <StatCard label="Total Tickets" value={`${counts.all} Tickets`} icon={Wrench} iconBg="bg-brand/10" iconColor="text-brand" />
-        <StatCard label="Waiting Approval" value={`${counts.pending} Pending`} icon={ShieldAlert} iconBg="bg-violet-50" iconColor="text-violet-600" />
-        <StatCard label="Approved Service" value={`${counts.approved} Approved`} icon={Package} iconBg="bg-amber-50" iconColor="text-amber-600" />
-        <StatCard label="Cancelled Service" value={`${counts.cancelled} Cancelled`} icon={XCircle} iconBg="bg-rose-50" iconColor="text-rose-600" />
+        <StatCard label="Total Tickets" value={`${counts.all} Tickets`} icon={Wrench} iconBg="bg-gradient-to-br from-brand/20 to-brand/5" iconColor="text-brand" />
+        <StatCard label="Waiting Approval" value={`${counts.pending} Pending`} icon={ShieldAlert} iconBg="bg-gradient-to-br from-violet-100 to-violet-50" iconColor="text-violet-600" />
+        <StatCard label="Approved Service" value={`${counts.approved} Approved`} icon={Package} iconBg="bg-gradient-to-br from-amber-100 to-amber-50" iconColor="text-amber-600" />
+        <StatCard label="Cancelled Service" value={`${counts.cancelled} Cancelled`} icon={XCircle} iconBg="bg-gradient-to-br from-rose-100 to-rose-50" iconColor="text-rose-600" />
       </div>
 
       <div className="flex w-fit items-center gap-2 rounded-full border border-border bg-card p-1.5">
-        {tabs.map(({ label, count }) => (
+        {tabs.map(({ label, count, icon: Icon }) => (
           <button
             key={label}
             onClick={() => { setTab(label); setCurrentPage(1); }}
-            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${tab === label ? 'bg-brand text-brand-foreground' : 'text-muted-foreground hover:text-foreground'
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${tab === label ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-brand-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
           >
+            <Icon size={14} />
             {label}
             <span
               className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs ${tab === label ? 'bg-white/20 text-brand-foreground' : 'bg-accent text-muted-foreground'
@@ -291,119 +296,133 @@ export default function page() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-        {paginatedJobs.map((c) => {
-          const approvedLike = c.status === 'Approved' || c.status === 'In Progress'
-          const unassigned = !c.assignedMechanic || c.assignedMechanic === 'Unassigned'
-          return (
-            <div
-              key={c.ticketId}
-              className="rounded-2xl border border-border bg-card p-5 transition-shadow hover:shadow-sm"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-foreground">{c.vehicle}</h3>
-                  <span className="rounded-md bg-accent px-2 py-0.5 text-xs font-semibold text-muted-foreground">
-                    {c.plate}
-                  </span>
-                </div>
-                <span className="rounded-md bg-accent px-2 py-0.5 text-xs font-semibold text-muted-foreground">
-                  {c.customerId}
-                </span>
-              </div>
-
-              <div className="mt-2 flex items-center justify-between">
-                <span className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-muted-foreground">
-                  {c.serviceMode === 'Shop Visit' ? <Store size={12} /> : <Home size={12} />}
-                  {c.serviceMode}
-                </span>
-                <StatusBadge status={c.status === 'In Progress' ? 'Approved' : c.status} />
-              </div>
-
-              {c.holdReason && (
-                <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                  <Pause size={13} className="mt-0.5 shrink-0" />
-                  On hold: {c.holdReason}
-                </div>
-              )}
-
-              <p className="mt-2 text-sm text-muted-foreground">
-                {c.name} • {c.phone}
-              </p>
-
-              <div className="mt-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Service Needed</p>
-                <ul className="mt-1.5 space-y-1.5">
-                  {c.servicesNeeded.map((s) => (
-                    <li key={s} className="flex items-center gap-2 text-sm text-foreground/80">
-                      <span className="h-3.5 w-3.5 rounded-full border-2 border-border" />
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="my-3 h-px bg-border" />
-
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-muted-foreground">
-                  <Wrench size={14} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Assigned Mechanic</p>
-                  <select
-                    value={c.assignedMechanic ?? 'Unassigned'}
-                    onChange={(e) => updateMechanic(c.ticketId, e.target.value)}
-                    className={`mt-0.5 w-full rounded-md border px-2 py-1 text-sm text-foreground ${unassigned ? 'border-amber-300 bg-amber-50' : 'border-border'
-                      }`}
-                  >
-                    <option value="Unassigned">Unassigned</option>
-                    {mechanics.map(m => (
-                      <option key={m.id} value={m.id.toString()}>{m.full_name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="mt-4 flex gap-2">
-                {approvedLike ? (
-                  <>
-                    <button className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-500 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600">
-                      <Check size={15} /> Approved
-                    </button>
-                    <button
-                      onClick={() => setHoldTarget(c)}
-                      className="flex items-center gap-1.5 rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:bg-accent"
-                    >
-                      <Pause size={14} /> Hold
-                    </button>
-                    <button
-                      onClick={() => setDeleteTarget(c)}
-                      className="flex items-center justify-center rounded-lg border border-rose-200 px-3 text-rose-500 hover:bg-rose-50"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => setApproveTarget(c)}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90"
-                    >
-                      <Check size={15} /> Approve
-                    </button>
-                    <button
-                      onClick={() => setRejectTarget(c)}
-                      className="flex items-center gap-1.5 rounded-lg border border-rose-200 px-4 py-2.5 text-sm font-semibold text-rose-500 hover:bg-rose-50"
-                    >
-                      <X size={14} /> Reject
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          )
-        })}
+      {/* Job queue table — every new booking lands here for triage */}
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
+        <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
+              <th className="px-4 py-3 font-semibold">Customer</th>
+              <th className="px-4 py-3 font-semibold">Vehicle</th>
+              <th className="px-4 py-3 font-semibold">Mode</th>
+              <th className="px-4 py-3 font-semibold">Service Needed</th>
+              <th className="px-4 py-3 font-semibold">Mechanic</th>
+              <th className="px-4 py-3 font-semibold">Status</th>
+              <th className="px-4 py-3 text-right font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedJobs.map((c) => {
+              const approvedLike = c.status === 'Approved' || c.status === 'In Progress'
+              const unassigned = !c.assignedMechanic || c.assignedMechanic === 'Unassigned'
+              return (
+                <tr key={c.ticketId} className="border-b border-border/60 align-top last:border-0">
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-xs font-semibold text-white">
+                        {c.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-foreground">{c.name}</p>
+                        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Hash size={11} className="shrink-0" /> {c.customerId}
+                        </p>
+                        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Phone size={11} className="shrink-0" /> {c.phone}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <p className="flex items-center gap-1.5 font-semibold text-foreground">
+                      <Car size={12} className="shrink-0 text-muted-foreground" /> {c.vehicle}
+                    </p>
+                    <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Hash size={11} className="shrink-0" /> {c.plate}
+                    </p>
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className="flex w-fit items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-muted-foreground">
+                      {c.serviceMode === 'Shop Visit' ? <Store size={12} /> : <Home size={12} />}
+                      {c.serviceMode}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className="flex items-center gap-1.5 text-foreground/80">
+                      <Wrench size={12} className="shrink-0 text-muted-foreground" />
+                      {c.servicesNeeded.map(getServiceLabel).join(', ')}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="relative">
+                      <UserCog className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                      <select
+                        value={c.assignedMechanic ?? 'Unassigned'}
+                        onChange={(e) => updateMechanic(c.ticketId, e.target.value)}
+                        className={`w-full min-w-[150px] rounded-md border py-1 pl-8 pr-2 text-sm text-foreground ${unassigned ? 'border-amber-300 bg-amber-50' : 'border-border'
+                          }`}
+                      >
+                        <option value="Unassigned">Unassigned</option>
+                        {mechanics.map(m => (
+                          <option key={m.id} value={m.id.toString()}>{m.full_name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <StatusBadge status={c.status === 'In Progress' ? 'Approved' : c.status} />
+                  </td>
+                  <td className="px-4 py-4 text-right">
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => setViewTarget(c)}
+                        title="View"
+                        className="flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent"
+                      >
+                        <Eye size={14} />
+                      </button>
+                      {approvedLike ? (
+                        <button
+                          onClick={() => setDeleteTarget(c)}
+                          title="Delete"
+                          className="flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => setApproveTarget(c)}
+                            title="Approve"
+                            className="flex items-center justify-center rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] p-2 text-brand-foreground hover:opacity-90"
+                          >
+                            <Check size={14} />
+                          </button>
+                          <button
+                            onClick={() => setRejectTarget(c)}
+                            title="Reject"
+                            className="flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50"
+                          >
+                            <X size={14} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
+            {paginatedJobs.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  No tickets found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+        </div>
       </div>
 
       {showNewTicket && <NewTicketModal onClose={() => setShowNewTicket(false)} onSubmit={addTicket} />}
@@ -423,8 +442,8 @@ export default function page() {
         />
       )}
 
-      {holdTarget && (
-        <HoldModal job={holdTarget} onClose={() => setHoldTarget(null)} onConfirm={(reason) => confirmHold(holdTarget, reason)} />
+      {viewTarget && (
+        <ViewModal job={viewTarget} onClose={() => setViewTarget(null)} />
       )}
 
       {deleteTarget && (
@@ -491,7 +510,7 @@ function ApproveModal({ job, onClose, onConfirm }: { job: Job; onClose: () => vo
           <div className="mt-3 flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2.5 text-xs text-amber-700">
             <AlertCircle size={14} className="mt-0.5 shrink-0" />
             You must assign a mechanic to this job before it can be approved. Close this dialog and pick one from the
-            card, then try again.
+            table, then try again.
           </div>
         )}
 
@@ -502,7 +521,7 @@ function ApproveModal({ job, onClose, onConfirm }: { job: Job; onClose: () => vo
           <button
             onClick={onConfirm}
             disabled={unassigned}
-            className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Confirm Approval
           </button>
@@ -516,59 +535,120 @@ function ApproveModal({ job, onClose, onConfirm }: { job: Job; onClose: () => vo
 // Hold modal — requires a reason before putting a job on hold.
 // ---------------------------------------------------------------------------
 
-function HoldModal({ job, onClose, onConfirm }: { job: Job; onClose: () => void; onConfirm: (reason: string) => void }) {
-  const [reason, setReason] = useState('')
-  const [error, setError] = useState('')
-
-  const submit = () => {
-    if (!reason.trim()) {
-      setError('Please provide a reason for the hold.')
-      return
-    }
-    setError('')
-    onConfirm(reason.trim())
-  }
-
+function ViewModal({ job, onClose }: { job: Job; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-xl bg-background p-6 shadow-2xl">
+      <div className="w-full max-w-lg rounded-xl bg-background p-6 shadow-2xl">
         <div className="flex items-start justify-between">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-            <Pause size={20} />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Booking Reference No. {job.ticketId}
+            </p>
+            <h3 className="mt-1 text-lg font-bold text-foreground">Customer Booking Record</h3>
           </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
             <X size={18} />
           </button>
         </div>
-
-        <h3 className="mt-4 text-lg font-bold text-foreground">Put job on hold</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          {job.name}'s {job.vehicle} job order will be paused until resumed.
+          The following information was submitted by the customer at the time of booking.
         </p>
 
-        <div className="mt-4">
-          <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Reason for hold *</label>
-          <textarea
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            rows={3}
-            placeholder="e.g., Waiting for parts delivery"
-            className={`mt-1.5 w-full rounded-md border px-3 py-2 text-sm focus:outline-none ${error ? 'border-destructive' : 'border-border focus:border-brand'
-              }`}
-          />
-          {error && (
-            <p className="mt-1 flex items-center gap-1 text-xs text-destructive">
-              <AlertCircle size={12} /> {error}
+        <div className="mt-5 space-y-5">
+          <section>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Customer Information
             </p>
-          )}
+            <dl className="mt-2 space-y-2 rounded-lg border border-border p-4 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="flex items-center gap-1.5 text-muted-foreground">
+                  <Hash size={12} /> Customer ID
+                </dt>
+                <dd className="font-medium text-foreground">{job.customerId}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="flex items-center gap-1.5 text-muted-foreground">
+                  <User size={12} /> Full Name
+                </dt>
+                <dd className="font-medium text-foreground">{job.name}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="flex items-center gap-1.5 text-muted-foreground">
+                  <Phone size={12} /> Contact Number
+                </dt>
+                <dd className="font-medium text-foreground">{job.phone}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="flex items-center gap-1.5 text-muted-foreground">
+                  <Mail size={12} /> Email Address
+                </dt>
+                <dd className="font-medium text-foreground">{job.email}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Vehicle &amp; Service Details
+            </p>
+            <dl className="mt-2 space-y-2 rounded-lg border border-border p-4 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="flex items-center gap-1.5 text-muted-foreground">
+                  <Car size={12} /> Vehicle
+                </dt>
+                <dd className="text-right font-medium text-foreground">{job.vehicle}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="flex items-center gap-1.5 text-muted-foreground">
+                  <Hash size={12} /> Plate Number
+                </dt>
+                <dd className="font-medium text-foreground">{job.plate}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="flex items-center gap-1.5 text-muted-foreground">
+                  {job.serviceMode === 'Shop Visit' ? <Store size={12} /> : <Home size={12} />} Service Mode
+                </dt>
+                <dd className="font-medium text-foreground">{job.serviceMode}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="flex items-center gap-1.5 text-muted-foreground">
+                  <Wrench size={12} /> Service(s) Requested
+                </dt>
+                <dd className="text-right font-medium text-foreground">{job.servicesNeeded.join(', ')}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Booking Status
+            </p>
+            <dl className="mt-2 space-y-2 rounded-lg border border-border p-4 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="flex items-center gap-1.5 text-muted-foreground">
+                  <Calendar size={12} /> Date of Request
+                </dt>
+                <dd className="font-medium text-foreground">{job.date}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="flex items-center gap-1.5 text-muted-foreground">
+                  <UserCog size={12} /> Assigned Mechanic
+                </dt>
+                <dd className="font-medium text-foreground">{job.assignedMechanic ?? 'Not yet assigned'}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-muted-foreground">Current Status</dt>
+                <dd>
+                  <StatusBadge status={job.status === 'In Progress' ? 'Approved' : job.status} />
+                </dd>
+              </div>
+            </dl>
+          </section>
         </div>
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-6 flex justify-end">
           <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent">
-            Cancel
-          </button>
-          <button onClick={submit} className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600">
-            Confirm Hold
+            Close
           </button>
         </div>
       </div>
@@ -1050,7 +1130,7 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
             >
               Cancel
             </button>
-            <button type="submit" className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90">
+            <button type="submit" className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm hover:opacity-90">
               Create Ticket
             </button>
           </div>
