@@ -51,52 +51,67 @@ export function StageStepper({
           const isDone = i < activeIdx || (isFinalStage && i === activeIdx);
           const isCurrent = i === activeIdx && !isFinalStage;
           const isActive = isDone || isCurrent;
+          // Stages after the current one haven't happened yet — nothing to
+          // show there, so they shouldn't be clickable.
+          const isFuture = !isActive;
           const time = stageTimes?.[s.key];
+
+          const content = (
+            <>
+              <div className="relative flex h-10 w-10 items-center justify-center">
+                {isCurrent && (
+                  <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
+                )}
+                <div
+                  className={`relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300 ${
+                    isCurrent
+                      ? "scale-110 border-transparent bg-brand text-white"
+                      : isDone
+                      ? "border-transparent bg-brand text-white shadow-sm"
+                      : "border-border bg-card text-muted-foreground/50"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" strokeWidth={2.5} />
+                  {isDone && (
+                    <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-card bg-success text-white">
+                      <Check className="h-2.5 w-2.5" strokeWidth={3.5} />
+                    </span>
+                  )}
+                </div>
+              </div>
+              <span
+                className={`whitespace-nowrap text-[10px] font-bold uppercase leading-none tracking-wider transition-colors duration-300 ${
+                  isCurrent
+                    ? "text-brand"
+                    : isDone
+                    ? "text-foreground/70 group-hover:text-foreground"
+                    : "text-muted-foreground/50"
+                }`}
+              >
+                {s.label}
+              </span>
+              {time && (
+                <span className="whitespace-nowrap text-[9px] font-medium text-muted-foreground/70">
+                  {time}
+                </span>
+              )}
+            </>
+          );
 
           return (
             <div key={s.key} className="relative z-10 flex flex-1 flex-col items-center">
-              <Link
-                href={`${s.to}?jobOrderId=${jobOrderId}`}
-                className="group flex flex-col items-center gap-2 transition-transform duration-200 hover:-translate-y-0.5"
-              >
-                <div className="relative flex h-10 w-10 items-center justify-center">
-                  {isCurrent && (
-                    <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
-                  )}
-                  <div
-                    className={`relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300 ${
-                      isCurrent
-                        ? "scale-110 border-transparent bg-brand text-white"
-                        : isDone
-                        ? "border-transparent bg-brand text-white shadow-sm"
-                        : "border-border bg-card text-muted-foreground"
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" strokeWidth={2.5} />
-                    {isDone && (
-                      <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-card bg-success text-white">
-                        <Check className="h-2.5 w-2.5" strokeWidth={3.5} />
-                      </span>
-                    )}
-                  </div>
+              {isFuture ? (
+                <div className="flex cursor-default flex-col items-center gap-2" aria-disabled="true">
+                  {content}
                 </div>
-                <span
-                  className={`whitespace-nowrap text-[10px] font-bold uppercase leading-none tracking-wider transition-colors duration-300 ${
-                    isCurrent
-                      ? "text-brand"
-                      : isDone
-                      ? "text-foreground/70 group-hover:text-foreground"
-                      : "text-muted-foreground"
-                  }`}
+              ) : (
+                <Link
+                  href={`${s.to}?jobOrderId=${jobOrderId}`}
+                  className="group flex flex-col items-center gap-2 transition-transform duration-200 hover:-translate-y-0.5"
                 >
-                  {s.label}
-                </span>
-                {time && (
-                  <span className="whitespace-nowrap text-[9px] font-medium text-muted-foreground/70">
-                    {time}
-                  </span>
-                )}
-              </Link>
+                  {content}
+                </Link>
+              )}
             </div>
           );
         })}
