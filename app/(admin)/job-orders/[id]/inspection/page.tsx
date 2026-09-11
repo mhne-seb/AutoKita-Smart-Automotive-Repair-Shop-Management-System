@@ -10,9 +10,9 @@ import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { Lightbox } from '@/components/Lightbox'
 import { compressImage } from '@/lib/image'
 import { getJobOrderById } from '@/controllers/jobOrderController'
-import { getInspectionById, addInspectionFinding, updateInspectionFinding, deleteInspectionFinding, uploadInspectionPhoto} from '@/controllers/inspectionController'
+import { getInspectionById, addInspectionFinding, updateInspectionFinding, deleteInspectionFinding, uploadInspectionPhoto, saveWalkaroundNote } from '@/controllers/inspectionController'
 import { getLatestPreDiagnostic, sendForApproval, type PreDiagnosticRound } from '@/controllers/preDiagnosticController'
-import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData } from '@/data/types'
+import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData, InspectionPhotoSlot } from '@/data/types'
 
 export default function page() {
   const jobOrderId = String(useParams().id)
@@ -121,9 +121,9 @@ export default function page() {
 
     try {
       const compressed = await compressImage(file)
-      const url = await uploadInspectionPhoto(jobOrderId, slotId, label, compressed)
-      if (!url) throw new Error('upload rejected')
-      setPhotoSlots((prev) => prev.map((p) => (p.id === slotId ? { ...p, url } : p)))
+      const uploaded = await uploadInspectionPhoto(jobOrderId, slotId, label, compressed)
+      if (!uploaded) throw new Error('upload rejected')
+      setPhotoSlots((prev) => prev.map((p) => (p.id === slotId ? { ...p, url: uploaded.url, rowId: uploaded.rowId } : p)))
       toast.success(`${label} photo saved`)
     } catch {
       setPhotoSlots((prev) => prev.map((p) => (p.id === slotId ? { ...p, url: previousUrl } : p)))
@@ -133,6 +133,15 @@ export default function page() {
       setUploadingSlot(null)
     }
   }
+
+    // Condition notes save on blur — one photo, one note, no separate Save button
+  // to forget. Needs a row to write to, so a photo must be uploaded first.
+  async function persistSlotNote(slot: InspectionPhotoSlot) {
+    if (isLocked || !slot.rowId) return
+    const ok = await saveWalkaroundNote(jobOrderId, slot.rowId, slot.note ?? '')
+    if (!ok) toast.error(`Could not save the ${slot.label} note. Please try again.`)
+  }
+
   function saveNote() {
     if (!noteDraft.trim()) return
     setNotes((prev) => [
@@ -277,8 +286,8 @@ export default function page() {
 
             <div className="grid grid-cols-3 gap-4">
               {photoSlots.map((slot) => (
-                <div
-                  key={slot.id}
+                <div key={slot.id} className="flex flex-col gap-2">
+                  <div
                   className="group relative h-40 overflow-hidden rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-400 hover:border-slate-300"
                 >
                   {slot.url ? (
@@ -331,6 +340,19 @@ export default function page() {
                       e.target.value = '' // re-picking the same file still fires onChange
                     }}
                   />
+                </div>
+
+                 <textarea
+                  value={slot.note ?? ''}
+                  onChange={(e) =>
+                    setPhotoSlots((prev) => prev.map((p) => (p.id === slot.id ? { ...p, note: e.target.value } : p)))
+                  }
+                  onBlur={() => persistSlotNote(slot)}
+                  disabled={isLocked || !slot.rowId}
+                  rows={2}
+                  placeholder={slot.rowId ? 'Condition on arrival — scratches, dents, existing damage…' : 'Upload a photo first'}
+                  className="w-full resize-none rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-50"
+                />
                 </div>
               ))}
             </div>
