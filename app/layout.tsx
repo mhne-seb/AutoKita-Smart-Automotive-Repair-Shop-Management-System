@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Toaster } from "@/components/ui/sonner";
 // @ts-ignore: global CSS import declaration not found in this project setup
 import "./globals.css";
 
@@ -23,7 +24,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
         />
       </head>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+      {children}
+      <Toaster position="top-right" richColors />
+      </body>
     </html>
   );
 }

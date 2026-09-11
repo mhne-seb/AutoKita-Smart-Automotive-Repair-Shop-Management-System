@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { LayoutGrid, FileText, Wrench, Loader2, Camera, AlertCircle } from "lucide-react";
+import { LayoutGrid, FileText, Wrench, ChevronRight, Loader2, Camera, AlertCircle, Check } from "lucide-react";
+import { toast } from "sonner";
 import { StageStepper } from "@/components/dashboard/StageStepper";
-import { getInspectingData } from "@/controllers/serviceProgressController";
+import { getInspectingData, respondToInspection } from "@/controllers/serviceProgressController";
 
 function toneClass(status: string | null) {
   if (!status) return "bg-muted text-muted-foreground";
@@ -47,6 +48,26 @@ function Inspecting() {
 
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
 
+  const [responding, setResponding] = useState(false);
+
+  const respond = async (decision: "approved" | "disputed") => {
+    if (!jobOrder) return;
+    setResponding(true);
+    const userId = Number(sessionStorage.getItem("autokita_user_id"));
+    const res = await respondToInspection(userId, jobOrder.job_order_id, decision);
+    if (res.success) {
+      toast.success(
+        decision === "approved"
+          ? "Inspection approved. We're preparing your quotation."
+          : "Thanks — we've flagged your concerns for the service team.",
+      );
+      setData(await getInspectingData(userId, jobOrder.job_order_id));
+    } else {
+      toast.error(res.message ?? "Could not submit your response.");
+    }
+    setResponding(false);
+  };
+
   if (loading) {
     return (
       <div className="mx-auto max-w-6xl px-6 py-8">
@@ -70,6 +91,51 @@ function Inspecting() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
       <StageStepper active="inspecting" jobOrderId={jobOrder.job_order_id} />
+
+      {preDiagnostic?.approval_status === "pending" && !isHistorical && (
+        <div className="rounded-xl border-2 border-brand bg-brand-soft/40 p-6">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand" />
+            <div className="flex-1">
+              <h3 className="font-bold">Please review your inspection report</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Our team has finished inspecting your vehicle. Review the findings below, then let
+                us know if we can go ahead and prepare your quotation.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  onClick={() => respond("approved")}
+                  disabled={responding}
+                  className="flex items-center gap-2 rounded-md bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-60"
+                >
+                  <Check className="h-4 w-4" /> {responding ? "Sending…" : "Approve findings"}
+                </button>
+                <button
+                  onClick={() => respond("disputed")}
+                  disabled={responding}
+                  className="rounded-md border px-5 py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-60"
+                >
+                  I have concerns
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {preDiagnostic?.approval_status === "approved" && (
+        <div className="flex items-center gap-2 rounded-lg border border-success/30 bg-success/5 px-4 py-3 text-sm">
+          <Check className="h-4 w-4 flex-shrink-0 text-success" />
+          You approved this inspection. We&apos;re preparing your quotation.
+        </div>
+      )}
+
+      {preDiagnostic?.approval_status === "disputed" && (
+        <div className="flex items-center gap-2 rounded-lg border border-warning/40 bg-warning/5 px-4 py-3 text-sm">
+          <AlertCircle className="h-4 w-4 flex-shrink-0 text-warning" />
+          You raised concerns about this inspection. Our service team will contact you shortly.
+        </div>
+      )}
 
       {isHistorical && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">

@@ -21,6 +21,10 @@ export async function POST(req: NextRequest) {
     if (checkUser.rows.length > 0) {
       userId = checkUser.rows[0].id
     } else {
+        // users.password is UNIQUE in the schema, so one shared default only works
+      // for the first walk-in. Give each new customer their own temporary password.
+      const tempPassword = `temp-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString().slice(-6)}`
+
       // 7 target columns and 7 expressions (including NOW())
       const insUser = await db.query(
         `INSERT INTO users (first_name, last_name, nickname, contact_number, email, password, registration_date) 
@@ -31,28 +35,38 @@ export async function POST(req: NextRequest) {
           firstName, // Fallback for nickname
           ticketData.contactNumber, 
           ticketData.email, 
-          'admin_created_123'
+          tempPassword
         ]
       )
       userId = insUser.rows[0].id
     }
 
-    // 2. Insert Vehicle
-    // 6 target columns and 6 expressions ($1 to $6)
-    const vehQuery = `
-      INSERT INTO vehicles (user_id, vehicle_model, vehicle_year, plate_number, vehicle_type, mileage)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id
-    `
-    const vehResult = await db.query(vehQuery, [
-      userId,
-      ticketData.vehicleModel || 'Unknown',
-      parseInt(ticketData.year) || 2026,
-      ticketData.licensePlate,
-      ticketData.transmission || 'Automatic',
-      parseFloat(ticketData.mileage) || 0
-    ])
-    const vehicleId = vehResult.rows[0].id
+    // 2. Find or insert the vehicle.
+    // vehicles.plate_number is UNIQUE, so reuse the car if it is already
+    // registered — same lookup-then-insert we do for the user above.
+    let vehicleId
+    const checkVeh = await db.query(
+      `SELECT id FROM vehicles WHERE plate_number = $1`,
+      [ticketData.licensePlate]
+    )
+
+    if (checkVeh.rows.length > 0) {
+      vehicleId = checkVeh.rows[0].id
+    } else {
+      const vehResult = await db.query(
+        `INSERT INTO vehicles (user_id, vehicle_model, vehicle_year, plate_number, vehicle_type, mileage)
+         VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+        [
+          userId,
+          ticketData.vehicleModel || 'Unknown',
+          parseInt(ticketData.year) || 2026,
+          ticketData.licensePlate,
+          ticketData.transmission || 'Automatic',
+          parseFloat(ticketData.mileage) || 0
+        ]
+      )
+      vehicleId = vehResult.rows[0].id
+    }
 
     // 3. Create Service Ticket using your database procedure
     const mappedServiceMode = ticketData.pickupOption === 'Home Service' ? 'home_service' : 'walk_in'

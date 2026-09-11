@@ -379,11 +379,11 @@ export default function page() {
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-2 rounded-full px-4 py-2 font-semibold transition-colors ${
                 isActive
-                  ? 'bg-white text-slate-900 shadow-sm'
+                  ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              <Icon size={16} className={isActive ? 'text-slate-900' : 'text-slate-400'} />
+              <Icon size={16} className={isActive ? 'text-white' : 'text-slate-400'} />
               {tab.label}
             </button>
           )
@@ -391,7 +391,9 @@ export default function page() {
       </div>
 
       {activeTab === 'payments' && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
+          <div className="p-6">
           <div className="flex items-center justify-between border-l-4 border-slate-900 pl-3">
             <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">
               Customer Payment Records
@@ -424,7 +426,7 @@ export default function page() {
             </select>
             <button
               onClick={exportPayments}
-              className="flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
             >
               <Download size={14} /> Export CSV
             </button>
@@ -502,11 +504,14 @@ export default function page() {
             <p>* Highlighted rows indicate pending customer payments that require collection or follow-up.</p>
             <p>{filteredPayments.length} of {paymentRecords.length} records shown</p>
           </div>
+          </div>
         </div>
       )}
 
       {activeTab === 'payroll' && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
+          <div className="p-6">
           <div className="flex items-center justify-between border-l-4 border-slate-900 pl-3">
             <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">
               Employee Payroll & Commission Summary
@@ -529,7 +534,7 @@ export default function page() {
             </div>
             <button
               onClick={exportPayroll}
-              className="flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
             >
               <Download size={14} /> Export CSV
             </button>
@@ -639,11 +644,14 @@ export default function page() {
             <li>• Commission Salary is computed automatically as all services divided equally among the active mechanics/workers.</li>
             <li>• Newly added mechanics from the Employee Tab are automatically cascaded here with a default rank, salary, and commission percentage.</li>
           </ul>
+          </div>
         </div>
       )}
 
       {activeTab === 'services' && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
+          <div className="p-6">
           <div className="flex items-center justify-between border-l-4 border-emerald-500 pl-3">
             <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">
               Weekly Services Completed & Commission Breakdown
@@ -666,7 +674,7 @@ export default function page() {
             </div>
             <button
               onClick={exportServices}
-              className="flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
             >
               <Download size={14} /> Export CSV
             </button>
@@ -704,6 +712,7 @@ export default function page() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
@@ -852,7 +861,7 @@ export default function page() {
             <div className="mt-6 flex justify-end gap-2">
               <button
                 onClick={() => downloadInvoice(selectedPayment)}
-                className="flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
               >
                 <Download size={14} /> Download Invoice
               </button>

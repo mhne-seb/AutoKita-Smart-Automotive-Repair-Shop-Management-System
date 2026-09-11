@@ -2,26 +2,131 @@
 
 // Route: /dashboard/profile — Customer account/profile settings page.
 
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
   User,
   Upload,
-  Smartphone,
   Mail,
-  KeyRound,
   Info,
   Eye,
   EyeOff,
   Camera,
+  Check,
   Lock,
   ShieldCheck,
   Settings,
 } from "lucide-react";
 
 const BRAND_GRADIENT = "linear-gradient(90deg, #0b1730 0%, #1d3a68 55%, #3b6cb4 100%)";
+const FALLBACK_USER_ID = 280;
+
+type ProfileForm = {
+  first_name: string;
+  last_name: string;
+  nickname: string;
+  email: string;
+  contact_number: string;
+};
 
 function Profile() {
   useEffect(() => { document.title = "Profile Settings — AutoKita"; }, []);
+
+  const [userId, setUserId] = useState<number>(FALLBACK_USER_ID);
+  const [form, setForm] = useState<ProfileForm | null>(null);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [pwd, setPwd] = useState({ current: "", next: "", confirm: "" });
+  const [savingPwd, setSavingPwd] = useState(false);
+
+  //Brief green "updated" state on the buttons - a corner toast is easy to miss.
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [pwdSaved, setPwdSaved] = useState(false); 
+
+  useEffect(() => {
+    const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
+    const id = stored ? parseInt(stored, 10) : FALLBACK_USER_ID;
+    setUserId(id);
+    fetch(`/api/customer/profile?userId=${id}`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.success) {
+          setForm({
+            first_name: j.user.first_name ?? "",
+            last_name: j.user.last_name ?? "",
+            nickname: j.user.nickname ?? "",
+            email: j.user.email ?? "",
+            contact_number: j.user.contact_number ?? "",
+          });
+        } else {
+          toast.error(j.message ?? "Could not load your profile.");
+        }
+      })
+      .catch(() => toast.error("Could not load your profile."));
+  }, []);
+
+  const set = <K extends keyof ProfileForm>(k: K, v: string) =>
+    setForm((p) => (p ? { ...p, [k]: v } : p));
+
+  const saveProfile = async () => {
+    if (!form) return;
+    setSavingProfile(true);
+    try {
+      const res = await fetch("/api/customer/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          firstName: form.first_name,
+          lastName: form.last_name,
+          nickname: form.nickname,
+          email: form.email,
+          contactNumber: form.contact_number,
+        }),
+      });
+      const j = await res.json();
+      if(j.success) {
+        toast.success("Profile updated.");
+        setProfileSaved(true);
+        setTimeout(() => setProfileSaved(false), 2000);
+      } else {
+        toast.error(j.message ?? "Update failed.");
+      }
+    } catch {
+      toast.error("Could not reach the server.");
+    }
+    setSavingProfile(false);
+  };
+
+  const savePassword = async () => {
+    if (pwd.next.length < 8) return toast.error("New password must be at least 8 characters.");
+    if (pwd.next !== pwd.confirm) return toast.error("New passwords don't match.");
+    setSavingPwd(true);
+    try {
+      const res = await fetch("/api/customer/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, currentPassword: pwd.current, newPassword: pwd.next }),
+      });
+      const j = await res.json();
+      if (j.success) {
+        toast.success("Password updated.");
+        setPwd({ current: "", next: "", confirm: "" });
+        setPwdSaved(true);
+        setTimeout(() => setPwdSaved(false), 2000);
+      } else {
+        toast.error(j.message ?? "Update failed.");
+      }
+    } catch {
+      toast.error("Could not reach the server.");
+    }
+    setSavingPwd(false);
+  };
+
+  if (!form) {
+    return (
+      <div className="mx-auto max-w-6xl px-6 py-10 text-sm text-muted-foreground">Loading…</div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -68,36 +173,63 @@ function Profile() {
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="First name" defaultValue="Juan" />
-            <Field label="Last name" defaultValue="Dela Cruz" />
-            <Field label="Username" defaultValue="@juan.dlcruz" wide />
-            <Field label="Email address" defaultValue="juand.cruz@example.com" wide />
+            <Field label="First name" value={form.first_name} onChange={(e) => set("first_name", e.target.value)} />
+            <Field label="Last name" value={form.last_name} onChange={(e) => set("last_name", e.target.value)} />
+            <Field label="Nickname" value={form.nickname} onChange={(e) => set("nickname", e.target.value)} wide />
+            <Field label="Contact number" value={form.contact_number} onChange={(e) => set("contact_number", e.target.value)} wide />
+            <Field label="Email address" value={form.email} onChange={(e) => set("email", e.target.value)} wide />
           </div>
           <div className="mt-6 flex justify-end">
             <button
-              className="rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-              style={{ backgroundImage: BRAND_GRADIENT }}
+              onClick={saveProfile}
+              disabled={savingProfile}
+              className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors ${
+                profileSaved
+                  ? "bg-emerald-600 text-white"
+                  : "bg-brand text-brand-foreground hover:opacity-90 disabled:opacity-60"
+              }`}
             >
-              Save changes
+              {profileSaved ? (
+                <>
+                  <Check className="h-4 w-4" /> Profile updated
+                </>
+              ) : savingProfile ? (
+                "Saving..."
+              ) : (
+                "Save changes"
+              )}
             </button>
           </div>
         </Section>
 
         <Section icon={Lock} title="Password" desc="Update your password to keep your account secure." stacked>
-          <div className="space-y-4">
-            <PasswordField label="Current password" defaultValue="password" />
+                    <div className="space-y-4">
+            <PasswordField label="Current password" value={pwd.current} onChange={(v) => setPwd((p) => ({ ...p, current: v }))} />
             <div>
-              <PasswordField label="New password" defaultValue="password" />
+              <PasswordField label="New password" value={pwd.next} onChange={(v) => setPwd((p) => ({ ...p, next: v }))} />
               <p className="mt-1 text-xs text-muted-foreground">Must be at least 8 characters.</p>
             </div>
-            <PasswordField label="Confirm new password" defaultValue="password" />
+            <PasswordField label="Confirm new password" value={pwd.confirm} onChange={(v) => setPwd((p) => ({ ...p, confirm: v }))} />
           </div>
           <div className="mt-6 flex justify-end">
             <button
-              className="rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-              style={{ backgroundImage: BRAND_GRADIENT }}
+              onClick={savePassword}
+              disabled={savingPwd}
+              className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors ${
+                pwdSaved
+                  ? "bg-emerald-600 text-white"
+                  : "bg-brand text-brand-foreground hover:opacity-90 disabled:opacity-60"
+              }`}
             >
-              Update password
+              {pwdSaved ? (
+                <>
+                  <Check className="h-4 w-4" /> Password updated 
+                </>
+              ) : savingPwd ? (
+                "Updating..."
+              ) : (
+                "Update password"
+              )}
             </button>
           </div>
         </Section>
@@ -109,24 +241,14 @@ function Profile() {
             <TwoFA
               icon={Mail}
               name="Email verification"
-              desc="Receive a one-time code at juand.cruz@example.com"
+              desc={`Approval codes are sent to ${form.email}`}
               enabled
-            />
-            <TwoFA
-              icon={Smartphone}
-              name="Authenticator app"
-              desc="Use an app like Google Authenticator or Authy"
-            />
-            <TwoFA
-              icon={KeyRound}
-              name="Security key (WebAuthn)"
-              desc="Use a hardware key like YubiKey or Touch ID"
             />
           </div>
           <div className="mt-4 flex items-start gap-2 rounded-md bg-brand-soft/60 p-3 text-xs text-brand">
             <Info className="mt-0.5 h-4 w-4 flex-shrink-0" />
-            Email verification is your primary 2FA method. You can add an authenticator app or
-            security key for extra backup options.
+            AutoKita uses email verification for account codes. Authenticator apps and hardware
+            keys aren&apos;t supported.
           </div>
         </Section>
       </div>
@@ -180,7 +302,7 @@ function Field({ label, wide, ...props }: { label: string; wide?: boolean } & Re
   );
 }
 
-function PasswordField({ label, defaultValue }: { label: string; defaultValue?: string }) {
+function PasswordField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   const [visible, setVisible] = useState(false);
 
   return (
@@ -189,7 +311,8 @@ function PasswordField({ label, defaultValue }: { label: string; defaultValue?: 
       <div className="relative mt-1.5">
         <input
           type={visible ? "text" : "password"}
-          defaultValue={defaultValue}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           className="w-full rounded-md border bg-background px-3 py-2 pr-10 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
         />
         <button
@@ -218,8 +341,7 @@ function TwoFA({ icon: Icon, name, desc, enabled }: { icon: any; name: string; d
       <div className="flex items-center gap-2">
         {enabled ? (
           <>
-            <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-medium text-brand">Enabled</span>
-            <button className="rounded-md border px-3 py-1 text-xs hover:bg-accent">Configure</button>
+            <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-medium text-brand">Always on</span>
           </>
         ) : (
           <>

@@ -39,11 +39,22 @@ export interface DashboardJobOrder {
 
 export interface DashboardActivity {
   id: number
-  type: 'payment' | 'progress_log' | 'status_change'
+  type: 'payment' | 'progress_log' | 'status_change' | 'booking_accepted'
   title: string
   description: string
   time: string
   job_order_id: number
+}
+
+export interface DashboardPendingTicket {
+  id: number
+  ticket_status: string
+  service_mode: string
+  concern: string | null
+  request_date: string
+  vehicle_model: string
+  vehicle_year: number
+  plate_number: string
 }
 
 export interface DashboardShop {
@@ -59,6 +70,7 @@ export interface DashboardData {
   user: DashboardUser | null
   vehicles: DashboardVehicle[]
   activeJobOrders: DashboardJobOrder[]
+  pendingTickets: DashboardPendingTicket[]
   recentActivity: DashboardActivity[]
   shop: DashboardShop | null
 }
@@ -90,8 +102,78 @@ export async function getDashboardActiveJobOrders(userId: number): Promise<Dashb
 }
 
 export async function getDashboardRecentActivity(userId: number): Promise<DashboardActivity[]> {
-  const { rows } = await db.query(
+ const base = await db.query(
     `SELECT * FROM get_dashboard_recent_activity($1)`,
+    [userId],
+  )
+
+  // 2. "Booking accepted" events. When an admin approves a ticket,
+  //    create_job_order_from_ticket() logs it as action_performed = 'created'
+  //    on job_orders — which the function above doesn't surface, so the
+  //    customer never hears their booking went through. Inline query, no new
+  //    stored function.
+  const accepted = await db.query(
+    `SELECT
+        sal.id,
+        'booking_accepted'::text AS type,
+        'Booking Accepted'::text AS title,
+        ('Your booking has been accepted. Job Order #JO-' || sal.entity_id
+            || ' is now scheduled for inspection.')::text AS description,
+        sal.action_date AS job_time,
+        sal.entity_id AS job_order_id
+     FROM system_audit_logs sal
+     WHERE sal.entity_type = 'job_orders'
+       AND sal.action_performed = 'created'
+       AND sal.entity_id IN (SELECT jo.id FROM job_orders jo WHERE jo.user_id = $1)
+     ORDER BY sal.action_date DESC
+     LIMIT 10`,
+    [userId],
+  )
+
+  type RawActivityRow = {
+    id: number
+    type: DashboardActivity['type']
+    title: string
+    description: string
+    time?: string
+    job_time?: string
+    job_order_id: number
+  }
+
+  return ([...base.rows, ...accepted.rows] as RawActivityRow[])
+    .map((r) => ({
+      id: r.id,
+      type: r.type,
+      title: r.title,
+      description: r.description,
+      time: r.time ?? r.job_time ?? '',
+      job_order_id: r.job_order_id,
+    }))
+    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+    .slice(0, 10)
+}
+
+// Bookings the customer submitted that the shop hasn't turned into a job order
+// yet — invisible on the dashboard until an admin accepts the ticket. Inline
+// query (no stored function) against existing tables.
+export async function getDashboardPendingTickets(userId: number): Promise<DashboardPendingTicket[]> {
+  const { rows } = await db.query(
+    `SELECT
+        st.id,
+        st.ticket_status::text  AS ticket_status,
+        st.service_mode::text   AS service_mode,
+        st.customer_concern     AS concern,
+        st.request_date::text   AS request_date,
+        v.vehicle_model,
+        v.vehicle_year,
+        v.plate_number
+     FROM service_tickets st
+     JOIN vehicles v ON v.id = st.vehicle_id
+     WHERE st.user_id = $1
+       AND st.ticket_status IN ('pending', 'queued', 'inspection_scheduled')
+       AND NOT EXISTS (SELECT 1 FROM job_orders jo WHERE jo.ticket_id = st.id)
+     ORDER BY st.request_date DESC
+     LIMIT 6`,
     [userId],
   )
   return rows
@@ -106,13 +188,14 @@ export async function getDashboardShop(): Promise<DashboardShop | null> {
 
 
 export async function getFullDashboardData(userId: number): Promise<DashboardData> {
-  const [user, vehicles, activeJobOrders, recentActivity, shop] = await Promise.all([
+  const [user, vehicles, activeJobOrders, pendingTickets, recentActivity, shop] = await Promise.all([
     getDashboardUser(userId),
     getDashboardVehicles(userId),
     getDashboardActiveJobOrders(userId),
+    getDashboardPendingTickets(userId),
     getDashboardRecentActivity(userId),
     getDashboardShop(),
   ])
 
-  return { user, vehicles, activeJobOrders, recentActivity, shop }
+  return { user, vehicles, activeJobOrders, pendingTickets, recentActivity, shop }
 }

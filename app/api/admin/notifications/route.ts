@@ -6,7 +6,8 @@ import { db } from '@/lib/db'
 // admin acts (advance stage / release / verify payment).
 export async function GET() {
   try {
-    const [jobOrders, payments] = await Promise.all([
+    const [tickets, jobOrders, payments] = await Promise.all([
+      db.query('SELECT * FROM get_service_tickets_queue()'),
       db.query('SELECT * FROM get_job_orders_list()'),
       db.query('SELECT * FROM get_payment_records()'),
     ])
@@ -24,8 +25,20 @@ export async function GET() {
       Number(v ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     const name = (f?: string | null, l?: string | null) =>
       [f, l].filter(Boolean).join(' ') || 'a customer'
+    const short = (s?: string | null, n = 80) =>
+      !s ? '' : s.length > n ? s.slice(0, n) + '...' : s
 
     const notifs: Notif[] = []
+
+    for(const t of tickets.rows) {
+      notifs.push({
+        notif_key: `ticket-${t.id}`,
+        title: 'New service request',
+        message: `${name(t.first_name, t.last_name)} booked ${t.vehicle_model ?? 'a vehicle'} (${t.plate_number ?? 'no plate'}). ${short(t.customer_concern)}`.trim(),
+        notif_time:t.request_date,
+        href:'/job-queue',
+      })
+    }
 
     for (const jo of jobOrders.rows) {
       // 1. Job order just created from a ticket (stays 'inspecting' until advanced)

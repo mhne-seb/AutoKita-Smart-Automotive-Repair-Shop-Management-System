@@ -1,6 +1,7 @@
 'use client'
 
 // Admin "Quotation" page (one step of the job-order workflow: Inspection -> Quotation -> Service Progress). Lets the mechanic/admin build a service+parts quote for the customer to approve, then hands off to Service Progress.
+import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useState, useRef } from 'react'
 import Link from "next/link";
 import { Plus, Pencil, Check, Send, ShieldCheck, ChevronRight, X, Trash2, RotateCcw } from 'lucide-react'
@@ -12,11 +13,8 @@ import { getLatestPreDiagnostic, sendForApproval, recallApproval } from '@/contr
 import { currency } from '@/data/mockData'
 import { QuotationService, JobOrderCard, QuotationData } from '@/data/types'
 
-interface Props {
-  jobOrderId: string
-}
-
-export default function page({ jobOrderId }: Props) {
+export default function page() {
+  const jobOrderId = String(useParams().id)
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)
 
   // Quotation data now comes from the real database, which is an async call

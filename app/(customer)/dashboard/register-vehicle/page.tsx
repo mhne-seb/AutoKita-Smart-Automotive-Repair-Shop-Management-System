@@ -32,7 +32,7 @@ function RegisterVehicle() {
   const [activeJobOrders, setActiveJobOrders] = useState<any[]>([]);
 
   // Form state
-  const [selectedVehicleId, setSelectedVehicleId] = useState<string>("new");
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string>("");
   const [vehicleMake, setVehicleMake] = useState("");
   const [vehicleModel, setVehicleModel] = useState("");
   const [vehicleYear, setVehicleYear] = useState("");
@@ -51,6 +51,7 @@ function RegisterVehicle() {
           if (data.user) setUser(data.user);
           if (data.vehicles) setVehicles(data.vehicles);
           if (data.activeJobOrders) setActiveJobOrders(data.activeJobOrders);
+          if (!data.vehicles || data.vehicles.length === 0) setSelectedVehicleId("new");
           setLoading(false);
         })
         .catch(err => {
@@ -64,10 +65,14 @@ function RegisterVehicle() {
 
   const handleConfirm = async () => {
     if (isSubmitting) return;
-    setIsSubmitting(true);
     const userId = sessionStorage.getItem("autokita_user_id");
     if (!userId) {
       alert("You must be logged in to book a service.");
+      return;
+    }
+
+    if (!selectedVehicleId) {
+      alert("Please select a vehicle, or choose \"+ Register New Vehicle\".");
       return;
     }
 
@@ -103,6 +108,7 @@ function RegisterVehicle() {
       reqBody.vehicleId = parseInt(selectedVehicleId, 10);
     }
 
+    setIsSubmitting(true);
     try {
       const res = await fetch("/api/customer/booking", {
         method: "POST",
@@ -191,6 +197,7 @@ function RegisterVehicle() {
                 onChange={(e) => setSelectedVehicleId(e.target.value)}
                 className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15"
               >
+                <option value="" disabled> Select a vehicle...</option>
                 {vehicles.map(v => {
                   const isActive = activeJobOrders.some(jo => jo.plate_number === v.plate_number);
                   return (
@@ -201,6 +208,9 @@ function RegisterVehicle() {
                 })}
                 <option value="new">+ Register New Vehicle</option>
               </select>
+              {selectedVehicleId === "" && (
+                <p className="mt-2 text-xs text-muted-forground"> Choose one of your saved vehicles, or register a new one.</p>
+              )}
             </div>
 
             {selectedVehicleId === "new" && (

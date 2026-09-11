@@ -39,7 +39,9 @@ export default function page() {
         <p className="mt-1 text-sm text-muted-foreground">Monitor changes in the database.</p>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-6">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
+        <div className="p-6">
         <div className="flex flex-wrap items-center justify-between gap-3 border-l-4 border-brand pl-3">
           <h3 className="text-sm font-bold uppercase tracking-wide text-foreground">Database Administration</h3>
           <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -118,7 +120,7 @@ export default function page() {
                       <button
                         aria-label="View details"
                         onClick={() => setDetailTarget(entry)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-accent hover:text-foreground"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white hover:opacity-90"
                       >
                         <Eye size={14} />
                       </button>
@@ -128,6 +130,7 @@ export default function page() {
               )}
             </tbody>
           </table>
+        </div>
         </div>
       </div>
 
@@ -146,12 +149,12 @@ function LogDetailModal({ entry, onClose }: { entry: (typeof initialAuditLog)[nu
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg overflow-hidden rounded-xl bg-background shadow-2xl">
-        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+        <div className="flex items-center justify-between bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-6 py-4">
           <div>
-            <p className="font-bold text-foreground">Log Entry {entry.id}</p>
-            <p className="text-xs text-muted-foreground">Full record of this database change</p>
+            <p className="font-bold text-white">Log Entry {entry.id}</p>
+            <p className="text-xs text-white/70">Full record of this database change</p>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+          <button onClick={onClose} className="text-white/70 hover:text-white" aria-label="Close">
             <X size={20} />
           </button>
         </div>
