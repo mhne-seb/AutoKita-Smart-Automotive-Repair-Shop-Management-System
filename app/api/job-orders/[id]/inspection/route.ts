@@ -26,9 +26,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       [id]
     )
 
+    const photoResult = await db.query(
+      `SELECT findings_description AS slot_id, name AS label, photo
+      FROM vehicle_inspections
+      WHERE job_order_id = $1 AND status = 'reference-photo' `,
+      [id]
+    )
+
     return NextResponse.json({
       success: true,
-      data: { ...headerResult.rows[0], findings: findingsResult.rows },
+      data: { ...headerResult.rows[0], findings: findingsResult.rows, referencePhotos: photoResult.rows},
     })
   } catch (error) {
     console.error('Inspection fetch error:', error)

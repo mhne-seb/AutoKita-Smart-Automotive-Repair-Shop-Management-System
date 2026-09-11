@@ -15,6 +15,7 @@
 //     if present, otherwise 0 / not running.
 
 import type { InspectionData, MechanicalFinding, InspectionPhotoSlot } from '@/data/types'
+import { REFERENCE_PHOTO_STATUS } from '@/data/types'
 
 const DEFAULT_PHOTO_SLOTS: InspectionPhotoSlot[] = [
   { id: 'front', label: 'Front Quarter' },
@@ -35,13 +36,24 @@ function timeToHours(time: string | null): number {
 }
 
 function toInspectionData(row: any): InspectionData {
-  const findings: MechanicalFinding[] = row.findings.map((f: any) => ({
-    id: String(f.id),
-    name: f.name || 'Inspection Finding',
-    note: f.findings_description || f.notes || '',
-    status: f.status ?? 'needs-attention',
-    photo: f.photo ?? undefined,
-  }))
+   // Walkaround photos come back from a separate query (row.referencePhotos),
+  // keyed by slot id. Fall back to the hardcoded empty slots if none exist yet.
+
+  const photoRows: any[] = row.referencePhotos ?? []
+  const photoSlots: InspectionPhotoSlot[] = DEFAULT_PHOTO_SLOTS.map((slot) => {
+    const shot = photoRows.find((p) => p.slot_id === slot.id)
+    return shot?.photo ? {...slot, url: shot.photo} : slot
+  })
+
+  const findings: MechanicalFinding[] = row.findings
+    .filter((f: any) => f.status !== REFERENCE_PHOTO_STATUS)
+    .map((f: any) => ({
+      id: String(f.id),
+      name: f.name || 'Inspection Finding',
+      note: f.findings_description || f.notes || '',
+      status: f.status ?? 'needs-attention',
+      photo: f.photo ?? undefined,
+    }))
 
   const laborHoursEstimate = timeToHours(row.estimated_duration)
   const currentDurationHours = row.started_at
@@ -53,7 +65,7 @@ function toInspectionData(row: any): InspectionData {
     vehicleTitle: `${row.vin ? '' : ''}${row.vehicle_model ?? 'Unknown Vehicle'}`.trim(),
     plate: row.plate_number || '—',
     customer: `${row.first_name ?? ''} ${row.last_name ?? ''}`.trim() || 'Unknown Customer',
-    photoSlots: DEFAULT_PHOTO_SLOTS,
+    photoSlots,
     notes: [], // no notes table exists yet — technician notes are session-only until one is added
     findings,
     timer: {
@@ -81,7 +93,23 @@ export async function getInspectionForJobOrder(jobOrderId: string): Promise<Insp
   return (await getInspectionById(jobOrderId)) ?? null
 }
 
+export async function uploadInspectionPhoto(
+  jobOrderId: string,
+  slotId: string,
+  label: string,
+  file: File,
+): Promise<string | null> { 
+  const form = new FormData()
+  form.append('file', file)
+  form.append('slotId', slotId)
+  form.append('label', label)
 
+  const res = await fetch(`/api/job-orders/${jobOrderId}/photos`, { method: 'POST',
+    body: form })
+    const json = await res.json().catch(() => null)
+    if (!res.ok || !json?.success) return null
+    return json.url as string
+}
 
 export async function addInspectionFinding(jobOrderId: string, finding: Partial<MechanicalFinding>): Promise<MechanicalFinding | null> {
   const res = await fetch(`/api/job-orders/${jobOrderId}/findings`, {

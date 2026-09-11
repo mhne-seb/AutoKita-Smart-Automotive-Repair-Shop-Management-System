@@ -3,11 +3,14 @@
 import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from "next/link";
-import { Camera, Plus, Pencil, Trash2, Check, X, Cloud, Clock, ChevronRight, CheckCircle2 } from 'lucide-react'
+import { Camera, Plus, Pencil, Trash2, Check, X, Cloud, Clock, ChevronRight, CheckCircle2, Loader2, Maximize2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
+import { Lightbox } from '@/components/Lightbox'
+import { compressImage } from '@/lib/image'
 import { getJobOrderById } from '@/controllers/jobOrderController'
-import { getInspectionById, addInspectionFinding, updateInspectionFinding, deleteInspectionFinding } from '@/controllers/inspectionController'
+import { getInspectionById, addInspectionFinding, updateInspectionFinding, deleteInspectionFinding, uploadInspectionPhoto} from '@/controllers/inspectionController'
 import { getLatestPreDiagnostic, sendForApproval, type PreDiagnosticRound } from '@/controllers/preDiagnosticController'
 import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData } from '@/data/types'
 
@@ -65,6 +68,8 @@ export default function page() {
   const [sending, setSending] = useState(false)
   const [respondingTo, setRespondingTo] = useState<'approved' | 'disputed' | null>(null)
 
+  const [uploadingSlot, setUploadingSlot] = useState<string | null>(null)
+  const [lightbox, setLightbox] = useState<{ url: string; label: string } | null>(null)
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
 
   // Once the real data arrives, seed the editable state from it.
@@ -95,12 +100,31 @@ export default function page() {
     )
   }
 
-  function handlePhotoPick(slotId: string, file: File | undefined) {
+  // Compress, upload, then keep the stored URL. The preview swaps to a local
+  // copy immediately so the shot appears to land, but only the uploaded URL
+  // survives a refresh.
+  async function handlePhotoPick(slotId: string, label: string, file: File | undefined) {
     if (!file) return
-    const url = URL.createObjectURL(file)
-    setPhotoSlots((prev) => prev.map((p) => (p.id === slotId ? { ...p, url } : p)))
-  }
 
+    const previousUrl = photoSlots.find((p) => p.id === slotId)?.url
+    const localUrl = URL.createObjectURL(file)
+    setPhotoSlots((prev) => prev.map((p) => (p.id === slotId ? { ...p, url: localUrl } : p)))
+    setUploadingSlot(slotId)
+
+    try {
+      const compressed = await compressImage(file)
+      const url = await uploadInspectionPhoto(jobOrderId, slotId, label, compressed)
+      if (!url) throw new Error('upload rejected')
+      setPhotoSlots((prev) => prev.map((p) => (p.id === slotId ? { ...p, url } : p)))
+      toast.success(`${label} photo saved`)
+    } catch {
+      setPhotoSlots((prev) => prev.map((p) => (p.id === slotId ? { ...p, url: previousUrl } : p)))
+      toast.error(`Could not save the ${label} photo. Please try again.`)
+    } finally {
+      URL.revokeObjectURL(localUrl)
+      setUploadingSlot(null)
+    }
+  }
   function saveNote() {
     if (!noteDraft.trim()) return
     setNotes((prev) => [
@@ -226,32 +250,59 @@ export default function page() {
 
             <div className="grid grid-cols-3 gap-4">
               {photoSlots.map((slot) => (
-                <button
+                <div
                   key={slot.id}
-                  onClick={() => fileInputRefs.current[slot.id]?.click()}
-                  className="group relative flex h-40 flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-400 hover:border-slate-300"
+                  className="group relative h-40 overflow-hidden rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-400 hover:border-slate-300"
                 >
                   {slot.url ? (
                     <>
-                      <img src={slot.url} alt={slot.label} className="absolute inset-0 h-full w-full object-cover" />
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100">
-                        Replace photo
-                      </span>
+                      {/* The photo opens the viewer; replacing it is a separate
+                          control, since one click can't mean both. */}
+                      <button
+                        type="button"
+                        onClick={() => setLightbox({ url: slot.url!, label: slot.label })}
+                        className="absolute inset-0 h-full w-full"
+                      >
+                        <img src={slot.url} alt={slot.label} className="h-full w-full object-cover" />
+                        <span className="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/40 text-white opacity-0 group-hover:opacity-100">
+                          <Maximize2 size={14} /> View
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRefs.current[slot.id]?.click()}
+                        disabled={uploadingSlot === slot.id}
+                        className="absolute bottom-2 right-2 z-10 rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700 opacity-0 shadow group-hover:opacity-100 hover:bg-white"
+                      >
+                        Replace
+                      </button>
                     </>
                   ) : (
-                    <>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRefs.current[slot.id]?.click()}
+                      disabled={uploadingSlot === slot.id}
+                      className="flex h-full w-full flex-col items-center justify-center gap-2 disabled:cursor-wait"
+                    >
                       <Camera size={20} />
                       {slot.label}
-                    </>
+                    </button>
+                  )}
+                  {uploadingSlot === slot.id && (
+                    <span className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 text-white">
+                      <Loader2 size={16} className="animate-spin" /> Uploading…
+                    </span>
                   )}
                   <input
                     ref={(el) => { fileInputRefs.current[slot.id] = el }}
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
                     className="hidden"
-                    onChange={(e) => handlePhotoPick(slot.id, e.target.files?.[0])}
+                    onChange={(e) => {handlePhotoPick(slot.id, slot.label, e.target.files?.[0])
+                      e.target.value = '' // re-picking the same file still fires onChange
+                    }}
                   />
-                </button>
+                </div>
               ))}
             </div>
 
@@ -499,6 +550,10 @@ export default function page() {
           )}
         </div>
       </div>
+
+      {lightbox && (
+        <Lightbox url={lightbox.url} label={lightbox.label} onClose={() => setLightbox(null)} />
+      )}
     </div>
   )
 }
