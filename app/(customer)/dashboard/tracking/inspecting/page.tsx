@@ -45,6 +45,7 @@ function Inspecting() {
   const jobOrder = data?.jobOrder ?? null;
   const preDiagnostic = data?.preDiagnostic ?? null;
   const findings = data?.findings ?? [];
+  const walkaround = data?.walkaround ?? [];
   const shop = data?.shop ?? null;
 
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
@@ -147,12 +148,51 @@ function Inspecting() {
 
       <div className={findings.length > 0 ? "grid gap-6 lg:grid-cols-[2fr_1fr]" : "mx-auto max-w-3xl"}>
         <div className="space-y-6">
+          {walkaround.length > 0 && (
+            <div className="rounded-xl border bg-card p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2 text-[color:oklch(0.5_0.2_300)]">
+                  <Camera className="h-4 w-4" />
+                  <span className="text-xs font-bold uppercase tracking-wider">Pre-Diagnostics</span>
+                </div>
+                <span className="rounded-full border px-3 py-0.5 text-[10px]">Official Record</span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Your vehicle&apos;s condition as documented on arrival, before any work began.
+              </p>
+              <div className="mt-4 divide-y">
+                {walkaround.map((w) => (
+                  <div key={w.id} className="grid gap-4 py-4 first:pt-0 last:pb-0 sm:grid-cols-[160px_1fr]">
+                    <button
+                      type="button"
+                      onClick={() => setLightbox({ url: w.photo, label: w.label })}
+                      className="group relative overflow-hidden rounded-lg"
+                      title="Click to enlarge"
+                    >
+                      <img src={w.photo} alt={w.label} className="aspect-[4/3] w-full object-cover" />
+                      <span className="absolute inset-0 bg-black/30 opacity-0 transition-opacity group-hover:opacity-100" />
+                    </button>
+                    <div>
+                      <div className="font-semibold">{w.label}</div>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {w.note?.trim() ? w.note : <span className="italic">No condition notes recorded for this area.</span>}
+                      </p>
+                      {w.logged_date && (
+                        <p className="mt-2 text-[11px] text-muted-foreground">{w.logged_date}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {preDiagnostic?.mechanic_notes && (
             <div className="rounded-xl border bg-card p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2 text-[color:oklch(0.5_0.2_300)]">
                   <LayoutGrid className="h-4 w-4" />
-                  <span className="text-xs font-bold uppercase tracking-wider">Pre-Diagnostics</span>
+                  <span className="text-xs font-bold uppercase tracking-wider">Inspection Summary</span>
                 </div>
                 <span className="rounded-full border px-3 py-0.5 text-[10px]">Official Record</span>
               </div>
@@ -187,31 +227,6 @@ function Inspecting() {
                   )}
                 </div>
               )}
-            </div>
-          )}
-
-          {findings.some((f) => f.photo) && (
-            <div className="rounded-xl border bg-card p-6">
-              <div className="flex items-center gap-2 text-[color:oklch(0.5_0.2_300)]">
-                <Camera className="h-4 w-4" />
-                <span className="text-xs font-bold uppercase tracking-wider">Photo Documentation</span>
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-4">
-                {findings.filter((f) => f.photo).map((f) => (
-                  <div key={f.id} className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => setLightbox({ url: f.photo!, label: f.name ?? "Inspection photo" })}
-                      className="group relative block w-full overflow-hidden rounded-lg"
-                      title="Click to enlarge"
-                    >
-                      <img src={f.photo!} alt={f.name ?? "Inspection photo"} className="aspect-video w-full object-cover" />
-                      <span className="absolute inset-0 bg-black/30 opacity-0 transition-opacity group-hover:opacity-100" />
-                    </button>
-                    <div className="mt-2 text-xs">{f.name ?? "Inspection photo"}</div>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
 

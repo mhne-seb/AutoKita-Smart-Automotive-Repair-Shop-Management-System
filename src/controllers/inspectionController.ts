@@ -42,7 +42,7 @@ function toInspectionData(row: any): InspectionData {
   const photoRows: any[] = row.referencePhotos ?? []
   const photoSlots: InspectionPhotoSlot[] = DEFAULT_PHOTO_SLOTS.map((slot) => {
     const shot = photoRows.find((p) => p.slot_id === slot.id)
-    return shot?.photo ? {...slot, url: shot.photo} : slot
+    return shot?.photo ? {...slot, url: shot.photo, rowId: shot.id, note: shot.note ?? '' } : slot
   })
 
   const findings: MechanicalFinding[] = row.findings
@@ -98,7 +98,7 @@ export async function uploadInspectionPhoto(
   slotId: string,
   label: string,
   file: File,
-): Promise<string | null> { 
+): Promise<{ url: string; rowId: number } | null>{ 
   const form = new FormData()
   form.append('file', file)
   form.append('slotId', slotId)
@@ -108,7 +108,19 @@ export async function uploadInspectionPhoto(
     body: form })
     const json = await res.json().catch(() => null)
     if (!res.ok || !json?.success) return null
-    return json.url as string
+    return { url: json.url as string, rowId: json.id as number }
+}
+
+/** Saves the mechanic's condition note for a walkaround photo. */
+export async function saveWalkaroundNote(jobOrderId: string, rowId: number, note: string):
+Promise<boolean> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/photos` , {
+    method: 'PATCH', 
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ rowId, note }),
+  })
+  const json = await res.json().catch(() => null)
+  return Boolean(res.ok && json?.success)
 }
 
 export async function addInspectionFinding(jobOrderId: string, finding: Partial<MechanicalFinding>): Promise<MechanicalFinding | null> {

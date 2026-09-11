@@ -175,6 +175,13 @@ export async function getInspectingData(userId: number, jobOrderId?: number) {
       datetime_created: string | null
       approval_status: string| null
   } | null
+    walkaround: {
+      id: number
+      label: string
+      note: string | null
+      photo: string 
+      logged_date: string
+    }[]
     findings: {
       id: number
       name: string | null

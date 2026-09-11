@@ -57,6 +57,9 @@ export interface InspectionPhotoSlot {
   id: string
   label: string
   url?: string
+  // Present once a photo has been uploaded: the vehicle_inspections row that backs this slot, and the mechanic's condition note for it.
+  rowId?: number
+  note?: string
 }
 
 // Walkaround photos are stored as vehicle_inspections rows to reuse the
