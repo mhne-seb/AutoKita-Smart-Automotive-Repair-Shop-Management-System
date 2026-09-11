@@ -60,6 +60,9 @@ export default function page() {
   const [editingFindingId, setEditingFindingId] = useState<string | null>(null)
   const [editFindingName, setEditFindingName] = useState('')
   const [editFindingNote, setEditFindingNote] = useState('')
+  // Severity is staged here while editing and only written on Save, so picking
+  // a chip no longer commits (and discards) an in-progress name/note edit.
+  const [editFindingStatus, setEditFindingStatus] = useState<FindingStatus>('ok')
   const [timerRunning, setTimerRunning] = useState(false)
   const [approvalDecision, setApprovalDecision] = useState<'pending' | 'confirmed' | 'reverted'>('pending')
 
@@ -71,6 +74,11 @@ export default function page() {
   const [uploadingSlot, setUploadingSlot] = useState<string | null>(null)
   const [lightbox, setLightbox] = useState<{ url: string; label: string } | null>(null)
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
+
+  // While the customer is reviewing the report we sent them, it must not change
+  // underneath them — the record they approve has to be the record we sent.
+  // Everything stays visible, just not editable.
+  const isLocked = preDiagnostic?.status === 'pending'
 
   // Once the real data arrives, seed the editable state from it.
   useEffect(() => {
@@ -104,7 +112,7 @@ export default function page() {
   // copy immediately so the shot appears to land, but only the uploaded URL
   // survives a refresh.
   async function handlePhotoPick(slotId: string, label: string, file: File | undefined) {
-    if (!file) return
+    if (!file || isLocked) return
 
     const previousUrl = photoSlots.find((p) => p.id === slotId)?.url
     const localUrl = URL.createObjectURL(file)
@@ -134,16 +142,18 @@ export default function page() {
     setNoteDraft('')
   }
 
-  async function updateFindingStatus(fId: string, status: FindingStatus) {
-    // Optimistic update
-    setFindings((prev) => prev.map((f) => (f.id === fId ? { ...f, status } : f)))
-    setEditingFindingId(null)
-    
-    // API Call
-    await updateInspectionFinding(jobOrderId, { id: fId, status })
+  // Opens the editor with every field seeded from the finding, so the form
+  // never shows leftovers from whichever finding was edited before it.
+  function startEditingFinding(f: MechanicalFinding) {
+    if (isLocked) return
+    setEditingFindingId(f.id)
+    setEditFindingName(f.name)
+    setEditFindingNote(f.note)
+    setEditFindingStatus(f.status)
   }
 
   async function updateFindingContent(fId: string, name: string, note: string, status: FindingStatus) {
+    if (isLocked) return
     setFindings((prev) => prev.map((f) => (f.id === fId ? { ...f, name, note, status } : f)))
     setEditingFindingId(null)
 
@@ -151,14 +161,16 @@ export default function page() {
   }
 
   async function deleteFinding(fId: string) {
+    if (isLocked) return
     // Optimistic update
     setFindings((prev) => prev.filter((f) => f.id !== fId))
-    
+
     // API Call
     await deleteInspectionFinding(jobOrderId, fId)
   }
 
   async function addFinding() {
+    if (isLocked) return
     const newFindingData = {
       name: 'New finding',
       note: 'Describe what was found...',
@@ -172,6 +184,7 @@ export default function page() {
       setEditingFindingId(added.id)
       setEditFindingName(added.name)
       setEditFindingNote(added.note)
+      setEditFindingStatus(added.status)
     }
   }
 
@@ -248,6 +261,20 @@ export default function page() {
               </div>
             </div>
 
+            {isLocked && (
+              <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                <Clock size={16} className="mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold">Locked while the customer reviews this report</p>
+                  <p className="mt-0.5 text-amber-800">
+                    The customer is reviewing the findings you sent. The report can&apos;t be edited
+                    until they approve or raise a concern, so the record they act on is exactly the
+                    one you submitted.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-3 gap-4">
               {photoSlots.map((slot) => (
                 <div
@@ -268,21 +295,23 @@ export default function page() {
                           <Maximize2 size={14} /> View
                         </span>
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => fileInputRefs.current[slot.id]?.click()}
-                        disabled={uploadingSlot === slot.id}
-                        className="absolute bottom-2 right-2 z-10 rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700 opacity-0 shadow group-hover:opacity-100 hover:bg-white"
-                      >
-                        Replace
-                      </button>
+                      {!isLocked && (
+                        <button
+                          type="button"
+                          onClick={() => fileInputRefs.current[slot.id]?.click()}
+                          disabled={uploadingSlot === slot.id}
+                          className="absolute bottom-2 right-2 z-10 rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700 opacity-0 shadow group-hover:opacity-100 hover:bg-white"
+                        >
+                          Replace
+                        </button>
+                      )}
                     </>
                   ) : (
                     <button
                       type="button"
                       onClick={() => fileInputRefs.current[slot.id]?.click()}
-                      disabled={uploadingSlot === slot.id}
-                      className="flex h-full w-full flex-col items-center justify-center gap-2 disabled:cursor-wait"
+                      disabled={uploadingSlot === slot.id || isLocked}
+                      className="flex h-full w-full flex-col items-center justify-center gap-2 disabled:cursor-not-allowed"
                     >
                       <Camera size={20} />
                       {slot.label}
@@ -313,12 +342,14 @@ export default function page() {
               <input
                 value={noteDraft}
                 onChange={(e) => setNoteDraft(e.target.value)}
+                disabled={isLocked}
                 placeholder="Add a note about this inspection..."
-                className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+                className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50"
               />
               <button
                 onClick={saveNote}
-                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                disabled={isLocked}
+                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Add
               </button>
@@ -344,7 +375,8 @@ export default function page() {
               <p className="text-sm font-bold text-slate-900">Mechanical Findings</p>
               <button
                 onClick={addFinding}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                disabled={isLocked}
+                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Plus size={13} /> Add Finding
               </button>
@@ -375,8 +407,8 @@ export default function page() {
                               rows={2}
                               className="w-full rounded border border-slate-300 px-2 py-1 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none"
                             />
-                            <button 
-                              onClick={() => updateFindingContent(f.id, editFindingName, editFindingNote, f.status)}
+                            <button
+                              onClick={() => updateFindingContent(f.id, editFindingName, editFindingNote, editFindingStatus)}
                               className="rounded bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700"
                             >
                               Save
@@ -396,8 +428,13 @@ export default function page() {
                             {(['ok', 'needs-attention', 'urgent'] as FindingStatus[]).map((s) => (
                               <button
                                 key={s}
-                                onClick={() => updateFindingStatus(f.id, s)}
-                                className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${findingStatusMeta[s].classes}`}
+                                onClick={() => setEditFindingStatus(s)}
+                                aria-pressed={editFindingStatus === s}
+                                className={`rounded-full border px-2.5 py-1 text-xs font-semibold transition-opacity ${findingStatusMeta[s].classes} ${
+                                  editFindingStatus === s
+                                    ? 'ring-2 ring-slate-900/20 ring-offset-1'
+                                    : 'opacity-40 hover:opacity-75'
+                                }`}
                               >
                                 {findingStatusMeta[s].label}
                               </button>
@@ -408,23 +445,25 @@ export default function page() {
                           </div>
                         ) : (
                           <button
-                            onClick={() => setEditingFindingId(f.id)}
-                            className={`rounded-full border px-3 py-1 text-xs font-semibold ${meta.classes}`}
+                            onClick={() => startEditingFinding(f)}
+                            disabled={isLocked}
+                            className={`rounded-full border px-3 py-1 text-xs font-semibold disabled:cursor-not-allowed ${meta.classes}`}
                           >
                             {meta.label}
                           </button>
                         )}
-                        <button 
-                          onClick={() => {
-                            setEditingFindingId(f.id)
-                            setEditFindingName(f.name)
-                            setEditFindingNote(f.note)
-                          }} 
-                          className="rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50"
+                        <button
+                          onClick={() => startEditingFinding(f)}
+                          disabled={isLocked}
+                          className="rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           <Pencil size={14} />
                         </button>
-                        <button onClick={() => deleteFinding(f.id)} className="rounded-lg border border-slate-200 p-1.5 text-rose-500 hover:bg-rose-50">
+                        <button
+                          onClick={() => deleteFinding(f.id)}
+                          disabled={isLocked}
+                          className="rounded-lg border border-slate-200 p-1.5 text-rose-500 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
                           <Trash2 size={14} />
                         </button>
                       </div>
