@@ -15,8 +15,10 @@ import {
   Check,
   Lock,
   ShieldCheck,
+  Settings,
 } from "lucide-react";
 
+const BRAND_GRADIENT = "linear-gradient(90deg, #0b1730 0%, #1d3a68 55%, #3b6cb4 100%)";
 const FALLBACK_USER_ID = 280;
 
 type ProfileForm = {
@@ -128,11 +130,24 @@ function Profile() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Account Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage your profile, password, and account security.
-        </p>
+      <div className="mb-8 flex items-center gap-3">
+        <div
+          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-white shadow-md"
+          style={{ backgroundImage: BRAND_GRADIENT }}
+        >
+          <Settings className="h-5 w-5" />
+        </div>
+        <div>
+          <h1
+            className="bg-clip-text text-2xl font-extrabold tracking-tight text-transparent"
+            style={{ backgroundImage: BRAND_GRADIENT }}
+          >
+            Account Settings
+          </h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Manage your profile, password, and account security.
+          </p>
+        </div>
       </div>
 
       {/* Profile + Password side by side on larger screens */}
@@ -151,7 +166,7 @@ function Profile() {
               </button>
             </div>
             <div>
-              <button className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-accent">
+              <button className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-accent">
                 <Upload className="h-3.5 w-3.5" /> Upload photo
               </button>
               <p className="mt-1.5 text-xs text-muted-foreground">JPG or PNG. Max 5MB.</p>
@@ -255,18 +270,21 @@ function Section({
   stacked?: boolean;
 }) {
   return (
-    <section className="rounded-xl border bg-card p-6 shadow-sm md:p-8">
-      <div className={stacked ? "space-y-6" : "grid gap-6 md:grid-cols-[220px_1fr] md:gap-8"}>
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-brand-soft text-brand">
-              <Icon className="h-4 w-4" />
+    <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+      <div className="h-1 w-full" style={{ backgroundImage: BRAND_GRADIENT }} />
+      <div className="p-6 md:p-8">
+        <div className={stacked ? "space-y-6" : "grid gap-6 md:grid-cols-[220px_1fr] md:gap-8"}>
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-brand-soft text-brand">
+                <Icon className="h-4 w-4" />
+              </div>
+              <h2 className="text-lg font-semibold">{title}</h2>
             </div>
-            <h2 className="text-lg font-semibold">{title}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{desc}</p>
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">{desc}</p>
+          <div>{children}</div>
         </div>
-        <div>{children}</div>
       </div>
     </section>
   );

@@ -1,11 +1,13 @@
 'use client'
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Check, FileText, Wrench, ShieldCheck, Printer, Download, CreditCard, Clock } from "lucide-react";
+import { Check, FileText, Wrench, ShieldCheck, Printer, Download, Clock, Car, User, PackageCheck } from "lucide-react";
 import { StageStepper } from "@/components/dashboard/StageStepper";
 import { getCompletedData } from "@/controllers/serviceProgressController";
+import { getShopInfo } from "@/controllers/billingController";
+// npm install jspdf
+import jsPDF from "jspdf";
 
 function formatMoney(v: string | number | null | undefined) {
   const n = Number(v ?? 0);
@@ -63,32 +65,20 @@ function Completed() {
 
   const { jobOrder, logs, warranties, services, parts } = data;
 
+  // NOTE: release-related fields (released_at / released_to / odometer /
+  // release_photo_url) aren't in the current CompletedData shape yet — add
+  // them to getCompletedData's return once the release flow is wired up on
+  // the admin side. Falling back gracefully below in the meantime.
+  const releasedAt = (jobOrder as any).released_at ?? null;
+  const releasedTo = (jobOrder as any).released_to ?? "Customer / Authorized Representative";
+  const releasePhoto = (jobOrder as any).release_photo_url ?? null;
+
   const laborTotal = services.reduce((sum, s) => sum + Number(s.actual_amount ?? 0), 0);
   const partsTotal = parts.reduce((sum, p) => sum + Number(p.total_retail_amount ?? 0), 0);
+  const balanceDue = Number(jobOrder.balance ?? 0);
 
   const handleDownload = () => {
-    const lines = [
-      `AutoKita — Final Service Invoice`,
-      `Vehicle: ${jobOrder.vehicle_year} ${jobOrder.vehicle_model} — ${jobOrder.plate_number}`,
-      ``,
-      `Technician Labor`,
-      ...services.map((s) => `  ${s.service_name} (${s.actual_hours ?? s.estimated_hours} hrs)`.padEnd(42) + formatMoney(s.actual_amount)),
-      ``,
-      `Replaced Parts`,
-      ...parts.map((p) => `  ${p.description} x${p.quantity}`.padEnd(42) + formatMoney(p.total_retail_amount)),
-      ``,
-      `------------------------------------------------`,
-      `Total Due`.padEnd(42) + formatMoney(jobOrder.actual_grand_total),
-    ];
-    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `AutoKita_Invoice_JO-${jobOrder.job_order_id}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    void generateServiceReportPDF({ jobOrder, services, parts, warranties, releasedAt, releasedTo });
   };
 
   return (
@@ -104,10 +94,14 @@ function Completed() {
               <span className="rounded-full bg-background px-3 py-1 text-xs font-semibold">{statusLabel(jobOrder.status)}</span>
               <span className="text-xs text-muted-foreground">JOB ORDER #JO-{jobOrder.job_order_id}</span>
             </div>
-            <h1 className="mt-3 text-3xl font-bold">Your vehicle is ready!</h1>
+            <h1 className="mt-3 text-3xl font-bold">Final Service Report</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              The service for your {jobOrder.vehicle_year} {jobOrder.vehicle_model} ({jobOrder.plate_number}) has been completed by our technicians.
+              Complete summary for your {jobOrder.vehicle_year} {jobOrder.vehicle_model} ({jobOrder.plate_number}) — services performed, parts and labor, payment, warranties, and release details.
             </p>
+          </div>
+          <div className="ml-auto flex shrink-0 gap-2">
+            <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-xs hover:bg-accent"><Printer className="h-3 w-3" /> Print</button>
+            <button onClick={handleDownload} className="inline-flex items-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-xs hover:bg-accent"><Download className="h-3 w-3" /> Download</button>
           </div>
         </div>
       </div>
@@ -115,16 +109,8 @@ function Completed() {
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-5">
           <div className="rounded-xl border bg-card p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="flex items-center gap-2 font-bold"><FileText className="h-4 w-4" /> Final Service Report</h3>
-                <p className="text-xs text-muted-foreground">Log of all work performed on your vehicle.</p>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs hover:bg-accent"><Printer className="h-3 w-3" /> Print</button>
-                <button onClick={handleDownload} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs hover:bg-accent"><Download className="h-3 w-3" /> Invoice</button>
-              </div>
-            </div>
+            <h3 className="flex items-center gap-2 font-bold"><Wrench className="h-4 w-4" /> Services Performed</h3>
+            <p className="text-xs text-muted-foreground">Full log of all work completed on your vehicle.</p>
             <div className="mt-4 divide-y">
               {logs.length === 0 && <p className="py-4 text-xs text-muted-foreground">No log entries yet.</p>}
               {logs.map((log) => (
@@ -164,11 +150,41 @@ function Completed() {
             </div>
             <p className="mt-3 text-xs text-muted-foreground">Warranty coverage applies to both parts and labor. Please keep your digital receipt for any potential claims.</p>
           </div>
+
+          {/* --- Vehicle Release Information --- */}
+          <div className="rounded-xl border bg-card p-6">
+            <h3 className="flex items-center gap-2 font-bold"><Car className="h-4 w-4" /> Vehicle Release Information</h3>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
+                <User className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+                <div>
+                  <div className="text-[10px] font-semibold uppercase text-muted-foreground">Released To</div>
+                  <div className="text-sm font-medium">{releasedTo}</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
+                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+                <div>
+                  <div className="text-[10px] font-semibold uppercase text-muted-foreground">Released At</div>
+                  <div className="text-sm font-medium">
+                    {releasedAt ? `${formatDate(releasedAt)} · ${formatTime(releasedAt)}` : "Pending release"}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {releasePhoto ? (
+              <img src={releasePhoto} alt="Vehicle release proof" className="mt-4 aspect-video w-full max-w-md rounded-lg border object-cover" />
+            ) : (
+              <div className="mt-4 flex items-center gap-2 rounded-md border border-dashed bg-muted/20 p-4 text-xs text-muted-foreground">
+                <PackageCheck className="h-4 w-4" /> Release photo will appear here once the vehicle has been handed back.
+              </div>
+            )}
+          </div>
         </div>
 
         <aside className="space-y-4">
           <div className="rounded-xl border bg-card p-5">
-            <h3 className="flex items-center gap-2 font-bold"><FileText className="h-4 w-4" /> Invoice Summary</h3>
+            <h3 className="flex items-center gap-2 font-bold"><FileText className="h-4 w-4" /> Payment Summary</h3>
             <div className="mt-4 space-y-2 text-sm">
               <div className="font-semibold flex items-center gap-1">🔧 Technician Labor</div>
               {services.length === 0 && <p className="text-xs text-muted-foreground">No labor charges.</p>}
@@ -193,10 +209,14 @@ function Completed() {
               </div>
               <div className="mt-3 flex items-center justify-between border-t pt-3">
                 <span className="font-semibold">Total Due</span>
-                <span className="text-2xl font-bold text-teal">{formatMoney(jobOrder.balance)}</span>
+                <span className="text-2xl font-bold text-teal">{formatMoney(jobOrder.actual_grand_total)}</span>
               </div>
-              <Link href="/dashboard/billing" className="mt-2 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90"><CreditCard className="h-4 w-4" /> Choose Payment Method</Link>
-              <p className="mt-2 text-[10px] text-muted-foreground text-center">By proceeding to payment, you confirm that you have reviewed the service report and agree to the charges.</p>
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-medium">Payment Status</span>
+                <span className={`font-semibold ${balanceDue <= 0 ? "text-success" : "text-warning"}`}>
+                  {balanceDue <= 0 ? "Fully Paid" : `₱${formatMoney(balanceDue)} balance`}
+                </span>
+              </div>
             </div>
           </div>
         </aside>
@@ -206,3 +226,193 @@ function Completed() {
 }
 
 export default Completed;
+
+// ---------------------------------------------------------------------------
+// PDF generation — same visual format as the History page's downloadable
+// invoice (logo header, SERVICE INVOICE title, details block, itemized
+// DESCRIPTION/AMOUNT table covering both labor and parts, total, footer note),
+// just sourced from the completed job order's data instead of a history row.
+// ---------------------------------------------------------------------------
+
+function loadCompletedLogoAsDataURL(src: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("Canvas context unavailable"));
+      ctx.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+async function generateServiceReportPDF({
+  jobOrder,
+  services,
+  parts,
+  warranties,
+  releasedAt,
+  releasedTo,
+}: {
+  jobOrder: CompletedData["jobOrder"];
+  services: CompletedData["services"];
+  parts: CompletedData["parts"];
+  warranties: CompletedData["warranties"];
+  releasedAt: string | null;
+  releasedTo: string;
+}) {
+  if (!jobOrder) return;
+
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 48;
+  let y = 56;
+
+  const SHOP_INFO = await getShopInfo();
+
+  // --- Logo ---
+  const logoX = margin;
+  const logoY = y;
+  try {
+    const logoDataUrl = await loadCompletedLogoAsDataURL("/autokita-logo.png");
+    doc.addImage(logoDataUrl, "PNG", logoX, logoY - 14, 28, 28);
+  } catch {
+    doc.setDrawColor(15, 76, 92);
+    doc.setLineWidth(1.5);
+    doc.circle(logoX + 14, logoY + 10, 14, "S");
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(15, 76, 92);
+    doc.text("A", logoX + 14, logoY + 15, { align: "center" });
+  }
+
+  // --- Shop name / tagline ---
+  doc.setFontSize(16);
+  doc.setTextColor(20, 20, 20);
+  doc.text(SHOP_INFO.name, logoX + 36, logoY + 8);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(110, 110, 110);
+  doc.text(SHOP_INFO.tagline, logoX + 36, logoY + 21);
+
+  // --- Shop address block (right-aligned) ---
+  doc.setFontSize(9);
+  doc.setTextColor(90, 90, 90);
+  const addressLines = doc.splitTextToSize(SHOP_INFO.address, 220);
+  doc.text(addressLines, pageWidth - margin, y - 4, { align: "right" });
+  doc.text(`Tel: ${SHOP_INFO.phone}`, pageWidth - margin, y + 22, { align: "right" });
+  doc.text(SHOP_INFO.email, pageWidth - margin, y + 34, { align: "right" });
+  doc.text(`TIN: ${SHOP_INFO.tin}`, pageWidth - margin, y + 46, { align: "right" });
+
+  y += 66;
+  doc.setDrawColor(220, 220, 220);
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 28;
+
+  // --- Invoice title + booking meta ---
+  doc.setFontSize(18);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(20, 20, 20);
+  doc.text("SERVICE INVOICE", margin, y);
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(90, 90, 90);
+  doc.text(`Job Order: JO-${jobOrder.job_order_id}`, pageWidth - margin, y - 12, { align: "right" });
+  doc.text(`Date: ${formatDate(releasedAt) || new Date().toLocaleDateString("en-PH")}`, pageWidth - margin, y, { align: "right" });
+  doc.text(`Status: ${statusLabel(jobOrder.status)}`, pageWidth - margin, y + 12, { align: "right" });
+
+  y += 34;
+
+  // --- Booking details grid ---
+  const primaryService = services[0]?.service_name ?? "General Service";
+  const serviceLabel = services.length > 1 ? `${primaryService} +${services.length - 1} more` : primaryService;
+  const activeWarranty = warranties[0];
+  const warrantyLabel = activeWarranty
+    ? `${warrantyDuration(activeWarranty.start_date, activeWarranty.expiration_date)} — ${activeWarranty.coverage_description}`
+    : "—";
+
+  const details: [string, string][] = [
+    ["Vehicle", `${jobOrder.vehicle_year} ${jobOrder.vehicle_model} (${jobOrder.plate_number})`],
+    ["Mechanic", "AutoKita Service Team"],
+    ["Location", SHOP_INFO.name],
+    ["Warranty", warrantyLabel],
+    ["Service", serviceLabel],
+    ["Released To", releasedTo],
+  ];
+  doc.setFontSize(9);
+  details.forEach(([label, value]) => {
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(60, 60, 60);
+    doc.text(`${label}:`, margin, y);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(20, 20, 20);
+    doc.text(value, margin + 90, y);
+    y += 16;
+  });
+
+  y += 12;
+
+  // --- Line items table — labor and parts together, same as the invoice sample ---
+  const col1 = margin;
+  const col2 = pageWidth - margin;
+  const items: [string, number][] = [
+    ...services.map((s): [string, number] => [
+      `${s.service_name}${s.actual_hours ? ` (${s.actual_hours} hrs)` : ""}`,
+      Number(s.actual_amount ?? 0),
+    ]),
+    ...parts.map((p): [string, number] => [`${p.description} x${p.quantity}`, Number(p.total_retail_amount ?? 0)]),
+  ];
+
+  doc.setFillColor(15, 76, 92);
+  doc.rect(margin, y, pageWidth - margin * 2, 22, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.text("DESCRIPTION", col1 + 8, y + 15);
+  doc.text("AMOUNT (PHP)", col2 - 8, y + 15, { align: "right" });
+  y += 22;
+
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(30, 30, 30);
+  items.forEach(([desc, amt], idx) => {
+    const rowHeight = 22;
+    if (idx % 2 === 1) {
+      doc.setFillColor(246, 247, 248);
+      doc.rect(margin, y, pageWidth - margin * 2, rowHeight, "F");
+    }
+    doc.text(desc, col1 + 8, y + 15);
+    doc.text(formatMoney(amt), col2 - 8, y + 15, { align: "right" });
+    y += rowHeight;
+  });
+
+  // Total row
+  doc.setDrawColor(15, 76, 92);
+  doc.setLineWidth(1);
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 20;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(15, 76, 92);
+  doc.text("TOTAL", col1 + 8, y);
+  doc.text(`₱ ${formatMoney(jobOrder.actual_grand_total)}`, col2 - 8, y, { align: "right" });
+
+  y += 40;
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(8.5);
+  doc.setTextColor(140, 140, 140);
+  doc.text(
+    "Thank you for choosing AutoKita. This invoice was generated electronically and is valid without a signature.",
+    margin,
+    y,
+    { maxWidth: pageWidth - margin * 2 }
+  );
+
+  doc.save(`AutoKita_ServiceReport_JO-${jobOrder.job_order_id}.pdf`);
+}

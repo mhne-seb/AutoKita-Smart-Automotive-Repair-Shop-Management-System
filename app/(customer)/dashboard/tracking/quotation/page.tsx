@@ -382,15 +382,6 @@ function Quotation() {
               <div className="flex gap-2"><AlertCircle className="h-4 w-4 shrink-0" /> Parts marked "To Order" may add 1-3 business days to the estimated completion time. The workshop will confirm once parts arrive.</div>
             </div>
           )}
-
-          {locked && (
-            <button
-              onClick={goToInProgress}
-              className="flex w-full items-center justify-center gap-2 rounded-md border bg-card py-2.5 text-sm font-medium hover:border-brand hover:text-brand"
-            >
-              Go to Service Tracker
-            </button>
-          )}
         </aside>
       </div>
 
