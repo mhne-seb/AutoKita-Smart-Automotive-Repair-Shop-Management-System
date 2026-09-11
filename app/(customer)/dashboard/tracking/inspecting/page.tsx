@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { LayoutGrid, FileText, Wrench, ChevronRight, Loader2, Camera, AlertCircle } from "lucide-react";
+import { LayoutGrid, FileText, Wrench, Loader2, Camera, AlertCircle } from "lucide-react";
 import { StageStepper } from "@/components/dashboard/StageStepper";
 import { getInspectingData } from "@/controllers/serviceProgressController";
 
@@ -78,7 +77,7 @@ function Inspecting() {
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+      <div className={findings.length > 0 ? "grid gap-6 lg:grid-cols-[2fr_1fr]" : "mx-auto max-w-3xl"}>
         <div className="space-y-6">
           {preDiagnostic?.mechanic_notes && (
             <div className="rounded-xl border bg-card p-6">
@@ -167,28 +166,8 @@ function Inspecting() {
           </div>
         </div>
 
-        <aside className="space-y-5">
-          <div className="rounded-xl border-2 border-brand bg-card p-5">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              {isHistorical ? "Historical Record" : "Next Step"}
-            </div>
-            <h3 className="mt-1 text-lg font-bold">
-              {isHistorical ? "Quotation Was Prepared" : "Quotation is Being Prepared"}
-            </h3>
-            <p className="mt-2 text-xs text-muted-foreground">
-              {isHistorical
-                ? "Here's the quotation that was prepared for this job order."
-                : "Based on these findings, we're putting together your service quotation. You'll be able to review and approve it before any work begins."}
-            </p>
-            <Link
-              href={`/dashboard/tracking/quotation?jobOrderId=${jobOrder.job_order_id}`}
-              className="mt-4 flex w-full items-center justify-center gap-1 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90"
-            >
-              View Quotation <ChevronRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-
-          {findings.length > 0 && (
+        {findings.length > 0 && (
+          <aside className="space-y-5">
             <div className="rounded-xl border bg-card p-5">
               <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Report Highlights
@@ -206,8 +185,8 @@ function Inspecting() {
                 ))}
               </div>
             </div>
-          )}
-        </aside>
+          </aside>
+        )}
       </div>
     </div>
   );

@@ -1,10 +1,8 @@
 'use client'
 
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Download,
-  Wrench,
   Search,
   Calendar,
   Car,
@@ -20,8 +18,8 @@ import {
   Inbox,
   ArrowUpDown,
   ReceiptText,
-  Wallet,
   Loader2,
+  History as HistoryIcon,
 } from "lucide-react";
 import { getServiceHistory, getShopInfo } from "@/controllers/billingController";
 import type { ServiceRecord } from "@/data/history";
@@ -30,11 +28,10 @@ import type { ServiceRecord } from "@/data/history";
 import jsPDF from "jspdf";
 
 const PAGE_SIZE = 5;
+const BRAND_GRADIENT = "linear-gradient(90deg, #0b1730 0%, #1d3a68 55%, #3b6cb4 100%)";
 
 type StatusFilter = "All" | "Completed" | "Cancelled";
 type SortDir = "desc" | "asc";
-
-const peso = new Intl.NumberFormat("en-PH", { minimumFractionDigits: 2 });
 
 function History() {
   useEffect(() => { document.title = "Service History — AutoKita"; }, []);
@@ -85,14 +82,9 @@ function History() {
   // --- Overview stats (not filtered) ---
   const stats = useMemo(() => {
     const completed = serviceHistory.filter((r) => r.status === "Completed");
-    const totalSpent = completed.reduce(
-      (sum, r) => sum + Number(String(r.amt).replace(/,/g, "")),
-      0
-    );
     return {
       total: serviceHistory.length,
       completed: completed.length,
-      totalSpent,
     };
   }, [serviceHistory]);
 
@@ -173,37 +165,28 @@ function History() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex items-center gap-3">
+        <div
+          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-white shadow-md"
+          style={{ backgroundImage: BRAND_GRADIENT }}
+        >
+          <HistoryIcon className="h-5 w-5" />
+        </div>
         <div>
-          <h1 className="text-2xl font-bold">Service History</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1
+            className="bg-clip-text text-2xl font-extrabold tracking-tight text-transparent"
+            style={{ backgroundImage: BRAND_GRADIENT }}
+          >
+            Service History
+          </h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">
             Review and manage your past vehicle service records and invoices.
           </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={exportCSV}
-            disabled={exporting}
-            className="inline-flex items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm hover:bg-accent disabled:opacity-60"
-          >
-            {exporting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Download className="h-4 w-4" />
-            )}
-            {exporting ? "Exporting…" : "Export CSV"}
-          </button>
-          <Link
-            href="/dashboard/register-vehicle"
-            className="inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90"
-          >
-            <Wrench className="h-4 w-4" /> Book New Service
-          </Link>
         </div>
       </div>
 
       {/* --- Overview stats: instant context before the table --- */}
-      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <StatCard
           icon={ReceiptText}
           label="Total Bookings"
@@ -213,11 +196,6 @@ function History() {
           icon={ShieldCheck}
           label="Completed Services"
           value={String(stats.completed)}
-        />
-        <StatCard
-          icon={Wallet}
-          label="Total Spent"
-          value={`₱ ${peso.format(stats.totalSpent)}`}
         />
       </div>
 
@@ -231,7 +209,7 @@ function History() {
               setPage(1);
             }}
             placeholder="Search by service type or booking ID..."
-            className="w-full rounded-md border bg-background pl-10 pr-9 py-2 text-sm"
+            className="w-full rounded-md border bg-background pl-10 pr-9 py-2 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15"
           />
           {search && (
             <button
@@ -354,11 +332,25 @@ function History() {
           )}
         </div>
 
-        {(activeFilters.length > 0 || search) && (
-          <button onClick={resetFilters} className="text-sm text-muted-foreground hover:underline">
-            Reset Filters
+        <div className="ml-auto flex items-center gap-3">
+          {(activeFilters.length > 0 || search) && (
+            <button onClick={resetFilters} className="text-sm text-muted-foreground hover:underline">
+              Reset Filters
+            </button>
+          )}
+          <button
+            onClick={exportCSV}
+            disabled={exporting}
+            className="inline-flex items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm transition-colors hover:bg-accent disabled:opacity-60"
+          >
+            {exporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            {exporting ? "Exporting…" : "Export CSV"}
           </button>
-        )}
+        </div>
       </div>
 
       {/* --- Active filter chips: shows what's currently applied --- */}
@@ -379,7 +371,8 @@ function History() {
       )}
 
       {/* --- Desktop table --- */}
-      <div className="mt-6 hidden rounded-xl border bg-card overflow-hidden md:block">
+      <div className="mt-6 hidden overflow-hidden rounded-xl border bg-card md:block">
+        <div className="h-1 w-full" style={{ backgroundImage: BRAND_GRADIENT }} />
         <table className="w-full text-sm">
           <thead className="text-left text-xs uppercase text-muted-foreground">
             <tr className="border-b">
@@ -428,7 +421,7 @@ function History() {
                       setOpen(r);
                     }}
                     aria-label="View details"
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-md border hover:bg-brand hover:text-brand-foreground transition"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-md border transition hover:bg-brand hover:text-brand-foreground"
                   >
                     <Eye className="h-4 w-4" />
                   </button>
@@ -614,7 +607,10 @@ function DetailsModal({ row, onClose }: { row: ServiceRecord; onClose: () => voi
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 animate-fade-up">
       <div className="w-full max-w-2xl overflow-hidden rounded-xl bg-background shadow-2xl">
-        <div className="flex items-center justify-between border-b bg-brand px-5 py-3.5 text-white">
+        <div
+          className="flex items-center justify-between px-5 py-3.5 text-white"
+          style={{ backgroundImage: BRAND_GRADIENT }}
+        >
           <div>
             <div className="text-[10px] uppercase tracking-widest text-white/70">Booking Details</div>
             <h3 className="text-sm font-bold">
@@ -638,7 +634,7 @@ function DetailsModal({ row, onClose }: { row: ServiceRecord; onClose: () => voi
             <Detail icon={MapPin} label="Location" value={row.location} />
             <Detail icon={ShieldCheck} label="Warranty" value={row.warranty} />
             <Detail icon={Clock} label="Completed" value={row.date} />
-            <Detail icon={Wrench} label="Service" value={row.desc} />
+            <Detail icon={Search} label="Service" value={row.desc} />
           </div>
 
           {row.items.length > 0 && (
@@ -683,7 +679,8 @@ function DetailsModal({ row, onClose }: { row: ServiceRecord; onClose: () => voi
           </button>
           <button
             onClick={onClose}
-            className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90"
+            className="rounded-md px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ backgroundImage: BRAND_GRADIENT }}
           >
             Close
           </button>
