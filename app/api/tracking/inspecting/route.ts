@@ -27,19 +27,32 @@ export async function GET(request: NextRequest) {
     }
 
     if (!jobOrder) {
-      return NextResponse.json({ jobOrder: null, preDiagnostic: null, findings: [], shop: null })
+      return NextResponse.json({ jobOrder: null, preDiagnostic: null, walkaround: [], findings: [], shop: null })
     }
 
-    const [preDiagRes, findingsRes, shopRes] = await Promise.all([
+    const [preDiagRes, findingsRes, walkaroundRes, shopRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_quotation($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_inspections($1)`, [jobOrder.job_order_id]),
+       // Walkaround photos share the table with findings but aren't findings —
+      // and the stored function above doesn't return `notes`, so they get their
+      // own inline query here (no new stored function).
+      db.query(
+        `SELECT id, name AS label, notes AS note, photo, logged_date::text
+         FROM vehicle_inspections
+         WHERE job_order_id = $1 AND status = 'reference-photo' AND photo IS NOT NULL
+         ORDER BY id`,
+        [jobOrder.job_order_id],
+      ),
       db.query(`SELECT * FROM get_dashboard_shop()`),
     ])
 
     return NextResponse.json({
       jobOrder,
       preDiagnostic: preDiagRes.rows[0] ?? null,
-      findings: findingsRes.rows,
+      walkaround: walkaroundRes.rows,
+      // Keep reference-photo rows out of the findings list — they're intake
+      // documentation, not something the mechanic diagnosed.
+      findings: findingsRes.rows.filter((r) => r.status !== 'reference-photo'),
       shop: shopRes.rows[0] ?? null,
     })
   } catch (err) {

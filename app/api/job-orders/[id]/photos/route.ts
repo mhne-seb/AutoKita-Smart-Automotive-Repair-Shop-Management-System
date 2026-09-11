@@ -45,20 +45,25 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       [jobOrderId, REFERENCE_PHOTO_STATUS, slotId],
     )
 
+    let rowId: number
     if (existing.rows.length > 0) {
+      rowId = existing.rows[0].id
       await db.query(
         `UPDATE vehicle_inspections SET photo = $1, name = $2, logged_date = NOW() WHERE id = $3`,
-        [publicUrl, label, existing.rows[0].id],
+        [publicUrl, label, rowId],
       )
     } else {
-      await db.query(
+      const inserted = await db.query(
         `INSERT INTO vehicle_inspections (job_order_id, name, findings_description, status, photo, logged_date)
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
+         VALUES ($1, $2, $3, $4, $5, NOW())
+         RETURNING id`,
         [jobOrderId, label, slotId, REFERENCE_PHOTO_STATUS, publicUrl],
       )
+      rowId = inserted.rows[0].id
     }
 
-    return NextResponse.json({ success: true, url: publicUrl })
+    // The client needs the row id to save a condition note against this photo.
+    return NextResponse.json({ success: true, url: publicUrl, id: rowId })
   } catch (error) {
     console.error('Photo upload error:', error)
     return NextResponse.json(
@@ -67,6 +72,36 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         message: 'Internal server error',
         debug: error instanceof Error ? error.message : String(error),
       },
+      { status: 500 },
+    )
+  }
+}
+
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id: jobOrderId } = await params
+    const { rowId, note } = await request.json()
+
+    if (!rowId) {
+      return NextResponse.json({ success: false, message: 'rowId is required' }, { status: 400 })
+    }
+
+    const result = await db.query(
+      `UPDATE vehicle_inspections SET notes = $1
+       WHERE id = $2 AND job_order_id = $3 AND status = $4
+       RETURNING id`,
+      [String(note ?? '').trim() || null, rowId, jobOrderId, REFERENCE_PHOTO_STATUS],
+    )
+
+    if (result.rows.length === 0) {
+      return NextResponse.json({ success: false, message: 'Photo not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Photo note update error:', error)
+    return NextResponse.json(
+      { success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) },
       { status: 500 },
     )
   }
