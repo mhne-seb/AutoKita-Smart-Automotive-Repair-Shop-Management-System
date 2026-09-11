@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
@@ -176,7 +177,7 @@ export function Sidebar() {
         )}
       </div>
 
-      {logoutConfirmOpen && (
+      {logoutConfirmOpen && createPortal(
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
           <div className="animate-fade-up w-full max-w-sm overflow-hidden rounded-xl bg-background shadow-2xl">
             <div className="h-1 w-full" style={{ backgroundImage: BRAND_GRADIENT }} />
@@ -215,7 +216,8 @@ export function Sidebar() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </aside>
   )
