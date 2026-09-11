@@ -50,6 +50,10 @@ function Inspecting() {
 
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
 
+  // No approval round yet means the mechanic is still working — what's in the
+  // findings table right now is a draft, not a report the customer should act on.
+  const awaitingReport = !preDiagnostic?.approval_status && !isHistorical;
+
   const [responding, setResponding] = useState(false);
   const [lightbox, setLightbox] = useState<{ url: string; label: string } | null>(null);
 
@@ -146,7 +150,21 @@ function Inspecting() {
         </div>
       )}
 
-      <div className={findings.length > 0 ? "grid gap-6 lg:grid-cols-[2fr_1fr]" : "mx-auto max-w-3xl"}>
+      {awaitingReport && (
+        <div className="mx-auto max-w-4xl rounded-2xl border bg-card px-8 py-10 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/10">
+            <Loader2 className="h-6 w-6 animate-spin text-brand" />
+          </div>
+          <h3 className="mt-4 font-bold">Inspection in progress</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Our team is still inspecting your vehicle. Once the mechanic finalizes the report,
+            the findings will appear here and we&apos;ll ask you to review them before any
+            quotation is prepared.
+          </p>
+        </div>
+      )}
+
+      <div className={!awaitingReport && findings.length > 0 ? "grid gap-6 lg:grid-cols-[2fr_1fr]" : "mx-auto max-w-3xl"}>
         <div className="space-y-6">
           {walkaround.length > 0 && (
             <div className="rounded-xl border bg-card p-6">
@@ -230,34 +248,36 @@ function Inspecting() {
             </div>
           )}
 
-          <div className="rounded-xl border bg-card p-6">
-            <div className="flex items-center gap-2 text-[color:oklch(0.5_0.2_300)]">
-              <FileText className="h-4 w-4" />
-              <span className="text-xs font-bold uppercase tracking-wider">Mechanical Findings</span>
-            </div>
-            <div className="mt-4 divide-y">
-              {findings.map((f) => (
-                <div key={f.id} className="flex items-start justify-between gap-4 py-4">
-                  <div>
-                    {f.name && <div className="font-semibold">{f.name}</div>}
-                    <p className="mt-1 text-xs text-muted-foreground">{f.findings_description}</p>
-                    <div className="mt-1 text-[10px] text-muted-foreground/70">{f.logged_date}</div>
+          {!awaitingReport && (
+            <div className="rounded-xl border bg-card p-6">
+              <div className="flex items-center gap-2 text-[color:oklch(0.5_0.2_300)]">
+                <FileText className="h-4 w-4" />
+                <span className="text-xs font-bold uppercase tracking-wider">Mechanical Findings</span>
+              </div>
+              <div className="mt-4 divide-y">
+                {findings.map((f) => (
+                  <div key={f.id} className="flex items-start justify-between gap-4 py-4">
+                    <div>
+                      {f.name && <div className="font-semibold">{f.name}</div>}
+                      <p className="mt-1 text-xs text-muted-foreground">{f.findings_description}</p>
+                      <div className="mt-1 text-[10px] text-muted-foreground/70">{f.logged_date}</div>
+                    </div>
+                    {f.status && (
+                      <span className={`shrink-0 rounded-md px-2.5 py-1 text-[11px] font-semibold ${toneClass(f.status)}`}>
+                        {f.status}
+                      </span>
+                    )}
                   </div>
-                  {f.status && (
-                    <span className={`shrink-0 rounded-md px-2.5 py-1 text-[11px] font-semibold ${toneClass(f.status)}`}>
-                      {f.status}
-                    </span>
-                  )}
-                </div>
-              ))}
-              {findings.length === 0 && (
-                <p className="py-4 text-sm text-muted-foreground">No findings recorded yet.</p>
-              )}
+                ))}
+                {findings.length === 0 && (
+                  <p className="py-4 text-sm text-muted-foreground">No findings recorded yet.</p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {findings.length > 0 && (
+        {!awaitingReport && findings.length > 0 && (
           <aside className="space-y-5">
             <div className="rounded-xl border bg-card p-5">
               <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -280,10 +300,12 @@ function Inspecting() {
         )}
       </div>
 
-      {lightbox && (
-        <Lightbox url={lightbox.url} label={lightbox.label} onClose={() => setLightbox(null)} />
-      )}
-    </div>
+      {
+        lightbox && (
+          <Lightbox url={lightbox.url} label={lightbox.label} onClose={() => setLightbox(null)} />
+        )
+      }
+    </div >
   );
 }
 
