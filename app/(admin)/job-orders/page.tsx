@@ -3,7 +3,7 @@
 // Admin "Job Orders" board — lists every job order across all stages (inspecting/quotation/in-progress/completed), searchable and filterable by stage tab.
 import { useEffect, useMemo, useState } from 'react'
 import Link from "next/link";
-import { ClipboardList, Search, FileText, Wrench, CheckCircle2, Eye, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ClipboardList, Search, FileText, Wrench, CheckCircle2, Eye, ChevronLeft, ChevronRight, Car, Hash, Calendar, UserCog } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { getJobOrders } from '@/controllers/jobOrderController'
 import { JobOrderCard, Stage, stageOrder, stageLabels } from '@/data/types'
@@ -102,28 +102,33 @@ export default function page() {
         onSearchChange={setQuery}
       />
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex w-fit flex-wrap items-center gap-2 rounded-full border border-border bg-card p-1.5">
         {tabs.map(({ key, label, count, icon: Icon }) => {
           const active = activeTab === key
           return (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-colors ${
-                active
-                  ? 'border-slate-900 bg-slate-900 text-white'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                active ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-brand-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <Icon size={14} />
-              {count} {label}
+              {label}
+              <span
+                className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs ${
+                  active ? 'bg-white/20 text-brand-foreground' : 'bg-accent text-muted-foreground'
+                }`}
+              >
+                {count}
+              </span>
             </button>
           )
         })}
       </div>
 
       {loading ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-sm text-slate-400">
+        <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center text-sm text-muted-foreground">
           Loading job orders…
         </div>
       ) : error ? (
@@ -131,156 +136,134 @@ export default function page() {
           {error}
         </div>
       ) : visibleCards.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-sm text-slate-400">
+        <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center text-sm text-muted-foreground">
           No job orders match your search.
         </div>
       ) : (
         <>
           {/* Pagination controls */}
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               Page {page} of {totalPages} · {total} total job orders
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                className="flex items-center gap-1 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-accent disabled:opacity-40"
               >
                 <ChevronLeft size={14} /> Prev
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                className="flex items-center gap-1 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground hover:bg-accent disabled:opacity-40"
               >
                 Next <ChevronRight size={14} />
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-            {paginatedCards.map((c) => (
-              <div key={c.id} className="rounded-2xl border border-slate-200 bg-white p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold text-white">
-                      {c.customer.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-bold text-slate-900">{c.customer}</p>
-                      <p className="text-sm text-slate-400">{c.vehicle}</p>
-                    </div>
-                  </div>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                    {stageLabels[c.stage]}
-                  </span>
-                </div>
-
-                <p className="mt-2 text-xs text-slate-400">{c.customerId}</p>
-
-                <Stepper stage={c.stage} />
-
-                <div className="mt-4 grid grid-cols-2 gap-y-3 text-sm">
-                  <InfoField label="Service" value={c.service} />
-                  <InfoField label="Time" value={c.time} />
-                  <InfoField label="Plate" value={c.plate} prefix="#" />
-                  <InfoField
-                    label="Payment"
-                    value={`${c.paid ? 'Paid' : 'Unpaid'} · ${c.payment}`}
-                    valueClass={c.paid ? 'text-emerald-600' : 'text-amber-600'}
-                  />
-                  <div className="col-span-2">
-                    <InfoField label="Assigned Mechanics" value={c.mechanic} />
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span>{c.stepsDone}/{c.stepsTotal} steps completed</span>
-                  </div>
-                  <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                    <div
-                      className="h-full rounded-full bg-slate-900"
-                      style={{ width: `${(c.stepsDone / c.stepsTotal) * 100}%` }}
-                    />
-                  </div>
-                </div>
-
-                <Link
-                  href={`/job-orders/${c.id}/${stageToRoute[c.stage]}`}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  <Eye size={15} /> View Full Job Order
-                </Link>
-              </div>
-            ))}
+          {/* Job orders table */}
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
+            <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
+            <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
+                  <th className="px-4 py-3 font-semibold">Customer</th>
+                  <th className="px-4 py-3 font-semibold">Stage</th>
+                  <th className="px-4 py-3 font-semibold">Service</th>
+                  <th className="px-4 py-3 font-semibold">Plate</th>
+                  <th className="px-4 py-3 font-semibold">Time</th>
+                  <th className="px-4 py-3 font-semibold">Payment</th>
+                  <th className="px-4 py-3 font-semibold">Mechanic</th>
+                  <th className="px-4 py-3 font-semibold">Progress</th>
+                  <th className="px-4 py-3 font-semibold text-right"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedCards.map((c) => {
+                  const StageIcon = stageIcons[c.stage]
+                  return (
+                    <tr key={c.id} className="border-b border-border/60 align-top last:border-0">
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-xs font-semibold text-white">
+                            {c.customer.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-foreground">{c.customer}</p>
+                            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <Car size={11} className="shrink-0" /> {c.vehicle}
+                            </p>
+                            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <Hash size={11} className="shrink-0" /> {c.customerId}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="flex w-fit items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-muted-foreground">
+                          <StageIcon size={12} />
+                          {stageLabels[c.stage]}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-foreground/80">
+                        <span className="flex items-center gap-1.5">
+                          <Wrench size={12} className="shrink-0 text-muted-foreground" /> {c.service}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-foreground/80">
+                        <span className="flex items-center gap-1.5">
+                          <Hash size={12} className="shrink-0 text-muted-foreground" /> {c.plate}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-foreground/80">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar size={12} className="shrink-0 text-muted-foreground" /> {c.time}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className={`font-semibold ${c.paid ? 'text-emerald-600' : 'text-amber-600'}`}>
+                          {c.paid ? 'Paid' : 'Unpaid'}
+                        </span>
+                        <p className="text-xs text-muted-foreground">{c.payment}</p>
+                      </td>
+                      <td className="px-4 py-4 text-foreground/80">
+                        <span className="flex items-center gap-1.5">
+                          <UserCog size={12} className="shrink-0 text-muted-foreground" /> {c.mechanic}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <p className="text-xs text-muted-foreground">
+                          {c.stepsDone}/{c.stepsTotal} steps
+                        </p>
+                        <div className="mt-1.5 h-1.5 w-24 overflow-hidden rounded-full bg-accent">
+                          <div
+                            className="h-full rounded-full bg-brand"
+                            style={{ width: `${(c.stepsDone / c.stepsTotal) * 100}%` }}
+                          />
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <Link
+                          href={`/job-orders/${c.id}/${stageToRoute[c.stage]}`}
+                          title="View Full Job Order"
+                          className="inline-flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent"
+                        >
+                          <Eye size={15} />
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+            </div>
           </div>
         </>
       )}
-    </div>
-  )
-}
-
-function Stepper({ stage }: { stage: Stage }) {
-  const currentIndex = stageOrder.indexOf(stage)
-
-  return (
-    <div className="mt-4 flex items-start">
-      {stageOrder.map((s, i) => {
-        const Icon = stageIcons[s]
-        const done = i < currentIndex
-        const active = i === currentIndex
-        return (
-          <div key={s} className="flex flex-1 items-center last:flex-none">
-            <div className="flex max-w-[56px] flex-col items-center gap-1">
-              <div className="relative flex h-8 w-8 shrink-0 items-center justify-center">
-                {active && (
-                  <span className="absolute inset-0 animate-ping rounded-full bg-slate-900/40" />
-                )}
-                <div
-                  className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-transform duration-300 ${
-                    done || active
-                      ? 'border-slate-900 bg-slate-900 text-white'
-                      : 'border-slate-200 text-slate-300'
-                  } ${active ? 'scale-110' : ''}`}
-                >
-                  <Icon size={14} />
-                </div>
-              </div>
-              <span
-                className={`text-center text-[6.5px] font-semibold uppercase leading-tight tracking-tighter transition-colors duration-300 ${
-                  done || active ? 'text-slate-900' : 'text-slate-300'
-                }`}
-              >
-                {stageLabels[s]}
-              </span>
-            </div>
-            {i < stageOrder.length - 1 && (
-              <div className={`-mt-4 h-0.5 flex-1 transition-colors duration-300 ${done ? 'bg-slate-900' : 'bg-slate-200'}`} />
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function InfoField({
-  label,
-  value,
-  prefix,
-  valueClass = 'text-slate-800',
-}: {
-  label: string
-  value: string
-  prefix?: string
-  valueClass?: string
-}) {
-  return (
-    <div>
-      <p className="text-xs text-slate-400">{prefix ? `${prefix} ${label}` : label}</p>
-      <p className={`font-semibold ${valueClass}`}>{value}</p>
     </div>
   )
 }
