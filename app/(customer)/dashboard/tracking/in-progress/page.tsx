@@ -19,7 +19,7 @@ import {
   Upload,
   ShieldCheck,
 } from "lucide-react";
-import { StageStepper } from "@/components/dashboard/StageStepper";
+import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getInProgressData } from "@/controllers/serviceProgressController";
 // Billing & Warranty was previously its own page/route — its exact UI/logic
 // (itemized parts/labor breakdown, payment method chooser, invoice download)
@@ -240,7 +240,7 @@ function InProgress() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active="in-progress" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper active={stageForStatus(jobOrder.status)} viewing="in-progress" jobOrderId={jobOrder.job_order_id} />
 
       {isHistorical && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">

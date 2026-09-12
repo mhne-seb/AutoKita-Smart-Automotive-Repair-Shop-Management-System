@@ -150,6 +150,14 @@ export async function getReceivedData(userId: number, jobOrderId?: number) {
       actual_grand_total: string
     }[]
     customerConcern: string | null
+    // Walkaround photos taken at drop-off — the vehicle's documented arrival condition.
+    walkaround: {
+      id: number
+      label: string
+      note: string | null
+      photo: string
+      logged_date: string
+    }[]
   }>
 }
 
@@ -179,9 +187,21 @@ export async function getInspectingData(userId: number, jobOrderId?: number) {
       id: number
       label: string
       note: string | null
-      photo: string 
+      photo: string
       logged_date: string
     }[]
+    // One entry per round the shop sent, oldest first, with the customer's
+    // answer attached once they've given one.
+    reviewHistory: {
+      id: number
+      mechanic_notes: string | null
+      status: 'pending' | 'approved' | 'disputed'
+      sent_at: string
+      customer_reason: string | null
+      responded_at: string | null
+    }[]
+    // True only while the shop hasn't started (no photos, findings, or report).
+    canCancel: boolean
     findings: {
       id: number
       name: string | null
@@ -194,17 +214,29 @@ export async function getInspectingData(userId: number, jobOrderId?: number) {
   }>
 }
 
+/** Withdraws an accepted booking the shop hasn't started on. The server
+ *  re-checks the "nothing started yet" rule; a 409 means work began. */
+export async function cancelJobOrder(userId: number, jobOrderId: number) {
+  const res = await fetch('/api/customer/job-orders/cancel', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, jobOrderId }),
+  })
+  return res.json() as Promise<{ success: boolean; message?: string }>
+}
+
 /** Customer approves or disputes the inspection findings. Approving is what
  *  advances the job order to the quotation stage. */
 export async function respondToInspection(
   userId: number,
   jobOrderId: number,
   decision: 'approved' | 'disputed',
+  reason?: string,
 ) {
   const res = await fetch('/api/tracking/inspecting/respond', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, jobOrderId, decision }),
+    body: JSON.stringify({ userId, jobOrderId, decision, reason }),
   })
   return res.json() as Promise<{ success: boolean; message?: string; decision?: string }>
 }

@@ -34,6 +34,8 @@ import {
   Calendar,
   Camera,
 } from "lucide-react";
+import { toast } from "sonner";
+import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
 import type {
   DashboardData,
   DashboardActivity,
@@ -55,6 +57,7 @@ const STATUS_TO_STEP: Record<string, number> = {
   in_progress:                3,
   completed:                  4,
   released:                   4,
+  cancelled:                  4,
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -65,9 +68,10 @@ const STATUS_LABEL: Record<string, string> = {
   in_progress:                "In Progress",
   completed:                  "Completed",
   released:                   "Released",
+  cancelled:                  "Cancelled",
 };
 
-const DONE_STATUSES = new Set(["completed", "released"]);
+const DONE_STATUSES = new Set(["completed", "released", "cancelled"]);
 // Labels for a submitted booking that hasn't become a job order yet.
 const TICKET_STATUS_LABEL: Record<string, string> = {
   pending:              "Awaiting Confirmation",
@@ -96,6 +100,9 @@ function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  // Two-step cancel on a pending booking: first click arms it, second confirms.
+  const [cancelArmedId, setCancelArmedId] = useState<number | null>(null);
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastSynced, setLastSynced] = useState<string>("");
 
@@ -127,6 +134,29 @@ function Dashboard() {
     }
   };
 
+  const cancelTicket = async (ticketId: number) => {
+    setCancellingId(ticketId);
+    try {
+      const storedUserId = sessionStorage.getItem('autokita_user_id');
+      const userId = storedUserId ? parseInt(storedUserId, 10) : CURRENT_USER_ID;
+      const res = await fetch('/api/customer/tickets/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, ticketId }),
+      });
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.success) {
+        toast.success('Booking cancelled.');
+        await fetchDashboard(true);
+      } else {
+        toast.error(json?.message ?? 'Could not cancel this booking.');
+      }
+    } finally {
+      setCancellingId(null);
+      setCancelArmedId(null);
+    }
+  };
+
   useEffect(() => { fetchDashboard(); }, []);
 
   // Activity icon/colour helpers
@@ -140,6 +170,8 @@ function Dashboard() {
         return { icon: RefreshCw, color: "text-warning" };
       case "booking_accepted":
         return { icon: CheckCircle2, color: "text-success"};
+      case "report_ready":
+        return { icon: ClipboardCheck, color: "text-brand" };
       default:
         return { icon: FileText, color: "text-muted-foreground" };
     }
@@ -245,6 +277,37 @@ function Dashboard() {
                         Requested {formatRelativeTime(t.request_date)} ·{" "}
                         {t.service_mode === "home_service" ? "Home Service" : "Walk-in"}
                       </span>
+                    </div>
+
+                    {/* Free to cancel while the shop hasn't started — the API
+                        enforces the same rule, this is just the affordance. */}
+                    <div className="mt-4 border-t pt-3">
+                      {cancelArmedId === t.id ? (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-xs text-muted-foreground">Cancel this booking?</span>
+                          <button
+                            onClick={() => cancelTicket(t.id)}
+                            disabled={cancellingId === t.id}
+                            className="rounded-md bg-destructive px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-60"
+                          >
+                            {cancellingId === t.id ? "Cancelling…" : "Yes, cancel"}
+                          </button>
+                          <button
+                            onClick={() => setCancelArmedId(null)}
+                            disabled={cancellingId === t.id}
+                            className="rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-60"
+                          >
+                            Keep it
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setCancelArmedId(t.id)}
+                          className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-destructive/40 px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/10"
+                        >
+                          <X className="h-3.5 w-3.5" /> Cancel booking
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -365,12 +428,12 @@ function Dashboard() {
                 </div>
               ) : (
                 recentActivity.slice(0, 3).map((act) => {
+                  // A job moving to its next stage is news, not a problem — keep
+                  // red for things that actually went wrong.
                   const tone: "destructive" | "neutral" | "success" =
-                    act.type === "status_change"
-                      ? "destructive"
-                      : act.type === "payment" || act.type === "booking_accepted"
-                        ? "success"
-                        : "neutral";
+                    act.type === "payment" || act.type === "booking_accepted"
+                      ? "success"
+                      : "neutral";
                   return (
                     <Alert
                       key={`alert-${act.type}-${act.id}`}
@@ -440,7 +503,12 @@ function Dashboard() {
 
       {contactOpen && <ContactShopModal shop={shop} onClose={() => setContactOpen(false)} />}
       {historyOpen && <HistoryModal activities={recentActivity} onClose={() => setHistoryOpen(false)} />}
-      {bookServiceOpen && <BookServiceModal onClose={() => setBookServiceOpen(false)} />}
+      {bookServiceOpen && (
+        <BookServiceModal
+          onClose={() => setBookServiceOpen(false)}
+          onBooked={() => fetchDashboard(true)}
+        />
+      )}
       {reportJobId !== null && (
         <ServiceReportModal jobId={reportJobId} onClose={() => setReportJobId(null)} />
       )}
@@ -663,7 +731,10 @@ const BOOK_VEHICLE_MAKES = [
 ];
 const BOOK_YEARS = Array.from({ length: 20 }, (_, i) => String(new Date().getFullYear() - i));
 
-function BookServiceModal({ onClose }: { onClose: () => void }) {
+// onBooked fires once a booking succeeds so the dashboard behind the modal
+// refetches — the new Pending Request should be there when the modal closes,
+// not after a manual refresh.
+function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked: () => void }) {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -683,6 +754,9 @@ function BookServiceModal({ onClose }: { onClose: () => void }) {
   const [pickup, setPickup] = useState<"shop" | "home">("shop");
   const [serviceCategory, setServiceCategory] = useState("");
   const [notes, setNotes] = useState("");
+  // Explicit agreement to the OBD-II scan fee when the category needs it.
+  const [scanAcknowledged, setScanAcknowledged] = useState(false);
+  const needsScan = requiresDiagnosticScan(serviceCategory);
 
   useEffect(() => {
     const userId = sessionStorage.getItem("autokita_user_id");
@@ -718,12 +792,17 @@ function BookServiceModal({ onClose }: { onClose: () => void }) {
       alert('Please select a vehicle, or choose "+ Register New Vehicle".');
       return;
     }
+    if (needsScan && !scanAcknowledged) {
+      toast.error("Please agree to the diagnostic scan fee to continue.");
+      return;
+    }
 
     const reqBody: any = {
       userId: parseInt(userId, 10),
       serviceMode: pickup === "shop" ? "Shop Visit" : "Home Service",
       customerConcern: `Category: ${serviceCategory || "Not specified"}. Notes: ${notes || "None"}`,
       homeAddress: user?.address || "None",
+      diagnosticScanAuthorized: needsScan && scanAcknowledged,
     };
 
     if (selectedVehicleId === "new") {
@@ -757,6 +836,7 @@ function BookServiceModal({ onClose }: { onClose: () => void }) {
       const data = await res.json();
       if (data.success) {
         setShowConfirmModal(true);
+        onBooked();
       } else {
         alert("Booking failed: " + data.message);
       }
@@ -907,7 +987,7 @@ function BookServiceModal({ onClose }: { onClose: () => void }) {
                   <label className="text-sm font-medium">Service Category</label>
                   <select
                     value={serviceCategory}
-                    onChange={(e) => setServiceCategory(e.target.value)}
+                    onChange={(e) => { setServiceCategory(e.target.value); setScanAcknowledged(false); }}
                     className="mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
                   >
                     <option value="">Select a Service</option>
@@ -918,6 +998,36 @@ function BookServiceModal({ onClose }: { onClose: () => void }) {
                     ))}
                   </select>
                 </div>
+
+                {/* Scanner-fee disclosure — same rule and wording as the public
+                    booking page. Confirm is blocked until it's agreed to. */}
+                {needsScan && (
+                  <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-amber-950">
+                          This service uses the OBD-II diagnostic scanner — {formatPeso(DIAGNOSTIC_SCAN_FEE)}
+                        </p>
+                        <p className="mt-1 text-sm text-amber-900">
+                          Our mechanic connects a diagnostic scanner to your vehicle&apos;s onboard computer.
+                          The scan fee of <b>{formatPeso(DIAGNOSTIC_SCAN_FEE)}</b> is charged whenever the
+                          scanner is used — <b>even if you decide not to go ahead with the repairs afterward</b>.
+                          Any repair costs will be quoted separately for your approval.
+                        </p>
+                        <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-sm text-amber-950">
+                          <input
+                            type="checkbox"
+                            checked={scanAcknowledged}
+                            onChange={(e) => setScanAcknowledged(e.target.checked)}
+                            className="mt-0.5 h-4 w-4 rounded border-amber-400 accent-amber-600"
+                          />
+                          <span>I understand and agree to the {formatPeso(DIAGNOSTIC_SCAN_FEE)} diagnostic scan fee.</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="mt-4">
                   <label className="text-sm font-medium">Additional Notes or Concerns</label>
                   <textarea
@@ -977,7 +1087,8 @@ function BookServiceModal({ onClose }: { onClose: () => void }) {
             </button>
             <button
               onClick={handleConfirm}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (needsScan && !scanAcknowledged)}
+              title={needsScan && !scanAcknowledged ? "Agree to the diagnostic scan fee first" : undefined}
               className="rounded-md bg-brand px-5 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-50"
             >
               {isSubmitting ? "Confirming..." : "Confirm Booking"}

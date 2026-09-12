@@ -39,7 +39,8 @@ CREATE TYPE "job_orders_status" AS ENUM (
   'waiting_on_parts',
   'revision_pending',
   'completed',
-  'released'
+  'released',
+  'cancelled'
 );
 
 CREATE TYPE "purchase_order_status" AS ENUM (

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 
 export async function GET(req: NextRequest) {
   try {
@@ -19,6 +20,12 @@ export async function GET(req: NextRequest) {
           v.vehicle_model,
           v.plate_number,
           v.vehicle_year,
+          EXISTS (
+              SELECT 1 FROM system_audit_logs c
+              WHERE c.entity_type = 'service_tickets'
+                AND c.entity_id = st.id
+                AND c.action_performed = 'approved'
+          ) AS diagnostic_scan_authorized,
           (
               SELECT sal.employees_id 
               FROM job_orders jo 
@@ -87,10 +94,35 @@ export async function POST(req: NextRequest) {
 
       const newJo = joResult.rows[0]
 
-
       if (mechanicId && newJo) {
         const assignQuery = `SELECT assign_mechanic_to_job_order($1, $2)`
         await db.query(assignQuery, [newJo.id, mechanicId])
+      }
+
+      // If the customer authorized the OBD-II scan at booking, attach the fee
+      // to the job order NOW — not at quotation time. That way declining the
+      // quotation later can't erase a charge they already agreed to.
+      // create_job_order_from_ticket() is a stored function we don't modify,
+      // so this is a follow-up insert. Skips silently if the migration that
+      // seeds the service row hasn't been run yet.
+      if (newJo) {
+        const consent = await db.query(
+          `SELECT 1 FROM system_audit_logs
+           WHERE entity_type = 'service_tickets' AND entity_id = $1 AND action_performed = 'approved'
+           LIMIT 1`,
+          [ticketId],
+        )
+        if (consent.rows.length > 0) {
+          await db.query(
+            `INSERT INTO job_order_services
+               (job_order_id, service_id, description_of_work, estimated_hours, estimated_amount, actual_amount)
+             SELECT $1, s.id, $2, s.base_duration_hours, s.base_price, s.base_price
+             FROM services s
+             WHERE s.service_name = $3 AND s.is_active
+             LIMIT 1`,
+            [newJo.id, 'OBD-II diagnostic scan — authorized by customer at booking. Payable even if repairs are declined.', DIAGNOSTIC_SCAN_SERVICE_NAME],
+          )
+        }
       }
 
       return NextResponse.json({ success: true, jobOrder: newJo })

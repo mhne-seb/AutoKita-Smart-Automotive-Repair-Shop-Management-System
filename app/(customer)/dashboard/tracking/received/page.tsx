@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { Car, Clock, ShieldCheck, ClipboardList, Wrench, Camera, AlertCircle, Loader2, CalendarClock } from "lucide-react";
-import { StageStepper } from "@/components/dashboard/StageStepper";
+import { Car, Clock, ShieldCheck, ClipboardList, Wrench, AlertCircle, Loader2 } from "lucide-react";
+import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getReceivedData } from "@/controllers/serviceProgressController";
 
 function Received() {
@@ -27,9 +27,6 @@ function Received() {
   const jobOrder = data?.jobOrder ?? null;
   const services = data?.services ?? [];
   const customerConcern = data?.customerConcern ?? null;
-  // NOTE: dropoff proof (photo + timestamp) needs to be added to getReceivedData's
-  // return shape — falling back to date_arrived + a placeholder while that's wired up.
-  const dropoffPhoto = (data?.jobOrder as any)?.dropoff_photo_url ?? null;
 
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
 
@@ -55,7 +52,7 @@ function Received() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active="received" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper active={stageForStatus(jobOrder.status)} viewing="received" jobOrderId={jobOrder.job_order_id} />
 
       {isHistorical && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
@@ -124,26 +121,6 @@ function Received() {
         </div>
 
         <aside className="space-y-5">
-          {/* Proof of Vehicle Drop-off */}
-          <div className="rounded-xl border bg-card p-5">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Camera className="h-4 w-4 text-teal" /> Proof of Vehicle Drop-off
-            </div>
-            <div className="mt-3 overflow-hidden rounded-lg border bg-muted/30">
-              {dropoffPhoto ? (
-                <img src={dropoffPhoto} alt="Vehicle drop-off proof" className="aspect-video w-full object-cover" />
-              ) : (
-                <div className="flex aspect-video w-full flex-col items-center justify-center gap-1 text-muted-foreground">
-                  <Camera className="h-6 w-6" />
-                  <span className="text-xs">No photo on file yet</span>
-                </div>
-              )}
-            </div>
-            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-              <CalendarClock className="h-3.5 w-3.5" /> Logged {jobOrder.date_arrived}
-            </div>
-          </div>
-
           <div className="rounded-xl border bg-card p-5">
             <div className="flex items-center gap-2 text-sm font-semibold"><ShieldCheck className="h-4 w-4 text-teal" /> Your Service Team</div>
             <p className="mt-2 text-xs text-muted-foreground">A certified AutoKita technician has been assigned to your vehicle and will begin the pre-diagnostic shortly.</p>

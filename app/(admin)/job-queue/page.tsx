@@ -27,7 +27,9 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  ScanLine,
 } from 'lucide-react'
+import { DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 import { TopBar } from '@/components/TopBar'
 import { StatCard } from '@/components/StatCard'
 import { StatusBadge } from '@/components/StatusBadge'
@@ -49,6 +51,9 @@ export interface Job {
   servicesNeeded: string[]
   assignedMechanic?: string
   total?: number
+  // Customer agreed to the OBD-II scan fee at booking — the mechanic may scan,
+  // and the fee attaches to the job order on approval.
+  diagnosticScanAuthorized: boolean
 }
 
 type Tab = 'All Jobs' | 'Pending' | 'Approved' | 'Cancelled'
@@ -93,6 +98,7 @@ export default function page() {
               plate: t.plate_number,
               serviceMode: t.service_mode === 'walk_in' ? 'Shop Visit' : 'Home Service',
               servicesNeeded: [t.customer_concern || 'N/A'],
+              diagnosticScanAuthorized: Boolean(t.diagnostic_scan_authorized),
               assignedMechanic: t.mechanic_id ? t.mechanic_id.toString() : undefined,
               status,
               date: new Date(t.request_date).toLocaleDateString(),
@@ -363,6 +369,14 @@ export default function page() {
                       <Wrench size={12} className="shrink-0 text-muted-foreground" />
                       {c.servicesNeeded.map(getServiceLabel).join(', ')}
                     </span>
+                    {c.diagnosticScanAuthorized && (
+                      <span
+                        title={`Customer agreed to the PHP ${DIAGNOSTIC_SCAN_FEE.toLocaleString()} OBD-II scan fee at booking`}
+                        className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800"
+                      >
+                        <ScanLine size={11} /> OBD-II scan authorized
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-4">
                     <div className="relative">
@@ -508,6 +522,14 @@ function ApproveModal({ job, busy, onClose, onConfirm }: { job: Job; busy: boole
             <dt className="text-muted-foreground">Services</dt>
             <dd className="text-right font-medium text-foreground">{job.servicesNeeded.join(', ')}</dd>
           </div>
+          {job.diagnosticScanAuthorized && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">Diagnostic scan</dt>
+              <dd className="text-right font-medium text-amber-700">
+                Authorized — PHP {DIAGNOSTIC_SCAN_FEE.toLocaleString()} attaches on approval
+              </dd>
+            </div>
+          )}
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">Assigned Mechanic</dt>
             <dd className={`font-medium ${unassigned ? 'text-amber-600' : 'text-foreground'}`}>
