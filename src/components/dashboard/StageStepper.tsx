@@ -11,12 +11,43 @@ const STAGES: { key: string; label: string; icon: LucideIcon; to: string }[] = [
   { key: "completed", label: "COMPLETED", icon: CheckCircle2, to: "/dashboard/tracking/completed" },
 ];
 
+export type StageKey = (typeof STAGES)[number]["key"];
+
+// The stepper must reflect where the job order actually is — not which page
+// the customer happens to be reading. Every tracking page passes the job
+// order's real status through this, so looking back at "Received" while the
+// job is at Inspecting still shows Inspecting as current (and clickable).
+export function stageForStatus(status: string | null | undefined): StageKey {
+  switch (status) {
+    case "inspecting":
+      return "inspecting";
+    case "pending_customer_approval":
+    case "revision_pending":
+      return "quotation";
+    case "in_progress":
+    case "waiting_on_parts":
+      return "in-progress";
+    case "completed":
+    case "released":
+    case "cancelled":
+      return "completed";
+    default:
+      return "received";
+  }
+}
+
 export function StageStepper({
   active,
+  viewing,
   jobOrderId,
   stageTimes,
 }: {
+  // Where the job order actually is (drives done / current / future).
   active: (typeof STAGES)[number]["key"];
+  // Which stage's page the customer is reading right now. Usually equals
+  // `active`, but a customer can look back at an earlier stage — and then
+  // they need to see both "the job is here" and "I'm looking at this".
+  viewing?: (typeof STAGES)[number]["key"];
   jobOrderId: number;
   // Optional timestamp per stage (e.g. { received: "02/04/2026 11:32" }).
   // A stage with no entry here simply shows no time line — pass whatever
@@ -54,6 +85,7 @@ export function StageStepper({
           // Stages after the current one haven't happened yet — nothing to
           // show there, so they shouldn't be clickable.
           const isFuture = !isActive;
+          const isViewing = viewing === s.key;
           const time = stageTimes?.[s.key];
 
           const content = (
@@ -69,7 +101,7 @@ export function StageStepper({
                       : isDone
                       ? "border-transparent bg-brand text-white shadow-sm"
                       : "border-border bg-card text-muted-foreground/50"
-                  }`}
+                  } ${isViewing ? "ring-2 ring-brand ring-offset-2 ring-offset-card" : ""}`}
                 >
                   <Icon className="h-4 w-4" strokeWidth={2.5} />
                   {isDone && (
@@ -90,6 +122,12 @@ export function StageStepper({
               >
                 {s.label}
               </span>
+              {isViewing && (
+                <span className="flex flex-col items-center gap-1">
+                  <span className="h-0.5 w-8 rounded-full" style={{ backgroundImage: BRAND_GRADIENT }} />
+                  <span className="text-[8px] font-bold uppercase tracking-widest text-brand">You&apos;re here</span>
+                </span>
+              )}
               {time && (
                 <span className="whitespace-nowrap text-[9px] font-medium text-muted-foreground/70">
                   {time}

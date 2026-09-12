@@ -3,12 +3,13 @@
 import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from "next/link";
-import { Camera, Plus, Pencil, Trash2, Check, X, Cloud, Clock, ChevronRight, CheckCircle2, Loader2, Maximize2 } from 'lucide-react'
+import { Camera, Plus, Pencil, Trash2, Check, X, Cloud, Clock, ChevronRight, CheckCircle2, Loader2, Maximize2, AlertCircle, ScanLine } from 'lucide-react'
 import { toast } from 'sonner'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { Lightbox } from '@/components/Lightbox'
 import { compressImage } from '@/lib/image'
+import { DIAGNOSTIC_SCAN_FEE, formatPeso } from '@/data/diagnosticScan'
 import { getJobOrderById } from '@/controllers/jobOrderController'
 import { getInspectionById, addInspectionFinding, updateInspectionFinding, deleteInspectionFinding, uploadInspectionPhoto, saveWalkaroundNote } from '@/controllers/inspectionController'
 import { getLatestPreDiagnostic, sendForApproval, type PreDiagnosticRound } from '@/controllers/preDiagnosticController'
@@ -235,7 +236,13 @@ export default function page() {
               disabled={sending || Boolean(preDiagnostic && preDiagnostic.status === 'pending')}
               className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-default disabled:bg-emerald-600"
             >
-              {preDiagnostic ? <CheckCircle2 size={15} /> : <Cloud size={15} />}
+              {preDiagnostic?.status === 'disputed' ? (
+                  <AlertCircle size={15} /> 
+                ) : preDiagnostic ? (
+                <CheckCircle2 size={15} /> 
+                ) : ( 
+                <Cloud size={15} /> 
+                )}
               {sending
                 ? 'Sending…'
                 : preDiagnostic?.status === 'pending'
@@ -243,7 +250,7 @@ export default function page() {
                 : preDiagnostic?.status === 'approved'
                 ? 'Approved by customer'
                 : preDiagnostic?.status === 'disputed'
-                ? 'Disputed — resend after changes'
+                ? 'Customer has concerns - revise and send again'
                 : 'Upload to customer portal'}
             </button>
           </div>
@@ -270,6 +277,19 @@ export default function page() {
               </div>
             </div>
 
+            {/* The mechanic's go-ahead for the scanner. Without this the
+                customer never agreed to the fee, so don't plug it in. */}
+            {initial.diagnosticScanAuthorized && (
+              <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <ScanLine size={16} className="flex-shrink-0" />
+                <span>
+                  <b>OBD-II scan authorized.</b> The customer agreed to the{' '}
+                  {formatPeso(DIAGNOSTIC_SCAN_FEE)} diagnostic fee at booking — it&apos;s already on
+                  this job order.
+                </span>
+              </div>
+            )}
+
             {isLocked && (
               <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                 <Clock size={16} className="mt-0.5 flex-shrink-0" />
@@ -279,6 +299,27 @@ export default function page() {
                     The customer is reviewing the findings you sent. The report can&apos;t be edited
                     until they approve or raise a concern, so the record they act on is exactly the
                     one you submitted.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {preDiagnostic?.status === 'disputed' && (
+              <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+                <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">The customer has a concern with this report</p>
+                  {preDiagnostic.customerReason ? (
+                    <p className="mt-1.5 rounded-md bg-white/70 px-3 py-2 italic text-rose-950">
+                      &ldquo;{preDiagnostic.customerReason}&rdquo;
+                    </p>
+                  ) : (
+                    <p className="mt-0.5 text-rose-800">No reason was recorded.</p>
+                  )}
+                  <p className="mt-1.5 text-rose-800">
+                    Call the customer to talk it through, update the findings below, then send the
+                    report again.
+                    {preDiagnostic.respondedAt && ` Raised ${preDiagnostic.respondedAt}.`}
                   </p>
                 </div>
               </div>

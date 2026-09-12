@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, KeyboardEvent } from "react";
 import { Car, FileText, Clock, AlertCircle, CreditCard, Mail, X, ShieldCheck, CheckCircle2, Loader2, Store, Wallet, Send, HourglassIcon, BadgeCheck, Lock, Wrench } from "lucide-react";
-import { StageStepper } from "@/components/dashboard/StageStepper";
+import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import {
   getQuotationData,
   confirmQuotationVia2FA,
@@ -24,6 +24,7 @@ type FetchedService = {
 
 type JobOrder = {
   job_order_id: number;
+  status: string;
   quotation_approved: boolean;
   vehicle_model: string;
   vehicle_year: number;
@@ -144,7 +145,7 @@ function Quotation() {
   if (quotationStatus === 'preparing' && !locked) {
     return (
       <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-        <StageStepper active="quotation" jobOrderId={jobOrder.job_order_id} />
+        <StageStepper active={stageForStatus(jobOrder.status)} viewing="quotation" jobOrderId={jobOrder.job_order_id} />
         <div className="rounded-xl border bg-card p-12 text-center text-muted-foreground">
           <Wrench className="mx-auto mb-4 h-12 w-12 text-brand/50" />
           <h2 className="text-lg font-bold text-foreground">Preparing Quotation</h2>
@@ -156,7 +157,7 @@ function Quotation() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active="quotation" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper active={stageForStatus(jobOrder.status)} viewing="quotation" jobOrderId={jobOrder.job_order_id} />
 
       {locked && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
