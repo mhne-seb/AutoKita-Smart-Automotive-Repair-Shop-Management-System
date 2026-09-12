@@ -27,10 +27,13 @@ export async function GET(request: NextRequest) {
     }
 
     if (!jobOrder) {
-      return NextResponse.json({ jobOrder: null, preDiagnostic: null, walkaround: [], findings: [], shop: null })
+      return NextResponse.json({
+        jobOrder: null, preDiagnostic: null, walkaround: [], findings: [], reviewHistory: [], shop: null,
+        canCancel: false,
+      })
     }
 
-    const [preDiagRes, findingsRes, walkaroundRes, shopRes] = await Promise.all([
+    const [preDiagRes, findingsRes, walkaroundRes, historyRes, shopRes, cancelRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_quotation($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_inspections($1)`, [jobOrder.job_order_id]),
        // Walkaround photos share the table with findings but aren't findings —
@@ -43,13 +46,46 @@ export async function GET(request: NextRequest) {
          ORDER BY id`,
         [jobOrder.job_order_id],
       ),
+      // Every round the shop has sent, with the customer's answer (if any)
+      // pulled from the audit log. The respond endpoint refuses a second
+      // answer on the same round, so the LEFT JOIN yields at most one row
+      // per round. Inline query — get_pre_diagnostic() only returns the latest.
+      db.query(
+        `SELECT pd.id,
+                pd.mechanic_notes,
+                pd.customer_approval_status::text AS status,
+                pd.datetime_created::text          AS sent_at,
+                sal.new_values                     AS customer_reason,
+                sal.action_date::text              AS responded_at
+         FROM pre_diagnostics pd
+         LEFT JOIN system_audit_logs sal
+           ON sal.entity_type = 'pre_diagnostics'
+          AND sal.entity_id = pd.id
+          AND sal.action_performed IN ('approved', 'rejected')
+         WHERE pd.job_order_id = $1
+         ORDER BY pd.datetime_created ASC`,
+        [jobOrder.job_order_id],
+      ),
       db.query(`SELECT * FROM get_dashboard_shop()`),
+      // Mirrors the guard in /api/customer/job-orders/cancel exactly, so the
+      // page only offers a Cancel button that will actually succeed.
+      db.query(
+        `SELECT (
+            jo.status = 'inspecting'
+            AND NOT EXISTS (SELECT 1 FROM vehicle_inspections vi WHERE vi.job_order_id = jo.id)
+            AND NOT EXISTS (SELECT 1 FROM pre_diagnostics pd WHERE pd.job_order_id = jo.id)
+         ) AS can_cancel
+         FROM job_orders jo WHERE jo.id = $1`,
+        [jobOrder.job_order_id],
+      ),
     ])
 
     return NextResponse.json({
       jobOrder,
       preDiagnostic: preDiagRes.rows[0] ?? null,
       walkaround: walkaroundRes.rows,
+      reviewHistory: historyRes.rows,
+      canCancel: Boolean(cancelRes.rows[0]?.can_cancel),
       // Keep reference-photo rows out of the findings list — they're intake
       // documentation, not something the mechanic diagnosed.
       findings: findingsRes.rows.filter((r) => r.status !== 'reference-photo'),

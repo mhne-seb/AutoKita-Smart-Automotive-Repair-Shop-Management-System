@@ -204,10 +204,16 @@ export default function page() {
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <span className="flex w-fit items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-muted-foreground">
-                          <StageIcon size={12} />
-                          {stageLabels[c.stage]}
-                        </span>
+                        {c.cancelled ? (
+                          <span className="flex w-fit items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive">
+                            Cancelled by customer
+                          </span>
+                        ) : (
+                          <span className="flex w-fit items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-muted-foreground">
+                            <StageIcon size={12} />
+                            {stageLabels[c.stage]}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-4 text-foreground/80">
                         <span className="flex items-center gap-1.5">

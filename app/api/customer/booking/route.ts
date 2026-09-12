@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { sendTempPasswordEmail } from '@/lib/mail'
+import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,7 +13,8 @@ export async function POST(req: NextRequest) {
       newVehicleDetails,
       serviceMode,
       homeAddress,
-      customerConcern
+      customerConcern,
+      diagnosticScanAuthorized,
     } = body
 
     if (!vehicleId && !newVehicleDetails) {
@@ -103,6 +105,18 @@ export async function POST(req: NextRequest) {
     ])
 
     const ticket = ticketResult.rows[0]
+
+    // Documented consent to the OBD-II scan fee. service_tickets has no column
+    // for it and create_service_ticket() takes no flag, so it's an audit event
+    // against the ticket — who agreed, to what, and when. The admin queue and
+    // the job-order creation step both read this back.
+    if (diagnosticScanAuthorized === true) {
+      await db.query(
+        `INSERT INTO system_audit_logs (user_id, action_performed, entity_type, entity_id, new_values, action_date)
+         VALUES ($1, 'approved'::audit_action_enum, 'service_tickets', $2, $3, NOW())`,
+        [finalUserId, ticket.id, `${DIAGNOSTIC_SCAN_SERVICE_NAME} fee (PHP ${DIAGNOSTIC_SCAN_FEE}) authorized at booking`],
+      )
+    }
 
     // New guest customer — email the temp password together with a booking copy.
     if (tempPassword) {

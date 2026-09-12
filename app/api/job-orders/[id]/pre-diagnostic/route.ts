@@ -6,7 +6,25 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   try {
     const { id } = await params
     const result = await db.query(`SELECT * FROM get_pre_diagnostic($1)`, [id])
-    return NextResponse.json({ success: true, data: result.rows[0] ?? null })
+    const round = result.rows[0] ?? null
+
+    // The customer's reason for a dispute lives in the audit log (see the
+    // customer respond endpoint), not on pre_diagnostics — fetch it so the
+    // mechanic knows what to revise toward.
+    if (round && round.customer_approval_status === 'disputed') {
+      const reasonRes = await db.query(
+        `SELECT new_values AS reason, action_date::text AS responded_at
+         FROM system_audit_logs
+         WHERE entity_type = 'pre_diagnostics' AND entity_id = $1 AND action_performed = 'rejected'
+         ORDER BY action_date DESC
+         LIMIT 1`,
+        [round.id],
+      )
+      round.customer_reason = reasonRes.rows[0]?.reason ?? null
+      round.responded_at = reasonRes.rows[0]?.responded_at ?? null
+    }
+
+    return NextResponse.json({ success: true, data: round })
   } catch (error) {
     console.error('Pre-diagnostic fetch error:', error)
     return NextResponse.json(

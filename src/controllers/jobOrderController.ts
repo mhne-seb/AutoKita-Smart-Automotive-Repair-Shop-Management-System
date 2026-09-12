@@ -27,6 +27,9 @@ function mapDbStatusToStage(dbStatus: string): Stage {
       return 'in-progress'
     case 'completed':
     case 'released':
+    // Terminal, nothing left to do — sits with the finished ones. The card's
+    // `cancelled` flag keeps the label honest.
+    case 'cancelled':
       return 'completed'
     default:
       return 'inspecting'
@@ -53,6 +56,7 @@ function toJobOrderCard(row: any): JobOrderCard {
     vehicle: row.vehicle_model ? `${row.vehicle_year ?? ''} ${row.vehicle_model}`.trim() : 'Unknown Vehicle',
     customerId: `CUST-${row.user_id ?? '0000'}`,
     stage,
+    cancelled: row.status === 'cancelled',
     service: row.service_names || 'No services listed',
     time: row.date_arrived
       ? new Date(row.date_arrived).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Check, FileText, Wrench, ShieldCheck, Printer, Download, Clock, Car, User, PackageCheck } from "lucide-react";
-import { StageStepper } from "@/components/dashboard/StageStepper";
+import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getCompletedData } from "@/controllers/serviceProgressController";
 import { getShopInfo } from "@/controllers/billingController";
 // npm install jspdf
@@ -83,7 +83,7 @@ function Completed() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active="completed" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper active={stageForStatus(jobOrder.status)} viewing="completed" jobOrderId={jobOrder.job_order_id} />
 
       <div className="relative overflow-hidden rounded-2xl bg-brand-soft/60 p-8">
         <Check className="absolute right-8 top-8 h-32 w-32 text-brand/10" />

@@ -72,6 +72,7 @@ export async function getQuotationData(userId: number, jobOrderId?: number) {
   return res.json() as Promise<{
     jobOrder: {
       job_order_id: number
+      status: string
       quotation_approved: boolean
       vehicle_model: string
       vehicle_year: number
