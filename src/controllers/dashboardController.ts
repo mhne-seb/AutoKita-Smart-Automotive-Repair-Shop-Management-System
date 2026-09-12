@@ -39,11 +39,35 @@ export interface DashboardJobOrder {
 
 export interface DashboardActivity {
   id: number
-  type: 'payment' | 'progress_log' | 'status_change' | 'booking_accepted'
+  type: 'payment' | 'progress_log' | 'status_change' | 'booking_accepted' | 'report_ready'
   title: string
   description: string
   time: string
   job_order_id: number
+}
+
+// Customer-facing names for job_orders_status values. The stored activity
+// function echoes the raw enum ("pending_customer_approval") into its text;
+// this is what we swap it for before it reaches the screen.
+const STATUS_LABEL: Record<string, string> = {
+  inspecting: 'Under Inspection',
+  pending_customer_approval: 'Awaiting Your Approval',
+  in_progress: 'In Progress',
+  waiting_on_parts: 'Waiting on Parts',
+  revision_pending: 'Revision Pending',
+  completed: 'Completed',
+  released: 'Released',
+  cancelled: 'Cancelled',
+}
+
+function humanizeStatusChange(description: string): string {
+  // Enum values are lowercase + underscores; matching only those keeps the
+  // trailing period out of the captured value.
+  return description.replace(
+    /status changed from ([a-z_]+) to ([a-z_]+)\.?/,
+    (_m, from: string, to: string) =>
+      `moved from ${STATUS_LABEL[from] ?? from} to ${STATUS_LABEL[to] ?? to}.`,
+  )
 }
 
 export interface DashboardPendingTicket {
@@ -130,6 +154,35 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
     [userId],
   )
 
+  // 3. "Your report is ready" — fires when the mechanic sends a round for
+  //    approval. Nothing else surfaces this to the customer, and it's the one
+  //    event that actually needs them to do something.
+  //    A second round on the same job order is a revision (the customer had a
+  //    concern), so say so instead of repeating the first message verbatim.
+  const reportReady = await db.query(
+    `SELECT
+        r.id,
+        'report_ready'::text AS type,
+        CASE WHEN r.round_no = 1 THEN 'Inspection Report Ready' ELSE 'Revised Report Ready' END::text AS title,
+        CASE WHEN r.round_no = 1
+             THEN 'Your inspection report for Job Order #JO-' || r.job_order_id
+                  || ' is ready. Please review it and let us know if we can proceed.'
+             ELSE 'We''ve revised the inspection report for Job Order #JO-' || r.job_order_id
+                  || ' based on your concern. Please take another look.'
+        END::text AS description,
+        r.datetime_created AS job_time,
+        r.job_order_id
+     FROM (
+        SELECT pd.id, pd.job_order_id, pd.datetime_created,
+               ROW_NUMBER() OVER (PARTITION BY pd.job_order_id ORDER BY pd.datetime_created) AS round_no
+        FROM pre_diagnostics pd
+        WHERE pd.job_order_id IN (SELECT jo.id FROM job_orders jo WHERE jo.user_id = $1)
+     ) r
+     ORDER BY r.datetime_created DESC
+     LIMIT 10`,
+    [userId],
+  )
+
   type RawActivityRow = {
     id: number
     type: DashboardActivity['type']
@@ -140,12 +193,12 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
     job_order_id: number
   }
 
-  return ([...base.rows, ...accepted.rows] as RawActivityRow[])
+  return ([...base.rows, ...accepted.rows, ...reportReady.rows] as RawActivityRow[])
     .map((r) => ({
       id: r.id,
       type: r.type,
       title: r.title,
-      description: r.description,
+      description: r.type === 'status_change' ? humanizeStatusChange(r.description) : r.description,
       time: r.time ?? r.job_time ?? '',
       job_order_id: r.job_order_id,
     }))

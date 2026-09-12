@@ -77,6 +77,7 @@ function toInspectionData(row: any): InspectionData {
       progressPercent: row.status === 'inspecting' ? 25 : row.status ? 50 : 0,
     },
     approvalRequired: row.status === 'pending_customer_approval',
+    diagnosticScanAuthorized: Boolean(row.diagnosticScanAuthorized),
   }
 }
 

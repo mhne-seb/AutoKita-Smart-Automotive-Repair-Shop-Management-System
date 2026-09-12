@@ -27,6 +27,9 @@ export interface JobOrderCard {
   stepsTotal: number
   mileage?: number
   vehicleYear?: number
+  // A cancelled job order maps to the 'completed' stage (it's terminal) but
+  // must never be labelled as if the work was done.
+  cancelled?: boolean
 }
 
 export type FindingStatus = 'ok' | 'needs-attention' | 'urgent'
@@ -84,6 +87,8 @@ export interface InspectionData {
     progressPercent: number
   }
   approvalRequired: boolean
+  // Customer agreed to the OBD-II scan fee at booking — mechanic may scan.
+  diagnosticScanAuthorized?: boolean
   pullOutRequested?: boolean
 }
 

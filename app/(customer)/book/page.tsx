@@ -10,6 +10,7 @@ import {
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import phAddress from "@/data/ph-address.json";
+import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
 import { fy } from "date-fns/locale";
 
 const TIMES = ["08:00 AM", "09:30 AM", "10:30 AM", "01:00 PM", "02:30 PM", "04:00 PM"];
@@ -162,6 +163,9 @@ type Form = {
   pickup: "shop" | "home";
   category: string; categoryOther: string;
   concern: string;
+  // Customer's explicit agreement to the OBD-II scan fee, when the chosen
+  // category requires the scanner. Never inferred — always a real click.
+  scanAcknowledged: boolean;
 };
 
 function isStepValid(step: number, f: Form): boolean {
@@ -189,7 +193,10 @@ function isStepValid(step: number, f: Form): boolean {
         isFilled(f.mileage) &&
         isFilled(f.plate) &&
         isSelectValid(f.category, f.categoryOther) &&
-        isFilled(f.concern)
+        isFilled(f.concern) &&
+        // The scan fee has to be agreed to before the ticket can be submitted,
+        // so the shop is never charging for something nobody said yes to.
+        (!requiresDiagnosticScan(f.category) || f.scanAcknowledged)
       );
     default:
       return true;
@@ -232,6 +239,7 @@ function BookPage() {
     pickup: "shop",
     category: "", categoryOther: "",
     concern: "",
+    scanAcknowledged: false,
   });
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setF((p) => ({ ...p, [k]: v }));
@@ -363,6 +371,9 @@ function BookPage() {
           serviceMode: f.pickup === "home" ? "Home Service" : "Walk In",
           homeAddress: address,
           customerConcern: `Requested: ${slot} | Service: ${category} | ${f.concern || "No specific concerns"}`,
+          // Only true when the category needs the scanner AND the box was ticked;
+          // the server records it as a consent event against the ticket.
+          diagnosticScanAuthorized: requiresDiagnosticScan(f.category) && f.scanAcknowledged,
         }),
       });
 
@@ -420,6 +431,7 @@ function BookPage() {
       pickup: "shop",
       category: "", categoryOther: "",
       concern: "",
+      scanAcknowledged: false,
     });
   };
 
@@ -656,12 +668,56 @@ function BookPage() {
                 <div className="mt-5">
                   <SelectField
                     icon={Wrench} label="Service Category" required value={f.category}
-                    onChange={(v) => set("category", v)} options={CATEGORIES}
+                    onChange={(v) => { set("category", v); set("scanAcknowledged", false); }} options={CATEGORIES}
                     placeholder="Select a service"
                     otherValue={f.categoryOther} onOtherChange={(v) => set("categoryOther", v)}
                     error={showError && !isSelectValid(f.category, f.categoryOther) ? "Service category is required" : undefined}
                   />
                 </div>
+
+                {/* Scanner-fee disclosure — shown the moment a scanner category
+                    is chosen, and the ticket can't be submitted until it's
+                    agreed to. This is the documented consent, not a tooltip. */}
+                {requiresDiagnosticScan(f.category) && (
+                  <div
+                    className={`mt-4 rounded-xl border p-4 ${
+                      showError && !f.scanAcknowledged ? "border-red-400 bg-red-50/40" : "border-amber-300 bg-amber-50"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-amber-950">
+                          This service uses the OBD-II diagnostic scanner — {formatPeso(DIAGNOSTIC_SCAN_FEE)}
+                        </p>
+                        <p className="mt-1 text-sm text-amber-900">
+                          To inspect this properly, our mechanic connects a diagnostic scanner to your
+                          vehicle&apos;s onboard computer. The scan fee of{" "}
+                          <b>{formatPeso(DIAGNOSTIC_SCAN_FEE)}</b> is charged whenever the scanner is
+                          used — <b>even if you decide not to go ahead with the repairs afterward</b>.
+                          Any repair costs will be quoted separately for your approval.
+                        </p>
+                        <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-sm text-amber-950">
+                          <input
+                            type="checkbox"
+                            checked={f.scanAcknowledged}
+                            onChange={(e) => set("scanAcknowledged", e.target.checked)}
+                            className="mt-0.5 h-4 w-4 rounded border-amber-400 accent-amber-600"
+                          />
+                          <span>
+                            I understand and agree to the {formatPeso(DIAGNOSTIC_SCAN_FEE)} diagnostic scan fee.
+                          </span>
+                        </label>
+                        {showError && !f.scanAcknowledged && (
+                          <p className="mt-2 flex items-center gap-1 text-[11px] text-red-500">
+                            <AlertCircle className="h-3 w-3" /> Please agree to the scan fee to continue
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="mt-5">
                   <label className="flex items-center gap-1.5 text-xs font-semibold uppercase text-muted-foreground">
                     <FileText className="h-3 w-3" /> Concern <span className="text-red-500">*</span>
@@ -1064,6 +1120,15 @@ function buildReviewSections(f: Form): ReviewSection[] {
         { icon: Wrench, label: "Category", value: category || "—" },
         { icon: MapPin, label: "Pick Up", value: f.pickup === "shop" ? "Shop Visit" : "Home Service" },
         { icon: FileText, label: "Concern", value: f.concern || "—" },
+        // Restated on the review screen so the fee is the last thing they see
+        // before Confirm, not something buried two steps back.
+        ...(requiresDiagnosticScan(f.category)
+          ? [{
+              icon: ShieldCheck,
+              label: "Diagnostic Scan",
+              value: `${formatPeso(DIAGNOSTIC_SCAN_FEE)} fee — agreed (charged even if repairs are declined)`,
+            }]
+          : []),
       ],
     },
   ];

@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LayoutGrid, FileText, Wrench, ChevronRight, Loader2, Camera, AlertCircle, Check } from "lucide-react";
 import { toast } from "sonner";
-import { StageStepper } from "@/components/dashboard/StageStepper";
+import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { Lightbox } from "@/components/Lightbox";
-import { getInspectingData, respondToInspection } from "@/controllers/serviceProgressController";
+import { getInspectingData, respondToInspection, cancelJobOrder } from "@/controllers/serviceProgressController";
 
 function toneClass(status: string | null) {
   if (!status) return "bg-muted text-muted-foreground";
@@ -16,18 +16,11 @@ function toneClass(status: string | null) {
   return "bg-success/15 text-[color:oklch(0.5_0.16_145)]";
 }
 
-function highlightToneClass(status: string | null) {
-  if (!status) return "bg-muted text-muted-foreground";
-  const s = status.toLowerCase();
-  if (s.includes("urgent") || s.includes("replace")) return "bg-destructive text-white";
-  if (s.includes("attention") || s.includes("monitor")) return "bg-warning text-white";
-  return "bg-[color:oklch(0.6_0.15_240)] text-white";
-}
-
 function Inspecting() {
   useEffect(() => { document.title = "Inspecting — AutoKita"; }, []);
 
   const searchParams = useSearchParams();
+  const router = useRouter();
   const jobOrderIdParam = searchParams.get("jobOrderId");
 
   const [data, setData] = useState<Awaited<ReturnType<typeof getInspectingData>> | null>(null);
@@ -45,6 +38,7 @@ function Inspecting() {
   const jobOrder = data?.jobOrder ?? null;
   const preDiagnostic = data?.preDiagnostic ?? null;
   const findings = data?.findings ?? [];
+  const reviewHistory = data?.reviewHistory ?? [];
   const walkaround = data?.walkaround ?? [];
   const shop = data?.shop ?? null;
 
@@ -56,18 +50,43 @@ function Inspecting() {
 
   const [responding, setResponding] = useState(false);
   const [lightbox, setLightbox] = useState<{ url: string; label: string } | null>(null);
+  // "I have concerns" opens a one-line box before anything is sent — the line
+  // is the record; the actual conversation happens by phone.
+  const [concernOpen, setConcernOpen] = useState(false);
+  const [concern, setConcern] = useState("");
+  // Two-step cancel, same pattern as the dashboard's pending-booking cancel.
+  const [cancelArmed, setCancelArmed] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const canCancel = data?.canCancel ?? false;
+
+  const cancel = async () => {
+    if (!jobOrder) return;
+    setCancelling(true);
+    const userId = Number(sessionStorage.getItem("autokita_user_id"));
+    const res = await cancelJobOrder(userId, jobOrder.job_order_id);
+    if (res.success) {
+      toast.success("Booking cancelled.");
+      router.push("/dashboard");
+    } else {
+      toast.error(res.message ?? "Could not cancel this booking.");
+      setCancelling(false);
+      setCancelArmed(false);
+    }
+  };
 
   const respond = async (decision: "approved" | "disputed") => {
     if (!jobOrder) return;
     setResponding(true);
     const userId = Number(sessionStorage.getItem("autokita_user_id"));
-    const res = await respondToInspection(userId, jobOrder.job_order_id, decision);
+    const res = await respondToInspection(userId, jobOrder.job_order_id, decision, concern);
     if (res.success) {
       toast.success(
         decision === "approved"
           ? "Inspection approved. We're preparing your quotation."
-          : "Thanks — we've flagged your concerns for the service team.",
+          : "Thanks — we've noted your concern and will call you to sort it out.",
       );
+      setConcernOpen(false);
+      setConcern("");
       setData(await getInspectingData(userId, jobOrder.job_order_id));
     } else {
       toast.error(res.message ?? "Could not submit your response.");
@@ -97,7 +116,7 @@ function Inspecting() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active="inspecting" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper active={stageForStatus(jobOrder.status)} viewing="inspecting" jobOrderId={jobOrder.job_order_id} />
 
       {preDiagnostic?.approval_status === "pending" && !isHistorical && (
         <div className="rounded-xl border-2 border-brand bg-brand-soft/40 p-6">
@@ -109,22 +128,59 @@ function Inspecting() {
                 Our team has finished inspecting your vehicle. Review the findings below, then let
                 us know if we can go ahead and prepare your quotation.
               </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  onClick={() => respond("approved")}
-                  disabled={responding}
-                  className="flex items-center gap-2 rounded-md bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-60"
-                >
-                  <Check className="h-4 w-4" /> {responding ? "Sending…" : "Approve findings"}
-                </button>
-                <button
-                  onClick={() => respond("disputed")}
-                  disabled={responding}
-                  className="rounded-md border px-5 py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-60"
-                >
-                  I have concerns
-                </button>
-              </div>
+              {!concernOpen ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => respond("approved")}
+                    disabled={responding}
+                    className="flex items-center gap-2 rounded-md bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-60"
+                  >
+                    <Check className="h-4 w-4" /> {responding ? "Sending…" : "Approve findings"}
+                  </button>
+                  <button
+                    onClick={() => setConcernOpen(true)}
+                    disabled={responding}
+                    className="rounded-md border px-5 py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-60"
+                  >
+                    I have concerns
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <label htmlFor="concern" className="text-sm font-medium">
+                    Briefly, what&apos;s your concern?
+                  </label>
+                  <input
+                    id="concern"
+                    value={concern}
+                    onChange={(e) => setConcern(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && concern.trim()) respond("disputed"); }}
+                    maxLength={200}
+                    autoFocus
+                    placeholder="e.g. The brake pads were replaced last month"
+                    className="mt-1.5 w-full rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
+                  />
+                  <p className="mt-1.5 text-xs text-muted-foreground">
+                    We&apos;ll call you to talk it through, then send a revised report for you to approve here.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => respond("disputed")}
+                      disabled={responding || !concern.trim()}
+                      className="rounded-md bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-60"
+                    >
+                      {responding ? "Sending…" : "Send concern"}
+                    </button>
+                    <button
+                      onClick={() => { setConcernOpen(false); setConcern(""); }}
+                      disabled={responding}
+                      className="rounded-md border px-5 py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-60"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -161,10 +217,54 @@ function Inspecting() {
             the findings will appear here and we&apos;ll ask you to review them before any
             quotation is prepared.
           </p>
+
+          {/* Only offered while nothing has been done to the car yet — the API
+              decides that, this just shows what it said. */}
+          {canCancel && (
+            <div className="mt-6 border-t pt-5">
+              {!cancelArmed ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    Changed your mind? You can still cancel — it&apos;s free until the mechanic begins
+                    work on your vehicle.
+                  </p>
+                  <button
+                    onClick={() => setCancelArmed(true)}
+                    className="mt-3 inline-flex items-center gap-2 rounded-md border border-destructive/40 px-5 py-2.5 text-sm font-semibold text-destructive hover:bg-destructive/10"
+                  >
+                    Cancel this booking
+                  </button>
+                </>
+              ) : (
+                <div className="mx-auto max-w-sm">
+                  <p className="text-sm font-medium">Cancel this booking?</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Your slot will be released and you&apos;ll need to book again if you change your mind.
+                  </p>
+                  <div className="mt-3 flex justify-center gap-2">
+                    <button
+                      onClick={cancel}
+                      disabled={cancelling}
+                      className="rounded-md bg-destructive px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60"
+                    >
+                      {cancelling ? "Cancelling…" : "Yes, cancel booking"}
+                    </button>
+                    <button
+                      onClick={() => setCancelArmed(false)}
+                      disabled={cancelling}
+                      className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent disabled:opacity-60"
+                    >
+                      Keep it
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
-      <div className={!awaitingReport && findings.length > 0 ? "grid gap-6 lg:grid-cols-[2fr_1fr]" : "mx-auto max-w-3xl"}>
+      <div className={!awaitingReport && reviewHistory.length > 0 ? "grid gap-6 lg:grid-cols-[2fr_1fr]" : "mx-auto max-w-3xl"}>
         <div className="space-y-6">
           {walkaround.length > 0 && (
             <div className="rounded-xl border bg-card p-6">
@@ -277,24 +377,56 @@ function Inspecting() {
           )}
         </div>
 
-        {!awaitingReport && findings.length > 0 && (
+        {!awaitingReport && reviewHistory.length > 0 && (
           <aside className="space-y-5">
             <div className="rounded-xl border bg-card p-5">
               <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Report Highlights
+                Review History
               </div>
-              <div className="mt-4 space-y-3 text-sm">
-                {findings.map((f) => (
-                  <div key={f.id} className="flex items-center justify-between">
-                    <span>{f.name ?? "Finding"}</span>
-                    {f.status && (
-                      <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${highlightToneClass(f.status)}`}>
-                        {f.status}
-                      </span>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Every report we&apos;ve sent you, and how you answered.
+              </p>
+              <ol className="mt-4 space-y-4 border-l pl-4 text-sm">
+                {reviewHistory.map((round, i) => (
+                  <li key={round.id} className="relative">
+                    <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full border-2 border-card bg-brand" />
+                    <div className="font-semibold">
+                      Report {reviewHistory.length > 1 ? `#${i + 1} ` : ""}sent
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">{round.sent_at}</div>
+                    {round.mechanic_notes && (
+                      <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{round.mechanic_notes}</p>
                     )}
-                  </div>
+
+                    {round.status === "approved" && (
+                      <div className="mt-2 rounded-md bg-success/10 px-3 py-2">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-success">
+                          <Check className="h-3.5 w-3.5" /> You approved
+                        </div>
+                        {round.responded_at && (
+                          <div className="text-[11px] text-muted-foreground">{round.responded_at}</div>
+                        )}
+                      </div>
+                    )}
+                    {round.status === "disputed" && (
+                      <div className="mt-2 rounded-md bg-warning/10 px-3 py-2">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-warning">
+                          <AlertCircle className="h-3.5 w-3.5" /> You raised a concern
+                        </div>
+                        {round.customer_reason && (
+                          <p className="mt-1 text-xs italic">&ldquo;{round.customer_reason}&rdquo;</p>
+                        )}
+                        {round.responded_at && (
+                          <div className="mt-0.5 text-[11px] text-muted-foreground">{round.responded_at}</div>
+                        )}
+                      </div>
+                    )}
+                    {round.status === "pending" && (
+                      <div className="mt-2 text-xs font-medium text-brand">Awaiting your review</div>
+                    )}
+                  </li>
                 ))}
-              </div>
+              </ol>
             </div>
           </aside>
         )}

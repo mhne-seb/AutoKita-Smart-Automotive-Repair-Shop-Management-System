@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -27,15 +28,31 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     )
 
     const photoResult = await db.query(
-      `SELECT findings_description AS slot_id, name AS label, notes as note, photo
+      `SELECT id, findings_description AS slot_id, name AS label, notes as note, photo
       FROM vehicle_inspections
       WHERE job_order_id = $1 AND status = 'reference-photo'`,
       [id]
     )
 
+    // Whether the customer pre-authorized the OBD-II scan — the fee row is
+    // attached at job-order creation, so its presence is the signal.
+    const scanResult = await db.query(
+      `SELECT EXISTS (
+         SELECT 1 FROM job_order_services jos
+         JOIN services s ON s.id = jos.service_id
+         WHERE jos.job_order_id = $1 AND s.service_name = $2
+       ) AS authorized`,
+      [id, DIAGNOSTIC_SCAN_SERVICE_NAME],
+    )
+
     return NextResponse.json({
       success: true,
-      data: { ...headerResult.rows[0], findings: findingsResult.rows, referencePhotos: photoResult.rows},
+      data: {
+        ...headerResult.rows[0],
+        findings: findingsResult.rows,
+        referencePhotos: photoResult.rows,
+        diagnosticScanAuthorized: Boolean(scanResult.rows[0]?.authorized),
+      },
     })
   } catch (error) {
     console.error('Inspection fetch error:', error)
