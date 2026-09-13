@@ -7,7 +7,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
     const headerResult = await db.query(
       `
-      SELECT jo.id, jo.quotation_notes, jo.actual_grand_total,
+      SELECT jo.id, jo.quotation_notes, jo.actual_grand_total, jo.quotation_approved,
              (pd.job_order_id IS NOT NULL) AS sent_to_customer
       FROM job_orders jo
       LEFT JOIN pre_diagnostics pd ON pd.job_order_id = jo.id

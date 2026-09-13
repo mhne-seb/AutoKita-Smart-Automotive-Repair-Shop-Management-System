@@ -4,11 +4,12 @@
 import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useState, useRef } from 'react'
 import Link from "next/link";
-import { Plus, Pencil, Check, Send, ShieldCheck, ChevronRight, X, Trash2, RotateCcw } from 'lucide-react'
+import { Plus, Pencil, Check, Send, ShieldCheck, ChevronRight, X, Trash2, RotateCcw, PackagePlus, CreditCard, XCircle } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
+import { Lightbox } from '@/components/Lightbox'
 import { getJobOrderById } from '@/controllers/jobOrderController'
-import { getQuotationById } from '@/controllers/quotationController'
+import { getQuotationById, getJobOrderPayment, verifyJobOrderPayment, type JobOrderPayment } from '@/controllers/quotationController'
 import { getLatestPreDiagnostic, sendForApproval, recallApproval } from '@/controllers/preDiagnosticController'
 import { currency } from '@/data/mockData'
 import { QuotationService, JobOrderCard, QuotationData } from '@/data/types'
@@ -64,6 +65,31 @@ export default function page() {
       active = false
     }
   }, [jobOrderId])
+
+  // The customer's submitted payment (if any) — bank/e-wallet transfers need
+  // a human to check the proof against the shop's own account before they
+  // count as verified.
+  const [payment, setPayment] = useState<JobOrderPayment | null | undefined>(undefined)
+  const [verifyingPayment, setVerifyingPayment] = useState(false)
+  const [showProofLightbox, setShowProofLightbox] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    getJobOrderPayment(jobOrderId).then((data) => {
+      if (active) setPayment(data)
+    })
+    return () => {
+      active = false
+    }
+  }, [jobOrderId])
+
+  async function handleVerifyPayment(decision: 'verified' | 'rejected') {
+    if (!payment) return
+    setVerifyingPayment(true)
+    const ok = await verifyJobOrderPayment(jobOrderId, payment.id, decision)
+    if (ok) setPayment({ ...payment, verificationStatus: decision })
+    setVerifyingPayment(false)
+  }
 
   // Once the real data arrives, seed the editable state from it.
   const hasSeeded = useRef(false)
@@ -187,6 +213,15 @@ export default function page() {
   const [customServiceName, setCustomServiceName] = useState('')
   const [isAddingService, setIsAddingService] = useState(false)
 
+  // Add Part modal — replaces the old window.prompt() flow.
+  const [showPartModal, setShowPartModal] = useState(false)
+  const [partModalServiceId, setPartModalServiceId] = useState<string | null>(null)
+  const [partName, setPartName] = useState('')
+  const [partNumber, setPartNumber] = useState('')
+  const [partQty, setPartQty] = useState(1)
+  const [partUnitPrice, setPartUnitPrice] = useState(0)
+  const [partStatus, setPartStatus] = useState<'in-stock' | 'to-order'>('to-order')
+
   useEffect(() => {
     let active = true
     fetch('/api/services')
@@ -216,6 +251,12 @@ export default function page() {
     )
   }
 
+  // The customer's actual decision on THIS quotation — unlike preDiagnostic.status,
+  // which reflects the latest pre_diagnostics round for the whole job order and can
+  // still read 'approved' from an earlier stage (e.g. the inspection) even though
+  // no quotation has been sent yet. This is what should lock editing.
+  const quotationApproved = initial.quotationApproved
+
   function updateLaborCost(serviceId: string, laborCost: number) {
     setServices((prev) => prev.map((s) => (s.id === serviceId ? { ...s, laborCost } : s)))
     setHasUnsavedChanges(true)
@@ -226,10 +267,20 @@ export default function page() {
     setHasUnsavedChanges(true)
   }
 
-  function addPart(serviceId: string) {
-    const name = window.prompt('Part name?')
-    if (!name) return
-    const unitPrice = Number(window.prompt('Unit price (₱)?', '0')) || 0
+  function openAddPartModal(serviceId: string) {
+    setPartModalServiceId(serviceId)
+    setPartName('')
+    setPartNumber('')
+    setPartQty(1)
+    setPartUnitPrice(0)
+    setPartStatus('to-order')
+    setShowPartModal(true)
+  }
+
+  function confirmAddPart() {
+    const name = partName.trim()
+    if (!name || !partModalServiceId) return
+    const serviceId = partModalServiceId
     setServices((prev) =>
       prev.map((s) =>
         s.id === serviceId
@@ -237,13 +288,21 @@ export default function page() {
               ...s,
               parts: [
                 ...s.parts,
-                { id: `${serviceId}-p${s.parts.length + 1}`, name, partNo: `PRT-${Math.floor(Math.random() * 9000 + 1000)}`, qty: 1, unitPrice, status: 'to-order' },
+                {
+                  id: `${serviceId}-p${s.parts.length + 1}`,
+                  name,
+                  partNo: partNumber.trim() || `PRT-${Math.floor(Math.random() * 9000 + 1000)}`,
+                  qty: Math.max(1, partQty || 1),
+                  unitPrice: Math.max(0, partUnitPrice || 0),
+                  status: partStatus,
+                },
               ],
             }
           : s
       )
     )
     setHasUnsavedChanges(true)
+    setShowPartModal(false)
   }
   // Saves the quotation draft to the database without sending for approval.
   async function saveDraft() {
@@ -385,7 +444,7 @@ export default function page() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={openAddServiceModal}
-            disabled={preDiagnostic?.status === 'pending' || preDiagnostic?.status === 'approved'}
+            disabled={preDiagnostic?.status === 'pending' || quotationApproved}
             className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus size={14} /> Add Service
@@ -402,20 +461,20 @@ export default function page() {
             <div className="flex gap-2">
               <button
                 onClick={saveDraft}
-                disabled={savingDraft || savedDraft || sending || preDiagnostic?.status === 'approved'}
+                disabled={savingDraft || savedDraft || sending || quotationApproved}
                 className={`flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-slate-50 disabled:opacity-50 ${hasUnsavedChanges ? 'border-amber-400 bg-amber-50 text-amber-700' : 'border-slate-200 bg-white text-slate-700'}`}
               >
                 {savingDraft ? 'Saving...' : savedDraft ? '✓ Draft Saved' : hasUnsavedChanges ? '* Save Draft' : 'Save Draft'}
               </button>
               <button
                 onClick={sendQuotationForApproval}
-                disabled={sending || preDiagnostic?.status === 'approved'}
+                disabled={sending || quotationApproved}
                 className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
               >
                 <Send size={14} />{' '}
                 {sending
                   ? 'Sending…'
-                  : preDiagnostic?.status === 'approved'
+                  : quotationApproved
                   ? 'Approved by customer'
                   : 'Send to Customer'}
               </button>
@@ -515,14 +574,14 @@ export default function page() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setEditingServiceId(editing ? null : s.id)}
-                        disabled={preDiagnostic?.status === 'pending' || preDiagnostic?.status === 'approved'}
+                        disabled={preDiagnostic?.status === 'pending' || quotationApproved}
                         className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {editing ? <Check size={13} /> : <Pencil size={13} />} {editing ? 'Done' : 'Edit'}
                       </button>
                       <button
                         onClick={() => removeService(s.id)}
-                        disabled={preDiagnostic?.status === 'pending' || preDiagnostic?.status === 'approved'}
+                        disabled={preDiagnostic?.status === 'pending' || quotationApproved}
                         className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Remove Service"
                       >
@@ -534,9 +593,9 @@ export default function page() {
 
                 <div className="mt-4 flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-slate-400">
                   <span>Required Parts</span>
-                  <button 
-                    onClick={() => addPart(s.id)} 
-                    disabled={preDiagnostic?.status === 'pending' || preDiagnostic?.status === 'approved'}
+                  <button
+                    onClick={() => openAddPartModal(s.id)}
+                    disabled={preDiagnostic?.status === 'pending' || quotationApproved}
                     className="flex items-center gap-1 text-emerald-600 hover:underline disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed"
                   >
                     <Plus size={12} /> Add Part
@@ -624,6 +683,63 @@ export default function page() {
             </div>
           </div>
 
+          {payment && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="flex items-center gap-1.5 font-bold text-slate-900"><CreditCard size={16} /> Payment Verification</p>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${
+                    payment.verificationStatus === 'verified'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : payment.verificationStatus === 'rejected'
+                      ? 'bg-rose-100 text-rose-700'
+                      : 'bg-amber-100 text-amber-700'
+                  }`}
+                >
+                  {payment.verificationStatus}
+                </span>
+              </div>
+
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between"><span className="text-slate-400">Amount</span><span className="font-semibold text-slate-800">{currency(payment.amountPaid)}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Method</span><span className="font-semibold text-slate-800">{payment.paymentChannel ?? payment.paymentMethod}</span></div>
+                {payment.referenceNumber && (
+                  <div className="flex justify-between"><span className="text-slate-400">Reference No.</span><span className="font-semibold text-slate-800">{payment.referenceNumber}</span></div>
+                )}
+              </div>
+
+              {payment.proofOfPaymentImage && (
+                <button type="button" onClick={() => setShowProofLightbox(true)} className="mt-3 block w-full">
+                  <img
+                    src={payment.proofOfPaymentImage}
+                    alt="Proof of payment"
+                    className="h-32 w-full rounded-lg border border-slate-200 object-cover hover:opacity-90"
+                  />
+                  <p className="mt-1 text-center text-[10px] text-slate-400">Click to view full size</p>
+                </button>
+              )}
+
+              {payment.verificationStatus === 'pending' && (
+                <div className="mt-4 flex gap-2">
+                  <button
+                    onClick={() => handleVerifyPayment('rejected')}
+                    disabled={verifyingPayment}
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                  >
+                    <XCircle size={14} /> Reject
+                  </button>
+                  <button
+                    onClick={() => handleVerifyPayment('verified')}
+                    disabled={verifyingPayment}
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
+                  >
+                    <Check size={14} /> {verifyingPayment ? 'Saving…' : 'Verify'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
             <p className="mb-3 font-bold text-slate-900">Parts Status</p>
             <div className="flex items-center justify-between text-sm">
@@ -657,7 +773,7 @@ export default function page() {
           </div>
 
 
-          {preDiagnostic?.status === 'approved' && (
+          {quotationApproved && (
             <Link
               href={`/job-orders/${jobOrderId}/progress`}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
@@ -719,6 +835,102 @@ export default function page() {
             </div>
           </div>
         </div>
+      )}
+
+      {showPartModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setShowPartModal(false)}>
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900"><PackagePlus size={18} className="text-emerald-600" /> Add Part</h3>
+              <button onClick={() => setShowPartModal(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Part Name</label>
+                <input
+                  autoFocus
+                  type="text"
+                  value={partName}
+                  onChange={(e) => setPartName(e.target.value)}
+                  placeholder="e.g. Front Brake Pad Set"
+                  className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Part Number <span className="font-normal text-slate-400">(optional)</span></label>
+                <input
+                  type="text"
+                  value={partNumber}
+                  onChange={(e) => setPartNumber(e.target.value)}
+                  placeholder="Auto-generated if left blank"
+                  className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Quantity</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={partQty}
+                    onChange={(e) => setPartQty(Number(e.target.value) || 1)}
+                    className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Unit Price (₱)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={partUnitPrice}
+                    onChange={(e) => setPartUnitPrice(Number(e.target.value) || 0)}
+                    className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Availability</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPartStatus('in-stock')}
+                    className={`rounded-lg border-2 px-3 py-2 text-sm font-semibold ${partStatus === 'in-stock' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                  >
+                    In Stock
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPartStatus('to-order')}
+                    className={`rounded-lg border-2 px-3 py-2 text-sm font-semibold ${partStatus === 'to-order' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                  >
+                    To Order
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3 text-sm">
+                <span className="text-slate-500">Subtotal</span>
+                <span className="font-bold text-slate-900">{currency(Math.max(1, partQty || 1) * Math.max(0, partUnitPrice || 0))}</span>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button onClick={() => setShowPartModal(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50">Cancel</button>
+              <button onClick={confirmAddPart} disabled={!partName.trim()} className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">
+                <PackagePlus size={14} /> Add Part
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showProofLightbox && payment?.proofOfPaymentImage && (
+        <Lightbox url={payment.proofOfPaymentImage} label="Proof of payment" onClose={() => setShowProofLightbox(false)} />
       )}
     </div>
   )
