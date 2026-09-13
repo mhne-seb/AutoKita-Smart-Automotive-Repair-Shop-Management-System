@@ -45,12 +45,17 @@ export function JobOrderBreadcrumb({ jobOrderId, current }: Props) {
         })}
       </div>
 
-      <button
-        onClick={() => setShowGenerateModal(true)}
-        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-      >
-        <FileText size={14} /> Generate Job Order
-      </button>
+      {/* The printable job order document only makes sense once the quotation
+          is approved and work is actually underway — so it only shows on the
+          Service Progress stage, not Inspection or Quotation. */}
+      {current === 'progress' && (
+        <button
+          onClick={() => setShowGenerateModal(true)}
+          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          <FileText size={14} /> Generate Job Order
+        </button>
+      )}
 
       {showGenerateModal && (
         <GenerateJobOrderModal jobOrderId={jobOrderId} onClose={() => setShowGenerateModal(false)} />
