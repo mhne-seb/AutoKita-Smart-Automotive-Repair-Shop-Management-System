@@ -70,3 +70,32 @@ export async function sendTempPasswordEmail(opts: {
         `,
     })
 }
+// One-time code for confirming a quotation (the paper's 2FA-Secured Quotation
+// Approval). Plain and short: the code is the whole message.
+export async function sendOtpEmail(opts: {
+    to: string
+    name: string
+    code: string
+    expiresMinutes: number
+    context: string // e.g. "confirm the quotation for JO-1882"
+}) {
+    await transporter.sendMail({
+        from: `"AutoKita" <${process.env.GMAIL_USER}>`,
+        to: opts.to,
+        subject: `${opts.code} is your AutoKita verification code`,
+        text:
+            `Hi ${opts.name},\n\n` +
+            `Use this code to ${opts.context}:\n\n` +
+            `    ${opts.code}\n\n` +
+            `It expires in ${opts.expiresMinutes} minutes. If you didn't request this, you can ignore this email.\n\n— AutoKita`,
+        html: `
+          <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111">
+            <h2 style="color:#1e3a5f">Your verification code</h2>
+            <p>Hi ${opts.name},</p>
+            <p>Use this code to ${opts.context}:</p>
+            <p style="font-size:32px;font-weight:700;letter-spacing:8px;font-family:monospace;color:#1e3a5f;margin:20px 0">${opts.code}</p>
+            <p style="font-size:13px;color:#666">It expires in ${opts.expiresMinutes} minutes. If you didn't request this, you can ignore this email.</p>
+          </div>
+        `,
+    })
+}

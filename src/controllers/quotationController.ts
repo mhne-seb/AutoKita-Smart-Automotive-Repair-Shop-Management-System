@@ -44,6 +44,7 @@ function toQuotationData(row: any): QuotationData {
     services,
     notes: row.quotation_notes || '',
     sentToCustomer: Boolean(row.sent_to_customer),
+    quotationApproved: Boolean(row.quotation_approved),
   }
 }
 
@@ -92,22 +93,70 @@ export async function getQuotationData(userId: number, jobOrderId?: number) {
   }>
 }
 
-export async function confirmQuotationVia2FA(jobOrderId: number, acceptedServiceIds: number[]) {
+/** Emails the customer a 6-digit code and returns the signed token to present
+ *  with it. `devCode` is only ever present outside production when mail
+ *  isn't configured. */
+export async function requestQuotationOtp(userId: number, jobOrderId: number) {
+  const res = await fetch('/api/tracking/quotation/otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, jobOrderId }),
+  })
+  return res.json() as Promise<{
+    success: boolean
+    message?: string
+    token?: string
+    sentTo?: string
+    expiresMinutes?: number
+    devCode?: string
+  }>
+}
+
+/** Confirms the selected services. The server verifies the OTP pair, checks
+ *  ownership, keeps the pre-authorized OBD-II fee on the order, and logs the
+ *  customer's go-signal. */
+export async function confirmQuotationVia2FA(
+  userId: number,
+  jobOrderId: number,
+  acceptedServiceIds: number[],
+  otpToken: string,
+  otpCode: string,
+) {
   const res = await fetch('/api/tracking/quotation/confirm', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jobOrderId, acceptedServiceIds }),
+    body: JSON.stringify({ userId, jobOrderId, acceptedServiceIds, otpToken, otpCode }),
   })
-  return res.json() as Promise<{ success: boolean }>
+  return res.json() as Promise<{ success: boolean; message?: string; code?: 'expired' | 'invalid' }>
 }
 
-export async function submitQuotationPayment(jobOrderId: number, method: 'shop' | 'ewallet', amount: number, acceptedServiceIds: number[]) {
-  const res = await fetch('/api/tracking/quotation/payment', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jobOrderId, method, amount, acceptedServiceIds }),
-  })
-  return res.json() as Promise<{ success: boolean; paymentId: number }>
+/** Proof of a manual bank/e-wallet transfer — required for anything other than "Pay at Shop". */
+export interface PaymentProof {
+  channelId: string
+  referenceNumber: string
+  file: File
+}
+
+export async function submitQuotationPayment(
+  jobOrderId: number,
+  method: 'shop' | 'ewallet',
+  amount: number,
+  acceptedServiceIds: number[],
+  proof?: PaymentProof,
+) {
+  const form = new FormData()
+  form.set('jobOrderId', String(jobOrderId))
+  form.set('method', method)
+  form.set('amount', String(amount))
+  form.set('acceptedServiceIds', JSON.stringify(acceptedServiceIds))
+  if (proof) {
+    form.set('channel', proof.channelId)
+    form.set('referenceNumber', proof.referenceNumber)
+    form.set('file', proof.file)
+  }
+
+  const res = await fetch('/api/tracking/quotation/payment', { method: 'POST', body: form })
+  return res.json() as Promise<{ success: boolean; paymentId?: number; error?: string }>
 }
 
 export async function getQuotationPaymentStatus(jobOrderId: number) {
@@ -115,4 +164,52 @@ export async function getQuotationPaymentStatus(jobOrderId: number) {
   return res.json() as Promise<{
     paymentStatus: { verification_status: string; payment_method: string } | null
   }>
+}
+
+// ---------------------------------------------------------------------------
+// Admin-side: reviewing and verifying a customer's submitted payment.
+// ---------------------------------------------------------------------------
+
+export interface JobOrderPayment {
+  id: number
+  paymentMethod: string
+  paymentChannel: string | null
+  referenceNumber: string | null
+  proofOfPaymentImage: string | null
+  amountPaid: number
+  paymentDate: string
+  verificationStatus: 'pending' | 'verified' | 'rejected' | 'refunded'
+}
+
+/** Fetches the latest payment submitted for a job order, or null if none yet. */
+export async function getJobOrderPayment(jobOrderId: string): Promise<JobOrderPayment | null> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/payment`)
+  const json = await res.json()
+  if (!json.success || !json.payment) return null
+  const p = json.payment
+  return {
+    id: p.id,
+    paymentMethod: p.payment_method,
+    paymentChannel: p.payment_channel,
+    referenceNumber: p.reference_number,
+    proofOfPaymentImage: p.proof_of_payment_image,
+    amountPaid: Number(p.amount_paid),
+    paymentDate: p.payment_date,
+    verificationStatus: p.verification_status,
+  }
+}
+
+/** Admin verifies or rejects a payment after checking it against the shop's own account. */
+export async function verifyJobOrderPayment(
+  jobOrderId: string,
+  paymentId: number,
+  decision: 'verified' | 'rejected',
+): Promise<boolean> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/payment`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paymentId, decision }),
+  })
+  const json = await res.json()
+  return json.success === true
 }
