@@ -121,6 +121,7 @@ export interface QuotationData {
   services: QuotationService[]
   notes: string
   sentToCustomer: boolean
+  quotationApproved: boolean
 }
 
 export type TaskStatus = 'completed' | 'active' | 'pending'
