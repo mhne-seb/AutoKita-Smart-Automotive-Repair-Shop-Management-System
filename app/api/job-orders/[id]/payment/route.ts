@@ -50,6 +50,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ success: false, message: 'Payment not found' }, { status: 404 })
     }
 
+    // Money's confirmed — the downpayment policy is satisfied, work can start.
+    // (The 2FA path advances immediately in /api/tracking/quotation/confirm,
+    // since no payment is involved there.)
+    if (decision === 'verified') {
+      await db.query(`SELECT advance_job_order_stage($1::int, 'in_progress'::job_orders_status)`, [id])
+    }
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Payment verification error:', error)

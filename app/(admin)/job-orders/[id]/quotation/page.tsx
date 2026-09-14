@@ -1,21 +1,22 @@
 'use client'
 
 // Admin "Quotation" page (one step of the job-order workflow: Inspection -> Quotation -> Service Progress). Lets the mechanic/admin build a service+parts quote for the customer to approve, then hands off to Service Progress.
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState, useRef } from 'react'
-import Link from "next/link";
-import { Plus, Pencil, Check, Send, ShieldCheck, ChevronRight, X, Trash2, RotateCcw, PackagePlus, CreditCard, XCircle } from 'lucide-react'
+import { Plus, Pencil, Check, Send, ShieldCheck, ChevronRight, X, Trash2, RotateCcw, PackagePlus, CreditCard, XCircle, ClipboardCheck } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { Lightbox } from '@/components/Lightbox'
-import { getJobOrderById } from '@/controllers/jobOrderController'
+import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
 import { getQuotationById, getJobOrderPayment, verifyJobOrderPayment, type JobOrderPayment } from '@/controllers/quotationController'
 import { getLatestPreDiagnostic, sendForApproval, recallApproval } from '@/controllers/preDiagnosticController'
+import { getInspectionById } from '@/controllers/inspectionController'
 import { currency } from '@/data/mockData'
-import { QuotationService, JobOrderCard, QuotationData } from '@/data/types'
+import { QuotationService, JobOrderCard, QuotationData, MechanicalFinding, findingStatusMeta } from '@/data/types'
 
 export default function page() {
   const jobOrderId = String(useParams().id)
+  const router = useRouter()
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)
 
   // Quotation data now comes from the real database, which is an async call
@@ -66,6 +67,19 @@ export default function page() {
     }
   }, [jobOrderId])
 
+  // The findings the customer approved at the inspection stage — the reason
+  // this quotation exists. Read-only here; they're edited on the inspection page.
+  const [findings, setFindings] = useState<MechanicalFinding[]>([])
+  useEffect(() => {
+    let active = true
+    getInspectionById(jobOrderId).then((data) => {
+      if (active) setFindings(data?.findings ?? [])
+    })
+    return () => {
+      active = false
+    }
+  }, [jobOrderId])
+
   // The customer's submitted payment (if any) — bank/e-wallet transfers need
   // a human to check the proof against the shop's own account before they
   // count as verified.
@@ -91,6 +105,20 @@ export default function page() {
     setVerifyingPayment(false)
   }
 
+  // The handoff to the floor. Normally the stage is already in_progress by the
+  // time this is clicked (2FA confirm / payment verify advance it server-side),
+  // but if it isn't — e.g. an older job order — this advances it, so the
+  // breadcrumb and the customer's tracker agree the work has started.
+  const [startingWork, setStartingWork] = useState(false)
+  async function continueToServiceProgress() {
+    setStartingWork(true)
+    if (jobOrder && jobOrder.stage !== 'in-progress' && jobOrder.stage !== 'completed') {
+      const updated = await advanceJobOrderStage(jobOrderId, 'in-progress')
+      if (updated) setJobOrder(updated)
+    }
+    router.push(`/job-orders/${jobOrderId}/progress`)
+  }
+
   // Once the real data arrives, seed the editable state from it.
   const hasSeeded = useRef(false)
   useEffect(() => {
@@ -110,6 +138,10 @@ export default function page() {
   useEffect(() => {
     // Don't auto-save until initial data has loaded and seeded
     if (!hasSeeded.current) return
+    // Once the customer has approved, the page is read-only — there's nothing
+    // to save, and a save is a full delete/reinsert of services and parts
+    // (which would otherwise fire every visit when the AI predictions land).
+    if (initial?.quotationApproved) return
     
     // Skip the first execution which is triggered by the initial setServices/setNotes
     if (isFirstRender.current) {
@@ -218,8 +250,10 @@ export default function page() {
   const [partModalServiceId, setPartModalServiceId] = useState<string | null>(null)
   const [partName, setPartName] = useState('')
   const [partNumber, setPartNumber] = useState('')
-  const [partQty, setPartQty] = useState(1)
-  const [partUnitPrice, setPartUnitPrice] = useState(0)
+  // Kept as text while typing — a controlled number input seeded with 0/1
+  // keeps the old digit in front of what you type ("0900"). Converted on save.
+  const [partQty, setPartQty] = useState('1')
+  const [partUnitPrice, setPartUnitPrice] = useState('')
   const [partStatus, setPartStatus] = useState<'in-stock' | 'to-order'>('to-order')
 
   useEffect(() => {
@@ -271,8 +305,8 @@ export default function page() {
     setPartModalServiceId(serviceId)
     setPartName('')
     setPartNumber('')
-    setPartQty(1)
-    setPartUnitPrice(0)
+    setPartQty('1')
+    setPartUnitPrice('')
     setPartStatus('to-order')
     setShowPartModal(true)
   }
@@ -292,8 +326,8 @@ export default function page() {
                   id: `${serviceId}-p${s.parts.length + 1}`,
                   name,
                   partNo: partNumber.trim() || `PRT-${Math.floor(Math.random() * 9000 + 1000)}`,
-                  qty: Math.max(1, partQty || 1),
-                  unitPrice: Math.max(0, partUnitPrice || 0),
+                  qty: Math.max(1, Number(partQty) || 1),
+                  unitPrice: Math.max(0, Number(partUnitPrice) || 0),
                   status: partStatus,
                 },
               ],
@@ -409,7 +443,7 @@ export default function page() {
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 p-8">
       <TopBar title="Vehicle Inspection" subtitle="Inspection workflow & time tracking." />
-      <JobOrderBreadcrumb jobOrderId={jobOrderId} current="quotation" />
+      <JobOrderBreadcrumb jobOrderId={jobOrderId} current="quotation" stage={jobOrder.stage} />
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
         <div className="grid grid-cols-4 gap-6 text-sm">
@@ -753,7 +787,33 @@ export default function page() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="mb-2 font-bold text-slate-900">📝 Inspection Notes</p>
+            <p className="flex items-center gap-1.5 font-bold text-slate-900"><ClipboardCheck size={16} /> Inspection Findings</p>
+            <p className="mt-0.5 text-xs text-slate-400">What the mechanic found, as approved by the customer.</p>
+            {findings.length === 0 ? (
+              <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-500">No findings were recorded.</p>
+            ) : (
+              <div className="mt-3 space-y-2">
+                {findings.map((f) => {
+                  const meta = findingStatusMeta[f.status] ?? findingStatusMeta['needs-attention']
+                  return (
+                    <div key={f.id} className="rounded-lg border border-slate-100 bg-slate-50 p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-semibold text-slate-900">{f.name}</p>
+                        <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${meta.classes}`}>
+                          {meta.label}
+                        </span>
+                      </div>
+                      {f.note && <p className="mt-1 text-xs text-slate-600">{f.note}</p>}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <p className="font-bold text-slate-900">📝 Quotation Notes</p>
+            <p className="mb-2 mt-0.5 text-xs text-slate-400">Internal — for the shop, not shown to the customer.</p>
             {editingNotes ? (
               <textarea
                 value={notes}
@@ -773,14 +833,28 @@ export default function page() {
           </div>
 
 
-          {quotationApproved && (
-            <Link
-              href={`/job-orders/${jobOrderId}/progress`}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
-            >
-              Continue to Service Progress <ChevronRight size={15} />
-            </Link>
-          )}
+          {/* One-time handoff, like "Continue to Quotation" on the inspection
+              page: hidden once the job is actually on the floor. Blocked while
+              a downpayment is still unverified — the shop's policy is that
+              work doesn't start until the money is confirmed. */}
+          {quotationApproved && jobOrder.stage !== 'in-progress' && jobOrder.stage !== 'completed' && (() => {
+            const paymentBlocks =
+              payment?.verificationStatus === 'pending'
+                ? "Verify the customer's payment first"
+                : payment?.verificationStatus === 'rejected'
+                ? 'Payment was rejected — the customer needs to resubmit'
+                : null
+            return (
+              <button
+                onClick={continueToServiceProgress}
+                disabled={startingWork || Boolean(paymentBlocks)}
+                title={paymentBlocks ?? undefined}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {startingWork ? 'Starting…' : 'Continue to Service Progress'} <ChevronRight size={15} />
+              </button>
+            )
+          })()}
         </div>
       </div>
 
@@ -876,7 +950,8 @@ export default function page() {
                     type="number"
                     min={1}
                     value={partQty}
-                    onChange={(e) => setPartQty(Number(e.target.value) || 1)}
+                    onChange={(e) => setPartQty(e.target.value)}
+                    onFocus={(e) => e.target.select()}
                     className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
                   />
                 </div>
@@ -887,7 +962,9 @@ export default function page() {
                     min={0}
                     step="0.01"
                     value={partUnitPrice}
-                    onChange={(e) => setPartUnitPrice(Number(e.target.value) || 0)}
+                    onChange={(e) => setPartUnitPrice(e.target.value)}
+                    onFocus={(e) => e.target.select()}
+                    placeholder="0.00"
                     className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
                   />
                 </div>
@@ -915,7 +992,7 @@ export default function page() {
 
               <div className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3 text-sm">
                 <span className="text-slate-500">Subtotal</span>
-                <span className="font-bold text-slate-900">{currency(Math.max(1, partQty || 1) * Math.max(0, partUnitPrice || 0))}</span>
+                <span className="font-bold text-slate-900">{currency(Math.max(1, Number(partQty) || 1) * Math.max(0, Number(partUnitPrice) || 0))}</span>
               </div>
             </div>
 

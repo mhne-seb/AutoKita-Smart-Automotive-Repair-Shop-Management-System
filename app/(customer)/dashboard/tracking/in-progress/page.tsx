@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react";
+import { PAYMENT_CHANNELS } from "@/data/paymentChannels";
 import { useSearchParams } from "next/navigation";
 import {
   Clock,
@@ -34,6 +35,17 @@ import {
   serviceTotal,
 } from "@/data/billings";
 import { getServices, getWarranties } from "@/controllers/billingController";
+
+// A part one of the services is waiting on. Only "still to order" vs "here"
+// matters to the shop (no inventory system), so that's all we show.
+type Part = {
+  id: number;
+  service_name: string;
+  description: string;
+  quantity: number;
+  status: string;
+};
+const partIsReady = (p: Part) => p.status !== "to_order" && p.status !== "ordered" && p.status !== "in_transit";
 
 type Task = {
   id: number;
@@ -80,6 +92,14 @@ type TimelineEntry = {
   image?: string;
 };
 
+// Same short format the admin pages use — the raw ISO string was leaking
+// through to the customer ("2026-09-13T02:00:00.000Z").
+function fmtWhen(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? null : d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
 function getTag(status: string): "completed" | "active" | "pending" {
   if (status === "completed") return "completed";
   if (status === "in_progress") return "active";
@@ -92,7 +112,7 @@ function InProgress() {
   const searchParams = useSearchParams();
   const jobOrderIdParam = searchParams.get("jobOrderId");
 
-  const [data, setData] = useState<{ jobOrder: JobOrder | null; tasks: Task[] } | null>(null);
+  const [data, setData] = useState<{ jobOrder: JobOrder | null; tasks: Task[]; parts?: Part[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showWarn, setShowWarn] = useState(false);
   const [pullOutStatus, setPullOutStatus] = useState<"none" | "requested">("none");
@@ -108,6 +128,10 @@ function InProgress() {
   }, [jobOrderIdParam]);
 
   const tasks = data?.tasks ?? [];
+  const parts = data?.parts ?? [];
+  // Parts still to be ordered, grouped by the service (task title) they belong to.
+  const missingPartsFor = (taskTitle: string) => parts.filter((p) => p.service_name === taskTitle && !partIsReady(p));
+  const partsFor = (taskTitle: string) => parts.filter((p) => p.service_name === taskTitle);
   const jobOrder = data?.jobOrder ?? null;
 
   // Locked once the job order has moved past active servicing — the
@@ -186,13 +210,24 @@ function InProgress() {
           time: jobOrder.downpayment_received_at ?? null,
           status: jobOrder.quotation_approved ? "completed" : "pending",
         },
-        ...tasks.map((t) => ({
-          key: `task-${t.id}`,
-          label: t.task_title,
-          detail: t.note && t.note !== "Describe the service..." ? t.note : undefined,
-          time: t.completed_at ?? t.scheduled_date ?? null,
-          status: getTag(t.task_status),
-        })),
+        ...tasks.map((t) => {
+          const missing = getTag(t.task_status) === "pending" ? missingPartsFor(t.task_title) : [];
+          const all = partsFor(t.task_title);
+          return {
+            key: `task-${t.id}`,
+            label: t.task_title,
+            detail: t.note && t.note !== "Describe the service..." ? t.note : undefined,
+            time: t.completed_at
+              ? `Finished ${fmtWhen(t.completed_at)}`
+              : missing.length > 0
+              ? `Waiting for parts (${all.length - missing.length} of ${all.length} received)`
+              : t.scheduled_date
+              ? `Scheduled ${fmtWhen(t.scheduled_date)}`
+              : null,
+            status: getTag(t.task_status),
+            waitingForParts: missing.length > 0,
+          };
+        }),
         {
           key: "service_completed",
           label: "Vehicle Service Completed",
@@ -263,19 +298,28 @@ function InProgress() {
                 const isLast = idx === timeline.length - 1;
                 const isOnHold = pullOutStatus === "requested" && entry.status !== "completed" && entry.key.startsWith("task-");
 
+                // Service tasks use the exact words the admin picks in the
+                // schedule modal (Not Yet / Started / Finished), so the customer
+                // sees what the shop tagged. Other milestones keep Completed/Pending.
+                const isTask = entry.key.startsWith("task-");
+                const waiting = Boolean((entry as { waitingForParts?: boolean }).waitingForParts);
                 const badgeLabel = isOnHold
                   ? "On Hold"
                   : entry.status === "completed"
-                  ? "Completed"
+                  ? (isTask ? "Finished" : "Completed")
                   : entry.status === "active"
-                  ? "Active"
-                  : "Pending";
+                  ? "Started"
+                  : waiting
+                  ? "Waiting for parts"
+                  : (isTask ? "Not Yet" : "Pending");
                 const badgeClasses = isOnHold
                   ? "bg-destructive/15 text-destructive"
                   : entry.status === "completed"
                   ? "bg-success/15 text-[color:oklch(0.5_0.16_145)]"
                   : entry.status === "active"
                   ? "bg-brand-soft text-brand"
+                  : waiting
+                  ? "bg-warning/15 text-[color:oklch(0.5_0.13_50)]"
                   : "bg-muted text-muted-foreground";
 
                 return (
@@ -728,7 +772,7 @@ function ServiceModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 py-10" onClick={onClose}>
-      <div className="w-full max-w-2xl overflow-hidden rounded-xl border bg-card shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-4xl overflow-hidden rounded-xl border bg-card shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between border-b p-6">
           <div>
             <h2 className="text-lg font-bold">{service.name}</h2>
@@ -831,27 +875,30 @@ function ServiceModal({
               </div>
 
               {method === "ewallet" && (
-                <div className="mt-5 grid gap-5 md:grid-cols-2">
+                <div className="mt-5 space-y-5">
                   <div>
                     <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      <Wallet className="h-3 w-3" /> Payment Details
+                      <Wallet className="h-3 w-3" /> Scan to pay
                     </div>
-                    {[
-                      { n: "GCash", num: "0917-123-4567" },
-                      { n: "Maya", num: "0908-765-4321" },
-                    ].map((p) => (
-                      <div key={p.n} className="mt-2 flex items-center justify-between rounded-lg bg-muted/40 p-3">
-                        <div className="text-xs">
-                          <div className="text-sm font-bold">{p.n}</div>
-                          <div>Account Name: <b>AutoCare Services</b></div>
-                          <div>Mobile Number: <b>{p.num}</b></div>
+                    {/* One card per e-wallet, QR large enough to scan from a phone
+                        held up to the screen. Details come from the shared channel
+                        list, so the shop's real numbers/QRs are set in one place. */}
+                    <div className="mt-2 grid gap-4 sm:grid-cols-2">
+                      {PAYMENT_CHANNELS.filter((c) => c.type === "e_wallet").map((c) => (
+                        <div key={c.id} className="flex flex-col items-center rounded-lg border bg-muted/30 p-4 text-center">
+                          {c.qrImage ? (
+                            <img src={c.qrImage} alt={`${c.label} payment QR`} className="h-48 w-48 rounded-lg border bg-white object-contain p-2" />
+                          ) : (
+                            <div className="grid h-48 w-48 place-items-center rounded-lg border-2 border-dashed bg-white text-xs text-muted-foreground">
+                              {c.label} QR<br />coming soon
+                            </div>
+                          )}
+                          <div className="mt-3 text-sm font-bold">{c.label}</div>
+                          <div className="text-xs text-muted-foreground">{c.accountName}</div>
+                          <div className="mt-0.5 font-mono text-sm font-semibold tracking-wide">{c.accountNumber}</div>
                         </div>
-                        <div className="text-center">
-                          <div className="grid h-16 w-16 place-items-center rounded border bg-white p-1 text-[8px]">QR</div>
-                          <div className="mt-1 text-[10px]">{p.n} QR</div>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                   <div>
                     <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -1006,7 +1053,7 @@ function PullOutModal({
             <button
               onClick={submit}
               disabled={status === "submitting"}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-[color:oklch(0.6_0.22_350)] py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-[color:oklch(0.6_0.22_350)] py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-[color:oklch(0.54_0.22_350)] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none disabled:active:scale-100"
             >
               {status === "submitting" ? (
                 <>
@@ -1018,7 +1065,7 @@ function PullOutModal({
             </button>
             <button
               onClick={onClose}
-              className="mt-2 w-full rounded-md border py-2 text-sm hover:bg-accent"
+              className="mt-2 w-full rounded-md border py-2 text-sm transition-all duration-150 hover:border-foreground/30 hover:bg-accent active:scale-[0.98]"
             >
               Keep Servicing My Vehicle
             </button>
