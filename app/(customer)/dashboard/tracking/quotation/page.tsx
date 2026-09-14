@@ -31,6 +31,7 @@ type JobOrder = {
   job_order_id: number;
   status: string;
   quotation_approved: boolean;
+  diagnostic_scan_authorized: boolean;
   vehicle_model: string;
   vehicle_year: number;
   plate_number: string;
@@ -229,9 +230,13 @@ function Quotation() {
 
           <div className="mt-4 space-y-3">
             {services.map((s) => {
-              // The OBD-II scan fee was agreed to at booking and is payable
-              // regardless — it's shown, but it isn't the customer's to untick.
-              const isAuthorizedFee = s.service_name === DIAGNOSTIC_SCAN_SERVICE_NAME;
+              // Locked only when the customer genuinely pre-authorized the OBD-II
+              // fee at booking (checked via the audit log, not just whether a
+              // line item with this name exists — a mechanic can add that line
+              // item later, e.g. for an "Others" booking, without the customer
+              // ever having agreed to it, and that case must stay untickable
+              // like any other service).
+              const isAuthorizedFee = s.service_name === DIAGNOSTIC_SCAN_SERVICE_NAME && jobOrder.diagnostic_scan_authorized;
               const frozen = locked || isAuthorizedFee;
               return (
               <label

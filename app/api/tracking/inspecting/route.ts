@@ -80,15 +80,24 @@ export async function GET(request: NextRequest) {
       ),
     ])
 
+    const preDiagnostic = preDiagRes.rows[0] ?? null
+
+    // Until the mechanic clicks "Upload to customer portal" there is no round,
+    // and what's in vehicle_inspections is a draft — don't hand it to the
+    // customer's browser at all. Completed/released jobs are the read-only
+    // history view and always show what was recorded.
+    const isHistorical = jobOrder.status === 'completed' || jobOrder.status === 'released'
+    const reportSent = Boolean(preDiagnostic?.approval_status) || isHistorical
+
     return NextResponse.json({
       jobOrder,
-      preDiagnostic: preDiagRes.rows[0] ?? null,
-      walkaround: walkaroundRes.rows,
+      preDiagnostic,
+      walkaround: reportSent ? walkaroundRes.rows : [],
       reviewHistory: historyRes.rows,
       canCancel: Boolean(cancelRes.rows[0]?.can_cancel),
       // Keep reference-photo rows out of the findings list — they're intake
       // documentation, not something the mechanic diagnosed.
-      findings: findingsRes.rows.filter((r) => r.status !== 'reference-photo'),
+      findings: reportSent ? findingsRes.rows.filter((r) => r.status !== 'reference-photo') : [],
       shop: shopRes.rows[0] ?? null,
     })
   } catch (err) {

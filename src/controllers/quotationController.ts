@@ -75,6 +75,7 @@ export async function getQuotationData(userId: number, jobOrderId?: number) {
       job_order_id: number
       status: string
       quotation_approved: boolean
+      diagnostic_scan_authorized: boolean
       vehicle_model: string
       vehicle_year: number
       plate_number: string
