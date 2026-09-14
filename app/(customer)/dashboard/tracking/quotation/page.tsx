@@ -3,14 +3,19 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, KeyboardEvent } from "react";
-import { Car, FileText, Clock, AlertCircle, CreditCard, Mail, X, ShieldCheck, CheckCircle2, Loader2, Store, Wallet, Send, HourglassIcon, BadgeCheck, Lock, Wrench } from "lucide-react";
-import { StageStepper } from "@/components/dashboard/StageStepper";
+import { Car, FileText, Clock, AlertCircle, CreditCard, Mail, X, ShieldCheck, CheckCircle2, Loader2, Store, Wallet, Send, HourglassIcon, BadgeCheck, Lock, Wrench, Copy, Check, Upload, ImageIcon } from "lucide-react";
+import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
+import { toast } from "sonner";
 import {
   getQuotationData,
+  requestQuotationOtp,
   confirmQuotationVia2FA,
   submitQuotationPayment,
   getQuotationPaymentStatus,
+  type PaymentProof,
 } from "@/controllers/quotationController";
+import { DIAGNOSTIC_SCAN_SERVICE_NAME } from "@/data/diagnosticScan";
+import { PAYMENT_CHANNELS } from "@/data/paymentChannels";
 
 type FetchedService = {
   id: number;
@@ -24,7 +29,9 @@ type FetchedService = {
 
 type JobOrder = {
   job_order_id: number;
+  status: string;
   quotation_approved: boolean;
+  diagnostic_scan_authorized: boolean;
   vehicle_model: string;
   vehicle_year: number;
   plate_number: string;
@@ -84,7 +91,8 @@ function Quotation() {
   const total = services
     .filter((s) => checked[s.id])
     .reduce((sum, s) => sum + Number(s.actual_amount), 0);
-  const needsDownpayment = total > 50000;
+  // Downpayment Policy: 20% required for bills that reach OR exceed PHP 50,000.
+  const needsDownpayment = total >= 50000;
   const downpayment = Math.round(total * 0.2);
   const selectedCount = Object.values(checked).filter(Boolean).length;
 
@@ -102,23 +110,48 @@ function Quotation() {
     return () => clearInterval(interval);
   }, [paymentStatus, jobOrder, locked]);
 
-  const handlePaymentSubmitted = async (method: PaymentMethod, actual_amount: number) => {
-    if (!jobOrder) return;
+  // Returns whether the submission actually went through, so the modal knows
+  // whether to show its success screen or let the customer fix something and
+  // retry (e.g. the quotation got confirmed elsewhere in the meantime).
+  const handlePaymentSubmitted = async (
+    method: PaymentMethod,
+    actual_amount: number,
+    proof?: PaymentProof,
+  ): Promise<boolean> => {
+    if (!jobOrder) return false;
     const acceptedServiceIds = Object.entries(checked).filter(([, v]) => v).map(([k]) => Number(k));
-    const res = await submitQuotationPayment(jobOrder.job_order_id, method, actual_amount, acceptedServiceIds);
-    if (!res.success) return; // e.g. 409 already-confirmed — server is the source of truth
+    const res = await submitQuotationPayment(jobOrder.job_order_id, method, actual_amount, acceptedServiceIds, proof);
+    if (!res.success) {
+      toast.error(res.error ?? "Could not submit your payment. Please try again.");
+      return false;
+    }
     setPaymentMethod(method);
     setPaymentStatus("pending");
     setJobOrder({ ...jobOrder, quotation_approved: true });
     setShowPay(false);
+    return true;
   };
 
-  const handle2FAVerified = async () => {
-    if (!jobOrder) return;
+  // The modal owns the code-entry UI; this owns the network round-trips.
+  const requestOtp = async () => {
+    if (!jobOrder) return null;
+    const userId = Number(sessionStorage.getItem("autokita_user_id"));
+    const res = await requestQuotationOtp(userId, jobOrder.job_order_id);
+    if (!res.success || !res.token) {
+      toast.error(res.message ?? "Could not send the verification code.");
+      return null;
+    }
+    if (res.devCode) toast.message(`Dev only — code: ${res.devCode}`);
+    return { token: res.token, sentTo: res.sentTo ?? "your email", expiresMinutes: res.expiresMinutes ?? 10 };
+  };
+
+  const submitOtp = async (token: string, code: string): Promise<{ ok: boolean; message?: string }> => {
+    if (!jobOrder) return { ok: false };
+    const userId = Number(sessionStorage.getItem("autokita_user_id"));
     const acceptedServiceIds = Object.entries(checked).filter(([, v]) => v).map(([k]) => Number(k));
-    const res = await confirmQuotationVia2FA(jobOrder.job_order_id, acceptedServiceIds);
-    if (!res.success) return;
-    goToInProgress();
+    const res = await confirmQuotationVia2FA(userId, jobOrder.job_order_id, acceptedServiceIds, token, code);
+    if (!res.success) return { ok: false, message: res.message };
+    return { ok: true };
   };
 
   if (loading) {
@@ -144,7 +177,7 @@ function Quotation() {
   if (quotationStatus === 'preparing' && !locked) {
     return (
       <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-        <StageStepper active="quotation" jobOrderId={jobOrder.job_order_id} />
+        <StageStepper active={stageForStatus(jobOrder.status)} viewing="quotation" jobOrderId={jobOrder.job_order_id} />
         <div className="rounded-xl border bg-card p-12 text-center text-muted-foreground">
           <Wrench className="mx-auto mb-4 h-12 w-12 text-brand/50" />
           <h2 className="text-lg font-bold text-foreground">Preparing Quotation</h2>
@@ -156,7 +189,7 @@ function Quotation() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active="quotation" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper active={stageForStatus(jobOrder.status)} viewing="quotation" jobOrderId={jobOrder.job_order_id} />
 
       {locked && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
@@ -196,25 +229,41 @@ function Quotation() {
           </div>
 
           <div className="mt-4 space-y-3">
-            {services.map((s) => (
+            {services.map((s) => {
+              // Locked only when the customer genuinely pre-authorized the OBD-II
+              // fee at booking (checked via the audit log, not just whether a
+              // line item with this name exists — a mechanic can add that line
+              // item later, e.g. for an "Others" booking, without the customer
+              // ever having agreed to it, and that case must stay untickable
+              // like any other service).
+              const isAuthorizedFee = s.service_name === DIAGNOSTIC_SCAN_SERVICE_NAME && jobOrder.diagnostic_scan_authorized;
+              const frozen = locked || isAuthorizedFee;
+              return (
               <label
                 key={s.id}
                 className={`block rounded-xl border-2 bg-card p-5 ${checked[s.id] ? "border-teal" : "border-border"} ${
-                  locked ? "cursor-not-allowed opacity-80" : "cursor-pointer"
-                }`}
+                  frozen ? "cursor-not-allowed" : "cursor-pointer"
+                } ${locked ? "opacity-80" : ""}`}
               >
                 <div className="flex items-start gap-4">
                   <input
                     type="checkbox"
                     checked={!!checked[s.id]}
-                    disabled={locked}
+                    disabled={frozen}
                     onChange={(e) => setChecked({ ...checked, [s.id]: e.target.checked })}
                     className="mt-1 h-5 w-5 accent-[color:var(--teal)] disabled:cursor-not-allowed"
                   />
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <div className="mt-1 font-bold">{s.service_name}</div>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 font-bold">
+                          {s.service_name}
+                          {isAuthorizedFee && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                              <Lock className="h-3 w-3" /> Already authorized at booking
+                            </span>
+                          )}
+                        </div>
                         <p className="mt-1 text-xs text-muted-foreground">{s.description_of_work}</p>
                       </div>
                       <div className="text-right shrink-0">
@@ -248,7 +297,8 @@ function Quotation() {
                   </div>
                 </div>
               </label>
-            ))}
+              );
+            })}
             {services.length === 0 && (
               <div className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">
                 No services have been added to this job order yet.
@@ -382,15 +432,6 @@ function Quotation() {
               <div className="flex gap-2"><AlertCircle className="h-4 w-4 shrink-0" /> Parts marked "To Order" may add 1-3 business days to the estimated completion time. The workshop will confirm once parts arrive.</div>
             </div>
           )}
-
-          {locked && (
-            <button
-              onClick={goToInProgress}
-              className="flex w-full items-center justify-center gap-2 rounded-md border bg-card py-2.5 text-sm font-medium hover:border-brand hover:text-brand"
-            >
-              Go to Service Tracker
-            </button>
-          )}
         </aside>
       </div>
 
@@ -403,7 +444,9 @@ function Quotation() {
           onSubmitted={handlePaymentSubmitted}
         />
       )}
-      {show2FA && !locked && <TwoFAModal onClose={() => setShow2FA(false)} onVerified={handle2FAVerified} />}
+      {show2FA && !locked && (
+        <TwoFAModal onClose={() => setShow2FA(false)} onRequest={requestOtp} onSubmit={submitOtp} onVerified={goToInProgress} />
+      )}
     </div>
   );
 }
@@ -429,7 +472,7 @@ function PaymentStatusCard({ status, method }: { status: PaymentStatus; method: 
           <p className="mt-1 text-xs text-muted-foreground">
             {method === "shop"
               ? "Please settle your downpayment at the shop counter."
-              : "We're confirming your GCash/Maya transfer."}
+              : "We're checking your transfer and proof against the shop's account."}
           </p>
         </div>
       </div>
@@ -437,14 +480,46 @@ function PaymentStatusCard({ status, method }: { status: PaymentStatus; method: 
   );
 }
 
-function TwoFAModal({ onClose, onVerified }: { onClose: () => void; onVerified: () => void | Promise<void> }) {
+function TwoFAModal({
+  onClose,
+  onRequest,
+  onSubmit,
+  onVerified,
+}: {
+  onClose: () => void;
+  // Asks the server to email a code; resolves with the signed token to send back with it.
+  onRequest: () => Promise<{ token: string; sentTo: string; expiresMinutes: number } | null>;
+  // Sends token + typed code; the server does the actual check and the confirm.
+  onSubmit: (token: string, code: string) => Promise<{ ok: boolean; message?: string }>;
+  onVerified: () => void | Promise<void>;
+}) {
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
-  const [status, setStatus] = useState<"idle" | "verifying" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"sending" | "idle" | "verifying" | "success" | "error">("sending");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [resent, setResent] = useState(false);
+  const [challenge, setChallenge] = useState<{ token: string; sentTo: string; expiresMinutes: number } | null>(null);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
   const code = digits.join("");
   const complete = code.length === 6;
+
+  // Send the code the moment the modal opens — opening it IS the request.
+  // Guarded by a ref, not an effect cleanup: React Strict Mode (dev) runs
+  // mount effects twice, and a cleanup flag only discards the second
+  // *response* — the second *email* had already gone out. The ref survives
+  // the simulated remount, so exactly one request is ever made per open.
+  const requestedOnce = useRef(false);
+  useEffect(() => {
+    if (requestedOnce.current) return;
+    requestedOnce.current = true;
+    onRequest().then((c) => {
+      if (!c) { onClose(); return; }
+      setChallenge(c);
+      setStatus("idle");
+      setTimeout(() => inputsRef.current[0]?.focus(), 50);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = (i: number, val: string) => {
     if (!/^[0-9]?$/.test(val)) return;
@@ -459,21 +534,29 @@ function TwoFAModal({ onClose, onVerified }: { onClose: () => void; onVerified: 
     if (e.key === "Backspace" && !digits[i] && i > 0) inputsRef.current[i - 1]?.focus();
   };
 
-  const verify = () => {
-    if (!complete) return;
+  const verify = async () => {
+    if (!complete || !challenge) return;
     setStatus("verifying");
-    setTimeout(async () => {
-      if (code === "000000") {
-        setStatus("success");
-        setTimeout(() => onVerified(), 900);
-      } else {
-        setStatus("error");
-      }
-    }, 900);
+    setErrorMsg(null);
+    const res = await onSubmit(challenge.token, code);
+    if (res.ok) {
+      setStatus("success");
+      setTimeout(() => onVerified(), 900);
+    } else {
+      setStatus("error");
+      setErrorMsg(res.message ?? "Incorrect code. Please try again.");
+      setDigits(Array(6).fill(""));
+      inputsRef.current[0]?.focus();
+    }
   };
 
-  const resend = () => {
+  const resend = async () => {
     setDigits(Array(6).fill(""));
+    setErrorMsg(null);
+    setStatus("sending");
+    const c = await onRequest();
+    if (!c) { setStatus("idle"); return; }
+    setChallenge(c);
     setStatus("idle");
     setResent(true);
     inputsRef.current[0]?.focus();
@@ -486,7 +569,11 @@ function TwoFAModal({ onClose, onVerified }: { onClose: () => void; onVerified: 
         <div className="flex items-start justify-between">
           <div>
             <h3 className="text-lg font-bold">Verify It's You</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Enter the 6-digit code sent to j••••cruz@gmail.com.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {status === "sending" && !challenge
+                ? "Sending a code to your email…"
+                : <>Enter the 6-digit code sent to <b>{challenge?.sentTo}</b>. It expires in {challenge?.expiresMinutes} minutes.</>}
+            </p>
           </div>
           <button onClick={onClose} className="rounded-full border p-1 hover:bg-accent"><X className="h-4 w-4" /></button>
         </div>
@@ -513,22 +600,27 @@ function TwoFAModal({ onClose, onVerified }: { onClose: () => void; onVerified: 
                 />
               ))}
             </div>
-            {status === "error" && <p className="mt-2 text-xs text-destructive">Incorrect code. Please try again.</p>}
+            {status === "error" && <p className="mt-2 text-xs text-destructive">{errorMsg}</p>}
             {resent && <p className="mt-2 text-xs text-success">A new code has been sent.</p>}
             <button
               onClick={verify}
-              disabled={!complete || status === "verifying"}
+              disabled={!complete || status === "verifying" || status === "sending"}
               className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {status === "verifying" ? (<><Loader2 className="h-4 w-4 animate-spin" /> Verifying…</>) : "Verify & Confirm"}
             </button>
-            <button onClick={resend} className="mt-3 w-full text-center text-xs text-muted-foreground hover:text-brand">Didn't get a code? Resend</button>
+            <button onClick={resend} disabled={status === "sending"} className="mt-3 w-full text-center text-xs text-muted-foreground hover:text-brand disabled:opacity-50">
+              {status === "sending" && challenge ? "Sending…" : "Didn't get a code? Resend"}
+            </button>
           </>
         )}
       </div>
     </div>
   );
 }
+
+const MAX_PROOF_BYTES = 5 * 1024 * 1024;
+const ALLOWED_PROOF_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 function PaymentModal({
   total,
@@ -541,30 +633,81 @@ function PaymentModal({
   downpayment: number;
   optional?: boolean;
   onClose: () => void;
-  onSubmitted: (method: PaymentMethod, actual_amount: number) => void | Promise<void>;
+  onSubmitted: (method: PaymentMethod, actual_amount: number, proof?: PaymentProof) => Promise<boolean>;
 }) {
   const [method, setMethod] = useState<PaymentMethod>("shop");
   const [status, setStatus] = useState<"idle" | "processing" | "success">("idle");
 
+  // Manual transfer proof — only relevant once "Bank / E-Wallet Transfer" is picked.
+  const [channelId, setChannelId] = useState("");
+  const [referenceNumber, setReferenceNumber] = useState("");
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [proofPreview, setProofPreview] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const selectedChannel = PAYMENT_CHANNELS.find((c) => c.id === channelId) ?? null;
+  const transferReady = Boolean(selectedChannel && referenceNumber.trim() && proofFile);
+  const canConfirm = method === "shop" ? true : transferReady;
+
+  useEffect(() => {
+    return () => { if (proofPreview) URL.revokeObjectURL(proofPreview); };
+  }, [proofPreview]);
+
+  const handleProofChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setFileError(null);
+    if (!file) return;
+    if (!ALLOWED_PROOF_TYPES.includes(file.type)) {
+      setFileError("Please upload a JPEG, PNG or WebP image.");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > MAX_PROOF_BYTES) {
+      setFileError("Image must be under 5MB.");
+      e.target.value = "";
+      return;
+    }
+    if (proofPreview) URL.revokeObjectURL(proofPreview);
+    setProofFile(file);
+    setProofPreview(URL.createObjectURL(file));
+  };
+
+  const copyAccountNumber = async () => {
+    if (!selectedChannel) return;
+    try {
+      await navigator.clipboard.writeText(selectedChannel.accountNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard access can be denied — not worth failing the flow over.
+    }
+  };
+
   const confirm = () => {
+    if (!canConfirm) return;
     setStatus("processing");
     setTimeout(async () => {
-      await onSubmitted(method, downpayment);
-      setStatus("success");
-    }, 1200);
+      const proof: PaymentProof | undefined =
+        method === "ewallet" && selectedChannel && proofFile
+          ? { channelId: selectedChannel.id, referenceNumber: referenceNumber.trim(), file: proofFile }
+          : undefined;
+      const ok = await onSubmitted(method, downpayment, proof);
+      setStatus(ok ? "success" : "idle");
+    }, 800);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-xl bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         {status === "success" ? (
           <div className="flex flex-col items-center gap-2 py-8 text-center">
             <CheckCircle2 className="h-10 w-10 text-success" />
-            <div className="font-semibold">Payment Submitted</div>
+            <div className="font-semibold">{method === "shop" ? "Payment Method Saved" : "Submitted for Approval"}</div>
             <p className="text-xs text-muted-foreground">
               {method === "shop"
-                ? "Please settle the downpayment at the shop counter. We'll mark it verified once received."
-                : "We'll notify you once your GCash/Maya transfer has been confirmed."}
+                ? "Okay, please go to our shop first before confirming. Settle the downpayment at the counter and we'll mark it verified once received."
+                : "Thanks — we've received your transfer details and proof. The shop will verify it against their account and confirm here shortly."}
             </p>
           </div>
         ) : (
@@ -597,18 +740,91 @@ function PaymentModal({
                   method === "ewallet" ? "border-brand bg-brand-soft/30" : "border-border"
                 }`}
               >
-                <Send className="h-5 w-5 text-brand" /> <span className="text-sm font-semibold">E-Wallet Transfer</span>
+                <Send className="h-5 w-5 text-brand" /> <span className="text-sm font-semibold">Bank / E-Wallet Transfer</span>
               </button>
             </div>
 
             {method === "ewallet" && (
-              <div className="mt-5 flex flex-col items-center gap-3 rounded-lg border-2 border-dashed bg-muted/20 p-6 text-center">
-                <div className="grid h-40 w-40 place-items-center rounded-lg border bg-white text-xs text-muted-foreground">
-                  QR Code Coming Soon
+              <div className="mt-5 space-y-4">
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">1. Where are you sending from?</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {PAYMENT_CHANNELS.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => setChannelId(c.id)}
+                        className={`rounded-lg border-2 py-2 text-xs font-semibold ${
+                          channelId === c.id ? "border-brand bg-brand-soft/30" : "border-border hover:bg-accent"
+                        }`}
+                      >
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Scan this QR code with your GCash or Maya app to send your downpayment. Once GCash/Maya integration is live, this will show a live payment QR.
-                </p>
+
+                {selectedChannel && (
+                  <div className="rounded-lg border-2 border-dashed bg-muted/20 p-4">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Send your downpayment to</p>
+                    <div className="mt-2 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="font-bold">{selectedChannel.accountName}</p>
+                        <p className="text-sm text-muted-foreground">{selectedChannel.accountNumber} · {selectedChannel.label}</p>
+                      </div>
+                      <button
+                        onClick={copyAccountNumber}
+                        className="flex shrink-0 items-center gap-1 rounded-md border px-2.5 py-1.5 text-xs font-semibold hover:bg-accent"
+                      >
+                        {copied ? <><Check className="h-3 w-3 text-success" /> Copied</> : <><Copy className="h-3 w-3" /> Copy</>}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">2. Reference number</label>
+                  <input
+                    type="text"
+                    value={referenceNumber}
+                    onChange={(e) => setReferenceNumber(e.target.value)}
+                    maxLength={50}
+                    placeholder="e.g. the transaction/ref no. from your app's receipt"
+                    className="w-full rounded-md border p-2.5 text-sm focus:border-brand focus:outline-none"
+                    disabled={!selectedChannel}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">3. Upload proof of payment</label>
+                  {proofPreview ? (
+                    <div className="flex items-center gap-3 rounded-lg border p-3">
+                      <img src={proofPreview} alt="Proof of payment" className="h-16 w-16 shrink-0 rounded-md border object-cover" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-medium">{proofFile?.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{((proofFile?.size ?? 0) / 1024).toFixed(0)} KB</p>
+                      </div>
+                      <label className="shrink-0 cursor-pointer rounded-md border px-2.5 py-1.5 text-xs font-semibold hover:bg-accent">
+                        Replace
+                        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleProofChange} className="hidden" />
+                      </label>
+                    </div>
+                  ) : (
+                    <label
+                      className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border-2 border-dashed p-5 text-center hover:bg-accent ${!selectedChannel ? "pointer-events-none opacity-50" : ""}`}
+                    >
+                      <Upload className="h-5 w-5 text-muted-foreground" />
+                      <span className="text-xs font-semibold">Click to upload a screenshot</span>
+                      <span className="text-[10px] text-muted-foreground">JPEG, PNG or WebP · up to 5MB · required</span>
+                      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleProofChange} className="hidden" disabled={!selectedChannel} />
+                    </label>
+                  )}
+                  {fileError && <p className="mt-1.5 text-xs text-destructive">{fileError}</p>}
+                </div>
+
+                <div className="flex items-start gap-2 rounded-lg bg-muted/30 p-3 text-xs text-muted-foreground">
+                  <ImageIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  This is manually checked against the shop's account — verification may take a little while. Your status will show as "Pending" here until it's confirmed.
+                </div>
               </div>
             )}
 
@@ -621,10 +837,16 @@ function PaymentModal({
 
             <button
               onClick={confirm}
-              disabled={status === "processing"}
+              disabled={status === "processing" || !canConfirm}
               className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {status === "processing" ? (<><Loader2 className="h-4 w-4 animate-spin" /> Processing…</>) : (<><CheckCircle2 className="h-4 w-4" /> Confirm Payment</>)}
+              {status === "processing" ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</>
+              ) : method === "ewallet" ? (
+                <><CheckCircle2 className="h-4 w-4" /> Submit for Approval</>
+              ) : (
+                <><CheckCircle2 className="h-4 w-4" /> Confirm Payment</>
+              )}
             </button>
             <button onClick={onClose} className="mt-2 w-full rounded-md border py-2 text-sm hover:bg-accent">Cancel</button>
           </>

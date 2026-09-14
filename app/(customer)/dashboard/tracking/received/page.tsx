@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { Car, Clock, ShieldCheck, ClipboardList, Wrench, ChevronRight, Calendar, X, Loader2, AlertCircle } from "lucide-react";
-import { StageStepper } from "@/components/dashboard/StageStepper";
+import { Car, Clock, ShieldCheck, ClipboardList, Wrench, AlertCircle, Loader2 } from "lucide-react";
+import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getReceivedData } from "@/controllers/serviceProgressController";
-import Link from "next/link";
 
 function Received() {
   useEffect(() => { document.title = "Vehicle Received — AutoKita"; }, []);
@@ -15,7 +14,6 @@ function Received() {
 
   const [data, setData] = useState<Awaited<ReturnType<typeof getReceivedData>> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     const userId = Number(sessionStorage.getItem("autokita_user_id"));
@@ -28,7 +26,6 @@ function Received() {
 
   const jobOrder = data?.jobOrder ?? null;
   const services = data?.services ?? [];
-  const history = data?.history ?? [];
   const customerConcern = data?.customerConcern ?? null;
 
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
@@ -55,7 +52,7 @@ function Received() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active="received" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper active={stageForStatus(jobOrder.status)} viewing="received" jobOrderId={jobOrder.job_order_id} />
 
       {isHistorical && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
@@ -127,48 +124,9 @@ function Received() {
           <div className="rounded-xl border bg-card p-5">
             <div className="flex items-center gap-2 text-sm font-semibold"><ShieldCheck className="h-4 w-4 text-teal" /> Your Service Team</div>
             <p className="mt-2 text-xs text-muted-foreground">A certified AutoKita technician has been assigned to your vehicle and will begin the pre-diagnostic shortly.</p>
-            <Link href={`/dashboard/tracking/inspecting?jobOrderId=${jobOrder.job_order_id}`} className="mt-4 flex items-center justify-center gap-1 text-sm font-medium text-brand">
-              View Live Queue <ChevronRight className="h-3 w-3" />
-            </Link>
           </div>
-
-          <button
-            onClick={() => setShowHistory(true)}
-            className="flex w-full items-center justify-center gap-2 rounded-md border bg-card py-2.5 text-sm font-medium transition-colors hover:border-brand hover:text-brand"
-          >
-            <Calendar className="h-4 w-4" /> View Service History
-          </button>
         </aside>
       </div>
-
-      {showHistory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowHistory(false)}>
-          <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-lg font-bold">Service History</h3>
-                <p className="text-sm text-muted-foreground">{jobOrder.vehicle_year} {jobOrder.vehicle_model} · {jobOrder.plate_number}</p>
-              </div>
-              <button onClick={() => setShowHistory(false)} className="rounded-full border p-1 hover:bg-accent"><X className="h-4 w-4" /></button>
-            </div>
-            <div className="mt-4 divide-y">
-              {history.map((h, i) => (
-                <div key={i} className="flex items-center justify-between py-3 text-sm">
-                  <div>
-                    <div className="font-semibold">{h.service_name ?? "Service"}</div>
-                    <div className="text-xs text-muted-foreground">{h.jo_date}</div>
-                  </div>
-                  <div className="font-medium">₱{h.actual_grand_total}</div>
-                </div>
-              ))}
-              {history.length === 0 && (
-                <p className="py-3 text-sm text-muted-foreground">No previous service history found.</p>
-              )}
-            </div>
-            <button onClick={() => setShowHistory(false)} className="mt-4 w-full rounded-md border py-2 text-sm hover:bg-accent">Close</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

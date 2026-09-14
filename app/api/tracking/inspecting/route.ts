@@ -27,19 +27,77 @@ export async function GET(request: NextRequest) {
     }
 
     if (!jobOrder) {
-      return NextResponse.json({ jobOrder: null, preDiagnostic: null, findings: [], shop: null })
+      return NextResponse.json({
+        jobOrder: null, preDiagnostic: null, walkaround: [], findings: [], reviewHistory: [], shop: null,
+        canCancel: false,
+      })
     }
 
-    const [preDiagRes, findingsRes, shopRes] = await Promise.all([
+    const [preDiagRes, findingsRes, walkaroundRes, historyRes, shopRes, cancelRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_quotation($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_inspections($1)`, [jobOrder.job_order_id]),
+       // Walkaround photos share the table with findings but aren't findings —
+      // and the stored function above doesn't return `notes`, so they get their
+      // own inline query here (no new stored function).
+      db.query(
+        `SELECT id, name AS label, notes AS note, photo, logged_date::text
+         FROM vehicle_inspections
+         WHERE job_order_id = $1 AND status = 'reference-photo' AND photo IS NOT NULL
+         ORDER BY id`,
+        [jobOrder.job_order_id],
+      ),
+      // Every round the shop has sent, with the customer's answer (if any)
+      // pulled from the audit log. The respond endpoint refuses a second
+      // answer on the same round, so the LEFT JOIN yields at most one row
+      // per round. Inline query — get_pre_diagnostic() only returns the latest.
+      db.query(
+        `SELECT pd.id,
+                pd.mechanic_notes,
+                pd.customer_approval_status::text AS status,
+                pd.datetime_created::text          AS sent_at,
+                sal.new_values                     AS customer_reason,
+                sal.action_date::text              AS responded_at
+         FROM pre_diagnostics pd
+         LEFT JOIN system_audit_logs sal
+           ON sal.entity_type = 'pre_diagnostics'
+          AND sal.entity_id = pd.id
+          AND sal.action_performed IN ('approved', 'rejected')
+         WHERE pd.job_order_id = $1
+         ORDER BY pd.datetime_created ASC`,
+        [jobOrder.job_order_id],
+      ),
       db.query(`SELECT * FROM get_dashboard_shop()`),
+      // Mirrors the guard in /api/customer/job-orders/cancel exactly, so the
+      // page only offers a Cancel button that will actually succeed.
+      db.query(
+        `SELECT (
+            jo.status = 'inspecting'
+            AND NOT EXISTS (SELECT 1 FROM vehicle_inspections vi WHERE vi.job_order_id = jo.id)
+            AND NOT EXISTS (SELECT 1 FROM pre_diagnostics pd WHERE pd.job_order_id = jo.id)
+         ) AS can_cancel
+         FROM job_orders jo WHERE jo.id = $1`,
+        [jobOrder.job_order_id],
+      ),
     ])
+
+    const preDiagnostic = preDiagRes.rows[0] ?? null
+
+    // Until the mechanic clicks "Upload to customer portal" there is no round,
+    // and what's in vehicle_inspections is a draft — don't hand it to the
+    // customer's browser at all. Completed/released jobs are the read-only
+    // history view and always show what was recorded.
+    const isHistorical = jobOrder.status === 'completed' || jobOrder.status === 'released'
+    const reportSent = Boolean(preDiagnostic?.approval_status) || isHistorical
 
     return NextResponse.json({
       jobOrder,
-      preDiagnostic: preDiagRes.rows[0] ?? null,
-      findings: findingsRes.rows,
+      preDiagnostic,
+      walkaround: reportSent ? walkaroundRes.rows : [],
+      reviewHistory: historyRes.rows,
+      canCancel: Boolean(cancelRes.rows[0]?.can_cancel),
+      // Keep reference-photo rows out of the findings list — they're intake
+      // documentation, not something the mechanic diagnosed.
+      findings: reportSent ? findingsRes.rows.filter((r) => r.status !== 'reference-photo') : [],
       shop: shopRes.rows[0] ?? null,
     })
   } catch (err) {
