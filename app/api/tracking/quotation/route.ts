@@ -29,11 +29,26 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ jobOrder: null, services: [], paymentStatus: null })
     }
 
-    const [servicesRes, paymentRes, partsRes, preDiagRes] = await Promise.all([
+    const [servicesRes, paymentRes, partsRes, preDiagRes, scanAuthRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_quotation_services($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_payment_status($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_parts($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT customer_approval_status FROM pre_diagnostics WHERE job_order_id = $1 ORDER BY id DESC LIMIT 1`, [jobOrder.job_order_id]),
+      // The real "did the customer actually agree to this at booking" signal —
+      // an audit-log event on the original ticket, not just "is the OBD-II
+      // line item present on the job order" (a mechanic can add that line
+      // item later, e.g. for an "Others" booking, without the customer ever
+      // having pre-authorized it).
+      db.query(
+        `SELECT EXISTS (
+           SELECT 1 FROM system_audit_logs sal
+           JOIN job_orders jo ON jo.ticket_id = sal.entity_id
+           WHERE jo.id = $1
+             AND sal.entity_type = 'service_tickets'
+             AND sal.action_performed = 'approved'
+         ) AS authorized`,
+        [jobOrder.job_order_id],
+      ),
     ])
 
     const latestStatus = preDiagRes.rows[0]?.customer_approval_status
@@ -60,7 +75,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      jobOrder,
+      jobOrder: { ...jobOrder, diagnostic_scan_authorized: Boolean(scanAuthRes.rows[0]?.authorized) },
       services,
       quotationStatus: isReady ? 'ready' : 'preparing',
       paymentStatus: paymentRes.rows[0] ?? null,

@@ -724,6 +724,7 @@ const BOOK_CATEGORIES = [
   "Oil Change", "Brake Service", "Engine Diagnostics", "Tire Replacement",
   "Aircon Repair", "General Maintenance", "Car Wash & Detailing",
 ];
+const BOOK_OTHERS = "Others";
 const BOOK_VEHICLE_MAKES = [
   "Toyota", "Honda", "Mitsubishi", "Ford", "Nissan", "Hyundai", "Kia",
   "Suzuki", "Isuzu", "Mazda", "Chevrolet", "Subaru", "Volkswagen",
@@ -753,6 +754,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
 
   const [pickup, setPickup] = useState<"shop" | "home">("shop");
   const [serviceCategory, setServiceCategory] = useState("");
+  const [serviceCategoryOther, setServiceCategoryOther] = useState("");
   const [notes, setNotes] = useState("");
   // Explicit agreement to the OBD-II scan fee when the category needs it.
   const [scanAcknowledged, setScanAcknowledged] = useState(false);
@@ -796,11 +798,16 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
       toast.error("Please agree to the diagnostic scan fee to continue.");
       return;
     }
+    if (serviceCategory === BOOK_OTHERS && !serviceCategoryOther.trim()) {
+      toast.error("Please describe the service you need.");
+      return;
+    }
 
+    const category = serviceCategory === BOOK_OTHERS ? serviceCategoryOther.trim() : serviceCategory;
     const reqBody: any = {
       userId: parseInt(userId, 10),
       serviceMode: pickup === "shop" ? "Shop Visit" : "Home Service",
-      customerConcern: `Category: ${serviceCategory || "Not specified"}. Notes: ${notes || "None"}`,
+      customerConcern: `Category: ${category || "Not specified"}. Notes: ${notes || "None"}`,
       homeAddress: user?.address || "None",
       diagnosticScanAuthorized: needsScan && scanAcknowledged,
     };
@@ -996,7 +1003,17 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                         {c}
                       </option>
                     ))}
+                    <option value={BOOK_OTHERS}>Others (type your own)</option>
                   </select>
+                  {serviceCategory === BOOK_OTHERS && (
+                    <input
+                      value={serviceCategoryOther}
+                      onChange={(e) => setServiceCategoryOther(e.target.value)}
+                      placeholder="Please describe the service you need"
+                      autoFocus
+                      className="mt-2 w-full rounded-md border border-brand/50 bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
+                    />
+                  )}
                 </div>
 
                 {/* Scanner-fee disclosure — same rule and wording as the public

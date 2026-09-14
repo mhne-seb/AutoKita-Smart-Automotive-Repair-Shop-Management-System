@@ -266,7 +266,10 @@ function Inspecting() {
 
       <div className={!awaitingReport && reviewHistory.length > 0 ? "grid gap-6 lg:grid-cols-[2fr_1fr]" : "mx-auto max-w-3xl"}>
         <div className="space-y-6">
-          {walkaround.length > 0 && (
+          {/* Same gate as the findings: the photos are part of the report the
+              mechanic sends, so they stay hidden until "Upload to customer
+              portal" — otherwise half-written notes show up live. */}
+          {!awaitingReport && walkaround.length > 0 && (
             <div className="rounded-xl border bg-card p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2 text-[color:oklch(0.5_0.2_300)]">
