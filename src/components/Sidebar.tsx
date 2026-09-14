@@ -16,6 +16,7 @@ import {
   MoreVertical,
   LogOut,
   X,
+  ScanLine,
 } from 'lucide-react'
 import { Logo } from '@/components/site/Logo'
 
@@ -27,6 +28,7 @@ const primaryNav = [
   { label: 'Sales & Payroll', to: '/sales-payroll', icon: LineChart },
   { label: 'Database Administration', to: '/database', icon: Database },
   { label: 'Mechanics Management', to: '/mechanics', icon: Users },
+  { label: 'OCR Review', to: '/ocr-review', icon: ScanLine },
 ] as const
 
 // Each of these opens its own dedicated History Logs page (see
