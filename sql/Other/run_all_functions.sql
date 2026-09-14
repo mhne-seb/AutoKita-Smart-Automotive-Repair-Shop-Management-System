@@ -302,67 +302,100 @@ $$;
 -- get_inspection_findings(p_job_order_id)
 CREATE OR REPLACE FUNCTION get_inspection_findings(p_job_order_id INT)
 RETURNS TABLE (
-    id                    INT,
-    name                  VARCHAR(100),
-    notes                 TEXT,
-    status                VARCHAR(50),
-    photo                 TEXT,
-    findings_description  TEXT,
-    logged_date           TIMESTAMP
+    id          INT,
+    name        VARCHAR(100),
+    description TEXT,
+    status      finding_status,
+    photo       TEXT,
+    logged_at   TIMESTAMP
 )
 LANGUAGE SQL STABLE
 AS $$
     SELECT
-        vi.id,
-        vi.name,
-        vi.notes,
-        vi.status,
-        vi.photo,
-        vi.findings_description,
-        vi.logged_date
-    FROM vehicle_inspections vi
+        p.id,
+        p.title AS name,
+        p.note AS description,
+        p.status,
+        p.photo_url AS photo,
+        p.logged_at
+    FROM inspection_photos p
+    JOIN vehicle_inspections vi ON vi.id = p.inspection_id
     WHERE vi.job_order_id = p_job_order_id
-    ORDER BY vi.logged_date ASC;
+      AND p.status IS NOT NULL
+    ORDER BY p.logged_at ASC;
+$$;
+
+
+-- get_inspection_photos(p_job_order_id)
+CREATE OR REPLACE FUNCTION get_inspection_photos(p_job_order_id INT)
+RETURNS TABLE (
+    id        INT,
+    title     VARCHAR(100),
+    note      TEXT,
+    photo_url TEXT,
+    logged_at TIMESTAMP
+)
+LANGUAGE SQL STABLE
+AS $$
+    SELECT
+        p.id,
+        p.title,
+        p.note,
+        p.photo_url,
+        p.logged_at
+    FROM inspection_photos p
+    JOIN vehicle_inspections vi ON vi.id = p.inspection_id
+    WHERE vi.job_order_id = p_job_order_id
+      AND p.status IS NULL
+    ORDER BY p.logged_at ASC;
 $$;
 
 
 -- add_inspection_finding(...)
 CREATE OR REPLACE FUNCTION add_inspection_finding(
-    p_job_order_id  INT,
-    p_name          VARCHAR(100),
-    p_notes         TEXT,
-    p_status        VARCHAR(50),
-    p_photo         TEXT,
-    p_description   TEXT
+    p_job_order_id INT,
+    p_name         VARCHAR(100),
+    p_description  TEXT,
+    p_status       finding_status,
+    p_photo        TEXT
 )
 RETURNS TABLE (
-    id                    INT,
-    job_order_id          INT,
-    name                  VARCHAR(100),
-    notes                 TEXT,
-    status                VARCHAR(50),
-    photo                 TEXT,
-    findings_description  TEXT,
-    logged_date           TIMESTAMP
+    id            INT,
+    inspection_id INT,
+    name          VARCHAR(100),
+    description   TEXT,
+    status        finding_status,
+    photo         TEXT,
+    logged_at     TIMESTAMP
 )
-LANGUAGE SQL VOLATILE
+LANGUAGE plpgsql VOLATILE
 AS $$
-    INSERT INTO vehicle_inspections (
-        job_order_id, name, notes, status, photo,
-        findings_description, logged_date
-    ) VALUES (
-        p_job_order_id, p_name, p_notes, p_status, p_photo,
-        p_description, NOW()
-    )
+DECLARE
+    v_inspection_id INT;
+BEGIN
+    SELECT vi.id INTO v_inspection_id
+    FROM vehicle_inspections vi
+    WHERE vi.job_order_id = p_job_order_id
+    LIMIT 1;
+
+    IF v_inspection_id IS NULL THEN
+        INSERT INTO vehicle_inspections (job_order_id, started_at)
+        VALUES (p_job_order_id, NOW())
+        RETURNING vehicle_inspections.id INTO v_inspection_id;
+    END IF;
+
+    RETURN QUERY
+    INSERT INTO inspection_photos (inspection_id, title, note, status, photo_url, logged_at)
+    VALUES (v_inspection_id, p_name, p_description, p_status, p_photo, NOW())
     RETURNING
-        vehicle_inspections.id,
-        vehicle_inspections.job_order_id,
-        vehicle_inspections.name,
-        vehicle_inspections.notes,
-        vehicle_inspections.status,
-        vehicle_inspections.photo,
-        vehicle_inspections.findings_description,
-        vehicle_inspections.logged_date;
+        inspection_photos.id,
+        inspection_photos.inspection_id,
+        inspection_photos.title AS name,
+        inspection_photos.note AS description,
+        inspection_photos.status,
+        inspection_photos.photo_url AS photo,
+        inspection_photos.logged_at;
+END;
 $$;
 
 
@@ -622,6 +655,21 @@ BEGIN
         completed_at = CASE WHEN p_new_status = 'completed' THEN NOW() ELSE completed_at END,
         released_at  = CASE WHEN p_new_status = 'released'  THEN NOW() ELSE released_at  END
     WHERE id = p_job_order_id;
+
+    -- When entering inspecting stage, initialize vehicle_inspections started_at
+    IF p_new_status = 'inspecting' THEN
+        IF NOT EXISTS (SELECT 1 FROM vehicle_inspections WHERE job_order_id = p_job_order_id) THEN
+            INSERT INTO vehicle_inspections (job_order_id, started_at)
+            VALUES (p_job_order_id, NOW());
+        END IF;
+    END IF;
+
+    -- When leaving inspecting stage, fulfill the inspection
+    IF v_old_status = 'inspecting' AND p_new_status <> 'inspecting' THEN
+        UPDATE vehicle_inspections
+        SET fulfilled_at = NOW()
+        WHERE job_order_id = p_job_order_id AND fulfilled_at IS NULL;
+    END IF;
 
     INSERT INTO system_audit_logs (
         user_id, employees_id, action_performed,
@@ -2129,10 +2177,12 @@ id INTEGER, name VARCHAR, status VARCHAR, photo TEXT, findings_description TEXT,
 )
 LANGUAGE sql STABLE
 AS $$
-SELECT vi.id, vi.name, vi.status, vi.photo, vi.findings_description, vi.logged_date::text
-FROM vehicle_inspections vi
+SELECT p.id, p.title AS name, p.status::text, p.photo_url AS photo, p.note AS findings_description, p.logged_at::text AS logged_date
+FROM inspection_photos p
+JOIN vehicle_inspections vi ON vi.id = p.inspection_id
 WHERE vi.job_order_id = p_job_order_id
-ORDER BY vi.logged_date ASC;
+  AND (p.status IS NOT NULL OR p.title NOT IN ('Front Quarter', 'Engine Bay', 'Underchassis'))
+ORDER BY p.logged_at ASC;
 $$;
 
 -- 5. Payments

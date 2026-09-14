@@ -70,23 +70,80 @@ function toRequest(ticket: any): InspectionData['request'] {
   }
 }
 
+function buildPhotoSlots(photoRows: any[]): InspectionPhotoSlot[] {
+  // Start with 3 slots corresponding to the defaults
+  const slots: (InspectionPhotoSlot | null)[] = [null, null, null]
+  const unassignedPhotos: any[] = []
+
+  // Pass 1: Match by exact title (case-insensitive) to default slot labels
+  for (const photo of photoRows) {
+    const defaultIndex = DEFAULT_PHOTO_SLOTS.findIndex(
+      (d, idx) => slots[idx] === null && d.label.toLowerCase() === String(photo.title ?? '').trim().toLowerCase()
+    )
+    if (defaultIndex !== -1) {
+      slots[defaultIndex] = {
+        id: DEFAULT_PHOTO_SLOTS[defaultIndex].id,
+        label: photo.title,
+        title: photo.title,
+        url: photo.photo_url ?? photo.photo ?? photo.url,
+        rowId: photo.id,
+        note: photo.note ?? '',
+      }
+    } else {
+      unassignedPhotos.push(photo)
+    }
+  }
+
+  // Pass 2: Assign unassigned photos to any remaining empty default slots
+  for (let i = 0; i < slots.length; i++) {
+    if (slots[i] === null) {
+      const nextPhoto = unassignedPhotos.shift()
+      if (nextPhoto) {
+        slots[i] = {
+          id: DEFAULT_PHOTO_SLOTS[i].id,
+          label: nextPhoto.title || DEFAULT_PHOTO_SLOTS[i].label,
+          title: nextPhoto.title || DEFAULT_PHOTO_SLOTS[i].label,
+          url: nextPhoto.photo_url ?? nextPhoto.photo ?? nextPhoto.url,
+          rowId: nextPhoto.id,
+          note: nextPhoto.note ?? '',
+        }
+      } else {
+        slots[i] = {
+          id: DEFAULT_PHOTO_SLOTS[i].id,
+          label: DEFAULT_PHOTO_SLOTS[i].label,
+          title: DEFAULT_PHOTO_SLOTS[i].label,
+          url: undefined,
+          rowId: undefined,
+          note: '',
+        }
+      }
+    }
+  }
+
+  // Pass 3: Any additional photos beyond the 3 defaults are appended as extra slots
+  const extraSlots: InspectionPhotoSlot[] = unassignedPhotos.map((p, i) => ({
+    id: `custom-${p.id || i}`,
+    label: p.title || 'Inspection Photo',
+    title: p.title || 'Inspection Photo',
+    url: p.photo_url ?? p.photo ?? p.url,
+    rowId: p.id,
+    note: p.note ?? '',
+  }))
+
+  return [...(slots as InspectionPhotoSlot[]), ...extraSlots]
+}
+
 function toInspectionData(row: any): InspectionData {
-   // Walkaround photos come back from a separate query (row.referencePhotos),
-  // keyed by slot id. Fall back to the hardcoded empty slots if none exist yet.
-
   const photoRows: any[] = row.referencePhotos ?? []
-  const photoSlots: InspectionPhotoSlot[] = DEFAULT_PHOTO_SLOTS.map((slot) => {
-    const shot = photoRows.find((p) => p.slot_id === slot.id)
-    return shot?.photo ? {...slot, url: shot.photo, rowId: shot.id, note: shot.note ?? '' } : slot
-  })
+  const photoSlots: InspectionPhotoSlot[] = buildPhotoSlots(photoRows)
 
-  const findings: MechanicalFinding[] = row.findings
+  const findings: MechanicalFinding[] = (row.findings ?? [])
     .filter((f: any) => f.status !== REFERENCE_PHOTO_STATUS)
     .map((f: any) => ({
       id: String(f.id),
       name: f.name || 'Inspection Finding',
-      note: f.findings_description || f.notes || '',
-      status: f.status ?? 'needs-attention',
+      note: f.description || f.findings_description || f.notes || '',
+      status: f.status === 'needs_attention' ? 'needs-attention' : (f.status ?? 'needs-attention'),
       photo: f.photo ?? undefined,
     }))
 
@@ -101,7 +158,6 @@ function toInspectionData(row: any): InspectionData {
     plate: row.plate_number || '—',
     customer: `${row.first_name ?? ''} ${row.last_name ?? ''}`.trim() || 'Unknown Customer',
     photoSlots,
-    notes: [], // no notes table exists yet — technician notes are session-only until one is added
     findings,
     timer: {
       startedAt: formatDateTime(row.started_at),
@@ -136,29 +192,55 @@ export async function uploadInspectionPhoto(
   slotId: string,
   label: string,
   file: File,
-): Promise<{ url: string; rowId: number } | null>{ 
+  title?: string,
+  rowId?: number,
+): Promise<{ url: string; rowId: number; title: string } | null> { 
   const form = new FormData()
   form.append('file', file)
   form.append('slotId', slotId)
   form.append('label', label)
+  form.append('title', title ?? label)
+  if (rowId) form.append('rowId', String(rowId))
 
-  const res = await fetch(`/api/job-orders/${jobOrderId}/photos`, { method: 'POST',
-    body: form })
-    const json = await res.json().catch(() => null)
-    if (!res.ok || !json?.success) return null
-    return { url: json.url as string, rowId: json.id as number }
+  const res = await fetch(`/api/job-orders/${jobOrderId}/photos`, {
+    method: 'POST',
+    body: form,
+  })
+  const json = await res.json().catch(() => null)
+  if (!res.ok || !json?.success) return null
+  return { url: json.url as string, rowId: json.id as number, title: json.title as string }
 }
 
 /** Saves the mechanic's condition note for a walkaround photo. */
-export async function saveWalkaroundNote(jobOrderId: string, rowId: number, note: string):
-Promise<boolean> {
-  const res = await fetch(`/api/job-orders/${jobOrderId}/photos` , {
+export async function saveWalkaroundNote(jobOrderId: string, rowId: number, note: string): Promise<boolean> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/photos`, {
     method: 'PATCH', 
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ rowId, note }),
   })
   const json = await res.json().catch(() => null)
   return Boolean(res.ok && json?.success)
+}
+
+/** Saves the title for a walkaround photo. */
+export async function saveWalkaroundTitle(jobOrderId: string, rowId: number, title: string): Promise<boolean> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/photos`, {
+    method: 'PATCH', 
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ rowId, title }),
+  })
+  const json = await res.json().catch(() => null)
+  return Boolean(res.ok && json?.success)
+}
+
+/** Deletes a walkaround photo. */
+export async function deleteInspectionPhoto(jobOrderId: string, photoId: number): Promise<boolean> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/photos?photoId=${photoId}`, {
+    method: 'DELETE',
+  })
+  if (!res.ok) return false
+  const json = await res.json().catch(() => null)
+  return Boolean(json?.success)
 }
 
 export async function addInspectionFinding(jobOrderId: string, finding: Partial<MechanicalFinding>): Promise<MechanicalFinding | null> {
@@ -173,7 +255,7 @@ export async function addInspectionFinding(jobOrderId: string, finding: Partial<
   return {
     id: String(json.data.id),
     name: json.data.name,
-    note: json.data.findings_description,
+    note: json.data.description || json.data.findings_description || '',
     status: json.data.status,
     photo: json.data.photo || undefined,
   }
@@ -191,7 +273,7 @@ export async function updateInspectionFinding(jobOrderId: string, finding: Parti
   return {
     id: String(json.data.id),
     name: json.data.name,
-    note: json.data.findings_description,
+    note: json.data.description || json.data.findings_description || '',
     status: json.data.status,
     photo: json.data.photo || undefined,
   }
