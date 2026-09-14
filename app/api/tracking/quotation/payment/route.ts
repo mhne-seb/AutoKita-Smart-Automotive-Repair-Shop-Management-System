@@ -92,6 +92,15 @@ export async function POST(request: NextRequest) {
     // lock it immediately so it can't be re-picked while payment is pending.
     await db.query(`SELECT set_quotation_approval($1, $2)`, [jobOrderId, true])
 
+    // That also answers the quotation review round. The job order's stage
+    // deliberately does NOT move yet — a downpayment has to be verified by
+    // the shop before work starts (see the admin verify route).
+    const roundRes = await db.query(`SELECT id, customer_approval_status FROM get_pre_diagnostic($1)`, [jobOrderId])
+    const round = roundRes.rows[0]
+    if (round?.customer_approval_status === 'pending') {
+      await db.query(`SELECT update_pre_diagnostic_approval($1, 'approved'::approval_status)`, [round.id])
+    }
+
     return NextResponse.json({ success: true, paymentId: rows[0].id })
   } catch (err) {
     console.error('[/api/tracking/quotation/payment] error:', err)

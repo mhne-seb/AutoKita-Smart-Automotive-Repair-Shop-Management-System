@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { LayoutGrid, FileText, Wrench, ChevronRight, Loader2, Camera, AlertCircle, Check } from "lucide-react";
+import { FileText, ChevronRight, Loader2, Camera, AlertCircle, Check } from "lucide-react";
 import { toast } from "sonner";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { Lightbox } from "@/components/Lightbox";
@@ -40,7 +40,6 @@ function Inspecting() {
   const findings = data?.findings ?? [];
   const reviewHistory = data?.reviewHistory ?? [];
   const walkaround = data?.walkaround ?? [];
-  const shop = data?.shop ?? null;
 
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
 
@@ -305,49 +304,6 @@ function Inspecting() {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-
-          {preDiagnostic?.mechanic_notes && (
-            <div className="rounded-xl border bg-card p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2 text-[color:oklch(0.5_0.2_300)]">
-                  <LayoutGrid className="h-4 w-4" />
-                  <span className="text-xs font-bold uppercase tracking-wider">Inspection Summary</span>
-                </div>
-                <span className="rounded-full border px-3 py-0.5 text-[10px]">Official Record</span>
-              </div>
-              <div className="mt-4 flex items-start gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal text-white">
-                  <Wrench className="h-3.5 w-3.5" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <b>AutoKita Service Team</b>
-                    <span className="text-xs text-success">Customer Visible</span>
-                  </div>
-                  <p className="mt-2 text-sm text-muted-foreground">{preDiagnostic.mechanic_notes}</p>
-                  {preDiagnostic.datetime_created && (
-                    <p className="mt-2 text-[11px] text-muted-foreground">{preDiagnostic.datetime_created}</p>
-                  )}
-                </div>
-              </div>
-              {(shop || jobOrder.estimated_duration) && (
-                <div className="mt-5 grid grid-cols-2 gap-6 border-t pt-4 text-sm">
-                  {shop && (
-                    <div>
-                      <div className="text-[10px] font-bold uppercase text-muted-foreground">Shop Location</div>
-                      <div className="mt-1 font-semibold">{shop.name}</div>
-                    </div>
-                  )}
-                  {jobOrder.estimated_duration && (
-                    <div>
-                      <div className="text-[10px] font-bold uppercase text-muted-foreground">Service Duration</div>
-                      <div className="mt-1 font-semibold">{jobOrder.estimated_duration}</div>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           )}
 

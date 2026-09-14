@@ -58,7 +58,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       [notes || '', estimated_grand_total || 0, actual_grand_total || 0, id]
     )
 
-    // 2. Clear existing services and parts
+    // 2. Clear existing services and parts. The save is a full replace, so
+    //    remember which parts had already arrived — the Service Progress page
+    //    marks them 'received' and a re-save must not knock them back to
+    //    'to_order'. Keyed by part number + description since row ids change.
+    const arrivedRes = await db.query(
+      `SELECT part_number, description FROM job_order_parts
+       WHERE job_order_id = $1::int AND status IN ('received', 'installed')`,
+      [id],
+    )
+    const arrived = new Set(arrivedRes.rows.map((r) => `${r.part_number ?? ''}|${r.description ?? ''}`))
     await db.query(`DELETE FROM job_order_services WHERE job_order_id = $1::int`, [id])
     await db.query(`DELETE FROM job_order_parts WHERE job_order_id = $1::int`, [id])
 
@@ -88,7 +97,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         // Insert parts for this service
         if (Array.isArray(s.parts)) {
           for (const p of s.parts) {
-            const dbStatus = p.status === 'in-stock' ? 'in_stock' : 'to_order'
+            const dbStatus = arrived.has(`${p.partNo || ''}|${p.name || ''}`)
+              ? 'received'
+              : p.status === 'in-stock' ? 'in_stock' : 'to_order'
             const totalRetail = (p.qty || 1) * (p.unitPrice || 0)
             await db.query(
               `INSERT INTO job_order_parts

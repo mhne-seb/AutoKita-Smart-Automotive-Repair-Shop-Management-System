@@ -45,6 +45,29 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       [id, DIAGNOSTIC_SCAN_SERVICE_NAME],
     )
 
+    // What the customer originally asked for when they booked — the mechanic
+    // should read this before inspecting. Lives on the ticket, not the job
+    // order, so it's joined back here (inline — no stored function covers it).
+    const ticketResult = await db.query(
+      `SELECT st.service_mode::text, st.home_service_address, st.customer_concern, st.request_date::text
+       FROM job_orders jo
+       JOIN service_tickets st ON st.id = jo.ticket_id
+       WHERE jo.id = $1`,
+      [id],
+    )
+
+    // Has the admin started building the quotation? Any service other than
+    // the OBD-II fee (which is attached automatically at booking) means yes.
+    // Used to show the "Continue to Quotation" handoff only until it's used.
+    const startedResult = await db.query(
+      `SELECT EXISTS (
+         SELECT 1 FROM job_order_services jos
+         JOIN services s ON s.id = jos.service_id
+         WHERE jos.job_order_id = $1 AND s.service_name <> $2
+       ) AS started`,
+      [id, DIAGNOSTIC_SCAN_SERVICE_NAME],
+    )
+
     return NextResponse.json({
       success: true,
       data: {
@@ -52,6 +75,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         findings: findingsResult.rows,
         referencePhotos: photoResult.rows,
         diagnosticScanAuthorized: Boolean(scanResult.rows[0]?.authorized),
+        ticket: ticketResult.rows[0] ?? null,
+        quotationStarted: Boolean(startedResult.rows[0]?.started),
       },
     })
   } catch (error) {

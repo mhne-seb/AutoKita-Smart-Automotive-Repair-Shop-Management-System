@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from "next/link";
-import { Camera, Plus, Pencil, Trash2, Check, X, Cloud, Clock, ChevronRight, CheckCircle2, Loader2, Maximize2, AlertCircle, ScanLine, Info } from 'lucide-react'
+import { Camera, Plus, Pencil, Trash2, Check, X, Cloud, Clock, ChevronRight, CheckCircle2, Loader2, Maximize2, AlertCircle, ScanLine, Info, ClipboardList, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
@@ -77,8 +77,11 @@ export default function page() {
 
   // While the customer is reviewing the report we sent them, it must not change
   // underneath them — the record they approve has to be the record we sent.
-  // Everything stays visible, just not editable.
-  const isLocked = preDiagnostic?.status === 'pending'
+  // And once they've approved it, it's final: that exact record is what they
+  // agreed to. Everything stays visible, just not editable. Only 'disputed'
+  // (or no round yet) is editable, since that's when the mechanic revises.
+  const isApproved = preDiagnostic?.status === 'approved'
+  const isLocked = preDiagnostic?.status === 'pending' || isApproved
 
   // Once the real data arrives, seed the editable state from it.
   useEffect(() => {
@@ -225,12 +228,12 @@ export default function page() {
   // The side column only ever holds the pull-out review card or the
   // "Continue to Quotation" link — reserve its width only when one of those
   // actually has something to show, otherwise let the report use the full page.
-  const hasSidebar = Boolean(initial.pullOutRequested) || preDiagnostic?.status === 'approved'
+  const hasSidebar = Boolean(initial.request) || Boolean(initial.pullOutRequested) || (isApproved && !initial.quotationStarted)
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 p-8">
       <TopBar title="Vehicle Inspection" subtitle="Inspection workflow & time tracking." />
-      <JobOrderBreadcrumb jobOrderId={jobOrderId} current="inspection" />
+      <JobOrderBreadcrumb jobOrderId={jobOrderId} current="inspection" stage={jobOrder.stage} />
 
       <div className={hasSidebar ? "grid grid-cols-1 gap-6 xl:grid-cols-[1fr_340px]" : "block"}>
         <div className="space-y-6">
@@ -246,7 +249,7 @@ export default function page() {
             </div>
             <button
               onClick={sendInspectionForApproval}
-              disabled={sending || Boolean(preDiagnostic && preDiagnostic.status === 'pending')}
+              disabled={sending || isLocked}
               className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-default disabled:bg-emerald-600"
             >
               {preDiagnostic?.status === 'disputed' ? (
@@ -316,7 +319,7 @@ export default function page() {
               </div>
             )}
 
-            {isLocked && (
+            {preDiagnostic?.status === 'pending' && (
               <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                 <Clock size={16} className="mt-0.5 flex-shrink-0" />
                 <div>
@@ -325,6 +328,19 @@ export default function page() {
                     The customer is reviewing the findings you sent. The report can&apos;t be edited
                     until they approve or raise a concern, so the record they act on is exactly the
                     one you submitted.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {isApproved && (
+              <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+                <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold">Approved by the customer — this report is final</p>
+                  <p className="mt-0.5 text-emerald-800">
+                    This is the exact record the customer agreed to, so it can no longer be changed.
+                    Anything new goes on the quotation.
                   </p>
                 </div>
               </div>
@@ -571,6 +587,56 @@ export default function page() {
 
         {hasSidebar && (
           <div className="space-y-6">
+              {/* What the customer asked for at booking. Read this before
+                  inspecting — it's the reason the car is here. */}
+              {initial.request && (
+                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <div className="flex items-center gap-2">
+                    <ClipboardList size={16} className="text-slate-500" />
+                    <p className="text-sm font-bold text-slate-900">Customer&apos;s Request</p>
+                  </div>
+                  <p className="mt-0.5 text-xs text-slate-500">What they asked for when they booked.</p>
+
+                  <div className="mt-4 space-y-3 text-sm">
+                    <div>
+                      <p className="text-xs text-slate-400">Service requested</p>
+                      <p className="mt-0.5 font-semibold text-slate-900">{initial.request.category ?? 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400">Service type</p>
+                      <p className="mt-0.5 font-semibold text-slate-900">{initial.request.serviceMode}</p>
+                      {initial.request.homeAddress && (
+                        <p className="mt-1 flex items-start gap-1 text-xs text-slate-500">
+                          <MapPin size={12} className="mt-0.5 flex-shrink-0" /> {initial.request.homeAddress}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400">Requested on</p>
+                      <p className="mt-0.5 font-semibold text-slate-900">{initial.request.requestedOn}</p>
+                      {initial.request.requestedSlot && (
+                        <p className="mt-1 text-xs text-slate-500">Preferred slot: {initial.request.requestedSlot}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <p className="text-xs text-slate-400">Customer&apos;s notes</p>
+                    {initial.request.notes ? (
+                      <p className="mt-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+                        &ldquo;{initial.request.notes}&rdquo;
+                      </p>
+                    ) : !initial.request.category && initial.request.raw ? (
+                      // Unrecognised format — show the ticket text as-is rather than hide it.
+                      <p className="mt-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+                        {initial.request.raw}
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-sm text-slate-400">No specific concerns given.</p>
+                    )}
+                  </div>
+                </div>
+              )}
             {initial.pullOutRequested && (
               <div className="rounded-2xl border border-rose-100 bg-rose-50 p-5">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-rose-500">Review Action</p>
@@ -603,7 +669,9 @@ export default function page() {
               </div>
             )}
 
-            {preDiagnostic?.status === 'approved' && (
+            {/* One-time handoff: gone once the quotation has anything on it —
+                after that the breadcrumb is the way there. */}
+            {isApproved && !initial.quotationStarted && (
               <Link
                 href={`/job-orders/${jobOrderId}/quotation`}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"

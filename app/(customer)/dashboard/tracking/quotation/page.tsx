@@ -504,16 +504,20 @@ function TwoFAModal({
   const complete = code.length === 6;
 
   // Send the code the moment the modal opens — opening it IS the request.
+  // Guarded by a ref, not an effect cleanup: React Strict Mode (dev) runs
+  // mount effects twice, and a cleanup flag only discards the second
+  // *response* — the second *email* had already gone out. The ref survives
+  // the simulated remount, so exactly one request is ever made per open.
+  const requestedOnce = useRef(false);
   useEffect(() => {
-    let active = true;
+    if (requestedOnce.current) return;
+    requestedOnce.current = true;
     onRequest().then((c) => {
-      if (!active) return;
       if (!c) { onClose(); return; }
       setChallenge(c);
       setStatus("idle");
       setTimeout(() => inputsRef.current[0]?.focus(), 50);
     });
-    return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

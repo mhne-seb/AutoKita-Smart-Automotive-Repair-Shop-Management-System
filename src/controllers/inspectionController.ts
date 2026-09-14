@@ -35,6 +35,41 @@ function timeToHours(time: string | null): number {
   return Math.round((h + m / 60) * 10) / 10
 }
 
+// The booking forms cram the customer's request into one free-text column in
+// two different shapes:
+//   /book page:        "Requested: <slot> | Service: <category> | <notes>"
+//   dashboard modal:   "Category: <category>. Notes: <notes>"
+// Pull the parts back out for a clean summary; anything else is shown as-is.
+function parseConcern(raw: string): { category: string | null; notes: string | null; requestedSlot: string | null } {
+  const bookPage = raw.match(/^Requested:\s*(.*?)\s*\|\s*Service:\s*(.*?)\s*\|\s*([\s\S]*)$/)
+  if (bookPage) {
+    return { requestedSlot: bookPage[1].trim() || null, category: bookPage[2].trim() || null, notes: bookPage[3].trim() || null }
+  }
+  const modal = raw.match(/^Category:\s*(.*?)\.\s*Notes:\s*([\s\S]*)$/)
+  if (modal) {
+    return { requestedSlot: null, category: modal[1].trim() || null, notes: modal[2].trim() || null }
+  }
+  return { requestedSlot: null, category: null, notes: null }
+}
+
+function toRequest(ticket: any): InspectionData['request'] {
+  if (!ticket) return null
+  const raw = String(ticket.customer_concern ?? '').trim()
+  const parsed = parseConcern(raw)
+  const notes = parsed.notes && !/^(none|no specific concerns)$/i.test(parsed.notes) ? parsed.notes : null
+  return {
+    serviceMode: ticket.service_mode === 'home_service' ? 'Home Service' : 'Shop Visit',
+    homeAddress: ticket.service_mode === 'home_service' && ticket.home_service_address && ticket.home_service_address !== 'None'
+      ? ticket.home_service_address
+      : null,
+    category: parsed.category && parsed.category !== 'Not specified' ? parsed.category : null,
+    notes,
+    requestedSlot: parsed.requestedSlot,
+    requestedOn: formatDateTime(ticket.request_date),
+    raw,
+  }
+}
+
 function toInspectionData(row: any): InspectionData {
    // Walkaround photos come back from a separate query (row.referencePhotos),
   // keyed by slot id. Fall back to the hardcoded empty slots if none exist yet.
@@ -78,6 +113,8 @@ function toInspectionData(row: any): InspectionData {
     },
     approvalRequired: row.status === 'pending_customer_approval',
     diagnosticScanAuthorized: Boolean(row.diagnosticScanAuthorized),
+    request: toRequest(row.ticket),
+    quotationStarted: Boolean(row.quotationStarted),
   }
 }
 
