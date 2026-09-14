@@ -4,7 +4,4 @@ out
 .env*
 *.log
 Chatbot/
-src/data/job_order_extracts
-app/api/admin/ocr-extract
-app/api/admin/ocr-save
-app/(admin)/ocr-review
+src/data/job_order_extracts

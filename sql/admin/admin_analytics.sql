@@ -5,7 +5,6 @@ RETURNS TABLE (
     first_name       VARCHAR(40),
     last_name        VARCHAR(40),
     contact_number   VARCHAR(11),
-    tier             user_tiers,
     vehicle_model    VARCHAR(40),
     plate_number     VARCHAR(10),
     mileage          DECIMAL(10,2),
@@ -20,7 +19,6 @@ AS $$
         u.first_name,
         u.last_name,
         u.contact_number,
-        u.tier,
         v.vehicle_model,
         v.plate_number,
         v.mileage,
@@ -36,7 +34,7 @@ AS $$
     LEFT JOIN vehicles v   ON v.user_id = u.id
     LEFT JOIN job_orders jo ON jo.user_id = u.id
                            AND jo.status IN ('completed', 'released')
-    GROUP BY u.id, u.first_name, u.last_name, u.contact_number, u.tier,
+    GROUP BY u.id, u.first_name, u.last_name, u.contact_number,
              v.vehicle_model, v.plate_number, v.mileage
     ORDER BY last_checkup ASC NULLS FIRST;
 $$;
