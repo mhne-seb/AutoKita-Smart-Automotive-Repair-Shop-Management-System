@@ -35,7 +35,21 @@ export async function GET(request: NextRequest) {
       ? (await db.query(`SELECT * FROM get_job_order_tasks($1)`, [jobOrder.job_order_id])).rows
       : []
 
-    return NextResponse.json({ jobOrder, tasks })
+    // Parts per service so the tracker can say "waiting for parts" instead
+    // of a task just sitting at Not Yet with no explanation.
+    const parts = jobOrder
+      ? (await db.query(
+          `SELECT p.id, p.job_order_service_id, p.description, p.part_number, p.quantity, p.status::text, s.service_name
+       FROM job_order_parts p
+       JOIN job_order_services jos ON jos.id = p.job_order_service_id
+       JOIN services s ON s.id = jos.service_id
+       WHERE p.job_order_id = $1
+       ORDER BY p.id`,
+          [jobOrder.job_order_id],
+        )).rows
+      : []
+
+    return NextResponse.json({ jobOrder, tasks, parts })
   } catch (err) {
     console.error('[/api/tracking/in-progress] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

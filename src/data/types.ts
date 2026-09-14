@@ -90,6 +90,21 @@ export interface InspectionData {
   // Customer agreed to the OBD-II scan fee at booking — mechanic may scan.
   diagnosticScanAuthorized?: boolean
   pullOutRequested?: boolean
+  // The admin has added at least one service to the quotation.
+  quotationStarted?: boolean
+  // What the customer asked for when they booked (from the service ticket).
+  // category/notes/requestedSlot are parsed out of the free-text concern
+  // field when it matches a known booking-form format; `raw` always has
+  // the original text as a fallback.
+  request?: {
+    serviceMode: 'Shop Visit' | 'Home Service'
+    homeAddress: string | null
+    category: string | null
+    notes: string | null
+    requestedSlot: string | null
+    requestedOn: string
+    raw: string
+  } | null
 }
 
 export type PartStatus = 'in-stock' | 'to-order'
@@ -126,6 +141,20 @@ export interface QuotationData {
 
 export type TaskStatus = 'completed' | 'active' | 'pending'
 
+// A part a task is waiting on. The shop orders as needed (no inventory
+// system), so the app only distinguishes "still to order" from "here".
+export interface TaskPart {
+  id: number
+  name: string
+  partNo: string
+  qty: number
+  status: string // job_order_parts_status; app uses in_stock | to_order | received
+}
+
+export function partIsReady(p: TaskPart): boolean {
+  return p.status !== 'to_order' && p.status !== 'ordered' && p.status !== 'in_transit'
+}
+
 export interface ServiceTask {
   id: string
   title: string
@@ -136,6 +165,7 @@ export interface ServiceTask {
   mechanicId?: number
   mechanicName?: string
   estimatedFinish?: string
+  parts?: TaskPart[]
 }
 
 export interface ServiceSection {
@@ -148,4 +178,14 @@ export interface ServiceProgressData {
   jobOrderId: string
   sections: ServiceSection[]
   quotationConfirmed: boolean
+  // The job-order-level clock (not per-service): when the job went onto the
+  // floor, when it's promised back, and the estimated labor. ISO values are
+  // kept so the page can tick the running duration live.
+  timer: {
+    startedAtIso: string | null
+    completedAtIso: string | null
+    startedAt: string
+    estimatedFinish: string
+    estimatedDurationHours: number
+  }
 }

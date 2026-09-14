@@ -3,14 +3,14 @@
 // Admin "Service Progress" page — the final step of the job-order workflow. Shows a section-by-section task checklist; once every task is marked done the job order is written back to "completed" (see jobOrderController.advanceJobOrderStage).
 import { useParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { Check, ListChecks, CalendarDays, Clock, X } from 'lucide-react'
+import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2 } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
 import { getQuotationById } from '@/controllers/quotationController'
-import { getServiceProgressById, scheduleTask } from '@/controllers/serviceProgressController'
+import { getServiceProgressById, scheduleTask, setPartStatus } from '@/controllers/serviceProgressController'
 import { currency } from '@/data/mockData'
-import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask } from '@/data/types'
+import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, partIsReady } from '@/data/types'
 
 const sectionColors: Record<string, string> = {
   received: 'text-emerald-600',
@@ -82,6 +82,10 @@ export default function page() {
   const [sections, setSections] = useState<ServiceSection[]>([])
   const [quotationConfirmed, setQuotationConfirmed] = useState(false)
   const [schedulingTask, setSchedulingTask] = useState<ServiceTask | null>(null)
+  // Which task / part has a request in flight (declared here, above the early
+  // returns, so the hook order is identical on every render).
+  const [busyTaskId, setBusyTaskId] = useState<string | null>(null)
+  const [busyPartId, setBusyPartId] = useState<number | null>(null)
 
   // Once the real data arrives, seed the editable state from it.
   useEffect(() => {
@@ -93,6 +97,28 @@ export default function page() {
 
   const allTasks = useMemo(() => sections.flatMap((s) => s.tasks), [sections])
   const completedCount = allTasks.filter((t) => t.status === 'completed').length
+  const progressPercent = allTasks.length === 0 ? 0 : Math.round((completedCount / allTasks.length) * 100)
+
+  // Job-order clock. Ticks once a minute while the job is on the floor so
+  // "Current Duration" is live; freezes at completed_at once it's done.
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    if (!initial?.timer.startedAtIso || initial.timer.completedAtIso) return
+    const t = setInterval(() => setNow(Date.now()), 60_000)
+    return () => clearInterval(t)
+  }, [initial?.timer.startedAtIso, initial?.timer.completedAtIso])
+
+  const currentDurationHours = useMemo(() => {
+    const start = initial?.timer.startedAtIso
+    if (!start) return 0
+    const end = initial?.timer.completedAtIso ? new Date(initial.timer.completedAtIso).getTime() : now
+    return Math.max(0, Math.round(((end - new Date(start).getTime()) / 36e5) * 10) / 10)
+  }, [initial?.timer.startedAtIso, initial?.timer.completedAtIso, now])
+
+  const laborHoursEstimate = useMemo(() => {
+    const fromQuotation = quotation?.services.reduce((sum, s) => sum + (s.laborHours || 0), 0) ?? 0
+    return fromQuotation > 0 ? Math.round(fromQuotation * 10) / 10 : (initial?.timer.estimatedDurationHours ?? 0)
+  }, [quotation, initial?.timer.estimatedDurationHours])
 
   const quotationTotal = useMemo(() => {
     if (!quotation) return 0
@@ -118,39 +144,43 @@ export default function page() {
     )
   }
 
-  function markDone(taskId: string) {
-    setSections((prev) => {
-      // Complete the chosen task, then activate the next pending task overall (any section).
-      const flatIds = prev.flatMap((s) => s.tasks.map((t) => t.id))
-      const idx = flatIds.indexOf(taskId)
-      const nextId = flatIds[idx + 1]
-
-      const next = prev.map((s) => ({
-        ...s,
-        tasks: s.tasks.map((t) => {
-          if (t.id === taskId) return { ...t, status: 'completed' as TaskStatus }
-          if (t.id === nextId && t.status === 'pending') return { ...t, status: 'active' as TaskStatus }
-          return t
-        }),
-      }))
-
-      // Once every task across every section is done, write that back to the
-      // shared job order so the Customer's dashboard reflects "Completed".
-      const stillPending = next.some((s) => s.tasks.some((t) => t.status !== 'completed'))
-      if (!stillPending) void advanceJobOrderStage(jobOrderId, 'completed')
-
-      return next
-    })
+  async function refreshTasks() {
+    const data = await getServiceProgressById(jobOrderId)
+    if (data) setSections(data.sections)
   }
 
-  function toggleCheckbox(taskId: string, status: TaskStatus) {
-    if (status === 'completed' || status === 'active') markDone(taskId)
+  // Start / Finish live on the card, not in the modal — one tap, in the
+  // moment. Schedule/mechanic/note are passed through unchanged (the stored
+  // function is a full update). When Jubert adds started_at, the 'Started'
+  // tap is what stamps it — nothing here needs to change.
+  async function setTaskStatus(task: ServiceTask, next: TaskStatus) {
+    setBusyTaskId(task.id)
+    await scheduleTask(jobOrderId, task.id, task.scheduledDate ?? null, next, task.mechanicId, task.note)
+    const data = await getServiceProgressById(jobOrderId)
+    if (data) {
+      setSections(data.sections)
+      // Every task done -> the job order itself is complete (customer's
+      // tracker flips to "Completed").
+      const all = data.sections.flatMap((s) => s.tasks)
+      if (all.length > 0 && all.every((t) => t.status === 'completed')) {
+        void advanceJobOrderStage(jobOrderId, 'completed')
+      }
+    }
+    setBusyTaskId(null)
+  }
+
+  // No inventory system — the only fact about a part is "has it arrived".
+  async function togglePartReceived(part: TaskPart) {
+    setBusyPartId(part.id)
+    await setPartStatus(jobOrderId, part.id, partIsReady(part) ? 'to_order' : 'received')
+    await refreshTasks()
+    setBusyPartId(null)
   }
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 p-8">
       <TopBar title="Vehicle Inspection" subtitle="Inspection workflow & time tracking." />
-      <JobOrderBreadcrumb jobOrderId={jobOrderId} current="progress" />
+      <JobOrderBreadcrumb jobOrderId={jobOrderId} current="progress" stage={jobOrder.stage} />
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
         <div className="grid grid-cols-4 gap-6 text-sm">
@@ -185,20 +215,22 @@ export default function page() {
         </span>
       </div>
 
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_340px]">
+      <div>
       {sections.length === 0 ? (
-        <div className="mx-auto max-w-[1000px] rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-sm text-slate-400">
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-sm text-slate-400">
           No service progress tasks recorded yet for this job order.
         </div>
       ) : (
-        <div className="mx-auto max-w-[1000px] space-y-6">
+        <div className="space-y-6">
           {sections.map((section) => (
             <div key={section.id} className="space-y-3">
               <p className={`text-sm font-bold uppercase tracking-wide ${sectionColors[section.id] ?? 'text-slate-500'}`}>
                 {section.title}
               </p>
               {section.tasks.map((task) => (
+                  <Fragment key={task.id}>
                   <div
-                    key={task.id}
                     className={`flex items-center justify-between rounded-xl border p-4 ${
                       task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50' : 'border-slate-200 bg-white hover:bg-slate-50 cursor-pointer'
                     }`}
@@ -232,20 +264,82 @@ export default function page() {
                       </div>
                     </div>
                     
-                    <div className="shrink-0 ml-4 flex flex-col items-end gap-2">
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                          task.status === 'completed'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : task.status === 'active'
-                            ? 'bg-indigo-100 text-indigo-700'
-                            : 'bg-slate-100 text-slate-500'
-                        }`}
-                      >
-                        {task.status === 'completed' ? 'Finished' : task.status === 'active' ? 'Started' : 'Not Yet'}
-                      </span>
-                    </div>
+                    {(() => {
+                      const parts = task.parts ?? []
+                      const missing = parts.filter((p) => !partIsReady(p))
+                      const busy = busyTaskId === task.id
+                      return (
+                        <div className="shrink-0 ml-4 flex flex-col items-end gap-2" onClick={(e) => e.stopPropagation()}>
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                              task.status === 'completed'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : task.status === 'active'
+                                ? 'bg-indigo-100 text-indigo-700'
+                                : missing.length > 0
+                                ? 'bg-amber-100 text-amber-700'
+                                : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            {task.status === 'completed' ? 'Finished' : task.status === 'active' ? 'Started' : missing.length > 0 ? 'Waiting for parts' : 'Not Yet'}
+                          </span>
+
+                          {/* Start is blocked until every part for this service has
+                              arrived — work doesn't begin on a car missing parts. */}
+                          {task.status === 'pending' && (
+                            <button
+                              onClick={() => setTaskStatus(task, 'active')}
+                              disabled={busy || missing.length > 0}
+                              title={missing.length > 0 ? `Waiting for parts (${parts.length - missing.length} of ${parts.length} received)` : undefined}
+                              className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-indigo-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100"
+                            >
+                              {busy ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />} Start
+                            </button>
+                          )}
+                          {task.status === 'active' && (
+                            <button
+                              onClick={() => setTaskStatus(task, 'completed')}
+                              disabled={busy}
+                              className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-700 active:scale-95 disabled:opacity-40"
+                            >
+                              {busy ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />} Finish
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })()}
                   </div>
+
+                  {/* Parts this service needs. Tap to mark one received (tap again
+                      to undo a mis-tap). Hidden once the task is finished. */}
+                  {task.status !== 'completed' && (task.parts?.length ?? 0) > 0 && (
+                    <div className="ml-4 rounded-b-xl border border-t-0 border-slate-200 bg-slate-50 px-4 py-2">
+                      <div className="flex flex-wrap gap-2">
+                        {task.parts!.map((p) => {
+                          const ready = partIsReady(p)
+                          const busyP = busyPartId === p.id
+                          return (
+                            <button
+                              key={p.id}
+                              onClick={() => togglePartReceived(p)}
+                              disabled={busyP}
+                              title={ready ? 'Received — tap to undo' : 'Tap when this part arrives'}
+                              className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-all duration-150 active:scale-95 disabled:opacity-50 ${
+                                ready
+                                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                  : 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                              }`}
+                            >
+                              {busyP ? <Loader2 size={12} className="animate-spin" /> : ready ? <PackageCheck size={12} /> : <Package size={12} />}
+                              {p.qty > 1 ? `${p.qty}x ` : ''}{p.name}
+                              <span className="font-normal opacity-70">- {ready ? (p.status === 'in_stock' ? 'in stock' : 'received') : 'to order'}</span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  </Fragment>
               ))}
 
               {section.id === 'quotation' && quotation && (
@@ -320,6 +414,70 @@ export default function page() {
           ))}
         </div>
       )}
+      </div>
+
+      <div className="space-y-6">
+        {/* The job-order clock — restored from the Inspection page, where it
+            didn't belong. Starts by itself when the job enters in_progress
+            (advance_job_order_stage stamps started_at); there's no manual
+            pause/resume — per-service Started/Finished is the real control. */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+          <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400"><Timer size={13} /> Time Tracking</p>
+
+          <div className="mb-2 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-slate-900">{jobOrder.customer}</p>
+              <p className="text-xs text-slate-400">{jobOrder.vehicle}</p>
+            </div>
+            <span className="rounded border border-slate-200 px-2 py-1 text-xs font-semibold text-slate-500">
+              JO-{jobOrderId.toUpperCase()}
+            </span>
+          </div>
+
+          <div className="mb-1 flex items-center justify-between text-xs font-semibold text-slate-400">
+            <span>Job Progress</span>
+            <span className="text-slate-700">{progressPercent}%</span>
+          </div>
+          <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="h-full rounded-full bg-slate-900 transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+          </div>
+
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-slate-400"><Clock size={13} /> Started</span>
+              <span className="font-semibold text-slate-800">{initial.timer.startedAt}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-slate-400"><Clock size={13} /> Estimated Finish</span>
+              <span className="font-semibold text-slate-800">{initial.timer.estimatedFinish}</span>
+            </div>
+          </div>
+
+          <div className="my-4 border-t border-slate-100" />
+
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400">Labor Hours (Est.)</span>
+              <span className="font-semibold text-slate-800">{laborHoursEstimate} hrs</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400">{initial.timer.completedAtIso ? 'Total Duration' : 'Current Duration'}</span>
+              <span className={`font-semibold ${!initial.timer.completedAtIso && laborHoursEstimate > 0 && currentDurationHours > laborHoursEstimate ? 'text-rose-600' : 'text-slate-800'}`}>
+                {currentDurationHours} hrs
+              </span>
+            </div>
+          </div>
+
+          <p className="mt-4 text-[11px] text-slate-400">
+            {initial.timer.startedAtIso
+              ? initial.timer.completedAtIso
+                ? 'Finished — the clock stopped when the last task was completed.'
+                : 'Running since the job went onto the floor. Mark each task Started / Finished below to track individual services.'
+              : 'The clock starts when the job enters In Progress.'}
+          </p>
+        </div>
+      </div>
+      </div>
       
       {schedulingTask && (
         <ScheduleModal 
@@ -363,7 +521,6 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
     return '09:00'
   })
 
-  const [status, setStatus] = useState<TaskStatus>(task.status)
   const [mechanicId, setMechanicId] = useState<number | ''>(task.mechanicId || '')
   const [note, setNote] = useState(task.note === 'Describe the service...' ? '' : (task.note || ''))
   
@@ -372,7 +529,8 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
   const handleSave = async () => {
     setSaving(true)
     const datetime = `${date}T${time}:00`
-    await scheduleTask(jobOrderId, task.id, datetime, status, mechanicId === '' ? undefined : mechanicId, note)
+    // Status isn't set here — Start/Finish live on the task card.
+    await scheduleTask(jobOrderId, task.id, datetime, task.status, mechanicId === '' ? undefined : mechanicId, note)
     setSaving(false)
     onSaved()
   }
@@ -399,17 +557,6 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
             placeholder="Service notes (optional)..."
             className="w-full rounded-md border border-slate-200 p-2 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none min-h-[80px]"
           />
-        </div>
-
-        <div className="space-y-4 mb-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Status</label>
-            <div className="flex gap-2">
-              <button onClick={() => setStatus('pending')} className={`flex-1 rounded-lg border py-2 text-sm font-semibold transition-colors ${status === 'pending' ? 'bg-slate-200 border-slate-300 text-slate-800' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>Not Yet</button>
-              <button onClick={() => setStatus('active')} className={`flex-1 rounded-lg border py-2 text-sm font-semibold transition-colors ${status === 'active' ? 'bg-indigo-100 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>Started</button>
-              <button onClick={() => setStatus('completed')} className={`flex-1 rounded-lg border py-2 text-sm font-semibold transition-colors ${status === 'completed' ? 'bg-emerald-100 border-emerald-200 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>Finished</button>
-            </div>
-          </div>
         </div>
 
         <div className="space-y-4">

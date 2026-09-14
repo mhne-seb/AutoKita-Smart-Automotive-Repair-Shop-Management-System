@@ -1,7 +1,7 @@
 // serviceProgressController — now backed by the real "service_progress_tasks"
 // table instead of src/data/serviceProgress.ts.
 
-import type { ServiceProgressData, ServiceSection, ServiceTask, TaskStatus } from '@/data/types'
+import type { ServiceProgressData, ServiceSection, ServiceTask, TaskStatus, TaskPart } from '@/data/types'
 
 // UI section ids use a hyphen ('in-progress'), the database enum uses an
 // underscore ('in_progress') — this bridges the two.
@@ -27,6 +27,18 @@ const SECTION_ORDER = ['received', 'inspecting', 'quotation', 'in-progress', 'co
 
 // The database only stores 'pending' | 'in_progress' | 'completed'.
 // The UI expects 'pending' | 'active' | 'completed'.
+function formatDateTime(value: string | null | undefined): string {
+  if (!value) return '—'
+  return new Date(value).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+}
+
+// job_orders.estimated_duration is a Postgres TIME like "02:30:00" — to decimal hours.
+function timeToHours(time: string | null | undefined): number {
+  if (!time) return 0
+  const [h, m] = time.split(':').map(Number)
+  return Math.round((h + m / 60) * 10) / 10
+}
+
 function mapDbTaskStatus(dbStatus: string): TaskStatus {
   if (dbStatus === 'completed') return 'completed'
   if (dbStatus === 'in_progress') return 'active'
@@ -59,6 +71,15 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
 
   const rows: any[] = json.data
 
+  // Parts grouped by service name — tasks are matched to their service by
+  // title (service_progress_tasks has no FK to job_order_services).
+  const partsByService = new Map<string, TaskPart[]>()
+  for (const r of (json.parts ?? []) as any[]) {
+    const list = partsByService.get(r.service_name) ?? []
+    list.push({ id: r.id, name: r.description || 'Unnamed part', partNo: r.part_number || '—', qty: r.quantity ?? 1, status: r.status })
+    partsByService.set(r.service_name, list)
+  }
+
   // Group raw rows by section
   const sectionMap = new Map<string, ServiceTask[]>()
   const seenTaskIds = new Set<string>()
@@ -78,6 +99,7 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
       mechanicId: row.mechanic_id ?? undefined,
       mechanicName: row.mechanic_name ?? undefined,
       estimatedFinish: row.estimated_finish ? new Date(row.estimated_finish).toISOString() : undefined,
+      parts: partsByService.get(row.task_title) ?? [],
     }
     if (!sectionMap.has(sectionId)) sectionMap.set(sectionId, [])
     sectionMap.get(sectionId)!.push(task)
@@ -94,15 +116,34 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
   const quotationTasks = sectionMap.get('quotation') ?? []
   const quotationConfirmed = quotationTasks.length > 0 && quotationTasks.every((t) => t.status === 'completed')
 
+  const timing = json.timing ?? {}
   return {
     jobOrderId,
     sections,
     quotationConfirmed,
+    timer: {
+      startedAtIso: timing.started_at ?? null,
+      completedAtIso: timing.completed_at ?? null,
+      startedAt: formatDateTime(timing.started_at),
+      estimatedFinish: formatDateTime(timing.date_promised),
+      estimatedDurationHours: timeToHours(timing.estimated_duration),
+    },
   }
 }
 
 export async function getServiceProgressForJobOrder(jobOrderId: string): Promise<ServiceProgressData | null> {
   return (await getServiceProgressById(jobOrderId)) ?? null
+}
+
+/** Flips a part between to_order and received. Returns whether it saved. */
+export async function setPartStatus(jobOrderId: string, partId: number, status: 'received' | 'to_order'): Promise<boolean> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/parts`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ partId, status }),
+  })
+  const json = await res.json().catch(() => null)
+  return Boolean(res.ok && json?.success)
 }
 
 export async function scheduleTask(jobOrderId: string, taskId: string, scheduledDate: string | null, status: string, mechanicId?: number, note?: string) {

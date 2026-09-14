@@ -71,6 +71,17 @@ export async function POST(request: NextRequest) {
 
     await db.query(`SELECT set_quotation_approval($1, $2)`, [jobOrderId, true])
 
+    // The customer's go-signal is the answer to the quotation review round
+    // the admin sent — close it as approved so the admin side stops showing
+    // "Recall Approval", then move the job onto the floor. No payment is
+    // involved on this path, so work can start right away.
+    const roundRes = await db.query(`SELECT id, customer_approval_status FROM get_pre_diagnostic($1)`, [jobOrderId])
+    const round = roundRes.rows[0]
+    if (round?.customer_approval_status === 'pending') {
+      await db.query(`SELECT update_pre_diagnostic_approval($1, 'approved'::approval_status)`, [round.id])
+    }
+    await db.query(`SELECT advance_job_order_stage($1, 'in_progress'::job_orders_status)`, [jobOrderId])
+
     await db.query(
       `INSERT INTO system_audit_logs (user_id, action_performed, entity_type, entity_id, new_values, action_date)
        VALUES ($1, 'approved'::audit_action_enum, 'job_orders', $2, $3, NOW())`,
