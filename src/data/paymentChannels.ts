@@ -14,6 +14,9 @@ export interface PaymentChannel {
   type: PaymentChannelType
   accountName: string
   accountNumber: string
+  // Path under /public to the channel's payment QR (e.g. '/assets/qr-gcash.png').
+  // Leave unset until the shop provides one — the UI shows a placeholder.
+  qrImage?: string
 }
 
 export const PAYMENT_CHANNELS: PaymentChannel[] = [

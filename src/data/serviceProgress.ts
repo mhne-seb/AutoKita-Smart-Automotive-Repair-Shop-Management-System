@@ -4,6 +4,7 @@ export const serviceProgress: Record<string, ServiceProgressData> = {
   i1: {
     jobOrderId: 'i1',
     quotationConfirmed: false,
+    timer: { startedAtIso: null, completedAtIso: null, startedAt: '—', estimatedFinish: '—', estimatedDurationHours: 0 },
     sections: [
       {
         id: 'received',
@@ -56,6 +57,7 @@ export const serviceProgress: Record<string, ServiceProgressData> = {
   i2: {
     jobOrderId: 'i2',
     quotationConfirmed: false,
+    timer: { startedAtIso: null, completedAtIso: null, startedAt: '—', estimatedFinish: '—', estimatedDurationHours: 0 },
     sections: [
       {
         id: 'received',
@@ -75,6 +77,7 @@ export const serviceProgress: Record<string, ServiceProgressData> = {
   i3: {
     jobOrderId: 'i3',
     quotationConfirmed: true,
+    timer: { startedAtIso: null, completedAtIso: null, startedAt: '—', estimatedFinish: '—', estimatedDurationHours: 0 },
     sections: [
       { id: 'received', title: 'Received', tasks: [{ id: 't1', title: 'Customer check-in', note: 'Vehicle dropped off.', time: '09:00 AM, May 27', status: 'completed' }] },
       { id: 'inspecting', title: 'Inspecting', tasks: [{ id: 't2', title: 'Fuel system inspection', note: 'Filter found clogged.', time: '09:15 AM, May 27', status: 'completed' }] },
@@ -86,6 +89,7 @@ export const serviceProgress: Record<string, ServiceProgressData> = {
   i4: {
     jobOrderId: 'i4',
     quotationConfirmed: true,
+    timer: { startedAtIso: null, completedAtIso: null, startedAt: '—', estimatedFinish: '—', estimatedDurationHours: 0 },
     sections: [
       { id: 'received', title: 'Received', tasks: [{ id: 't1', title: 'Customer check-in', note: 'Vehicle dropped off.', time: '09:00 AM, May 17', status: 'completed' }] },
       { id: 'inspecting', title: 'Inspecting', tasks: [{ id: 't2', title: 'A/C system inspection', note: 'Low refrigerant found.', time: '09:15 AM, May 17', status: 'completed' }] },

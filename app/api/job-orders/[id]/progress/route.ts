@@ -30,7 +30,29 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       [id]
     )
 
-    return NextResponse.json({ success: true, data: result.rows })
+    // Job-order-level clock: started_at is stamped by advance_job_order_stage
+    // when the job enters in_progress; date_promised / estimated_duration are
+    // the pickup window. Returned alongside the tasks (not inside data[]) so
+    // the existing consumer is untouched.
+    const timingResult = await db.query(
+      `SELECT started_at::text, completed_at::text, date_promised::text, estimated_duration::text
+       FROM job_orders WHERE id = $1`,
+      [id],
+    )
+
+    // Parts per service, so a task can show what it's waiting on. Matched to
+    // tasks by service name (service_progress_tasks has no FK to the service).
+    const partsResult = await db.query(
+      `SELECT p.id, p.job_order_service_id, p.description, p.part_number, p.quantity, p.status::text, s.service_name
+       FROM job_order_parts p
+       JOIN job_order_services jos ON jos.id = p.job_order_service_id
+       JOIN services s ON s.id = jos.service_id
+       WHERE p.job_order_id = $1
+       ORDER BY p.id`,
+      [id],
+    )
+
+    return NextResponse.json({ success: true, data: result.rows, timing: timingResult.rows[0] ?? null, parts: partsResult.rows })
   } catch (error) {
     console.error('Service progress fetch error:', error)
     return NextResponse.json(
