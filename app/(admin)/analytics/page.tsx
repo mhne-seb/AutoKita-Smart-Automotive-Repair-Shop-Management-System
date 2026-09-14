@@ -374,7 +374,7 @@ export default function Page() {
   return (
     <div className="space-y-6 p-8">
       {toast && (
-        <div className="fixed right-6 top-6 z-50 rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white shadow-lg">
+        <div className="fixed right-6 top-6 z-50 rounded-xl bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-3 text-sm font-medium text-white shadow-lg">
           {toast}
         </div>
       )}
@@ -400,7 +400,7 @@ export default function Page() {
           </select>
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90"
           >
             <Download size={15} /> Export Reports
           </button>
@@ -437,7 +437,9 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 lg:col-span-2">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white lg:col-span-2">
+          <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
+          <div className="p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Revenue & Job Trends</p>
@@ -464,6 +466,7 @@ export default function Page() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+          </div>
         </div>
       </div>
 
@@ -481,7 +484,7 @@ export default function Page() {
                 onClick={() => setChartType(opt.value)}
                 className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
                   chartType === opt.value
-                    ? 'bg-slate-900 text-white shadow-sm'
+                    ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white shadow-sm'
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
@@ -660,18 +663,21 @@ export default function Page() {
 
           return (
             <>
-              <table className="mt-4 w-full text-left text-sm">
+              <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
+                <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
+                <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
-                    <th className="py-3 font-semibold">Customer ID</th>
-                    <th className="py-3 font-semibold">Name</th>
-                    <th className="py-3 font-semibold">Contact</th>
-                    <th className="py-3 font-semibold">Status (Churn)</th>
-                    <th className="py-3 font-semibold">Vehicle (Year & Model)</th>
-                    <th className="py-3 font-semibold">Mileage</th>
-                    <th className="py-3 font-semibold">Last Checkup</th>
-                    <th className="py-3 font-semibold">Promotional Offer</th>
-                    <th className="py-3 font-semibold"></th>
+                    <th className="px-4 py-3 font-semibold">Customer ID</th>
+                    <th className="px-4 py-3 font-semibold">Name</th>
+                    <th className="px-4 py-3 font-semibold">Contact</th>
+                    <th className="px-4 py-3 font-semibold">Status (Churn)</th>
+                    <th className="px-4 py-3 font-semibold">Vehicle (Year & Model)</th>
+                    <th className="px-4 py-3 font-semibold">Mileage</th>
+                    <th className="px-4 py-3 font-semibold">Last Checkup</th>
+                    <th className="px-4 py-3 font-semibold">Promotional Offer</th>
+                    <th className="px-4 py-3 font-semibold"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -680,29 +686,29 @@ export default function Page() {
                     const sent = Boolean(sentOffer)
                     return (
                       <tr key={c.customerId} className="border-b border-slate-50 last:border-0">
-                        <td className="py-4 font-semibold text-slate-800">{c.customerId}</td>
-                        <td className="py-4 text-slate-700">{c.name}</td>
-                        <td className="py-4 text-slate-500">{c.contact}</td>
-                        <td className="py-4">
+                        <td className="px-4 py-4 font-semibold text-slate-800">{c.customerId}</td>
+                        <td className="px-4 py-4 text-slate-700">{c.name}</td>
+                        <td className="px-4 py-4 text-slate-500">{c.contact}</td>
+                        <td className="px-4 py-4">
                           <StatusBadge status={c.churnStatus} />
                         </td>
-                        <td className="py-4 text-slate-600">{c.vehicle}</td>
-                        <td className="py-4 text-slate-600">{c.mileage}</td>
-                        <td className="py-4 text-slate-600">{c.lastCheckup ?? '—'}</td>
-                        <td className="py-4">
+                        <td className="px-4 py-4 text-slate-600">{c.vehicle}</td>
+                        <td className="px-4 py-4 text-slate-600">{c.mileage}</td>
+                        <td className="px-4 py-4 text-slate-600">{c.lastCheckup ?? '—'}</td>
+                        <td className="px-4 py-4">
                           <span className="flex items-center gap-1.5 font-semibold text-slate-800">
                             <Info size={13} className="text-slate-300" />
                             {sentOffer ?? c.offer ?? (c.churnStatus === 'New Customer' ? 'Welcome Discount' : '—')}
                           </span>
                         </td>
-                        <td className="py-4 text-right">
+                        <td className="px-4 py-4 text-right">
                           <button
                             onClick={() => !sent && openOfferModal(c)}
                             disabled={sent}
                             className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
                               sent
                                 ? 'cursor-default border border-emerald-200 bg-emerald-50 text-emerald-700'
-                                : 'bg-slate-900 text-white hover:bg-slate-800'
+                                : 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white hover:opacity-90'
                             }`}
                           >
                             {sent ? (
@@ -722,13 +728,15 @@ export default function Page() {
 
                   {filteredList.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="py-8 text-center text-sm text-slate-400">
+                      <td colSpan={9} className="px-4 py-8 text-center text-sm text-slate-400">
                         No customers match this filter.
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
+                </div>
+              </div>
 
               {/* Pagination controls */}
               {filteredList.length > 0 && (
@@ -774,7 +782,7 @@ export default function Page() {
                           onClick={() => setCurrentPage(pageNum)}
                           className={`min-w-[32px] rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
                             pageNum === safePage
-                              ? 'bg-slate-900 text-white'
+                              ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white'
                               : 'text-slate-500 hover:bg-slate-100'
                           }`}
                         >
@@ -870,7 +878,7 @@ export default function Page() {
               </button>
               <button
                 onClick={confirmGiveOffer}
-                className="flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
               >
                 <Gift size={15} /> Send Offer
               </button>

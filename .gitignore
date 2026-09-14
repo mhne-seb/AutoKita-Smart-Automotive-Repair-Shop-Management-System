@@ -2,6 +2,8 @@ node_modules
 .next
 out
 .env*
+!.env.example
 *.log
 Chatbot/
-src/data/job_order_extracts
+tsconfig.tsbuildinfo
+src/data/job_order_extracts

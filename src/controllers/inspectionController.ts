@@ -15,6 +15,7 @@
 //     if present, otherwise 0 / not running.
 
 import type { InspectionData, MechanicalFinding, InspectionPhotoSlot } from '@/data/types'
+import { REFERENCE_PHOTO_STATUS } from '@/data/types'
 
 const DEFAULT_PHOTO_SLOTS: InspectionPhotoSlot[] = [
   { id: 'front', label: 'Front Quarter' },
@@ -34,14 +35,60 @@ function timeToHours(time: string | null): number {
   return Math.round((h + m / 60) * 10) / 10
 }
 
+// The booking forms cram the customer's request into one free-text column in
+// two different shapes:
+//   /book page:        "Requested: <slot> | Service: <category> | <notes>"
+//   dashboard modal:   "Category: <category>. Notes: <notes>"
+// Pull the parts back out for a clean summary; anything else is shown as-is.
+function parseConcern(raw: string): { category: string | null; notes: string | null; requestedSlot: string | null } {
+  const bookPage = raw.match(/^Requested:\s*(.*?)\s*\|\s*Service:\s*(.*?)\s*\|\s*([\s\S]*)$/)
+  if (bookPage) {
+    return { requestedSlot: bookPage[1].trim() || null, category: bookPage[2].trim() || null, notes: bookPage[3].trim() || null }
+  }
+  const modal = raw.match(/^Category:\s*(.*?)\.\s*Notes:\s*([\s\S]*)$/)
+  if (modal) {
+    return { requestedSlot: null, category: modal[1].trim() || null, notes: modal[2].trim() || null }
+  }
+  return { requestedSlot: null, category: null, notes: null }
+}
+
+function toRequest(ticket: any): InspectionData['request'] {
+  if (!ticket) return null
+  const raw = String(ticket.customer_concern ?? '').trim()
+  const parsed = parseConcern(raw)
+  const notes = parsed.notes && !/^(none|no specific concerns)$/i.test(parsed.notes) ? parsed.notes : null
+  return {
+    serviceMode: ticket.service_mode === 'home_service' ? 'Home Service' : 'Shop Visit',
+    homeAddress: ticket.service_mode === 'home_service' && ticket.home_service_address && ticket.home_service_address !== 'None'
+      ? ticket.home_service_address
+      : null,
+    category: parsed.category && parsed.category !== 'Not specified' ? parsed.category : null,
+    notes,
+    requestedSlot: parsed.requestedSlot,
+    requestedOn: formatDateTime(ticket.request_date),
+    raw,
+  }
+}
+
 function toInspectionData(row: any): InspectionData {
-  const findings: MechanicalFinding[] = row.findings.map((f: any) => ({
-    id: String(f.id),
-    name: f.name || 'Inspection Finding',
-    note: f.findings_description || f.notes || '',
-    status: f.status ?? 'needs-attention',
-    photo: f.photo ?? undefined,
-  }))
+   // Walkaround photos come back from a separate query (row.referencePhotos),
+  // keyed by slot id. Fall back to the hardcoded empty slots if none exist yet.
+
+  const photoRows: any[] = row.referencePhotos ?? []
+  const photoSlots: InspectionPhotoSlot[] = DEFAULT_PHOTO_SLOTS.map((slot) => {
+    const shot = photoRows.find((p) => p.slot_id === slot.id)
+    return shot?.photo ? {...slot, url: shot.photo, rowId: shot.id, note: shot.note ?? '' } : slot
+  })
+
+  const findings: MechanicalFinding[] = row.findings
+    .filter((f: any) => f.status !== REFERENCE_PHOTO_STATUS)
+    .map((f: any) => ({
+      id: String(f.id),
+      name: f.name || 'Inspection Finding',
+      note: f.findings_description || f.notes || '',
+      status: f.status ?? 'needs-attention',
+      photo: f.photo ?? undefined,
+    }))
 
   const laborHoursEstimate = timeToHours(row.estimated_duration)
   const currentDurationHours = row.started_at
@@ -53,7 +100,7 @@ function toInspectionData(row: any): InspectionData {
     vehicleTitle: `${row.vin ? '' : ''}${row.vehicle_model ?? 'Unknown Vehicle'}`.trim(),
     plate: row.plate_number || '—',
     customer: `${row.first_name ?? ''} ${row.last_name ?? ''}`.trim() || 'Unknown Customer',
-    photoSlots: DEFAULT_PHOTO_SLOTS,
+    photoSlots,
     notes: [], // no notes table exists yet — technician notes are session-only until one is added
     findings,
     timer: {
@@ -65,6 +112,9 @@ function toInspectionData(row: any): InspectionData {
       progressPercent: row.status === 'inspecting' ? 25 : row.status ? 50 : 0,
     },
     approvalRequired: row.status === 'pending_customer_approval',
+    diagnosticScanAuthorized: Boolean(row.diagnosticScanAuthorized),
+    request: toRequest(row.ticket),
+    quotationStarted: Boolean(row.quotationStarted),
   }
 }
 
@@ -81,7 +131,35 @@ export async function getInspectionForJobOrder(jobOrderId: string): Promise<Insp
   return (await getInspectionById(jobOrderId)) ?? null
 }
 
+export async function uploadInspectionPhoto(
+  jobOrderId: string,
+  slotId: string,
+  label: string,
+  file: File,
+): Promise<{ url: string; rowId: number } | null>{ 
+  const form = new FormData()
+  form.append('file', file)
+  form.append('slotId', slotId)
+  form.append('label', label)
 
+  const res = await fetch(`/api/job-orders/${jobOrderId}/photos`, { method: 'POST',
+    body: form })
+    const json = await res.json().catch(() => null)
+    if (!res.ok || !json?.success) return null
+    return { url: json.url as string, rowId: json.id as number }
+}
+
+/** Saves the mechanic's condition note for a walkaround photo. */
+export async function saveWalkaroundNote(jobOrderId: string, rowId: number, note: string):
+Promise<boolean> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/photos` , {
+    method: 'PATCH', 
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ rowId, note }),
+  })
+  const json = await res.json().catch(() => null)
+  return Boolean(res.ok && json?.success)
+}
 
 export async function addInspectionFinding(jobOrderId: string, finding: Partial<MechanicalFinding>): Promise<MechanicalFinding | null> {
   const res = await fetch(`/api/job-orders/${jobOrderId}/findings`, {

@@ -15,6 +15,9 @@ export interface PreDiagnosticRound {
   status: 'pending' | 'approved' | 'disputed'
   createdAt: string
   approvedAt: string | null
+  // Only present when status is 'disputed' — what the customer said was wrong.
+  customerReason: string | null
+  respondedAt: string | null
 }
 
 function toPreDiagnosticRound(row: any): PreDiagnosticRound {
@@ -24,6 +27,8 @@ function toPreDiagnosticRound(row: any): PreDiagnosticRound {
     status: row.customer_approval_status,
     createdAt: row.datetime_created,
     approvedAt: row.datetime_approved,
+    customerReason: row.customer_reason ?? null,
+    respondedAt: row.responded_at ?? null,
   }
 }
 

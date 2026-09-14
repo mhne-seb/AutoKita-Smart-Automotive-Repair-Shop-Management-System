@@ -1,10 +1,51 @@
 'use client'
 
 import { useState, useEffect } from "react";
+import { PAYMENT_CHANNELS } from "@/data/paymentChannels";
 import { useSearchParams } from "next/navigation";
-import { Clock, AlertCircle, Info, X, Wrench, CheckCircle2, Loader2, ChevronDown } from "lucide-react";
-import { StageStepper } from "@/components/dashboard/StageStepper";
+import {
+  Clock,
+  AlertCircle,
+  Info,
+  X,
+  Wrench,
+  CheckCircle2,
+  Loader2,
+  Wallet,
+  Store,
+  Send,
+  CreditCard,
+  Camera,
+  Download,
+  Upload,
+  ShieldCheck,
+} from "lucide-react";
+import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getInProgressData } from "@/controllers/serviceProgressController";
+// Billing & Warranty was previously its own page/route — its exact UI/logic
+// (itemized parts/labor breakdown, payment method chooser, invoice download)
+// now lives inline on this tracking stage instead, scoped to this job order.
+import {
+  type Service,
+  type Warranty,
+  CATEGORY_ORDER,
+  STATUS_STYLE,
+  WARRANTY_STATUS_STYLE,
+  peso,
+  serviceTotal,
+} from "@/data/billings";
+import { getServices, getWarranties } from "@/controllers/billingController";
+
+// A part one of the services is waiting on. Only "still to order" vs "here"
+// matters to the shop (no inventory system), so that's all we show.
+type Part = {
+  id: number;
+  service_name: string;
+  description: string;
+  quantity: number;
+  status: string;
+};
+const partIsReady = (p: Part) => p.status !== "to_order" && p.status !== "ordered" && p.status !== "in_transit";
 
 type Task = {
   id: number;
@@ -32,7 +73,32 @@ type JobOrder = {
   vehicle_model: string;
   vehicle_year: number;
   plate_number: string;
+  // Optional milestone timestamps — wire these up on the backend as they
+  // become available so the unified Service Timeline below can show them.
+  date_arrived?: string;
+  inspection_completed_at?: string;
+  quotation_prepared_at?: string;
+  downpayment_received_at?: string;
+  released_at?: string;
+  release_photo_url?: string;
 };
+
+type TimelineEntry = {
+  key: string;
+  label: string;
+  detail?: string;
+  time?: string | null;
+  status: "completed" | "active" | "pending";
+  image?: string;
+};
+
+// Same short format the admin pages use — the raw ISO string was leaking
+// through to the customer ("2026-09-13T02:00:00.000Z").
+function fmtWhen(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? null : d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
 
 function getTag(status: string): "completed" | "active" | "pending" {
   if (status === "completed") return "completed";
@@ -46,12 +112,11 @@ function InProgress() {
   const searchParams = useSearchParams();
   const jobOrderIdParam = searchParams.get("jobOrderId");
 
-  const [data, setData] = useState<{ jobOrder: JobOrder | null; tasks: Task[] } | null>(null);
+  const [data, setData] = useState<{ jobOrder: JobOrder | null; tasks: Task[]; parts?: Part[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showWarn, setShowWarn] = useState(false);
   const [pullOutStatus, setPullOutStatus] = useState<"none" | "requested">("none");
   const [pullOutNote, setPullOutNote] = useState("");
-  const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
     const userId = Number(sessionStorage.getItem("autokita_user_id"));
@@ -63,6 +128,10 @@ function InProgress() {
   }, [jobOrderIdParam]);
 
   const tasks = data?.tasks ?? [];
+  const parts = data?.parts ?? [];
+  // Parts still to be ordered, grouped by the service (task title) they belong to.
+  const missingPartsFor = (taskTitle: string) => parts.filter((p) => p.service_name === taskTitle && !partIsReady(p));
+  const partsFor = (taskTitle: string) => parts.filter((p) => p.service_name === taskTitle);
   const jobOrder = data?.jobOrder ?? null;
 
   // Locked once the job order has moved past active servicing — the
@@ -97,6 +166,93 @@ function InProgress() {
       )
     : 0;
 
+  // --- Unified Service Timeline -----------------------------------------
+  // Combines job-order-level milestones (received → inspecting → quotation →
+  // downpayment → per-task work → completed/released) into a single list.
+  // Milestone timestamps that aren't in the DB yet fall back gracefully so
+  // the timeline still renders something sensible while the backend catches up.
+  const timeline: TimelineEntry[] = jobOrder
+    ? [
+        {
+          key: "received",
+          label: "Vehicle Received",
+          detail: `${jobOrder.vehicle_year} ${jobOrder.vehicle_model} checked in at the shop.`,
+          time: jobOrder.date_arrived ?? null,
+          status: "completed",
+        },
+        {
+          key: "inspecting",
+          label: "Mechanic Inspecting Vehicle",
+          detail: "Technician performed the pre-diagnostic inspection.",
+          time: jobOrder.date_arrived ?? null,
+          status: "completed",
+        },
+        {
+          key: "inspection_completed",
+          label: "Inspection Completed",
+          detail: "Findings logged and quotation drafting started.",
+          time: jobOrder.inspection_completed_at ?? null,
+          status: "completed",
+        },
+        {
+          key: "quotation_prepared",
+          label: "Quotation Prepared",
+          detail: "Service quotation was sent for your review.",
+          time: jobOrder.quotation_prepared_at ?? null,
+          status: "completed",
+        },
+        {
+          key: "downpayment",
+          label: jobOrder.quotation_approved ? "Downpayment / Confirmation Received" : "Awaiting Confirmation",
+          detail: jobOrder.quotation_approved
+            ? "Quotation confirmed and servicing authorized."
+            : "Waiting for customer to confirm the quotation.",
+          time: jobOrder.downpayment_received_at ?? null,
+          status: jobOrder.quotation_approved ? "completed" : "pending",
+        },
+        ...tasks.map((t) => {
+          const missing = getTag(t.task_status) === "pending" ? missingPartsFor(t.task_title) : [];
+          const all = partsFor(t.task_title);
+          return {
+            key: `task-${t.id}`,
+            label: t.task_title,
+            detail: t.note && t.note !== "Describe the service..." ? t.note : undefined,
+            time: t.completed_at
+              ? `Finished ${fmtWhen(t.completed_at)}`
+              : missing.length > 0
+              ? `Waiting for parts (${all.length - missing.length} of ${all.length} received)`
+              : t.scheduled_date
+              ? `Scheduled ${fmtWhen(t.scheduled_date)}`
+              : null,
+            status: getTag(t.task_status),
+            waitingForParts: missing.length > 0,
+          };
+        }),
+        {
+          key: "service_completed",
+          label: "Vehicle Service Completed",
+          detail: "All confirmed services finished by our technicians.",
+          time: isHistorical ? (jobOrder.date_promised ?? null) : null,
+          status: isHistorical ? "completed" : completionPct === 100 ? "completed" : "pending",
+        },
+        {
+          key: "payment_received",
+          label: "Payment Received",
+          detail: "Final billing settled for this job order.",
+          time: null,
+          status: Number(jobOrder.balance) <= 0 && isHistorical ? "completed" : "pending",
+        },
+        {
+          key: "released",
+          label: "Vehicle Released",
+          detail: "Vehicle handed back to the customer.",
+          time: jobOrder.released_at ?? null,
+          status: jobOrder.status === "released" ? "completed" : "pending",
+          image: jobOrder.release_photo_url,
+        },
+      ]
+    : [];
+
   if (loading) {
     return (
       <div className="mx-auto max-w-6xl px-6 py-8">
@@ -119,7 +275,7 @@ function InProgress() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active="in-progress" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper active={stageForStatus(jobOrder.status)} viewing="in-progress" jobOrderId={jobOrder.job_order_id} />
 
       {isHistorical && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
@@ -133,55 +289,61 @@ function InProgress() {
             <div className="flex items-center justify-between border-l-4 border-brand pl-3">
               <h2 className="text-xl font-bold">Service Timeline</h2>
               <span className="rounded-md border px-2.5 py-1 text-xs font-semibold">
-                {tasks.length} Tasks Total
+                {timeline.length} Milestones
               </span>
             </div>
 
             <div className="mt-4">
-              {tasks.map((t, idx) => {
-                const tag = getTag(t.task_status);
-                const isOpen = expanded === String(t.id);
-                const isCollapsible = tag === "completed";
-                const isLast = idx === tasks.length - 1;
-                const isOnHold = pullOutStatus === "requested" && tag !== "completed";
+              {timeline.map((entry, idx) => {
+                const isLast = idx === timeline.length - 1;
+                const isOnHold = pullOutStatus === "requested" && entry.status !== "completed" && entry.key.startsWith("task-");
 
+                // Service tasks use the exact words the admin picks in the
+                // schedule modal (Not Yet / Started / Finished), so the customer
+                // sees what the shop tagged. Other milestones keep Completed/Pending.
+                const isTask = entry.key.startsWith("task-");
+                const waiting = Boolean((entry as { waitingForParts?: boolean }).waitingForParts);
                 const badgeLabel = isOnHold
                   ? "On Hold"
-                  : tag === "completed"
-                  ? "Completed"
-                  : tag === "active"
-                  ? "Active"
-                  : "Pending";
+                  : entry.status === "completed"
+                  ? (isTask ? "Finished" : "Completed")
+                  : entry.status === "active"
+                  ? "Started"
+                  : waiting
+                  ? "Waiting for parts"
+                  : (isTask ? "Not Yet" : "Pending");
                 const badgeClasses = isOnHold
                   ? "bg-destructive/15 text-destructive"
-                  : tag === "completed"
+                  : entry.status === "completed"
                   ? "bg-success/15 text-[color:oklch(0.5_0.16_145)]"
-                  : tag === "active"
+                  : entry.status === "active"
                   ? "bg-brand-soft text-brand"
+                  : waiting
+                  ? "bg-warning/15 text-[color:oklch(0.5_0.13_50)]"
                   : "bg-muted text-muted-foreground";
 
                 return (
-                  <div key={t.id} className="flex gap-3">
+                  <div key={entry.key} className="flex gap-3">
                     <div className="flex flex-col items-center">
                       <div
                         className={`relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
-                          tag === "completed"
+                          entry.status === "completed"
                             ? "border-muted-foreground/40 bg-background"
                             : isOnHold
                             ? "border-destructive bg-background"
-                            : tag === "active"
+                            : entry.status === "active"
                             ? "border-brand bg-background"
                             : "border-muted-foreground/20 bg-background"
                         }`}
                       >
-                        {tag === "active" && !isOnHold && (
+                        {entry.status === "active" && !isOnHold && (
                           <>
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-30" />
                             <span className="relative h-2.5 w-2.5 rounded-full bg-brand" />
                           </>
                         )}
                         {isOnHold && <X className="h-3.5 w-3.5 text-destructive" strokeWidth={2.5} />}
-                        {tag === "completed" && (
+                        {entry.status === "completed" && (
                           <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground/70" strokeWidth={2} />
                         )}
                       </div>
@@ -189,88 +351,42 @@ function InProgress() {
                     </div>
 
                     <div className={`min-w-0 flex-1 ${isLast ? "pb-0" : "pb-5"} ${isOnHold ? "opacity-70" : ""}`}>
-                      <button
-                        type="button"
-                        onClick={() => isCollapsible && setExpanded(isOpen ? null : String(t.id))}
-                        className={`flex w-full items-start justify-between text-left ${
-                          isCollapsible ? "cursor-pointer" : "cursor-default"
-                        }`}
-                      >
+                      <div className="flex w-full items-start justify-between">
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-semibold">{t.task_title}</div>
-                          {t.note && t.note !== 'Describe the service...' && (
-                            <p className="mt-0.5 truncate text-xs text-muted-foreground">{t.note}</p>
+                          <div className="truncate text-sm font-semibold">{entry.label}</div>
+                          {entry.detail && (
+                            <p className="mt-0.5 truncate text-xs text-muted-foreground">{entry.detail}</p>
                           )}
-                          {t.completed_at && !isOpen && (
+                          {entry.time && (
                             <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
                               <Clock className="h-3 w-3" />
-                              {t.completed_at}
-                            </div>
-                          )}
-                          {t.estimated_finish && tag !== 'completed' && !isOpen && (
-                            <div className="mt-1 flex items-center gap-1 text-[11px] text-amber-600 font-medium">
-                              <Clock className="h-3 w-3" />
-                              Est. Finish: {new Date(t.estimated_finish).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                              {entry.time}
                             </div>
                           )}
                         </div>
-                        <div className="flex shrink-0 flex-col items-end gap-1.5">
-                          <span
-                            className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${badgeClasses}`}
-                          >
-                            {badgeLabel}
-                          </span>
-                          {isCollapsible && (
-                            <ChevronDown
-                              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                                isOpen ? "rotate-180" : ""
-                              }`}
-                            />
-                          )}
-                        </div>
-                      </button>
+                        <span
+                          className={`shrink-0 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${badgeClasses}`}
+                        >
+                          {badgeLabel}
+                        </span>
+                      </div>
 
-                      {isCollapsible && isOpen && (
-                        <div className="mt-2 rounded-lg border bg-muted/20 p-3">
-                          <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
-                            <span>{t.completed_at}</span>
-                            <span className="text-success">Verified</span>
-                          </div>
-                          {t.note && t.note !== 'Describe the service...' && (
-                            <p className="mt-2 text-xs text-muted-foreground">{t.note}</p>
-                          )}
+                      {entry.key === "released" && entry.image && (
+                        <img
+                          src={entry.image}
+                          alt="Vehicle release proof"
+                          className="mt-2 aspect-video w-full max-w-sm rounded-lg border object-cover"
+                        />
+                      )}
+                      {entry.key === "released" && !entry.image && entry.status !== "completed" && (
+                        <div className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                          <Camera className="h-3 w-3" /> Release photo will appear here once the vehicle is handed back.
                         </div>
                       )}
                     </div>
                   </div>
                 );
               })}
-            </div>
-          </div>
-
-          <div className="rounded-xl border bg-card p-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-[color:oklch(0.5_0.2_300)] text-xs font-bold uppercase tracking-wider">
-                📋 Technician's Log
-              </div>
-              <span className="rounded-full border px-2.5 py-0.5 text-[10px]">Verified Record</span>
-            </div>
-            <div className="mt-3 flex items-start gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal text-white">
-                <Wrench className="h-3.5 w-3.5" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <b>AutoKita Service Team</b>
-                  </div>
-                  <span className="text-xs text-success">Customer Visible</span>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Latest updates for {jobOrder.vehicle_year} {jobOrder.vehicle_model} will appear here
-                  as your technician logs progress.
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -360,7 +476,8 @@ function InProgress() {
             </div>
           </div>
 
-
+          {/* --- Billing (moved in from the standalone Billing & Warranty page) --- */}
+          <BillingSection jobOrder={jobOrder} />
 
           <div className="rounded-xl border bg-card p-4">
             <div className="flex items-center gap-2 text-sm font-semibold">
@@ -454,6 +571,381 @@ function InProgress() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Billing section — brought in from the old standalone Billing & Warranty page.
+// Shows this job order's current bill and lets the customer settle it without
+// leaving the tracking flow. Warranty browsing (for past services) stays on
+// the Service History page; this section is scoped to the active job order.
+// ---------------------------------------------------------------------------
+
+function downloadText(filename: string, content: string) {
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function buildInvoiceText(service: Service) {
+  const total = serviceTotal(service);
+  const lines = [
+    "AutoKita — Service Invoice",
+    "================================",
+    `Invoice #: ${service.invoice}`,
+    `Service: ${service.name}`,
+    `Vehicle: ${service.vehicle}`,
+    `Date: ${service.date}`,
+    "",
+  ];
+  for (const cat of CATEGORY_ORDER) {
+    const items = service.items.filter((i) => i.category === cat);
+    if (!items.length) continue;
+    lines.push(`-- ${cat} --`);
+    for (const it of items) {
+      lines.push(`${it.name}  x${it.qty}  @ ₱${peso(it.price)}  =  ₱${peso(it.qty * it.price)}`);
+    }
+    lines.push("");
+  }
+  lines.push(`Subtotal: ₱${peso(total)}`);
+  if (service.status !== "pending") lines.push(`Amount Paid: ₱${peso(service.amountPaid)}`);
+  if (service.status !== "paid") lines.push(`Balance Due: ₱${peso(total - service.amountPaid)}`);
+  lines.push("", `Status: ${STATUS_STYLE[service.status].label}`);
+  return lines.join("\n");
+}
+
+// ---------------------------------------------------------------------------
+// Billing section — ported as-is from the old standalone Billing & Warranty
+// page (same itemized Parts/Labor breakdown, payment chooser, invoice
+// download), just relocated here and scoped to the vehicle in this job order
+// instead of listing every service the customer has ever had.
+// ---------------------------------------------------------------------------
+
+function BillingSection({ jobOrder }: { jobOrder: JobOrder }) {
+  const [services, setServices] = useState<Service[]>([]);
+  const [warranties, setWarranties] = useState<Warranty[]>([]);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    getServices().then((data) => active && setServices(data));
+    getWarranties().then((data) => active && setWarranties(data));
+    return () => { active = false; };
+  }, []);
+
+  // Match this job order's service/warranties by plate number (falls back to
+  // vehicle name match). Swap this for a direct job_order_id join once
+  // billings.ts / billingController.ts exposes one.
+  const matchesThisVehicle = (vehicle: string) =>
+    vehicle.includes(jobOrder.plate_number) ||
+    vehicle.includes(`${jobOrder.vehicle_year} ${jobOrder.vehicle_model}`);
+
+  const service = services.find((s) => matchesThisVehicle(s.vehicle)) ?? services[0] ?? null;
+  const vehicleWarranties = warranties.filter((w) => matchesThisVehicle(w.vehicle));
+
+  if (!service) {
+    return (
+      <div className="rounded-xl border bg-card p-4">
+        <p className="text-xs text-muted-foreground">Billing details for this service will appear here once available.</p>
+        <div className="mt-4 border-t pt-3">
+          <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-teal" /> Active Warranty
+          </div>
+          {vehicleWarranties.length === 0 ? (
+            <p className="mt-2 text-xs text-muted-foreground">No warranty on file for this vehicle yet.</p>
+          ) : (
+            <div className="mt-2 space-y-2">
+              {vehicleWarranties.map((w) => (
+                <div key={w.t} className="flex items-center justify-between gap-2 rounded-md bg-muted/30 px-2.5 py-2">
+                  <div className="min-w-0">
+                    <div className="truncate text-xs font-semibold">🛡 {w.t}</div>
+                    <div className="truncate text-[10px] text-muted-foreground">Expires: {w.expires}</div>
+                  </div>
+                  <span className={`shrink-0 whitespace-nowrap text-[10px] font-semibold ${WARRANTY_STATUS_STYLE[w.status]}`}>
+                    {w.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const total = serviceTotal(service);
+  const balance = total - service.amountPaid;
+  const badge = STATUS_STYLE[service.status];
+
+  return (
+    <>
+      <div className="overflow-hidden rounded-xl border bg-card p-4">
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          <Wallet className="h-4 w-4 text-teal" /> Billing
+          <span className={`ml-auto whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-semibold ${badge.className}`}>
+            {badge.label}
+          </span>
+        </div>
+        <p className="mt-1 truncate text-xs text-muted-foreground">{service.invoice} · {service.vehicle}</p>
+
+        <div className="mt-3 flex items-center justify-between border-t pt-3">
+          <span className="text-xs text-muted-foreground">Total Due</span>
+          <span className="text-lg font-bold text-teal">₱{peso(total)}</span>
+        </div>
+
+        <button
+          onClick={() => setOpen(true)}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2 text-xs font-semibold text-brand-foreground hover:opacity-90"
+        >
+          <CreditCard className="h-3.5 w-3.5" /> View Billing Details
+        </button>
+
+        {/* --- Active Warranty (moved in from the standalone Billing & Warranty page) --- */}
+        <div className="mt-4 border-t pt-3">
+          <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-teal" /> Active Warranty
+          </div>
+          {vehicleWarranties.length === 0 ? (
+            <p className="mt-2 text-xs text-muted-foreground">No warranty on file for this vehicle yet.</p>
+          ) : (
+            <div className="mt-2 space-y-2">
+              {vehicleWarranties.map((w) => (
+                <div key={w.t} className="flex items-center justify-between gap-2 rounded-md bg-muted/30 px-2.5 py-2">
+                  <div className="min-w-0">
+                    <div className="truncate text-xs font-semibold">🛡 {w.t}</div>
+                    <div className="truncate text-[10px] text-muted-foreground">Expires: {w.expires}</div>
+                  </div>
+                  <span className={`shrink-0 whitespace-nowrap text-[10px] font-semibold ${WARRANTY_STATUS_STYLE[w.status]}`}>
+                    {w.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {open && (
+        <ServiceModal
+          service={service}
+          onClose={() => setOpen(false)}
+          onDownload={(s) => downloadText(`${s.invoice}.txt`, buildInvoiceText(s))}
+          onSubmitPayment={(s, method) => {
+            setServices((prev) =>
+              prev.map((x) => (x.id === s.id ? { ...x, status: method === "ewallet" ? "verifying" : x.status } : x))
+            );
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Service modal — sectioned Parts / Labor breakdown + payment (ported 1:1
+// from the old Billing.tsx ServiceModal).
+// ---------------------------------------------------------------------------
+
+function ServiceModal({
+  service,
+  onClose,
+  onDownload,
+  onSubmitPayment,
+}: {
+  service: Service;
+  onClose: () => void;
+  onDownload: (s: Service) => void;
+  onSubmitPayment: (s: Service, method: "shop" | "ewallet") => void;
+}) {
+  const [method, setMethod] = useState<"shop" | "ewallet">("ewallet");
+  const total = serviceTotal(service);
+  const balance = total - service.amountPaid;
+  const badge = STATUS_STYLE[service.status];
+  const needsPayment = service.status === "pending" || service.status === "downpayment";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 py-10" onClick={onClose}>
+      <div className="w-full max-w-4xl overflow-hidden rounded-xl border bg-card shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between border-b p-6">
+          <div>
+            <h2 className="text-lg font-bold">{service.name}</h2>
+            <p className="mt-1 text-xs text-muted-foreground">{service.invoice} · {service.date} · {service.vehicle}</p>
+          </div>
+          <button onClick={onClose} className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted/50">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="max-h-[65vh] overflow-y-auto p-6">
+          <div className="mb-4 flex items-center justify-end">
+            <span className={`inline-block whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${badge.className}`}>
+              {badge.label}
+            </span>
+          </div>
+
+          {CATEGORY_ORDER.map((cat) => {
+            const items = service.items.filter((i) => i.category === cat);
+            if (!items.length) return null;
+            const sectionTotal = items.reduce((sum, i) => sum + i.qty * i.price, 0);
+            return (
+              <div key={cat} className="mb-5">
+                <div className="mb-2 flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{cat}</h4>
+                  <span className="text-xs text-muted-foreground">₱{peso(sectionTotal)}</span>
+                </div>
+                <table className="w-full text-sm">
+                  <tbody>
+                    {items.map((it) => (
+                      <tr key={it.name} className="border-b last:border-0">
+                        <td className="py-2.5">{it.name}</td>
+                        <td className="py-2.5 text-muted-foreground">x{it.qty}</td>
+                        <td className="py-2.5 text-muted-foreground">₱{peso(it.price)}</td>
+                        <td className="py-2.5 text-right font-medium">₱{peso(it.qty * it.price)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })}
+
+          <div className="ml-auto max-w-xs space-y-1 border-t pt-3 text-sm">
+            <div className="flex justify-between">
+              <span>Subtotal:</span>
+              <b>₱{peso(total)}</b>
+            </div>
+            {service.status === "downpayment" && (
+              <>
+                <div className="flex justify-between text-success">
+                  <span>Downpayment received:</span>
+                  <span>− ₱{peso(service.amountPaid)}</span>
+                </div>
+                <div className="flex justify-between border-t pt-2 text-lg">
+                  <b>Balance Due:</b>
+                  <b className="text-teal">₱{peso(balance)}</b>
+                </div>
+              </>
+            )}
+            {(service.status === "pending" || service.status === "verifying") && (
+              <div className="flex justify-between border-t pt-2 text-lg">
+                <b>Total Due:</b>
+                <b className="text-teal">₱{peso(total)}</b>
+              </div>
+            )}
+            {service.status === "paid" && (
+              <div className="flex justify-between border-t pt-2 text-lg">
+                <b>Total Paid:</b>
+                <b className="text-success">₱{peso(service.amountPaid)}</b>
+              </div>
+            )}
+          </div>
+
+          {needsPayment && (
+            <div className="mt-6 border-t pt-6">
+              <h3 className="font-bold">Choose Payment Method</h3>
+              <p className="text-xs text-muted-foreground">
+                Select your preferred way to settle {service.status === "downpayment" ? "the remaining balance" : "this bill"}.
+              </p>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setMethod("shop")}
+                  className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                    method === "shop" ? "border-brand bg-brand-soft/30 shadow-sm" : "border-border hover:bg-muted/20"
+                  }`}
+                >
+                  <Store className={`h-5 w-5 ${method === "shop" ? "text-brand" : "text-muted-foreground"}`} />
+                  <span className="text-sm">Pay at Shop</span>
+                </button>
+                <button
+                  onClick={() => setMethod("ewallet")}
+                  className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                    method === "ewallet" ? "border-brand bg-brand-soft/30 shadow-sm" : "border-border hover:bg-muted/20"
+                  }`}
+                >
+                  <Send className={`h-5 w-5 ${method === "ewallet" ? "text-brand" : "text-muted-foreground"}`} />
+                  <span className="text-sm">E-Wallet Transfer</span>
+                </button>
+              </div>
+
+              {method === "ewallet" && (
+                <div className="mt-5 space-y-5">
+                  <div>
+                    <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      <Wallet className="h-3 w-3" /> Scan to pay
+                    </div>
+                    {/* One card per e-wallet, QR large enough to scan from a phone
+                        held up to the screen. Details come from the shared channel
+                        list, so the shop's real numbers/QRs are set in one place. */}
+                    <div className="mt-2 grid gap-4 sm:grid-cols-2">
+                      {PAYMENT_CHANNELS.filter((c) => c.type === "e_wallet").map((c) => (
+                        <div key={c.id} className="flex flex-col items-center rounded-lg border bg-muted/30 p-4 text-center">
+                          {c.qrImage ? (
+                            <img src={c.qrImage} alt={`${c.label} payment QR`} className="h-48 w-48 rounded-lg border bg-white object-contain p-2" />
+                          ) : (
+                            <div className="grid h-48 w-48 place-items-center rounded-lg border-2 border-dashed bg-white text-xs text-muted-foreground">
+                              {c.label} QR<br />coming soon
+                            </div>
+                          )}
+                          <div className="mt-3 text-sm font-bold">{c.label}</div>
+                          <div className="text-xs text-muted-foreground">{c.accountName}</div>
+                          <div className="mt-0.5 font-mono text-sm font-semibold tracking-wide">{c.accountNumber}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Upload Payment Proof
+                    </div>
+                    <label className="mt-2 flex h-32 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/20 p-6 text-center transition-colors hover:bg-muted/30">
+                      <Upload className="h-6 w-6 text-muted-foreground" />
+                      <p className="mt-2 text-xs text-muted-foreground">Drag and drop or click to upload PDF/JPG</p>
+                      <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" />
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-4 flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3" /> Estimated verification time for transfers: 2–4 business hours.
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between border-t p-6">
+          <button
+            onClick={() => onDownload(service)}
+            className="inline-flex items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm transition-colors hover:bg-muted/40"
+          >
+            <Download className="h-4 w-4" /> Download Invoice
+          </button>
+          {needsPayment ? (
+            <button
+              onClick={() => onSubmitPayment(service, method)}
+              className="inline-flex items-center gap-2 rounded-md bg-[linear-gradient(90deg,#0b1730_0%,#1d3a68_55%,#3b6cb4_100%)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              {service.status === "downpayment" ? `Pay Balance · ₱${peso(balance)}` : "Finish Checkout"}
+            </button>
+          ) : service.status === "verifying" ? (
+            <span className="flex items-center gap-1 text-sm font-semibold text-brand">
+              <Clock className="h-4 w-4" /> Verifying payment…
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 text-sm font-semibold text-success">
+              <CheckCircle2 className="h-4 w-4" /> Fully Paid
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -561,7 +1053,7 @@ function PullOutModal({
             <button
               onClick={submit}
               disabled={status === "submitting"}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-[color:oklch(0.6_0.22_350)] py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-[color:oklch(0.6_0.22_350)] py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-[color:oklch(0.54_0.22_350)] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none disabled:active:scale-100"
             >
               {status === "submitting" ? (
                 <>
@@ -573,7 +1065,7 @@ function PullOutModal({
             </button>
             <button
               onClick={onClose}
-              className="mt-2 w-full rounded-md border py-2 text-sm hover:bg-accent"
+              className="mt-2 w-full rounded-md border py-2 text-sm transition-all duration-150 hover:border-foreground/30 hover:bg-accent active:scale-[0.98]"
             >
               Keep Servicing My Vehicle
             </button>

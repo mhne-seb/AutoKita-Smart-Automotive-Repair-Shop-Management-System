@@ -1,20 +1,15 @@
 'use client'
 
-// Admin dashboard "Overview" page — KPI cards, revenue/service-mix charts, and the active customers table with row actions (view/edit/mark complete/cancel).
+// Admin dashboard "Overview" page — KPI cards, revenue/service-mix charts, and a
+// live Job Queue preview (bookings waiting for approval).
 import { useEffect, useState } from 'react'
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Car,
-  Wrench,
   Users,
   Wallet,
   ChevronRight,
-  MoreVertical,
-  Eye,
-  Pencil,
-  CheckCircle2,
-  XCircle,
 } from 'lucide-react'
 import {
   AreaChart,
@@ -34,36 +29,37 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { getJobOrders } from '@/controllers/jobOrderController'
 import { JobOrderCard } from '@/data/types'
 import { getRevenueTrend, getServiceMix } from '@/controllers/reportController'
-import { currency, type Customer, type RevenuePoint, type ServiceMixSlice } from '@/data/mockData'
+import { currency, type RevenuePoint, type ServiceMixSlice } from '@/data/mockData'
 const heroImage = "/assets/ac/a1.jpg"; // static asset path
+
+type PendingBooking = {
+  ticketId: number
+  name: string
+  vehicle: string
+  plate: string
+  serviceMode: string
+  concern: string
+  date: string
+}
 
 export default function page() {
   const router = useRouter()
-  const [activeTableOrders, setActiveTableOrders] = useState<any[]>([])
   const [jobOrders, setJobOrders] = useState<JobOrderCard[]>([])
   const [revenueTrend, setRevenueTrend] = useState<RevenuePoint[]>([])
   const [serviceMix, setServiceMix] = useState<ServiceMixSlice[]>([])
   const [pendingTicketsCount, setPendingTicketsCount] = useState<number>(0)
   const [techniciansCount, setTechniciansCount] = useState<number>(0)
+  const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([])
   const totalRevenue = revenueTrend.reduce((sum, item) => sum + item.revenue, 0)
-  const activeJobOrders = jobOrders.filter(
-    (jobOrder) =>
-      jobOrder.stage === 'inspecting' ||
-      jobOrder.stage === 'quotation' ||
-      jobOrder.stage === 'in-progress'
-  ).length
 
   useEffect(() => {
     let active = true
 
-    // 2. Fetching dashboard table data for Active Job Orders
+    // 2. Fetching chart data (revenue trend + service mix)
     fetch('/api/analytics')
       .then((res) => res.json())
       .then((json) => {
         if (active && json.success && json.data) {
-          // Update the table
-          if (json.data.activeTable) setActiveTableOrders(json.data.activeTable)
-
           // Update the Pie Chart (Service Mix)
           if (json.data.serviceMix) setServiceMix(json.data.serviceMix)
 
@@ -80,19 +76,32 @@ export default function page() {
       }
     })
 
-    // 4. Fetching job queue data for pending tickets & technicians count
+    // 4. Fetching job queue data — pending tickets count, technicians count,
+    //    and a live preview of the bookings still waiting for approval.
     fetch('/api/admin/job-queue')
       .then((res) => res.json())
       .then((data) => {
         if (active && data.success && data.tickets) {
-          const pendingCount = data.tickets.filter(
+          const pending = data.tickets.filter(
             (t: any) =>
               t.ticket_status !== 'approved' &&
               t.ticket_status !== 'declined' &&
               t.ticket_status !== 'cancelled'
-          ).length
+          )
 
-          setPendingTicketsCount(pendingCount)
+          setPendingTicketsCount(pending.length)
+
+          setPendingBookings(
+            pending.slice(0, 6).map((t: any) => ({
+              ticketId: t.ticket_id,
+              name: `${t.first_name} ${t.last_name}`,
+              vehicle: `${t.vehicle_model} ${t.vehicle_year}`,
+              plate: t.plate_number,
+              serviceMode: t.service_mode === 'walk_in' ? 'Shop Visit' : 'Home Service',
+              concern: t.customer_concern || 'N/A',
+              date: new Date(t.request_date).toLocaleDateString(),
+            }))
+          )
         }
 
         if (data.mechanics) {
@@ -106,24 +115,9 @@ export default function page() {
     }
   }, [])
 
-
   const inProgressOrders = jobOrders.filter(
     (jobOrder) => jobOrder.stage === 'in-progress'
   ).length
-
-  const [openRowMenu, setOpenRowMenu] = useState<string | null>(null)
-
-  const handleRowAction = async (action: string, jobOrderId: string) => {
-    setOpenRowMenu(null)
-
-    if (action === 'View Details') {
-      router.push(`/job-orders?customerId=${encodeURIComponent(jobOrderId)}`)
-      return
-    }
-    if (action === 'Edit') {
-      router.push(`/job-orders/${jobOrderId}`)
-    }
-  }
 
   return (
     <div className="space-y-6 p-8">
@@ -132,7 +126,7 @@ export default function page() {
       {/* Welcome banner */}
       <div className="relative overflow-hidden rounded-2xl">
         <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-brand/85" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] opacity-90" />
         <div className="relative flex flex-col justify-between gap-6 p-8 text-brand-foreground sm:flex-row sm:items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-foreground/70">
@@ -143,12 +137,6 @@ export default function page() {
               {inProgressOrders} in progress and {pendingTicketsCount} {pendingTicketsCount === 1 ? 'ticket' : 'tickets'} tickets waiting for triage.
             </p>
           </div>
-          <button
-            onClick={() => router.push('/job-queue')}
-            className="flex shrink-0 items-center gap-2 rounded-lg bg-brand-foreground px-4 py-2.5 text-sm font-semibold text-brand hover:opacity-90"
-          >
-            Go to Job Queue <ChevronRight size={16} />
-          </button>
         </div>
       </div>
 
@@ -159,19 +147,9 @@ export default function page() {
             label="Pending Tickets"
             value={`${pendingTicketsCount} Pending`}
             icon={Car}
-            iconBg="bg-brand/10"
+            iconBg="bg-gradient-to-br from-brand/20 to-brand/5"
             iconColor="text-brand"
             trend={{ text: '↗ +0 today' }}
-          />
-        </Link>
-        <Link href="/job-orders" className="min-w-[220px] flex-1">
-          <StatCard
-            label="Active Job Orders"
-            value={activeJobOrders.toString()}
-            icon={Wrench}
-            iconBg="bg-amber-50"
-            iconColor="text-amber-600"
-            trend={{ text: '⏱ On Schedule' }}
           />
         </Link>
         <Link href="/mechanics" className="min-w-[220px] flex-1">
@@ -179,7 +157,7 @@ export default function page() {
             label="Technicians"
             value={techniciansCount.toString()}
             icon={Users}
-            iconBg="bg-emerald-50"
+            iconBg="bg-gradient-to-br from-emerald-100 to-emerald-50"
             iconColor="text-emerald-600"
             trend={{ text: '✓ All on duty' }}
           />
@@ -189,7 +167,7 @@ export default function page() {
             label="6-Mo Revenue"
             value={currency(totalRevenue)}
             icon={Wallet}
-            iconBg="bg-violet-50"
+            iconBg="bg-gradient-to-br from-violet-100 to-violet-50"
             iconColor="text-violet-600"
             trend={{ text: '↗ +18% YoY' }}
           />
@@ -206,7 +184,7 @@ export default function page() {
             </div>
             <button
               onClick={() => router.push('/analytics')}
-              className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand hover:bg-brand/20"
+              className="rounded-full bg-gradient-to-r from-brand/20 to-brand/5 px-3 py-1 text-xs font-semibold text-brand transition-colors hover:from-brand/30 hover:to-brand/10"
             >
               ↗ Trending Up
             </button>
@@ -291,79 +269,60 @@ export default function page() {
         </div>
       </div>
 
-      {/* Active job orders table */}
+      {/* Job Queue (Live) — bookings still waiting for approval */}
       <div className="rounded-2xl border border-border bg-card p-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-foreground">Active Job Orders</h3>
+          <div>
+            <h3 className="text-lg font-bold text-foreground">Job Queue</h3>
+            <p className="text-sm text-muted-foreground">Newest bookings waiting for approval</p>
+          </div>
           <button
             onClick={() => router.push('/job-queue')}
-            className="flex items-center gap-1 text-sm font-semibold text-brand hover:underline"
+            className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-brand-foreground shadow-sm transition-opacity hover:opacity-90"
           >
             View All Queue <ChevronRight size={14} />
           </button>
         </div>
 
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
-                <th className="py-3 font-semibold">Customer ID</th>
-                <th className="py-3 font-semibold">Customer</th>
-                <th className="py-3 font-semibold">Vehicle Details</th>
-                <th className="py-3 font-semibold">Total Cost</th>
-                <th className="py-3 font-semibold">Balance Due</th>
-                <th className="py-3 font-semibold">Status</th>
-                <th className="py-3 font-semibold"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {activeTableOrders.map((c) => {
-                const idStr = String(c.jobOrderId)
-                return (
-                  <tr key={idStr} className="border-b border-border/60 last:border-0">
-                    <td className="py-4 font-semibold text-foreground">JO-{c.jobOrderId}</td>
-                    <td className="py-4 text-foreground/90">{c.name}</td>
-                    <td className="py-4 text-muted-foreground">
-                      {c.vehicle} - {c.plate}
+        <div className="relative mt-4 overflow-hidden rounded-xl border border-border">
+          <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
+                  <th className="px-4 py-3 font-semibold">Customer</th>
+                  <th className="px-4 py-3 font-semibold">Vehicle</th>
+                  <th className="px-4 py-3 font-semibold">Service Mode</th>
+                  <th className="px-4 py-3 font-semibold">Concern</th>
+                  <th className="px-4 py-3 font-semibold">Date</th>
+                  <th className="px-4 py-3 font-semibold">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingBookings.map((b) => (
+                  <tr key={b.ticketId} className="border-b border-border/60 last:border-0">
+                    <td className="px-4 py-4 font-semibold text-foreground">{b.name}</td>
+                    <td className="px-4 py-4 text-muted-foreground">
+                      {b.vehicle} - {b.plate}
                     </td>
-                    <td className="py-4 font-semibold text-foreground">{currency(Number(c.totalCost))}</td>
-                    <td className="py-4 font-semibold text-destructive">
-                      {Number(c.balanceDue) > 0 ? currency(Number(c.balanceDue)) : currency(0)}
-                    </td>
-                    <td className="py-4">
-                      <StatusBadge status={c.status} />
-                    </td>
-                    <td className="relative py-4 text-right">
-                      <button
-                        aria-label="Row actions"
-                        onClick={() => setOpenRowMenu(openRowMenu === idStr ? null : idStr)}
-                        className="text-muted-foreground hover:text-foreground"
-                      >
-                        <MoreVertical size={16} />
-                      </button>
-
-                      {openRowMenu === idStr && (
-                        <div className="absolute right-0 top-10 z-10 w-44 rounded-lg border border-border bg-card p-1 text-left shadow-lg">
-                          <button
-                            onClick={() => handleRowAction('View Details', idStr)}
-                            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent"
-                          >
-                            <Eye size={14} /> View Details
-                          </button>
-                          <button
-                            onClick={() => handleRowAction('Edit', idStr)}
-                            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent"
-                          >
-                            <Pencil size={14} /> Edit
-                          </button>
-                        </div>
-                      )}
+                    <td className="px-4 py-4 text-muted-foreground">{b.serviceMode}</td>
+                    <td className="px-4 py-4 text-muted-foreground">{b.concern}</td>
+                    <td className="px-4 py-4 text-muted-foreground">{b.date}</td>
+                    <td className="px-4 py-4">
+                      <StatusBadge status="Pending" />
                     </td>
                   </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                ))}
+                {pendingBookings.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-6 text-center text-sm text-muted-foreground">
+                      No bookings waiting for approval right now.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

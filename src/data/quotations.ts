@@ -4,6 +4,7 @@ export const quotations: Record<string, QuotationData> = {
   i1: {
     jobOrderId: 'i1',
     sentToCustomer: false,
+    quotationApproved: false,
     notes:
       'Front brake pads worn to 2mm — immediate replacement recommended. Air filter heavily clogged. Oil change overdue by ~8,000 km based on last service record.',
     services: [
@@ -58,6 +59,7 @@ export const quotations: Record<string, QuotationData> = {
   i2: {
     jobOrderId: 'i2',
     sentToCustomer: false,
+    quotationApproved: false,
     notes: 'Front rotors show visible scoring; resurfacing requested by customer instead of full replacement.',
     services: [
       {
@@ -74,6 +76,7 @@ export const quotations: Record<string, QuotationData> = {
   i3: {
     jobOrderId: 'i3',
     sentToCustomer: true,
+    quotationApproved: false,
     notes: 'Customer requested lowest-cost OEM-equivalent part.',
     services: [
       {
@@ -90,6 +93,7 @@ export const quotations: Record<string, QuotationData> = {
   i4: {
     jobOrderId: 'i4',
     sentToCustomer: true,
+    quotationApproved: false,
     notes: 'A/C system cleaned and recharged, no further parts required.',
     services: [
       {

@@ -35,10 +35,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ jobOrder: null, services: [], history: [], customerConcern: null })
     }
 
-    const [servicesRes, ticketRes, vehicleRes] = await Promise.all([
+    const [servicesRes, ticketRes, vehicleRes, walkaroundRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_quotation_services($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_ticket_notes($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT vehicle_id FROM job_orders WHERE id = $1`, [jobOrder.job_order_id]),
+      // The mechanic's walkaround shots are the proof of the vehicle's
+      // condition on arrival — same rows the Inspecting page shows.
+      db.query(
+        `SELECT id, name AS label, notes AS note, photo, logged_date::text
+         FROM vehicle_inspections
+         WHERE job_order_id = $1 AND status = 'reference-photo' AND photo IS NOT NULL
+         ORDER BY id`,
+        [jobOrder.job_order_id],
+      ),
     ])
 
     const vehicleId = vehicleRes.rows[0]?.vehicle_id ?? null
@@ -51,6 +60,7 @@ export async function GET(request: NextRequest) {
       services: servicesRes.rows,
       history,
       customerConcern: ticketRes.rows[0]?.customer_concern ?? null,
+      walkaround: walkaroundRes.rows,
     })
   } catch (err) {
     console.error('[/api/tracking/received] error:', err)

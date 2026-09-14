@@ -12,7 +12,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       `INSERT INTO vehicle_inspections (job_order_id, name, findings_description, status, photo, logged_date) 
        VALUES ($1, $2, $3, $4, $5, NOW()) 
        RETURNING *`,
-      [jobOrderId, name || 'New finding', note || 'Describe what was found...', status || 'ok', photo || null]
+      [jobOrderId, name ?? '', note ?? '', status || 'ok', photo || null]
     )
 
     return NextResponse.json({ success: true, data: result.rows[0] })

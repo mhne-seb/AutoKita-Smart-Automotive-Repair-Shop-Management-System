@@ -41,6 +41,8 @@ interface Props {
   tab: HistoryTab
 }
 
+const GRADIENT = 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]'
+
 type PopoverKey = 'date-top' | 'date-table' | 'vehicle' | 'filter' | null
 
 const TAB_META: { key: HistoryTab; label: string; to: string; icon: typeof ClipboardList }[] = [
@@ -283,7 +285,7 @@ export function HistoryLogs({ tab }: Props) {
               setPage(1)
               setOpenPopover(null)
             }}
-            className="flex items-center gap-1 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
+            className={`flex items-center gap-1 rounded-lg ${GRADIENT} px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90`}
           >
             <Check size={12} /> Apply
           </button>
@@ -303,7 +305,7 @@ export function HistoryLogs({ tab }: Props) {
             setOpenPopover(null)
           }}
           className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-sm ${
-            vehicleFilter === 'All Vehicles' ? 'bg-slate-900 text-white font-semibold' : 'text-slate-600 hover:bg-slate-50'
+            vehicleFilter === 'All Vehicles' ? `${GRADIENT} text-white font-semibold` : 'text-slate-600 hover:bg-slate-50'
           }`}
         >
           All Vehicles
@@ -318,7 +320,7 @@ export function HistoryLogs({ tab }: Props) {
               setOpenPopover(null)
             }}
             className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-sm ${
-              vehicleFilter === v ? 'bg-slate-900 text-white font-semibold' : 'text-slate-600 hover:bg-slate-50'
+              vehicleFilter === v ? `${GRADIENT} text-white font-semibold` : 'text-slate-600 hover:bg-slate-50'
             }`}
           >
             {v}
@@ -346,7 +348,7 @@ export function HistoryLogs({ tab }: Props) {
             setOpenPopover(null)
           }}
           className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-sm ${
-            currentValue === allLabel ? 'bg-slate-900 text-white font-semibold' : 'text-slate-600 hover:bg-slate-50'
+            currentValue === allLabel ? `${GRADIENT} text-white font-semibold` : 'text-slate-600 hover:bg-slate-50'
           }`}
         >
           {allLabel}
@@ -361,7 +363,7 @@ export function HistoryLogs({ tab }: Props) {
               setOpenPopover(null)
             }}
             className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-sm ${
-              currentValue === opt ? 'bg-slate-900 text-white font-semibold' : 'text-slate-600 hover:bg-slate-50'
+              currentValue === opt ? `${GRADIENT} text-white font-semibold` : 'text-slate-600 hover:bg-slate-50'
             }`}
           >
             {opt}
@@ -406,7 +408,7 @@ export function HistoryLogs({ tab }: Props) {
         <h1 className="text-3xl font-bold text-slate-900">{PAGE_TITLES[tab]}</h1>
         <button
           onClick={handleExport}
-          className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+          className={`flex items-center gap-2 rounded-lg ${GRADIENT} px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90`}
         >
           <Download size={15} /> Export Reports
         </button>
@@ -482,7 +484,7 @@ export function HistoryLogs({ tab }: Props) {
               key={key}
               href={to}
               className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                active ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                active ? `${GRADIENT} text-white shadow-sm` : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               <Icon size={15} /> {label}
@@ -568,14 +570,16 @@ export function HistoryLogs({ tab }: Props) {
 
         <button
           onClick={handleExport}
-          className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+          className={`flex items-center gap-2 rounded-xl ${GRADIENT} px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90`}
         >
           <Download size={15} /> Export
         </button>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div className={`h-1 ${GRADIENT}`} />
+        <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           {tab === 'job-orders' && (
             <>
@@ -724,6 +728,7 @@ export function HistoryLogs({ tab }: Props) {
             </>
           )}
         </table>
+        </div>
       </div>
 
       {/* Pagination */}
@@ -768,7 +773,7 @@ export function HistoryLogs({ tab }: Props) {
                 key={n}
                 onClick={() => setPage(n)}
                 className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-semibold ${
-                  currentPage === n ? 'bg-slate-900 text-white' : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
+                  currentPage === n ? `${GRADIENT} text-white` : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
                 }`}
               >
                 {n}
@@ -780,7 +785,7 @@ export function HistoryLogs({ tab }: Props) {
             <button
               onClick={() => setPage(totalPages)}
               className={`flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm font-semibold ${
-                currentPage === totalPages ? 'bg-slate-900 text-white' : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
+                currentPage === totalPages ? `${GRADIENT} text-white` : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
               }`}
             >
               {totalPages}
@@ -805,25 +810,26 @@ export function HistoryLogs({ tab }: Props) {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-y-auto"
           >
-            <div className="flex items-start justify-between">
+            <div className={`flex items-start justify-between ${GRADIENT} px-6 py-4`}>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <p className="text-xs font-semibold uppercase tracking-wide text-white/70">
                   {tab === 'job-orders' ? 'Job Order' : tab === 'tickets' ? 'Ticket' : 'Customer'} Record
                 </p>
-                <h3 className="mt-1 text-xl font-bold text-slate-900">{String(selectedRow.name)}</h3>
-                <p className="text-sm text-slate-400">{String(selectedRow[idKey])}</p>
+                <h3 className="mt-1 text-xl font-bold text-white">{String(selectedRow.name)}</h3>
+                <p className="text-sm text-white/70">{String(selectedRow[idKey])}</p>
               </div>
               <button
                 onClick={() => setSelectedRow(null)}
-                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                className="rounded-full p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="mt-5 space-y-3 rounded-xl bg-slate-50 p-4">
+            <div className="p-6">
+            <div className="space-y-3 rounded-xl bg-slate-50 p-4">
               {Object.entries(selectedRow)
                 .filter(([key]) => key !== 'name' && key !== idKey)
                 .map(([key, value]) => (
@@ -841,6 +847,7 @@ export function HistoryLogs({ tab }: Props) {
               >
                 Close
               </button>
+            </div>
             </div>
           </div>
         </div>

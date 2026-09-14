@@ -28,6 +28,8 @@ import { getMechanics } from '@/controllers/mechanicController'
 import type { Mechanic as BaseMechanic } from '@/data/mockData'
 import { EMPLOYMENT_TYPES, DAYS, AVATAR_PALETTE, CUSTOMER_POOL, type EmploymentType } from '@/data/mechanicsSeed'
 
+const GRADIENT = 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]'
+
 type Mechanic = BaseMechanic & {
   employmentType: EmploymentType
   baseSalary: number
@@ -205,7 +207,7 @@ export default function page() {
         </div>
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90"
+          className={`flex items-center gap-2 rounded-full ${GRADIENT} px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90`}
         >
           <Plus size={15} /> Add Mechanics
         </button>
@@ -255,7 +257,9 @@ export default function page() {
           {filtered.map((m) => {
             const full = m.jobsAssigned === m.jobsCapacity
             return (
-              <div key={m.id} className="overflow-hidden rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-sm">
+              <div key={m.id} className="overflow-hidden rounded-2xl border border-border bg-card transition-shadow hover:shadow-sm">
+                <div className={`h-1 ${GRADIENT}`} />
+                <div className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <button onClick={() => setProfileTarget(m)} className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-border">
@@ -369,6 +373,7 @@ export default function page() {
                     </button>
                   </div>
                 </div>
+                </div>
               </div>
             )
           })}
@@ -449,17 +454,17 @@ function ProfileModal({ mechanic, onClose, onMarkPaid }: { mechanic: Mechanic; o
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md overflow-hidden rounded-xl bg-background shadow-2xl">
-        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+        <div className={`flex items-center justify-between ${GRADIENT} px-6 py-4`}>
           <div className="flex items-center gap-3">
             <img src={avatarUrl(mechanic)} alt={mechanic.name} className="h-10 w-10 rounded-full object-cover" />
             <div>
-              <p className="font-bold text-foreground">{mechanic.name}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="font-bold text-white">{mechanic.name}</p>
+              <p className="text-xs text-white/70">
                 {mechanic.employmentType} • {mechanic.branch}
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+          <button onClick={onClose} className="text-white/70 hover:text-white" aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -510,7 +515,7 @@ function ProfileModal({ mechanic, onClose, onMarkPaid }: { mechanic: Mechanic; o
           {mechanic.payrollStatus === 'Pending' && (
             <button
               onClick={onMarkPaid}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90"
+              className={`flex w-full items-center justify-center gap-2 rounded-lg ${GRADIENT} py-2.5 text-sm font-semibold text-white hover:opacity-90`}
             >
               <BadgeCheck size={15} /> Mark Payout as Paid
             </button>
@@ -531,12 +536,12 @@ function ServiceHistoryModal({ mechanic, onClose }: { mechanic: Mechanic; onClos
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg overflow-hidden rounded-xl bg-background shadow-2xl">
-        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+        <div className={`flex items-center justify-between ${GRADIENT} px-6 py-4`}>
           <div>
-            <p className="font-bold text-foreground">Service History — {mechanic.name}</p>
-            <p className="text-xs text-muted-foreground">Most recent jobs completed</p>
+            <p className="font-bold text-white">Service History — {mechanic.name}</p>
+            <p className="text-xs text-white/70">Most recent jobs completed</p>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+          <button onClick={onClose} className="text-white/70 hover:text-white" aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -572,12 +577,12 @@ function ScheduleModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: () 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md overflow-hidden rounded-xl bg-background shadow-2xl">
-        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+        <div className={`flex items-center justify-between ${GRADIENT} px-6 py-4`}>
           <div>
-            <p className="font-bold text-foreground">Weekly Schedule — {mechanic.name}</p>
-            <p className="text-xs text-muted-foreground">{mechanic.employmentType} shift rotation</p>
+            <p className="font-bold text-white">Weekly Schedule — {mechanic.name}</p>
+            <p className="text-xs text-white/70">{mechanic.employmentType} shift rotation</p>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+          <button onClick={onClose} className="text-white/70 hover:text-white" aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -700,14 +705,14 @@ function MechanicFormModal({
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
       <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-background shadow-2xl">
-        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+        <div className={`flex items-center justify-between ${GRADIENT} px-6 py-4`}>
           <div>
-            <p className="text-lg font-bold text-foreground">{mode === 'add' ? 'Add Mechanic' : 'Edit Mechanic'}</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-lg font-bold text-white">{mode === 'add' ? 'Add Mechanic' : 'Edit Mechanic'}</p>
+            <p className="text-sm text-white/70">
               {mode === 'add' ? 'Add a new technician to the roster.' : 'Update this technician\u2019s details.'}
             </p>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+          <button onClick={onClose} className="text-white/70 hover:text-white" aria-label="Close">
             <X size={20} />
           </button>
         </div>
@@ -853,7 +858,7 @@ function MechanicFormModal({
             <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
               Cancel
             </button>
-            <button type="submit" className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90">
+            <button type="submit" className={`flex items-center gap-2 rounded-lg ${GRADIENT} px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90`}>
               <CheckCircle2 size={15} /> {mode === 'add' ? 'Add Mechanic' : 'Save Changes'}
             </button>
           </div>
