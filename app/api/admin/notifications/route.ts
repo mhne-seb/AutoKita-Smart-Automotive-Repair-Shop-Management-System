@@ -15,21 +15,22 @@ export async function GET() {
       // that was later revised and approved shows the approval, not both.
       // Inline query — no stored function covers pre_diagnostics + audit log.
       db.query(
-        `SELECT DISTINCT ON (pd.job_order_id)
-                pd.job_order_id,
+        `SELECT DISTINCT ON (vi.job_order_id)
+                vi.job_order_id,
                 pd.customer_approval_status::text AS status,
                 sal.new_values                     AS reason,
                 sal.action_date                    AS responded_at,
                 u.first_name, u.last_name
          FROM pre_diagnostics pd
-         JOIN job_orders jo ON jo.id = pd.job_order_id
-         JOIN users u       ON u.id = jo.user_id
+         JOIN vehicle_inspections vi ON vi.id = pd.inspection_id
+         JOIN job_orders jo          ON jo.id = vi.job_order_id
+         JOIN users u                ON u.id = jo.user_id
          LEFT JOIN system_audit_logs sal
            ON sal.entity_type = 'pre_diagnostics'
           AND sal.entity_id = pd.id
           AND sal.action_performed IN ('approved', 'rejected')
          WHERE pd.customer_approval_status IN ('approved', 'disputed')
-         ORDER BY pd.job_order_id, pd.datetime_created DESC`,
+         ORDER BY vi.job_order_id, pd.datetime_created DESC`,
       ),
     ])
 

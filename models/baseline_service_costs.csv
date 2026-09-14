@@ -1,0 +1,19 @@
+service_name,category,median_labor_cost,min_labor_cost,max_labor_cost,typical_duration_hours,is_price_fixed
+"Change Oil","Maintenance",650,450,900,0.75,True
+"Brake Service","Braking",800,500,1400,1.25,True
+"Wheel Alignment","Steering & Suspension",800,800,1500,1.0,True
+"Replace Fuel Filter","Maintenance",550,350,800,0.75,True
+"Replace Valve Cover Gasket","Engine",1400,800,2200,1.75,False
+"Down Clutch / Pulldown Transmission","Transmission",3500,2500,5500,4.5,False
+"Replace Suspension Bushing","Steering & Suspension",1500,900,2800,2.5,False
+"Change ATF / Transmission Oil","Transmission",650,500,900,0.75,True
+"Replace Tie Rod / Rack End","Steering & Suspension",1000,600,1600,1.5,True
+"Rotor Disc Refacing","Braking",3000,1600,4500,2.0,True
+"Top Overhaul","Engine Overhaul",15000,9000,24000,14.0,False
+"Aircon Cleaning & Freon Charge","Climate Control",2500,1500,3800,3.0,False
+"Replace Spark Plugs","Ignition & Electrical",350,200,600,0.5,True
+"Replace Shock Absorbers","Steering & Suspension",1500,800,2200,2.0,True
+"Replace Fan Belt / Serpentine Belt","Engine",800,500,1500,1.0,True
+"Cleaning EGR & Throttle Body","Intake & Exhaust",1600,1000,2500,2.0,True
+"Replace Engine Support","Engine",1200,700,2000,1.5,False
+"Replace Brake Pads / Shoes","Braking",800,500,1200,1.0,True

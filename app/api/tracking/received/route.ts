@@ -42,10 +42,11 @@ export async function GET(request: NextRequest) {
       // The mechanic's walkaround shots are the proof of the vehicle's
       // condition on arrival — same rows the Inspecting page shows.
       db.query(
-        `SELECT id, name AS label, notes AS note, photo, logged_date::text
-         FROM vehicle_inspections
-         WHERE job_order_id = $1 AND status = 'reference-photo' AND photo IS NOT NULL
-         ORDER BY id`,
+        `SELECT p.id, p.title AS label, p.note, p.photo_url AS photo, p.logged_at::text AS logged_date
+         FROM inspection_photos p
+         JOIN vehicle_inspections vi ON vi.id = p.inspection_id
+         WHERE vi.job_order_id = $1 AND p.photo_url IS NOT NULL
+         ORDER BY p.id`,
         [jobOrder.job_order_id],
       ),
     ])

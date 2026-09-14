@@ -2,6 +2,7 @@
 Run this script in terminal before using the website for ML stuff
 """
 import os
+import json
 import warnings
 import joblib
 import numpy as np
@@ -25,21 +26,34 @@ app.add_middleware(
 # Loading
 BASE = os.path.dirname(os.path.abspath(__file__))
 EXPORTED = os.path.join(BASE, 'exported')
+SYNC_META_PATH = os.path.join(EXPORTED, 'last_sync_meta.json')
 
-time_model      = joblib.load(os.path.join(EXPORTED, 'time_model.pkl'))
-cost_model      = joblib.load(os.path.join(EXPORTED, 'cost_model.pkl'))
-churn_model     = joblib.load(os.path.join(EXPORTED, 'churn_model.pkl'))
-veh_encoder     = joblib.load(os.path.join(EXPORTED, 'veh_type_encoder.pkl'))
+time_model = None
+cost_model = None
+churn_model = None
+veh_encoder = None
+KNOWN_TYPES = set()
+service_base_prices = {}
+service_base_durations = {}
 
-# Load base-price lookup (service_id -> avg base_price) 
-_svc_bp_path = os.path.join(EXPORTED, 'service_base_prices.pkl')
-service_base_prices: dict = joblib.load(_svc_bp_path) if os.path.exists(_svc_bp_path) else {}
+def load_models():
+    """Loads or reloads all models and lookup tables from models/exported/."""
+    global time_model, cost_model, churn_model, veh_encoder, KNOWN_TYPES, service_base_prices, service_base_durations
+    time_model = joblib.load(os.path.join(EXPORTED, 'time_model.pkl'))
+    cost_model = joblib.load(os.path.join(EXPORTED, 'cost_model.pkl'))
+    churn_model = joblib.load(os.path.join(EXPORTED, 'churn_model.pkl'))
+    veh_encoder = joblib.load(os.path.join(EXPORTED, 'veh_type_encoder.pkl'))
+    KNOWN_TYPES = set(veh_encoder.classes_)
 
-_svc_bd_path = os.path.join(EXPORTED, 'service_base_durations.pkl')
-service_base_durations: dict = joblib.load(_svc_bd_path) if os.path.exists(_svc_bd_path) else {}
+    _svc_bp_path = os.path.join(EXPORTED, 'service_base_prices.pkl')
+    service_base_prices = joblib.load(_svc_bp_path) if os.path.exists(_svc_bp_path) else {}
 
-# Get encoder
-KNOWN_TYPES = set(veh_encoder.classes_)
+    _svc_bd_path = os.path.join(EXPORTED, 'service_base_durations.pkl')
+    service_base_durations = joblib.load(_svc_bd_path) if os.path.exists(_svc_bd_path) else {}
+    print(f" Loaded {len(service_base_prices)} baseline prices and {len(service_base_durations)} baseline durations.")
+
+# Initial load
+load_models()
 
 def encode_vehicle_type(vtype):
     if vtype and vtype in KNOWN_TYPES:
@@ -224,6 +238,65 @@ def predict_churn(data: Union[Dict[str, Any], List[Dict[str, Any]]] = Body(...))
 @app.get('/health')
 def health():
     return {'status': 'ok', 'models_loaded': True}
+
+
+@app.get('/api/model-status')
+def get_model_status():
+    """Returns training metadata, cursor position, and evaluation metrics."""
+    if os.path.exists(SYNC_META_PATH):
+        try:
+            with open(SYNC_META_PATH, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            return {'status': 'error', 'message': str(e)}
+    return {
+        'status': 'no_sync_meta',
+        'models_loaded': True,
+        'total_baseline_services': len(service_base_prices),
+    }
+
+
+@app.get('/api/baselines')
+def get_baselines():
+    """Returns active service baseline prices and durations."""
+    return {
+        'service_base_prices': service_base_prices,
+        'service_base_durations': service_base_durations,
+    }
+
+
+@app.post('/api/reload')
+def reload_in_memory_models():
+    """Hot-reloads models and baselines from disk without process restart."""
+    try:
+        load_models()
+        return {'status': 'reloaded', 'known_types': sorted(list(KNOWN_TYPES))}
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}
+
+
+@app.post('/api/batch-sync')
+def trigger_batch_sync(
+    min_batch_size: int = 10,
+    alpha: float = 0.15,
+    dry_run: bool = False
+):
+    """
+    Triggers batch continuous learning from Supabase database.
+    Applies outlier filtering, damped EMA updates to baselines, and retrains models.
+    """
+    try:
+        from retrain_engine import execute_batch_sync
+        execute_batch_sync(min_batch_size=min_batch_size, alpha=alpha, dry_run=dry_run)
+        if not dry_run:
+            load_models()
+        return {
+            'status': 'completed',
+            'dry_run': dry_run,
+            'message': f'Batch sync executed (min_batch={min_batch_size}, alpha={alpha}). Models reloaded.'
+        }
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}
 
 
 if __name__ == '__main__':

@@ -28,9 +28,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     )
 
     const photoResult = await db.query(
-      `SELECT id, findings_description AS slot_id, name AS label, notes as note, photo
-      FROM vehicle_inspections
-      WHERE job_order_id = $1 AND status = 'reference-photo'`,
+      `SELECT id, title, note, photo_url, logged_at
+       FROM get_inspection_photos($1)`,
       [id]
     )
 
