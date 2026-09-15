@@ -1143,7 +1143,8 @@ AS $$
         pd.datetime_created,
         pd.datetime_approved
     FROM pre_diagnostics pd
-    WHERE pd.job_order_id = p_job_order_id
+    JOIN vehicle_inspections vi ON vi.id = pd.inspection_id
+    WHERE vi.job_order_id = p_job_order_id
     ORDER BY pd.datetime_created DESC;
 $$;
 
@@ -2004,7 +2005,8 @@ SELECT jo.id, jo.quotation_notes, jo.actual_grand_total::text, jo.balance::text,
 pd.customer_approval_status::text, pd.mechanic_notes,
 pd.datetime_created::text, pd.datetime_approved::text
 FROM job_orders jo
-LEFT JOIN pre_diagnostics pd ON pd.job_order_id = jo.id
+LEFT JOIN vehicle_inspections vi ON vi.job_order_id = jo.id
+LEFT JOIN pre_diagnostics pd ON pd.inspection_id = vi.id
 WHERE jo.id = p_job_order_id
 ORDER BY pd.datetime_created DESC
 LIMIT 1;
