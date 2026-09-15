@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Download, Pencil, Info, Lock, Search, Check, X, Eye, Phone, Wallet, Wrench, CreditCard, Users } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
-import { getMechanics } from '@/controllers/mechanicController'
+// Still on mock mechanics — this page isn't wired to the DB yet (see
+// mechanicController.ts for the real roster once payroll gets connected).
+import { mechanics as mockMechanics } from '@/data/mockData'
 import { getPaymentRecords, getWeeklyServices } from '@/controllers/billingController'
 import type { Mechanic, PaymentRecord, WeeklyService } from '@/data/mockData'
 import { currency } from '@/data/mockData'
@@ -227,7 +229,7 @@ export default function page() {
 
   useEffect(() => {
     let active = true
-    getMechanics().then((data) => active && setMechanics(data.map((m) => ({ ...m }))))
+    Promise.resolve(mockMechanics).then((data) => active && setMechanics(data.map((m) => ({ ...m }))))
     getPaymentRecords().then((data) => active && setPaymentRecords(data))
     getWeeklyServices().then((data) => active && setWeeklyServices(data))
     return () => {

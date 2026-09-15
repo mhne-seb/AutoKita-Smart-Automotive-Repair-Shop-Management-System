@@ -9,6 +9,8 @@ import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
 import { getQuotationById } from '@/controllers/quotationController'
 import { getServiceProgressById, scheduleTask, setPartStatus } from '@/controllers/serviceProgressController'
+import { mechanicIsFull } from '@/data/mechanicPolicy'
+import { toast } from 'sonner'
 import { currency } from '@/data/mockData'
 import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, partIsReady } from '@/data/types'
 
@@ -155,7 +157,8 @@ export default function page() {
   // tap is what stamps it — nothing here needs to change.
   async function setTaskStatus(task: ServiceTask, next: TaskStatus) {
     setBusyTaskId(task.id)
-    await scheduleTask(jobOrderId, task.id, task.scheduledDate ?? null, next, task.mechanicId, task.note)
+    const result = await scheduleTask(jobOrderId, task.id, task.scheduledDate ?? null, next, task.mechanicId, task.note)
+    if (!result.ok) toast.error(result.message ?? 'Could not update the task.')
     const data = await getServiceProgressById(jobOrderId)
     if (data) {
       setSections(data.sections)
@@ -530,8 +533,12 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
     setSaving(true)
     const datetime = `${date}T${time}:00`
     // Status isn't set here — Start/Finish live on the task card.
-    await scheduleTask(jobOrderId, task.id, datetime, task.status, mechanicId === '' ? undefined : mechanicId, note)
+    const result = await scheduleTask(jobOrderId, task.id, datetime, task.status, mechanicId === '' ? undefined : mechanicId, note)
     setSaving(false)
+    if (!result.ok) {
+      toast.error(result.message ?? 'Could not save the schedule.')
+      return
+    }
     onSaved()
   }
 
@@ -585,10 +592,32 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
               className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
             >
               <option value="">-- Unassigned --</option>
-              {scheduleData.mechanics.map(m => (
-                <option key={m.id} value={m.id}>{m.full_name}</option>
-              ))}
+              {scheduleData.mechanics.map((m) => {
+                const open = Number(m.open_tasks ?? 0)
+                const cap = Number(m.capacity)
+                // A full mechanic can't take a NEW task, but stays selectable
+                // for a task that's already theirs (re-saving the schedule).
+                const full = mechanicIsFull(open, cap) && task.mechanicId !== m.id
+                return (
+                  <option key={m.id} value={m.id} disabled={full}>
+                    {m.full_name} ({open}/{cap}{full ? ' — full' : ''})
+                  </option>
+                )
+              })}
             </select>
+            {(() => {
+              const m = scheduleData.mechanics.find((x) => x.id === mechanicId)
+              if (!m) return null
+              const open = Number(m.open_tasks ?? 0)
+              const cap = Number(m.capacity)
+              const wouldAdd = task.mechanicId !== m.id
+              return (
+                <p className={`mt-1.5 text-xs ${mechanicIsFull(open, cap) && wouldAdd ? 'text-rose-600' : 'text-slate-500'}`}>
+                  {open} of {cap} open tasks{wouldAdd ? ` — this would make ${open + 1}` : ' (including this one)'}.
+                  {mechanicIsFull(open, cap) && wouldAdd && ' At the limit — finish one of theirs first or pick someone else.'}
+                </p>
+              )
+            })()}
           </div>
 
           {/* Overlap / Daily Schedule View */}
@@ -641,7 +670,14 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
         
         <div className="mt-6 flex gap-3">
           <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
-          <button onClick={handleSave} disabled={saving} className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-70 flex items-center justify-center gap-2">
+          <button
+            onClick={handleSave}
+            disabled={saving || (() => {
+              const m = scheduleData.mechanics.find((x) => x.id === mechanicId)
+              return Boolean(m && task.mechanicId !== m.id && mechanicIsFull(Number(m.open_tasks ?? 0), Number(m.capacity)))
+            })()}
+            className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-2"
+          >
             {saving ? 'Saving...' : <><CalendarDays size={16}/> Save Schedule</>}
           </button>
         </div>

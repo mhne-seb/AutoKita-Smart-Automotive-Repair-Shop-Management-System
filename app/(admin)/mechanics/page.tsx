@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Search,
   Plus,
@@ -15,106 +15,58 @@ import {
   Wallet,
   Percent,
   CalendarClock,
-  CalendarDays,
   CheckCircle2,
-  BadgeCheck,
   MoreVertical,
   Pencil,
   Trash2,
-  ImagePlus,
+  Loader2,
+  UserMinus,
+  UserCheck,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { StatusBadge } from '@/components/StatusBadge'
-import { getMechanics } from '@/controllers/mechanicController'
-import type { Mechanic as BaseMechanic } from '@/data/mockData'
-import { EMPLOYMENT_TYPES, DAYS, AVATAR_PALETTE, CUSTOMER_POOL, type EmploymentType } from '@/data/mechanicsSeed'
+import {
+  getMechanics,
+  addMechanic,
+  updateMechanic,
+  removeMechanic,
+  getMechanicHistory,
+  type Mechanic,
+  type MechanicInput,
+  type MechanicHistoryRow,
+} from '@/controllers/mechanicController'
+import { DEFAULT_MECHANIC_CAPACITY } from '@/data/mechanicPolicy'
 
 const GRADIENT = 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]'
-
-type Mechanic = BaseMechanic & {
-  employmentType: EmploymentType
-  baseSalary: number
-  commissionRate: number
-  commissionEarned: number
-  payrollStatus: 'Paid' | 'Pending'
-  lastPayout: string
-  schedule: { day: string; shift: string }[]
-  photoUrl?: string
-}
-
-function seedSchedule(index: number) {
-  const dayOff = (index * 2) % 7
-  const morningShift = index % 2 === 0
-  return DAYS.map((day, i) => ({
-    day,
-    shift: i === dayOff ? 'Day Off' : morningShift ? '8:00 AM – 5:00 PM' : '1:00 PM – 10:00 PM',
-  }))
-}
-
-function seedPayroll(m: BaseMechanic, index: number): Mechanic {
-  const employmentType = EMPLOYMENT_TYPES[index % EMPLOYMENT_TYPES.length]
-  const baseSalary = employmentType === 'Full-Time' ? 18000 : employmentType === 'Part-Time' ? 11000 : 9000
-  const commissionRate = 5 + (index % 4) * 2
-  const commissionEarned = m.jobsAssigned * 850 + index * 120
-  return {
-    ...m,
-    employmentType,
-    baseSalary,
-    commissionRate,
-    commissionEarned,
-    payrollStatus: index % 3 === 0 ? 'Pending' : 'Paid',
-    lastPayout: index % 3 === 0 ? '—' : 'Jun 30, 2026',
-    schedule: seedSchedule(index),
-  }
-}
+const STATUS_OPTIONS = ['All Statuses', 'Available', 'Busy', 'On Leave']
 
 const currency = (v: number) => `₱${v.toLocaleString()}`
 
-// Fallback photo when no real one is uploaded — swap for a real photo field
-function avatarUrl(m: Mechanic) {
-  if (m.photoUrl) return m.photoUrl
-  const hash = m.name.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
-  const bg = AVATAR_PALETTE[hash % AVATAR_PALETTE.length]
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=${bg}&color=fff&size=300&bold=true&font-size=0.38`
-}
-const SERVICE_HISTORY_POOL = [
-  { service: 'Oil Change', vehicle: 'Toyota Vios 2021' },
-  { service: 'Brake Service', vehicle: 'Honda Civic 2019' },
-  { service: 'Engine Diagnostic', vehicle: 'Ford Ranger 2020' },
-  { service: 'Tire Replacement', vehicle: 'Mitsubishi Montero 2022' },
-  { service: 'Aircon Repair', vehicle: 'Nissan Terra 2021' },
-]
+const fmtDate = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
 
-function historyFor(m: Mechanic) {
-  return Array.from({ length: 4 }).map((_, i) => {
-    const entry = SERVICE_HISTORY_POOL[(m.id.length + i) % SERVICE_HISTORY_POOL.length]
-    const customer = CUSTOMER_POOL[(m.id.length + i * 3) % CUSTOMER_POOL.length]
-    return {
-      id: `${m.id}-h${i}`,
-      ...entry,
-      customer,
-      date: `Jun ${28 - i * 5}, 2026`,
-      cost: 1800 + i * 650,
-    }
-  })
+// No photo column in employees — initials avatar, colour picked from the name.
+const AVATAR_PALETTE = ['1e3a5f', '0f766e', 'b45309', '7c3aed', 'be123c', '15803d']
+function avatarUrl(name: string) {
+  const hash = name.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
+  const bg = AVATAR_PALETTE[hash % AVATAR_PALETTE.length]
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bg}&color=fff&size=300&bold=true&font-size=0.38`
 }
 
 export default function page() {
-  // Base mechanic records come through the controller (mock API); the
-  // payroll/schedule fields are layered on top locally (see seedPayroll above).
   const [mechanicsList, setMechanicsList] = useState<Mechanic[]>([])
+  const [loading, setLoading] = useState(true)
 
+  async function refresh() {
+    const data = await getMechanics()
+    setMechanicsList(data)
+    setLoading(false)
+  }
   useEffect(() => {
-    let active = true
-    getMechanics().then((data) => {
-      if (active) setMechanicsList(data.map(seedPayroll))
-    })
-    return () => {
-      active = false
-    }
+    void refresh()
   }, [])
 
   const [search, setSearch] = useState('')
-  const [typeFilter, setTypeFilter] = useState('All Types')
   const [statusFilter, setStatusFilter] = useState('All Statuses')
 
   const [showAdd, setShowAdd] = useState(false)
@@ -122,80 +74,68 @@ export default function page() {
   const [deleteTarget, setDeleteTarget] = useState<Mechanic | null>(null)
   const [historyTarget, setHistoryTarget] = useState<Mechanic | null>(null)
   const [profileTarget, setProfileTarget] = useState<Mechanic | null>(null)
-  const [scheduleTarget, setScheduleTarget] = useState<Mechanic | null>(null)
-  const [openCardMenu, setOpenCardMenu] = useState<string | null>(null)
-
-  const statuses = useMemo(() => Array.from(new Set(mechanicsList.map((m) => m.status))), [mechanicsList])
+  const [openCardMenu, setOpenCardMenu] = useState<number | null>(null)
+  const [busy, setBusy] = useState(false)
 
   const filtered = mechanicsList.filter((m) => {
     const q = search.trim().toLowerCase()
     const matchesSearch =
       !q || m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q) || m.branch.toLowerCase().includes(q)
-    const matchesType = typeFilter === 'All Types' || m.employmentType === typeFilter
     const matchesStatus = statusFilter === 'All Statuses' || m.status === statusFilter
-    return matchesSearch && matchesType && matchesStatus
+    return matchesSearch && matchesStatus
   })
 
-  const markPaid = (id: string) => {
-    setMechanicsList((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, payrollStatus: 'Paid', lastPayout: 'Jul 5, 2026' } : m)),
-    )
-    setProfileTarget((prev) => (prev && prev.id === id ? { ...prev, payrollStatus: 'Paid', lastPayout: 'Jul 5, 2026' } : prev))
-  }
+  const toInput = (m: Mechanic): MechanicInput => ({
+    name: m.name,
+    email: m.email,
+    phone: m.phone,
+    branch: m.branch,
+    location: m.location,
+    rank: m.rank,
+    baseSalary: m.baseSalary,
+    commissionPercent: m.commissionPercent,
+    jobsCapacity: m.jobsCapacity,
+  })
 
-  const addMechanic = (data: MechanicFormData) => {
-    const id = `mech-${Date.now().toString().slice(-6)}`
-    const newMechanic: Mechanic = {
-      id,
-      name: data.name,
-      branch: data.branch,
-      color: ['bg-brand', 'bg-emerald-500', 'bg-rose-500', 'bg-violet-500'][mechanicsList.length % 4],
-      status: 'Available',
-      email: data.email,
-      phone: data.phone,
-      location: data.location,
-      jobsAssigned: 0,
-      jobsCapacity: Number(data.jobsCapacity),
-      employmentType: data.employmentType,
-      baseSalary: Number(data.baseSalary),
-      commissionRate: Number(data.commissionRate),
-      commissionEarned: 0,
-      payrollStatus: 'Pending',
-      lastPayout: '—',
-      schedule: data.schedule,
-      photoUrl: data.photoUrl || undefined,
-    } as unknown as Mechanic
-    setMechanicsList((prev) => [newMechanic, ...prev])
+  const handleAdd = async (data: MechanicInput) => {
+    setBusy(true)
+    const r = await addMechanic(data)
+    setBusy(false)
+    if (!r.ok) return toast.error(r.message)
+    toast.success(`${data.name} added to the roster.`)
     setShowAdd(false)
+    void refresh()
   }
 
-  const saveEdit = (id: string, data: MechanicFormData) => {
-    setMechanicsList((prev) =>
-      prev.map((m) =>
-        m.id === id
-          ? {
-              ...m,
-              name: data.name,
-              branch: data.branch,
-              email: data.email,
-              phone: data.phone,
-              location: data.location,
-              employmentType: data.employmentType,
-              baseSalary: Number(data.baseSalary),
-              commissionRate: Number(data.commissionRate),
-              jobsCapacity: Number(data.jobsCapacity),
-              schedule: data.schedule,
-              photoUrl: data.photoUrl || undefined,
-            }
-          : m,
-      ),
-    )
+  const handleEdit = async (id: number, data: MechanicInput) => {
+    setBusy(true)
+    const r = await updateMechanic(id, data)
+    setBusy(false)
+    if (!r.ok) return toast.error(r.message)
+    toast.success('Mechanic updated.')
     setEditTarget(null)
+    void refresh()
   }
 
-  const deleteMechanic = (id: string) => {
-    setMechanicsList((prev) => prev.filter((m) => m.id !== id))
+  // On-leave mechanics disappear from the assignment dropdown (the paper's
+  // "not on leave" check) but keep their tasks and history.
+  const toggleLeave = async (m: Mechanic) => {
+    setOpenCardMenu(null)
+    const next = m.employeeStatus === 'on_leave' ? 'active' : 'on_leave'
+    const r = await updateMechanic(m.id, { ...toInput(m), status: next })
+    if (!r.ok) return toast.error(r.message)
+    toast.success(next === 'on_leave' ? `${m.name} marked on leave.` : `${m.name} is back on the floor.`)
+    void refresh()
+  }
+
+  const handleDelete = async (m: Mechanic) => {
+    setBusy(true)
+    const r = await removeMechanic(m.id)
+    setBusy(false)
+    if (!r.ok) return toast.error(r.message)
+    toast.success(`${m.name} removed from the roster.`)
     setDeleteTarget(null)
+    void refresh()
   }
 
   return (
@@ -207,9 +147,9 @@ export default function page() {
         </div>
         <button
           onClick={() => setShowAdd(true)}
-          className={`flex items-center gap-2 rounded-full ${GRADIENT} px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90`}
+          className={`flex items-center gap-2 rounded-full ${GRADIENT} px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:opacity-90 active:scale-95`}
         >
-          <Plus size={15} /> Add Mechanics
+          <Plus size={15} /> Add Mechanic
         </button>
       </div>
 
@@ -219,27 +159,16 @@ export default function page() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search contacts..."
+            placeholder="Search by name, email, or branch..."
             className="w-full rounded-full border border-border bg-card py-2.5 pl-9 pr-4 text-sm placeholder:text-muted-foreground focus:border-brand focus:outline-none"
           />
         </div>
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="rounded-full border border-border bg-card px-4 py-2.5 text-sm text-foreground"
-        >
-          <option>All Types</option>
-          {EMPLOYMENT_TYPES.map((t) => (
-            <option key={t}>{t}</option>
-          ))}
-        </select>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="rounded-full border border-border bg-card px-4 py-2.5 text-sm text-foreground"
         >
-          <option>All Statuses</option>
-          {statuses.map((s) => (
+          {STATUS_OPTIONS.map((s) => (
             <option key={s}>{s}</option>
           ))}
         </select>
@@ -248,68 +177,79 @@ export default function page() {
         </span>
       </div>
 
-      {filtered.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center rounded-2xl border border-border bg-card p-12 text-sm text-muted-foreground">
+          <Loader2 size={16} className="mr-2 animate-spin" /> Loading mechanics...
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center text-sm text-muted-foreground">
-          No mechanics match your search or filters.
+          {mechanicsList.length === 0 ? 'No mechanics on the roster yet. Add one to get started.' : 'No mechanics match your search or filters.'}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((m) => {
-            const full = m.jobsAssigned === m.jobsCapacity
+            const full = m.openTasks >= m.jobsCapacity
+            const onLeave = m.employeeStatus === 'on_leave'
             return (
-              <div key={m.id} className="overflow-hidden rounded-2xl border border-border bg-card transition-shadow hover:shadow-sm">
+              <div key={m.id} className={`overflow-hidden rounded-2xl border border-border bg-card transition-shadow hover:shadow-sm ${onLeave ? 'opacity-75' : ''}`}>
                 <div className={`h-1 ${GRADIENT}`} />
                 <div className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <button onClick={() => setProfileTarget(m)} className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-border">
-                      <img src={avatarUrl(m)} alt={m.name} className="h-full w-full object-cover" />
-                    </button>
-                    <div>
-                      <p className="font-bold text-foreground">{m.name}</p>
-                      <p className="text-xs text-muted-foreground">{m.employmentType}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <StatusBadge status={m.status} />
-                    <div className="relative">
-                      <button
-                        onClick={() => setOpenCardMenu(openCardMenu === m.id ? null : m.id)}
-                        className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
-                        aria-label="Mechanic options"
-                      >
-                        <MoreVertical size={16} />
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => setProfileTarget(m)} className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-border">
+                        <img src={avatarUrl(m.name)} alt={m.name} className="h-full w-full object-cover" />
                       </button>
-                      {openCardMenu === m.id && (
-                        <div className="absolute right-0 top-9 z-10 w-36 rounded-lg border border-border bg-card p-1 text-left shadow-lg">
-                          <button
-                            onClick={() => {
-                              setOpenCardMenu(null)
-                              setEditTarget(m)
-                            }}
-                            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent"
-                          >
-                            <Pencil size={14} /> Edit
-                          </button>
-                          <button
-                            onClick={() => {
-                              setOpenCardMenu(null)
-                              setDeleteTarget(m)
-                            }}
-                            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 size={14} /> Delete
-                          </button>
-                        </div>
-                      )}
+                      <div>
+                        <p className="font-bold text-foreground">{m.name}</p>
+                        <p className="text-xs text-muted-foreground">{m.rank || 'Mechanic'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <StatusBadge status={m.status} />
+                      <div className="relative">
+                        <button
+                          onClick={() => setOpenCardMenu(openCardMenu === m.id ? null : m.id)}
+                          className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                          aria-label="Mechanic options"
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+                        {openCardMenu === m.id && (
+                          <div className="absolute right-0 top-9 z-10 w-44 rounded-lg border border-border bg-card p-1 text-left shadow-lg">
+                            <button
+                              onClick={() => {
+                                setOpenCardMenu(null)
+                                setEditTarget(m)
+                              }}
+                              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent"
+                            >
+                              <Pencil size={14} /> Edit
+                            </button>
+                            <button
+                              onClick={() => toggleLeave(m)}
+                              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent"
+                            >
+                              {onLeave ? <UserCheck size={14} /> : <UserMinus size={14} />}
+                              {onLeave ? 'Mark Available' : 'Mark On Leave'}
+                            </button>
+                            <button
+                              onClick={() => {
+                                setOpenCardMenu(null)
+                                setDeleteTarget(m)
+                              }}
+                              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 size={14} /> Remove
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div>
                   <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-                    <Building2 size={14} /> {m.branch}
+                    <Building2 size={14} /> {m.branch || 'No branch set'}
                   </p>
 
                   <div className="my-4 h-px bg-border" />
@@ -322,15 +262,15 @@ export default function page() {
                       <Phone size={14} /> {m.phone}
                     </p>
                     <p className="flex items-center gap-2">
-                      <MapPin size={14} /> {m.location}
+                      <MapPin size={14} /> {m.location || 'No location set'}
                     </p>
                   </div>
 
                   <div className="mt-4">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Workload Capacity</span>
+                      <span className="text-muted-foreground">Open Tasks</span>
                       <span className={`font-semibold ${full ? 'text-destructive' : 'text-foreground'}`}>
-                        {m.jobsAssigned}/{m.jobsCapacity} Jobs
+                        {m.openTasks}/{m.jobsCapacity}
                       </span>
                     </div>
                     <div className="mt-2 flex gap-1">
@@ -338,14 +278,14 @@ export default function page() {
                         <span
                           key={i}
                           className={`h-1.5 flex-1 rounded-full ${
-                            i < m.jobsAssigned ? (full ? 'bg-destructive' : 'bg-emerald-500') : 'bg-accent'
+                            i < m.openTasks ? (full ? 'bg-destructive' : 'bg-emerald-500') : 'bg-accent'
                           }`}
                         />
                       ))}
                     </div>
                     {full && (
                       <p className="mt-1.5 flex items-center gap-1 text-xs text-destructive">
-                        <AlertCircle size={12} /> Fully booked
+                        <AlertCircle size={12} /> At capacity — can't take new tasks
                       </p>
                     )}
                   </div>
@@ -357,13 +297,7 @@ export default function page() {
                       onClick={() => setHistoryTarget(m)}
                       className="flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline"
                     >
-                      <Clock3 size={14} /> Service History
-                    </button>
-                    <button
-                      onClick={() => setScheduleTarget(m)}
-                      className="flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline"
-                    >
-                      <CalendarDays size={14} /> Schedule
+                      <Clock3 size={14} /> Task History
                     </button>
                     <button
                       onClick={() => setProfileTarget(m)}
@@ -373,32 +307,20 @@ export default function page() {
                     </button>
                   </div>
                 </div>
-                </div>
               </div>
             )
           })}
         </div>
       )}
 
-      {showAdd && <MechanicFormModal mode="add" onClose={() => setShowAdd(false)} onSubmit={addMechanic} />}
+      {showAdd && <MechanicFormModal mode="add" busy={busy} onClose={() => setShowAdd(false)} onSubmit={handleAdd} />}
       {editTarget && (
         <MechanicFormModal
           mode="edit"
-          initial={{
-            name: editTarget.name,
-            branch: editTarget.branch,
-            email: editTarget.email,
-            phone: editTarget.phone,
-            location: editTarget.location,
-            employmentType: editTarget.employmentType,
-            baseSalary: String(editTarget.baseSalary),
-            commissionRate: String(editTarget.commissionRate),
-            jobsCapacity: String(editTarget.jobsCapacity),
-            photoUrl: editTarget.photoUrl ?? '',
-            schedule: editTarget.schedule,
-          }}
+          busy={busy}
+          initial={toInput(editTarget)}
           onClose={() => setEditTarget(null)}
-          onSubmit={(data) => saveEdit(editTarget.id, data)}
+          onSubmit={(data) => handleEdit(editTarget.id, data)}
         />
       )}
 
@@ -415,8 +337,13 @@ export default function page() {
             </div>
             <h3 className="mt-4 text-lg font-bold text-foreground">Remove {deleteTarget.name}?</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              This will permanently remove this mechanic from the roster. This action cannot be undone.
+              They'll be taken off the roster and can no longer be assigned. Their finished work and payroll records are kept.
             </p>
+            {deleteTarget.openTasks > 0 && (
+              <p className="mt-2 flex items-center gap-1 text-xs text-destructive">
+                <AlertCircle size={12} /> Still has {deleteTarget.openTasks} open task(s) — reassign them first.
+              </p>
+            )}
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
@@ -425,42 +352,40 @@ export default function page() {
                 Cancel
               </button>
               <button
-                onClick={() => deleteMechanic(deleteTarget.id)}
-                className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+                onClick={() => handleDelete(deleteTarget)}
+                disabled={busy || deleteTarget.openTasks > 0}
+                className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Delete
+                {busy ? 'Removing...' : 'Remove'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {historyTarget && <ServiceHistoryModal mechanic={historyTarget} onClose={() => setHistoryTarget(null)} />}
-      {scheduleTarget && <ScheduleModal mechanic={scheduleTarget} onClose={() => setScheduleTarget(null)} />}
-      {profileTarget && (
-        <ProfileModal mechanic={profileTarget} onClose={() => setProfileTarget(null)} onMarkPaid={() => markPaid(profileTarget.id)} />
-      )}
+      {historyTarget && <TaskHistoryModal mechanic={historyTarget} onClose={() => setHistoryTarget(null)} />}
+      {profileTarget && <ProfileModal mechanic={profileTarget} onClose={() => setProfileTarget(null)} />}
     </div>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Profile modal — contact + payroll/commission summary.
+// Profile modal — pay setup + this month's commission + last payroll run.
+// Read-only: payroll runs are generated from the Sales & Payroll page.
 // ---------------------------------------------------------------------------
 
-function ProfileModal({ mechanic, onClose, onMarkPaid }: { mechanic: Mechanic; onClose: () => void; onMarkPaid: () => void }) {
-  const total = mechanic.baseSalary + mechanic.commissionEarned
-
+function ProfileModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: () => void }) {
+  const lp = mechanic.lastPayroll
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md overflow-hidden rounded-xl bg-background shadow-2xl">
         <div className={`flex items-center justify-between ${GRADIENT} px-6 py-4`}>
           <div className="flex items-center gap-3">
-            <img src={avatarUrl(mechanic)} alt={mechanic.name} className="h-10 w-10 rounded-full object-cover" />
+            <img src={avatarUrl(mechanic.name)} alt={mechanic.name} className="h-10 w-10 rounded-full object-cover" />
             <div>
               <p className="font-bold text-white">{mechanic.name}</p>
               <p className="text-xs text-white/70">
-                {mechanic.employmentType} • {mechanic.branch}
+                {mechanic.rank || 'Mechanic'} • Hired {fmtDate(mechanic.hireDate)}
               </p>
             </div>
           </div>
@@ -471,7 +396,7 @@ function ProfileModal({ mechanic, onClose, onMarkPaid }: { mechanic: Mechanic; o
 
         <div className="space-y-5 px-6 py-5">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Payroll & Commission</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Pay Setup</p>
             <div className="mt-2 grid grid-cols-2 gap-3">
               <div className="rounded-lg bg-accent/60 p-3">
                 <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -483,43 +408,45 @@ function ProfileModal({ mechanic, onClose, onMarkPaid }: { mechanic: Mechanic; o
                 <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Percent size={12} /> Commission Rate
                 </p>
-                <p className="mt-1 text-lg font-bold text-foreground">{mechanic.commissionRate}%</p>
+                <p className="mt-1 text-lg font-bold text-foreground">{mechanic.commissionPercent}%</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">This Month</p>
+            <div className="mt-2 grid grid-cols-2 gap-3">
+              <div className="rounded-lg bg-accent/60 p-3">
+                <p className="text-xs text-muted-foreground">Tasks Finished</p>
+                <p className="mt-1 text-lg font-bold text-foreground">{mechanic.completedThisMonth}</p>
               </div>
               <div className="rounded-lg bg-accent/60 p-3">
                 <p className="text-xs text-muted-foreground">Commission Earned</p>
-                <p className="mt-1 text-lg font-bold text-foreground">{currency(mechanic.commissionEarned)}</p>
-              </div>
-              <div className="rounded-lg bg-accent/60 p-3">
-                <p className="text-xs text-muted-foreground">Total This Period</p>
-                <p className="mt-1 text-lg font-bold text-brand">{currency(total)}</p>
+                <p className="mt-1 text-lg font-bold text-brand">{currency(mechanic.commissionThisMonth)}</p>
               </div>
             </div>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">Commission = total of finished task prices × rate.</p>
           </div>
 
           <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
             <div>
               <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                <CalendarClock size={14} /> Last Payout
+                <CalendarClock size={14} /> Last Payroll Run
               </p>
-              <p className="text-xs text-muted-foreground">{mechanic.lastPayout}</p>
+              <p className="text-xs text-muted-foreground">
+                {lp ? `${fmtDate(lp.periodStart)} – ${fmtDate(lp.periodEnd)} • ${currency(lp.netPay)}` : 'No payroll generated yet'}
+              </p>
             </div>
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                mechanic.payrollStatus === 'Paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-700'
-              }`}
-            >
-              {mechanic.payrollStatus}
-            </span>
+            {lp && (
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${
+                  lp.status === 'paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-700'
+                }`}
+              >
+                {lp.status}
+              </span>
+            )}
           </div>
-
-          {mechanic.payrollStatus === 'Pending' && (
-            <button
-              onClick={onMarkPaid}
-              className={`flex w-full items-center justify-center gap-2 rounded-lg ${GRADIENT} py-2.5 text-sm font-semibold text-white hover:opacity-90`}
-            >
-              <BadgeCheck size={15} /> Mark Payout as Paid
-            </button>
-          )}
         </div>
       </div>
     </div>
@@ -527,19 +454,24 @@ function ProfileModal({ mechanic, onClose, onMarkPaid }: { mechanic: Mechanic; o
 }
 
 // ---------------------------------------------------------------------------
-// Service history modal
+// Task history modal — what this mechanic has actually worked on.
 // ---------------------------------------------------------------------------
 
-function ServiceHistoryModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: () => void }) {
-  const history = historyFor(mechanic)
+function TaskHistoryModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: () => void }) {
+  const [rows, setRows] = useState<MechanicHistoryRow[] | null>(null)
+  useEffect(() => {
+    getMechanicHistory(mechanic.id).then(setRows)
+  }, [mechanic.id])
+
+  const statusLabel = (s: string) => (s === 'completed' ? 'Finished' : s === 'in_progress' ? 'Started' : 'Not Yet')
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg overflow-hidden rounded-xl bg-background shadow-2xl">
         <div className={`flex items-center justify-between ${GRADIENT} px-6 py-4`}>
           <div>
-            <p className="font-bold text-white">Service History — {mechanic.name}</p>
-            <p className="text-xs text-white/70">Most recent jobs completed</p>
+            <p className="font-bold text-white">Task History — {mechanic.name}</p>
+            <p className="text-xs text-white/70">Most recent tasks assigned to this mechanic</p>
           </div>
           <button onClick={onClose} className="text-white/70 hover:text-white" aria-label="Close">
             <X size={18} />
@@ -547,61 +479,31 @@ function ServiceHistoryModal({ mechanic, onClose }: { mechanic: Mechanic; onClos
         </div>
 
         <div className="max-h-80 overflow-y-auto px-6 py-4">
-          <ul className="space-y-3">
-            {history.map((h) => (
-              <li key={h.id} className="flex items-center justify-between rounded-lg border border-border px-4 py-3 text-sm">
-                <div>
-                  <p className="font-semibold text-foreground">{h.service}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {h.vehicle} • {h.date}
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Customer: {h.customer}</p>
-                </div>
-                <p className="font-semibold text-foreground">{currency(h.cost)}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Weekly schedule modal
-// ---------------------------------------------------------------------------
-
-function ScheduleModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: () => void }) {
-  const today = DAYS[(new Date().getDay() + 6) % 7] // JS Sunday=0 → align to Monday-first DAYS array
-
-  return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md overflow-hidden rounded-xl bg-background shadow-2xl">
-        <div className={`flex items-center justify-between ${GRADIENT} px-6 py-4`}>
-          <div>
-            <p className="font-bold text-white">Weekly Schedule — {mechanic.name}</p>
-            <p className="text-xs text-white/70">{mechanic.employmentType} shift rotation</p>
-          </div>
-          <button onClick={onClose} className="text-white/70 hover:text-white" aria-label="Close">
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="px-6 py-4">
-          <ul className="divide-y divide-border">
-            {mechanic.schedule.map((s) => (
-              <li
-                key={s.day}
-                className={`flex items-center justify-between py-3 text-sm ${s.day === today ? 'font-semibold text-brand' : 'text-foreground'}`}
-              >
-                <span className="flex items-center gap-2">
-                  {s.day === today && <span className="h-1.5 w-1.5 rounded-full bg-brand" />}
-                  {s.day}
-                </span>
-                <span className={s.shift === 'Day Off' ? 'text-muted-foreground' : ''}>{s.shift}</span>
-              </li>
-            ))}
-          </ul>
+          {rows === null ? (
+            <p className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+              <Loader2 size={14} className="animate-spin" /> Loading...
+            </p>
+          ) : rows.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">No tasks assigned yet.</p>
+          ) : (
+            <ul className="space-y-3">
+              {rows.map((h) => (
+                <li key={h.id} className="flex items-center justify-between rounded-lg border border-border px-4 py-3 text-sm">
+                  <div>
+                    <p className="font-semibold text-foreground">{h.taskTitle}</p>
+                    <p className="text-xs text-muted-foreground">
+                      JO-{h.jobOrderId} • {h.vehicle || 'Vehicle'} {h.plate && `(${h.plate})`} • {fmtDate(h.when)}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">Customer: {h.customer}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-foreground">{currency(h.price)}</p>
+                    <p className={`text-xs ${h.taskStatus === 'completed' ? 'text-emerald-600' : 'text-muted-foreground'}`}>{statusLabel(h.taskStatus)}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>
@@ -612,34 +514,40 @@ function ScheduleModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: () 
 // Add / Edit mechanic modal (shared form)
 // ---------------------------------------------------------------------------
 
-type MechanicFormData = {
+type FormState = {
   name: string
-  branch: string
   email: string
   phone: string
+  branch: string
   location: string
-  employmentType: EmploymentType
+  rank: string
   baseSalary: string
-  commissionRate: string
+  commissionPercent: string
   jobsCapacity: string
-  photoUrl: string
-  schedule: { day: string; shift: string }[]
 }
 
-const defaultSchedule = () => DAYS.map((day) => ({ day, shift: day === 'Sunday' ? 'Day Off' : '8:00 AM – 5:00 PM' }))
-
-const emptyMechanic = (): MechanicFormData => ({
+const emptyForm = (): FormState => ({
   name: '',
-  branch: 'AutoKita Main Branch',
   email: '',
   phone: '',
+  branch: 'AutoKita Main Branch',
   location: '',
-  employmentType: 'Full-Time',
+  rank: 'Mechanic',
   baseSalary: '',
-  commissionRate: '',
-  jobsCapacity: '5',
-  photoUrl: '',
-  schedule: defaultSchedule(),
+  commissionPercent: '',
+  jobsCapacity: String(DEFAULT_MECHANIC_CAPACITY),
+})
+
+const fromInput = (m: MechanicInput): FormState => ({
+  name: m.name,
+  email: m.email,
+  phone: m.phone,
+  branch: m.branch,
+  location: m.location,
+  rank: m.rank,
+  baseSalary: String(m.baseSalary || ''),
+  commissionPercent: String(m.commissionPercent),
+  jobsCapacity: String(m.jobsCapacity),
 })
 
 const validEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
@@ -648,38 +556,29 @@ const validPhone = (v: string) => /^(\+63\s?9\d{2}\s?\d{3}\s?\d{4}|09\d{9})$/.te
 function MechanicFormModal({
   mode,
   initial,
+  busy,
   onClose,
   onSubmit,
 }: {
   mode: 'add' | 'edit'
-  initial?: MechanicFormData
+  initial?: MechanicInput
+  busy: boolean
   onClose: () => void
-  onSubmit: (data: MechanicFormData) => void
+  onSubmit: (data: MechanicInput) => void
 }) {
-  const [form, setForm] = useState<MechanicFormData>(initial ?? emptyMechanic())
-  const [errors, setErrors] = useState<Partial<Record<keyof MechanicFormData, string>>>({})
+  const [form, setForm] = useState<FormState>(initial ? fromInput(initial) : emptyForm())
+  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
 
-  const set = <K extends keyof MechanicFormData>(key: K, value: MechanicFormData[K]) => {
+  const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
-  const setShift = (day: string, shift: string) => {
-    setForm((prev) => ({ ...prev, schedule: prev.schedule.map((s) => (s.day === day ? { ...s, shift } : s)) }))
-  }
-
-  const handlePhoto = (file: File | null) => {
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => set('photoUrl', reader.result as string)
-    reader.readAsDataURL(file)
-  }
-
-  const fieldClass = (key: keyof MechanicFormData) =>
+  const fieldClass = (key: keyof FormState) =>
     `mt-1.5 w-full rounded-md border px-3 py-2 text-sm focus:outline-none ${
       errors[key] ? 'border-destructive' : 'border-border focus:border-brand'
     }`
 
-  const ErrorText = ({ field }: { field: keyof MechanicFormData }) =>
+  const ErrorText = ({ field }: { field: keyof FormState }) =>
     errors[field] ? (
       <p className="mt-1 flex items-center gap-1 text-xs text-destructive">
         <AlertCircle size={12} /> {errors[field]}
@@ -688,18 +587,29 @@ function MechanicFormModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const next: Partial<Record<keyof MechanicFormData, string>> = {}
+    const next: Partial<Record<keyof FormState, string>> = {}
     if (!form.name.trim()) next.name = 'Name is required'
-    if (!form.branch.trim()) next.branch = 'Branch is required'
     if (!validEmail(form.email)) next.email = 'Enter a valid email address'
     if (!validPhone(form.phone)) next.phone = 'Enter a valid PH mobile number'
+    if (!form.branch.trim()) next.branch = 'Branch is required'
     if (!form.location.trim()) next.location = 'Location is required'
     if (!form.baseSalary || Number(form.baseSalary) <= 0) next.baseSalary = 'Enter a valid salary'
-    if (!form.commissionRate || Number(form.commissionRate) < 0 || Number(form.commissionRate) > 100)
-      next.commissionRate = 'Enter a rate between 0–100'
+    if (form.commissionPercent === '' || Number(form.commissionPercent) < 0 || Number(form.commissionPercent) > 100)
+      next.commissionPercent = 'Enter a rate between 0–100'
     if (!form.jobsCapacity || Number(form.jobsCapacity) <= 0) next.jobsCapacity = 'Enter a valid capacity'
     setErrors(next)
-    if (Object.keys(next).length === 0) onSubmit(form)
+    if (Object.keys(next).length > 0) return
+    onSubmit({
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      branch: form.branch,
+      location: form.location,
+      rank: form.rank,
+      baseSalary: Number(form.baseSalary),
+      commissionPercent: Number(form.commissionPercent),
+      jobsCapacity: Number(form.jobsCapacity),
+    })
   }
 
   return (
@@ -709,7 +619,7 @@ function MechanicFormModal({
           <div>
             <p className="text-lg font-bold text-white">{mode === 'add' ? 'Add Mechanic' : 'Edit Mechanic'}</p>
             <p className="text-sm text-white/70">
-              {mode === 'add' ? 'Add a new technician to the roster.' : 'Update this technician\u2019s details.'}
+              {mode === 'add' ? 'Add a new technician to the roster.' : 'Update this technician’s details.'}
             </p>
           </div>
           <button onClick={onClose} className="text-white/70 hover:text-white" aria-label="Close">
@@ -718,34 +628,6 @@ function MechanicFormModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
-          {/* Photo (2x2-style square) */}
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Photo</label>
-            <div className="mt-1.5 flex items-center gap-4">
-              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-border bg-accent">
-                {form.photoUrl ? (
-                  <img src={form.photoUrl} alt="Preview" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                    <ImagePlus size={24} />
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-accent">
-                  <ImagePlus size={14} /> Upload 2x2 Photo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handlePhoto(e.target.files?.[0] ?? null)}
-                  />
-                </label>
-                <p className="mt-1 text-xs text-muted-foreground">Square photo works best (e.g. 2x2 ID picture).</p>
-              </div>
-            </div>
-          </div>
-
           <div>
             <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Full Name *</label>
             <input value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="e.g., Mark Reyes" className={fieldClass('name')} />
@@ -780,16 +662,8 @@ function MechanicFormModal({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Employment Type</label>
-              <select
-                value={form.employmentType}
-                onChange={(e) => set('employmentType', e.target.value as EmploymentType)}
-                className={fieldClass('employmentType')}
-              >
-                {EMPLOYMENT_TYPES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
+              <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Rank</label>
+              <input value={form.rank} onChange={(e) => set('rank', e.target.value)} placeholder="e.g., Senior Mechanic" className={fieldClass('rank')} />
             </div>
             <div>
               <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Base Salary *</label>
@@ -805,13 +679,13 @@ function MechanicFormModal({
             <div>
               <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Commission % *</label>
               <input
-                value={form.commissionRate}
-                onChange={(e) => set('commissionRate', e.target.value)}
+                value={form.commissionPercent}
+                onChange={(e) => set('commissionPercent', e.target.value)}
                 placeholder="e.g., 8"
                 inputMode="numeric"
-                className={fieldClass('commissionRate')}
+                className={fieldClass('commissionPercent')}
               />
-              <ErrorText field="commissionRate" />
+              <ErrorText field="commissionPercent" />
             </div>
           </div>
 
@@ -823,43 +697,21 @@ function MechanicFormModal({
               inputMode="numeric"
               className={fieldClass('jobsCapacity')}
             />
+            <p className="mt-1 text-xs text-muted-foreground">Max open tasks at once. The scheduler won't assign more than this.</p>
             <ErrorText field="jobsCapacity" />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Weekly Schedule</label>
-            <p className="mt-0.5 text-xs text-muted-foreground">Set the shift for each day, or mark it as a day off.</p>
-            <div className="mt-2 space-y-1.5 rounded-lg border border-border p-3">
-              {form.schedule.map((s) => (
-                <div key={s.day} className="flex items-center gap-2">
-                  <span className="w-24 shrink-0 text-sm text-foreground">{s.day}</span>
-                  <input
-                    value={s.shift === 'Day Off' ? '' : s.shift}
-                    disabled={s.shift === 'Day Off'}
-                    onChange={(e) => setShift(s.day, e.target.value)}
-                    placeholder="e.g., 8:00 AM – 5:00 PM"
-                    className="flex-1 rounded-md border border-border px-3 py-1.5 text-sm focus:border-brand focus:outline-none disabled:bg-accent disabled:text-muted-foreground"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShift(s.day, s.shift === 'Day Off' ? '8:00 AM – 5:00 PM' : 'Day Off')}
-                    className={`shrink-0 rounded-md border px-2.5 py-1.5 text-xs font-medium ${
-                      s.shift === 'Day Off' ? 'border-brand bg-brand/10 text-brand' : 'border-border text-muted-foreground hover:bg-accent'
-                    }`}
-                  >
-                    Day Off
-                  </button>
-                </div>
-              ))}
-            </div>
           </div>
 
           <div className="flex justify-end gap-3 border-t border-border pt-4">
             <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
               Cancel
             </button>
-            <button type="submit" className={`flex items-center gap-2 rounded-lg ${GRADIENT} px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90`}>
-              <CheckCircle2 size={15} /> {mode === 'add' ? 'Add Mechanic' : 'Save Changes'}
+            <button
+              type="submit"
+              disabled={busy}
+              className={`flex items-center gap-2 rounded-lg ${GRADIENT} px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:opacity-90 active:scale-95 disabled:opacity-60`}
+            >
+              {busy ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+              {mode === 'add' ? 'Add Mechanic' : 'Save Changes'}
             </button>
           </div>
         </form>
