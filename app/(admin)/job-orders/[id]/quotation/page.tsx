@@ -290,6 +290,10 @@ export default function page() {
   // still read 'approved' from an earlier stage (e.g. the inspection) even though
   // no quotation has been sent yet. This is what should lock editing.
   const quotationApproved = initial.quotationApproved
+  // Same idea for "pending": a round can only be waiting on THIS quotation if
+  // the quotation hasn't been decided yet. Once it's approved, whatever
+  // pre_diagnostics says is history — never offer to recall it.
+  const quotationPending = !quotationApproved && preDiagnostic?.status === 'pending'
 
   function updateLaborCost(serviceId: string, laborCost: number) {
     setServices((prev) => prev.map((s) => (s.id === serviceId ? { ...s, laborCost } : s)))
@@ -478,12 +482,12 @@ export default function page() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={openAddServiceModal}
-            disabled={preDiagnostic?.status === 'pending' || quotationApproved}
+            disabled={quotationPending || quotationApproved}
             className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus size={14} /> Add Service
           </button>
-          {preDiagnostic?.status === 'pending' ? (
+          {quotationPending ? (
             <button
               onClick={handleRecallApproval}
               disabled={recalling}
@@ -608,14 +612,14 @@ export default function page() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setEditingServiceId(editing ? null : s.id)}
-                        disabled={preDiagnostic?.status === 'pending' || quotationApproved}
+                        disabled={quotationPending || quotationApproved}
                         className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {editing ? <Check size={13} /> : <Pencil size={13} />} {editing ? 'Done' : 'Edit'}
                       </button>
                       <button
                         onClick={() => removeService(s.id)}
-                        disabled={preDiagnostic?.status === 'pending' || quotationApproved}
+                        disabled={quotationPending || quotationApproved}
                         className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Remove Service"
                       >
@@ -629,7 +633,7 @@ export default function page() {
                   <span>Required Parts</span>
                   <button
                     onClick={() => openAddPartModal(s.id)}
-                    disabled={preDiagnostic?.status === 'pending' || quotationApproved}
+                    disabled={quotationPending || quotationApproved}
                     className="flex items-center gap-1 text-emerald-600 hover:underline disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed"
                   >
                     <Plus size={12} /> Add Part
