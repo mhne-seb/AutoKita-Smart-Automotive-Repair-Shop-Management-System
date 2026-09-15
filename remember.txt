@@ -106,3 +106,12 @@ const pool = new Pool({
     ca: fs.readFileSync('certs/prod-ca-2021.crt').toString(),
   },
 });
+
+
+python scrape_partsouq.py "https://partsouq.com/en/catalog/toyota/vehicle/GENERAL/2012/HIACE/KDH200L-RBMDY/catalog/711350/category/1" --all-categories --outdir "../src/data/automotive_knowledge"
+
+Manual Extraction:
+cd Chatbot
+C:\Users\Snow\AppData\Local\Programs\Python\Python313\python.exe extract_manuals.py --vehicle hiace_2012
+# or all vehicles:
+C:\Users\Snow\AppData\Local\Programs\Python\Python313\python.exe extract_manuals.py

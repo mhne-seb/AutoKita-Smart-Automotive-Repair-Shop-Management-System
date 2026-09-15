@@ -11,20 +11,6 @@ export const inspections: Record<string, InspectionData> = {
       { id: 'engine', label: 'Engine Bay', url: 'https://images.unsplash.com/photo-1621361365424-06f0e1eaf0c3?w=400&q=60' },
       { id: 'under', label: 'Underchassis', url: 'https://images.unsplash.com/photo-1632823469850-1b7b1e8b7692?w=400&q=60' },
     ],
-    notes: [
-      {
-        id: 'n1',
-        author: 'Boss Boyet',
-        timestamp: '15 mins ago',
-        content:
-          "Initial scan completed for the 2022 Tesla Model 3. The brake system requires immediate attention as noted in the findings below. I've also topped up the washer fluid as a courtesy. Battery health remains optimal. We recommend immediate replacement of front brake pads to ensure safety.",
-        photos: [
-          { label: 'Front Quarter', url: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=300&q=60' },
-          { label: 'Front Bay Area', url: 'https://images.unsplash.com/photo-1632823469850-1b7b1e8b7692?w=300&q=60' },
-          { label: 'Underchasis', url: 'https://images.unsplash.com/photo-1621361365424-06f0e1eaf0c3?w=300&q=60' },
-        ],
-      },
-    ],
     findings: [
       { id: 'f1', name: 'Engine oil', note: 'Oil levels are slightly low; recommended synthetic upgrade for high mileage.', status: 'needs-attention' },
       {
@@ -59,7 +45,6 @@ export const inspections: Record<string, InspectionData> = {
       { id: 'engine', label: 'Engine Bay' },
       { id: 'under', label: 'Underchassis' },
     ],
-    notes: [],
     findings: [
       { id: 'f1', name: 'Front rotors', note: 'Visible scoring, resurfacing requested by customer.', status: 'needs-attention' },
       { id: 'f2', name: 'Brake pads', note: 'Pad thickness at 6mm, within safe range.', status: 'ok' },
@@ -84,7 +69,6 @@ export const inspections: Record<string, InspectionData> = {
       { id: 'engine', label: 'Engine Bay' },
       { id: 'under', label: 'Underchassis' },
     ],
-    notes: [],
     findings: [
       { id: 'f1', name: 'Fuel filter', note: 'Clogged, restricting flow. Replacement needed.', status: 'urgent' },
     ],
@@ -108,7 +92,6 @@ export const inspections: Record<string, InspectionData> = {
       { id: 'engine', label: 'Engine Bay' },
       { id: 'under', label: 'Underchassis' },
     ],
-    notes: [],
     findings: [
       { id: 'f1', name: 'A/C system', note: 'Cleaned and recharged. Cooling verified at 100%.', status: 'ok' },
     ],

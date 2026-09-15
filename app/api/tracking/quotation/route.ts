@@ -33,7 +33,15 @@ export async function GET(request: NextRequest) {
       db.query(`SELECT * FROM get_job_order_quotation_services($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_payment_status($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_parts($1)`, [jobOrder.job_order_id]),
-      db.query(`SELECT customer_approval_status FROM pre_diagnostics WHERE job_order_id = $1 ORDER BY id DESC LIMIT 1`, [jobOrder.job_order_id]),
+      db.query(
+        `SELECT pd.customer_approval_status
+         FROM pre_diagnostics pd
+         JOIN vehicle_inspections vi ON vi.id = pd.inspection_id
+         WHERE vi.job_order_id = $1
+         ORDER BY pd.id DESC
+         LIMIT 1`,
+        [jobOrder.job_order_id],
+      ),
       // The real "did the customer actually agree to this at booking" signal —
       // an audit-log event on the original ticket, not just "is the OBD-II
       // line item present on the job order" (a mechanic can add that line

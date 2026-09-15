@@ -25,8 +25,14 @@ export async function POST(request: NextRequest) {
        WHERE jo.id = $1
          AND jo.user_id = $2
          AND jo.status = 'inspecting'
-         AND NOT EXISTS (SELECT 1 FROM vehicle_inspections vi WHERE vi.job_order_id = jo.id)
-         AND NOT EXISTS (SELECT 1 FROM pre_diagnostics pd WHERE pd.job_order_id = jo.id)
+         AND NOT EXISTS (
+           SELECT 1 FROM vehicle_inspections vi
+           WHERE vi.job_order_id = jo.id
+             AND (
+               EXISTS (SELECT 1 FROM inspection_photos ip WHERE ip.inspection_id = vi.id)
+               OR EXISTS (SELECT 1 FROM pre_diagnostics pd WHERE pd.inspection_id = vi.id)
+             )
+         )
        RETURNING jo.id, jo.ticket_id`,
       [jobOrderId, userId],
     )

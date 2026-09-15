@@ -175,10 +175,12 @@ id INTEGER, name VARCHAR, status VARCHAR, photo TEXT, findings_description TEXT,
 )
 LANGUAGE sql STABLE
 AS $$
-SELECT vi.id, vi.name, vi.status, vi.photo, vi.findings_description, vi.logged_date::text
-FROM vehicle_inspections vi
+SELECT p.id, p.title AS name, p.status::text, p.photo_url AS photo, p.note AS findings_description, p.logged_at::text AS logged_date
+FROM inspection_photos p
+JOIN vehicle_inspections vi ON vi.id = p.inspection_id
 WHERE vi.job_order_id = p_job_order_id
-ORDER BY vi.logged_date ASC;
+  AND (p.status IS NOT NULL OR p.title NOT IN ('Front Quarter', 'Engine Bay', 'Underchassis'))
+ORDER BY p.logged_at ASC;
 $$;
 
 -- 5. Payments

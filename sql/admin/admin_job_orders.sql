@@ -50,8 +50,6 @@ RETURNS TABLE (
     last_name          VARCHAR(40),
     email              VARCHAR(80),
     contact_number     VARCHAR(11),
-    tier               user_tiers,
-    loyalty_points     INTEGER,
     vehicle_id         INT,
     vehicle_model      VARCHAR(40),
     plate_number       VARCHAR(10),
@@ -81,8 +79,6 @@ AS $$
         u.last_name,
         u.email,
         u.contact_number,
-        u.tier,
-        u.loyalty_points,
         v.id             AS vehicle_id,
         v.vehicle_model,
         v.plate_number,
@@ -248,6 +244,21 @@ BEGIN
         completed_at = CASE WHEN p_new_status = 'completed' THEN NOW() ELSE completed_at END,
         released_at  = CASE WHEN p_new_status = 'released'  THEN NOW() ELSE released_at  END
     WHERE id = p_job_order_id;
+
+    -- When entering inspecting stage, initialize vehicle_inspections started_at
+    IF p_new_status = 'inspecting' THEN
+        IF NOT EXISTS (SELECT 1 FROM vehicle_inspections WHERE job_order_id = p_job_order_id) THEN
+            INSERT INTO vehicle_inspections (job_order_id, started_at)
+            VALUES (p_job_order_id, NOW());
+        END IF;
+    END IF;
+
+    -- When leaving inspecting stage, fulfill the inspection
+    IF v_old_status = 'inspecting' AND p_new_status <> 'inspecting' THEN
+        UPDATE vehicle_inspections
+        SET fulfilled_at = NOW()
+        WHERE job_order_id = p_job_order_id AND fulfilled_at IS NULL;
+    END IF;
 
     INSERT INTO system_audit_logs (
         user_id, employees_id, action_performed,

@@ -11,7 +11,7 @@ import { Lightbox } from '@/components/Lightbox'
 import { compressImage } from '@/lib/image'
 import { DIAGNOSTIC_SCAN_FEE, formatPeso } from '@/data/diagnosticScan'
 import { getJobOrderById } from '@/controllers/jobOrderController'
-import { getInspectionById, addInspectionFinding, updateInspectionFinding, deleteInspectionFinding, uploadInspectionPhoto, saveWalkaroundNote } from '@/controllers/inspectionController'
+import { getInspectionById, addInspectionFinding, updateInspectionFinding, deleteInspectionFinding, uploadInspectionPhoto, saveWalkaroundNote, saveWalkaroundTitle, deleteInspectionPhoto } from '@/controllers/inspectionController'
 import { getLatestPreDiagnostic, sendForApproval, type PreDiagnosticRound } from '@/controllers/preDiagnosticController'
 import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData, InspectionPhotoSlot } from '@/data/types'
 
@@ -56,8 +56,6 @@ export default function page() {
 
   const [photoSlots, setPhotoSlots] = useState<InspectionData['photoSlots']>([])
   const [findings, setFindings] = useState<MechanicalFinding[]>([])
-  const [noteDraft, setNoteDraft] = useState('')
-  const [notes, setNotes] = useState<InspectionData['notes']>([])
   const [editingFindingId, setEditingFindingId] = useState<string | null>(null)
   const [editFindingName, setEditFindingName] = useState('')
   const [editFindingNote, setEditFindingNote] = useState('')
@@ -88,7 +86,6 @@ export default function page() {
     if (initial) {
       setPhotoSlots(initial.photoSlots)
       setFindings(initial.findings)
-      setNotes(initial.notes)
     }
   }, [initial])
 
@@ -116,17 +113,25 @@ export default function page() {
   async function handlePhotoPick(slotId: string, label: string, file: File | undefined) {
     if (!file || isLocked) return
 
-    const previousUrl = photoSlots.find((p) => p.id === slotId)?.url
+    const slot = photoSlots.find((p) => p.id === slotId)
+    const previousUrl = slot?.url
     const localUrl = URL.createObjectURL(file)
     setPhotoSlots((prev) => prev.map((p) => (p.id === slotId ? { ...p, url: localUrl } : p)))
     setUploadingSlot(slotId)
 
     try {
       const compressed = await compressImage(file)
-      const uploaded = await uploadInspectionPhoto(jobOrderId, slotId, label, compressed)
+      const currentTitle = slot?.title || slot?.label || label
+      const uploaded = await uploadInspectionPhoto(jobOrderId, slotId, label, compressed, currentTitle, slot?.rowId)
       if (!uploaded) throw new Error('upload rejected')
-      setPhotoSlots((prev) => prev.map((p) => (p.id === slotId ? { ...p, url: uploaded.url, rowId: uploaded.rowId } : p)))
-      toast.success(`${label} photo saved`)
+      setPhotoSlots((prev) =>
+        prev.map((p) =>
+          p.id === slotId
+            ? { ...p, url: uploaded.url, rowId: uploaded.rowId, title: uploaded.title || p.title || label }
+            : p,
+        ),
+      )
+      toast.success(`${currentTitle} photo saved`)
     } catch {
       setPhotoSlots((prev) => prev.map((p) => (p.id === slotId ? { ...p, url: previousUrl } : p)))
       toast.error(`Could not save the ${label} photo. Please try again.`)
@@ -136,21 +141,59 @@ export default function page() {
     }
   }
 
-    // Condition notes save on blur — one photo, one note, no separate Save button
+  // Title saves on blur when the photo has already been uploaded.
+  async function persistSlotTitle(slot: InspectionPhotoSlot) {
+    if (isLocked || !slot.rowId) return
+    const titleToSave = (slot.title ?? slot.label ?? '').trim()
+    if (!titleToSave) return
+    const ok = await saveWalkaroundTitle(jobOrderId, slot.rowId, titleToSave)
+    if (!ok) toast.error(`Could not save the photo title. Please try again.`)
+  }
+
+  // Condition notes save on blur — one photo, one note, no separate Save button
   // to forget. Needs a row to write to, so a photo must be uploaded first.
   async function persistSlotNote(slot: InspectionPhotoSlot) {
     if (isLocked || !slot.rowId) return
     const ok = await saveWalkaroundNote(jobOrderId, slot.rowId, slot.note ?? '')
-    if (!ok) toast.error(`Could not save the ${slot.label} note. Please try again.`)
+    if (!ok) toast.error(`Could not save the ${slot.title || slot.label} note. Please try again.`)
   }
 
-  function saveNote() {
-    if (!noteDraft.trim()) return
-    setNotes((prev) => [
-      { id: `n${prev.length + 1}`, author: 'Boss Boyet', timestamp: 'Just now', content: noteDraft.trim() },
+  async function handlePhotoDelete(slot: InspectionPhotoSlot) {
+    if (isLocked) return
+    if (slot.rowId) {
+      const ok = await deleteInspectionPhoto(jobOrderId, slot.rowId)
+      if (!ok) {
+        toast.error('Could not delete photo. Please try again.')
+        return
+      }
+      toast.success('Photo removed')
+    }
+
+    if (slot.id.startsWith('custom-')) {
+      setPhotoSlots((prev) => prev.filter((p) => p.id !== slot.id))
+    } else {
+      setPhotoSlots((prev) =>
+        prev.map((p) =>
+          p.id === slot.id
+            ? { ...p, url: undefined, rowId: undefined, note: '' }
+            : p,
+        ),
+      )
+    }
+  }
+
+  function addPhotoSlot() {
+    if (isLocked) return
+    const newSlotId = `custom-${Date.now()}`
+    setPhotoSlots((prev) => [
       ...prev,
+      { id: newSlotId, label: 'Inspection Photo', title: 'Inspection Photo' },
     ])
-    setNoteDraft('')
+  }
+
+  function removeCustomSlot(slotId: string) {
+    if (isLocked) return
+    setPhotoSlots((prev) => prev.filter((p) => p.id !== slotId))
   }
 
   // Opens the editor with every field seeded from the finding, so the form
@@ -367,114 +410,131 @@ export default function page() {
               </div>
             )}
 
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-slate-900">Inspection Photos</p>
+                <p className="text-xs text-slate-500">Walkaround condition photos and reference views</p>
+              </div>
+              <button
+                type="button"
+                onClick={addPhotoSlot}
+                disabled={isLocked}
+                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-150 hover:border-slate-300 hover:bg-slate-100 hover:shadow-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 disabled:hover:shadow-none"
+              >
+                <Plus size={13} /> Add Photo
+              </button>
+            </div>
+
             <div className="grid grid-cols-3 gap-4">
               {photoSlots.map((slot) => (
                 <div key={slot.id} className="flex flex-col gap-2">
                   <div
-                  className="group relative h-40 overflow-hidden rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-400 hover:border-slate-300"
-                >
-                  {slot.url ? (
-                    <>
-                      {/* The photo opens the viewer; replacing it is a separate
-                          control, since one click can't mean both. */}
-                      <button
-                        type="button"
-                        onClick={() => setLightbox({ url: slot.url!, label: slot.label })}
-                        className="absolute inset-0 h-full w-full"
-                      >
-                        <img src={slot.url} alt={slot.label} className="h-full w-full object-cover" />
-                        <span className="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/40 text-white opacity-0 group-hover:opacity-100">
-                          <Maximize2 size={14} /> View
-                        </span>
-                      </button>
-                      {!isLocked && (
+                    className="group relative h-40 overflow-hidden rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-400 hover:border-slate-300"
+                  >
+                    {slot.url ? (
+                      <>
+                        {/* The photo opens the viewer; replacing it is a separate
+                            control, since one click can't mean both. */}
                         <button
                           type="button"
-                          onClick={() => fileInputRefs.current[slot.id]?.click()}
-                          disabled={uploadingSlot === slot.id}
-                          className="absolute bottom-2 right-2 z-10 rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700 opacity-0 shadow group-hover:opacity-100 hover:bg-white"
+                          onClick={() => setLightbox({ url: slot.url!, label: slot.title || slot.label })}
+                          className="absolute inset-0 h-full w-full"
                         >
-                          Replace
+                          <img src={slot.url} alt={slot.title || slot.label} className="h-full w-full object-cover" />
+                          <span className="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/40 text-white opacity-0 group-hover:opacity-100">
+                            <Maximize2 size={14} /> View
+                          </span>
                         </button>
-                      )}
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => fileInputRefs.current[slot.id]?.click()}
-                      disabled={uploadingSlot === slot.id || isLocked}
-                      className="flex h-full w-full flex-col items-center justify-center gap-2 disabled:cursor-not-allowed"
-                    >
-                      <Camera size={20} />
-                      {slot.label}
-                    </button>
-                  )}
-                  {uploadingSlot === slot.id && (
-                    <span className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 text-white">
-                      <Loader2 size={16} className="animate-spin" /> Uploading…
-                    </span>
-                  )}
-                  <input
-                    ref={(el) => { fileInputRefs.current[slot.id] = el }}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="hidden"
-                    onChange={(e) => {handlePhotoPick(slot.id, slot.label, e.target.files?.[0])
-                      e.target.value = '' // re-picking the same file still fires onChange
-                    }}
-                  />
-                </div>
+                        {!isLocked && (
+                          <div className="absolute bottom-2 right-2 z-10 flex items-center gap-1 opacity-0 shadow group-hover:opacity-100">
+                            <button
+                              type="button"
+                              onClick={() => fileInputRefs.current[slot.id]?.click()}
+                              disabled={uploadingSlot === slot.id}
+                              className="rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700 hover:bg-white"
+                            >
+                              Replace
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handlePhotoDelete(slot)}
+                              className="rounded-md bg-white/90 p-1 text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+                              title="Delete photo"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRefs.current[slot.id]?.click()}
+                        disabled={uploadingSlot === slot.id || isLocked}
+                        className="flex h-full w-full flex-col items-center justify-center gap-2 disabled:cursor-not-allowed"
+                      >
+                        <Camera size={20} />
+                        {slot.title || slot.label}
+                      </button>
+                    )}
+                    {uploadingSlot === slot.id && (
+                      <span className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 text-white">
+                        <Loader2 size={16} className="animate-spin" /> Uploading…
+                      </span>
+                    )}
+                    {slot.id.startsWith('custom-') && !slot.rowId && !isLocked && (
+                      <button
+                        type="button"
+                        onClick={() => removeCustomSlot(slot.id)}
+                        className="absolute top-2 right-2 z-10 rounded-md bg-white/80 p-1 text-slate-400 hover:bg-white hover:text-rose-500"
+                        title="Remove photo slot"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                    <input
+                      ref={(el) => { fileInputRefs.current[slot.id] = el }}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={(e) => {
+                        handlePhotoPick(slot.id, slot.title || slot.label, e.target.files?.[0])
+                        e.target.value = '' // re-picking the same file still fires onChange
+                      }}
+                    />
+                  </div>
 
-                 <textarea
-                  value={slot.note ?? ''}
-                  onChange={(e) =>
-                    setPhotoSlots((prev) => prev.map((p) => (p.id === slot.id ? { ...p, note: e.target.value } : p)))
-                  }
-                  onBlur={() => persistSlotNote(slot)}
-                  disabled={isLocked || !slot.rowId}
-                  rows={2}
-                  placeholder={slot.rowId ? 'Condition on arrival — scratches, dents, existing damage…' : 'Upload a photo first'}
-                  className="w-full resize-none rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-50"
-                />
+                  <input
+                    type="text"
+                    value={slot.title ?? slot.label ?? ''}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setPhotoSlots((prev) =>
+                        prev.map((p) => (p.id === slot.id ? { ...p, title: val, label: val } : p))
+                      )
+                    }}
+                    onBlur={() => persistSlotTitle(slot)}
+                    disabled={isLocked}
+                    placeholder="Photo title (e.g. Front Quarter)"
+                    className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-800 placeholder:font-normal placeholder:text-slate-400 focus:border-slate-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-50"
+                  />
+
+                  <textarea
+                    value={slot.note ?? ''}
+                    onChange={(e) =>
+                      setPhotoSlots((prev) => prev.map((p) => (p.id === slot.id ? { ...p, note: e.target.value } : p)))
+                    }
+                    onBlur={() => persistSlotNote(slot)}
+                    disabled={isLocked || !slot.rowId}
+                    rows={2}
+                    placeholder={slot.rowId ? 'Condition on arrival — scratches, dents, existing damage…' : 'Upload a photo first'}
+                    className="w-full resize-none rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-50"
+                  />
                 </div>
               ))}
             </div>
 
             <div className="my-6 border-t border-slate-100" />
-
-            <p className="mb-3 text-sm font-bold text-slate-900">Technician Notes</p>
-            <div className="mb-4 flex gap-2">
-              <input
-                value={noteDraft}
-                onChange={(e) => setNoteDraft(e.target.value)}
-                disabled={isLocked}
-                placeholder="Add a note about this inspection..."
-                className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50"
-              />
-              <button
-                onClick={saveNote}
-                disabled={isLocked}
-                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Add
-              </button>
-            </div>
-
-            {notes.length === 0 ? (
-              <p className="mb-6 text-sm text-slate-400">No technician notes yet.</p>
-            ) : (
-              <div className="mb-6 space-y-3">
-                {notes.map((n) => (
-                  <div key={n.id} className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm">
-                    <p className="mb-1 flex items-center justify-between text-xs text-slate-400">
-                      <span className="font-semibold text-slate-600">{n.author}</span>
-                      <span>{n.timestamp}</span>
-                    </p>
-                    <p className="text-slate-700">{n.content}</p>
-                  </div>
-                ))}
-              </div>
-            )}
 
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-bold text-slate-900">Mechanical Findings</p>

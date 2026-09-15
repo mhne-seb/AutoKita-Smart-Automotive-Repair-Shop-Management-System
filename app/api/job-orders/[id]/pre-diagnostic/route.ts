@@ -41,13 +41,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const { id } = await params
     const { notes } = await request.json()
 
+    const inspRes = await db.query(
+      `SELECT id FROM get_or_create_inspection($1)`,
+      [id]
+    )
+    const inspectionId = inspRes.rows[0]?.id
+
     const result = await db.query(
       `
-      INSERT INTO pre_diagnostics (job_order_id, mechanic_notes, customer_approval_status, datetime_created)
+      INSERT INTO pre_diagnostics (inspection_id, mechanic_notes, customer_approval_status, datetime_created)
       VALUES ($1, $2, 'pending', NOW())
       RETURNING *
       `,
-      [id, notes ?? '']
+      [inspectionId, notes ?? '']
     )
 
     return NextResponse.json({ success: true, data: result.rows[0] })
