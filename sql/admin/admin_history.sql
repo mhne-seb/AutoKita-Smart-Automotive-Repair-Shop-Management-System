@@ -93,8 +93,6 @@ RETURNS TABLE (
     user_id        INT,
     first_name     VARCHAR(40),
     last_name      VARCHAR(40),
-    tier           user_tiers,
-    loyalty_points INTEGER,
     total_spent    DECIMAL,
     total_jobs     BIGINT,
     last_service   TIMESTAMP
@@ -105,14 +103,12 @@ AS $$
         u.id             AS user_id,
         u.first_name,
         u.last_name,
-        u.tier,
-        u.loyalty_points,
         COALESCE(SUM(jo.actual_grand_total), 0) AS total_spent,
         COUNT(jo.id)                      AS total_jobs,
         MAX(jo.completed_at)              AS last_service
     FROM users u
     LEFT JOIN job_orders jo ON jo.user_id = u.id
-    GROUP BY u.id, u.first_name, u.last_name, u.tier, u.loyalty_points
+    GROUP BY u.id, u.first_name, u.last_name
     ORDER BY total_spent DESC;
 $$;
 

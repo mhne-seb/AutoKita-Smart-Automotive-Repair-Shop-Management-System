@@ -36,20 +36,17 @@ export async function GET(request: NextRequest) {
     const [preDiagRes, findingsRes, walkaroundRes, historyRes, shopRes, cancelRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_quotation($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_inspections($1)`, [jobOrder.job_order_id]),
-       // Walkaround photos share the table with findings but aren't findings —
-      // and the stored function above doesn't return `notes`, so they get their
-      // own inline query here (no new stored function).
+       // Walkaround photos from inspection_photos (child of vehicle_inspections)
       db.query(
-        `SELECT id, name AS label, notes AS note, photo, logged_date::text
-         FROM vehicle_inspections
-         WHERE job_order_id = $1 AND status = 'reference-photo' AND photo IS NOT NULL
-         ORDER BY id`,
+        `SELECT p.id, p.title AS label, p.note, p.photo_url AS photo, p.logged_at::text AS logged_date
+         FROM inspection_photos p
+         JOIN vehicle_inspections vi ON vi.id = p.inspection_id
+         WHERE vi.job_order_id = $1 AND p.photo_url IS NOT NULL
+         ORDER BY p.id`,
         [jobOrder.job_order_id],
       ),
       // Every round the shop has sent, with the customer's answer (if any)
-      // pulled from the audit log. The respond endpoint refuses a second
-      // answer on the same round, so the LEFT JOIN yields at most one row
-      // per round. Inline query — get_pre_diagnostic() only returns the latest.
+      // pulled from the audit log. pre_diagnostics is now joined through vehicle_inspections.
       db.query(
         `SELECT pd.id,
                 pd.mechanic_notes,
@@ -58,11 +55,12 @@ export async function GET(request: NextRequest) {
                 sal.new_values                     AS customer_reason,
                 sal.action_date::text              AS responded_at
          FROM pre_diagnostics pd
+         JOIN vehicle_inspections vi ON vi.id = pd.inspection_id
          LEFT JOIN system_audit_logs sal
            ON sal.entity_type = 'pre_diagnostics'
           AND sal.entity_id = pd.id
           AND sal.action_performed IN ('approved', 'rejected')
-         WHERE pd.job_order_id = $1
+         WHERE vi.job_order_id = $1
          ORDER BY pd.datetime_created ASC`,
         [jobOrder.job_order_id],
       ),
@@ -72,8 +70,14 @@ export async function GET(request: NextRequest) {
       db.query(
         `SELECT (
             jo.status = 'inspecting'
-            AND NOT EXISTS (SELECT 1 FROM vehicle_inspections vi WHERE vi.job_order_id = jo.id)
-            AND NOT EXISTS (SELECT 1 FROM pre_diagnostics pd WHERE pd.job_order_id = jo.id)
+            AND NOT EXISTS (
+              SELECT 1 FROM vehicle_inspections vi
+              WHERE vi.job_order_id = jo.id
+                AND (
+                  EXISTS (SELECT 1 FROM inspection_photos ip WHERE ip.inspection_id = vi.id)
+                  OR EXISTS (SELECT 1 FROM pre_diagnostics pd WHERE pd.inspection_id = vi.id)
+                )
+            )
          ) AS can_cancel
          FROM job_orders jo WHERE jo.id = $1`,
         [jobOrder.job_order_id],

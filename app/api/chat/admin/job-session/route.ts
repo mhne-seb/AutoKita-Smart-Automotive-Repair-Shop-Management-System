@@ -159,10 +159,12 @@ export async function GET(req: NextRequest) {
 
     // Inspection notes
     const inspRes = await db.query(`
-      SELECT name, notes, findings_description AS findings, status
-      FROM vehicle_inspections
-      WHERE job_order_id = $1
-      ORDER BY logged_date ASC
+      SELECT p.title AS name, NULL AS notes, p.note AS findings, p.status::text
+      FROM inspection_photos p
+      JOIN vehicle_inspections vi ON vi.id = p.inspection_id
+      WHERE vi.job_order_id = $1
+        AND (p.status IS NOT NULL OR p.title NOT IN ('Front Quarter', 'Engine Bay', 'Underchassis'))
+      ORDER BY p.logged_at ASC
       LIMIT 20
     `, [joId]);
     const inspectionNotes: InspectionNote[] = inspRes.rows.map((r) => ({

@@ -1,0 +1,2538 @@
+job_order_id,service_name,category,quantity,unit_price,total,base_duration_hours,include,is_synthetic
+1,"PULLDOWN TRANS.","General",1.0,6000.00,6000.00,1.00,True,False
+1,"OVERHAUL","General",1.0,6000.00,6000.00,1.00,True,False
+2,"Down clutch","General",1.0,4000.00,4000.00,1.00,True,False
+3,"Replace Transmission support","General",1.0,1800.00,1800.00,1.00,True,False
+5,"Top Overhaul","General",1.0,12000.00,12000.00,1.00,True,False
+5,"Overhaul Steering Pump","General",1.0,1500.00,1500.00,1.00,True,False
+5,"Wheel Align","General",1.0,800.00,800.00,1.00,True,False
+5,"Overhaul Rack And Pinion","General",1.0,3500.00,3500.00,1.00,True,False
+6,"Reseal Timing chain cover","General",1.0,0.00,3500.00,1.00,True,False
+6,"Replace suspension bush","General",1.0,0.00,1500.00,1.00,True,False
+6,"Replace shock front and rear","General",1.0,0.00,2000.00,1.00,True,False
+7,"AIRCON SERVICE","General",1.0,7000.00,7000.00,1.00,True,False
+7,"MECHANICAL SERVICE","General",1.0,21200.00,21200.00,1.00,True,False
+8,"SERVICE","General",1.0,0.00,10000.00,1.00,True,False
+8,"Replace starter L300","General",1.0,0.00,2300.00,1.00,True,False
+9,"Replace intercooler hose - A","General",1.0,1000.00,1000.00,1.00,True,False
+10,"Service","General",1.0,7500.00,7500.00,1.00,True,False
+11,"Down Clutch","General",1.0,3500.00,3500.00,1.00,True,False
+12,"Down Clutch","General",1.0,3500.00,3500.00,1.00,True,False
+13,"Suspension Bushing","General",1.0,1500.00,1500.00,1.00,True,False
+13,"Wheel Plating","General",1.0,1500.00,1500.00,1.00,True,False
+13,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+14,"Replace Suspension Bushing","General",1.0,1500.00,1500.00,1.00,True,False
+14,"Replace Wheel Bearing","General",1.0,1800.00,1800.00,1.00,True,False
+14,"Change oil","General",1.0,650.00,650.00,1.00,True,False
+14,"Brake Service & Replace Brake Pads","General",1.0,1500.00,1500.00,1.00,True,False
+15,"Service","General",1.0,7500.00,7500.00,1.00,True,False
+16,"Down Clutch","General",1.0,3500.00,3500.00,1.00,True,False
+17,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+18,"Wheel Alignment","General",1.0,800.00,800.00,1.00,True,False
+18,"Cleaning EGR","General",1.0,4500.00,4500.00,1.00,True,False
+18,"Reface FW & RR","General",1.0,4000.00,4000.00,1.00,True,False
+18,"Replace Tie Rod & Tie Rod End","General",1.0,1000.00,1000.00,1.00,True,False
+18,"Replace Brake Shoe","General",1.0,800.00,800.00,1.00,True,False
+18,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+18,"Replace Fuel Filter","General",1.0,550.00,550.00,1.00,True,False
+18,"Brake Fluid","General",1.0,500.00,500.00,1.00,True,False
+18,"Fuel Pump","General",1.0,200.00,200.00,1.00,True,False
+19,"Replace Shock 1","General",1.0,1800.00,1800.00,1.00,True,False
+19,"Reface FW & RR","General",1.0,4000.00,4000.00,1.00,True,False
+19,"Replace Shock 2","General",1.0,600.00,600.00,1.00,True,False
+20,"Trouble Shoot","General",1.0,1500.00,1500.00,1.00,True,False
+20,"Replace Fuel Pump","General",1.0,1300.00,1300.00,1.00,True,False
+20,"Cleaning Spark Plugs","General",1.0,200.00,200.00,1.00,True,False
+23,"replace oil pump","General",1.0,18000.00,18000.00,1.00,True,False
+23,"change oil","General",1.0,800.00,800.00,1.00,True,False
+24,"Wheel Align","General",1.0,800.00,800.00,1.00,True,False
+24,"Reface FW & RR","General",1.0,4000.00,4000.00,1.00,True,False
+24,"Cleaning EGR","General",1.0,4500.00,4500.00,1.00,True,False
+24,"Replace Tie Rod and Tie Bar","General",1.0,1000.00,1000.00,1.00,True,False
+24,"Replace Brake Shoe","General",1.0,800.00,800.00,1.00,True,False
+24,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+24,"Replace Fuel Filter","General",1.0,550.00,550.00,1.00,True,False
+24,"Drain Fluid","General",1.0,500.00,500.00,1.00,True,False
+24,"Drain Water","General",1.0,500.00,500.00,1.00,True,False
+25,"Top Overhaul","General",1.0,15000.00,15000.00,1.00,True,False
+25,"Oil","General",1.0,500.00,500.00,1.00,True,False
+26,"Replace Wheel Bearing","General",1.0,800.00,800.00,1.00,True,False
+26,"Trouble Shooting(Scan)","General",1.0,1500.00,1500.00,1.00,True,False
+26,"Replace Check Mounting","General",1.0,500.00,500.00,1.00,True,False
+27,"Pull down transmission","General",1.0,8500.00,8500.00,1.00,True,False
+27,"Change oil","General",1.0,800.00,800.00,1.00,True,False
+27,"Replace Fuel","General",1.0,550.00,550.00,1.00,True,False
+27,"Replace fan belt","General",1.0,800.00,800.00,1.00,True,False
+28,"Change oil","General",1.0,800.00,800.00,1.00,True,False
+28,"Replace Valve cover gasket","General",1.0,1200.00,1200.00,1.00,True,False
+28,"Brake service ","General",1.0,1200.00,1200.00,1.00,True,False
+29,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+29,"Replace Tie Rod","General",1.0,1200.00,1200.00,1.00,True,False
+29,"Replace Clamp Bushing","General",1.0,400.00,400.00,1.00,True,False
+29,"Replace Shock Upper","General",1.0,1200.00,1200.00,1.00,True,False
+29,"Wheel Alignment","General",1.0,800.00,800.00,1.00,True,False
+30,"Replace Rotor Disk","General",1.0,1500.00,1500.00,1.00,True,False
+30,"Brake Service","General",1.0,500.00,500.00,1.00,True,False
+30,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+30,"Replace Shock","General",1.0,1500.00,1500.00,1.00,True,False
+31,"Replace Brake Master","General",1.0,800.00,800.00,1.00,True,False
+31,"Engine Cleaning","General",1.0,500.00,500.00,1.00,True,False
+31,"Cleaning Brake","General",1.0,800.00,800.00,1.00,True,False
+32,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+32,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+32,"Replace Fuel Filter","General",1.0,650.00,650.00,1.00,True,False
+32,"Cleaning EGR","General",1.0,4500.00,4500.00,1.00,True,False
+33,"Replace Shock KYB","General",1.0,1200.00,1200.00,1.00,True,False
+33,"Replace Stab Link","General",1.0,600.00,600.00,1.00,True,False
+34,"Replace Radiator","General",1.0,400.00,400.00,1.00,True,False
+34,"Replace Brakes","General",1.0,400.00,400.00,1.00,True,False
+34,"Drain Brake Fluid","General",1.0,400.00,400.00,1.00,True,False
+34,"Drain Clutch Fluid","General",1.0,400.00,400.00,1.00,True,False
+34,"Drain Steering Fluid","General",1.0,400.00,400.00,1.00,True,False
+35,"Pull down transmission","General",1.0,4500.00,4500.00,1.00,True,False
+36,"CHANGE OIL","General",1.0,0.00,600.00,1.00,True,False
+36,"REPLACE Suspension BUSHING","General",1.0,1500.00,1500.00,1.00,True,False
+36,"Brake Service ","General",1.0,2900.00,2900.00,1.00,True,False
+36,"Replace Valve Cover Gasket","General",1.0,800.00,800.00,1.00,True,False
+37,"Down Clutch","General",1.0,2000.00,2000.00,1.00,True,False
+37,"Replace Stab Link","General",1.0,1000.00,1000.00,1.00,True,False
+37,"Wheel Alignment","General",1.0,1200.00,1200.00,1.00,True,False
+37,"Replace Tie Rods","General",1.0,1500.00,1500.00,1.00,True,False
+38,"Pulldown transmission","General",1.0,0.00,12000.00,1.00,True,False
+40,"Replace Fuel Filter","General",1.0,600.00,600.00,1.00,True,False
+40,"Cleaning throttle","General",1.0,600.00,600.00,1.00,True,False
+41,"Reseal Crankcase","General",1.0,1500.00,1500.00,1.00,True,False
+41,"Cleaning VVTI","General",1.0,4500.00,4500.00,1.00,True,False
+41,"Cleaning Engine Bay","General",1.0,2500.00,2500.00,1.00,True,False
+42,"Replace Aux Fan Motor","General",1.0,1500.00,1500.00,1.00,True,False
+43,"Labor","General",1.0,4000.00,4000.00,1.00,True,False
+44,"Replace STARTER SOLENOID","General",1.0,1800.00,1800.00,1.00,True,False
+44,"Reface Rotor Disc - FW & RR","General",1.0,4000.00,4000.00,1.00,True,False
+44,"Replace Wheel Cylinder","General",1.0,900.00,900.00,1.00,True,False
+45,"DOWN CLUTCH","General",1.0,2800.00,2800.00,1.00,True,False
+46,"Replace valve cover gasket","General",1.0,1200.00,1200.00,1.00,True,False
+47,"Replace Rack End Pinion - Under Chareen Kit - Wheel Alignment","General",1.0,3000.00,3000.00,1.00,True,False
+47,"Rack Caliper Kit","General",1.0,500.00,500.00,1.00,True,False
+47,"Wheel Alignment","General",1.0,900.00,900.00,1.00,True,False
+48,"Pull Down Tran","General",1.0,4500.00,4500.00,1.00,True,False
+49,"Down Clutch","General",1.0,3500.00,3500.00,1.00,True,False
+49,"Replace Suspension Bushing","General",1.0,1200.00,1200.00,1.00,True,False
+49,"Replace axle boots","General",1.0,500.00,500.00,1.00,True,False
+49,"Replace Valve Cover Gasket","General",1.0,850.00,850.00,1.00,True,False
+50,"CRANKCASE Reseal","General",1.0,1600.00,1600.00,1.00,True,False
+50,"REPLACE Cross Joint","General",1.0,2000.00,2000.00,1.00,True,False
+50,"REPLACE Shock RR","General",1.0,1800.00,1800.00,1.00,True,False
+50,"REPLACE Fanbelt","General",1.0,1200.00,1200.00,1.00,True,False
+50,"REPLACE SUPPORT ENGINE Trans","General",1.0,3500.00,3500.00,1.00,True,False
+50,"Brake Service FW & RR","General",1.0,1500.00,1500.00,1.00,True,False
+51,"Replace Brake Pads","General",1.0,500.00,500.00,1.00,True,False
+51,"Replace axle boots","General",1.0,1500.00,1500.00,1.00,True,False
+51,"Pull down rack end, pinion","General",1.0,3500.00,3500.00,1.00,True,False
+51,"Rebushing rack end, pinion","General",1.0,4500.00,4500.00,1.00,True,False
+51,"Wheel align","General",1.0,900.00,900.00,1.00,True,False
+52,"Replace Radiator","General",1.0,3500.00,3500.00,1.00,True,False
+52,"Cleaning Turbo","General",1.0,8500.00,8500.00,1.00,True,False
+52,"Replace Valve Cover","General",1.0,1500.00,1500.00,1.00,True,False
+52,"Machine ALTERNATOR","General",1.0,3000.00,3000.00,1.00,True,False
+52,"Pulldown Transmission","General",1.0,12000.00,12000.00,1.00,True,False
+52,"Tire Mounting","General",1.0,1200.00,1200.00,1.00,True,False
+52,"Replace ABS Sensor/Scan","General",1.0,3500.00,3500.00,1.00,True,False
+52,"Replace Brake Master","General",1.0,1200.00,1200.00,1.00,True,False
+52,"Clean Throttle","General",1.0,800.00,800.00,1.00,True,False
+52,"CrankCase Reseal","General",1.0,2800.00,2800.00,1.00,True,False
+52,"Intake Manifold - RESEAL","General",1.0,2000.00,2000.00,1.00,True,False
+52,"Replace Rack & Pinion","General",1.0,8500.00,8500.00,1.00,True,False
+53,"Change oil","General",1.0,800.00,800.00,1.00,True,False
+53,"Replace Spiral Cable","General",1.0,2500.00,2500.00,1.00,True,False
+53,"Brake service","General",1.0,800.00,800.00,1.00,True,False
+53,"Replace headlight bulbs","General",1.0,350.00,350.00,1.00,True,False
+53,"Replace fuel filter","General",1.0,550.00,550.00,1.00,True,False
+53,"Replace stud bolt","General",1.0,700.00,700.00,1.00,True,False
+53,"Replace brake shoe","General",1.0,800.00,800.00,1.00,True,False
+54,"Change Oil","General",1.0,600.00,600.00,1.00,True,False
+54,"Bleed Service","General",1.0,800.00,800.00,1.00,True,False
+54,"Down Clutch","General",1.0,2800.00,2800.00,1.00,True,False
+55,"Change oil","General",1.0,600.00,600.00,1.00,True,False
+55,"Brake service","General",1.0,800.00,800.00,1.00,True,False
+55,"Cleaning throttle","General",1.0,550.00,550.00,1.00,True,False
+55,"Repair power window","General",1.0,500.00,500.00,1.00,True,False
+56,"Cleaning EGR","General",1.0,6500.00,6500.00,1.00,True,False
+56,"Cleaning Turbo","General",1.0,3500.00,3500.00,1.00,True,False
+56,"Gas","General",1.0,500.00,500.00,1.00,True,False
+56,"Replace Steering fluid & hose","General",1.0,1800.00,1800.00,1.00,True,False
+56,"Change oil","General",1.0,800.00,800.00,1.00,True,False
+56,"Replace Fuel filter","General",1.0,550.00,550.00,1.00,True,False
+56,"Replace Valve cover gasket","General",1.0,2500.00,2500.00,1.00,True,False
+57,"Transmission Replace","General",1.0,4000.00,4000.00,1.00,True,False
+58,"Replace Rack End Pinion","General",1.0,1600.00,1600.00,1.00,True,False
+58,"Wheel Alignment","General",1.0,900.00,900.00,1.00,True,False
+60,"Replace Valve Seal ","General",1.0,6500.00,6500.00,1.00,True,False
+60,"Cleaning Engine","General",1.0,1500.00,1500.00,1.00,True,False
+61,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+61,"Brake Service","General",1.0,1200.00,1200.00,1.00,True,False
+61,"Replace Air Filter","General",1.0,550.00,550.00,1.00,True,False
+61,"Cleaning EGR","General",1.0,4500.00,4500.00,1.00,True,False
+61,"Gas","General",1.0,500.00,500.00,1.00,True,False
+62,"Replace Tie Rod Bar","General",1.0,800.00,800.00,1.00,True,False
+62,"Replace Stab Clamp Bushing","General",1.0,600.00,600.00,1.00,True,False
+62,"Repack Wheel bearing","General",1.0,600.00,600.00,1.00,True,False
+62,"Repair Wheel Align","General",1.0,900.00,900.00,1.00,True,False
+62,"Replace Valve Lifter","General",1.0,1800.00,1800.00,1.00,True,False
+64,"Adjust Rock N Pinion","General",1.0,0.00,2800.00,1.00,True,False
+64,"Pulldown Rack & Pinion","General",1.0,12000.00,12000.00,1.00,True,False
+64,"Replace ABS Module","General",1.0,5500.00,5500.00,1.00,True,False
+64,"Wheel Alignment","General",1.0,3000.00,3000.00,1.00,True,False
+64,"Scan/TroubleShoot","General",1.0,1500.00,1500.00,1.00,True,False
+64,"Brake Service","General",1.0,1800.00,1800.00,1.00,True,False
+65,"Replace Pressurized hose & Returned Hose","General",1.0,1800.00,1800.00,1.00,True,False
+66,"Change Oil","General",1.0,600.00,600.00,1.00,True,False
+66,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+66,"Repair Valve Cover Gasket","General",1.0,800.00,800.00,1.00,True,False
+66,"Repair Shock Mounting","General",1.0,1200.00,1200.00,1.00,True,False
+68,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+68,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+68,"Replace Tie Rod End & Tier Rod Bar","General",1.0,1500.00,1500.00,1.00,True,False
+68,"Trailing Arm / lateral link","General",1.0,2800.00,2800.00,1.00,True,False
+69,"Rack end Pinion rebushing","General",1.0,7500.00,7500.00,1.00,True,False
+69,"Replace Steering Wheel Bearing","General",1.0,2500.00,2500.00,1.00,True,False
+70,"Replace shock","General",1.0,1600.00,1600.00,1.00,True,False
+70,"Replace suspension arm","General",1.0,1800.00,1800.00,1.00,True,False
+70,"Replace tie rod bar","General",1.0,1500.00,1500.00,1.00,True,False
+70,"Camber alignment","General",1.0,2800.00,2800.00,1.00,True,False
+72,"Pulldown Rack end pinion / Alignment","General",1.0,10000.00,10000.00,1.00,True,False
+72,"Replace Suspension Bushing REbushing","General",1.0,1500.00,1500.00,1.00,True,False
+72,"Replace SHOCK","General",1.0,1500.00,1500.00,1.00,True,False
+72,"Replace STAB link","General",1.0,600.00,600.00,1.00,True,False
+72,"CAMBER ALIGN","General",1.0,2500.00,2500.00,1.00,True,False
+73,"Pulldown Transmission","General",1.0,12000.00,12000.00,1.00,True,False
+74,"Change oil","General",1.0,600.00,600.00,1.00,True,False
+74,"Replace brake shoe","General",1.0,800.00,800.00,1.00,True,False
+74,"Resurface rotor disc","General",1.0,1200.00,1200.00,1.00,True,False
+74,"resurface brake drum","General",1.0,1200.00,1200.00,1.00,True,False
+74,"Replace shock mounting","General",1.0,1200.00,1200.00,1.00,True,False
+76,"Pulldown transmission","General",1.0,4500.00,4500.00,1.00,True,False
+76,"Replace valve cover gasket","General",1.0,1500.00,1500.00,1.00,True,False
+76,"Reseal Oil Pan","General",1.0,2500.00,2500.00,1.00,True,False
+76,"Replace oil Sending unit","General",1.0,350.00,350.00,1.00,True,False
+76,"Pressure hose","General",1.0,1500.00,1500.00,1.00,True,False
+78,"Calibration","General",1.0,25000.00,25000.00,1.00,True,False
+79,"Change oil (1 gal)","General",1.0,450.00,450.00,1.00,True,False
+79,"Barner PMS (keep/rest)","General",1.0,350.00,350.00,1.00,True,False
+80,"Cleaning EGR","General",1.0,7500.00,7500.00,1.00,True,False
+80,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+80,"Replace Transmission Filter","General",1.0,1200.00,1200.00,1.00,True,False
+80,"Brake Service","General",1.0,1600.00,1600.00,1.00,True,False
+80,"Replace Fuel Filter","General",1.0,800.00,800.00,1.00,True,False
+80,"Cleaning","General",1.0,500.00,500.00,1.00,True,False
+81,"Down Clutch","General",1.0,6500.00,6500.00,1.00,True,False
+82,"Wheel Alignment","General",1.0,900.00,900.00,1.00,True,False
+82,"Repair Tie Rod","General",1.0,1200.00,1200.00,1.00,True,False
+82,"Replace Stab Link","General",1.0,800.00,800.00,1.00,True,False
+82,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+82,"Brake Service FW & RR","General",1.0,1200.00,1200.00,1.00,True,False
+83,"Repair timing chain","General",1.0,3500.00,3500.00,1.00,True,False
+84,"Replace Tie rod","General",1.0,1000.00,1000.00,1.00,True,False
+84,"Replace Brake Shoe","General",1.0,800.00,800.00,1.00,True,False
+84,"Replace Wheel Bearing","General",1.0,800.00,800.00,1.00,True,False
+84,"Replace Shock Boots","General",1.0,800.00,800.00,1.00,True,False
+84,"Reface Brake Drum","General",1.0,1500.00,1500.00,1.00,True,False
+86,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+86,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+86,"Replace Fuel Filter","General",1.0,550.00,550.00,1.00,True,False
+87,"CHANGE OIL","General",1.0,800.00,800.00,1.00,True,False
+87,"CHANGE ATF","General",1.0,800.00,800.00,1.00,True,False
+87,"Brake Service FW & RR","General",1.0,800.00,800.00,1.00,True,False
+87,"CLEANING SPARK PLUG","General",1.0,250.00,250.00,1.00,True,False
+88,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+88,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+88,"Change ATF","General",1.0,800.00,800.00,1.00,True,False
+88,"Clean Sparkplug","General",1.0,250.00,250.00,1.00,True,False
+89,"Electrical Service","General",1.0,8000.00,8000.00,1.00,True,False
+90,"Reservoir Hose","General",1.0,4500.00,4500.00,1.00,True,False
+91,"CHANGE OIL","General",1.0,800.00,800.00,1.00,True,False
+91,"BRAKE SERVICE","General",1.0,1200.00,1200.00,1.00,True,False
+92,"Replace Timing Belt","General",1.0,6500.00,6500.00,1.00,True,False
+92,"Change Oil","General",1.0,600.00,600.00,1.00,True,False
+92,"Replace Tie Rod Bar","General",1.0,800.00,800.00,1.00,True,False
+92,"Replace Stab Link","General",1.0,600.00,600.00,1.00,True,False
+92,"Wheel Align","General",1.0,800.00,800.00,1.00,True,False
+92,"Brake Service","General",1.0,400.00,400.00,1.00,True,False
+92,"Replace Water Inlet","General",1.0,500.00,500.00,1.00,True,False
+92,"Replace Water Inlet","General",1.0,650.00,650.00,1.00,True,False
+93,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+93,"Brake Service FW & RR","General",1.0,1200.00,1200.00,1.00,True,False
+94,"Cleaning Evaporator","General",1.0,4500.00,4500.00,1.00,True,False
+94,"Pulldown Condenser","General",1.0,500.00,500.00,1.00,True,False
+95,"Troubleshoot","General",1.0,3500.00,3500.00,1.00,True,False
+96,"Replace Suspension bushing Upper & Lower","General",1.0,3500.00,3500.00,1.00,True,False
+97,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+97,"Brake Service","General",1.0,1200.00,1200.00,1.00,True,False
+97,"Replace Fuel Filter","General",1.0,550.00,550.00,1.00,True,False
+97,"Cleaning EGR","General",1.0,4500.00,4500.00,1.00,True,False
+97,"Gas","General",1.0,500.00,500.00,1.00,True,False
+98,"Down Clutch","General",1.0,2500.00,2500.00,1.00,True,False
+98,"Replace Valve Cover","General",1.0,250.00,250.00,1.00,True,False
+99,"TOP OVERHAUL","General",1.0,8000.00,8000.00,1.00,True,False
+100,"Replace Spark Plug","General",1.0,400.00,400.00,1.00,True,False
+100,"Replace Support RR","General",1.0,1500.00,1500.00,1.00,True,False
+100,"Replace Shock Mounting ","General",1.0,1200.00,1200.00,1.00,True,False
+100,"Replace CV JOINT","General",1.0,1800.00,1800.00,1.00,True,False
+101,"Replace Upper Suspension","General",1.0,800.00,800.00,1.00,True,False
+101,"Replace Tie Rod","General",1.0,1000.00,1000.00,1.00,True,False
+101,"Replace Stab Link & Clamp","General",1.0,600.00,600.00,1.00,True,False
+101,"Camber Alignment","General",1.0,2500.00,2500.00,1.00,True,False
+101,"Alignment","General",1.0,800.00,800.00,1.00,True,False
+101,"Replace Lateral Link","General",1.0,500.00,500.00,1.00,True,False
+102,"Engine check","General",1.0,850.00,850.00,1.00,True,False
+102,"Recall oil cooler","General",1.0,1500.00,1500.00,1.00,True,False
+103,"Machine Shop - Ball Joint","General",1.0,850.00,850.00,1.00,True,False
+103,"Reseal Oil Cooler","General",1.0,1500.00,1500.00,1.00,True,False
+104,"Pulldown Rack in pinion","General",1.0,3500.00,3500.00,1.00,True,False
+105,"Field down transmission ","General",1.0,3500.00,3500.00,1.00,True,False
+105,"Rebushing ","General",1.0,4500.00,4500.00,1.00,True,False
+106,"CHANGE OIL","General",1.0,650.00,650.00,1.00,True,False
+107,"Pull down and replace Rack n Pinion","General",1.0,3500.00,3500.00,1.00,True,False
+107,"Pull down Rack n Pinion","General",1.0,3500.00,3500.00,1.00,True,False
+108,"Change Oil","General",1.0,850.00,850.00,1.00,True,False
+108,"Replace Brake Pad","General",1.0,600.00,600.00,1.00,True,False
+108,"Brake Service ","General",1.0,600.00,600.00,1.00,True,False
+108,"Replace Fuel Filter","General",1.0,550.00,550.00,1.00,True,False
+109,"replace shock","General",1.0,1200.00,1200.00,1.00,True,False
+109,"replace steering pump","General",1.0,1800.00,1800.00,1.00,True,False
+110,"CHANGE OIL","General",1.0,650.00,650.00,1.00,True,False
+110,"Replace Brake Pads","General",1.0,1500.00,1500.00,1.00,True,False
+112,"Replace Differential Assy","General",1.0,4500.00,4500.00,1.00,True,False
+112,"Wheel Alignment","General",1.0,4500.00,4500.00,1.00,True,False
+114,"CHANGE OIL","General",1.0,650.00,650.00,1.00,True,False
+114,"BRAKE SERVICE FW & RR","General",1.0,800.00,800.00,1.00,True,False
+115,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+115,"Brake Cleaning","General",1.0,800.00,800.00,1.00,True,False
+115,"Wheel Alignment","General",1.0,900.00,900.00,1.00,True,False
+116,"Rebushing","General",1.0,5500.00,5500.00,1.00,True,False
+116,"Electric","General",1.0,1000.00,1000.00,1.00,True,False
+116,"Alignment","General",1.0,800.00,800.00,1.00,True,False
+116,"Replace shock ","General",1.0,400.00,400.00,1.00,True,False
+116,"Pulldown","General",1.0,4500.00,4500.00,1.00,True,False
+117,"CHANGE OIL","General",1.0,650.00,650.00,1.00,True,False
+117,"BRAKE SERVICE","General",1.0,600.00,600.00,1.00,True,False
+117,"REFACE rotor","General",1.0,1500.00,1500.00,1.00,True,False
+117,"Replace Spark Plug","General",1.0,200.00,200.00,1.00,True,False
+118,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+118,"Overhaul Caliper Kit","General",1.0,600.00,600.00,1.00,True,False
+118,"Reface rotor","General",1.0,1500.00,1500.00,1.00,True,False
+118,"Replace Sparkplug","General",1.0,200.00,200.00,1.00,True,False
+120,"Camber Alignment","General",1.0,2800.00,2800.00,1.00,True,False
+120,"Replace Upper Suspension","General",1.0,2000.00,2000.00,1.00,True,False
+120,"Replace Tie Rod End ","General",1.0,500.00,500.00,1.00,True,False
+120,"Replace Tie Rod Bar","General",1.0,500.00,500.00,1.00,True,False
+120,"Change Oil","General",1.0,850.00,850.00,1.00,True,False
+120,"Replace Rotor Disc","General",1.0,2500.00,2500.00,1.00,True,False
+120,"Reface Brake Drum","General",1.0,2000.00,2000.00,1.00,True,False
+120,"Replace Brake shoe","General",1.0,1200.00,1200.00,1.00,True,False
+120,"Replace Fuel Filter","General",1.0,550.00,550.00,1.00,True,False
+121,"CHANGE OIL","General",1.0,650.00,650.00,1.00,True,False
+122,"Camber align","General",1.0,2800.00,2800.00,1.00,True,False
+122,"Replace upper suspension","General",1.0,2000.00,2000.00,1.00,True,False
+122,"Replace tie rod end","General",1.0,500.00,500.00,1.00,True,False
+122,"Replace tie rod bar","General",1.0,500.00,500.00,1.00,True,False
+122,"Change oil","General",1.0,850.00,850.00,1.00,True,False
+122,"Reface rotor disc","General",1.0,2500.00,2500.00,1.00,True,False
+122,"Reface brake drum","General",1.0,2000.00,2000.00,1.00,True,False
+122,"Replace brake shoe","General",1.0,1200.00,1200.00,1.00,True,False
+122,"Replace fuel filter","General",1.0,550.00,550.00,1.00,True,False
+122,"Replace drive belt","General",1.0,850.00,850.00,1.00,True,False
+123,"Replace fan motor","General",1.0,1500.00,1500.00,1.00,True,False
+124,"Replace Steering Pump","General",1.0,1800.00,1800.00,1.00,True,False
+124,"CHANGE OIL","General",1.0,650.00,650.00,1.00,True,False
+125,"Camber Align","General",1.0,2800.00,2800.00,1.00,True,False
+125,"Replace Upper Suspension","General",1.0,2000.00,2000.00,1.00,True,False
+125,"Replace Tie Rod End & Tie rod Bar","General",1.0,1000.00,1000.00,1.00,True,False
+125,"Chamber Oil","General",1.0,850.00,850.00,1.00,True,False
+125,"Reface Rotor Disc","General",1.0,2500.00,2500.00,1.00,True,False
+125,"Reface Brake Drum","General",1.0,2000.00,2000.00,1.00,True,False
+125,"Replace Brake Shoe","General",1.0,1200.00,1200.00,1.00,True,False
+125,"Replace Fluid Filter","General",1.0,550.00,550.00,1.00,True,False
+125,"Replace Bell","General",1.0,850.00,850.00,1.00,True,False
+126,"REPLACE STEERING PUMP","General",1.0,1800.00,1800.00,1.00,True,False
+126,"CHANGE OIL","General",1.0,650.00,650.00,1.00,True,False
+127,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+127,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+127,"Replacement Bearing","General",1.0,800.00,800.00,1.00,True,False
+127,"Replace Fuel Filter","General",1.0,550.00,550.00,1.00,True,False
+128,"Replace Stab Bar Bushing","General",1.0,600.00,600.00,1.00,True,False
+128,"Replace Suspension","General",1.0,800.00,800.00,1.00,True,False
+128,"Replace axle oil seal","General",1.0,1500.00,1500.00,1.00,True,False
+129,"Replace Stab Bar Bushing","General",1.0,600.00,600.00,1.00,True,False
+129,"Replace Suspension Bushing","General",1.0,800.00,800.00,1.00,True,False
+129,"Replace Axle Oil Seal","General",1.0,1500.00,1500.00,1.00,True,False
+129,"Change ATF","General",1.0,650.00,650.00,1.00,True,False
+129,"Replace Brake FW & RR","General",1.0,1500.00,1500.00,1.00,True,False
+129,"Replace wheel hub bearing","General",1.0,1500.00,1500.00,1.00,True,False
+130,"Machine Shop","General",1.0,25000.00,25000.00,1.00,True,False
+130,"general overhauling","General",1.0,25000.00,25000.00,1.00,True,False
+130,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+130,"Repair Alternator","General",1.0,1200.00,1200.00,1.00,True,False
+131,"Rebushing Rack n Pinion","General",1.0,8500.00,8500.00,1.00,True,False
+131,"Wheel Alignment","General",1.0,800.00,800.00,1.00,True,False
+131,"Replace Suspension Bushing","General",1.0,1500.00,1500.00,1.00,True,False
+132,"Pulldown Transmission","General",1.0,4500.00,4500.00,1.00,True,False
+132,"Change oil","General",1.0,650.00,650.00,1.00,True,False
+132,"Replace Wiper Motor","General",1.0,1200.00,1200.00,1.00,True,False
+133,"Replace Fan Belt","General",1.0,1200.00,1200.00,1.00,True,False
+133,"Replace Side mirror","General",1.0,500.00,500.00,1.00,True,False
+134,"Change oil","General",1.0,650.00,650.00,1.00,True,False
+134,"Replace fan belt","General",1.0,550.00,550.00,1.00,True,False
+134,"Replace Valve cover Gasket","General",1.0,1200.00,1200.00,1.00,True,False
+134,"Replace Spark Plug","General",1.0,200.00,200.00,1.00,True,False
+135,"Down Clutch","General",1.0,8500.00,8500.00,1.00,True,False
+136,"Change Oil","General",1.0,850.00,850.00,1.00,True,False
+136,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+136,"Replace Fuel Filter","General",1.0,550.00,550.00,1.00,True,False
+137,"General Overhaul","General",1.0,28000.00,28000.00,1.00,True,False
+137,"Machine Shop","General",1.0,32000.00,32000.00,1.00,True,False
+138,"Main Drive Pulley","General",1.0,2500.00,2500.00,1.00,True,False
+138,"Timing Chain Kit","General",1.0,7000.00,7000.00,1.00,True,False
+138,"Water Pump","General",1.0,3200.00,3200.00,1.00,True,False
+138,"Piston Assy.","General",1.0,5500.00,5500.00,1.00,True,False
+138,"Steering Belt","General",1.0,1200.00,1200.00,1.00,True,False
+138,"Aircon Belt","General",1.0,1000.00,1000.00,1.00,True,False
+138,"Alternator Belt","General",1.0,1200.00,1200.00,1.00,True,False
+139,"TroubleShoot","General",1.0,1500.00,1500.00,1.00,True,False
+140,"Cleaning Evaporator","General",1.0,4500.00,4500.00,1.00,True,False
+141,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+141,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+141,"Replace Tie Rod","General",1.0,1000.00,1000.00,1.00,True,False
+141,"Wheel Alignment","General",1.0,800.00,800.00,1.00,True,False
+141,"Wheel Replacement","General",1.0,3250.00,3250.00,1.00,True,False
+141,"Wheel Balance","General",1.0,3200.00,3200.00,1.00,True,False
+143,"Cleaning Condenser","General",1.0,5000.00,5000.00,1.00,True,False
+143,"Replace Displacer","General",1.0,0.00,0.00,1.00,True,False
+144,"Repair gear box","General",1.0,2800.00,2800.00,1.00,True,False
+144,"Diesel","General",1.0,500.00,500.00,1.00,True,False
+144,"Repair power window rear left right","General",1.0,1000.00,1000.00,1.00,True,False
+145,"Rebushing Alternator","General",1.0,1800.00,1800.00,1.00,True,False
+146,"Scan","General",1.0,1500.00,1500.00,1.00,True,False
+146,"Replace Oxygen Sensor","General",1.0,800.00,800.00,1.00,True,False
+147,"CLEANING","General",1.0,5500.00,5500.00,1.00,True,False
+148,"Replace & Pull down Transmission","General",1.0,8500.00,8500.00,1.00,True,False
+148,"Key programming","General",1.0,18000.00,18000.00,1.00,True,False
+148,"Replace Intercooler hose","General",1.0,1500.00,1500.00,1.00,True,False
+149,"scan","General",1.0,1500.00,1500.00,1.00,True,False
+149,"Replace Oxygen sensor","General",1.0,800.00,800.00,1.00,True,False
+150,"Reseal Valve Cover","General",1.0,1200.00,1200.00,1.00,True,False
+150,"Replace Auto Tensioner","General",1.0,2000.00,2000.00,1.00,True,False
+150,"Regrease Caliper Slider","General",1.0,600.00,600.00,1.00,True,False
+150,"Wheel Alignment","General",1.0,800.00,800.00,1.00,True,False
+151,"Replace Aux Fan Motor","General",1.0,800.00,800.00,1.00,True,False
+152,"Pulldown Transmission","General",1.0,8500.00,8500.00,1.00,True,False
+152,"KEY programming","General",1.0,18000.00,18000.00,1.00,True,False
+152,"Replace intercooler hose","General",1.0,1500.00,1500.00,1.00,True,False
+153,"CHANGE OIL","General",1.0,850.00,850.00,1.00,True,False
+153,"BRAKE SERVICE","General",1.0,800.00,800.00,1.00,True,False
+154,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+154,"Rebushing Rack and Pinion","General",1.0,4500.00,4500.00,1.00,True,False
+154,"Pulldown Transmission","General",1.0,3500.00,3500.00,1.00,True,False
+154,"Brake cleaning FW & RR","General",1.0,800.00,800.00,1.00,True,False
+154,"Wheel Alignment","General",1.0,800.00,800.00,1.00,True,False
+155,"Replace Tie Rod","General",1.0,1200.00,1200.00,1.00,True,False
+155,"Replace Suspension Arm","General",1.0,1000.00,1000.00,1.00,True,False
+155,"Replace Shock","General",1.0,1800.00,1800.00,1.00,True,False
+155,"Replace Stab Link","General",1.0,1200.00,1200.00,1.00,True,False
+155,"Replace Power Window Motor","General",1.0,1200.00,1200.00,1.00,True,False
+155,"Replace Axle Boots","General",1.0,1600.00,1600.00,1.00,True,False
+155,"Alignment","General",1.0,1000.00,1000.00,1.00,True,False
+155,"Brake Light Stopper","General",1.0,300.00,300.00,1.00,True,False
+156,"Change Oil","General",1.0,450.00,450.00,1.00,True,False
+156,"Replace Engine Support","General",1.0,550.00,550.00,1.00,True,False
+156,"Cleaning Spark plug","General",1.0,200.00,200.00,1.00,True,False
+157,"Replace Valve Cover Gasket","General",1.0,1200.00,1200.00,1.00,True,False
+157,"Replace Transmission Oil","General",1.0,800.00,800.00,1.00,True,False
+157,"Replace Support","General",1.0,800.00,800.00,1.00,True,False
+157,"Replace CV Joint","General",1.0,1800.00,1800.00,1.00,True,False
+158,"Replace Wheel Cylinder","General",1.0,800.00,800.00,1.00,True,False
+158,"Replace Bulb Sockets","General",1.0,500.00,500.00,1.00,True,False
+158,"Replace Wiper Motor","General",1.0,3000.00,3000.00,1.00,True,False
+158,"Replace Brake Pads","General",1.0,500.00,500.00,1.00,True,False
+158,"Spindle Repair","General",1.0,1200.00,1200.00,1.00,True,False
+159,"Replace Suspension Bushing","General",1.0,5000.00,5000.00,1.00,True,False
+159,"Camber alignment","General",1.0,2500.00,2500.00,1.00,True,False
+160,"Replace Engine Support","General",1.0,1800.00,1800.00,1.00,True,False
+160,"Scan","General",1.0,1500.00,1500.00,1.00,True,False
+161,"Replace Aux Fan Assy","General",1.0,2800.00,2800.00,1.00,True,False
+162,"Replace Aux fan","General",1.0,2800.00,2800.00,1.00,True,False
+163,"Replace Water Pump","General",1.0,3500.00,3500.00,1.00,True,False
+164,"accelerator adjustment ","General",1.0,300.00,300.00,1.00,True,False
+164,"Replace Accelerator Pedal","General",1.0,1200.00,1200.00,1.00,True,False
+165,"Replace wheel cylinder","General",1.0,800.00,800.00,1.00,True,False
+165,"Replace bulb","General",1.0,500.00,500.00,1.00,True,False
+165,"Replace brake pads front","General",1.0,500.00,500.00,1.00,True,False
+166,"General Overhaul","General",1.0,25000.00,25000.00,1.00,True,False
+167,"Overhaul Caliper Kit","General",1.0,500.00,500.00,1.00,True,False
+168,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+168,"Replace Tie Rod","General",1.0,1000.00,1000.00,1.00,True,False
+168,"Wheel Alignment","General",1.0,800.00,800.00,1.00,True,False
+168,"Wheel Balancing","General",1.0,3200.00,3200.00,1.00,True,False
+168,"Electrical Wiring","General",1.0,7500.00,7500.00,1.00,True,False
+168,"Brake Cleaner","General",1.0,250.00,250.00,1.00,True,False
+169,"Cleaning Condenser","General",1.0,5000.00,5000.00,1.00,True,False
+170,"Replace Stab Bar Bushing","General",1.0,600.00,600.00,1.00,True,False
+170,"Replace Suspension Bushing","General",1.0,800.00,800.00,1.00,True,False
+170,"Replace Axle Oil Seal","General",1.0,1500.00,1500.00,1.00,True,False
+170,"Change ATF","General",1.0,650.00,650.00,1.00,True,False
+170,"Replace Brake Pads FW & RR","General",1.0,1500.00,1500.00,1.00,True,False
+170,"Replace Wheel Hub Bearing","General",1.0,1500.00,1500.00,1.00,True,False
+171,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+171,"Replace Tie Rod","General",1.0,1000.00,1000.00,1.00,True,False
+171,"Wheel Alignment","General",1.0,800.00,800.00,1.00,True,False
+171,"Wheel Balance","General",1.0,3200.00,3200.00,1.00,True,False
+171,"Electrical Wiring","General",1.0,7500.00,7500.00,1.00,True,False
+172,"Overhaul","General",1.0,30000.00,30000.00,1.00,True,False
+172,"Machine Shop","General",1.0,28000.00,28000.00,1.00,True,False
+173,"Cleaning Evaporator","General",1.0,3500.00,3500.00,1.00,True,False
+173,"Flushing System","General",1.0,500.00,500.00,1.00,True,False
+174,"Down Clutch","General",1.0,4500.00,4500.00,1.00,True,False
+174,"Replace Valve Cover Gasket","General",1.0,1200.00,1200.00,1.00,True,False
+174,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+174,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+174,"Replace Fuel Filter","General",1.0,550.00,550.00,1.00,True,False
+175,"Cleaning Evaporation","General",1.0,3500.00,3500.00,1.00,True,False
+175,"Flushing System","General",1.0,500.00,500.00,1.00,True,False
+176,"Overhaul","General",1.0,18000.00,18000.00,1.00,True,False
+176,"Machine Shop","General",1.0,22000.00,22000.00,1.00,True,False
+177,"Replace Valve Cover Gasket","General",1.0,1200.00,1200.00,1.00,True,False
+177,"Replace Transmission O-Ring","General",1.0,800.00,800.00,1.00,True,False
+177,"Replace Engine Support","General",1.0,800.00,800.00,1.00,True,False
+177,"Replace CV Joint","General",1.0,1800.00,1800.00,1.00,True,False
+177,"Replace Transmission Support","General",1.0,800.00,800.00,1.00,True,False
+178,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+178,"Replace Spark Plug","General",1.0,300.00,300.00,1.00,True,False
+179,"Replace Fan Belt","General",1.0,500.00,500.00,1.00,True,False
+180,"Cleaning Evaporator","General",1.0,2000.00,2000.00,1.00,True,False
+180,"Flushing","General",1.0,500.00,500.00,1.00,True,False
+181,"Change Oil","General",1.0,600.00,600.00,1.00,True,False
+181,"Change ATF","General",1.0,600.00,600.00,1.00,True,False
+181,"Brake Cleaning","General",1.0,800.00,800.00,1.00,True,False
+182,"Replace Fan Belt","General",1.0,500.00,500.00,1.00,True,False
+183,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+183,"Brake Service","General",1.0,400.00,400.00,1.00,True,False
+183,"Reface","General",1.0,1500.00,1500.00,1.00,True,False
+183,"Overhaul Caliper","General",1.0,600.00,600.00,1.00,True,False
+183,"Replace Socket","General",1.0,200.00,200.00,1.00,True,False
+183,"Wheel Alignment","General",1.0,800.00,800.00,1.00,True,False
+184,"Replace Valve cover gasket","General",1.0,800.00,800.00,1.00,True,False
+184,"Replace Brake Master","General",1.0,1200.00,1200.00,1.00,True,False
+184,"Replace Wheel Cylinder","General",1.0,700.00,700.00,1.00,True,False
+185,"Replace Head gasket","General",1.0,8500.00,8500.00,1.00,True,False
+185,"Gas","General",1.0,500.00,500.00,1.00,True,False
+186,"Replace Valves Solenoid","General",1.0,3500.00,3500.00,1.00,True,False
+187,"Replace Valve Solenoid","General",1.0,3500.00,3500.00,1.00,True,False
+188,"CHANGE OIL","General",1.0,800.00,800.00,1.00,True,False
+188,"Brake cleaning","General",1.0,800.00,800.00,1.00,True,False
+188,"Replace Brake Pads","General",1.0,500.00,500.00,1.00,True,False
+188,"Replace Brake Shoe","General",1.0,800.00,800.00,1.00,True,False
+188,"Pull out rack & pinion","General",1.0,4500.00,4500.00,1.00,True,False
+188,"Replace bushing oil seal kit: rack n pinion","General",1.0,6500.00,6500.00,1.00,True,False
+188,"Down Clutch","General",1.0,3500.00,3500.00,1.00,True,False
+188,"Camber Alignment","General",1.0,2500.00,2500.00,1.00,True,False
+189,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+189,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+189,"Cleaning Throttle","General",1.0,500.00,500.00,1.00,True,False
+189,"Cleaning Sparkplug","General",1.0,300.00,300.00,1.00,True,False
+190,"Reface FW & RR","General",1.0,3000.00,3000.00,1.00,True,False
+190,"Replace Brake pads Fr","General",1.0,500.00,500.00,1.00,True,False
+190,"Replace CV Joint","General",1.0,1600.00,1600.00,1.00,True,False
+191,"Replace Radiator","General",1.0,1500.00,1500.00,1.00,True,False
+191,"Replace Shock Mounting","General",1.0,800.00,800.00,1.00,True,False
+191,"Resurface rotor disc","General",1.0,1200.00,1200.00,1.00,True,False
+191,"Replace Valve cover gasket","General",1.0,1500.00,1500.00,1.00,True,False
+191,"Brake service rear","General",1.0,500.00,500.00,1.00,True,False
+192,"Pull down & Replace compressor","General",1.0,3500.00,3500.00,1.00,True,False
+193,"Reface","General",1.0,1500.00,1500.00,1.00,True,False
+193,"Rebushing","General",1.0,4000.00,4000.00,1.00,True,False
+193,"Pulldown Rack n Pinion","General",1.0,3500.00,3500.00,1.00,True,False
+193,"Replace Wheel Cylinder & Brake Service","General",1.0,600.00,600.00,1.00,True,False
+193,"Overhaul Cylinder Front","General",1.0,600.00,600.00,1.00,True,False
+193,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+193,"Wheel Alignment","General",1.0,800.00,800.00,1.00,True,False
+194,"Replace Alternator & Service","General",1.0,2500.00,2500.00,1.00,True,False
+196,"CHANGE OIL","General",1.0,600.00,600.00,1.00,True,False
+196,"CHANGE ATF","General",1.0,600.00,600.00,1.00,True,False
+196,"BRAKE CLEANING","General",1.0,800.00,800.00,1.00,True,False
+196,"Replace Fan Belt","General",1.0,500.00,500.00,1.00,True,False
+196,"Alignment","General",1.0,800.00,800.00,1.00,True,False
+197,"Replace Brake Pads","General",1.0,1000.00,1000.00,1.00,True,False
+198,"Scan","General",1.0,1500.00,1500.00,1.00,True,False
+198,"Replace & Brake Cleaning","General",1.0,1000.00,1000.00,1.00,True,False
+198,"Trouble Shoot","General",1.0,500.00,500.00,1.00,True,False
+199,"Change oil","General",1.0,1200.00,1200.00,1.00,True,False
+199,"Replace fuel filter","General",1.0,800.00,800.00,1.00,True,False
+199,"Brake Service","General",1.0,1000.00,1000.00,1.00,True,False
+200,"REPLACE UPPER BUSHING & BALL JOINT","General",1.0,3000.00,3000.00,1.00,True,False
+200,"REPLACE lower suspension BUSHING & BALL JOINT","General",1.0,1200.00,1200.00,1.00,True,False
+200,"REPLACE TIE ROD","General",1.0,500.00,500.00,1.00,True,False
+200,"REPLACE STRUT BAR BUSHING","General",1.0,500.00,500.00,1.00,True,False
+200,"CAMBER ALIGN","General",1.0,2700.00,2700.00,1.00,True,False
+200,"Wheel Align","General",1.0,800.00,800.00,1.00,True,False
+201,"Replace Valve cover gasket","General",1.0,2800.00,2800.00,1.00,True,False
+201,"Gas","General",1.0,300.00,300.00,1.00,True,False
+201,"Replace Fuel Filter","General",1.0,350.00,350.00,1.00,True,False
+202,"Replace Engine Support","General",1.0,1800.00,1800.00,1.00,True,False
+202,"Replace Stab Link","General",1.0,600.00,600.00,1.00,True,False
+203,"REPLACE TIE ROD","General",1.0,1000.00,1000.00,1.00,True,False
+203,"REPLACE Coupling","General",1.0,1500.00,1500.00,1.00,True,False
+203,"REPLACE ENGINE SUPPORT","General",1.0,800.00,800.00,1.00,True,False
+203,"REPLACE BRAKE PADS RR","General",1.0,800.00,800.00,1.00,True,False
+203,"BRAKE SERVICE FR","General",1.0,500.00,500.00,1.00,True,False
+203,"REPLACE CLAMP BUSHING","General",1.0,600.00,600.00,1.00,True,False
+203,"REPLACE TRANSMISSION SUPPORT","General",1.0,1500.00,1500.00,1.00,True,False
+203,"DRAIN FLUID","General",1.0,800.00,800.00,1.00,True,False
+203,"CALIPER CLEANING FW & RR","General",1.0,1500.00,1500.00,1.00,True,False
+204,"Repair Shock","General",1.0,2500.00,2500.00,1.00,True,False
+205,"Top Overhaul","General",1.0,15000.00,15000.00,1.00,True,False
+206,"Replace Shock","General",1.0,1500.00,1500.00,1.00,True,False
+207,"Reface rotor disc","General",1.0,1500.00,1500.00,1.00,True,False
+207,"Brake service","General",1.0,500.00,500.00,1.00,True,False
+207,"Change oil","General",1.0,650.00,650.00,1.00,True,False
+207,"Replace shocks","General",1.0,1500.00,1500.00,1.00,True,False
+209,"Replace Wheel Cylinder","General",1.0,600.00,600.00,1.00,True,False
+209,"Replace Steering Belt","General",1.0,1000.00,1000.00,1.00,True,False
+209,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+210,"Change oil","General",1.0,600.00,600.00,1.00,True,False
+210,"Replace Valve Cover Gasket","General",1.0,1400.00,1400.00,1.00,True,False
+210,"Brake service","General",1.0,1200.00,1200.00,1.00,True,False
+211,"Replace shock","General",1.0,1500.00,1500.00,1.00,True,False
+212,"Top Overhaul","General",1.0,15000.00,15000.00,1.00,True,False
+213,"Replace Rack End & Tie Rod","General",1.0,1000.00,1000.00,1.00,True,False
+213,"Reface ","General",1.0,1500.00,1500.00,1.00,True,False
+213,"Replace Wheel Hub Bearing","General",1.0,1000.00,1000.00,1.00,True,False
+213,"Wheel Alignment","General",1.0,800.00,800.00,1.00,True,False
+214,"Replace Ignition Coil","General",1.0,500.00,500.00,1.00,True,False
+214,"Cleaning Spark Plug","General",1.0,400.00,400.00,1.00,True,False
+214,"Cleaning Throttle","General",1.0,550.00,550.00,1.00,True,False
+215,"CHANGE OIL","General",1.0,650.00,650.00,1.00,True,False
+215,"BRAKE CLEANING","General",1.0,800.00,800.00,1.00,True,False
+215,"WHEEL ALIGNMENT BALANCE","General",1.0,1000.00,1000.00,1.00,True,False
+215,"CHANGE ATF","General",1.0,650.00,650.00,1.00,True,False
+215,"WHEEL ALIGNMENT","General",1.0,1000.00,1000.00,1.00,True,False
+216,"Top Overhaul","General",1.0,12000.00,12000.00,1.00,True,False
+216,"Machine Shop","General",1.0,11400.00,11400.00,1.00,True,False
+217,"Replace Transmission & Pull down Transmission","General",1.0,4500.00,4500.00,1.00,True,False
+218,"CHANGE OIL","General",1.0,650.00,650.00,1.00,True,False
+218,"BRAKE CLEANING","General",1.0,800.00,800.00,1.00,True,False
+218,"WHEEL ALIGNMENT","General",1.0,800.00,800.00,1.00,True,False
+218,"WHEEL BALANCING","General",1.0,1000.00,1000.00,1.00,True,False
+218,"CHANGE ATF","General",1.0,650.00,650.00,1.00,True,False
+219,"Replace Transmission","General",1.0,4500.00,4500.00,1.00,True,False
+219,"Replace Suspension Bushing","General",1.0,2500.00,2500.00,1.00,True,False
+220,"CHANGE OIL","General",1.0,1000.00,1000.00,1.00,True,False
+220,"Brake Service","General",1.0,500.00,500.00,1.00,True,False
+220,"Adjust Brake","General",1.0,1500.00,1500.00,1.00,True,False
+220,"Replace Fuel Filter","General",1.0,800.00,800.00,1.00,True,False
+220,"Replace Cabin Filter","General",1.0,200.00,200.00,1.00,True,False
+220,"Scan","General",1.0,1500.00,1500.00,1.00,True,False
+220,"Electrical Service","General",1.0,8500.00,8500.00,1.00,True,False
+221,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+221,"Replace Fuel Filter","General",1.0,550.00,550.00,1.00,True,False
+221,"Clean EGR","General",1.0,4500.00,4500.00,1.00,True,False
+221,"Replace Valve Cover Gasket","General",1.0,3500.00,3500.00,1.00,True,False
+221,"Replace By Pass Tube","General",1.0,2500.00,2500.00,1.00,True,False
+221,"Replace Induction Washer","General",1.0,1500.00,1500.00,1.00,True,False
+221,"GAS","General",1.0,500.00,500.00,1.00,True,False
+222,"Change oil","General",1.0,800.00,800.00,1.00,True,False
+222,"Brake service & replace brake pads","General",1.0,1500.00,1500.00,1.00,True,False
+222,"Wheel alignment","General",1.0,1000.00,1000.00,1.00,True,False
+222,"Wheel balancing","General",1.0,1000.00,1000.00,1.00,True,False
+223,"Change oil","General",1.0,1000.00,1000.00,1.00,True,False
+223,"Brake service & replace brake pads","General",1.0,1500.00,1500.00,1.00,True,False
+223,"Replace fuel filter","General",1.0,500.00,500.00,1.00,True,False
+224,"Change Oil","General",1.0,1000.00,1000.00,1.00,True,False
+224,"Brake Service FW & RR","General",1.0,800.00,800.00,1.00,True,False
+224,"Replace Brake Pads","General",1.0,800.00,800.00,1.00,True,False
+224,"Replace Fuel Filter","General",1.0,550.00,550.00,1.00,True,False
+225,"Change Oil","General",1.0,1200.00,1200.00,1.00,True,False
+225,"Replace Spark Plug","General",1.0,500.00,500.00,1.00,True,False
+225,"Replace Shock","General",1.0,1800.00,1800.00,1.00,True,False
+225,"Replace Brake Pads","General",1.0,600.00,600.00,1.00,True,False
+225,"Cleaning Throttle","General",1.0,500.00,500.00,1.00,True,False
+226,"Top Overhaul","General",1.0,25000.00,25000.00,1.00,True,False
+227,"Pulldown & Replace Rack n Pinion","General",1.0,4500.00,4500.00,1.00,True,False
+228,"Replace shock mountnhl","General",1.0,1500.00,1500.00,1.00,True,False
+228,"Replace TIE Rod","General",1.0,500.00,500.00,1.00,True,False
+228,"Replace Suspension bushing","General",1.0,1500.00,1500.00,1.00,True,False
+228,"Wheel alignment","General",1.0,950.00,950.00,1.00,True,False
+229,"Pull down & replace rack n pinion","General",1.0,4500.00,4500.00,1.00,True,False
+229,"Replace suspension bushing","General",1.0,1500.00,1500.00,1.00,True,False
+229,"Replace valve cover gasket","General",1.0,1500.00,1500.00,1.00,True,False
+229,"Wheel alignment & wheel camber","General",1.0,2500.00,2500.00,1.00,True,False
+230,"Pull Down & Replace Rack N Pinion","General",1.0,4500.00,4500.00,1.00,True,False
+230,"Replace Suspension","General",1.0,1500.00,1500.00,1.00,True,False
+230,"Replace Valve Cover Gasket","General",1.0,1500.00,1500.00,1.00,True,False
+230,"Camber & Wheel Alignment","General",1.0,2500.00,2500.00,1.00,True,False
+231,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+231,"Replace Fuel Filter","General",1.0,550.00,550.00,1.00,True,False
+231,"Clean EGR","General",1.0,4500.00,4500.00,1.00,True,False
+231,"Replace Valve Cover Gasket","General",1.0,3500.00,3500.00,1.00,True,False
+231,"Replace By Pass Tube","General",1.0,2500.00,2500.00,1.00,True,False
+231,"Replace Injector Washer","General",1.0,1500.00,1500.00,1.00,True,False
+231,"CPA","General",1.0,500.00,500.00,1.00,True,False
+232,"Pull down & replace rack end pinion","General",1.0,4500.00,4500.00,1.00,True,False
+232,"Replace suspension bushing","General",1.0,1500.00,1500.00,1.00,True,False
+232,"Replace valve cover gasket","General",1.0,1500.00,1500.00,1.00,True,False
+232,"Camber & wheel align","General",1.0,2500.00,2500.00,1.00,True,False
+234,"Pull down rack end & pinion","General",1.0,4500.00,4500.00,1.00,True,False
+234,"Replace shock mounting","General",1.0,1200.00,1200.00,1.00,True,False
+234,"Wheel Align","General",1.0,950.00,950.00,1.00,True,False
+234,"Rebushing","General",1.0,3500.00,3500.00,1.00,True,False
+235,"Alignment","General",1.0,950.00,950.00,1.00,True,False
+235,"Replace & Repack Rack In Pinion","General",1.0,4500.00,4500.00,1.00,True,False
+235,"Replace Suspension Bushing","General",1.0,1500.00,1500.00,1.00,True,False
+235,"Replace Valve Cover Gasket","General",1.0,1500.00,1500.00,1.00,True,False
+237,"Change Oil","General",1.0,600.00,600.00,1.00,True,False
+237,"Replace Spark Plug","General",1.0,300.00,300.00,1.00,True,False
+238,"Wheel Alignment","General",1.0,950.00,950.00,1.00,True,False
+238,"Replace Rubber Boot","General",1.0,1000.00,1000.00,1.00,True,False
+238,"Replace Stabilizer","General",1.0,600.00,600.00,1.00,True,False
+239,"Replace Stabilizer Link","General",1.0,600.00,600.00,1.00,True,False
+239,"Replace Engine Support","General",1.0,550.00,550.00,1.00,True,False
+239,"Replace Suspension Bushing","General",1.0,1500.00,1500.00,1.00,True,False
+239,"Replace Shock Absorber","General",1.0,1200.00,1200.00,1.00,True,False
+240,"CHANGE OIL","General",1.0,800.00,800.00,1.00,True,False
+240,"BRAKE CLEANING","General",1.0,800.00,800.00,1.00,True,False
+242,"SERVICE CHARGE","General",1.0,500.00,500.00,1.00,True,False
+242,"Tire Vulcanized","General",1.0,300.00,300.00,1.00,True,False
+242,"Mags Repair","General",1.0,2500.00,2500.00,1.00,True,False
+242,"Service Charge","General",1.0,2000.00,2000.00,1.00,True,False
+243,"Top Overhaul","General",1.0,15000.00,15000.00,1.00,True,False
+244,"Change Oil","General",1.0,600.00,600.00,1.00,True,False
+244,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+244,"Down Clutch","General",1.0,2800.00,2800.00,1.00,True,False
+245,"Service","General",1.0,800.00,800.00,1.00,True,False
+246,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+246,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+246,"Replace Fuel Filter","General",1.0,350.00,350.00,1.00,True,False
+246,"Replace Stab Clamp Bushing","General",1.0,600.00,600.00,1.00,True,False
+246,"Replace Tie Rod Bar/End","General",1.0,1200.00,1200.00,1.00,True,False
+246,"Wheel Alignment","General",1.0,1000.00,1000.00,1.00,True,False
+248,"Replace Alternator","General",1.0,1200.00,1200.00,1.00,True,False
+249,"Reface","General",1.0,3000.00,3000.00,1.00,True,False
+249,"Labor","General",1.0,2800.00,2800.00,1.00,True,False
+250,"Change Oil","General",1.0,800.00,800.00,1.00,True,False
+250,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+250,"Replace Fuel Filter","General",1.0,550.00,550.00,1.00,True,False
+251,"change oil","General",1.0,600.00,600.00,1.00,True,False
+251,"brake service","General",1.0,800.00,800.00,1.00,True,False
+251,"replace shock mounting","General",1.0,1200.00,1200.00,1.00,True,False
+251,"replace tie rod","General",1.0,1200.00,1200.00,1.00,True,False
+251,"replace spark plug","General",1.0,200.00,200.00,1.00,True,False
+251,"wheel alignment","General",1.0,800.00,800.00,1.00,True,False
+252,"Electrical","General",1.0,1050.00,1050.00,1.00,True,False
+252,"Replace Fan Belt","General",1.0,2500.00,2500.00,1.00,True,False
+253,"Change AFT","General",1.0,650.00,650.00,1.00,True,False
+253,"Brake Cleaning FW & RR","General",1.0,800.00,800.00,1.00,True,False
+253,"Flushing/Drain Radiator","General",1.0,350.00,350.00,1.00,True,False
+253,"Alternator Repair","General",1.0,3500.00,3500.00,1.00,True,False
+254,"Tint","General",1.0,6500.00,6500.00,1.00,True,False
+254,"Replace bulb & Socket","General",1.0,600.00,600.00,1.00,True,False
+255,"Change Oil","General",1.0,850.00,850.00,1.00,True,False
+255,"Brake Cleaning","General",1.0,1200.00,1200.00,1.00,True,False
+255,"Replace Cabin Filter","General",1.0,150.00,150.00,1.00,True,False
+256,"Transmission","General",1.0,35000.00,35000.00,1.00,True,False
+256,"Reface","General",1.0,1800.00,1800.00,1.00,True,False
+256,"Drain Fluid","General",1.0,600.00,600.00,1.00,True,False
+257,"Down Clutch","General",1.0,5500.00,5500.00,1.00,True,False
+258,"Down Clutch","General",1.0,5500.00,5500.00,1.00,True,False
+259,"General OverHaul","General",1.0,28000.00,28000.00,1.00,True,False
+259,"General Settings/Machine","General",1.0,35000.00,35000.00,1.00,True,False
+260,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+260,"Replace Wiper Linkage","General",1.0,5800.00,5800.00,1.00,True,False
+260,"Tint","General",1.0,6500.00,6500.00,1.00,True,False
+260,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+260,"Mechanical Repair","General",1.0,2000.00,2000.00,1.00,True,False
+261,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+261,"Replace Wiper Linkage","General",1.0,5800.00,5800.00,1.00,True,False
+261,"Tint ","General",1.0,6500.00,6500.00,1.00,True,False
+261,"Brake Service FW & RR","General",1.0,800.00,800.00,1.00,True,False
+262,"Clutch Kit","General",1.0,12000.00,12000.00,1.00,True,False
+262,"Release Bearing","General",1.0,850.00,850.00,1.00,True,False
+262,"Crankshaft Oil Seal","General",1.0,950.00,950.00,1.00,True,False
+262,"Gear Oil","General",1.0,1200.00,1200.00,1.00,True,False
+262,"Pilot Bearing","General",1.0,150.00,150.00,1.00,True,False
+263,"Change Oil","General",1.0,850.00,850.00,1.00,True,False
+263,"Brake Cleaning","General",1.0,1200.00,1200.00,1.00,True,False
+264,"Reface","General",1.0,3500.00,3500.00,1.00,True,False
+264,"Transmission","General",1.0,1800.00,1800.00,1.00,True,False
+264,"Drain Fluid","General",1.0,600.00,600.00,1.00,True,False
+265,"Overhaul","General",1.0,18000.00,18000.00,1.00,True,False
+265,"Machine Shop / Setting","General",1.0,22000.00,22000.00,1.00,True,False
+266,"Reface Motor Disc","General",1.0,4000.00,4000.00,1.00,True,False
+266,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+266,"Change ATF","General",1.0,650.00,650.00,1.00,True,False
+266,"Replace Spark Plug","General",1.0,400.00,400.00,1.00,True,False
+266,"Throttle Cleaning","General",1.0,800.00,800.00,1.00,True,False
+266,"Replace Master brake","General",1.0,1200.00,1200.00,1.00,True,False
+266,"Replace Engine Support","General",1.0,1200.00,1200.00,1.00,True,False
+267,"Pull down transmission","General",1.0,8500.00,8500.00,1.00,True,False
+267,"Crankcase reseal","General",1.0,2500.00,2500.00,1.00,True,False
+267,"Turbo cleaning","General",1.0,3500.00,3500.00,1.00,True,False
+268,"Service","General",1.0,350.00,350.00,1.00,True,False
+269,"OVERHAUL STEERING RACK","General",1.0,4500.00,4500.00,1.00,True,False
+269,"Rebushing","General",1.0,3500.00,3500.00,1.00,True,False
+269,"ALIGNMENT","General",1.0,800.00,800.00,1.00,True,False
+269,"REPLACE Stab Link","General",1.0,600.00,600.00,1.00,True,False
+269,"Replace Stabilizer clamp","General",1.0,600.00,600.00,1.00,True,False
+270,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+270,"Brake Service FW & RR","General",1.0,1200.00,1200.00,1.00,True,False
+270,"Replace Brake Master ","General",1.0,1200.00,1200.00,1.00,True,False
+270,"Replace Fuel Filter","General",1.0,800.00,800.00,1.00,True,False
+271,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+271,"Brake Service","General",1.0,1200.00,1200.00,1.00,True,False
+271,"Replace Brake Master","General",1.0,1200.00,1200.00,1.00,True,False
+271,"Replace Fuel Filter","General",1.0,800.00,800.00,1.00,True,False
+272,"Replace Timing Chain","General",1.0,3500.00,3500.00,1.00,True,False
+272,"Reseal Crankcase","General",1.0,2800.00,2800.00,1.00,True,False
+272,"Alternator Rebushing","General",1.0,1800.00,1800.00,1.00,True,False
+272,"Replace Valve Cover Gasket","General",1.0,1200.00,1200.00,1.00,True,False
+273,"Reface Rotor Disc","General",1.0,4000.00,4000.00,1.00,True,False
+273,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+273,"Change ATF","General",1.0,650.00,650.00,1.00,True,False
+273,"Replace Sparkplug","General",1.0,400.00,400.00,1.00,True,False
+273,"Throttle Body Cleaning","General",1.0,800.00,800.00,1.00,True,False
+273,"Replace Brake Master","General",1.0,1200.00,1200.00,1.00,True,False
+273,"Replace Engine Support","General",1.0,1200.00,1200.00,1.00,True,False
+273,"Caliper Kit","General",1.0,1500.00,1500.00,1.00,True,False
+274,"Replace Spark Plug and Injector","General",1.0,2500.00,2500.00,1.00,True,False
+274,"Brake Service","General",1.0,450.00,450.00,1.00,True,False
+274,"Repair","General",1.0,4000.00,4000.00,1.00,True,False
+275,"Intake Manifold Cleaning","General",1.0,1500.00,1500.00,1.00,True,False
+275,"Drain Fluid Steering","General",1.0,350.00,350.00,1.00,True,False
+275,"Replace Brake Hose Rear ","General",1.0,350.00,350.00,1.00,True,False
+275,"Drain Clutch fluid","General",1.0,250.00,250.00,1.00,True,False
+277,"Change oil","General",1.0,650.00,650.00,1.00,True,False
+277,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+277,"Cleaning Sparkplug","General",1.0,200.00,200.00,1.00,True,False
+278,"Replace Injector & Spark Plug","General",1.0,3500.00,3500.00,1.00,True,False
+278,"Brake Service","General",1.0,450.00,450.00,1.00,True,False
+278,"Reface FW & RR","General",1.0,4000.00,4000.00,1.00,True,False
+279,"Cleaning Evaporator","General",1.0,3500.00,3500.00,1.00,True,False
+279,"Flushing","General",1.0,500.00,500.00,1.00,True,False
+279,"Electrical","General",1.0,3500.00,3500.00,1.00,True,False
+280,"Change oil","General",1.0,850.00,850.00,1.00,True,False
+280,"Change ATF","General",1.0,650.00,650.00,1.00,True,False
+280,"Silicon oil additional","General",1.0,1200.00,1200.00,1.00,True,False
+280,"Change coolant","General",1.0,650.00,650.00,1.00,True,False
+280,"Replace Turbo","General",1.0,3500.00,3500.00,1.00,True,False
+280,"Replace filter","General",1.0,800.00,800.00,1.00,True,False
+281,"Change Oil","General",1.0,850.00,850.00,1.00,True,False
+281,"Change ATF","General",1.0,650.00,650.00,1.00,True,False
+281,"Addtitional Silicon Oil","General",1.0,1200.00,1200.00,1.00,True,False
+281,"Change Coolant","General",1.0,600.00,600.00,1.00,True,False
+281,"Replace Turbo","General",1.0,3500.00,3500.00,1.00,True,False
+281,"Brakes Service","General",1.0,1200.00,1200.00,1.00,True,False
+281,"Replace Transmission Filter","General",1.0,800.00,800.00,1.00,True,False
+282,"Machine cylinder block settings","General",1.0,25000.00,25000.00,1.00,True,False
+282,"General Overhaul","General",1.0,25000.00,25000.00,1.00,True,False
+283,"Machine Shop - General Settings","General",1.0,35000.00,35000.00,1.00,True,False
+283,"General Overhaul","General",1.0,35000.00,35000.00,1.00,True,False
+286,"Machine Shop","General",1.0,25000.00,25000.00,1.00,True,False
+286,"General Overhaul","General",1.0,25000.00,25000.00,1.00,True,False
+286,"Overhaul Transmission","General",1.0,8500.00,8500.00,1.00,True,False
+288,"Replace Tensioner","General",1.0,1800.00,1800.00,1.00,True,False
+289,"Replace Tensioner","General",1.0,1800.00,1800.00,1.00,True,False
+289,"Replace Compressor","General",1.0,3500.00,3500.00,1.00,True,False
+289,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+289,"Pull Down Condenser","General",1.0,500.00,500.00,1.00,True,False
+293,"Replace Oil Cooler","General",1.0,2500.00,2500.00,1.00,True,False
+293,"Hydro All Side Support","General",1.0,4500.00,4500.00,1.00,True,False
+294,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+294,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+294,"Replace crossjoint","General",1.0,2000.00,2000.00,1.00,True,False
+296,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+296,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+296,"Replace Center Bearing / Cross Joint","General",1.0,2000.00,2000.00,1.00,True,False
+296,"Repair Sliding Door RH & LH","General",1.0,3500.00,3500.00,1.00,True,False
+296,"Repair Wiper Linkage","General",1.0,4500.00,4500.00,1.00,True,False
+297,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+297,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+297,"Replace Center Bearing","General",1.0,2000.00,2000.00,1.00,True,False
+297,"Repair Sliding Door RH Side","General",1.0,1500.00,1500.00,1.00,True,False
+297,"Repair Wiper Linkage","General",1.0,4000.00,4000.00,1.00,True,False
+297,"Repair Sliding Door LH Side","General",1.0,1500.00,1500.00,1.00,True,False
+298,"Reface","General",1.0,3500.00,3500.00,1.00,True,False
+298,"Windshield Cleaning","General",1.0,2000.00,2000.00,1.00,True,False
+299,"Reface","General",1.0,3500.00,3500.00,1.00,True,False
+300,"Reface","General",1.0,3500.00,3500.00,1.00,True,False
+301,"Change Oil","General",1.0,500.00,500.00,1.00,True,False
+301,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+301,"Replace Propeller Assembly","General",1.0,1500.00,1500.00,1.00,True,False
+301,"Repair Sliding Door ","General",1.0,3000.00,3000.00,1.00,True,False
+301,"Repair Wiper Linkage","General",1.0,4000.00,4000.00,1.00,True,False
+301,"Hazard Relay/Replace","General",1.0,8000.00,8000.00,1.00,True,False
+302,"Reface","General",1.0,1500.00,1500.00,1.00,True,False
+302,"Brake service FW & RR","General",1.0,800.00,800.00,1.00,True,False
+303,"Change Oil","General",1.0,500.00,500.00,1.00,True,False
+303,"Brake Service FW & RR","General",1.0,800.00,800.00,1.00,True,False
+303,"Repair Sliding Door","General",1.0,3000.00,3000.00,1.00,True,False
+303,"Repair Wiper Linkage","General",1.0,4000.00,4000.00,1.00,True,False
+303,"Hazard Relay & Replace","General",1.0,8000.00,8000.00,1.00,True,False
+304,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+304,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+304,"Replace Propeller assy","General",1.0,2000.00,2000.00,1.00,True,False
+304,"Repair Sliding Door ","General",1.0,3000.00,3000.00,1.00,True,False
+304,"Repair Wiper Linkage","General",1.0,4000.00,4000.00,1.00,True,False
+304,"Replace Hazard Relay","General",1.0,8000.00,8000.00,1.00,True,False
+306,"Replace Timing belt","General",1.0,2000.00,2000.00,1.00,True,False
+306,"Tensioner bearing","General",1.0,1500.00,1500.00,1.00,True,False
+306,"Pilot Bearing","General",1.0,350.00,350.00,1.00,True,False
+306,"Release bearing","General",1.0,1500.00,1500.00,1.00,True,False
+307,"Replace Suspension bush","General",1.0,1800.00,1800.00,1.00,True,False
+307,"Replace Shock absorber","General",1.0,1200.00,1200.00,1.00,True,False
+307,"Rebushing rack end and pinion","General",1.0,8500.00,8500.00,1.00,True,False
+307,"Drain radiator","General",1.0,350.00,350.00,1.00,True,False
+307,"Cleaning throttle","General",1.0,500.00,500.00,1.00,True,False
+307,"Replace spark plugs","General",1.0,300.00,300.00,1.00,True,False
+307,"Replace Fan Belt","General",1.0,800.00,800.00,1.00,True,False
+307,"Resurface rotor disc ","General",1.0,3000.00,3000.00,1.00,True,False
+308,"REPLACE SUSPENSION","General",1.0,1800.00,1800.00,1.00,True,False
+308,"REPLACE SHOCK ABS","General",1.0,1200.00,1200.00,1.00,True,False
+308,"DRAIN RADIATOR","General",1.0,350.00,350.00,1.00,True,False
+308,"CLEANING THROTTLE","General",1.0,500.00,500.00,1.00,True,False
+308,"REPLACE SPARK PLUG","General",1.0,300.00,300.00,1.00,True,False
+308,"REPLACE FAN BELT","General",1.0,800.00,800.00,1.00,True,False
+308,"REFACE ROTOR DISC","General",1.0,2800.00,2800.00,1.00,True,False
+308,"ALIGNMENT","General",1.0,800.00,800.00,1.00,True,False
+310,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+310,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+310,"Replace Fuel Filter","General",1.0,450.00,450.00,1.00,True,False
+311,"Top Overhaul","General",1.0,15000.00,15000.00,1.00,True,False
+311,"Reface","General",1.0,4500.00,4500.00,1.00,True,False
+312,"change oil","General",1.0,650.00,650.00,1.00,True,False
+312,"brake service","General",1.0,800.00,800.00,1.00,True,False
+312,"replace spark plug","General",1.0,350.00,350.00,1.00,True,False
+312,"Scan","General",1.0,1500.00,1500.00,1.00,True,False
+313,"Brake Cleaning","General",1.0,800.00,800.00,1.00,True,False
+315,"Rebushing Rack n Pinion","General",1.0,8000.00,8000.00,1.00,True,False
+315,"Replace Suspension Bushings","General",1.0,800.00,800.00,1.00,True,False
+315,"Wheel Alignment","General",1.0,1500.00,1500.00,1.00,True,False
+316,"PCV","General",1.0,1500.00,1500.00,1.00,True,False
+316,"Top Overhaul","General",1.0,15000.00,15000.00,1.00,True,False
+316,"Reseal bearing","General",1.0,1500.00,1500.00,1.00,True,False
+316,"Reface","General",1.0,4500.00,4500.00,1.00,True,False
+317,"Pulldown condenser","General",1.0,2500.00,2500.00,1.00,True,False
+317,"Replace compressor","General",1.0,3500.00,3500.00,1.00,True,False
+317,"Flushing","General",1.0,1000.00,1000.00,1.00,True,False
+319,"Replace upper Suspension","General",1.0,800.00,800.00,1.00,True,False
+319,"Replace Ball Joint","General",1.0,1200.00,1200.00,1.00,True,False
+319,"Replace Tie Rod","General",1.0,1000.00,1000.00,1.00,True,False
+319,"Replace Trailing Arm Bushing","General",1.0,2000.00,2000.00,1.00,True,False
+319,"Replace Stabilizer Link & Clamp","General",1.0,600.00,600.00,1.00,True,False
+319,"Replace Suspension Arm","General",1.0,800.00,800.00,1.00,True,False
+319,"Wheel Alignment","General",1.0,800.00,800.00,1.00,True,False
+319,"Camber Alignment","General",1.0,2500.00,2500.00,1.00,True,False
+320,"Replace Rack & Pinion","General",1.0,3500.00,3500.00,1.00,True,False
+320,"Replace Alternator","General",1.0,1800.00,1800.00,1.00,True,False
+320,"Alignment","General",1.0,800.00,800.00,1.00,True,False
+321,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+321,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+321,"Rebushing Rack n Pinion","General",1.0,8500.00,8500.00,1.00,True,False
+321,"Alignment","General",1.0,800.00,800.00,1.00,True,False
+321,"Replace Suspension Bushing","General",1.0,1500.00,1500.00,1.00,True,False
+321,"Replace Wheel Hub Bearing","General",1.0,600.00,600.00,1.00,True,False
+321,"Change ATF","General",1.0,550.00,550.00,1.00,True,False
+322,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+322,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+323,"Change Oil","General",1.0,650.00,650.00,1.00,True,False
+323,"Brake Service","General",1.0,800.00,800.00,1.00,True,False
+323,"Refurbishing Rack n Pinion","General",1.0,8500.00,8500.00,1.00,True,False
+323,"Alignment","General",1.0,800.00,800.00,1.00,True,False
+323,"Repair Suspension","General",1.0,1500.00,1500.00,1.00,True,False
+323,"Replace Wheel Hub Bearing: LH & RH","General",1.0,1200.00,1200.00,1.00,True,False
+324,"Replace Clock Spring","General",1.0,2500.00,2500.00,1.00,True,False
+325,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+325,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+325,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+326,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+326,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+327,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+327,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+328,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+328,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+329,"Replace Suspension Bushing","Steering & Suspension",1.0,2050.00,2050.00,2.50,True,True
+329,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+329,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+330,"Replace Valve Cover Gasket","Engine",1.0,1600.00,1600.00,1.75,True,True
+330,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1050.00,1050.00,1.00,True,True
+331,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+331,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+331,"Wheel Alignment","Steering & Suspension",1.0,1250.00,1250.00,1.00,True,True
+332,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2100.00,2100.00,3.00,True,True
+333,"Top Overhaul","Engine Overhaul",1.0,11500.00,11500.00,14.00,True,True
+333,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+334,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+334,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+335,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+335,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+335,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1350.00,1350.00,2.00,True,True
+336,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+336,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+336,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+337,"Top Overhaul","Engine Overhaul",1.0,16600.00,16600.00,14.00,True,True
+337,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+338,"Brake Service","Braking",1.0,950.00,950.00,1.25,True,True
+338,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+339,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+339,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+340,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2250.00,2250.00,3.00,True,True
+341,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+341,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+341,"Wheel Alignment","Steering & Suspension",1.0,1250.00,1250.00,1.00,True,True
+342,"Replace Suspension Bushing","Steering & Suspension",1.0,1350.00,1350.00,2.50,True,True
+342,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,900.00,900.00,1.50,True,True
+342,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+342,"Replace Shock Absorbers","Steering & Suspension",1.0,1450.00,1450.00,2.00,True,True
+343,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+343,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+343,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+344,"Replace Suspension Bushing","Steering & Suspension",1.0,2150.00,2150.00,2.50,True,True
+344,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,800.00,800.00,1.50,True,True
+344,"Wheel Alignment","Steering & Suspension",1.0,1350.00,1350.00,1.00,True,True
+344,"Replace Shock Absorbers","Steering & Suspension",1.0,1600.00,1600.00,2.00,True,True
+345,"Brake Service","Braking",1.0,1150.00,1150.00,1.25,True,True
+345,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+345,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+346,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+346,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+346,"Rotor Disc Refacing","Braking",1.0,4050.00,4050.00,2.00,True,True
+347,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+347,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+347,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1650.00,1650.00,2.00,True,True
+348,"Replace Valve Cover Gasket","Engine",1.0,1250.00,1250.00,1.75,True,True
+348,"Replace Fan Belt / Serpentine Belt","Engine",1.0,650.00,650.00,1.00,True,True
+348,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+349,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+349,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+350,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+350,"Replace Brake Pads / Shoes","Braking",1.0,650.00,650.00,1.00,True,True
+351,"Brake Service","Braking",1.0,600.00,600.00,1.25,True,True
+351,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+352,"Replace Suspension Bushing","Steering & Suspension",1.0,1650.00,1650.00,2.50,True,True
+352,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+352,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+353,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+353,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+354,"Replace Suspension Bushing","Steering & Suspension",1.0,2200.00,2200.00,2.50,True,True
+354,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1300.00,1300.00,1.50,True,True
+354,"Wheel Alignment","Steering & Suspension",1.0,1250.00,1250.00,1.00,True,True
+355,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+355,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+356,"Down Clutch / Pulldown Transmission","Transmission",1.0,5300.00,5300.00,4.50,True,True
+357,"Replace Suspension Bushing","Steering & Suspension",1.0,1300.00,1300.00,2.50,True,True
+357,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,800.00,800.00,1.50,True,True
+357,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+358,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2500.00,2500.00,3.00,True,True
+358,"Cabin Filter Replacement","Maintenance",1.0,700.00,700.00,0.75,True,True
+359,"Replace Valve Cover Gasket","Engine",1.0,1500.00,1500.00,1.75,True,True
+359,"Replace Fan Belt / Serpentine Belt","Engine",1.0,950.00,950.00,1.00,True,True
+360,"Top Overhaul","Engine Overhaul",1.0,13300.00,13300.00,14.00,True,True
+361,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+361,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+362,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+362,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+363,"Brake Service","Braking",1.0,1150.00,1150.00,1.25,True,True
+363,"Replace Brake Pads / Shoes","Braking",1.0,1050.00,1050.00,1.00,True,True
+363,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+364,"Replace Valve Cover Gasket","Engine",1.0,1800.00,1800.00,1.75,True,True
+364,"Replace Fan Belt / Serpentine Belt","Engine",1.0,950.00,950.00,1.00,True,True
+364,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+365,"Replace Suspension Bushing","Steering & Suspension",1.0,2600.00,2600.00,2.50,True,True
+365,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,750.00,750.00,1.50,True,True
+365,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+365,"Replace Shock Absorbers","Steering & Suspension",1.0,1950.00,1950.00,2.00,True,True
+366,"Aircon Cleaning & Freon Charge","Climate Control",1.0,3100.00,3100.00,3.00,True,True
+367,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+367,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+367,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+368,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2750.00,2750.00,3.00,True,True
+369,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+369,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+370,"Replace Suspension Bushing","Steering & Suspension",1.0,2700.00,2700.00,2.50,True,True
+370,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1350.00,1350.00,1.50,True,True
+370,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+371,"Replace Suspension Bushing","Steering & Suspension",1.0,1800.00,1800.00,2.50,True,True
+371,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1200.00,1200.00,1.50,True,True
+371,"Wheel Alignment","Steering & Suspension",1.0,1150.00,1150.00,1.00,True,True
+371,"Replace Shock Absorbers","Steering & Suspension",1.0,1300.00,1300.00,2.00,True,True
+372,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2300.00,2300.00,3.00,True,True
+373,"Replace Valve Cover Gasket","Engine",1.0,1750.00,1750.00,1.75,True,True
+373,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1100.00,1100.00,1.00,True,True
+374,"Down Clutch / Pulldown Transmission","Transmission",1.0,3600.00,3600.00,4.50,True,True
+374,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+375,"Replace Suspension Bushing","Steering & Suspension",1.0,1100.00,1100.00,2.50,True,True
+375,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,900.00,900.00,1.50,True,True
+375,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+376,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+376,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+377,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+377,"Replace Fuel Filter","Maintenance",1.0,400.00,400.00,0.75,True,True
+378,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+378,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+378,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1850.00,1850.00,2.00,True,True
+379,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+379,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+380,"Down Clutch / Pulldown Transmission","Transmission",1.0,4500.00,4500.00,4.50,True,True
+381,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2800.00,2800.00,3.00,True,True
+381,"Cabin Filter Replacement","Maintenance",1.0,750.00,750.00,0.75,True,True
+382,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+382,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+382,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+383,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+383,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+384,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+384,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+385,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+385,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+385,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+386,"Change Oil","Maintenance",1.0,900.00,900.00,0.75,True,True
+386,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+386,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1600.00,1600.00,2.00,True,True
+387,"Brake Service","Braking",1.0,1100.00,1100.00,1.25,True,True
+387,"Replace Brake Pads / Shoes","Braking",1.0,1100.00,1100.00,1.00,True,True
+388,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+388,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+388,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1950.00,1950.00,2.00,True,True
+389,"Aircon Cleaning & Freon Charge","Climate Control",1.0,1800.00,1800.00,3.00,True,True
+390,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+390,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+391,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+391,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+392,"Replace Valve Cover Gasket","Engine",1.0,1450.00,1450.00,1.75,True,True
+392,"Replace Fan Belt / Serpentine Belt","Engine",1.0,850.00,850.00,1.00,True,True
+392,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+393,"Replace Suspension Bushing","Steering & Suspension",1.0,1150.00,1150.00,2.50,True,True
+393,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1350.00,1350.00,1.50,True,True
+393,"Wheel Alignment","Steering & Suspension",1.0,1400.00,1400.00,1.00,True,True
+394,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+394,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+394,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1600.00,1600.00,2.00,True,True
+395,"Replace Valve Cover Gasket","Engine",1.0,1500.00,1500.00,1.75,True,True
+395,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1100.00,1100.00,1.00,True,True
+396,"Down Clutch / Pulldown Transmission","Transmission",1.0,3300.00,3300.00,4.50,True,True
+396,"Change ATF / Transmission Oil","Transmission",1.0,700.00,700.00,0.75,True,True
+397,"Replace Suspension Bushing","Steering & Suspension",1.0,2350.00,2350.00,2.50,True,True
+397,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1150.00,1150.00,1.50,True,True
+397,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+398,"Replace Suspension Bushing","Steering & Suspension",1.0,1500.00,1500.00,2.50,True,True
+398,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+398,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+398,"Replace Shock Absorbers","Steering & Suspension",1.0,1500.00,1500.00,2.00,True,True
+399,"Replace Suspension Bushing","Steering & Suspension",1.0,1000.00,1000.00,2.50,True,True
+399,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+399,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+399,"Replace Shock Absorbers","Steering & Suspension",1.0,1600.00,1600.00,2.00,True,True
+400,"Down Clutch / Pulldown Transmission","Transmission",1.0,3300.00,3300.00,4.50,True,True
+401,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+401,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+401,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1150.00,1150.00,2.00,True,True
+402,"Brake Service","Braking",1.0,1050.00,1050.00,1.25,True,True
+402,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+403,"Down Clutch / Pulldown Transmission","Transmission",1.0,3550.00,3550.00,4.50,True,True
+403,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+404,"Change Oil","Maintenance",1.0,450.00,450.00,0.75,True,True
+404,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+404,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,2050.00,2050.00,2.00,True,True
+405,"Top Overhaul","Engine Overhaul",1.0,21500.00,21500.00,14.00,True,True
+405,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+406,"Replace Suspension Bushing","Steering & Suspension",1.0,2500.00,2500.00,2.50,True,True
+406,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,950.00,950.00,1.50,True,True
+406,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+406,"Replace Shock Absorbers","Steering & Suspension",1.0,1100.00,1100.00,2.00,True,True
+407,"Replace Suspension Bushing","Steering & Suspension",1.0,1150.00,1150.00,2.50,True,True
+407,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1200.00,1200.00,1.50,True,True
+407,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+407,"Replace Shock Absorbers","Steering & Suspension",1.0,1400.00,1400.00,2.00,True,True
+408,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+408,"Replace Brake Pads / Shoes","Braking",1.0,1000.00,1000.00,1.00,True,True
+408,"Rotor Disc Refacing","Braking",1.0,3050.00,3050.00,2.00,True,True
+409,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+409,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+409,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+410,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2400.00,2400.00,3.00,True,True
+411,"Replace Suspension Bushing","Steering & Suspension",1.0,2050.00,2050.00,2.50,True,True
+411,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1250.00,1250.00,1.50,True,True
+411,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+411,"Replace Shock Absorbers","Steering & Suspension",1.0,1550.00,1550.00,2.00,True,True
+412,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+412,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+413,"Down Clutch / Pulldown Transmission","Transmission",1.0,4350.00,4350.00,4.50,True,True
+413,"Change ATF / Transmission Oil","Transmission",1.0,800.00,800.00,0.75,True,True
+414,"Replace Suspension Bushing","Steering & Suspension",1.0,1950.00,1950.00,2.50,True,True
+414,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,600.00,600.00,1.50,True,True
+414,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+414,"Replace Shock Absorbers","Steering & Suspension",1.0,1150.00,1150.00,2.00,True,True
+415,"Brake Service","Braking",1.0,1200.00,1200.00,1.25,True,True
+415,"Replace Brake Pads / Shoes","Braking",1.0,850.00,850.00,1.00,True,True
+415,"Rotor Disc Refacing","Braking",1.0,2950.00,2950.00,2.00,True,True
+416,"Replace Suspension Bushing","Steering & Suspension",1.0,2050.00,2050.00,2.50,True,True
+416,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1250.00,1250.00,1.50,True,True
+416,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+416,"Replace Shock Absorbers","Steering & Suspension",1.0,1400.00,1400.00,2.00,True,True
+417,"Down Clutch / Pulldown Transmission","Transmission",1.0,3750.00,3750.00,4.50,True,True
+418,"Replace Suspension Bushing","Steering & Suspension",1.0,1350.00,1350.00,2.50,True,True
+418,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,650.00,650.00,1.50,True,True
+418,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+419,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+419,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+420,"Down Clutch / Pulldown Transmission","Transmission",1.0,3250.00,3250.00,4.50,True,True
+421,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+421,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+422,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+422,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+423,"Brake Service","Braking",1.0,650.00,650.00,1.25,True,True
+423,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+423,"Rotor Disc Refacing","Braking",1.0,2700.00,2700.00,2.00,True,True
+424,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+424,"Replace Brake Pads / Shoes","Braking",1.0,550.00,550.00,1.00,True,True
+425,"Replace Suspension Bushing","Steering & Suspension",1.0,1550.00,1550.00,2.50,True,True
+425,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+425,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+426,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+426,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+426,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+427,"Replace Valve Cover Gasket","Engine",1.0,1200.00,1200.00,1.75,True,True
+427,"Replace Fan Belt / Serpentine Belt","Engine",1.0,750.00,750.00,1.00,True,True
+428,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2700.00,2700.00,3.00,True,True
+428,"Cabin Filter Replacement","Maintenance",1.0,800.00,800.00,0.75,True,True
+429,"Replace Valve Cover Gasket","Engine",1.0,1250.00,1250.00,1.75,True,True
+429,"Replace Fan Belt / Serpentine Belt","Engine",1.0,950.00,950.00,1.00,True,True
+430,"Replace Suspension Bushing","Steering & Suspension",1.0,2250.00,2250.00,2.50,True,True
+430,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+430,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+431,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+431,"Replace Brake Pads / Shoes","Braking",1.0,650.00,650.00,1.00,True,True
+432,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+432,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+432,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+433,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+433,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+434,"Replace Valve Cover Gasket","Engine",1.0,1950.00,1950.00,1.75,True,True
+434,"Replace Fan Belt / Serpentine Belt","Engine",1.0,700.00,700.00,1.00,True,True
+435,"Down Clutch / Pulldown Transmission","Transmission",1.0,3050.00,3050.00,4.50,True,True
+436,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+436,"Replace Brake Pads / Shoes","Braking",1.0,1000.00,1000.00,1.00,True,True
+436,"Wheel Alignment","Steering & Suspension",1.0,1250.00,1250.00,1.00,True,True
+437,"Down Clutch / Pulldown Transmission","Transmission",1.0,3200.00,3200.00,4.50,True,True
+437,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+438,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2450.00,2450.00,3.00,True,True
+438,"Cabin Filter Replacement","Maintenance",1.0,550.00,550.00,0.75,True,True
+439,"Down Clutch / Pulldown Transmission","Transmission",1.0,4200.00,4200.00,4.50,True,True
+440,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+440,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+441,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+441,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+441,"Rotor Disc Refacing","Braking",1.0,3450.00,3450.00,2.00,True,True
+442,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+442,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+443,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+443,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+444,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+444,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+445,"Replace Suspension Bushing","Steering & Suspension",1.0,1350.00,1350.00,2.50,True,True
+445,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+445,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+446,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2300.00,2300.00,3.00,True,True
+446,"Cabin Filter Replacement","Maintenance",1.0,750.00,750.00,0.75,True,True
+447,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+447,"Replace Fuel Filter","Maintenance",1.0,400.00,400.00,0.75,True,True
+447,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,2000.00,2000.00,2.00,True,True
+448,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2450.00,2450.00,3.00,True,True
+448,"Cabin Filter Replacement","Maintenance",1.0,650.00,650.00,0.75,True,True
+449,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+449,"Replace Fuel Filter","Maintenance",1.0,750.00,750.00,0.75,True,True
+450,"Top Overhaul","Engine Overhaul",1.0,15850.00,15850.00,14.00,True,True
+450,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+451,"Brake Service","Braking",1.0,950.00,950.00,1.25,True,True
+451,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+452,"Replace Suspension Bushing","Steering & Suspension",1.0,1150.00,1150.00,2.50,True,True
+452,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1150.00,1150.00,1.50,True,True
+452,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+452,"Replace Shock Absorbers","Steering & Suspension",1.0,1150.00,1150.00,2.00,True,True
+453,"Brake Service","Braking",1.0,850.00,850.00,1.25,True,True
+453,"Replace Brake Pads / Shoes","Braking",1.0,650.00,650.00,1.00,True,True
+453,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+454,"Brake Service","Braking",1.0,1000.00,1000.00,1.25,True,True
+454,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+455,"Replace Suspension Bushing","Steering & Suspension",1.0,1950.00,1950.00,2.50,True,True
+455,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,750.00,750.00,1.50,True,True
+455,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+455,"Replace Shock Absorbers","Steering & Suspension",1.0,1450.00,1450.00,2.00,True,True
+456,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+456,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+457,"Replace Suspension Bushing","Steering & Suspension",1.0,2300.00,2300.00,2.50,True,True
+457,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1100.00,1100.00,1.50,True,True
+457,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+458,"Replace Suspension Bushing","Steering & Suspension",1.0,2200.00,2200.00,2.50,True,True
+458,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+458,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+459,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+459,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+460,"Down Clutch / Pulldown Transmission","Transmission",1.0,3100.00,3100.00,4.50,True,True
+461,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+461,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+462,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2000.00,2000.00,3.00,True,True
+463,"Replace Suspension Bushing","Steering & Suspension",1.0,1700.00,1700.00,2.50,True,True
+463,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,800.00,800.00,1.50,True,True
+463,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+463,"Replace Shock Absorbers","Steering & Suspension",1.0,900.00,900.00,2.00,True,True
+464,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+464,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+464,"Rotor Disc Refacing","Braking",1.0,2850.00,2850.00,2.00,True,True
+465,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+465,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+466,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+466,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+467,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+467,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+467,"Wheel Alignment","Steering & Suspension",1.0,1300.00,1300.00,1.00,True,True
+468,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2500.00,2500.00,3.00,True,True
+468,"Cabin Filter Replacement","Maintenance",1.0,600.00,600.00,0.75,True,True
+469,"Down Clutch / Pulldown Transmission","Transmission",1.0,3900.00,3900.00,4.50,True,True
+469,"Change ATF / Transmission Oil","Transmission",1.0,700.00,700.00,0.75,True,True
+470,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+470,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+471,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+471,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+472,"Down Clutch / Pulldown Transmission","Transmission",1.0,3900.00,3900.00,4.50,True,True
+472,"Change ATF / Transmission Oil","Transmission",1.0,650.00,650.00,0.75,True,True
+473,"Aircon Cleaning & Freon Charge","Climate Control",1.0,3050.00,3050.00,3.00,True,True
+473,"Cabin Filter Replacement","Maintenance",1.0,650.00,650.00,0.75,True,True
+474,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+474,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+475,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+475,"Replace Brake Pads / Shoes","Braking",1.0,850.00,850.00,1.00,True,True
+476,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+476,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+476,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+477,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+477,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+478,"Brake Service","Braking",1.0,1150.00,1150.00,1.25,True,True
+478,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+479,"Replace Suspension Bushing","Steering & Suspension",1.0,1250.00,1250.00,2.50,True,True
+479,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,750.00,750.00,1.50,True,True
+479,"Wheel Alignment","Steering & Suspension",1.0,1250.00,1250.00,1.00,True,True
+479,"Replace Shock Absorbers","Steering & Suspension",1.0,1550.00,1550.00,2.00,True,True
+480,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+480,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+481,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+481,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+482,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+482,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+483,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2900.00,2900.00,3.00,True,True
+484,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+484,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+484,"Wheel Alignment","Steering & Suspension",1.0,1400.00,1400.00,1.00,True,True
+485,"Replace Suspension Bushing","Steering & Suspension",1.0,1450.00,1450.00,2.50,True,True
+485,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,750.00,750.00,1.50,True,True
+485,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+485,"Replace Shock Absorbers","Steering & Suspension",1.0,1550.00,1550.00,2.00,True,True
+486,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+486,"Replace Brake Pads / Shoes","Braking",1.0,850.00,850.00,1.00,True,True
+487,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+487,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+488,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+488,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+489,"Replace Suspension Bushing","Steering & Suspension",1.0,1450.00,1450.00,2.50,True,True
+489,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1450.00,1450.00,1.50,True,True
+489,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+490,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2650.00,2650.00,3.00,True,True
+490,"Cabin Filter Replacement","Maintenance",1.0,600.00,600.00,0.75,True,True
+491,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2600.00,2600.00,3.00,True,True
+491,"Cabin Filter Replacement","Maintenance",1.0,600.00,600.00,0.75,True,True
+492,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+492,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+492,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+493,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+493,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+493,"Wheel Alignment","Steering & Suspension",1.0,1150.00,1150.00,1.00,True,True
+494,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+494,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+494,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+495,"Brake Service","Braking",1.0,550.00,550.00,1.25,True,True
+495,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+495,"Rotor Disc Refacing","Braking",1.0,2800.00,2800.00,2.00,True,True
+496,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+496,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+496,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1700.00,1700.00,2.00,True,True
+497,"Brake Service","Braking",1.0,1250.00,1250.00,1.25,True,True
+497,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+498,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+498,"Replace Fuel Filter","Maintenance",1.0,750.00,750.00,0.75,True,True
+498,"Wheel Alignment","Steering & Suspension",1.0,1300.00,1300.00,1.00,True,True
+499,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+499,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+500,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2850.00,2850.00,3.00,True,True
+501,"Replace Suspension Bushing","Steering & Suspension",1.0,1850.00,1850.00,2.50,True,True
+501,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,800.00,800.00,1.50,True,True
+501,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+501,"Replace Shock Absorbers","Steering & Suspension",1.0,1700.00,1700.00,2.00,True,True
+502,"Aircon Cleaning & Freon Charge","Climate Control",1.0,1600.00,1600.00,3.00,True,True
+503,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+503,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+504,"Top Overhaul","Engine Overhaul",1.0,11800.00,11800.00,14.00,True,True
+505,"Brake Service","Braking",1.0,950.00,950.00,1.25,True,True
+505,"Replace Brake Pads / Shoes","Braking",1.0,600.00,600.00,1.00,True,True
+506,"Replace Suspension Bushing","Steering & Suspension",1.0,1050.00,1050.00,2.50,True,True
+506,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1100.00,1100.00,1.50,True,True
+506,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+507,"Brake Service","Braking",1.0,1200.00,1200.00,1.25,True,True
+507,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+507,"Rotor Disc Refacing","Braking",1.0,1900.00,1900.00,2.00,True,True
+508,"Down Clutch / Pulldown Transmission","Transmission",1.0,3450.00,3450.00,4.50,True,True
+509,"Replace Valve Cover Gasket","Engine",1.0,1000.00,1000.00,1.75,True,True
+509,"Replace Fan Belt / Serpentine Belt","Engine",1.0,600.00,600.00,1.00,True,True
+510,"Replace Valve Cover Gasket","Engine",1.0,1400.00,1400.00,1.75,True,True
+510,"Replace Fan Belt / Serpentine Belt","Engine",1.0,600.00,600.00,1.00,True,True
+510,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+511,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+511,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+512,"Down Clutch / Pulldown Transmission","Transmission",1.0,3450.00,3450.00,4.50,True,True
+512,"Change ATF / Transmission Oil","Transmission",1.0,750.00,750.00,0.75,True,True
+513,"Brake Service","Braking",1.0,950.00,950.00,1.25,True,True
+513,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+514,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2500.00,2500.00,3.00,True,True
+515,"Replace Suspension Bushing","Steering & Suspension",1.0,2200.00,2200.00,2.50,True,True
+515,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1200.00,1200.00,1.50,True,True
+515,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+516,"Replace Suspension Bushing","Steering & Suspension",1.0,1750.00,1750.00,2.50,True,True
+516,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1150.00,1150.00,1.50,True,True
+516,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+517,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+517,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+518,"Replace Valve Cover Gasket","Engine",1.0,1600.00,1600.00,1.75,True,True
+518,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1350.00,1350.00,1.00,True,True
+519,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+519,"Replace Brake Pads / Shoes","Braking",1.0,600.00,600.00,1.00,True,True
+519,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+520,"Aircon Cleaning & Freon Charge","Climate Control",1.0,3700.00,3700.00,3.00,True,True
+520,"Cabin Filter Replacement","Maintenance",1.0,600.00,600.00,0.75,True,True
+521,"Replace Valve Cover Gasket","Engine",1.0,1950.00,1950.00,1.75,True,True
+521,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1000.00,1000.00,1.00,True,True
+521,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+522,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2300.00,2300.00,3.00,True,True
+523,"Down Clutch / Pulldown Transmission","Transmission",1.0,3700.00,3700.00,4.50,True,True
+524,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2150.00,2150.00,3.00,True,True
+525,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+525,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+525,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+526,"Replace Suspension Bushing","Steering & Suspension",1.0,1950.00,1950.00,2.50,True,True
+526,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1100.00,1100.00,1.50,True,True
+526,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+527,"Replace Suspension Bushing","Steering & Suspension",1.0,1450.00,1450.00,2.50,True,True
+527,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1100.00,1100.00,1.50,True,True
+527,"Wheel Alignment","Steering & Suspension",1.0,1250.00,1250.00,1.00,True,True
+527,"Replace Shock Absorbers","Steering & Suspension",1.0,1450.00,1450.00,2.00,True,True
+528,"Down Clutch / Pulldown Transmission","Transmission",1.0,3150.00,3150.00,4.50,True,True
+528,"Change ATF / Transmission Oil","Transmission",1.0,800.00,800.00,0.75,True,True
+529,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+529,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+530,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+530,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+531,"Replace Valve Cover Gasket","Engine",1.0,1700.00,1700.00,1.75,True,True
+531,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1100.00,1100.00,1.00,True,True
+532,"Replace Suspension Bushing","Steering & Suspension",1.0,2300.00,2300.00,2.50,True,True
+532,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+532,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+532,"Replace Shock Absorbers","Steering & Suspension",1.0,1050.00,1050.00,2.00,True,True
+533,"Down Clutch / Pulldown Transmission","Transmission",1.0,3650.00,3650.00,4.50,True,True
+533,"Change ATF / Transmission Oil","Transmission",1.0,750.00,750.00,0.75,True,True
+534,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+534,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+534,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1400.00,1400.00,2.00,True,True
+535,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+535,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+535,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,2200.00,2200.00,2.00,True,True
+536,"Replace Suspension Bushing","Steering & Suspension",1.0,1600.00,1600.00,2.50,True,True
+536,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1300.00,1300.00,1.50,True,True
+536,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+536,"Replace Shock Absorbers","Steering & Suspension",1.0,1100.00,1100.00,2.00,True,True
+537,"Top Overhaul","Engine Overhaul",1.0,11800.00,11800.00,14.00,True,True
+538,"Down Clutch / Pulldown Transmission","Transmission",1.0,4500.00,4500.00,4.50,True,True
+538,"Change ATF / Transmission Oil","Transmission",1.0,650.00,650.00,0.75,True,True
+539,"Replace Suspension Bushing","Steering & Suspension",1.0,2150.00,2150.00,2.50,True,True
+539,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+539,"Wheel Alignment","Steering & Suspension",1.0,1150.00,1150.00,1.00,True,True
+540,"Brake Service","Braking",1.0,1050.00,1050.00,1.25,True,True
+540,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+541,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+541,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+542,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+542,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+543,"Replace Valve Cover Gasket","Engine",1.0,1450.00,1450.00,1.75,True,True
+543,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1050.00,1050.00,1.00,True,True
+544,"Brake Service","Braking",1.0,1150.00,1150.00,1.25,True,True
+544,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+545,"Replace Suspension Bushing","Steering & Suspension",1.0,1800.00,1800.00,2.50,True,True
+545,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1200.00,1200.00,1.50,True,True
+545,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+546,"Replace Suspension Bushing","Steering & Suspension",1.0,2100.00,2100.00,2.50,True,True
+546,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,900.00,900.00,1.50,True,True
+546,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+547,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+547,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+548,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+548,"Replace Fuel Filter","Maintenance",1.0,400.00,400.00,0.75,True,True
+548,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1450.00,1450.00,2.00,True,True
+549,"Brake Service","Braking",1.0,1000.00,1000.00,1.25,True,True
+549,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+550,"Replace Suspension Bushing","Steering & Suspension",1.0,1600.00,1600.00,2.50,True,True
+550,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+550,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+550,"Replace Shock Absorbers","Steering & Suspension",1.0,1450.00,1450.00,2.00,True,True
+551,"Replace Suspension Bushing","Steering & Suspension",1.0,1600.00,1600.00,2.50,True,True
+551,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1300.00,1300.00,1.50,True,True
+551,"Wheel Alignment","Steering & Suspension",1.0,1300.00,1300.00,1.00,True,True
+552,"Down Clutch / Pulldown Transmission","Transmission",1.0,4750.00,4750.00,4.50,True,True
+553,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+553,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+554,"Down Clutch / Pulldown Transmission","Transmission",1.0,4100.00,4100.00,4.50,True,True
+555,"Replace Suspension Bushing","Steering & Suspension",1.0,2050.00,2050.00,2.50,True,True
+555,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+555,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+556,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+556,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+556,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+557,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+557,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+558,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+558,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+559,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+559,"Replace Brake Pads / Shoes","Braking",1.0,1050.00,1050.00,1.00,True,True
+559,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+560,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2600.00,2600.00,3.00,True,True
+561,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+561,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+562,"Brake Service","Braking",1.0,650.00,650.00,1.25,True,True
+562,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+563,"Top Overhaul","Engine Overhaul",1.0,13800.00,13800.00,14.00,True,True
+563,"Replace Spark Plugs","Ignition & Electrical",1.0,300.00,300.00,0.50,True,True
+564,"Down Clutch / Pulldown Transmission","Transmission",1.0,3000.00,3000.00,4.50,True,True
+565,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+565,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+565,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1850.00,1850.00,2.00,True,True
+566,"Top Overhaul","Engine Overhaul",1.0,18850.00,18850.00,14.00,True,True
+566,"Replace Spark Plugs","Ignition & Electrical",1.0,250.00,250.00,0.50,True,True
+567,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+567,"Replace Fuel Filter","Maintenance",1.0,400.00,400.00,0.75,True,True
+567,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1150.00,1150.00,2.00,True,True
+568,"Replace Valve Cover Gasket","Engine",1.0,1350.00,1350.00,1.75,True,True
+568,"Replace Fan Belt / Serpentine Belt","Engine",1.0,900.00,900.00,1.00,True,True
+569,"Brake Service","Braking",1.0,1150.00,1150.00,1.25,True,True
+569,"Replace Brake Pads / Shoes","Braking",1.0,1000.00,1000.00,1.00,True,True
+569,"Wheel Alignment","Steering & Suspension",1.0,1250.00,1250.00,1.00,True,True
+570,"Down Clutch / Pulldown Transmission","Transmission",1.0,3050.00,3050.00,4.50,True,True
+571,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+571,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+572,"Brake Service","Braking",1.0,1000.00,1000.00,1.25,True,True
+572,"Replace Brake Pads / Shoes","Braking",1.0,1000.00,1000.00,1.00,True,True
+573,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+573,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+574,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+574,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+575,"Brake Service","Braking",1.0,850.00,850.00,1.25,True,True
+575,"Replace Brake Pads / Shoes","Braking",1.0,1050.00,1050.00,1.00,True,True
+576,"Brake Service","Braking",1.0,600.00,600.00,1.25,True,True
+576,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+576,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+577,"Replace Valve Cover Gasket","Engine",1.0,1450.00,1450.00,1.75,True,True
+577,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1050.00,1050.00,1.00,True,True
+578,"Down Clutch / Pulldown Transmission","Transmission",1.0,3750.00,3750.00,4.50,True,True
+579,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+579,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+579,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,2250.00,2250.00,2.00,True,True
+580,"Brake Service","Braking",1.0,650.00,650.00,1.25,True,True
+580,"Replace Brake Pads / Shoes","Braking",1.0,600.00,600.00,1.00,True,True
+581,"Replace Suspension Bushing","Steering & Suspension",1.0,1350.00,1350.00,2.50,True,True
+581,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,750.00,750.00,1.50,True,True
+581,"Wheel Alignment","Steering & Suspension",1.0,1300.00,1300.00,1.00,True,True
+582,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+582,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+583,"Down Clutch / Pulldown Transmission","Transmission",1.0,3100.00,3100.00,4.50,True,True
+583,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+584,"Down Clutch / Pulldown Transmission","Transmission",1.0,3900.00,3900.00,4.50,True,True
+585,"Brake Service","Braking",1.0,600.00,600.00,1.25,True,True
+585,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+586,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+586,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+586,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+587,"Replace Suspension Bushing","Steering & Suspension",1.0,1650.00,1650.00,2.50,True,True
+587,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+587,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+587,"Replace Shock Absorbers","Steering & Suspension",1.0,1600.00,1600.00,2.00,True,True
+588,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+588,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+589,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+589,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+589,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+590,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+590,"Replace Fuel Filter","Maintenance",1.0,400.00,400.00,0.75,True,True
+590,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1850.00,1850.00,2.00,True,True
+591,"Down Clutch / Pulldown Transmission","Transmission",1.0,4400.00,4400.00,4.50,True,True
+591,"Change ATF / Transmission Oil","Transmission",1.0,650.00,650.00,0.75,True,True
+592,"Down Clutch / Pulldown Transmission","Transmission",1.0,4400.00,4400.00,4.50,True,True
+593,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+593,"Replace Brake Pads / Shoes","Braking",1.0,650.00,650.00,1.00,True,True
+593,"Rotor Disc Refacing","Braking",1.0,3850.00,3850.00,2.00,True,True
+594,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+594,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+594,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1950.00,1950.00,2.00,True,True
+595,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+595,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+596,"Replace Suspension Bushing","Steering & Suspension",1.0,1250.00,1250.00,2.50,True,True
+596,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1100.00,1100.00,1.50,True,True
+596,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+596,"Replace Shock Absorbers","Steering & Suspension",1.0,1650.00,1650.00,2.00,True,True
+597,"Replace Suspension Bushing","Steering & Suspension",1.0,1800.00,1800.00,2.50,True,True
+597,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1400.00,1400.00,1.50,True,True
+597,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+598,"Brake Service","Braking",1.0,1000.00,1000.00,1.25,True,True
+598,"Replace Brake Pads / Shoes","Braking",1.0,650.00,650.00,1.00,True,True
+598,"Rotor Disc Refacing","Braking",1.0,3350.00,3350.00,2.00,True,True
+599,"Replace Suspension Bushing","Steering & Suspension",1.0,1550.00,1550.00,2.50,True,True
+599,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+599,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+600,"Replace Suspension Bushing","Steering & Suspension",1.0,1750.00,1750.00,2.50,True,True
+600,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+600,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+601,"Replace Suspension Bushing","Steering & Suspension",1.0,2150.00,2150.00,2.50,True,True
+601,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,950.00,950.00,1.50,True,True
+601,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+601,"Replace Shock Absorbers","Steering & Suspension",1.0,1600.00,1600.00,2.00,True,True
+602,"Top Overhaul","Engine Overhaul",1.0,17400.00,17400.00,14.00,True,True
+603,"Down Clutch / Pulldown Transmission","Transmission",1.0,4250.00,4250.00,4.50,True,True
+604,"Brake Service","Braking",1.0,650.00,650.00,1.25,True,True
+604,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+604,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+605,"Down Clutch / Pulldown Transmission","Transmission",1.0,4300.00,4300.00,4.50,True,True
+606,"Brake Service","Braking",1.0,850.00,850.00,1.25,True,True
+606,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+607,"Replace Suspension Bushing","Steering & Suspension",1.0,1450.00,1450.00,2.50,True,True
+607,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+607,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+607,"Replace Shock Absorbers","Steering & Suspension",1.0,1300.00,1300.00,2.00,True,True
+608,"Brake Service","Braking",1.0,1150.00,1150.00,1.25,True,True
+608,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+609,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+609,"Replace Brake Pads / Shoes","Braking",1.0,600.00,600.00,1.00,True,True
+610,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+610,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+611,"Replace Suspension Bushing","Steering & Suspension",1.0,1850.00,1850.00,2.50,True,True
+611,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1150.00,1150.00,1.50,True,True
+611,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+611,"Replace Shock Absorbers","Steering & Suspension",1.0,1450.00,1450.00,2.00,True,True
+612,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2900.00,2900.00,3.00,True,True
+613,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+613,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+614,"Replace Suspension Bushing","Steering & Suspension",1.0,2100.00,2100.00,2.50,True,True
+614,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,900.00,900.00,1.50,True,True
+614,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+614,"Replace Shock Absorbers","Steering & Suspension",1.0,1100.00,1100.00,2.00,True,True
+615,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+615,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+615,"Wheel Alignment","Steering & Suspension",1.0,1450.00,1450.00,1.00,True,True
+616,"Replace Suspension Bushing","Steering & Suspension",1.0,2050.00,2050.00,2.50,True,True
+616,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+616,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+617,"Top Overhaul","Engine Overhaul",1.0,19400.00,19400.00,14.00,True,True
+618,"Replace Suspension Bushing","Steering & Suspension",1.0,1400.00,1400.00,2.50,True,True
+618,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1100.00,1100.00,1.50,True,True
+618,"Wheel Alignment","Steering & Suspension",1.0,1400.00,1400.00,1.00,True,True
+619,"Down Clutch / Pulldown Transmission","Transmission",1.0,3100.00,3100.00,4.50,True,True
+620,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2050.00,2050.00,3.00,True,True
+620,"Cabin Filter Replacement","Maintenance",1.0,750.00,750.00,0.75,True,True
+621,"Replace Suspension Bushing","Steering & Suspension",1.0,1750.00,1750.00,2.50,True,True
+621,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1150.00,1150.00,1.50,True,True
+621,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+621,"Replace Shock Absorbers","Steering & Suspension",1.0,1200.00,1200.00,2.00,True,True
+622,"Down Clutch / Pulldown Transmission","Transmission",1.0,3950.00,3950.00,4.50,True,True
+623,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+623,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+624,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2750.00,2750.00,3.00,True,True
+625,"Brake Service","Braking",1.0,950.00,950.00,1.25,True,True
+625,"Replace Brake Pads / Shoes","Braking",1.0,1050.00,1050.00,1.00,True,True
+626,"Change Oil","Maintenance",1.0,450.00,450.00,0.75,True,True
+626,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+626,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+627,"Down Clutch / Pulldown Transmission","Transmission",1.0,3600.00,3600.00,4.50,True,True
+628,"Brake Service","Braking",1.0,1150.00,1150.00,1.25,True,True
+628,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+629,"Top Overhaul","Engine Overhaul",1.0,15250.00,15250.00,14.00,True,True
+630,"Down Clutch / Pulldown Transmission","Transmission",1.0,3450.00,3450.00,4.50,True,True
+631,"Replace Suspension Bushing","Steering & Suspension",1.0,1300.00,1300.00,2.50,True,True
+631,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+631,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+632,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+632,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+633,"Replace Suspension Bushing","Steering & Suspension",1.0,1350.00,1350.00,2.50,True,True
+633,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1200.00,1200.00,1.50,True,True
+633,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+633,"Replace Shock Absorbers","Steering & Suspension",1.0,1750.00,1750.00,2.00,True,True
+634,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+634,"Replace Fuel Filter","Maintenance",1.0,750.00,750.00,0.75,True,True
+634,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1550.00,1550.00,2.00,True,True
+635,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+635,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+635,"Wheel Alignment","Steering & Suspension",1.0,1150.00,1150.00,1.00,True,True
+636,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+636,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+637,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+637,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+637,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1600.00,1600.00,2.00,True,True
+638,"Replace Suspension Bushing","Steering & Suspension",1.0,1550.00,1550.00,2.50,True,True
+638,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,800.00,800.00,1.50,True,True
+638,"Wheel Alignment","Steering & Suspension",1.0,1300.00,1300.00,1.00,True,True
+638,"Replace Shock Absorbers","Steering & Suspension",1.0,1600.00,1600.00,2.00,True,True
+639,"Replace Suspension Bushing","Steering & Suspension",1.0,1600.00,1600.00,2.50,True,True
+639,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1150.00,1150.00,1.50,True,True
+639,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+639,"Replace Shock Absorbers","Steering & Suspension",1.0,1750.00,1750.00,2.00,True,True
+640,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+640,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+641,"Replace Suspension Bushing","Steering & Suspension",1.0,1300.00,1300.00,2.50,True,True
+641,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+641,"Wheel Alignment","Steering & Suspension",1.0,1350.00,1350.00,1.00,True,True
+642,"Down Clutch / Pulldown Transmission","Transmission",1.0,3100.00,3100.00,4.50,True,True
+643,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+643,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+643,"Wheel Alignment","Steering & Suspension",1.0,1150.00,1150.00,1.00,True,True
+644,"Brake Service","Braking",1.0,650.00,650.00,1.25,True,True
+644,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+645,"Down Clutch / Pulldown Transmission","Transmission",1.0,3700.00,3700.00,4.50,True,True
+646,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+646,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+646,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1900.00,1900.00,2.00,True,True
+647,"Replace Valve Cover Gasket","Engine",1.0,1000.00,1000.00,1.75,True,True
+647,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1350.00,1350.00,1.00,True,True
+648,"Brake Service","Braking",1.0,1250.00,1250.00,1.25,True,True
+648,"Replace Brake Pads / Shoes","Braking",1.0,650.00,650.00,1.00,True,True
+649,"Replace Valve Cover Gasket","Engine",1.0,1150.00,1150.00,1.75,True,True
+649,"Replace Fan Belt / Serpentine Belt","Engine",1.0,850.00,850.00,1.00,True,True
+649,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+650,"Down Clutch / Pulldown Transmission","Transmission",1.0,4900.00,4900.00,4.50,True,True
+650,"Change ATF / Transmission Oil","Transmission",1.0,800.00,800.00,0.75,True,True
+651,"Down Clutch / Pulldown Transmission","Transmission",1.0,3100.00,3100.00,4.50,True,True
+652,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+652,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+653,"Replace Suspension Bushing","Steering & Suspension",1.0,2500.00,2500.00,2.50,True,True
+653,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1550.00,1550.00,1.50,True,True
+653,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+653,"Replace Shock Absorbers","Steering & Suspension",1.0,2050.00,2050.00,2.00,True,True
+654,"Replace Valve Cover Gasket","Engine",1.0,950.00,950.00,1.75,True,True
+654,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1050.00,1050.00,1.00,True,True
+654,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+655,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+655,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+656,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+656,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+657,"Replace Suspension Bushing","Steering & Suspension",1.0,1650.00,1650.00,2.50,True,True
+657,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1250.00,1250.00,1.50,True,True
+657,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+658,"Down Clutch / Pulldown Transmission","Transmission",1.0,3700.00,3700.00,4.50,True,True
+658,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+659,"Replace Valve Cover Gasket","Engine",1.0,1350.00,1350.00,1.75,True,True
+659,"Replace Fan Belt / Serpentine Belt","Engine",1.0,950.00,950.00,1.00,True,True
+660,"Down Clutch / Pulldown Transmission","Transmission",1.0,3400.00,3400.00,4.50,True,True
+660,"Change ATF / Transmission Oil","Transmission",1.0,750.00,750.00,0.75,True,True
+661,"Top Overhaul","Engine Overhaul",1.0,17050.00,17050.00,14.00,True,True
+662,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+662,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+662,"Rotor Disc Refacing","Braking",1.0,4200.00,4200.00,2.00,True,True
+663,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2350.00,2350.00,3.00,True,True
+664,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+664,"Replace Brake Pads / Shoes","Braking",1.0,1050.00,1050.00,1.00,True,True
+664,"Rotor Disc Refacing","Braking",1.0,2450.00,2450.00,2.00,True,True
+665,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+665,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+665,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+666,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+666,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+666,"Rotor Disc Refacing","Braking",1.0,4100.00,4100.00,2.00,True,True
+667,"Brake Service","Braking",1.0,950.00,950.00,1.25,True,True
+667,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+667,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+668,"Down Clutch / Pulldown Transmission","Transmission",1.0,4700.00,4700.00,4.50,True,True
+668,"Change ATF / Transmission Oil","Transmission",1.0,650.00,650.00,0.75,True,True
+669,"Down Clutch / Pulldown Transmission","Transmission",1.0,3450.00,3450.00,4.50,True,True
+669,"Change ATF / Transmission Oil","Transmission",1.0,750.00,750.00,0.75,True,True
+670,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+670,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+671,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2850.00,2850.00,3.00,True,True
+671,"Cabin Filter Replacement","Maintenance",1.0,650.00,650.00,0.75,True,True
+672,"Brake Service","Braking",1.0,550.00,550.00,1.25,True,True
+672,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+673,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2900.00,2900.00,3.00,True,True
+673,"Cabin Filter Replacement","Maintenance",1.0,800.00,800.00,0.75,True,True
+674,"Replace Suspension Bushing","Steering & Suspension",1.0,1850.00,1850.00,2.50,True,True
+674,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,850.00,850.00,1.50,True,True
+674,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+674,"Replace Shock Absorbers","Steering & Suspension",1.0,1600.00,1600.00,2.00,True,True
+675,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+675,"Replace Brake Pads / Shoes","Braking",1.0,1150.00,1150.00,1.00,True,True
+676,"Replace Suspension Bushing","Steering & Suspension",1.0,1800.00,1800.00,2.50,True,True
+676,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1100.00,1100.00,1.50,True,True
+676,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+677,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+677,"Replace Brake Pads / Shoes","Braking",1.0,1150.00,1150.00,1.00,True,True
+678,"Replace Suspension Bushing","Steering & Suspension",1.0,1850.00,1850.00,2.50,True,True
+678,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+678,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+679,"Replace Suspension Bushing","Steering & Suspension",1.0,2500.00,2500.00,2.50,True,True
+679,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,750.00,750.00,1.50,True,True
+679,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+679,"Replace Shock Absorbers","Steering & Suspension",1.0,1800.00,1800.00,2.00,True,True
+680,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2400.00,2400.00,3.00,True,True
+681,"Brake Service","Braking",1.0,1000.00,1000.00,1.25,True,True
+681,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+681,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+682,"Change Oil","Maintenance",1.0,900.00,900.00,0.75,True,True
+682,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+682,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+683,"Down Clutch / Pulldown Transmission","Transmission",1.0,4150.00,4150.00,4.50,True,True
+683,"Change ATF / Transmission Oil","Transmission",1.0,700.00,700.00,0.75,True,True
+684,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+684,"Replace Brake Pads / Shoes","Braking",1.0,600.00,600.00,1.00,True,True
+685,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+685,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+686,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2500.00,2500.00,3.00,True,True
+687,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+687,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+688,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+688,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+689,"Replace Suspension Bushing","Steering & Suspension",1.0,2050.00,2050.00,2.50,True,True
+689,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1200.00,1200.00,1.50,True,True
+689,"Wheel Alignment","Steering & Suspension",1.0,1350.00,1350.00,1.00,True,True
+690,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+690,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+691,"Down Clutch / Pulldown Transmission","Transmission",1.0,3100.00,3100.00,4.50,True,True
+692,"Brake Service","Braking",1.0,1350.00,1350.00,1.25,True,True
+692,"Replace Brake Pads / Shoes","Braking",1.0,650.00,650.00,1.00,True,True
+693,"Brake Service","Braking",1.0,1000.00,1000.00,1.25,True,True
+693,"Replace Brake Pads / Shoes","Braking",1.0,850.00,850.00,1.00,True,True
+693,"Rotor Disc Refacing","Braking",1.0,3600.00,3600.00,2.00,True,True
+694,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+694,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+694,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+695,"Replace Suspension Bushing","Steering & Suspension",1.0,2150.00,2150.00,2.50,True,True
+695,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,950.00,950.00,1.50,True,True
+695,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+696,"Aircon Cleaning & Freon Charge","Climate Control",1.0,3200.00,3200.00,3.00,True,True
+697,"Brake Service","Braking",1.0,950.00,950.00,1.25,True,True
+697,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+698,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+698,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+699,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+699,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+700,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+700,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+700,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,2200.00,2200.00,2.00,True,True
+701,"Replace Valve Cover Gasket","Engine",1.0,1200.00,1200.00,1.75,True,True
+701,"Replace Fan Belt / Serpentine Belt","Engine",1.0,950.00,950.00,1.00,True,True
+701,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+702,"Brake Service","Braking",1.0,650.00,650.00,1.25,True,True
+702,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+702,"Rotor Disc Refacing","Braking",1.0,3750.00,3750.00,2.00,True,True
+703,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+703,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+704,"Replace Valve Cover Gasket","Engine",1.0,1450.00,1450.00,1.75,True,True
+704,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1000.00,1000.00,1.00,True,True
+705,"Replace Suspension Bushing","Steering & Suspension",1.0,1200.00,1200.00,2.50,True,True
+705,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1150.00,1150.00,1.50,True,True
+705,"Wheel Alignment","Steering & Suspension",1.0,1250.00,1250.00,1.00,True,True
+706,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2950.00,2950.00,3.00,True,True
+707,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+707,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+708,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+708,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+708,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1600.00,1600.00,2.00,True,True
+709,"Replace Suspension Bushing","Steering & Suspension",1.0,1450.00,1450.00,2.50,True,True
+709,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,750.00,750.00,1.50,True,True
+709,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+709,"Replace Shock Absorbers","Steering & Suspension",1.0,950.00,950.00,2.00,True,True
+710,"Down Clutch / Pulldown Transmission","Transmission",1.0,4700.00,4700.00,4.50,True,True
+710,"Change ATF / Transmission Oil","Transmission",1.0,600.00,600.00,0.75,True,True
+711,"Down Clutch / Pulldown Transmission","Transmission",1.0,3100.00,3100.00,4.50,True,True
+712,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+712,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+712,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+713,"Replace Suspension Bushing","Steering & Suspension",1.0,1450.00,1450.00,2.50,True,True
+713,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+713,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+713,"Replace Shock Absorbers","Steering & Suspension",1.0,1150.00,1150.00,2.00,True,True
+714,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2700.00,2700.00,3.00,True,True
+714,"Cabin Filter Replacement","Maintenance",1.0,650.00,650.00,0.75,True,True
+715,"Brake Service","Braking",1.0,1050.00,1050.00,1.25,True,True
+715,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+716,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+716,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+717,"Brake Service","Braking",1.0,850.00,850.00,1.25,True,True
+717,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+717,"Rotor Disc Refacing","Braking",1.0,2850.00,2850.00,2.00,True,True
+718,"Replace Suspension Bushing","Steering & Suspension",1.0,1700.00,1700.00,2.50,True,True
+718,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1250.00,1250.00,1.50,True,True
+718,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+718,"Replace Shock Absorbers","Steering & Suspension",1.0,1800.00,1800.00,2.00,True,True
+719,"Replace Suspension Bushing","Steering & Suspension",1.0,1350.00,1350.00,2.50,True,True
+719,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+719,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+719,"Replace Shock Absorbers","Steering & Suspension",1.0,1350.00,1350.00,2.00,True,True
+720,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+720,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+721,"Replace Valve Cover Gasket","Engine",1.0,1300.00,1300.00,1.75,True,True
+721,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1000.00,1000.00,1.00,True,True
+721,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+722,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+722,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+723,"Replace Suspension Bushing","Steering & Suspension",1.0,2650.00,2650.00,2.50,True,True
+723,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+723,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+723,"Replace Shock Absorbers","Steering & Suspension",1.0,1400.00,1400.00,2.00,True,True
+724,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2550.00,2550.00,3.00,True,True
+725,"Brake Service","Braking",1.0,1000.00,1000.00,1.25,True,True
+725,"Replace Brake Pads / Shoes","Braking",1.0,1100.00,1100.00,1.00,True,True
+725,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+726,"Brake Service","Braking",1.0,1300.00,1300.00,1.25,True,True
+726,"Replace Brake Pads / Shoes","Braking",1.0,850.00,850.00,1.00,True,True
+726,"Rotor Disc Refacing","Braking",1.0,2250.00,2250.00,2.00,True,True
+727,"Brake Service","Braking",1.0,950.00,950.00,1.25,True,True
+727,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+728,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+728,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+728,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+729,"Replace Suspension Bushing","Steering & Suspension",1.0,1700.00,1700.00,2.50,True,True
+729,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+729,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+730,"Replace Suspension Bushing","Steering & Suspension",1.0,2450.00,2450.00,2.50,True,True
+730,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+730,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+730,"Replace Shock Absorbers","Steering & Suspension",1.0,2000.00,2000.00,2.00,True,True
+731,"Replace Valve Cover Gasket","Engine",1.0,1050.00,1050.00,1.75,True,True
+731,"Replace Fan Belt / Serpentine Belt","Engine",1.0,750.00,750.00,1.00,True,True
+732,"Replace Suspension Bushing","Steering & Suspension",1.0,1700.00,1700.00,2.50,True,True
+732,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1450.00,1450.00,1.50,True,True
+732,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+732,"Replace Shock Absorbers","Steering & Suspension",1.0,1850.00,1850.00,2.00,True,True
+733,"Brake Service","Braking",1.0,650.00,650.00,1.25,True,True
+733,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+733,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+734,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2500.00,2500.00,3.00,True,True
+734,"Cabin Filter Replacement","Maintenance",1.0,650.00,650.00,0.75,True,True
+735,"Down Clutch / Pulldown Transmission","Transmission",1.0,3050.00,3050.00,4.50,True,True
+736,"Brake Service","Braking",1.0,650.00,650.00,1.25,True,True
+736,"Replace Brake Pads / Shoes","Braking",1.0,1100.00,1100.00,1.00,True,True
+737,"Brake Service","Braking",1.0,1000.00,1000.00,1.25,True,True
+737,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+738,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+738,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+739,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+739,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+739,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1400.00,1400.00,2.00,True,True
+740,"Brake Service","Braking",1.0,1050.00,1050.00,1.25,True,True
+740,"Replace Brake Pads / Shoes","Braking",1.0,600.00,600.00,1.00,True,True
+740,"Rotor Disc Refacing","Braking",1.0,3750.00,3750.00,2.00,True,True
+741,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+741,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+742,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+742,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+743,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2400.00,2400.00,3.00,True,True
+744,"Replace Valve Cover Gasket","Engine",1.0,1100.00,1100.00,1.75,True,True
+744,"Replace Fan Belt / Serpentine Belt","Engine",1.0,900.00,900.00,1.00,True,True
+744,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+745,"Brake Service","Braking",1.0,850.00,850.00,1.25,True,True
+745,"Replace Brake Pads / Shoes","Braking",1.0,850.00,850.00,1.00,True,True
+746,"Brake Service","Braking",1.0,850.00,850.00,1.25,True,True
+746,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+747,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+747,"Replace Fuel Filter","Maintenance",1.0,750.00,750.00,0.75,True,True
+748,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+748,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+749,"Change Oil","Maintenance",1.0,450.00,450.00,0.75,True,True
+749,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+750,"Replace Suspension Bushing","Steering & Suspension",1.0,1000.00,1000.00,2.50,True,True
+750,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,800.00,800.00,1.50,True,True
+750,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+751,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2850.00,2850.00,3.00,True,True
+752,"Top Overhaul","Engine Overhaul",1.0,15700.00,15700.00,14.00,True,True
+753,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+753,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+754,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+754,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+755,"Down Clutch / Pulldown Transmission","Transmission",1.0,3050.00,3050.00,4.50,True,True
+755,"Change ATF / Transmission Oil","Transmission",1.0,850.00,850.00,0.75,True,True
+756,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2500.00,2500.00,3.00,True,True
+757,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+757,"Replace Brake Pads / Shoes","Braking",1.0,850.00,850.00,1.00,True,True
+758,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+758,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+759,"Down Clutch / Pulldown Transmission","Transmission",1.0,4300.00,4300.00,4.50,True,True
+760,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+760,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+761,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+761,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+761,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+762,"Down Clutch / Pulldown Transmission","Transmission",1.0,3750.00,3750.00,4.50,True,True
+763,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+763,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+764,"Brake Service","Braking",1.0,650.00,650.00,1.25,True,True
+764,"Replace Brake Pads / Shoes","Braking",1.0,550.00,550.00,1.00,True,True
+765,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+765,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+766,"Top Overhaul","Engine Overhaul",1.0,14800.00,14800.00,14.00,True,True
+767,"Replace Valve Cover Gasket","Engine",1.0,1200.00,1200.00,1.75,True,True
+767,"Replace Fan Belt / Serpentine Belt","Engine",1.0,800.00,800.00,1.00,True,True
+768,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+768,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+769,"Replace Suspension Bushing","Steering & Suspension",1.0,2250.00,2250.00,2.50,True,True
+769,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,750.00,750.00,1.50,True,True
+769,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+770,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2650.00,2650.00,3.00,True,True
+771,"Replace Valve Cover Gasket","Engine",1.0,1400.00,1400.00,1.75,True,True
+771,"Replace Fan Belt / Serpentine Belt","Engine",1.0,800.00,800.00,1.00,True,True
+771,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+772,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+772,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+772,"Wheel Alignment","Steering & Suspension",1.0,1150.00,1150.00,1.00,True,True
+773,"Replace Suspension Bushing","Steering & Suspension",1.0,1850.00,1850.00,2.50,True,True
+773,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1100.00,1100.00,1.50,True,True
+773,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+773,"Replace Shock Absorbers","Steering & Suspension",1.0,1200.00,1200.00,2.00,True,True
+774,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+774,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+775,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+775,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+776,"Top Overhaul","Engine Overhaul",1.0,10450.00,10450.00,14.00,True,True
+777,"Top Overhaul","Engine Overhaul",1.0,17700.00,17700.00,14.00,True,True
+778,"Replace Valve Cover Gasket","Engine",1.0,1100.00,1100.00,1.75,True,True
+778,"Replace Fan Belt / Serpentine Belt","Engine",1.0,700.00,700.00,1.00,True,True
+779,"Top Overhaul","Engine Overhaul",1.0,17650.00,17650.00,14.00,True,True
+779,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+780,"Replace Suspension Bushing","Steering & Suspension",1.0,1150.00,1150.00,2.50,True,True
+780,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,900.00,900.00,1.50,True,True
+780,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+781,"Replace Valve Cover Gasket","Engine",1.0,1350.00,1350.00,1.75,True,True
+781,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1200.00,1200.00,1.00,True,True
+782,"Top Overhaul","Engine Overhaul",1.0,17700.00,17700.00,14.00,True,True
+782,"Replace Spark Plugs","Ignition & Electrical",1.0,400.00,400.00,0.50,True,True
+783,"Replace Suspension Bushing","Steering & Suspension",1.0,2500.00,2500.00,2.50,True,True
+783,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1250.00,1250.00,1.50,True,True
+783,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+784,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+784,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+785,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+785,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+786,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2750.00,2750.00,3.00,True,True
+786,"Cabin Filter Replacement","Maintenance",1.0,700.00,700.00,0.75,True,True
+787,"Replace Suspension Bushing","Steering & Suspension",1.0,1750.00,1750.00,2.50,True,True
+787,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+787,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+788,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+788,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+789,"Brake Service","Braking",1.0,950.00,950.00,1.25,True,True
+789,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+789,"Rotor Disc Refacing","Braking",1.0,2950.00,2950.00,2.00,True,True
+790,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+790,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+790,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1550.00,1550.00,2.00,True,True
+791,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+791,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+791,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+792,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+792,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+792,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+793,"Replace Suspension Bushing","Steering & Suspension",1.0,2700.00,2700.00,2.50,True,True
+793,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,750.00,750.00,1.50,True,True
+793,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+794,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+794,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+795,"Aircon Cleaning & Freon Charge","Climate Control",1.0,3650.00,3650.00,3.00,True,True
+796,"Replace Suspension Bushing","Steering & Suspension",1.0,1300.00,1300.00,2.50,True,True
+796,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1150.00,1150.00,1.50,True,True
+796,"Wheel Alignment","Steering & Suspension",1.0,1150.00,1150.00,1.00,True,True
+796,"Replace Shock Absorbers","Steering & Suspension",1.0,1650.00,1650.00,2.00,True,True
+797,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+797,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+798,"Brake Service","Braking",1.0,1250.00,1250.00,1.25,True,True
+798,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+798,"Rotor Disc Refacing","Braking",1.0,2200.00,2200.00,2.00,True,True
+799,"Replace Suspension Bushing","Steering & Suspension",1.0,1450.00,1450.00,2.50,True,True
+799,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,800.00,800.00,1.50,True,True
+799,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+799,"Replace Shock Absorbers","Steering & Suspension",1.0,1200.00,1200.00,2.00,True,True
+800,"Replace Suspension Bushing","Steering & Suspension",1.0,2450.00,2450.00,2.50,True,True
+800,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,800.00,800.00,1.50,True,True
+800,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+801,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+801,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+801,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+802,"Aircon Cleaning & Freon Charge","Climate Control",1.0,3150.00,3150.00,3.00,True,True
+802,"Cabin Filter Replacement","Maintenance",1.0,750.00,750.00,0.75,True,True
+803,"Replace Suspension Bushing","Steering & Suspension",1.0,2150.00,2150.00,2.50,True,True
+803,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+803,"Wheel Alignment","Steering & Suspension",1.0,1150.00,1150.00,1.00,True,True
+804,"Replace Suspension Bushing","Steering & Suspension",1.0,1450.00,1450.00,2.50,True,True
+804,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1150.00,1150.00,1.50,True,True
+804,"Wheel Alignment","Steering & Suspension",1.0,1400.00,1400.00,1.00,True,True
+804,"Replace Shock Absorbers","Steering & Suspension",1.0,1400.00,1400.00,2.00,True,True
+805,"Down Clutch / Pulldown Transmission","Transmission",1.0,3250.00,3250.00,4.50,True,True
+806,"Replace Valve Cover Gasket","Engine",1.0,1350.00,1350.00,1.75,True,True
+806,"Replace Fan Belt / Serpentine Belt","Engine",1.0,800.00,800.00,1.00,True,True
+807,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2050.00,2050.00,3.00,True,True
+807,"Cabin Filter Replacement","Maintenance",1.0,550.00,550.00,0.75,True,True
+808,"Down Clutch / Pulldown Transmission","Transmission",1.0,3000.00,3000.00,4.50,True,True
+808,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+809,"Replace Suspension Bushing","Steering & Suspension",1.0,1050.00,1050.00,2.50,True,True
+809,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1200.00,1200.00,1.50,True,True
+809,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+809,"Replace Shock Absorbers","Steering & Suspension",1.0,1650.00,1650.00,2.00,True,True
+810,"Replace Valve Cover Gasket","Engine",1.0,1400.00,1400.00,1.75,True,True
+810,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1150.00,1150.00,1.00,True,True
+810,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+811,"Replace Valve Cover Gasket","Engine",1.0,1300.00,1300.00,1.75,True,True
+811,"Replace Fan Belt / Serpentine Belt","Engine",1.0,900.00,900.00,1.00,True,True
+811,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+812,"Replace Valve Cover Gasket","Engine",1.0,1000.00,1000.00,1.75,True,True
+812,"Replace Fan Belt / Serpentine Belt","Engine",1.0,700.00,700.00,1.00,True,True
+812,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+813,"Down Clutch / Pulldown Transmission","Transmission",1.0,4400.00,4400.00,4.50,True,True
+814,"Brake Service","Braking",1.0,850.00,850.00,1.25,True,True
+814,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+815,"Brake Service","Braking",1.0,1150.00,1150.00,1.25,True,True
+815,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+816,"Replace Valve Cover Gasket","Engine",1.0,1650.00,1650.00,1.75,True,True
+816,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1000.00,1000.00,1.00,True,True
+816,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+817,"Replace Valve Cover Gasket","Engine",1.0,2050.00,2050.00,1.75,True,True
+817,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1200.00,1200.00,1.00,True,True
+818,"Down Clutch / Pulldown Transmission","Transmission",1.0,3650.00,3650.00,4.50,True,True
+818,"Change ATF / Transmission Oil","Transmission",1.0,650.00,650.00,0.75,True,True
+819,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+819,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+820,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+820,"Replace Fuel Filter","Maintenance",1.0,400.00,400.00,0.75,True,True
+821,"Brake Service","Braking",1.0,800.00,800.00,1.25,True,True
+821,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+822,"Brake Service","Braking",1.0,1000.00,1000.00,1.25,True,True
+822,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+823,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+823,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+824,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2200.00,2200.00,3.00,True,True
+825,"Top Overhaul","Engine Overhaul",1.0,14050.00,14050.00,14.00,True,True
+826,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+826,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+827,"Replace Suspension Bushing","Steering & Suspension",1.0,1600.00,1600.00,2.50,True,True
+827,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1350.00,1350.00,1.50,True,True
+827,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+828,"Brake Service","Braking",1.0,1000.00,1000.00,1.25,True,True
+828,"Replace Brake Pads / Shoes","Braking",1.0,1050.00,1050.00,1.00,True,True
+828,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+829,"Replace Suspension Bushing","Steering & Suspension",1.0,2000.00,2000.00,2.50,True,True
+829,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1300.00,1300.00,1.50,True,True
+829,"Wheel Alignment","Steering & Suspension",1.0,1300.00,1300.00,1.00,True,True
+830,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2600.00,2600.00,3.00,True,True
+830,"Cabin Filter Replacement","Maintenance",1.0,650.00,650.00,0.75,True,True
+831,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+831,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+831,"Wheel Alignment","Steering & Suspension",1.0,1300.00,1300.00,1.00,True,True
+832,"Replace Valve Cover Gasket","Engine",1.0,1100.00,1100.00,1.75,True,True
+832,"Replace Fan Belt / Serpentine Belt","Engine",1.0,850.00,850.00,1.00,True,True
+833,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+833,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+834,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+834,"Replace Fuel Filter","Maintenance",1.0,400.00,400.00,0.75,True,True
+835,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+835,"Replace Brake Pads / Shoes","Braking",1.0,1100.00,1100.00,1.00,True,True
+835,"Rotor Disc Refacing","Braking",1.0,2950.00,2950.00,2.00,True,True
+836,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+836,"Replace Fuel Filter","Maintenance",1.0,750.00,750.00,0.75,True,True
+837,"Replace Valve Cover Gasket","Engine",1.0,1700.00,1700.00,1.75,True,True
+837,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1000.00,1000.00,1.00,True,True
+837,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+838,"Replace Suspension Bushing","Steering & Suspension",1.0,1700.00,1700.00,2.50,True,True
+838,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+838,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+839,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+839,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+839,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+840,"Top Overhaul","Engine Overhaul",1.0,17300.00,17300.00,14.00,True,True
+841,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+841,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+842,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2150.00,2150.00,3.00,True,True
+843,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+843,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+843,"Wheel Alignment","Steering & Suspension",1.0,1250.00,1250.00,1.00,True,True
+844,"Brake Service","Braking",1.0,1050.00,1050.00,1.25,True,True
+844,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+844,"Rotor Disc Refacing","Braking",1.0,3350.00,3350.00,2.00,True,True
+845,"Down Clutch / Pulldown Transmission","Transmission",1.0,3450.00,3450.00,4.50,True,True
+845,"Change ATF / Transmission Oil","Transmission",1.0,700.00,700.00,0.75,True,True
+846,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+846,"Replace Fuel Filter","Maintenance",1.0,400.00,400.00,0.75,True,True
+846,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1550.00,1550.00,2.00,True,True
+847,"Replace Suspension Bushing","Steering & Suspension",1.0,1650.00,1650.00,2.50,True,True
+847,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1350.00,1350.00,1.50,True,True
+847,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+848,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+848,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+849,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+849,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+850,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+850,"Replace Brake Pads / Shoes","Braking",1.0,600.00,600.00,1.00,True,True
+851,"Replace Valve Cover Gasket","Engine",1.0,2150.00,2150.00,1.75,True,True
+851,"Replace Fan Belt / Serpentine Belt","Engine",1.0,600.00,600.00,1.00,True,True
+851,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+852,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+852,"Replace Fuel Filter","Maintenance",1.0,400.00,400.00,0.75,True,True
+853,"Top Overhaul","Engine Overhaul",1.0,15950.00,15950.00,14.00,True,True
+854,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+854,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+855,"Down Clutch / Pulldown Transmission","Transmission",1.0,4200.00,4200.00,4.50,True,True
+856,"Brake Service","Braking",1.0,1050.00,1050.00,1.25,True,True
+856,"Replace Brake Pads / Shoes","Braking",1.0,1000.00,1000.00,1.00,True,True
+856,"Rotor Disc Refacing","Braking",1.0,3150.00,3150.00,2.00,True,True
+857,"Top Overhaul","Engine Overhaul",1.0,15000.00,15000.00,14.00,True,True
+858,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2950.00,2950.00,3.00,True,True
+859,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2450.00,2450.00,3.00,True,True
+860,"Top Overhaul","Engine Overhaul",1.0,11600.00,11600.00,14.00,True,True
+860,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+861,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2700.00,2700.00,3.00,True,True
+862,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+862,"Replace Brake Pads / Shoes","Braking",1.0,1050.00,1050.00,1.00,True,True
+863,"Replace Suspension Bushing","Steering & Suspension",1.0,1150.00,1150.00,2.50,True,True
+863,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1300.00,1300.00,1.50,True,True
+863,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+863,"Replace Shock Absorbers","Steering & Suspension",1.0,1000.00,1000.00,2.00,True,True
+864,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+864,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+865,"Replace Suspension Bushing","Steering & Suspension",1.0,2400.00,2400.00,2.50,True,True
+865,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,800.00,800.00,1.50,True,True
+865,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+866,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2500.00,2500.00,3.00,True,True
+867,"Aircon Cleaning & Freon Charge","Climate Control",1.0,3450.00,3450.00,3.00,True,True
+868,"Replace Suspension Bushing","Steering & Suspension",1.0,1450.00,1450.00,2.50,True,True
+868,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+868,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+869,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2500.00,2500.00,3.00,True,True
+870,"Down Clutch / Pulldown Transmission","Transmission",1.0,3900.00,3900.00,4.50,True,True
+871,"Brake Service","Braking",1.0,1150.00,1150.00,1.25,True,True
+871,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+872,"Replace Valve Cover Gasket","Engine",1.0,1350.00,1350.00,1.75,True,True
+872,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1000.00,1000.00,1.00,True,True
+872,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+873,"Brake Service","Braking",1.0,1150.00,1150.00,1.25,True,True
+873,"Replace Brake Pads / Shoes","Braking",1.0,1050.00,1050.00,1.00,True,True
+874,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+874,"Replace Fuel Filter","Maintenance",1.0,750.00,750.00,0.75,True,True
+875,"Aircon Cleaning & Freon Charge","Climate Control",1.0,1600.00,1600.00,3.00,True,True
+876,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+876,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+876,"Rotor Disc Refacing","Braking",1.0,3050.00,3050.00,2.00,True,True
+877,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+877,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+877,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1800.00,1800.00,2.00,True,True
+878,"Brake Service","Braking",1.0,1350.00,1350.00,1.25,True,True
+878,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+879,"Aircon Cleaning & Freon Charge","Climate Control",1.0,3200.00,3200.00,3.00,True,True
+879,"Cabin Filter Replacement","Maintenance",1.0,700.00,700.00,0.75,True,True
+880,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+880,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+880,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+881,"Top Overhaul","Engine Overhaul",1.0,14400.00,14400.00,14.00,True,True
+882,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+882,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+882,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,2000.00,2000.00,2.00,True,True
+883,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+883,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+883,"Wheel Alignment","Steering & Suspension",1.0,1150.00,1150.00,1.00,True,True
+884,"Replace Suspension Bushing","Steering & Suspension",1.0,2100.00,2100.00,2.50,True,True
+884,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1400.00,1400.00,1.50,True,True
+884,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+884,"Replace Shock Absorbers","Steering & Suspension",1.0,1750.00,1750.00,2.00,True,True
+885,"Brake Service","Braking",1.0,1000.00,1000.00,1.25,True,True
+885,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+886,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+886,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+887,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2300.00,2300.00,3.00,True,True
+887,"Cabin Filter Replacement","Maintenance",1.0,750.00,750.00,0.75,True,True
+888,"Aircon Cleaning & Freon Charge","Climate Control",1.0,3050.00,3050.00,3.00,True,True
+889,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+889,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+890,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+890,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+890,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1700.00,1700.00,2.00,True,True
+891,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+891,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+891,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1600.00,1600.00,2.00,True,True
+892,"Brake Service","Braking",1.0,1250.00,1250.00,1.25,True,True
+892,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+892,"Rotor Disc Refacing","Braking",1.0,2700.00,2700.00,2.00,True,True
+893,"Brake Service","Braking",1.0,1200.00,1200.00,1.25,True,True
+893,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+894,"Replace Valve Cover Gasket","Engine",1.0,1500.00,1500.00,1.75,True,True
+894,"Replace Fan Belt / Serpentine Belt","Engine",1.0,950.00,950.00,1.00,True,True
+894,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+895,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+895,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+895,"Rotor Disc Refacing","Braking",1.0,4050.00,4050.00,2.00,True,True
+896,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+896,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+896,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1400.00,1400.00,2.00,True,True
+897,"Replace Valve Cover Gasket","Engine",1.0,1050.00,1050.00,1.75,True,True
+897,"Replace Fan Belt / Serpentine Belt","Engine",1.0,900.00,900.00,1.00,True,True
+898,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+898,"Replace Brake Pads / Shoes","Braking",1.0,600.00,600.00,1.00,True,True
+899,"Replace Valve Cover Gasket","Engine",1.0,1500.00,1500.00,1.75,True,True
+899,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1450.00,1450.00,1.00,True,True
+899,"Change Oil","Maintenance",1.0,800.00,800.00,0.75,True,True
+900,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+900,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+900,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1750.00,1750.00,2.00,True,True
+901,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+901,"Replace Brake Pads / Shoes","Braking",1.0,600.00,600.00,1.00,True,True
+902,"Replace Valve Cover Gasket","Engine",1.0,1100.00,1100.00,1.75,True,True
+902,"Replace Fan Belt / Serpentine Belt","Engine",1.0,750.00,750.00,1.00,True,True
+903,"Brake Service","Braking",1.0,1150.00,1150.00,1.25,True,True
+903,"Replace Brake Pads / Shoes","Braking",1.0,1050.00,1050.00,1.00,True,True
+903,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+904,"Brake Service","Braking",1.0,950.00,950.00,1.25,True,True
+904,"Replace Brake Pads / Shoes","Braking",1.0,1050.00,1050.00,1.00,True,True
+905,"Replace Suspension Bushing","Steering & Suspension",1.0,1650.00,1650.00,2.50,True,True
+905,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+905,"Wheel Alignment","Steering & Suspension",1.0,1150.00,1150.00,1.00,True,True
+905,"Replace Shock Absorbers","Steering & Suspension",1.0,1250.00,1250.00,2.00,True,True
+906,"Brake Service","Braking",1.0,600.00,600.00,1.25,True,True
+906,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+907,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+907,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+908,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+908,"Replace Fuel Filter","Maintenance",1.0,700.00,700.00,0.75,True,True
+909,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+909,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+909,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,2150.00,2150.00,2.00,True,True
+910,"Replace Suspension Bushing","Steering & Suspension",1.0,2250.00,2250.00,2.50,True,True
+910,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+910,"Wheel Alignment","Steering & Suspension",1.0,1150.00,1150.00,1.00,True,True
+911,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+911,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+912,"Brake Service","Braking",1.0,1100.00,1100.00,1.25,True,True
+912,"Replace Brake Pads / Shoes","Braking",1.0,750.00,750.00,1.00,True,True
+913,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+913,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+914,"Down Clutch / Pulldown Transmission","Transmission",1.0,3050.00,3050.00,4.50,True,True
+914,"Change ATF / Transmission Oil","Transmission",1.0,750.00,750.00,0.75,True,True
+915,"Down Clutch / Pulldown Transmission","Transmission",1.0,3800.00,3800.00,4.50,True,True
+916,"Brake Service","Braking",1.0,1200.00,1200.00,1.25,True,True
+916,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+916,"Rotor Disc Refacing","Braking",1.0,3100.00,3100.00,2.00,True,True
+917,"Brake Service","Braking",1.0,1250.00,1250.00,1.25,True,True
+917,"Replace Brake Pads / Shoes","Braking",1.0,1100.00,1100.00,1.00,True,True
+918,"Brake Service","Braking",1.0,1050.00,1050.00,1.25,True,True
+918,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+918,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+919,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+919,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+920,"Down Clutch / Pulldown Transmission","Transmission",1.0,3100.00,3100.00,4.50,True,True
+921,"Replace Suspension Bushing","Steering & Suspension",1.0,2250.00,2250.00,2.50,True,True
+921,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1200.00,1200.00,1.50,True,True
+921,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+922,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+922,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+922,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,2150.00,2150.00,2.00,True,True
+923,"Replace Valve Cover Gasket","Engine",1.0,1900.00,1900.00,1.75,True,True
+923,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1100.00,1100.00,1.00,True,True
+924,"Brake Service","Braking",1.0,750.00,750.00,1.25,True,True
+924,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+924,"Wheel Alignment","Steering & Suspension",1.0,1400.00,1400.00,1.00,True,True
+925,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+925,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+925,"Wheel Alignment","Steering & Suspension",1.0,1150.00,1150.00,1.00,True,True
+926,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+926,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+927,"Replace Suspension Bushing","Steering & Suspension",1.0,1850.00,1850.00,2.50,True,True
+927,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+927,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+927,"Replace Shock Absorbers","Steering & Suspension",1.0,1400.00,1400.00,2.00,True,True
+928,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+928,"Replace Fuel Filter","Maintenance",1.0,400.00,400.00,0.75,True,True
+929,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2850.00,2850.00,3.00,True,True
+930,"Replace Suspension Bushing","Steering & Suspension",1.0,1850.00,1850.00,2.50,True,True
+930,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1350.00,1350.00,1.50,True,True
+930,"Wheel Alignment","Steering & Suspension",1.0,1100.00,1100.00,1.00,True,True
+931,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+931,"Replace Fuel Filter","Maintenance",1.0,750.00,750.00,0.75,True,True
+931,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+932,"Replace Valve Cover Gasket","Engine",1.0,1500.00,1500.00,1.75,True,True
+932,"Replace Fan Belt / Serpentine Belt","Engine",1.0,650.00,650.00,1.00,True,True
+933,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2200.00,2200.00,3.00,True,True
+933,"Cabin Filter Replacement","Maintenance",1.0,700.00,700.00,0.75,True,True
+934,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+934,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+935,"Brake Service","Braking",1.0,700.00,700.00,1.25,True,True
+935,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+936,"Replace Suspension Bushing","Steering & Suspension",1.0,1350.00,1350.00,2.50,True,True
+936,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1000.00,1000.00,1.50,True,True
+936,"Wheel Alignment","Steering & Suspension",1.0,1350.00,1350.00,1.00,True,True
+937,"Replace Suspension Bushing","Steering & Suspension",1.0,1650.00,1650.00,2.50,True,True
+937,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1200.00,1200.00,1.50,True,True
+937,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+938,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+938,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+938,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+939,"Down Clutch / Pulldown Transmission","Transmission",1.0,4100.00,4100.00,4.50,True,True
+939,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+940,"Replace Suspension Bushing","Steering & Suspension",1.0,1550.00,1550.00,2.50,True,True
+940,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1250.00,1250.00,1.50,True,True
+940,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+941,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2450.00,2450.00,3.00,True,True
+941,"Cabin Filter Replacement","Maintenance",1.0,550.00,550.00,0.75,True,True
+942,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+942,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+943,"Aircon Cleaning & Freon Charge","Climate Control",1.0,3300.00,3300.00,3.00,True,True
+944,"Replace Suspension Bushing","Steering & Suspension",1.0,1550.00,1550.00,2.50,True,True
+944,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,900.00,900.00,1.50,True,True
+944,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+945,"Down Clutch / Pulldown Transmission","Transmission",1.0,4400.00,4400.00,4.50,True,True
+945,"Change ATF / Transmission Oil","Transmission",1.0,650.00,650.00,0.75,True,True
+946,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+946,"Replace Fuel Filter","Maintenance",1.0,400.00,400.00,0.75,True,True
+946,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1850.00,1850.00,2.00,True,True
+947,"Change Oil","Maintenance",1.0,850.00,850.00,0.75,True,True
+947,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+948,"Replace Valve Cover Gasket","Engine",1.0,1100.00,1100.00,1.75,True,True
+948,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1300.00,1300.00,1.00,True,True
+948,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+949,"Replace Valve Cover Gasket","Engine",1.0,1150.00,1150.00,1.75,True,True
+949,"Replace Fan Belt / Serpentine Belt","Engine",1.0,850.00,850.00,1.00,True,True
+950,"Brake Service","Braking",1.0,1250.00,1250.00,1.25,True,True
+950,"Replace Brake Pads / Shoes","Braking",1.0,650.00,650.00,1.00,True,True
+951,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2400.00,2400.00,3.00,True,True
+952,"Brake Service","Braking",1.0,1300.00,1300.00,1.25,True,True
+952,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+952,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+953,"Replace Suspension Bushing","Steering & Suspension",1.0,2500.00,2500.00,2.50,True,True
+953,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+953,"Wheel Alignment","Steering & Suspension",1.0,1200.00,1200.00,1.00,True,True
+953,"Replace Shock Absorbers","Steering & Suspension",1.0,1600.00,1600.00,2.00,True,True
+954,"Replace Suspension Bushing","Steering & Suspension",1.0,1900.00,1900.00,2.50,True,True
+954,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1300.00,1300.00,1.50,True,True
+954,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+955,"Brake Service","Braking",1.0,1250.00,1250.00,1.25,True,True
+955,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+956,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+956,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+957,"Replace Suspension Bushing","Steering & Suspension",1.0,1300.00,1300.00,2.50,True,True
+957,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,750.00,750.00,1.50,True,True
+957,"Wheel Alignment","Steering & Suspension",1.0,850.00,850.00,1.00,True,True
+957,"Replace Shock Absorbers","Steering & Suspension",1.0,1300.00,1300.00,2.00,True,True
+958,"Brake Service","Braking",1.0,950.00,950.00,1.25,True,True
+958,"Replace Brake Pads / Shoes","Braking",1.0,800.00,800.00,1.00,True,True
+958,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+959,"Replace Suspension Bushing","Steering & Suspension",1.0,2500.00,2500.00,2.50,True,True
+959,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+959,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+959,"Replace Shock Absorbers","Steering & Suspension",1.0,1550.00,1550.00,2.00,True,True
+960,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+960,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+961,"Replace Suspension Bushing","Steering & Suspension",1.0,1750.00,1750.00,2.50,True,True
+961,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,950.00,950.00,1.50,True,True
+961,"Wheel Alignment","Steering & Suspension",1.0,950.00,950.00,1.00,True,True
+962,"Replace Suspension Bushing","Steering & Suspension",1.0,1950.00,1950.00,2.50,True,True
+962,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,850.00,850.00,1.50,True,True
+962,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+963,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2550.00,2550.00,3.00,True,True
+964,"Change Oil","Maintenance",1.0,700.00,700.00,0.75,True,True
+964,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+965,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+965,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+966,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+966,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+966,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1750.00,1750.00,2.00,True,True
+967,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+967,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+968,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+968,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+968,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1850.00,1850.00,2.00,True,True
+969,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+969,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+969,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+970,"Down Clutch / Pulldown Transmission","Transmission",1.0,4850.00,4850.00,4.50,True,True
+971,"Replace Suspension Bushing","Steering & Suspension",1.0,1650.00,1650.00,2.50,True,True
+971,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1150.00,1150.00,1.50,True,True
+971,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+972,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+972,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+973,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+973,"Replace Fuel Filter","Maintenance",1.0,450.00,450.00,0.75,True,True
+973,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1400.00,1400.00,2.00,True,True
+974,"Replace Suspension Bushing","Steering & Suspension",1.0,1200.00,1200.00,2.50,True,True
+974,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1250.00,1250.00,1.50,True,True
+974,"Wheel Alignment","Steering & Suspension",1.0,900.00,900.00,1.00,True,True
+975,"Change Oil","Maintenance",1.0,550.00,550.00,0.75,True,True
+975,"Replace Fuel Filter","Maintenance",1.0,600.00,600.00,0.75,True,True
+976,"Replace Suspension Bushing","Steering & Suspension",1.0,1850.00,1850.00,2.50,True,True
+976,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,850.00,850.00,1.50,True,True
+976,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+977,"Aircon Cleaning & Freon Charge","Climate Control",1.0,3000.00,3000.00,3.00,True,True
+977,"Cabin Filter Replacement","Maintenance",1.0,650.00,650.00,0.75,True,True
+978,"Top Overhaul","Engine Overhaul",1.0,19300.00,19300.00,14.00,True,True
+979,"Change Oil","Maintenance",1.0,650.00,650.00,0.75,True,True
+979,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True
+979,"Cleaning EGR & Throttle Body","Intake & Exhaust",1.0,1300.00,1300.00,2.00,True,True
+980,"Brake Service","Braking",1.0,1050.00,1050.00,1.25,True,True
+980,"Replace Brake Pads / Shoes","Braking",1.0,900.00,900.00,1.00,True,True
+981,"Replace Valve Cover Gasket","Engine",1.0,1550.00,1550.00,1.75,True,True
+981,"Replace Fan Belt / Serpentine Belt","Engine",1.0,1000.00,1000.00,1.00,True,True
+982,"Brake Service","Braking",1.0,500.00,500.00,1.25,True,True
+982,"Replace Brake Pads / Shoes","Braking",1.0,600.00,600.00,1.00,True,True
+982,"Rotor Disc Refacing","Braking",1.0,2400.00,2400.00,2.00,True,True
+983,"Replace Suspension Bushing","Steering & Suspension",1.0,1350.00,1350.00,2.50,True,True
+983,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1150.00,1150.00,1.50,True,True
+983,"Wheel Alignment","Steering & Suspension",1.0,1300.00,1300.00,1.00,True,True
+984,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+984,"Replace Brake Pads / Shoes","Braking",1.0,950.00,950.00,1.00,True,True
+984,"Wheel Alignment","Steering & Suspension",1.0,1050.00,1050.00,1.00,True,True
+985,"Replace Suspension Bushing","Steering & Suspension",1.0,1600.00,1600.00,2.50,True,True
+985,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,700.00,700.00,1.50,True,True
+985,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+986,"Replace Suspension Bushing","Steering & Suspension",1.0,1600.00,1600.00,2.50,True,True
+986,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,650.00,650.00,1.50,True,True
+986,"Wheel Alignment","Steering & Suspension",1.0,1350.00,1350.00,1.00,True,True
+987,"Brake Service","Braking",1.0,900.00,900.00,1.25,True,True
+987,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+988,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+988,"Replace Fuel Filter","Maintenance",1.0,500.00,500.00,0.75,True,True
+989,"Brake Service","Braking",1.0,1250.00,1250.00,1.25,True,True
+989,"Replace Brake Pads / Shoes","Braking",1.0,850.00,850.00,1.00,True,True
+990,"Aircon Cleaning & Freon Charge","Climate Control",1.0,2550.00,2550.00,3.00,True,True
+990,"Cabin Filter Replacement","Maintenance",1.0,650.00,650.00,0.75,True,True
+991,"Replace Suspension Bushing","Steering & Suspension",1.0,2450.00,2450.00,2.50,True,True
+991,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1400.00,1400.00,1.50,True,True
+991,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+991,"Replace Shock Absorbers","Steering & Suspension",1.0,1650.00,1650.00,2.00,True,True
+992,"Brake Service","Braking",1.0,850.00,850.00,1.25,True,True
+992,"Replace Brake Pads / Shoes","Braking",1.0,600.00,600.00,1.00,True,True
+993,"Brake Service","Braking",1.0,600.00,600.00,1.25,True,True
+993,"Replace Brake Pads / Shoes","Braking",1.0,700.00,700.00,1.00,True,True
+993,"Rotor Disc Refacing","Braking",1.0,3050.00,3050.00,2.00,True,True
+994,"Replace Valve Cover Gasket","Engine",1.0,1450.00,1450.00,1.75,True,True
+994,"Replace Fan Belt / Serpentine Belt","Engine",1.0,900.00,900.00,1.00,True,True
+994,"Change Oil","Maintenance",1.0,500.00,500.00,0.75,True,True
+995,"Down Clutch / Pulldown Transmission","Transmission",1.0,3300.00,3300.00,4.50,True,True
+995,"Change ATF / Transmission Oil","Transmission",1.0,750.00,750.00,0.75,True,True
+996,"Down Clutch / Pulldown Transmission","Transmission",1.0,3450.00,3450.00,4.50,True,True
+997,"Replace Suspension Bushing","Steering & Suspension",1.0,1150.00,1150.00,2.50,True,True
+997,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,850.00,850.00,1.50,True,True
+997,"Wheel Alignment","Steering & Suspension",1.0,1000.00,1000.00,1.00,True,True
+998,"Change Oil","Maintenance",1.0,600.00,600.00,0.75,True,True
+998,"Replace Fuel Filter","Maintenance",1.0,550.00,550.00,0.75,True,True
+998,"Wheel Alignment","Steering & Suspension",1.0,1150.00,1150.00,1.00,True,True
+999,"Replace Suspension Bushing","Steering & Suspension",1.0,2000.00,2000.00,2.50,True,True
+999,"Replace Tie Rod / Rack End","Steering & Suspension",1.0,1050.00,1050.00,1.50,True,True
+999,"Wheel Alignment","Steering & Suspension",1.0,800.00,800.00,1.00,True,True
+1000,"Change Oil","Maintenance",1.0,750.00,750.00,0.75,True,True
+1000,"Replace Fuel Filter","Maintenance",1.0,650.00,650.00,0.75,True,True

@@ -21,8 +21,9 @@ const pool = new Pool({
 const PARTS_DIR = path.join(process.cwd(), 'src', 'data', 'parts_catalogs');
 
 const VEHICLE_SPECS = [
-  { key: 'hilux', make: 'Toyota', model: 'Hilux', year_start: 2005, year_end: 2011, trim_variant: 'Vigo', fuel_type: 'Diesel' },
-  { key: 'vios',  make: 'Toyota', model: 'Vios',  year_start: 2005, year_end: 2011, trim_variant: 'NCP',  fuel_type: 'Gasoline' },
+  { key: 'hilux',      make: 'Toyota', model: 'Hilux', year_start: 2005, year_end: 2011, trim_variant: 'Vigo',       fuel_type: 'Diesel'   },
+  { key: 'vios',       make: 'Toyota', model: 'Vios',  year_start: 2005, year_end: 2011, trim_variant: 'NCP',        fuel_type: 'Gasoline' },
+  { key: 'hiace_2012', make: 'Toyota', model: 'Hiace', year_start: 2005, year_end: 2013, trim_variant: 'KDH200L',    fuel_type: 'Diesel'   },
 ] as const;
 
 
@@ -120,7 +121,7 @@ function parsePartsFromMarkdown(content: string, broadCategory: string): ParsedP
 async function main() {
   console.log('='.repeat(60));
   console.log('  AutoKita — Parts Catalog DB Seeder');
-  console.log('  Scope: Toyota Hilux & Vios (2005–2011)');
+  console.log('  Scope: Toyota Hilux & Vios (2005–2011), Hiace (2005–2013)');
   console.log('='.repeat(60));
 
   const client = await pool.connect();
@@ -154,7 +155,7 @@ async function main() {
     }
 
     
-    console.log('\n[2/4] Clearing existing part fitments for Hilux/Vios...');
+    console.log('\n[2/4] Clearing existing part fitments for Hilux/Vios/Hiace...');
     const idList = Object.values(vehicleIds).join(',');
     const delRes = await client.query(
       `DELETE FROM part_fitments WHERE vehicle_catalog_id IN (${idList})`
@@ -171,8 +172,11 @@ async function main() {
     const batchSize = 50;
 
     for (const file of files.sort()) {
-      // Determine vehicle key (hilux | vios) and category from filename
-      const vehicleKey = file.includes('hilux') ? 'hilux' : file.includes('vios') ? 'vios' : null;
+      // Determine vehicle key (hilux | vios | hiace_2012) and category from filename
+      const vehicleKey = file.includes('hilux') ? 'hilux'
+                       : file.includes('vios')  ? 'vios'
+                       : file.includes('hiace') ? 'hiace_2012'
+                       : null;
       if (!vehicleKey) { console.log(`  [!] Skipped (unknown vehicle): ${file}`); continue; }
 
       const categoryKey = Object.keys(CATEGORY_FROM_FILENAME).find(k => file.includes(k));
@@ -183,7 +187,8 @@ async function main() {
       const parts = parsePartsFromMarkdown(content, broadCategory);
 
       console.log(`\n  [${file}]`);
-      console.log(`    Vehicle  : Toyota ${vehicleKey === 'hilux' ? 'Hilux' : 'Vios'}  |  Category: ${broadCategory}`);
+      const vehicleLabel = vehicleKey === 'hilux' ? 'Hilux' : vehicleKey === 'vios' ? 'Vios' : 'Hiace 2012';
+      console.log(`    Vehicle  : Toyota ${vehicleLabel}  |  Category: ${broadCategory}`);
       console.log(`    Parsed   : ${parts.length} parts`);
 
       if (parts.length === 0) continue;

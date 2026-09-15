@@ -48,26 +48,16 @@ export interface MechanicalFinding {
   photo?: string
 }
 
-export interface TechnicianNote {
-  id: string
-  author: string
-  timestamp: string
-  content: string
-  photos?: { label: string; url: string }[]
-}
-
 export interface InspectionPhotoSlot {
   id: string
   label: string
+  title?: string
   url?: string
-  // Present once a photo has been uploaded: the vehicle_inspections row that backs this slot, and the mechanic's condition note for it.
+  // Present once a photo has been uploaded: the inspection_photos row that backs this slot, and the mechanic's condition note for it.
   rowId?: number
   note?: string
 }
 
-// Walkaround photos are stored as vehicle_inspections rows to reuse the
-// existing `photo` column (no new table). This marker in `status` is what
-// tells them apart from real mechanical findings.
 export const REFERENCE_PHOTO_STATUS = 'reference-photo'
 
 export interface InspectionData {
@@ -76,7 +66,6 @@ export interface InspectionData {
   plate: string
   customer: string
   photoSlots: InspectionPhotoSlot[]
-  notes: TechnicianNote[]
   findings: MechanicalFinding[]
   timer: {
     startedAt: string

@@ -6,14 +6,12 @@ RETURNS TABLE (
     last_name       VARCHAR,
     email           VARCHAR,
     contact_number  VARCHAR,
-    address         VARCHAR,
-    loyalty_points  INTEGER,
-    tier            user_tiers
+    address         VARCHAR
 )
 LANGUAGE sql STABLE
 AS $$
     SELECT u.id, u.nickname, u.first_name, u.last_name, u.email,
-           u.contact_number, u.address, u.loyalty_points, u.tier
+           u.contact_number, u.address
     FROM users u
     WHERE u.id = p_user_id;
 $$;

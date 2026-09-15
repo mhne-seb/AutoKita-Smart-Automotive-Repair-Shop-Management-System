@@ -173,10 +173,11 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
         r.datetime_created AS job_time,
         r.job_order_id
      FROM (
-        SELECT pd.id, pd.job_order_id, pd.datetime_created,
-               ROW_NUMBER() OVER (PARTITION BY pd.job_order_id ORDER BY pd.datetime_created) AS round_no
+        SELECT pd.id, vi.job_order_id, pd.datetime_created,
+               ROW_NUMBER() OVER (PARTITION BY vi.job_order_id ORDER BY pd.datetime_created) AS round_no
         FROM pre_diagnostics pd
-        WHERE pd.job_order_id IN (SELECT jo.id FROM job_orders jo WHERE jo.user_id = $1)
+        JOIN vehicle_inspections vi ON vi.id = pd.inspection_id
+        WHERE vi.job_order_id IN (SELECT jo.id FROM job_orders jo WHERE jo.user_id = $1)
      ) r
      ORDER BY r.datetime_created DESC
      LIMIT 10`,

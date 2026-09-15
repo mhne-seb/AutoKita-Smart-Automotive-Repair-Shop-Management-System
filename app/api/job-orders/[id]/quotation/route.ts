@@ -8,9 +8,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const headerResult = await db.query(
       `
       SELECT jo.id, jo.quotation_notes, jo.actual_grand_total, jo.quotation_approved,
-             (pd.job_order_id IS NOT NULL) AS sent_to_customer
+             EXISTS (
+               SELECT 1 FROM pre_diagnostics pd
+               JOIN vehicle_inspections vi ON vi.id = pd.inspection_id
+               WHERE vi.job_order_id = jo.id
+             ) AS sent_to_customer
       FROM job_orders jo
-      LEFT JOIN pre_diagnostics pd ON pd.job_order_id = jo.id
       WHERE jo.id = $1
       `,
       [id]
