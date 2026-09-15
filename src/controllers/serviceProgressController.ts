@@ -146,16 +146,23 @@ export async function setPartStatus(jobOrderId: string, partId: number, status: 
   return Boolean(res.ok && json?.success)
 }
 
-export async function scheduleTask(jobOrderId: string, taskId: string, scheduledDate: string | null, status: string, mechanicId?: number, note?: string) {
-  const dbStatus = status === 'active' ? 'in_progress' : status;
+export async function scheduleTask(
+  jobOrderId: string,
+  taskId: string,
+  scheduledDate: string | null,
+  status: string,
+  mechanicId?: number,
+  note?: string,
+): Promise<{ ok: boolean; message?: string }> {
+  const dbStatus = status === 'active' ? 'in_progress' : status
   const res = await fetch(`/api/job-orders/${jobOrderId}/progress/schedule`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ taskId, scheduledDate, status: dbStatus, mechanicId, note }),
   })
-  return await res.json()
+  const json = await res.json().catch(() => null)
+  if (!res.ok || !json?.success) return { ok: false, message: json?.message ?? 'Could not save the schedule.' }
+  return { ok: true }
 }
 
 export async function getReceivedData(userId: number, jobOrderId?: number) {

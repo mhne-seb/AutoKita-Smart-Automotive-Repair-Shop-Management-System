@@ -8,6 +8,7 @@ const styles: Record<string, string> = {
   'To Be Paid': 'bg-rose-100 text-rose-700',
   Available: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
   Busy: 'bg-slate-100 text-slate-600 border border-slate-200',
+  'On Leave': 'bg-amber-50 text-amber-700 border border-amber-200',
   'High Churn Risk': 'bg-rose-100 text-rose-700',
   'Medium Churn Risk': 'bg-amber-100 text-amber-700',
   'Loyal Customer': 'bg-emerald-100 text-emerald-700',
