@@ -32,7 +32,17 @@ export async function GET(request: NextRequest) {
     }
 
     const tasks = jobOrder
-      ? (await db.query(`SELECT * FROM get_job_order_tasks($1)`, [jobOrder.job_order_id])).rows
+      ? await (async () => {
+          const rows = (await db.query(`SELECT * FROM get_job_order_tasks($1)`, [jobOrder.job_order_id])).rows
+          // Photo of the finished work per task — newer than get_job_order_tasks(),
+          // so it's picked up separately rather than editing that function.
+          const photos = await db.query(
+            `SELECT id, completion_photo_url FROM service_progress_tasks WHERE job_order_id = $1 AND completion_photo_url IS NOT NULL`,
+            [jobOrder.job_order_id],
+          )
+          const byId = new Map(photos.rows.map((p) => [p.id, p.completion_photo_url as string]))
+          return rows.map((t) => ({ ...t, completion_photo_url: byId.get(t.id) ?? null }))
+        })()
       : []
 
     // Parts per service so the tracker can say "waiting for parts" instead
