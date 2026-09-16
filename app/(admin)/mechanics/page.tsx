@@ -463,7 +463,7 @@ function TaskHistoryModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: 
     getMechanicHistory(mechanic.id).then(setRows)
   }, [mechanic.id])
 
-  const statusLabel = (s: string) => (s === 'completed' ? 'Finished' : s === 'in_progress' ? 'Started' : 'Not Yet')
+  const statusLabel = (s: string) => (s === 'completed' ? 'Finished' : s === 'in_progress' ? 'Started' : 'Upcoming')
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
