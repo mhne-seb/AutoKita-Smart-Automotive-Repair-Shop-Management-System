@@ -14,7 +14,11 @@ export async function POST(req: NextRequest) {
       [email, password]
     )
 
-    if (result.rows.length === 0) {
+    let isCustomer = false
+
+    if (result.rows.length > 0) {
+      isCustomer = true
+    } else {
       result = await db.query(
         "SELECT id, email, full_name as nickname, split_part(full_name, ' ', 1) as first_name, split_part(full_name, ' ', 2) as last_name, role FROM employees WHERE email = $1 AND password = $2",
         [email, password]
@@ -26,10 +30,17 @@ export async function POST(req: NextRequest) {
     }
 
     const user = result.rows[0]
+    const rawRole = user.role?.trim()?.toLowerCase()
+    // Live database users.role is 'c' (or 'customer'). Employees have roles: owner, mechanic, etc.
+    const resolvedRole = isCustomer || rawRole === 'c' || rawRole === 'customer' ? 'customer' : 'admin'
+
     return NextResponse.json({
       success: true,
-      user,
-      role: user.role?.trim() || 'customer',
+      user: {
+        ...user,
+        role: resolvedRole,
+      },
+      role: resolvedRole,
     })
   } catch (err) {
     console.error('Login query failed:', err)

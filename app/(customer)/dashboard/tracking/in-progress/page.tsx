@@ -53,6 +53,7 @@ type Task = {
   task_title: string;
   note: string;
   task_status: string;
+  started_at: string | null;
   completed_at: string | null;
   price: string;
   billable: boolean;
@@ -412,11 +413,11 @@ function InProgress() {
                           const firstTask = [...tasks]
                             .filter(t => t.task_status !== 'pending')
                             .sort((a, b) => {
-                              const dateA = a.scheduled_date || a.completed_at || '';
-                              const dateB = b.scheduled_date || b.completed_at || '';
+                              const dateA = a.started_at || a.scheduled_date || a.completed_at || '';
+                              const dateB = b.started_at || b.scheduled_date || b.completed_at || '';
                               return new Date(dateA).getTime() - new Date(dateB).getTime();
                             })[0];
-                          return firstTask?.scheduled_date || firstTask?.completed_at;
+                          return firstTask?.started_at || firstTask?.scheduled_date || firstTask?.completed_at;
                         })()
                       : null);
                     

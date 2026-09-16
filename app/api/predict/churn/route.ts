@@ -29,7 +29,7 @@ export async function GET() {
       LEFT JOIN job_order_services jos ON jos.job_order_id = jo.id
       LEFT JOIN services s ON s.id = jos.service_id
       LEFT JOIN vehicles v ON v.user_id = u.id
-      WHERE u.role = 'customer'
+      WHERE (u.role = 'customer' OR u.role = 'c' OR u.role LIKE 'c%')
       GROUP BY u.id, u.first_name, u.last_name, u.contact_number, u.email
       ORDER BY u.id
     `)

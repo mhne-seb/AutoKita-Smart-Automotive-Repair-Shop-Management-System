@@ -20,7 +20,7 @@ BEGIN
     FROM users u
     WHERE u.email = p_email 
       AND u.password = p_password 
-      AND TRIM(u.role) = 'customer';
+      AND (TRIM(u.role) = 'customer' OR TRIM(u.role) = 'c');
 
     IF FOUND THEN
         RETURN;

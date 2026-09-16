@@ -13,6 +13,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           spt.task_title,
           spt.note,
           spt.task_status,
+          spt.started_at,
           spt.completed_at,
           spt.price,
           spt.billable,

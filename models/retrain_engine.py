@@ -49,24 +49,64 @@ SYNC_META_FILE = EXPORTED_DIR / "last_sync_meta.json"
 
 # Canonical Services Mapping (Names, IDs, and Starting Baseline Values)
 SERVICE_CATALOG = {
-    1: {"name": "Change Oil", "aliases": ["oil change", "change oil", "pms"], "base_price": 650.0, "base_duration_hours": 0.75, "is_price_fixed": True, "category": "Maintenance"},
-    2: {"name": "Brake Service", "aliases": ["brake service", "brake cleaning", "brake pad replacement", "replace brake pads"], "base_price": 800.0, "base_duration_hours": 1.25, "is_price_fixed": True, "category": "Braking"},
-    3: {"name": "Tire Rotation & Balance", "aliases": ["tire rotation", "wheel balance", "tire rotation & balance"], "base_price": 800.0, "base_duration_hours": 0.5, "is_price_fixed": True, "category": "Steering & Suspension"},
-    4: {"name": "Wheel Alignment", "aliases": ["wheel alignment", "alignment", "camber"], "base_price": 800.0, "base_duration_hours": 1.0, "is_price_fixed": True, "category": "Steering & Suspension"},
-    5: {"name": "Engine Diagnostics", "aliases": ["engine diagnostics", "obd2 scan", "scan tool", "diagnostics"], "base_price": 1200.0, "base_duration_hours": 1.0, "is_price_fixed": False, "category": "Engine"},
-    6: {"name": "Replace Fan Belt", "aliases": ["fan belt", "alternator belt", "serpentine belt", "battery testing & replacement"], "base_price": 800.0, "base_duration_hours": 1.0, "is_price_fixed": True, "category": "Engine"},
-    7: {"name": "Aircon Cleaning & Freon Charge", "aliases": ["aircon cleaning", "a/c system recharge", "freon charge", "ac recharge"], "base_price": 2500.0, "base_duration_hours": 3.0, "is_price_fixed": False, "category": "Climate Control"},
-    8: {"name": "Change ATF / Transmission Fluid Flush", "aliases": ["transmission fluid flush", "change atf", "atf dialysis"], "base_price": 650.0, "base_duration_hours": 0.75, "is_price_fixed": True, "category": "Transmission"},
-    9: {"name": "Replace Fuel Filter", "aliases": ["replace fuel filter", "fuel filter"], "base_price": 550.0, "base_duration_hours": 0.75, "is_price_fixed": True, "category": "Maintenance"},
-    10: {"name": "Replace Valve Cover Gasket", "aliases": ["valve cover gasket", "valve gasket", "head cover gasket"], "base_price": 1400.0, "base_duration_hours": 1.75, "is_price_fixed": False, "category": "Engine"},
-    11: {"name": "Down Clutch / Pulldown Transmission", "aliases": ["down clutch", "pulldown transmission", "clutch overhaul"], "base_price": 3500.0, "base_duration_hours": 4.5, "is_price_fixed": False, "category": "Transmission"},
-    12: {"name": "Replace Suspension Bushing", "aliases": ["suspension bushing", "arm bushing", "press bushing"], "base_price": 1500.0, "base_duration_hours": 2.5, "is_price_fixed": False, "category": "Steering & Suspension"},
-    13: {"name": "Replace Tie Rod / Rack End", "aliases": ["tie rod", "rack end", "tie rod end"], "base_price": 1000.0, "base_duration_hours": 1.5, "is_price_fixed": True, "category": "Steering & Suspension"},
-    14: {"name": "Rotor Disc Refacing", "aliases": ["rotor refacing", "reface", "disc refacing"], "base_price": 3000.0, "base_duration_hours": 2.0, "is_price_fixed": True, "category": "Braking"},
-    15: {"name": "Top Overhaul", "aliases": ["top overhaul", "engine overhaul", "cylinder head overhaul"], "base_price": 15000.0, "base_duration_hours": 14.0, "is_price_fixed": False, "category": "Engine Overhaul"},
-    16: {"name": "Replace Spark Plugs", "aliases": ["spark plugs", "replace spark plug"], "base_price": 350.0, "base_duration_hours": 0.5, "is_price_fixed": True, "category": "Ignition & Electrical"},
-    17: {"name": "Replace Shock Absorbers", "aliases": ["shock absorber", "replace shock", "strut replacement"], "base_price": 1500.0, "base_duration_hours": 2.0, "is_price_fixed": True, "category": "Steering & Suspension"},
-    18: {"name": "Replace Engine Support", "aliases": ["engine support", "motor mount", "transmission support"], "base_price": 1200.0, "base_duration_hours": 1.5, "is_price_fixed": False, "category": "Engine"},
+    1: {"name": "Change Oil", "aliases": ["change oil", "oil change", "pms", "chamber oil"], "base_price": 650.0, "base_duration_hours": 0.75, "is_price_fixed": True, "category": "Maintenance"},
+    2: {"name": "Change ATF / Transmission Fluid", "aliases": ["change atf", "atf dialysis", "transmission fluid", "gear oil"], "base_price": 650.0, "base_duration_hours": 0.75, "is_price_fixed": True, "category": "Transmission"},
+    3: {"name": "Replace Fuel Filter", "aliases": ["replace fuel filter", "fuel filter"], "base_price": 550.0, "base_duration_hours": 0.75, "is_price_fixed": True, "category": "Maintenance"},
+    4: {"name": "Replace Air Filter", "aliases": ["replace air filter", "air filter", "air cleaner"], "base_price": 550.0, "base_duration_hours": 0.25, "is_price_fixed": True, "category": "Maintenance"},
+    5: {"name": "Replace Cabin Filter", "aliases": ["replace cabin filter", "cabin filter"], "base_price": 200.0, "base_duration_hours": 0.25, "is_price_fixed": True, "category": "Maintenance"},
+    6: {"name": "Fuel Injector Cleaning / Service", "aliases": ["injector cleaning", "injector", "fuel injector"], "base_price": 1500.0, "base_duration_hours": 1.5, "is_price_fixed": True, "category": "Maintenance"},
+    7: {"name": "Replace Fuel Pump", "aliases": ["replace fuel pump", "fuel pump"], "base_price": 750.0, "base_duration_hours": 1.5, "is_price_fixed": False, "category": "Maintenance"},
+    8: {"name": "Intake Manifold Cleaning & Reseal", "aliases": ["intake manifold", "reseal intake"], "base_price": 1750.0, "base_duration_hours": 2.0, "is_price_fixed": False, "category": "Intake & Exhaust"},
+    9: {"name": "Cleaning EGR", "aliases": ["clean egr", "cleaning egr", "egr clean"], "base_price": 4500.0, "base_duration_hours": 3.5, "is_price_fixed": False, "category": "Intake & Exhaust"},
+    10: {"name": "Throttle Body Cleaning", "aliases": ["throttle body cleaning", "clean throttle", "throttle cleaning"], "base_price": 550.0, "base_duration_hours": 0.75, "is_price_fixed": True, "category": "Intake & Exhaust"},
+    11: {"name": "Cleaning EGR & Throttle Body", "aliases": ["cleaning egr & throttle body", "egr and throttle"], "base_price": 5000.0, "base_duration_hours": 4.0, "is_price_fixed": False, "category": "Intake & Exhaust"},
+    12: {"name": "Replace Spark Plugs", "aliases": ["replace spark plugs", "spark plugs", "spark plug"], "base_price": 300.0, "base_duration_hours": 0.5, "is_price_fixed": True, "category": "Ignition & Electrical"},
+    13: {"name": "Brake Service & Cleaning", "aliases": ["brake service", "brake cleaning", "clean brakes"], "base_price": 800.0, "base_duration_hours": 1.25, "is_price_fixed": True, "category": "Braking"},
+    14: {"name": "Replace Brake Pads", "aliases": ["replace brake pads", "brake pads"], "base_price": 600.0, "base_duration_hours": 1.0, "is_price_fixed": True, "category": "Braking"},
+    15: {"name": "Replace Brake Shoes", "aliases": ["replace brake shoes", "brake shoes", "brake shoe"], "base_price": 800.0, "base_duration_hours": 1.0, "is_price_fixed": True, "category": "Braking"},
+    16: {"name": "Rotor Disc Refacing / Resurfacing", "aliases": ["rotor disc refacing", "reface", "resurface brake drum", "rotor refacing"], "base_price": 2500.0, "base_duration_hours": 2.0, "is_price_fixed": True, "category": "Braking"},
+    17: {"name": "Brake Master / Wheel Cylinder Overhaul", "aliases": ["brake master", "wheel cylinder", "overhaul caliper"], "base_price": 800.0, "base_duration_hours": 1.5, "is_price_fixed": False, "category": "Braking"},
+    18: {"name": "Wheel Alignment", "aliases": ["wheel alignment", "alignment", "camber"], "base_price": 900.0, "base_duration_hours": 1.0, "is_price_fixed": True, "category": "Steering & Suspension"},
+    19: {"name": "Wheel Balancing", "aliases": ["wheel balancing", "balance wheel"], "base_price": 500.0, "base_duration_hours": 0.5, "is_price_fixed": True, "category": "Steering & Suspension"},
+    20: {"name": "Tire Rotation & Balancing", "aliases": ["tire rotation & balancing", "tire rotation", "rotation & balance"], "base_price": 800.0, "base_duration_hours": 0.75, "is_price_fixed": True, "category": "Steering & Suspension"},
+    21: {"name": "Replace Shock Absorbers", "aliases": ["replace shock absorbers", "shock absorber", "strut"], "base_price": 1200.0, "base_duration_hours": 2.0, "is_price_fixed": True, "category": "Steering & Suspension"},
+    22: {"name": "Replace Suspension Bushing", "aliases": ["suspension bushing", "arm bushing", "rebushing"], "base_price": 1500.0, "base_duration_hours": 2.5, "is_price_fixed": False, "category": "Steering & Suspension"},
+    23: {"name": "Replace Tie Rod End", "aliases": ["replace tie rod end", "tie rod end"], "base_price": 800.0, "base_duration_hours": 1.0, "is_price_fixed": True, "category": "Steering & Suspension"},
+    24: {"name": "Replace Rack End", "aliases": ["replace rack end", "rack end"], "base_price": 900.0, "base_duration_hours": 1.25, "is_price_fixed": True, "category": "Steering & Suspension"},
+    25: {"name": "Replace Tie Rod & Rack End", "aliases": ["replace tie rod & rack end", "tie rod and rack end"], "base_price": 1000.0, "base_duration_hours": 1.5, "is_price_fixed": True, "category": "Steering & Suspension"},
+    26: {"name": "Overhaul / Replace Steering Rack & Pinion", "aliases": ["steering rack", "rack and pinion", "rack & pinion"], "base_price": 4500.0, "base_duration_hours": 4.0, "is_price_fixed": False, "category": "Steering & Suspension"},
+    27: {"name": "Replace Stabilizer Link", "aliases": ["replace stabilizer link", "stabilizer link", "stab link"], "base_price": 700.0, "base_duration_hours": 0.75, "is_price_fixed": True, "category": "Steering & Suspension"},
+    28: {"name": "Replace Stabilizer Bushing", "aliases": ["replace stabilizer bushing", "stabilizer bushing", "stab bushing"], "base_price": 600.0, "base_duration_hours": 0.75, "is_price_fixed": True, "category": "Steering & Suspension"},
+    29: {"name": "Replace Stabilizer Link & Bushing", "aliases": ["replace stabilizer link & bushing", "stabilizer link and bushing"], "base_price": 600.0, "base_duration_hours": 1.0, "is_price_fixed": True, "category": "Steering & Suspension"},
+    30: {"name": "Replace Ball Joint", "aliases": ["replace ball joint", "ball joint"], "base_price": 1200.0, "base_duration_hours": 1.25, "is_price_fixed": True, "category": "Steering & Suspension"},
+    31: {"name": "Replace Wheel Bearing", "aliases": ["replace wheel bearing", "wheel bearing", "hub bearing"], "base_price": 1350.0, "base_duration_hours": 1.5, "is_price_fixed": True, "category": "Steering & Suspension"},
+    32: {"name": "Replace CV Joint", "aliases": ["replace cv joint", "cv joint"], "base_price": 1800.0, "base_duration_hours": 1.5, "is_price_fixed": False, "category": "Steering & Suspension"},
+    33: {"name": "Replace Axle Boot", "aliases": ["replace axle boot", "axle boot"], "base_price": 800.0, "base_duration_hours": 1.0, "is_price_fixed": True, "category": "Steering & Suspension"},
+    34: {"name": "Replace CV Joint & Axle Boot", "aliases": ["replace cv joint & axle boot", "cv joint and axle boot"], "base_price": 1600.0, "base_duration_hours": 1.75, "is_price_fixed": False, "category": "Steering & Suspension"},
+    35: {"name": "Power Steering Pump Overhaul / Replacement", "aliases": ["power steering pump", "steering pump"], "base_price": 1800.0, "base_duration_hours": 2.0, "is_price_fixed": False, "category": "Steering & Suspension"},
+    36: {"name": "Down Clutch / Pulldown Transmission", "aliases": ["down clutch", "pulldown transmission", "clutch overhaul"], "base_price": 3500.0, "base_duration_hours": 4.5, "is_price_fixed": False, "category": "Transmission"},
+    37: {"name": "Air Conditioning Cleaning & Freon Charge", "aliases": ["air conditioning cleaning", "aircon cleaning", "freon charge"], "base_price": 3500.0, "base_duration_hours": 3.0, "is_price_fixed": False, "category": "Climate Control"},
+    38: {"name": "Replace A/C Compressor", "aliases": ["replace a/c compressor", "a/c compressor", "ac compressor"], "base_price": 3500.0, "base_duration_hours": 2.5, "is_price_fixed": False, "category": "Climate Control"},
+    39: {"name": "Coolant Flush", "aliases": ["coolant flush", "radiator flush"], "base_price": 350.0, "base_duration_hours": 0.75, "is_price_fixed": True, "category": "Engine Cooling"},
+    40: {"name": "Radiator Replacement / Repair", "aliases": ["radiator replacement", "radiator repair", "radiator"], "base_price": 1500.0, "base_duration_hours": 1.5, "is_price_fixed": False, "category": "Engine Cooling"},
+    41: {"name": "Replace Water Pump", "aliases": ["replace water pump", "water pump"], "base_price": 2500.0, "base_duration_hours": 2.0, "is_price_fixed": False, "category": "Engine Cooling"},
+    42: {"name": "Replace Auxiliary Fan / Motor", "aliases": ["auxiliary fan", "fan motor", "aux fan"], "base_price": 1500.0, "base_duration_hours": 1.0, "is_price_fixed": True, "category": "Engine Cooling"},
+    43: {"name": "Engine Diagnostics & Electrical Scan", "aliases": ["engine diagnostics", "electrical scan", "obd2 scan"], "base_price": 1500.0, "base_duration_hours": 0.75, "is_price_fixed": True, "category": "Diagnostics & Electrical"},
+    44: {"name": "Battery Testing & Replacement", "aliases": ["battery testing", "replace battery", "battery"], "base_price": 300.0, "base_duration_hours": 0.25, "is_price_fixed": True, "category": "Diagnostics & Electrical"},
+    45: {"name": "Alternator Repair / Replacement", "aliases": ["alternator repair", "replace alternator", "alternator"], "base_price": 1800.0, "base_duration_hours": 1.5, "is_price_fixed": False, "category": "Diagnostics & Electrical"},
+    46: {"name": "Starter Motor Repair / Replacement", "aliases": ["starter motor repair", "replace starter motor", "starter motor"], "base_price": 2050.0, "base_duration_hours": 1.5, "is_price_fixed": False, "category": "Diagnostics & Electrical"},
+    47: {"name": "Electrical System & Wiring Repair", "aliases": ["electrical system repair", "wiring repair", "electrical repair"], "base_price": 2500.0, "base_duration_hours": 1.5, "is_price_fixed": False, "category": "Diagnostics & Electrical"},
+    48: {"name": "Replace Fan Belt / Serpentine Belt", "aliases": ["replace fan belt", "serpentine belt", "drive belt", "fan belt"], "base_price": 1100.0, "base_duration_hours": 1.0, "is_price_fixed": True, "category": "Engine"},
+    49: {"name": "Replace Timing Belt / Chain", "aliases": ["timing belt", "timing chain"], "base_price": 3500.0, "base_duration_hours": 4.0, "is_price_fixed": False, "category": "Engine"},
+    50: {"name": "Replace Engine Support", "aliases": ["replace engine support", "engine support", "motor mount"], "base_price": 1200.0, "base_duration_hours": 1.5, "is_price_fixed": False, "category": "Engine"},
+    51: {"name": "Replace Valve Cover Gasket", "aliases": ["valve cover gasket", "head cover gasket"], "base_price": 1200.0, "base_duration_hours": 1.75, "is_price_fixed": False, "category": "Engine"},
+    52: {"name": "Reseal Oil Pan / Crankcase", "aliases": ["reseal oil pan", "crankcase reseal", "oil pan reseal"], "base_price": 2050.0, "base_duration_hours": 2.0, "is_price_fixed": False, "category": "Engine"},
+    53: {"name": "Top Overhaul", "aliases": ["top overhaul", "cylinder head overhaul"], "base_price": 15000.0, "base_duration_hours": 14.0, "is_price_fixed": False, "category": "Engine Overhaul"},
+    54: {"name": "General Engine Overhaul", "aliases": ["general engine overhaul", "engine overhaul", "general overhaul"], "base_price": 22000.0, "base_duration_hours": 24.0, "is_price_fixed": False, "category": "Engine Overhaul"},
+    55: {"name": "Sliding Door Repair / Mechanism", "aliases": ["sliding door repair", "sliding door mechanism", "sliding door"], "base_price": 3000.0, "base_duration_hours": 1.5, "is_price_fixed": False, "category": "Body & Accessories"},
+    56: {"name": "Power Window Repair / Motor Replacement", "aliases": ["power window repair", "power window motor", "power window"], "base_price": 1000.0, "base_duration_hours": 1.25, "is_price_fixed": False, "category": "Body & Accessories"},
+    57: {"name": "Wiper Linkage / Motor Repair", "aliases": ["wiper linkage repair", "wiper motor repair", "wiper linkage"], "base_price": 4000.0, "base_duration_hours": 1.5, "is_price_fixed": False, "category": "Body & Accessories"},
+    58: {"name": "General Mechanical Inspection & Check-Up", "aliases": ["general mechanical inspection", "check-up", "general inspection", "inspection"], "base_price": 800.0, "base_duration_hours": 0.5, "is_price_fixed": True, "category": "General Service"},
 }
 
 KNOWN_VEHICLE_TYPES = ["Crossover", "Hatchback", "Pickup", "SUV", "Sedan", "Van"]
@@ -93,14 +133,22 @@ def classify_vehicle_type(model_str: str, make_str: str = "") -> str:
 
 def match_service_id(service_name: str) -> int:
     """Matches a free-text service name to a canonical service_id."""
-    s_clean = str(service_name).lower().strip()
+    s_clean = str(service_name).strip()
+    s_lower = s_clean.lower()
+    
+    # 0. Direct exact name match
+    for sid, meta in SERVICE_CATALOG.items():
+        if meta["name"].lower() == s_lower:
+            return sid
+
     # 1. Exact alias match
     for sid, meta in SERVICE_CATALOG.items():
         for alias in meta["aliases"]:
-            if alias in s_clean or s_clean in alias:
+            if alias in s_lower or s_lower in alias:
                 return sid
+                
     # 2. Token overlap fallback
-    s_tokens = set(re.findall(r'\b\w+\b', s_clean))
+    s_tokens = set(re.findall(r'\b\w+\b', s_lower))
     best_id = 1
     best_overlap = 0
     for sid, meta in SERVICE_CATALOG.items():

@@ -1396,6 +1396,7 @@ RETURNS TABLE (
     task_title    VARCHAR(100),
     note          TEXT,
     task_status   VARCHAR,
+    started_at    TIMESTAMP,
     completed_at  TIMESTAMP,
     price         DECIMAL(10,2),
     billable      BOOLEAN,
@@ -1411,6 +1412,7 @@ AS $$
         spt.task_title,
         spt.note,
         spt.task_status,
+        spt.started_at,
         spt.completed_at,
         spt.price,
         spt.billable,
@@ -1435,32 +1437,51 @@ LANGUAGE SQL VOLATILE
 AS $$
     UPDATE service_progress_tasks
     SET task_status  = p_status,
+        started_at   = CASE
+            WHEN p_status IN ('in_progress', 'active') AND started_at IS NULL THEN NOW()
+            WHEN p_status = 'completed' AND started_at IS NULL THEN NOW()
+            WHEN p_status = 'pending' THEN NULL
+            ELSE started_at
+        END,
         completed_at = CASE
             WHEN p_status = 'completed' THEN NOW()
+            WHEN p_status IN ('in_progress', 'active', 'pending') THEN NULL
             ELSE completed_at
         END
     WHERE id = p_task_id;
 $$;
 
 -- schedule_service_task_with_status
+DROP FUNCTION IF EXISTS schedule_service_task_with_status(INT, TIMESTAMP, VARCHAR, INT, TEXT);
+DROP FUNCTION IF EXISTS schedule_service_task_with_status(INT, TIMESTAMP, VARCHAR, INT, TEXT, TIMESTAMP);
+
 CREATE OR REPLACE FUNCTION schedule_service_task_with_status(
     p_task_id INT,
     p_scheduled_date TIMESTAMP,
     p_status  VARCHAR,
     p_mechanic_id INT DEFAULT NULL,
-    p_note TEXT DEFAULT NULL
+    p_note TEXT DEFAULT NULL,
+    p_started_at TIMESTAMP DEFAULT NULL
 )
 RETURNS VOID
 LANGUAGE SQL VOLATILE
 AS $$
     UPDATE service_progress_tasks
-    SET task_status  = p_status,
+    SET task_status    = p_status,
         scheduled_date = p_scheduled_date,
-        mechanic_id = p_mechanic_id,
-        note = COALESCE(p_note, note),
-        completed_at = CASE
+        mechanic_id    = p_mechanic_id,
+        note           = COALESCE(p_note, note),
+        started_at     = CASE
+            WHEN p_started_at IS NOT NULL THEN p_started_at
+            WHEN p_status IN ('in_progress', 'active') AND started_at IS NULL THEN NOW()
+            WHEN p_status = 'completed' AND started_at IS NULL THEN NOW()
+            WHEN p_status = 'pending' THEN NULL
+            ELSE started_at
+        END,
+        completed_at   = CASE
             WHEN p_status = 'completed' THEN NOW()
-            ELSE NULL
+            WHEN p_status IN ('in_progress', 'active', 'pending') THEN NULL
+            ELSE completed_at
         END
     WHERE id = p_task_id;
 $$;
@@ -2128,15 +2149,16 @@ LIMIT 1;
 $$;
 
 -- 4. In Progress & Inspection
+DROP FUNCTION IF EXISTS get_job_order_tasks(INTEGER);
 CREATE OR REPLACE FUNCTION get_job_order_tasks(p_job_order_id INTEGER)
 RETURNS TABLE (
 id INTEGER, section_id TEXT, task_title VARCHAR, note TEXT, task_status TEXT,
-completed_at TEXT, price TEXT, billable BOOLEAN, scheduled_date TIMESTAMP
+started_at TEXT, completed_at TEXT, price TEXT, billable BOOLEAN, scheduled_date TIMESTAMP
 )
 LANGUAGE sql STABLE
 AS $$
 SELECT spt.id, spt.section_id::text, spt.task_title, spt.note,
-spt.task_status, spt.completed_at::text, spt.price::text, spt.billable, spt.scheduled_date
+spt.task_status, spt.started_at::text, spt.completed_at::text, spt.price::text, spt.billable, spt.scheduled_date
 FROM service_progress_tasks spt
 WHERE spt.job_order_id = p_job_order_id
 ORDER BY spt.id ASC;
