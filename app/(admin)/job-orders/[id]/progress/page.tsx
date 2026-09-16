@@ -3,12 +3,15 @@
 // Admin "Service Progress" page — the final step of the job-order workflow. Shows a section-by-section task checklist; once every task is marked done the job order is written back to "completed" (see jobOrderController.advanceJobOrderStage).
 import { useParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2 } from 'lucide-react'
+import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, CreditCard, XCircle, Banknote } from 'lucide-react'
+import { toast } from 'sonner'
+import { Lightbox } from '@/components/Lightbox'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
-import { getQuotationById } from '@/controllers/quotationController'
+import { getQuotationById, getJobOrderBill, verifyJobOrderPayment, type JobOrderBill } from '@/controllers/quotationController'
 import { getServiceProgressById, scheduleTask, setPartStatus } from '@/controllers/serviceProgressController'
+import { mechanicIsFull } from '@/data/mechanicPolicy'
 import { currency } from '@/data/mockData'
 import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, partIsReady } from '@/data/types'
 
@@ -65,6 +68,25 @@ export default function page() {
   }, [jobOrderId])
 
   const [scheduleData, setScheduleData] = useState<{tasks: any[], mechanics: any[]}>({ tasks: [], mechanics: [] })
+
+  // Final bill — what the job costs, what's verified, and the payment the
+  // customer most recently submitted for the admin to check. Only matters
+  // once the job is completed; loaded regardless so the card is instant.
+  const [bill, setBill] = useState<JobOrderBill | null>(null)
+  const [verifying, setVerifying] = useState(false)
+  const [showProof, setShowProof] = useState(false)
+  const loadBill = () => getJobOrderBill(jobOrderId).then(setBill)
+  useEffect(() => { void loadBill() }, [jobOrderId])
+  async function decidePayment(decision: 'verified' | 'rejected') {
+    const p = bill?.latestPayment
+    if (!p) return
+    setVerifying(true)
+    const ok = await verifyJobOrderPayment(jobOrderId, p.id, decision)
+    setVerifying(false)
+    if (!ok) return toast.error('Could not update the payment.')
+    toast.success(decision === 'verified' ? 'Payment verified.' : 'Payment rejected — the customer will be asked to resubmit.')
+    void loadBill()
+  }
   
   useEffect(() => {
     let active = true
@@ -120,6 +142,18 @@ export default function page() {
     return fromQuotation > 0 ? Math.round(fromQuotation * 10) / 10 : (initial?.timer.estimatedDurationHours ?? 0)
   }, [quotation, initial?.timer.estimatedDurationHours])
 
+  // Job-level finish = the latest estimate among tasks still open — the same
+  // number the task cards show, rolled up. (job_orders.date_promised is never
+  // set anywhere in the app, so reading it just gives '—' forever.)
+  const estimatedFinish = useMemo(() => {
+    const open = allTasks.filter((t) => t.status !== 'completed' && t.estimatedFinish)
+    if (open.length === 0) return null
+    return open.reduce<Date | null>((latest, t) => {
+      const d = new Date(t.estimatedFinish!)
+      return !latest || d > latest ? d : latest
+    }, null)
+  }, [allTasks])
+
   const quotationTotal = useMemo(() => {
     if (!quotation) return 0
     return quotation.services.reduce(
@@ -155,7 +189,8 @@ export default function page() {
   // tap is what stamps it — nothing here needs to change.
   async function setTaskStatus(task: ServiceTask, next: TaskStatus) {
     setBusyTaskId(task.id)
-    await scheduleTask(jobOrderId, task.id, task.scheduledDate ?? null, next, task.mechanicId, task.note)
+    const result = await scheduleTask(jobOrderId, task.id, task.scheduledDate ?? null, next, task.mechanicId, task.note)
+    if (!result.ok) toast.error(result.message ?? 'Could not update the task.')
     const data = await getServiceProgressById(jobOrderId)
     if (data) {
       setSections(data.sections)
@@ -232,9 +267,9 @@ export default function page() {
                   <Fragment key={task.id}>
                   <div
                     className={`flex items-center justify-between rounded-xl border p-4 ${
-                      task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50' : 'border-slate-200 bg-white hover:bg-slate-50 cursor-pointer'
+                       task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50 cursor-pointer' : task.status === 'completed' ? 'border-slate-200 bg-white' : 'border-slate-200 bg-white hover:bg-slate-50 cursor-pointer'
                     }`}
-                    onClick={() => setSchedulingTask(task)}
+                    onClick={() => task.status !== 'completed' && setSchedulingTask(task)}
                   >
                     <div className="flex items-start gap-4 flex-1 min-w-0">
                       <div className="flex-1 min-w-0">
@@ -255,11 +290,22 @@ export default function page() {
                               Assigned to: {task.mechanicName}
                             </span>
                           )}
-                          {task.estimatedFinish && (
-                            <span className="flex items-center gap-1 font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                              Est. Finish: {new Date(task.estimatedFinish).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                            </span>
-                          )}
+                          {/* A Started task past its estimate is overdue. A Not-Yet task past its
+                              estimate is a scheduling problem, not an overdue one, so it stays amber. */}
+                          {task.estimatedFinish && (() => {
+                            const est = new Date(task.estimatedFinish)
+                            const overdueHrs = task.status === 'active' ? (Date.now() - est.getTime()) / 3600000 : 0
+                            const label = est.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+                            return overdueHrs > 0 ? (
+                              <span className="flex items-center gap-1 font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
+                                Overdue by {overdueHrs < 1 ? `${Math.round(overdueHrs * 60)} min` : `${overdueHrs.toFixed(1)} hrs`} (est. {label})
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1 font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                                Est. Finish: {label}
+                              </span>
+                            )
+                          })()}
                         </div>
                       </div>
                     </div>
@@ -268,6 +314,10 @@ export default function page() {
                       const parts = task.parts ?? []
                       const missing = parts.filter((p) => !partIsReady(p))
                       const busy = busyTaskId === task.id
+                      // Nobody can start work that nobody's been assigned to.
+                      // Date + mechanic are both set in the schedule modal, so
+                      // "schedule it first" is the whole instruction.
+                      const unscheduled = !task.scheduledDate || !task.mechanicId
                       return (
                         <div className="shrink-0 ml-4 flex flex-col items-end gap-2" onClick={(e) => e.stopPropagation()}>
                           <span
@@ -284,13 +334,20 @@ export default function page() {
                             {task.status === 'completed' ? 'Finished' : task.status === 'active' ? 'Started' : missing.length > 0 ? 'Waiting for parts' : 'Not Yet'}
                           </span>
 
-                          {/* Start is blocked until every part for this service has
-                              arrived — work doesn't begin on a car missing parts. */}
+                          {/* Start is blocked until the task is scheduled to a mechanic
+                              and every part for it has arrived — work doesn't begin on
+                              a car missing parts, or with no one assigned to do it. */}
                           {task.status === 'pending' && (
                             <button
                               onClick={() => setTaskStatus(task, 'active')}
-                              disabled={busy || missing.length > 0}
-                              title={missing.length > 0 ? `Waiting for parts (${parts.length - missing.length} of ${parts.length} received)` : undefined}
+                              disabled={busy || missing.length > 0 || unscheduled}
+                              title={
+                                unscheduled
+                                  ? 'Schedule this task and assign a mechanic first (click the card)'
+                                  : missing.length > 0
+                                  ? `Waiting for parts (${parts.length - missing.length} of ${parts.length} received)`
+                                  : undefined
+                              }
                               className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-indigo-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100"
                             >
                               {busy ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />} Start
@@ -449,7 +506,15 @@ export default function page() {
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-slate-400"><Clock size={13} /> Estimated Finish</span>
-              <span className="font-semibold text-slate-800">{initial.timer.estimatedFinish}</span>
+              <span className={`font-semibold ${estimatedFinish && !initial.timer.completedAtIso && estimatedFinish.getTime() < now ? 'text-rose-600' : 'text-slate-800'}`}>
+                {estimatedFinish
+                  ? estimatedFinish.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+                  : allTasks.length === 0
+                  ? '—'
+                  : allTasks.every((t) => t.status === 'completed')
+                  ? 'All tasks done'
+                  : 'Schedule tasks first'}
+              </span>
             </div>
           </div>
 
@@ -461,8 +526,10 @@ export default function page() {
               <span className="font-semibold text-slate-800">{laborHoursEstimate} hrs</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">{initial.timer.completedAtIso ? 'Total Duration' : 'Current Duration'}</span>
-              <span className={`font-semibold ${!initial.timer.completedAtIso && laborHoursEstimate > 0 && currentDurationHours > laborHoursEstimate ? 'text-rose-600' : 'text-slate-800'}`}>
+              {/* Wall-clock since the job hit the floor (overnight included), so comparing
+                  it to labor hours is meaningless — no red here. Overdue lives on the task cards. */}
+              <span className="text-slate-400">{initial.timer.completedAtIso ? 'Total Time in Shop' : 'Time in Shop'}</span>
+              <span className="font-semibold text-slate-800">
                 {currentDurationHours} hrs
               </span>
             </div>
@@ -476,8 +543,94 @@ export default function page() {
               : 'The clock starts when the job enters In Progress.'}
           </p>
         </div>
+
+        {/* Final bill + verification. Same three numbers the customer sees
+            (services + parts − verified payments), so the two screens never
+            disagree. Shown once the job is done — that's when the balance is
+            collectable. A cash choice sits here as 'pending' until the admin
+            confirms the money is in hand. */}
+        {bill && (jobOrder.stage === 'completed' || bill.paid > 0) && (() => {
+          const p = bill.latestPayment
+          const status = p?.verificationStatus
+          return (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400"><CreditCard size={13} /> Final Bill</p>
+                {bill.balance <= 0 ? (
+                  <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">Paid in full</span>
+                ) : status === 'pending' ? (
+                  <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700">To verify</span>
+                ) : (
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-600">Unpaid</span>
+                )}
+              </div>
+
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between"><span className="text-slate-400">Total</span><span className="font-semibold text-slate-800">{currency(bill.total)}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Paid (verified)</span><span className="font-semibold text-slate-800">− {currency(bill.paid)}</span></div>
+                <div className="flex justify-between border-t border-slate-100 pt-1.5"><span className="font-semibold text-slate-700">Balance</span><span className={`text-lg font-bold ${bill.balance <= 0 ? 'text-emerald-600' : 'text-slate-900'}`}>{currency(bill.balance)}</span></div>
+              </div>
+
+              {p && bill.balance > 0 && status !== 'verified' && (
+                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-semibold text-slate-700">{status === 'pending' ? 'Waiting for your check' : 'Last submission'}</p>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${status === 'rejected' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}`}>{status}</span>
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between"><span className="text-slate-400">Amount</span><span className="font-semibold text-slate-800">{currency(p.amountPaid)}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-400">Method</span><span className="font-semibold text-slate-800">{p.paymentMethod === 'cash' ? 'Cash at counter' : p.paymentChannel ?? p.paymentMethod}</span></div>
+                    {p.referenceNumber && <div className="flex justify-between"><span className="text-slate-400">Reference No.</span><span className="font-semibold text-slate-800">{p.referenceNumber}</span></div>}
+                  </div>
+                  {p.proofOfPaymentImage && (
+                    <button type="button" onClick={() => setShowProof(true)} className="mt-2 block w-full">
+                      <img src={p.proofOfPaymentImage} alt="Proof of payment" className="h-28 w-full rounded-lg border border-slate-200 object-cover hover:opacity-90" />
+                      <p className="mt-1 text-center text-[10px] text-slate-400">Click to view full size</p>
+                    </button>
+                  )}
+                  {status === 'pending' && (
+                    p.paymentMethod === 'cash' ? (
+                      <button
+                        onClick={() => decidePayment('verified')}
+                        disabled={verifying}
+                        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-600 active:scale-[0.98] disabled:opacity-50"
+                      >
+                        <Banknote size={14} /> {verifying ? 'Saving…' : `Confirm ${currency(p.amountPaid)} cash received`}
+                      </button>
+                    ) : (
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          onClick={() => decidePayment('rejected')}
+                          disabled={verifying}
+                          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-white py-2 text-xs font-semibold text-rose-600 transition-all duration-150 hover:bg-rose-50 active:scale-[0.98] disabled:opacity-50"
+                        >
+                          <XCircle size={14} /> Reject
+                        </button>
+                        <button
+                          onClick={() => decidePayment('verified')}
+                          disabled={verifying}
+                          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-600 active:scale-[0.98] disabled:opacity-50"
+                        >
+                          <Check size={14} /> {verifying ? 'Saving…' : 'Verify'}
+                        </button>
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+
+              {!p && bill.balance > 0 && (
+                <p className="mt-3 text-[11px] text-slate-400">The customer hasn't submitted a payment yet. They'll see "Pay Remaining Balance" on their completed page.</p>
+              )}
+            </div>
+          )
+        })()}
       </div>
       </div>
+
+      {showProof && bill?.latestPayment?.proofOfPaymentImage && (
+        <Lightbox url={bill.latestPayment.proofOfPaymentImage} label="Proof of payment" onClose={() => setShowProof(false)} />
+      )}
       
       {schedulingTask && (
         <ScheduleModal 
@@ -530,8 +683,12 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
     setSaving(true)
     const datetime = `${date}T${time}:00`
     // Status isn't set here — Start/Finish live on the task card.
-    await scheduleTask(jobOrderId, task.id, datetime, task.status, mechanicId === '' ? undefined : mechanicId, note)
+    const result = await scheduleTask(jobOrderId, task.id, datetime, task.status, mechanicId === '' ? undefined : mechanicId, note)
     setSaving(false)
+    if (!result.ok) {
+      toast.error(result.message ?? 'Could not save the schedule.')
+      return
+    }
     onSaved()
   }
 
@@ -560,22 +717,32 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
         </div>
 
         <div className="space-y-4">
-          <div className="flex gap-2">
-            <button onClick={() => handleQuickPick(0)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Today</button>
-            <button onClick={() => handleQuickPick(1)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Tomorrow</button>
-            <button onClick={() => handleQuickPick(2)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">In 2 Days</button>
-          </div>
-          
+          {/* Quick picks only make sense before the task has started. */}
+          {task.status === 'pending' && (
+            <div className="flex gap-2">
+              <button onClick={() => handleQuickPick(0)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Today</button>
+              <button onClick={() => handleQuickPick(1)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Tomorrow</button>
+              <button onClick={() => handleQuickPick(2)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">In 2 Days</button>
+            </div>
+          )}
+
+          {/* Once started, the schedule is history — read-only. Mechanic and
+              note below stay editable (reassignment mid-task is legitimate). */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Date</label>
-              <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+              <input type="date" value={date} onChange={e => setDate(e.target.value)} disabled={task.status !== 'pending'} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:bg-slate-100 disabled:text-slate-500" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Time</label>
-              <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+              <input type="time" value={time} onChange={e => setTime(e.target.value)} disabled={task.status !== 'pending'} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:bg-slate-100 disabled:text-slate-500" />
             </div>
           </div>
+          {task.status === 'active' && (
+            <p className="text-xs text-slate-500">
+              Already started — the schedule is locked. You can still reassign the mechanic or update the note.
+            </p>
+          )}
           
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 mt-4">Assign Mechanic</label>
@@ -585,10 +752,32 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
               className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
             >
               <option value="">-- Unassigned --</option>
-              {scheduleData.mechanics.map(m => (
-                <option key={m.id} value={m.id}>{m.full_name}</option>
-              ))}
+              {scheduleData.mechanics.map((m) => {
+                const open = Number(m.open_tasks ?? 0)
+                const cap = Number(m.capacity)
+                // A full mechanic can't take a NEW task, but stays selectable
+                // for a task that's already theirs (re-saving the schedule).
+                const full = mechanicIsFull(open, cap) && task.mechanicId !== m.id
+                return (
+                  <option key={m.id} value={m.id} disabled={full}>
+                    {m.full_name} ({open}/{cap}{full ? ' — full' : ''})
+                  </option>
+                )
+              })}
             </select>
+            {(() => {
+              const m = scheduleData.mechanics.find((x) => x.id === mechanicId)
+              if (!m) return null
+              const open = Number(m.open_tasks ?? 0)
+              const cap = Number(m.capacity)
+              const wouldAdd = task.mechanicId !== m.id
+              return (
+                <p className={`mt-1.5 text-xs ${mechanicIsFull(open, cap) && wouldAdd ? 'text-rose-600' : 'text-slate-500'}`}>
+                  {open} of {cap} open tasks{wouldAdd ? ` — this would make ${open + 1}` : ' (including this one)'}.
+                  {mechanicIsFull(open, cap) && wouldAdd && ' At the limit — finish one of theirs first or pick someone else.'}
+                </p>
+              )
+            })()}
           </div>
 
           {/* Overlap / Daily Schedule View */}
@@ -641,8 +830,15 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
         
         <div className="mt-6 flex gap-3">
           <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
-          <button onClick={handleSave} disabled={saving} className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-70 flex items-center justify-center gap-2">
-            {saving ? 'Saving...' : <><CalendarDays size={16}/> Save Schedule</>}
+          <button
+            onClick={handleSave}
+            disabled={saving || (() => {
+              const m = scheduleData.mechanics.find((x) => x.id === mechanicId)
+              return Boolean(m && task.mechanicId !== m.id && mechanicIsFull(Number(m.open_tasks ?? 0), Number(m.capacity)))
+            })()}
+            className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-2"
+          >
+            {saving ? 'Saving...' : <><Check size={16}/> Save</>}
           </button>
         </div>
       </div>
