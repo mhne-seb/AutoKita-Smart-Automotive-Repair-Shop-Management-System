@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { uploadPaymentProof } from '@/lib/storage'
-import { getPaymentChannel } from '@/data/paymentChannels'
-
-const MAX_BYTES = 5 * 1024 * 1024
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+import { readTransferDetails } from '@/lib/paymentForm'
 
 // Submitted as multipart form-data, not JSON, because a bank/e-wallet
 // transfer carries a proof-of-payment screenshot alongside the plain fields.
@@ -35,30 +32,12 @@ export async function POST(request: NextRequest) {
   let proofUrl: string | null = null
 
   if (method !== 'shop') {
-    const channelId = String(form.get('channel') ?? '')
-    const channel = getPaymentChannel(channelId)
-    referenceNumber = String(form.get('referenceNumber') ?? '').trim() || null
-    const file = form.get('file')
-
-    if (!channel) {
-      return NextResponse.json({ error: 'A valid payment channel is required' }, { status: 400 })
-    }
-    if (!referenceNumber) {
-      return NextResponse.json({ error: 'Reference number is required' }, { status: 400 })
-    }
-    if (!(file instanceof File)) {
-      return NextResponse.json({ error: 'Proof of payment is required' }, { status: 400 })
-    }
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json({ error: 'Proof of payment must be a JPEG, PNG or WebP image' }, { status: 415 })
-    }
-    if (file.size > MAX_BYTES) {
-      return NextResponse.json({ error: 'Proof of payment must be under 5MB' }, { status: 413 })
-    }
-
-    dbMethod = channel.type
-    channelLabel = channel.label
-    proofUrl = await uploadPaymentProof(String(jobOrderId), file)
+    const transfer = readTransferDetails(form)
+    if (!transfer.ok) return NextResponse.json({ error: transfer.error }, { status: transfer.status })
+    dbMethod = transfer.channel.type
+    channelLabel = transfer.channel.label
+    referenceNumber = transfer.referenceNumber
+    proofUrl = await uploadPaymentProof(String(jobOrderId), transfer.file)
   }
 
   try {

@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getInProgressData } from "@/controllers/serviceProgressController";
+import { Lightbox } from "@/components/Lightbox";
+import { isRoadTest } from "@/data/roadTest";
 // Billing & Warranty was previously its own page/route — its exact UI/logic
 // (itemized parts/labor breakdown, payment method chooser, invoice download)
 // now lives inline on this tracking stage instead, scoped to this job order.
@@ -59,6 +61,8 @@ type Task = {
   billable: boolean;
   scheduled_date?: string;
   estimated_finish?: string;
+  // Photo the shop uploaded when they marked this finished — proof of work.
+  completion_photo_url?: string | null;
 };
 
 type JobOrder = {
@@ -117,6 +121,7 @@ function InProgress() {
   const [loading, setLoading] = useState(true);
   const [showWarn, setShowWarn] = useState(false);
   const [pullOutStatus, setPullOutStatus] = useState<"none" | "requested">("none");
+  const [photoView, setPhotoView] = useState<{ url: string; label: string } | null>(null);
   const [pullOutNote, setPullOutNote] = useState("");
 
   useEffect(() => {
@@ -217,7 +222,10 @@ function InProgress() {
           return {
             key: `task-${t.id}`,
             label: t.task_title,
-            detail: t.note && t.note !== "Describe the service..." ? t.note : undefined,
+            detail: isRoadTest(t)
+              ? "Our mechanic drives your vehicle to make sure the repairs hold up on the road before we hand it back."
+              : t.note && t.note !== "Describe the service..." ? t.note : undefined,
+            photo: t.completion_photo_url ?? undefined,
             time: t.completed_at
               ? `Finished ${fmtWhen(t.completed_at)}`
               : missing.length > 0
@@ -299,9 +307,9 @@ function InProgress() {
                 const isLast = idx === timeline.length - 1;
                 const isOnHold = pullOutStatus === "requested" && entry.status !== "completed" && entry.key.startsWith("task-");
 
-                // Service tasks use the exact words the admin picks in the
-                // schedule modal (Not Yet / Started / Finished), so the customer
-                // sees what the shop tagged. Other milestones keep Completed/Pending.
+                // Service tasks mirror what the shop tagged (Started / Finished);
+                // one that hasn't started yet is simply "Upcoming". Other
+                // milestones keep Completed/Pending.
                 const isTask = entry.key.startsWith("task-");
                 const waiting = Boolean((entry as { waitingForParts?: boolean }).waitingForParts);
                 const badgeLabel = isOnHold
@@ -312,7 +320,7 @@ function InProgress() {
                   ? "Started"
                   : waiting
                   ? "Waiting for parts"
-                  : (isTask ? "Not Yet" : "Pending");
+                  : (isTask ? "Upcoming" : "Pending");
                 const badgeClasses = isOnHold
                   ? "bg-destructive/15 text-destructive"
                   : entry.status === "completed"
@@ -372,6 +380,16 @@ function InProgress() {
                         </span>
                       </div>
 
+                      {entry.key.startsWith("task-") && (entry as { photo?: string }).photo && (
+                        <button
+                          type="button"
+                          onClick={() => setPhotoView({ url: (entry as { photo?: string }).photo!, label: `${entry.label} — finished work` })}
+                          className="mt-2 flex items-center gap-2 rounded-lg border p-1.5 text-left text-[11px] text-muted-foreground transition-colors hover:bg-accent"
+                        >
+                          <img src={(entry as { photo?: string }).photo} alt={`${entry.label} finished`} className="h-12 w-16 shrink-0 rounded-md object-cover" />
+                          <span><Camera className="mr-1 inline h-3 w-3" />Photo of the finished work — tap to enlarge</span>
+                        </button>
+                      )}
                       {entry.key === "released" && entry.image && (
                         <img
                           src={entry.image}
@@ -558,6 +576,8 @@ function InProgress() {
           </div>
         </aside>
       </div>
+
+      {photoView && <Lightbox url={photoView.url} label={photoView.label} onClose={() => setPhotoView(null)} />}
 
       {showWarn && !isHistorical && (
         <PullOutModal

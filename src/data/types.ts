@@ -156,6 +156,8 @@ export interface ServiceTask {
   mechanicName?: string
   estimatedFinish?: string
   parts?: TaskPart[]
+  // Photo of the finished work — set when the task is completed (required).
+  photoUrl?: string
 }
 
 export interface ServiceSection {

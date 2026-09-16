@@ -3,12 +3,17 @@
 // Admin "Service Progress" page — the final step of the job-order workflow. Shows a section-by-section task checklist; once every task is marked done the job order is written back to "completed" (see jobOrderController.advanceJobOrderStage).
 import { useParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2 } from 'lucide-react'
+import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, CreditCard, XCircle, Banknote, Camera, Upload, Car } from 'lucide-react'
+import type { ChangeEvent } from 'react'
+import { toast } from 'sonner'
+import { Lightbox } from '@/components/Lightbox'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
-import { getQuotationById } from '@/controllers/quotationController'
-import { getServiceProgressById, scheduleTask, setPartStatus } from '@/controllers/serviceProgressController'
+import { getQuotationById, getJobOrderBill, verifyJobOrderPayment, type JobOrderBill } from '@/controllers/quotationController'
+import { getServiceProgressById, scheduleTask, setPartStatus, finishTask } from '@/controllers/serviceProgressController'
+import { isRoadTest } from '@/data/roadTest'
+import { mechanicIsFull } from '@/data/mechanicPolicy'
 import { currency } from '@/data/mockData'
 import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, partIsReady } from '@/data/types'
 
@@ -65,6 +70,26 @@ export default function page() {
   }, [jobOrderId])
 
   const [scheduleData, setScheduleData] = useState<{tasks: any[], mechanics: any[]}>({ tasks: [], mechanics: [] })
+
+  // Final bill — what the job costs, what's verified, and the payment the
+  // customer most recently submitted for the admin to check. Only matters
+  // once the job is completed; loaded regardless so the card is instant.
+  const [bill, setBill] = useState<JobOrderBill | null>(null)
+  const [verifying, setVerifying] = useState(false)
+  const [showProof, setShowProof] = useState(false)
+  const [lightboxPhoto, setLightboxPhoto] = useState<{ url: string; label: string } | null>(null)
+  const loadBill = () => getJobOrderBill(jobOrderId).then(setBill)
+  useEffect(() => { void loadBill() }, [jobOrderId])
+  async function decidePayment(decision: 'verified' | 'rejected') {
+    const p = bill?.latestPayment
+    if (!p) return
+    setVerifying(true)
+    const ok = await verifyJobOrderPayment(jobOrderId, p.id, decision)
+    setVerifying(false)
+    if (!ok) return toast.error('Could not update the payment.')
+    toast.success(decision === 'verified' ? 'Payment verified.' : 'Payment rejected — the customer will be asked to resubmit.')
+    void loadBill()
+  }
   
   useEffect(() => {
     let active = true
@@ -86,6 +111,7 @@ export default function page() {
   // returns, so the hook order is identical on every render).
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null)
   const [busyPartId, setBusyPartId] = useState<number | null>(null)
+  const [finishingTask, setFinishingTask] = useState<ServiceTask | null>(null)
 
   // Once the real data arrives, seed the editable state from it.
   useEffect(() => {
@@ -120,6 +146,20 @@ export default function page() {
     return fromQuotation > 0 ? Math.round(fromQuotation * 10) / 10 : (initial?.timer.estimatedDurationHours ?? 0)
   }, [quotation, initial?.timer.estimatedDurationHours])
 
+  // Job-level finish = the latest estimate across ALL tasks — the same number
+  // the task cards show, rolled up. Finished tasks count too, so it's one
+  // stable date for the whole job rather than jumping to whichever task is
+  // left. (job_orders.date_promised is never set anywhere in the app, so
+  // reading it just gives '—' forever.)
+  const estimatedFinish = useMemo(() => {
+    const withEstimate = allTasks.filter((t) => t.estimatedFinish)
+    if (withEstimate.length === 0) return null
+    return withEstimate.reduce<Date | null>((latest, t) => {
+      const d = new Date(t.estimatedFinish!)
+      return !latest || d > latest ? d : latest
+    }, null)
+  }, [allTasks])
+
   const quotationTotal = useMemo(() => {
     if (!quotation) return 0
     return quotation.services.reduce(
@@ -149,24 +189,31 @@ export default function page() {
     if (data) setSections(data.sections)
   }
 
-  // Start / Finish live on the card, not in the modal — one tap, in the
-  // moment. Schedule/mechanic/note are passed through unchanged (the stored
-  // function is a full update). When Jubert adds started_at, the 'Started'
-  // tap is what stamps it — nothing here needs to change.
+  // Start lives on the card — one tap, in the moment. Schedule/mechanic/note
+  // are passed through unchanged (the stored function is a full update).
   async function setTaskStatus(task: ServiceTask, next: TaskStatus) {
     setBusyTaskId(task.id)
-    await scheduleTask(jobOrderId, task.id, task.scheduledDate ?? null, next, task.mechanicId, task.note)
-    const data = await getServiceProgressById(jobOrderId)
-    if (data) {
-      setSections(data.sections)
-      // Every task done -> the job order itself is complete (customer's
-      // tracker flips to "Completed").
-      const all = data.sections.flatMap((s) => s.tasks)
-      if (all.length > 0 && all.every((t) => t.status === 'completed')) {
-        void advanceJobOrderStage(jobOrderId, 'completed')
-      }
-    }
+    const result = await scheduleTask(jobOrderId, task.id, task.scheduledDate ?? null, next, task.mechanicId, task.note)
+    if (!result.ok) toast.error(result.message ?? 'Could not update the task.')
+    await refreshTasks()
     setBusyTaskId(null)
+  }
+
+  // Finish is a photo upload (shop policy: show the finished work). What
+  // happens to the job afterwards — road test created, job completed — is
+  // decided on the server, not here.
+  async function handleFinish(task: ServiceTask, photo: File): Promise<boolean> {
+    const result = await finishTask(jobOrderId, task.id, photo)
+    if (!result.ok) {
+      toast.error(result.message ?? 'Could not finish the task.')
+      return false
+    }
+    if (result.roadTestCreated) toast.success('All services done — Road Test added. Drive it before handing it back.')
+    else if (result.jobCompleted) toast.success('Road test finished — job order is now Completed.')
+    else toast.success(`${task.title} finished.`)
+    await refreshTasks()
+    if (result.jobCompleted) getJobOrderById(jobOrderId).then((jo) => jo && setJobOrder(jo))
+    return true
   }
 
   // No inventory system — the only fact about a part is "has it arrived".
@@ -232,23 +279,35 @@ export default function page() {
                   <Fragment key={task.id}>
                   <div
                     className={`flex items-center justify-between rounded-xl border p-4 ${
-                      task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50' : 'border-slate-200 bg-white hover:bg-slate-50 cursor-pointer'
+                       task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50 cursor-pointer' : task.status === 'completed' ? 'border-slate-200 bg-white' : 'border-slate-200 bg-white hover:bg-slate-50 cursor-pointer'
                     }`}
-                    onClick={() => setSchedulingTask(task)}
+                    onClick={() => task.status !== 'completed' && setSchedulingTask(task)}
                   >
                     <div className="flex items-start gap-4 flex-1 min-w-0">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-slate-900 transition-colors">{task.title}</h3>
+                        <h3 className="flex items-center gap-2 font-semibold text-slate-900 transition-colors">
+                          {task.title}
+                          {isRoadTest(task) && (
+                            <span className="flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-700"><Car size={11} /> Quality check</span>
+                          )}
+                        </h3>
                         {task.note && task.note !== 'Describe the service...' && (
                           <p className="mt-0.5 text-sm text-slate-500 truncate">{task.note}</p>
                         )}
                         <div className="mt-2 flex items-center gap-4 text-xs text-slate-400">
-                          <span>🕐 {task.time}</span>
-                          {task.scheduledDate && (
-                            <span className="flex items-center gap-1 font-semibold text-indigo-600">
-                              <CalendarDays size={13} />
-                              Scheduled: {new Date(task.scheduledDate).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                            </span>
+                          {/* Finish time — only meaningful once the task is done. (Per-task
+                              elapsed needs started_at, which the schema doesn't have yet.) */}
+                          {task.status === 'completed' && task.time !== '—' && (
+                            <span className="flex items-center gap-1 font-semibold text-emerald-600">🕐 Finished {task.time}</span>
+                          )}
+                          {task.photoUrl && (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setLightboxPhoto({ url: task.photoUrl!, label: `${task.title} — finished work` }) }}
+                              className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700 transition-colors hover:bg-emerald-100"
+                            >
+                              <img src={task.photoUrl} alt="" className="h-4 w-4 rounded-sm object-cover" /> Photo
+                            </button>
                           )}
                           {task.startedAt && (
                             <span className="flex items-center gap-1 font-semibold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full">
@@ -261,11 +320,32 @@ export default function page() {
                               Assigned to: {task.mechanicName}
                             </span>
                           )}
-                          {task.estimatedFinish && (
-                            <span className="flex items-center gap-1 font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                              Est. Finish: {new Date(task.estimatedFinish).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                          {task.scheduledDate && (
+                            <span className="flex items-center gap-1 font-semibold text-indigo-600">
+                              <CalendarDays size={13} />
+                              Scheduled: {new Date(task.scheduledDate).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                             </span>
                           )}
+                          {/* A Started task past its estimate is overdue. A Not-Yet task past its
+                              estimate is a scheduling problem, not an overdue one, so it stays amber. */}
+                          {task.estimatedFinish && (() => {
+                            const est = new Date(task.estimatedFinish)
+                            const overdueHrs = task.status === 'active' ? (Date.now() - est.getTime()) / 3600000 : 0
+                            const label = est.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+                            // Est. Finish is scheduled start + predicted duration, so the
+                            // duration is just the gap between the two.
+                            const estHrs = task.scheduledDate ? (est.getTime() - new Date(task.scheduledDate).getTime()) / 3600000 : 0
+                            const hrsLabel = estHrs > 0 ? ` (${estHrs % 1 === 0 ? estHrs : estHrs.toFixed(1)} hrs)` : ''
+                            return overdueHrs > 0 ? (
+                              <span className="flex items-center gap-1 font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
+                                Overdue by {overdueHrs < 1 ? `${Math.round(overdueHrs * 60)} min` : `${overdueHrs.toFixed(1)} hrs`} (est. {label})
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1 font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                                Est. Finish: {label}{hrsLabel}
+                              </span>
+                            )
+                          })()}
                         </div>
                       </div>
                     </div>
@@ -274,29 +354,43 @@ export default function page() {
                       const parts = task.parts ?? []
                       const missing = parts.filter((p) => !partIsReady(p))
                       const busy = busyTaskId === task.id
+                      // Nobody can start work that nobody's been assigned to.
+                      // Date + mechanic are both set in the schedule modal, so
+                      // "schedule it first" is the whole instruction.
+                      const unscheduled = !task.scheduledDate || !task.mechanicId
                       return (
                         <div className="shrink-0 ml-4 flex flex-col items-end gap-2" onClick={(e) => e.stopPropagation()}>
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                              task.status === 'completed'
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : task.status === 'active'
-                                ? 'bg-indigo-100 text-indigo-700'
-                                : missing.length > 0
-                                ? 'bg-amber-100 text-amber-700'
-                                : 'bg-slate-100 text-slate-500'
-                            }`}
-                          >
-                            {task.status === 'completed' ? 'Finished' : task.status === 'active' ? 'Started' : missing.length > 0 ? 'Waiting for parts' : 'Not Yet'}
-                          </span>
+                          {/* A task that simply hasn't started gets no badge — the Start
+                              button (or its "schedule first" hint) already says so.
+                              Waiting on parts is a real state, so that one stays. */}
+                          {(task.status !== 'pending' || missing.length > 0) && (
+                            <span
+                              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                                task.status === 'completed'
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : task.status === 'active'
+                                  ? 'bg-indigo-100 text-indigo-700'
+                                  : 'bg-amber-100 text-amber-700'
+                              }`}
+                            >
+                              {task.status === 'completed' ? 'Finished' : task.status === 'active' ? 'Started' : 'Waiting for parts'}
+                            </span>
+                          )}
 
-                          {/* Start is blocked until every part for this service has
-                              arrived — work doesn't begin on a car missing parts. */}
+                          {/* Start is blocked until the task is scheduled to a mechanic
+                              and every part for it has arrived — work doesn't begin on
+                              a car missing parts, or with no one assigned to do it. */}
                           {task.status === 'pending' && (
                             <button
                               onClick={() => setTaskStatus(task, 'active')}
-                              disabled={busy || missing.length > 0}
-                              title={missing.length > 0 ? `Waiting for parts (${parts.length - missing.length} of ${parts.length} received)` : undefined}
+                              disabled={busy || missing.length > 0 || unscheduled}
+                              title={
+                                unscheduled
+                                  ? 'Schedule this task and assign a mechanic first (click the card)'
+                                  : missing.length > 0
+                                  ? `Waiting for parts (${parts.length - missing.length} of ${parts.length} received)`
+                                  : undefined
+                              }
                               className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-indigo-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100"
                             >
                               {busy ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />} Start
@@ -304,11 +398,12 @@ export default function page() {
                           )}
                           {task.status === 'active' && (
                             <button
-                              onClick={() => setTaskStatus(task, 'completed')}
+                              onClick={() => setFinishingTask(task)}
                               disabled={busy}
+                              title="Upload a photo of the finished work to mark this done"
                               className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-700 active:scale-95 disabled:opacity-40"
                             >
-                              {busy ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />} Finish
+                              <Camera size={13} /> Finish
                             </button>
                           )}
                         </div>
@@ -455,7 +550,13 @@ export default function page() {
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-slate-400"><Clock size={13} /> Estimated Finish</span>
-              <span className="font-semibold text-slate-800">{initial.timer.estimatedFinish}</span>
+              <span className={`font-semibold ${estimatedFinish && !initial.timer.completedAtIso && estimatedFinish.getTime() < now ? 'text-rose-600' : 'text-slate-800'}`}>
+                {estimatedFinish
+                  ? estimatedFinish.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+                  : allTasks.length === 0
+                  ? '—'
+                  : 'Schedule tasks first'}
+              </span>
             </div>
           </div>
 
@@ -467,8 +568,10 @@ export default function page() {
               <span className="font-semibold text-slate-800">{laborHoursEstimate} hrs</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">{initial.timer.completedAtIso ? 'Total Duration' : 'Current Duration'}</span>
-              <span className={`font-semibold ${!initial.timer.completedAtIso && laborHoursEstimate > 0 && currentDurationHours > laborHoursEstimate ? 'text-rose-600' : 'text-slate-800'}`}>
+              {/* Wall-clock since the job hit the floor (overnight included), so comparing
+                  it to labor hours is meaningless — no red here. Overdue lives on the task cards. */}
+              <span className="text-slate-400">{initial.timer.completedAtIso ? 'Total Time in Shop' : 'Time in Shop'}</span>
+              <span className="font-semibold text-slate-800">
                 {currentDurationHours} hrs
               </span>
             </div>
@@ -482,8 +585,106 @@ export default function page() {
               : 'The clock starts when the job enters In Progress.'}
           </p>
         </div>
+
+        {/* Final bill + verification. Same three numbers the customer sees
+            (services + parts − verified payments), so the two screens never
+            disagree. Shown once the job is done — that's when the balance is
+            collectable. A cash choice sits here as 'pending' until the admin
+            confirms the money is in hand. */}
+        {bill && (jobOrder.stage === 'completed' || bill.paid > 0) && (() => {
+          const p = bill.latestPayment
+          const status = p?.verificationStatus
+          return (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400"><CreditCard size={13} /> Final Bill</p>
+                {bill.balance <= 0 ? (
+                  <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">Paid in full</span>
+                ) : status === 'pending' ? (
+                  <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700">To verify</span>
+                ) : (
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-600">Unpaid</span>
+                )}
+              </div>
+
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between"><span className="text-slate-400">Total</span><span className="font-semibold text-slate-800">{currency(bill.total)}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Paid (verified)</span><span className="font-semibold text-slate-800">− {currency(bill.paid)}</span></div>
+                <div className="flex justify-between border-t border-slate-100 pt-1.5"><span className="font-semibold text-slate-700">Balance</span><span className={`text-lg font-bold ${bill.balance <= 0 ? 'text-emerald-600' : 'text-slate-900'}`}>{currency(bill.balance)}</span></div>
+              </div>
+
+              {p && bill.balance > 0 && status !== 'verified' && (
+                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-semibold text-slate-700">{status === 'pending' ? 'Waiting for your check' : 'Last submission'}</p>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${status === 'rejected' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}`}>{status}</span>
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between"><span className="text-slate-400">Amount</span><span className="font-semibold text-slate-800">{currency(p.amountPaid)}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-400">Method</span><span className="font-semibold text-slate-800">{p.paymentMethod === 'cash' ? 'Cash at counter' : p.paymentChannel ?? p.paymentMethod}</span></div>
+                    {p.referenceNumber && <div className="flex justify-between"><span className="text-slate-400">Reference No.</span><span className="font-semibold text-slate-800">{p.referenceNumber}</span></div>}
+                  </div>
+                  {p.proofOfPaymentImage && (
+                    <button type="button" onClick={() => setShowProof(true)} className="mt-2 block w-full">
+                      <img src={p.proofOfPaymentImage} alt="Proof of payment" className="h-28 w-full rounded-lg border border-slate-200 object-cover hover:opacity-90" />
+                      <p className="mt-1 text-center text-[10px] text-slate-400">Click to view full size</p>
+                    </button>
+                  )}
+                  {status === 'pending' && (
+                    p.paymentMethod === 'cash' ? (
+                      <button
+                        onClick={() => decidePayment('verified')}
+                        disabled={verifying}
+                        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-600 active:scale-[0.98] disabled:opacity-50"
+                      >
+                        <Banknote size={14} /> {verifying ? 'Saving…' : `Confirm ${currency(p.amountPaid)} cash received`}
+                      </button>
+                    ) : (
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          onClick={() => decidePayment('rejected')}
+                          disabled={verifying}
+                          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-white py-2 text-xs font-semibold text-rose-600 transition-all duration-150 hover:bg-rose-50 active:scale-[0.98] disabled:opacity-50"
+                        >
+                          <XCircle size={14} /> Reject
+                        </button>
+                        <button
+                          onClick={() => decidePayment('verified')}
+                          disabled={verifying}
+                          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-600 active:scale-[0.98] disabled:opacity-50"
+                        >
+                          <Check size={14} /> {verifying ? 'Saving…' : 'Verify'}
+                        </button>
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+
+              {!p && bill.balance > 0 && (
+                <p className="mt-3 text-[11px] text-slate-400">The customer hasn't submitted a payment yet. They'll see "Pay Remaining Balance" on their completed page.</p>
+              )}
+            </div>
+          )
+        })()}
       </div>
       </div>
+
+      {finishingTask && (
+        <FinishTaskModal
+          task={finishingTask}
+          onClose={() => setFinishingTask(null)}
+          onSubmit={async (photo) => {
+            const ok = await handleFinish(finishingTask, photo)
+            if (ok) setFinishingTask(null)
+            return ok
+          }}
+        />
+      )}
+      {lightboxPhoto && <Lightbox url={lightboxPhoto.url} label={lightboxPhoto.label} onClose={() => setLightboxPhoto(null)} />}
+      {showProof && bill?.latestPayment?.proofOfPaymentImage && (
+        <Lightbox url={bill.latestPayment.proofOfPaymentImage} label="Proof of payment" onClose={() => setShowProof(false)} />
+      )}
       
       {schedulingTask && (
         <ScheduleModal 
@@ -504,6 +705,87 @@ export default function page() {
           }}
         />
       )}
+    </div>
+  )
+}
+
+// Finishing a task = proving it. One photo, required; nothing else to fill in.
+function FinishTaskModal({ task, onClose, onSubmit }: { task: ServiceTask; onClose: () => void; onSubmit: (photo: File) => Promise<boolean> }) {
+  const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
+
+  const pick = (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    setError(null)
+    if (!f) return
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(f.type)) return setError('Use a JPEG, PNG or WebP image.')
+    if (f.size > 5 * 1024 * 1024) return setError('Image must be under 5MB.')
+    if (preview) URL.revokeObjectURL(preview)
+    setFile(f)
+    setPreview(URL.createObjectURL(f))
+  }
+
+  const submit = async () => {
+    if (!file) return
+    setSaving(true)
+    const ok = await onSubmit(file)
+    if (!ok) setSaving(false)
+  }
+
+  const roadTest = isRoadTest(task)
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">Finish {task.title}</h2>
+            <p className="mt-0.5 text-sm text-slate-500">
+              {roadTest
+                ? 'Upload a photo from the road test — e.g. the dashboard with no warning lights.'
+                : 'Upload a photo of the finished work. Required — it goes on the customer\u2019s record.'}
+            </p>
+          </div>
+          <button onClick={onClose} className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"><X size={18} /></button>
+        </div>
+
+        <div className="mt-5">
+          {preview ? (
+            <div className="overflow-hidden rounded-xl border border-slate-200">
+              <img src={preview} alt="Finished work" className="aspect-video w-full object-cover" />
+              <div className="flex items-center justify-between px-3 py-2 text-xs">
+                <span className="truncate text-slate-500">{file?.name} · {((file?.size ?? 0) / 1024).toFixed(0)} KB</span>
+                <label className="shrink-0 cursor-pointer font-semibold text-indigo-600 hover:underline">
+                  Replace
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={pick} />
+                </label>
+              </div>
+            </div>
+          ) : (
+            <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-8 text-center transition-colors hover:border-indigo-400 hover:bg-indigo-50/40">
+              <Upload size={22} className="text-slate-400" />
+              <span className="text-sm font-semibold text-slate-700">Click to choose a photo</span>
+              <span className="text-xs text-slate-400">JPEG, PNG or WebP · up to 5MB</span>
+              <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={pick} />
+            </label>
+          )}
+          {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
+        </div>
+
+        <div className="mt-5 flex gap-3">
+          <button onClick={onClose} disabled={saving} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">Cancel</button>
+          <button
+            onClick={submit}
+            disabled={!file || saving}
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-emerald-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {saving ? <><Loader2 size={15} className="animate-spin" /> Saving…</> : <><Check size={15} /> Mark Finished</>}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
@@ -536,8 +818,12 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
     setSaving(true)
     const datetime = `${date}T${time}:00`
     // Status isn't set here — Start/Finish live on the task card.
-    await scheduleTask(jobOrderId, task.id, datetime, task.status, mechanicId === '' ? undefined : mechanicId, note)
+    const result = await scheduleTask(jobOrderId, task.id, datetime, task.status, mechanicId === '' ? undefined : mechanicId, note)
     setSaving(false)
+    if (!result.ok) {
+      toast.error(result.message ?? 'Could not save the schedule.')
+      return
+    }
     onSaved()
   }
 
@@ -566,22 +852,32 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
         </div>
 
         <div className="space-y-4">
-          <div className="flex gap-2">
-            <button onClick={() => handleQuickPick(0)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Today</button>
-            <button onClick={() => handleQuickPick(1)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Tomorrow</button>
-            <button onClick={() => handleQuickPick(2)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">In 2 Days</button>
-          </div>
-          
+          {/* Quick picks only make sense before the task has started. */}
+          {task.status === 'pending' && (
+            <div className="flex gap-2">
+              <button onClick={() => handleQuickPick(0)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Today</button>
+              <button onClick={() => handleQuickPick(1)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Tomorrow</button>
+              <button onClick={() => handleQuickPick(2)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">In 2 Days</button>
+            </div>
+          )}
+
+          {/* Once started, the schedule is history — read-only. Mechanic and
+              note below stay editable (reassignment mid-task is legitimate). */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Date</label>
-              <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+              <input type="date" value={date} onChange={e => setDate(e.target.value)} disabled={task.status !== 'pending'} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:bg-slate-100 disabled:text-slate-500" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Time</label>
-              <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+              <input type="time" value={time} onChange={e => setTime(e.target.value)} disabled={task.status !== 'pending'} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:bg-slate-100 disabled:text-slate-500" />
             </div>
           </div>
+          {task.status === 'active' && (
+            <p className="text-xs text-slate-500">
+              Already started — the schedule is locked. You can still reassign the mechanic or update the note.
+            </p>
+          )}
           
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 mt-4">Assign Mechanic</label>
@@ -591,10 +887,32 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
               className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
             >
               <option value="">-- Unassigned --</option>
-              {scheduleData.mechanics.map(m => (
-                <option key={m.id} value={m.id}>{m.full_name}</option>
-              ))}
+              {scheduleData.mechanics.map((m) => {
+                const open = Number(m.open_tasks ?? 0)
+                const cap = Number(m.capacity)
+                // A full mechanic can't take a NEW task, but stays selectable
+                // for a task that's already theirs (re-saving the schedule).
+                const full = mechanicIsFull(open, cap) && task.mechanicId !== m.id
+                return (
+                  <option key={m.id} value={m.id} disabled={full}>
+                    {m.full_name} ({open}/{cap}{full ? ' — full' : ''})
+                  </option>
+                )
+              })}
             </select>
+            {(() => {
+              const m = scheduleData.mechanics.find((x) => x.id === mechanicId)
+              if (!m) return null
+              const open = Number(m.open_tasks ?? 0)
+              const cap = Number(m.capacity)
+              const wouldAdd = task.mechanicId !== m.id
+              return (
+                <p className={`mt-1.5 text-xs ${mechanicIsFull(open, cap) && wouldAdd ? 'text-rose-600' : 'text-slate-500'}`}>
+                  {open} of {cap} open tasks{wouldAdd ? ` — this would make ${open + 1}` : ' (including this one)'}.
+                  {mechanicIsFull(open, cap) && wouldAdd && ' At the limit — finish one of theirs first or pick someone else.'}
+                </p>
+              )
+            })()}
           </div>
 
           {/* Overlap / Daily Schedule View */}
@@ -647,8 +965,15 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
         
         <div className="mt-6 flex gap-3">
           <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
-          <button onClick={handleSave} disabled={saving} className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-70 flex items-center justify-center gap-2">
-            {saving ? 'Saving...' : <><CalendarDays size={16}/> Save Schedule</>}
+          <button
+            onClick={handleSave}
+            disabled={saving || (() => {
+              const m = scheduleData.mechanics.find((x) => x.id === mechanicId)
+              return Boolean(m && task.mechanicId !== m.id && mechanicIsFull(Number(m.open_tasks ?? 0), Number(m.capacity)))
+            })()}
+            className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-2"
+          >
+            {saving ? 'Saving...' : <><Check size={16}/> Save</>}
           </button>
         </div>
       </div>
