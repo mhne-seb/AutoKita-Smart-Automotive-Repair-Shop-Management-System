@@ -182,6 +182,39 @@ export interface JobOrderPayment {
   verificationStatus: 'pending' | 'verified' | 'rejected' | 'refunded'
 }
 
+export interface JobOrderBill {
+  total: number
+  paid: number
+  balance: number
+  latestPayment: JobOrderPayment | null
+}
+
+/** Live bill for a job order: services + parts, verified payments, remaining balance, latest payment. */
+export async function getJobOrderBill(jobOrderId: string): Promise<JobOrderBill | null> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/bill`, { cache: 'no-store' })
+  const json = await res.json().catch(() => null)
+  if (!json?.success) return null
+  const b = json.bill
+  const p = b.latestPayment
+  return {
+    total: Number(b.total),
+    paid: Number(b.paid),
+    balance: Number(b.balance),
+    latestPayment: p
+      ? {
+          id: p.id,
+          paymentMethod: p.payment_method,
+          paymentChannel: p.payment_channel,
+          referenceNumber: p.reference_number,
+          proofOfPaymentImage: p.proof_of_payment_image,
+          amountPaid: Number(p.amount_paid),
+          paymentDate: p.payment_date,
+          verificationStatus: p.verification_status,
+        }
+      : null,
+  }
+}
+
 /** Fetches the latest payment submitted for a job order, or null if none yet. */
 export async function getJobOrderPayment(jobOrderId: string): Promise<JobOrderPayment | null> {
   const res = await fetch(`/api/job-orders/${jobOrderId}/payment`)
