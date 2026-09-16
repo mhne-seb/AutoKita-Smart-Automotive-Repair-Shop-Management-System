@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { getJobOrderBill } from '@/lib/jobOrderBill'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -32,14 +33,16 @@ export async function GET(request: NextRequest) {
     }
 
     if (!jobOrder) {
-      return NextResponse.json({ jobOrder: null, logs: [], warranties: [], services: [], parts: [] })
+      return NextResponse.json({ jobOrder: null, logs: [], warranties: [], services: [], parts: [], bill: null })
     }
 
-    const [logsRes, warrantiesRes, servicesRes, partsRes] = await Promise.all([
+    const [logsRes, warrantiesRes, servicesRes, partsRes, bill] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_repair_logs($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_warranties($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_invoice_services($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_invoice_parts($1)`, [jobOrder.job_order_id]),
+      // Live money: job_orders.balance is never written, so don't read it.
+      getJobOrderBill(jobOrder.job_order_id),
     ])
 
     return NextResponse.json({
@@ -48,6 +51,7 @@ export async function GET(request: NextRequest) {
       warranties: warrantiesRes.rows,
       services: servicesRes.rows,
       parts: partsRes.rows,
+      bill,
     })
   } catch (err) {
     console.error('[/api/tracking/completed] error:', err)
