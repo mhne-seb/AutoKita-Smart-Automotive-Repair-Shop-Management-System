@@ -289,6 +289,10 @@ export default function page() {
                       const parts = task.parts ?? []
                       const missing = parts.filter((p) => !partIsReady(p))
                       const busy = busyTaskId === task.id
+                      // Nobody can start work that nobody's been assigned to.
+                      // Date + mechanic are both set in the schedule modal, so
+                      // "schedule it first" is the whole instruction.
+                      const unscheduled = !task.scheduledDate || !task.mechanicId
                       return (
                         <div className="shrink-0 ml-4 flex flex-col items-end gap-2" onClick={(e) => e.stopPropagation()}>
                           <span
@@ -305,13 +309,20 @@ export default function page() {
                             {task.status === 'completed' ? 'Finished' : task.status === 'active' ? 'Started' : missing.length > 0 ? 'Waiting for parts' : 'Not Yet'}
                           </span>
 
-                          {/* Start is blocked until every part for this service has
-                              arrived — work doesn't begin on a car missing parts. */}
+                          {/* Start is blocked until the task is scheduled to a mechanic
+                              and every part for it has arrived — work doesn't begin on
+                              a car missing parts, or with no one assigned to do it. */}
                           {task.status === 'pending' && (
                             <button
                               onClick={() => setTaskStatus(task, 'active')}
-                              disabled={busy || missing.length > 0}
-                              title={missing.length > 0 ? `Waiting for parts (${parts.length - missing.length} of ${parts.length} received)` : undefined}
+                              disabled={busy || missing.length > 0 || unscheduled}
+                              title={
+                                unscheduled
+                                  ? 'Schedule this task and assign a mechanic first (click the card)'
+                                  : missing.length > 0
+                                  ? `Waiting for parts (${parts.length - missing.length} of ${parts.length} received)`
+                                  : undefined
+                              }
                               className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-indigo-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100"
                             >
                               {busy ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />} Start
