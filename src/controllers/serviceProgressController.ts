@@ -99,6 +99,7 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
       mechanicId: row.mechanic_id ?? undefined,
       mechanicName: row.mechanic_name ?? undefined,
       estimatedFinish: row.estimated_finish ? new Date(row.estimated_finish).toISOString() : undefined,
+      photoUrl: row.completion_photo_url ?? undefined,
       parts: partsByService.get(row.task_title) ?? [],
     }
     if (!sectionMap.has(sectionId)) sectionMap.set(sectionId, [])
@@ -136,6 +137,20 @@ export async function getServiceProgressForJobOrder(jobOrderId: string): Promise
 }
 
 /** Flips a part between to_order and received. Returns whether it saved. */
+/** Finishes a task. The photo is mandatory — it's the proof the work was done. */
+export async function finishTask(
+  jobOrderId: string,
+  taskId: string,
+  photo: File,
+): Promise<{ ok: boolean; message?: string; roadTestCreated?: boolean; jobCompleted?: boolean }> {
+  const form = new FormData()
+  form.set('file', photo)
+  const res = await fetch(`/api/job-orders/${jobOrderId}/progress/tasks/${taskId}/finish`, { method: 'POST', body: form })
+  const json = await res.json().catch(() => null)
+  if (!res.ok || !json?.success) return { ok: false, message: json?.message ?? 'Could not finish the task.' }
+  return { ok: true, roadTestCreated: json.roadTestCreated, jobCompleted: json.jobCompleted }
+}
+
 export async function setPartStatus(jobOrderId: string, partId: number, status: 'received' | 'to_order'): Promise<boolean> {
   const res = await fetch(`/api/job-orders/${jobOrderId}/parts`, {
     method: 'PATCH',
