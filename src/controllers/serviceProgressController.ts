@@ -322,6 +322,42 @@ export async function getInProgressData(userId: number, jobOrderId?: number) {
   }>
 }
 
+// The customer's final bill, computed live on the server (see lib/jobOrderBill).
+export interface CustomerBill {
+  total: number
+  paid: number
+  balance: number
+  latestPayment: {
+    id: number
+    payment_method: string
+    payment_channel: string | null
+    reference_number: string | null
+    amount_paid: number
+    payment_date: string
+    verification_status: 'pending' | 'verified' | 'rejected' | 'refunded'
+  } | null
+}
+
+/** Customer settles the remaining balance on a completed job. The server decides the amount. */
+export async function submitBalancePayment(
+  jobOrderId: number,
+  userId: number,
+  method: 'shop' | 'ewallet',
+  proof?: { channelId: string; referenceNumber: string; file: File },
+) {
+  const form = new FormData()
+  form.set('jobOrderId', String(jobOrderId))
+  form.set('userId', String(userId))
+  form.set('method', method)
+  if (proof) {
+    form.set('channel', proof.channelId)
+    form.set('referenceNumber', proof.referenceNumber)
+    form.set('file', proof.file)
+  }
+  const res = await fetch('/api/tracking/completed/payment', { method: 'POST', body: form })
+  return res.json() as Promise<{ success?: boolean; paymentId?: number; amount?: number; error?: string }>
+}
+
 export async function getCompletedData(userId: number, jobOrderId?: number) {
   const qs = new URLSearchParams({ userId: String(userId) })
   if (jobOrderId) qs.set('jobOrderId', String(jobOrderId))
@@ -365,5 +401,6 @@ export async function getCompletedData(userId: number, jobOrderId?: number) {
       retail_unit_price: string
       total_retail_amount: string
     }[]
+    bill: CustomerBill | null
   }>
 }
