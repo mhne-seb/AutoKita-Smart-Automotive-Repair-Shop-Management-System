@@ -39,3 +39,10 @@ export async function uploadPaymentProof(jobOrderId: string, file: File): Promis
     const path = `payments/${jobOrderId}/${Date.now()}.${extensionFor(file)}`
     return uploadFile(path, file)
 }
+
+// Proof a service was actually done — one photo per finished task (shop
+// policy: no task is marked Finished without it). Same bucket, own folder.
+export async function uploadTaskPhoto(jobOrderId: string, taskId: string, file: File): Promise<string> {
+    const path = `job-orders/${jobOrderId}/tasks/${taskId}-${Date.now()}.${extensionFor(file)}`
+    return uploadFile(path, file)
+}

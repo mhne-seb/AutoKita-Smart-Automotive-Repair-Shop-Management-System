@@ -78,8 +78,16 @@ export default function page() {
   // And once they've approved it, it's final: that exact record is what they
   // agreed to. Everything stays visible, just not editable. Only 'disputed'
   // (or no round yet) is editable, since that's when the mechanic revises.
-  const isApproved = preDiagnostic?.status === 'approved'
-  const isLocked = preDiagnostic?.status === 'pending' || isApproved
+  //
+  // pre_diagnostics holds the rounds for every stage (inspection first, then
+  // quotation), and getLatestPreDiagnostic returns the newest one whatever it
+  // is. Once the job has left 'inspecting' the inspection round is settled --
+  // the customer's approval is what moved it -- so a later quotation round
+  // (which may well be pending) must not make this page look pending again.
+  const inspectionStatus: PreDiagnosticRound['status'] | undefined =
+    jobOrder?.stage === 'inspecting' ? preDiagnostic?.status : 'approved'
+  const isApproved = inspectionStatus === 'approved'
+  const isLocked = inspectionStatus === 'pending' || isApproved
 
   // Once the real data arrives, seed the editable state from it.
   useEffect(() => {
@@ -295,20 +303,20 @@ export default function page() {
               disabled={sending || isLocked}
               className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-default disabled:bg-emerald-600"
             >
-              {preDiagnostic?.status === 'disputed' ? (
+              {inspectionStatus === 'disputed' ? (
                   <AlertCircle size={15} /> 
-                ) : preDiagnostic ? (
+                ) : inspectionStatus ? (
                 <CheckCircle2 size={15} /> 
                 ) : ( 
                 <Cloud size={15} /> 
                 )}
               {sending
                 ? 'Sending…'
-                : preDiagnostic?.status === 'pending'
+                : inspectionStatus === 'pending'
                 ? 'Awaiting customer approval'
-                : preDiagnostic?.status === 'approved'
+                : inspectionStatus === 'approved'
                 ? 'Approved by customer'
-                : preDiagnostic?.status === 'disputed'
+                : inspectionStatus === 'disputed'
                 ? 'Customer has concerns - revise and send again'
                 : 'Upload to customer portal'}
             </button>
@@ -362,7 +370,7 @@ export default function page() {
               </div>
             )}
 
-            {preDiagnostic?.status === 'pending' && (
+            {inspectionStatus === 'pending' && (
               <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                 <Clock size={16} className="mt-0.5 flex-shrink-0" />
                 <div>
@@ -389,7 +397,7 @@ export default function page() {
               </div>
             )}
 
-            {preDiagnostic?.status === 'disputed' && (
+            {inspectionStatus === 'disputed' && preDiagnostic && (
               <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
                 <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
                 <div className="min-w-0 flex-1">

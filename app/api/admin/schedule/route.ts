@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { DEFAULT_MECHANIC_CAPACITY } from '@/data/mechanicPolicy'
 
 export async function GET() {
   try {
@@ -25,13 +26,25 @@ export async function GET() {
     `
     const result = await db.query(query)
 
-    const mechanicsQuery = `SELECT id, full_name, email FROM employees WHERE role = 'mechanic' AND status = 'active'`
-    const mechanicsResult = await db.query(mechanicsQuery)
+    // Each mechanic's current load (open tasks) next to their own cap
+    // (employee_profiles.jobs_capacity, set on the Mechanics page). Only
+    // 'active' mechanics — on_leave and terminated never appear here.
+    const mechanicsQuery = `
+      SELECT e.id, e.full_name, e.email,
+             COALESCE(ep.jobs_capacity, $1)::int AS capacity,
+             COUNT(spt.id) FILTER (WHERE spt.task_status <> 'completed')::int AS open_tasks
+      FROM employees e
+      LEFT JOIN employee_profiles ep ON ep.employee_id = e.id
+      LEFT JOIN service_progress_tasks spt ON spt.mechanic_id = e.id
+      WHERE e.role = 'mechanic' AND e.status = 'active'
+      GROUP BY e.id, e.full_name, e.email, ep.jobs_capacity
+      ORDER BY e.full_name`
+    const mechanicsResult = await db.query(mechanicsQuery, [DEFAULT_MECHANIC_CAPACITY])
 
     return NextResponse.json({
       success: true,
       tasks: result.rows,
-      mechanics: mechanicsResult.rows
+      mechanics: mechanicsResult.rows,
     })
   } catch (err: any) {
     console.error('Schedule GET error:', err)

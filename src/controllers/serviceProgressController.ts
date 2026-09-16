@@ -100,6 +100,7 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
       mechanicId: row.mechanic_id ?? undefined,
       mechanicName: row.mechanic_name ?? undefined,
       estimatedFinish: row.estimated_finish ? new Date(row.estimated_finish).toISOString() : undefined,
+      photoUrl: row.completion_photo_url ?? undefined,
       parts: partsByService.get(row.task_title) ?? [],
     }
     if (!sectionMap.has(sectionId)) sectionMap.set(sectionId, [])
@@ -137,6 +138,20 @@ export async function getServiceProgressForJobOrder(jobOrderId: string): Promise
 }
 
 /** Flips a part between to_order and received. Returns whether it saved. */
+/** Finishes a task. The photo is mandatory — it's the proof the work was done. */
+export async function finishTask(
+  jobOrderId: string,
+  taskId: string,
+  photo: File,
+): Promise<{ ok: boolean; message?: string; roadTestCreated?: boolean; jobCompleted?: boolean }> {
+  const form = new FormData()
+  form.set('file', photo)
+  const res = await fetch(`/api/job-orders/${jobOrderId}/progress/tasks/${taskId}/finish`, { method: 'POST', body: form })
+  const json = await res.json().catch(() => null)
+  if (!res.ok || !json?.success) return { ok: false, message: json?.message ?? 'Could not finish the task.' }
+  return { ok: true, roadTestCreated: json.roadTestCreated, jobCompleted: json.jobCompleted }
+}
+
 export async function setPartStatus(jobOrderId: string, partId: number, status: 'received' | 'to_order'): Promise<boolean> {
   const res = await fetch(`/api/job-orders/${jobOrderId}/parts`, {
     method: 'PATCH',
@@ -147,16 +162,23 @@ export async function setPartStatus(jobOrderId: string, partId: number, status: 
   return Boolean(res.ok && json?.success)
 }
 
-export async function scheduleTask(jobOrderId: string, taskId: string, scheduledDate: string | null, status: string, mechanicId?: number, note?: string) {
-  const dbStatus = status === 'active' ? 'in_progress' : status;
+export async function scheduleTask(
+  jobOrderId: string,
+  taskId: string,
+  scheduledDate: string | null,
+  status: string,
+  mechanicId?: number,
+  note?: string,
+): Promise<{ ok: boolean; message?: string }> {
+  const dbStatus = status === 'active' ? 'in_progress' : status
   const res = await fetch(`/api/job-orders/${jobOrderId}/progress/schedule`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ taskId, scheduledDate, status: dbStatus, mechanicId, note }),
   })
-  return await res.json()
+  const json = await res.json().catch(() => null)
+  if (!res.ok || !json?.success) return { ok: false, message: json?.message ?? 'Could not save the schedule.' }
+  return { ok: true }
 }
 
 export async function getReceivedData(userId: number, jobOrderId?: number) {
@@ -316,6 +338,42 @@ export async function getInProgressData(userId: number, jobOrderId?: number) {
   }>
 }
 
+// The customer's final bill, computed live on the server (see lib/jobOrderBill).
+export interface CustomerBill {
+  total: number
+  paid: number
+  balance: number
+  latestPayment: {
+    id: number
+    payment_method: string
+    payment_channel: string | null
+    reference_number: string | null
+    amount_paid: number
+    payment_date: string
+    verification_status: 'pending' | 'verified' | 'rejected' | 'refunded'
+  } | null
+}
+
+/** Customer settles the remaining balance on a completed job. The server decides the amount. */
+export async function submitBalancePayment(
+  jobOrderId: number,
+  userId: number,
+  method: 'shop' | 'ewallet',
+  proof?: { channelId: string; referenceNumber: string; file: File },
+) {
+  const form = new FormData()
+  form.set('jobOrderId', String(jobOrderId))
+  form.set('userId', String(userId))
+  form.set('method', method)
+  if (proof) {
+    form.set('channel', proof.channelId)
+    form.set('referenceNumber', proof.referenceNumber)
+    form.set('file', proof.file)
+  }
+  const res = await fetch('/api/tracking/completed/payment', { method: 'POST', body: form })
+  return res.json() as Promise<{ success?: boolean; paymentId?: number; amount?: number; error?: string }>
+}
+
 export async function getCompletedData(userId: number, jobOrderId?: number) {
   const qs = new URLSearchParams({ userId: String(userId) })
   if (jobOrderId) qs.set('jobOrderId', String(jobOrderId))
@@ -359,5 +417,6 @@ export async function getCompletedData(userId: number, jobOrderId?: number) {
       retail_unit_price: string
       total_retail_amount: string
     }[]
+    bill: CustomerBill | null
   }>
 }
