@@ -3,7 +3,7 @@
 // Admin "Quotation" page (one step of the job-order workflow: Inspection -> Quotation -> Service Progress). Lets the mechanic/admin build a service+parts quote for the customer to approve, then hands off to Service Progress.
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState, useRef } from 'react'
-import { Plus, Pencil, Check, Send, ShieldCheck, ChevronRight, X, Trash2, RotateCcw, PackagePlus, CreditCard, XCircle, ClipboardCheck } from 'lucide-react'
+import { Plus, Pencil, Check, Send, ShieldCheck, ChevronRight, X, Trash2, RotateCcw, PackagePlus, CreditCard, XCircle, ClipboardCheck, Loader2, AlertCircle } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { Lightbox } from '@/components/Lightbox'
@@ -53,8 +53,10 @@ export default function page() {
   const [preDiagnostic, setPreDiagnostic] = useState<any>(undefined)
   const [sending, setSending] = useState(false)
   const [recalling, setRecalling] = useState(false)
-  const [savingDraft, setSavingDraft] = useState(false)
-  const [savedDraft, setSavedDraft] = useState(false)
+  // Edits live in React state and are written to the DB by the auto-save
+  // below. This is what the "Saved / Unsaved changes / Saving…" indicator
+  // reads; there's no manual Save button because auto-save already does it.
+  const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   useEffect(() => {
@@ -149,24 +151,18 @@ export default function page() {
       return
     }
     
-    const timer = setTimeout(() => {
-      const servicesWithEstimates = services.map(s => {
-        const prediction = aiPredictions[s.id]
-        return {
-          ...s,
-          estimated_amount: prediction?.predicted_amount || s.estimated_amount || s.laborCost,
-          actual_amount: s.laborCost
-        }
-      })
-
-      fetch(`/api/job-orders/${jobOrderId}/quotation`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notes, services: servicesWithEstimates }),
-      }).catch(console.error)
-    }, 1000)
+    const timer = setTimeout(() => { void persistQuotation() }, 1000)
     return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notes, services, aiPredictions, jobOrderId])
+
+  // Don't let the tab close on top of an in-flight or not-yet-fired save.
+  useEffect(() => {
+    if (!hasUnsavedChanges && saveState !== 'saving') return
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault() }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [hasUnsavedChanges, saveState])
 
   const totals = useMemo(() => {
     let laborTotal = 0
@@ -338,10 +334,11 @@ export default function page() {
     setHasUnsavedChanges(true)
     setShowPartModal(false)
   }
-  // Saves the quotation draft to the database without sending for approval.
-  async function saveDraft() {
-    setSavingDraft(true)
-    setSavedDraft(false)
+  // The one place the quotation is written to the DB — used by auto-save
+  // and by Send to Customer (which needs the latest edits on the server
+  // before it opens a round). Returns whether the write succeeded.
+  async function persistQuotation(): Promise<boolean> {
+    setSaveState('saving')
     try {
       const servicesWithEstimates = services.map(s => {
         const prediction = aiPredictions[s.id]
@@ -355,18 +352,20 @@ export default function page() {
       const estimated_grand_total = servicesWithEstimates.reduce((sum, s) => sum + Number(s.estimated_amount), 0) + totals.partsTotal
       const actual_grand_total = totals.grandTotal
 
-      await fetch(`/api/job-orders/${jobOrderId}/quotation`, {
+      const res = await fetch(`/api/job-orders/${jobOrderId}/quotation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notes, services: servicesWithEstimates, estimated_grand_total, actual_grand_total }),
       })
-      setSavedDraft(true)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       setHasUnsavedChanges(false)
-      setTimeout(() => setSavedDraft(false), 3000)
+      setSaveState('saved')
+      return true
     } catch (e) {
       console.error('Failed to save quotation', e)
+      setSaveState('error')
+      return false
     }
-    setSavingDraft(false)
   }
 
   // Sends the full quotation (services + parts + total) for approval — a
@@ -374,9 +373,13 @@ export default function page() {
   async function sendQuotationForApproval() {
     setSending(true)
 
-    // First save the quotation services and notes
-    await saveDraft()
-
+    // The round summarises what's on the server, so the latest edits have to
+    // land first. If that fails, don't send a round describing stale data.
+    const saved = await persistQuotation()
+    if (!saved) {
+      setSending(false)
+      return
+    }
 
     const summary = `Quotation total: ${currency(totals.grandTotal)} (Labor: ${currency(totals.laborTotal)}, Parts: ${currency(totals.partsTotal)}). ${notes}`
     const round = await sendForApproval(jobOrderId, summary)
@@ -492,14 +495,31 @@ export default function page() {
               <RotateCcw size={14} /> {recalling ? 'Recalling…' : 'Recall Approval'}
             </button>
           ) : (
-            <div className="flex gap-2">
-              <button
-                onClick={saveDraft}
-                disabled={savingDraft || savedDraft || sending || quotationApproved}
-                className={`flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-slate-50 disabled:opacity-50 ${hasUnsavedChanges ? 'border-amber-400 bg-amber-50 text-amber-700' : 'border-slate-200 bg-white text-slate-700'}`}
-              >
-                {savingDraft ? 'Saving...' : savedDraft ? '✓ Draft Saved' : hasUnsavedChanges ? '* Save Draft' : 'Save Draft'}
-              </button>
+            <div className="flex items-center gap-3">
+              {/* Passive save indicator — auto-save does the work, this just
+                  says whether the server has what's on screen. */}
+              {!quotationApproved && (
+                saveState === 'error' ? (
+                  <button
+                    onClick={() => void persistQuotation()}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:underline"
+                  >
+                    <AlertCircle size={13} /> Couldn't save — retry
+                  </button>
+                ) : saveState === 'saving' ? (
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
+                    <Loader2 size={13} className="animate-spin" /> Saving…
+                  </span>
+                ) : hasUnsavedChanges ? (
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-amber-600">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Unsaved changes
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
+                    <Check size={13} className="text-emerald-500" /> Saved
+                  </span>
+                )
+              )}
               <button
                 onClick={sendQuotationForApproval}
                 disabled={sending || quotationApproved}
