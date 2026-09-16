@@ -3,6 +3,7 @@
 // Used by the /api/dashboard API route.
 
 import { db } from '@/lib/db'
+import { getJobOrderBill } from '@/lib/jobOrderBill'
 
 export interface DashboardUser {
   id: number
@@ -122,7 +123,15 @@ export async function getDashboardActiveJobOrders(userId: number): Promise<Dashb
     `SELECT * FROM get_dashboard_active_job_orders($1)`,
     [userId],
   )
-  return rows
+  // job_orders.balance / actual_grand_total are never written (always 0.00),
+  // so the card would tell every customer they're paid up. Replace them with
+  // the live bill. A customer has a handful of active jobs at most.
+  return Promise.all(
+    rows.map(async (row: DashboardJobOrder) => {
+      const bill = await getJobOrderBill(row.id)
+      return { ...row, actual_grand_total: String(bill.total), balance: String(bill.balance) }
+    }),
+  )
 }
 
 export async function getDashboardRecentActivity(userId: number): Promise<DashboardActivity[]> {
