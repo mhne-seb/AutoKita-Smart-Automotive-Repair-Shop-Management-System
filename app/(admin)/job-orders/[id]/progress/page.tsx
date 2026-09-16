@@ -3,11 +3,13 @@
 // Admin "Service Progress" page — the final step of the job-order workflow. Shows a section-by-section task checklist; once every task is marked done the job order is written back to "completed" (see jobOrderController.advanceJobOrderStage).
 import { useParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2 } from 'lucide-react'
+import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, CreditCard, XCircle, Banknote } from 'lucide-react'
+import { toast } from 'sonner'
+import { Lightbox } from '@/components/Lightbox'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
-import { getQuotationById } from '@/controllers/quotationController'
+import { getQuotationById, getJobOrderBill, verifyJobOrderPayment, type JobOrderBill } from '@/controllers/quotationController'
 import { getServiceProgressById, scheduleTask, setPartStatus } from '@/controllers/serviceProgressController'
 import { currency } from '@/data/mockData'
 import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, partIsReady } from '@/data/types'
@@ -65,6 +67,25 @@ export default function page() {
   }, [jobOrderId])
 
   const [scheduleData, setScheduleData] = useState<{tasks: any[], mechanics: any[]}>({ tasks: [], mechanics: [] })
+
+  // Final bill — what the job costs, what's verified, and the payment the
+  // customer most recently submitted for the admin to check. Only matters
+  // once the job is completed; loaded regardless so the card is instant.
+  const [bill, setBill] = useState<JobOrderBill | null>(null)
+  const [verifying, setVerifying] = useState(false)
+  const [showProof, setShowProof] = useState(false)
+  const loadBill = () => getJobOrderBill(jobOrderId).then(setBill)
+  useEffect(() => { void loadBill() }, [jobOrderId])
+  async function decidePayment(decision: 'verified' | 'rejected') {
+    const p = bill?.latestPayment
+    if (!p) return
+    setVerifying(true)
+    const ok = await verifyJobOrderPayment(jobOrderId, p.id, decision)
+    setVerifying(false)
+    if (!ok) return toast.error('Could not update the payment.')
+    toast.success(decision === 'verified' ? 'Payment verified.' : 'Payment rejected — the customer will be asked to resubmit.')
+    void loadBill()
+  }
   
   useEffect(() => {
     let active = true
@@ -476,8 +497,94 @@ export default function page() {
               : 'The clock starts when the job enters In Progress.'}
           </p>
         </div>
+
+        {/* Final bill + verification. Same three numbers the customer sees
+            (services + parts − verified payments), so the two screens never
+            disagree. Shown once the job is done — that's when the balance is
+            collectable. A cash choice sits here as 'pending' until the admin
+            confirms the money is in hand. */}
+        {bill && (jobOrder.stage === 'completed' || bill.paid > 0) && (() => {
+          const p = bill.latestPayment
+          const status = p?.verificationStatus
+          return (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400"><CreditCard size={13} /> Final Bill</p>
+                {bill.balance <= 0 ? (
+                  <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">Paid in full</span>
+                ) : status === 'pending' ? (
+                  <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700">To verify</span>
+                ) : (
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-600">Unpaid</span>
+                )}
+              </div>
+
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between"><span className="text-slate-400">Total</span><span className="font-semibold text-slate-800">{currency(bill.total)}</span></div>
+                <div className="flex justify-between"><span className="text-slate-400">Paid (verified)</span><span className="font-semibold text-slate-800">− {currency(bill.paid)}</span></div>
+                <div className="flex justify-between border-t border-slate-100 pt-1.5"><span className="font-semibold text-slate-700">Balance</span><span className={`text-lg font-bold ${bill.balance <= 0 ? 'text-emerald-600' : 'text-slate-900'}`}>{currency(bill.balance)}</span></div>
+              </div>
+
+              {p && bill.balance > 0 && status !== 'verified' && (
+                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-semibold text-slate-700">{status === 'pending' ? 'Waiting for your check' : 'Last submission'}</p>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${status === 'rejected' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}`}>{status}</span>
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between"><span className="text-slate-400">Amount</span><span className="font-semibold text-slate-800">{currency(p.amountPaid)}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-400">Method</span><span className="font-semibold text-slate-800">{p.paymentMethod === 'cash' ? 'Cash at counter' : p.paymentChannel ?? p.paymentMethod}</span></div>
+                    {p.referenceNumber && <div className="flex justify-between"><span className="text-slate-400">Reference No.</span><span className="font-semibold text-slate-800">{p.referenceNumber}</span></div>}
+                  </div>
+                  {p.proofOfPaymentImage && (
+                    <button type="button" onClick={() => setShowProof(true)} className="mt-2 block w-full">
+                      <img src={p.proofOfPaymentImage} alt="Proof of payment" className="h-28 w-full rounded-lg border border-slate-200 object-cover hover:opacity-90" />
+                      <p className="mt-1 text-center text-[10px] text-slate-400">Click to view full size</p>
+                    </button>
+                  )}
+                  {status === 'pending' && (
+                    p.paymentMethod === 'cash' ? (
+                      <button
+                        onClick={() => decidePayment('verified')}
+                        disabled={verifying}
+                        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-600 active:scale-[0.98] disabled:opacity-50"
+                      >
+                        <Banknote size={14} /> {verifying ? 'Saving…' : `Confirm ${currency(p.amountPaid)} cash received`}
+                      </button>
+                    ) : (
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          onClick={() => decidePayment('rejected')}
+                          disabled={verifying}
+                          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-white py-2 text-xs font-semibold text-rose-600 transition-all duration-150 hover:bg-rose-50 active:scale-[0.98] disabled:opacity-50"
+                        >
+                          <XCircle size={14} /> Reject
+                        </button>
+                        <button
+                          onClick={() => decidePayment('verified')}
+                          disabled={verifying}
+                          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-600 active:scale-[0.98] disabled:opacity-50"
+                        >
+                          <Check size={14} /> {verifying ? 'Saving…' : 'Verify'}
+                        </button>
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+
+              {!p && bill.balance > 0 && (
+                <p className="mt-3 text-[11px] text-slate-400">The customer hasn't submitted a payment yet. They'll see "Pay Remaining Balance" on their completed page.</p>
+              )}
+            </div>
+          )
+        })()}
       </div>
       </div>
+
+      {showProof && bill?.latestPayment?.proofOfPaymentImage && (
+        <Lightbox url={bill.latestPayment.proofOfPaymentImage} label="Proof of payment" onClose={() => setShowProof(false)} />
+      )}
       
       {schedulingTask && (
         <ScheduleModal 
