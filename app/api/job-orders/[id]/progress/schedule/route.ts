@@ -53,6 +53,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       }
     }
 
+    // Finishing goes through /tasks/[taskId]/finish, which requires the
+    // photo of the finished work. Refusing it here is what makes that rule
+    // a rule rather than a suggestion.
+    if (status === 'completed') {
+      return NextResponse.json(
+        { success: false, code: 'PHOTO_REQUIRED', message: 'A task is finished by uploading a photo of the completed work.' },
+        { status: 409 },
+      )
+    }
+
     // A task can't be started with no mechanic or no schedule. The UI checks
     // this too; this is the guarantee. (The client always sends the task's
     // current date/mechanic along with a status change.)

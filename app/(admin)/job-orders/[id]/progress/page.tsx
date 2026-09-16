@@ -3,14 +3,16 @@
 // Admin "Service Progress" page — the final step of the job-order workflow. Shows a section-by-section task checklist; once every task is marked done the job order is written back to "completed" (see jobOrderController.advanceJobOrderStage).
 import { useParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, CreditCard, XCircle, Banknote } from 'lucide-react'
+import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, CreditCard, XCircle, Banknote, Camera, Upload, Car } from 'lucide-react'
+import type { ChangeEvent } from 'react'
 import { toast } from 'sonner'
 import { Lightbox } from '@/components/Lightbox'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
 import { getQuotationById, getJobOrderBill, verifyJobOrderPayment, type JobOrderBill } from '@/controllers/quotationController'
-import { getServiceProgressById, scheduleTask, setPartStatus } from '@/controllers/serviceProgressController'
+import { getServiceProgressById, scheduleTask, setPartStatus, finishTask } from '@/controllers/serviceProgressController'
+import { isRoadTest } from '@/data/roadTest'
 import { mechanicIsFull } from '@/data/mechanicPolicy'
 import { currency } from '@/data/mockData'
 import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, partIsReady } from '@/data/types'
@@ -75,6 +77,7 @@ export default function page() {
   const [bill, setBill] = useState<JobOrderBill | null>(null)
   const [verifying, setVerifying] = useState(false)
   const [showProof, setShowProof] = useState(false)
+  const [lightboxPhoto, setLightboxPhoto] = useState<{ url: string; label: string } | null>(null)
   const loadBill = () => getJobOrderBill(jobOrderId).then(setBill)
   useEffect(() => { void loadBill() }, [jobOrderId])
   async function decidePayment(decision: 'verified' | 'rejected') {
@@ -108,6 +111,7 @@ export default function page() {
   // returns, so the hook order is identical on every render).
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null)
   const [busyPartId, setBusyPartId] = useState<number | null>(null)
+  const [finishingTask, setFinishingTask] = useState<ServiceTask | null>(null)
 
   // Once the real data arrives, seed the editable state from it.
   useEffect(() => {
@@ -185,25 +189,31 @@ export default function page() {
     if (data) setSections(data.sections)
   }
 
-  // Start / Finish live on the card, not in the modal — one tap, in the
-  // moment. Schedule/mechanic/note are passed through unchanged (the stored
-  // function is a full update). When Jubert adds started_at, the 'Started'
-  // tap is what stamps it — nothing here needs to change.
+  // Start lives on the card — one tap, in the moment. Schedule/mechanic/note
+  // are passed through unchanged (the stored function is a full update).
   async function setTaskStatus(task: ServiceTask, next: TaskStatus) {
     setBusyTaskId(task.id)
     const result = await scheduleTask(jobOrderId, task.id, task.scheduledDate ?? null, next, task.mechanicId, task.note)
     if (!result.ok) toast.error(result.message ?? 'Could not update the task.')
-    const data = await getServiceProgressById(jobOrderId)
-    if (data) {
-      setSections(data.sections)
-      // Every task done -> the job order itself is complete (customer's
-      // tracker flips to "Completed").
-      const all = data.sections.flatMap((s) => s.tasks)
-      if (all.length > 0 && all.every((t) => t.status === 'completed')) {
-        void advanceJobOrderStage(jobOrderId, 'completed')
-      }
-    }
+    await refreshTasks()
     setBusyTaskId(null)
+  }
+
+  // Finish is a photo upload (shop policy: show the finished work). What
+  // happens to the job afterwards — road test created, job completed — is
+  // decided on the server, not here.
+  async function handleFinish(task: ServiceTask, photo: File): Promise<boolean> {
+    const result = await finishTask(jobOrderId, task.id, photo)
+    if (!result.ok) {
+      toast.error(result.message ?? 'Could not finish the task.')
+      return false
+    }
+    if (result.roadTestCreated) toast.success('All services done — Road Test added. Drive it before handing it back.')
+    else if (result.jobCompleted) toast.success('Road test finished — job order is now Completed.')
+    else toast.success(`${task.title} finished.`)
+    await refreshTasks()
+    if (result.jobCompleted) getJobOrderById(jobOrderId).then((jo) => jo && setJobOrder(jo))
+    return true
   }
 
   // No inventory system — the only fact about a part is "has it arrived".
@@ -275,7 +285,12 @@ export default function page() {
                   >
                     <div className="flex items-start gap-4 flex-1 min-w-0">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-slate-900 transition-colors">{task.title}</h3>
+                        <h3 className="flex items-center gap-2 font-semibold text-slate-900 transition-colors">
+                          {task.title}
+                          {isRoadTest(task) && (
+                            <span className="flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-700"><Car size={11} /> Quality check</span>
+                          )}
+                        </h3>
                         {task.note && task.note !== 'Describe the service...' && (
                           <p className="mt-0.5 text-sm text-slate-500 truncate">{task.note}</p>
                         )}
@@ -284,6 +299,15 @@ export default function page() {
                               elapsed needs started_at, which the schema doesn't have yet.) */}
                           {task.status === 'completed' && task.time !== '—' && (
                             <span className="flex items-center gap-1 font-semibold text-emerald-600">🕐 Finished {task.time}</span>
+                          )}
+                          {task.photoUrl && (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setLightboxPhoto({ url: task.photoUrl!, label: `${task.title} — finished work` }) }}
+                              className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700 transition-colors hover:bg-emerald-100"
+                            >
+                              <img src={task.photoUrl} alt="" className="h-4 w-4 rounded-sm object-cover" /> Photo
+                            </button>
                           )}
                           {task.mechanicName && (
                             <span className="flex items-center gap-1 font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
@@ -368,11 +392,12 @@ export default function page() {
                           )}
                           {task.status === 'active' && (
                             <button
-                              onClick={() => setTaskStatus(task, 'completed')}
+                              onClick={() => setFinishingTask(task)}
                               disabled={busy}
+                              title="Upload a photo of the finished work to mark this done"
                               className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-700 active:scale-95 disabled:opacity-40"
                             >
-                              {busy ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />} Finish
+                              <Camera size={13} /> Finish
                             </button>
                           )}
                         </div>
@@ -639,6 +664,18 @@ export default function page() {
       </div>
       </div>
 
+      {finishingTask && (
+        <FinishTaskModal
+          task={finishingTask}
+          onClose={() => setFinishingTask(null)}
+          onSubmit={async (photo) => {
+            const ok = await handleFinish(finishingTask, photo)
+            if (ok) setFinishingTask(null)
+            return ok
+          }}
+        />
+      )}
+      {lightboxPhoto && <Lightbox url={lightboxPhoto.url} label={lightboxPhoto.label} onClose={() => setLightboxPhoto(null)} />}
       {showProof && bill?.latestPayment?.proofOfPaymentImage && (
         <Lightbox url={bill.latestPayment.proofOfPaymentImage} label="Proof of payment" onClose={() => setShowProof(false)} />
       )}
@@ -662,6 +699,87 @@ export default function page() {
           }}
         />
       )}
+    </div>
+  )
+}
+
+// Finishing a task = proving it. One photo, required; nothing else to fill in.
+function FinishTaskModal({ task, onClose, onSubmit }: { task: ServiceTask; onClose: () => void; onSubmit: (photo: File) => Promise<boolean> }) {
+  const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
+
+  const pick = (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    setError(null)
+    if (!f) return
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(f.type)) return setError('Use a JPEG, PNG or WebP image.')
+    if (f.size > 5 * 1024 * 1024) return setError('Image must be under 5MB.')
+    if (preview) URL.revokeObjectURL(preview)
+    setFile(f)
+    setPreview(URL.createObjectURL(f))
+  }
+
+  const submit = async () => {
+    if (!file) return
+    setSaving(true)
+    const ok = await onSubmit(file)
+    if (!ok) setSaving(false)
+  }
+
+  const roadTest = isRoadTest(task)
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">Finish {task.title}</h2>
+            <p className="mt-0.5 text-sm text-slate-500">
+              {roadTest
+                ? 'Upload a photo from the road test — e.g. the dashboard with no warning lights.'
+                : 'Upload a photo of the finished work. Required — it goes on the customer\u2019s record.'}
+            </p>
+          </div>
+          <button onClick={onClose} className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"><X size={18} /></button>
+        </div>
+
+        <div className="mt-5">
+          {preview ? (
+            <div className="overflow-hidden rounded-xl border border-slate-200">
+              <img src={preview} alt="Finished work" className="aspect-video w-full object-cover" />
+              <div className="flex items-center justify-between px-3 py-2 text-xs">
+                <span className="truncate text-slate-500">{file?.name} · {((file?.size ?? 0) / 1024).toFixed(0)} KB</span>
+                <label className="shrink-0 cursor-pointer font-semibold text-indigo-600 hover:underline">
+                  Replace
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={pick} />
+                </label>
+              </div>
+            </div>
+          ) : (
+            <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-8 text-center transition-colors hover:border-indigo-400 hover:bg-indigo-50/40">
+              <Upload size={22} className="text-slate-400" />
+              <span className="text-sm font-semibold text-slate-700">Click to choose a photo</span>
+              <span className="text-xs text-slate-400">JPEG, PNG or WebP · up to 5MB</span>
+              <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={pick} />
+            </label>
+          )}
+          {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
+        </div>
+
+        <div className="mt-5 flex gap-3">
+          <button onClick={onClose} disabled={saving} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">Cancel</button>
+          <button
+            onClick={submit}
+            disabled={!file || saving}
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-emerald-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {saving ? <><Loader2 size={15} className="animate-spin" /> Saving…</> : <><Check size={15} /> Mark Finished</>}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
