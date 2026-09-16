@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Check, FileText, Wrench, ShieldCheck, Printer, Download, Clock, Car, User, PackageCheck } from "lucide-react";
+import { Check, FileText, Wrench, ShieldCheck, Printer, Download, Clock, Car, User, PackageCheck, CreditCard, HourglassIcon, AlertCircle, BadgeCheck } from "lucide-react";
+import { toast } from "sonner";
+import { PaymentModal, type PaymentMethod } from "@/components/dashboard/PaymentModal";
+import type { PaymentProof } from "@/controllers/quotationController";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
-import { getCompletedData } from "@/controllers/serviceProgressController";
+import { getCompletedData, submitBalancePayment } from "@/controllers/serviceProgressController";
 import { getShopInfo } from "@/controllers/billingController";
 // npm install jspdf
 import jsPDF from "jspdf";
@@ -45,16 +48,36 @@ function Completed() {
   const [data, setData] = useState<CompletedData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showPay, setShowPay] = useState(false);
 
-  useEffect(() => {
+  const load = () => {
     const userId = Number(sessionStorage.getItem("autokita_user_id"));
     const jobOrderId = jobOrderIdParam ? Number(jobOrderIdParam) : undefined;
-    setLoading(true);
-    getCompletedData(userId, jobOrderId)
+    return getCompletedData(userId, jobOrderId)
       .then(setData)
-      .catch(() => setError("Failed to load service report."))
-      .finally(() => setLoading(false));
+      .catch(() => setError("Failed to load service report."));
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    void load().finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobOrderIdParam]);
+
+  // Remaining balance → same modal as the downpayment. The server decides the
+  // amount; a cash choice is recorded as a pending row the shop confirms at
+  // pickup, a transfer as a pending row the shop verifies against its account.
+  const handleBalanceSubmitted = async (method: PaymentMethod, _amount: number, proof?: PaymentProof) => {
+    if (!data?.jobOrder) return false;
+    const userId = Number(sessionStorage.getItem("autokita_user_id"));
+    const res = await submitBalancePayment(data.jobOrder.job_order_id, userId, method, proof);
+    if (!res.success) {
+      toast.error(res.error ?? "Could not submit your payment.");
+      return false;
+    }
+    void load();
+    return true;
+  };
 
   if (loading) {
     return <div className="mx-auto max-w-6xl px-6 py-8 text-sm text-muted-foreground">Loading service report…</div>;
@@ -75,7 +98,12 @@ function Completed() {
 
   const laborTotal = services.reduce((sum, s) => sum + Number(s.actual_amount ?? 0), 0);
   const partsTotal = parts.reduce((sum, p) => sum + Number(p.total_retail_amount ?? 0), 0);
-  const balanceDue = Number(jobOrder.balance ?? 0);
+  // Money comes from the live bill, not job_orders.balance (never written).
+  const bill = data.bill;
+  const balanceDue = bill?.balance ?? laborTotal + partsTotal;
+  const latestPayment = bill?.latestPayment ?? null;
+  const paymentPending = latestPayment?.verification_status === "pending";
+  const paymentRejected = latestPayment?.verification_status === "rejected" && balanceDue > 0;
 
   const handleDownload = () => {
     void generateServiceReportPDF({ jobOrder, services, parts, warranties, releasedAt, releasedTo });
@@ -208,19 +236,69 @@ function Completed() {
                 <div className="flex justify-between"><span>Labor + Parts</span><b>{formatMoney(laborTotal + partsTotal)}</b></div>
               </div>
               <div className="mt-3 flex items-center justify-between border-t pt-3">
-                <span className="font-semibold">Total Due</span>
-                <span className="text-2xl font-bold text-teal">{formatMoney(jobOrder.actual_grand_total)}</span>
+                <span className="font-semibold">Total</span>
+                <span className="text-xl font-bold">{formatMoney(bill?.total ?? laborTotal + partsTotal)}</span>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-medium">Payment Status</span>
-                <span className={`font-semibold ${balanceDue <= 0 ? "text-success" : "text-warning"}`}>
-                  {balanceDue <= 0 ? "Fully Paid" : `₱${formatMoney(balanceDue)} balance`}
-                </span>
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span>Paid (verified)</span>
+                <span>− {formatMoney(bill?.paid ?? 0)}</span>
+              </div>
+              <div className="flex items-center justify-between border-t pt-2">
+                <span className="font-semibold">Balance Due</span>
+                <span className={`text-2xl font-bold ${balanceDue <= 0 ? "text-success" : "text-teal"}`}>{formatMoney(balanceDue)}</span>
               </div>
             </div>
+
+            {/* What happens next depends on where the money is. */}
+            {balanceDue <= 0 ? (
+              <div className="mt-4 flex items-center gap-2 rounded-lg bg-success/10 p-3 text-sm font-semibold text-success">
+                <BadgeCheck className="h-4 w-4" /> Paid in full — ready for pickup
+              </div>
+            ) : paymentPending ? (
+              <div className="mt-4 rounded-lg bg-warning/15 p-3 text-xs">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[color:oklch(0.55_0.15_60)]">
+                  <HourglassIcon className="h-4 w-4" /> Pending verification
+                </div>
+                <p className="mt-1 text-muted-foreground">
+                  {latestPayment?.payment_method === "cash"
+                    ? `You chose to pay ₱${formatMoney(latestPayment.amount_paid)} at the counter. The shop will mark it verified once received.`
+                    : `Your ${latestPayment?.payment_channel ?? "transfer"} of ₱${formatMoney(latestPayment?.amount_paid)} is being checked against the shop's account.`}
+                </p>
+                {latestPayment?.payment_method === "cash" && (
+                  <button onClick={() => setShowPay(true)} className="mt-2 text-xs font-semibold text-brand hover:underline">
+                    Pay by bank / e-wallet instead
+                  </button>
+                )}
+              </div>
+            ) : (
+              <>
+                {paymentRejected && (
+                  <div className="mt-4 flex items-start gap-2 rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
+                    <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    Your last payment couldn't be verified. Please check the reference number and re-upload a clear screenshot, or pay at the counter.
+                  </div>
+                )}
+                <button
+                  onClick={() => setShowPay(true)}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+                >
+                  <CreditCard className="h-4 w-4" /> Pay Remaining Balance
+                </button>
+              </>
+            )}
           </div>
         </aside>
       </div>
+
+      {showPay && bill && balanceDue > 0 && (
+        <PaymentModal
+          kind="balance"
+          total={bill.total}
+          amount={balanceDue}
+          onClose={() => setShowPay(false)}
+          onSubmitted={handleBalanceSubmitted}
+        />
+      )}
     </div>
   );
 }
