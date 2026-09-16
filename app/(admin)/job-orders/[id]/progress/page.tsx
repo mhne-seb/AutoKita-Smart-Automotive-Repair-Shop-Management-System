@@ -278,16 +278,20 @@ export default function page() {
                           <p className="mt-0.5 text-sm text-slate-500 truncate">{task.note}</p>
                         )}
                         <div className="mt-2 flex items-center gap-4 text-xs text-slate-400">
-                          <span>🕐 {task.time}</span>
-                          {task.scheduledDate && (
-                            <span className="flex items-center gap-1 font-semibold text-indigo-600">
-                              <CalendarDays size={13} />
-                              Scheduled: {new Date(task.scheduledDate).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                            </span>
+                          {/* Finish time — only meaningful once the task is done. (Per-task
+                              elapsed needs started_at, which the schema doesn't have yet.) */}
+                          {task.status === 'completed' && task.time !== '—' && (
+                            <span className="flex items-center gap-1 font-semibold text-emerald-600">🕐 Finished {task.time}</span>
                           )}
                           {task.mechanicName && (
                             <span className="flex items-center gap-1 font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
                               Assigned to: {task.mechanicName}
+                            </span>
+                          )}
+                          {task.scheduledDate && (
+                            <span className="flex items-center gap-1 font-semibold text-indigo-600">
+                              <CalendarDays size={13} />
+                              Scheduled: {new Date(task.scheduledDate).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                             </span>
                           )}
                           {/* A Started task past its estimate is overdue. A Not-Yet task past its
@@ -296,13 +300,17 @@ export default function page() {
                             const est = new Date(task.estimatedFinish)
                             const overdueHrs = task.status === 'active' ? (Date.now() - est.getTime()) / 3600000 : 0
                             const label = est.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+                            // Est. Finish is scheduled start + predicted duration, so the
+                            // duration is just the gap between the two.
+                            const estHrs = task.scheduledDate ? (est.getTime() - new Date(task.scheduledDate).getTime()) / 3600000 : 0
+                            const hrsLabel = estHrs > 0 ? ` (${estHrs % 1 === 0 ? estHrs : estHrs.toFixed(1)} hrs)` : ''
                             return overdueHrs > 0 ? (
                               <span className="flex items-center gap-1 font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
                                 Overdue by {overdueHrs < 1 ? `${Math.round(overdueHrs * 60)} min` : `${overdueHrs.toFixed(1)} hrs`} (est. {label})
                               </span>
                             ) : (
                               <span className="flex items-center gap-1 font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                                Est. Finish: {label}
+                                Est. Finish: {label}{hrsLabel}
                               </span>
                             )
                           })()}
@@ -320,19 +328,22 @@ export default function page() {
                       const unscheduled = !task.scheduledDate || !task.mechanicId
                       return (
                         <div className="shrink-0 ml-4 flex flex-col items-end gap-2" onClick={(e) => e.stopPropagation()}>
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                              task.status === 'completed'
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : task.status === 'active'
-                                ? 'bg-indigo-100 text-indigo-700'
-                                : missing.length > 0
-                                ? 'bg-amber-100 text-amber-700'
-                                : 'bg-slate-100 text-slate-500'
-                            }`}
-                          >
-                            {task.status === 'completed' ? 'Finished' : task.status === 'active' ? 'Started' : missing.length > 0 ? 'Waiting for parts' : 'Not Yet'}
-                          </span>
+                          {/* A task that simply hasn't started gets no badge — the Start
+                              button (or its "schedule first" hint) already says so.
+                              Waiting on parts is a real state, so that one stays. */}
+                          {(task.status !== 'pending' || missing.length > 0) && (
+                            <span
+                              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                                task.status === 'completed'
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : task.status === 'active'
+                                  ? 'bg-indigo-100 text-indigo-700'
+                                  : 'bg-amber-100 text-amber-700'
+                              }`}
+                            >
+                              {task.status === 'completed' ? 'Finished' : task.status === 'active' ? 'Started' : 'Waiting for parts'}
+                            </span>
+                          )}
 
                           {/* Start is blocked until the task is scheduled to a mechanic
                               and every part for it has arrived — work doesn't begin on
