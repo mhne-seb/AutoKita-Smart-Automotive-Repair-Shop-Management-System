@@ -142,13 +142,15 @@ export default function page() {
     return fromQuotation > 0 ? Math.round(fromQuotation * 10) / 10 : (initial?.timer.estimatedDurationHours ?? 0)
   }, [quotation, initial?.timer.estimatedDurationHours])
 
-  // Job-level finish = the latest estimate among tasks still open — the same
-  // number the task cards show, rolled up. (job_orders.date_promised is never
-  // set anywhere in the app, so reading it just gives '—' forever.)
+  // Job-level finish = the latest estimate across ALL tasks — the same number
+  // the task cards show, rolled up. Finished tasks count too, so it's one
+  // stable date for the whole job rather than jumping to whichever task is
+  // left. (job_orders.date_promised is never set anywhere in the app, so
+  // reading it just gives '—' forever.)
   const estimatedFinish = useMemo(() => {
-    const open = allTasks.filter((t) => t.status !== 'completed' && t.estimatedFinish)
-    if (open.length === 0) return null
-    return open.reduce<Date | null>((latest, t) => {
+    const withEstimate = allTasks.filter((t) => t.estimatedFinish)
+    if (withEstimate.length === 0) return null
+    return withEstimate.reduce<Date | null>((latest, t) => {
       const d = new Date(t.estimatedFinish!)
       return !latest || d > latest ? d : latest
     }, null)
@@ -522,8 +524,6 @@ export default function page() {
                   ? estimatedFinish.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
                   : allTasks.length === 0
                   ? '—'
-                  : allTasks.every((t) => t.status === 'completed')
-                  ? 'All tasks done'
                   : 'Schedule tasks first'}
               </span>
             </div>
