@@ -3,7 +3,7 @@
 // Admin "Quotation" page (one step of the job-order workflow: Inspection -> Quotation -> Service Progress). Lets the mechanic/admin build a service+parts quote for the customer to approve, then hands off to Service Progress.
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState, useRef } from 'react'
-import { Plus, Pencil, Check, Send, ShieldCheck, ChevronRight, X, Trash2, RotateCcw, PackagePlus, CreditCard, XCircle, ClipboardCheck } from 'lucide-react'
+import { Plus, Pencil, Check, Send, ShieldCheck, ChevronRight, X, Trash2, RotateCcw, PackagePlus, CreditCard, XCircle, ClipboardCheck, Loader2, AlertCircle } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { Lightbox } from '@/components/Lightbox'
@@ -12,7 +12,7 @@ import { getQuotationById, getJobOrderPayment, verifyJobOrderPayment, type JobOr
 import { getLatestPreDiagnostic, sendForApproval, recallApproval } from '@/controllers/preDiagnosticController'
 import { getInspectionById } from '@/controllers/inspectionController'
 import { currency } from '@/data/mockData'
-import { QuotationService, JobOrderCard, QuotationData, MechanicalFinding, findingStatusMeta } from '@/data/types'
+import { QuotationService, JobOrderCard, QuotationData, MechanicalFinding, findingStatusMeta, QuotationPart } from '@/data/types'
 
 export default function page() {
   const jobOrderId = String(useParams().id)
@@ -53,8 +53,10 @@ export default function page() {
   const [preDiagnostic, setPreDiagnostic] = useState<any>(undefined)
   const [sending, setSending] = useState(false)
   const [recalling, setRecalling] = useState(false)
-  const [savingDraft, setSavingDraft] = useState(false)
-  const [savedDraft, setSavedDraft] = useState(false)
+  // Edits live in React state and are written to the DB by the auto-save
+  // below. This is what the "Saved / Unsaved changes / Saving…" indicator
+  // reads; there's no manual Save button because auto-save already does it.
+  const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   useEffect(() => {
@@ -149,24 +151,18 @@ export default function page() {
       return
     }
     
-    const timer = setTimeout(() => {
-      const servicesWithEstimates = services.map(s => {
-        const prediction = aiPredictions[s.id]
-        return {
-          ...s,
-          estimated_amount: prediction?.predicted_amount || s.estimated_amount || s.laborCost,
-          actual_amount: s.laborCost
-        }
-      })
-
-      fetch(`/api/job-orders/${jobOrderId}/quotation`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notes, services: servicesWithEstimates }),
-      }).catch(console.error)
-    }, 1000)
+    const timer = setTimeout(() => { void persistQuotation() }, 1000)
     return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notes, services, aiPredictions, jobOrderId])
+
+  // Don't let the tab close on top of an in-flight or not-yet-fired save.
+  useEffect(() => {
+    if (!hasUnsavedChanges && saveState !== 'saving') return
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault() }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [hasUnsavedChanges, saveState])
 
   const totals = useMemo(() => {
     let laborTotal = 0
@@ -248,6 +244,7 @@ export default function page() {
   // Add Part modal — replaces the old window.prompt() flow.
   const [showPartModal, setShowPartModal] = useState(false)
   const [partModalServiceId, setPartModalServiceId] = useState<string | null>(null)
+  const [editingPartId, setEditingPartId] = useState<string | null>(null)
   const [partName, setPartName] = useState('')
   const [partNumber, setPartNumber] = useState('')
   // Kept as text while typing — a controlled number input seeded with 0/1
@@ -290,6 +287,10 @@ export default function page() {
   // still read 'approved' from an earlier stage (e.g. the inspection) even though
   // no quotation has been sent yet. This is what should lock editing.
   const quotationApproved = initial.quotationApproved
+  // Same idea for "pending": a round can only be waiting on THIS quotation if
+  // the quotation hasn't been decided yet. Once it's approved, whatever
+  // pre_diagnostics says is history — never offer to recall it.
+  const quotationPending = !quotationApproved && preDiagnostic?.status === 'pending'
 
   function updateLaborCost(serviceId: string, laborCost: number) {
     setServices((prev) => prev.map((s) => (s.id === serviceId ? { ...s, laborCost } : s)))
@@ -303,6 +304,7 @@ export default function page() {
 
   function openAddPartModal(serviceId: string) {
     setPartModalServiceId(serviceId)
+    setEditingPartId(null)
     setPartName('')
     setPartNumber('')
     setPartQty('1')
@@ -311,37 +313,53 @@ export default function page() {
     setShowPartModal(true)
   }
 
-  function confirmAddPart() {
+  // Same modal, prefilled — saving replaces the row instead of appending.
+  function openEditPartModal(serviceId: string, part: QuotationPart) {
+    setPartModalServiceId(serviceId)
+    setEditingPartId(part.id)
+    setPartName(part.name)
+    setPartNumber(part.partNo)
+    setPartQty(String(part.qty))
+    setPartUnitPrice(String(part.unitPrice))
+    setPartStatus(part.status)
+    setShowPartModal(true)
+  }
+
+  function removePart(serviceId: string, partId: string) {
+    setServices((prev) =>
+      prev.map((s) => (s.id === serviceId ? { ...s, parts: s.parts.filter((p) => p.id !== partId) } : s)),
+    )
+    setHasUnsavedChanges(true)
+  }
+
+  function confirmPart() {
     const name = partName.trim()
     if (!name || !partModalServiceId) return
     const serviceId = partModalServiceId
+    const draft = {
+      name,
+      partNo: partNumber.trim() || `PRT-${Math.floor(Math.random() * 9000 + 1000)}`,
+      qty: Math.max(1, Number(partQty) || 1),
+      unitPrice: Math.max(0, Number(partUnitPrice) || 0),
+      status: partStatus,
+    }
     setServices((prev) =>
-      prev.map((s) =>
-        s.id === serviceId
-          ? {
-              ...s,
-              parts: [
-                ...s.parts,
-                {
-                  id: `${serviceId}-p${s.parts.length + 1}`,
-                  name,
-                  partNo: partNumber.trim() || `PRT-${Math.floor(Math.random() * 9000 + 1000)}`,
-                  qty: Math.max(1, Number(partQty) || 1),
-                  unitPrice: Math.max(0, Number(partUnitPrice) || 0),
-                  status: partStatus,
-                },
-              ],
-            }
-          : s
-      )
+      prev.map((s) => {
+        if (s.id !== serviceId) return s
+        if (editingPartId) {
+          return { ...s, parts: s.parts.map((p) => (p.id === editingPartId ? { ...p, ...draft } : p)) }
+        }
+        return { ...s, parts: [...s.parts, { id: `${serviceId}-p${Date.now()}`, ...draft }] }
+      }),
     )
     setHasUnsavedChanges(true)
     setShowPartModal(false)
   }
-  // Saves the quotation draft to the database without sending for approval.
-  async function saveDraft() {
-    setSavingDraft(true)
-    setSavedDraft(false)
+  // The one place the quotation is written to the DB — used by auto-save
+  // and by Send to Customer (which needs the latest edits on the server
+  // before it opens a round). Returns whether the write succeeded.
+  async function persistQuotation(): Promise<boolean> {
+    setSaveState('saving')
     try {
       const servicesWithEstimates = services.map(s => {
         const prediction = aiPredictions[s.id]
@@ -355,18 +373,20 @@ export default function page() {
       const estimated_grand_total = servicesWithEstimates.reduce((sum, s) => sum + Number(s.estimated_amount), 0) + totals.partsTotal
       const actual_grand_total = totals.grandTotal
 
-      await fetch(`/api/job-orders/${jobOrderId}/quotation`, {
+      const res = await fetch(`/api/job-orders/${jobOrderId}/quotation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notes, services: servicesWithEstimates, estimated_grand_total, actual_grand_total }),
       })
-      setSavedDraft(true)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       setHasUnsavedChanges(false)
-      setTimeout(() => setSavedDraft(false), 3000)
+      setSaveState('saved')
+      return true
     } catch (e) {
       console.error('Failed to save quotation', e)
+      setSaveState('error')
+      return false
     }
-    setSavingDraft(false)
   }
 
   // Sends the full quotation (services + parts + total) for approval — a
@@ -374,9 +394,13 @@ export default function page() {
   async function sendQuotationForApproval() {
     setSending(true)
 
-    // First save the quotation services and notes
-    await saveDraft()
-
+    // The round summarises what's on the server, so the latest edits have to
+    // land first. If that fails, don't send a round describing stale data.
+    const saved = await persistQuotation()
+    if (!saved) {
+      setSending(false)
+      return
+    }
 
     const summary = `Quotation total: ${currency(totals.grandTotal)} (Labor: ${currency(totals.laborTotal)}, Parts: ${currency(totals.partsTotal)}). ${notes}`
     const round = await sendForApproval(jobOrderId, summary)
@@ -478,12 +502,12 @@ export default function page() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={openAddServiceModal}
-            disabled={preDiagnostic?.status === 'pending' || quotationApproved}
+            disabled={quotationPending || quotationApproved}
             className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus size={14} /> Add Service
           </button>
-          {preDiagnostic?.status === 'pending' ? (
+          {quotationPending ? (
             <button
               onClick={handleRecallApproval}
               disabled={recalling}
@@ -492,14 +516,31 @@ export default function page() {
               <RotateCcw size={14} /> {recalling ? 'Recalling…' : 'Recall Approval'}
             </button>
           ) : (
-            <div className="flex gap-2">
-              <button
-                onClick={saveDraft}
-                disabled={savingDraft || savedDraft || sending || quotationApproved}
-                className={`flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-slate-50 disabled:opacity-50 ${hasUnsavedChanges ? 'border-amber-400 bg-amber-50 text-amber-700' : 'border-slate-200 bg-white text-slate-700'}`}
-              >
-                {savingDraft ? 'Saving...' : savedDraft ? '✓ Draft Saved' : hasUnsavedChanges ? '* Save Draft' : 'Save Draft'}
-              </button>
+            <div className="flex items-center gap-3">
+              {/* Passive save indicator — auto-save does the work, this just
+                  says whether the server has what's on screen. */}
+              {!quotationApproved && (
+                saveState === 'error' ? (
+                  <button
+                    onClick={() => void persistQuotation()}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:underline"
+                  >
+                    <AlertCircle size={13} /> Couldn't save — retry
+                  </button>
+                ) : saveState === 'saving' ? (
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
+                    <Loader2 size={13} className="animate-spin" /> Saving…
+                  </span>
+                ) : hasUnsavedChanges ? (
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-amber-600">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Unsaved changes
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
+                    <Check size={13} className="text-emerald-500" /> Saved
+                  </span>
+                )
+              )}
               <button
                 onClick={sendQuotationForApproval}
                 disabled={sending || quotationApproved}
@@ -608,14 +649,14 @@ export default function page() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setEditingServiceId(editing ? null : s.id)}
-                        disabled={preDiagnostic?.status === 'pending' || quotationApproved}
+                        disabled={quotationPending || quotationApproved}
                         className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {editing ? <Check size={13} /> : <Pencil size={13} />} {editing ? 'Done' : 'Edit'}
                       </button>
                       <button
                         onClick={() => removeService(s.id)}
-                        disabled={preDiagnostic?.status === 'pending' || quotationApproved}
+                        disabled={quotationPending || quotationApproved}
                         className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Remove Service"
                       >
@@ -629,7 +670,7 @@ export default function page() {
                   <span>Required Parts</span>
                   <button
                     onClick={() => openAddPartModal(s.id)}
-                    disabled={preDiagnostic?.status === 'pending' || quotationApproved}
+                    disabled={quotationPending || quotationApproved}
                     className="flex items-center gap-1 text-emerald-600 hover:underline disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed"
                   >
                     <Plus size={12} /> Add Part
@@ -644,11 +685,12 @@ export default function page() {
                         <th className="px-3 py-2 text-left font-medium">Qty</th>
                         <th className="px-3 py-2 text-left font-medium">Unit Price</th>
                         <th className="px-3 py-2 text-left font-medium">Status</th>
+                        <th className="px-3 py-2 text-right font-medium"></th>
                       </tr>
                     </thead>
                     <tbody>
                       {s.parts.map((p) => (
-                        <tr key={p.id} className="border-t border-slate-100">
+                        <tr key={p.id} className="group border-t border-slate-100">
                           <td className="px-3 py-2">
                             <p className="font-semibold text-slate-800">{p.name}</p>
                             <p className="text-xs text-slate-400">{p.partNo}</p>
@@ -664,11 +706,31 @@ export default function page() {
                               {p.status === 'in-stock' ? 'In Stock' : 'To Order'}
                             </span>
                           </td>
+                          <td className="px-3 py-2 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                onClick={() => openEditPartModal(s.id, p)}
+                                disabled={preDiagnostic?.status === 'pending' || quotationApproved}
+                                title="Edit part"
+                                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                              >
+                                <Pencil size={13} />
+                              </button>
+                              <button
+                                onClick={() => removePart(s.id, p.id)}
+                                disabled={preDiagnostic?.status === 'pending' || quotationApproved}
+                                title="Remove part"
+                                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                       {s.parts.length === 0 && (
                         <tr>
-                          <td colSpan={4} className="px-3 py-4 text-center text-xs text-slate-400">
+                          <td colSpan={5} className="px-3 py-4 text-center text-xs text-slate-400">
                             No parts added yet.
                           </td>
                         </tr>
@@ -915,7 +977,7 @@ export default function page() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setShowPartModal(false)}>
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900"><PackagePlus size={18} className="text-emerald-600" /> Add Part</h3>
+              <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900"><PackagePlus size={18} className="text-emerald-600" /> {editingPartId ? 'Edit Part' : 'Add Part'}</h3>
               <button onClick={() => setShowPartModal(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
             </div>
 
@@ -998,8 +1060,8 @@ export default function page() {
 
             <div className="mt-6 flex justify-end gap-3">
               <button onClick={() => setShowPartModal(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50">Cancel</button>
-              <button onClick={confirmAddPart} disabled={!partName.trim()} className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">
-                <PackagePlus size={14} /> Add Part
+              <button onClick={confirmPart} disabled={!partName.trim()} className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition-all duration-150 hover:bg-emerald-600 active:scale-95 disabled:opacity-50">
+                {editingPartId ? <Check size={14} /> : <PackagePlus size={14} />} {editingPartId ? 'Save Part' : 'Add Part'}
               </button>
             </div>
           </div>

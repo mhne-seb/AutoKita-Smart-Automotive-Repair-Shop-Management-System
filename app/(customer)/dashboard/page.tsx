@@ -33,6 +33,7 @@ import {
   Download,
   Calendar,
   Camera,
+  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
@@ -357,6 +358,8 @@ function Dashboard() {
                       note={job.service_name ?? "Service"}
                       stepIndex={STATUS_TO_STEP[job.status] ?? 0}
                       isDone={DONE_STATUSES.has(job.status)}
+                      balanceDue={job.status === "cancelled" ? 0 : Number(job.balance ?? 0)}
+                      cancelled={job.status === "cancelled"}
                       onViewReport={() => setReportJobId(job.id)}
                     />
                   );
@@ -1473,10 +1476,27 @@ function ServiceReportModal({ jobId, onClose }: { jobId: number; onClose: () => 
                   </div>
                 ))}
                 <div className="mt-3 flex items-center justify-between border-t pt-3">
-                  <span className="font-semibold">Total Due</span>
-                  <span className="text-lg font-bold text-teal">₱{formatMoney(data.jobOrder.balance)}</span>
+                  <span className="font-semibold">Total</span>
+                  <span className="font-bold">₱{formatMoney(data.bill?.total)}</span>
+                </div>
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Paid (verified)</span>
+                  <span>− ₱{formatMoney(data.bill?.paid)}</span>
+                </div>
+                <div className="flex items-center justify-between border-t pt-2">
+                  <span className="font-semibold">Balance Due</span>
+                  <span className={`text-lg font-bold ${(data.bill?.balance ?? 0) > 0 ? "text-teal" : "text-success"}`}>₱{formatMoney(data.bill?.balance)}</span>
                 </div>
               </div>
+
+              {(data.bill?.balance ?? 0) > 0 && (
+                <Link
+                  href={`/dashboard/tracking/completed?jobOrderId=${jobId}`}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+                >
+                  <CreditCard className="h-4 w-4" /> Pay Remaining Balance
+                </Link>
+              )}
 
               {data.warranties.length > 0 && (
                 <div className="mt-4">
@@ -1751,6 +1771,8 @@ function ServiceCard({
   note,
   stepIndex,
   isDone,
+  balanceDue = 0,
+  cancelled = false,
   onViewReport,
 }: {
   vehicle: string;
@@ -1761,6 +1783,8 @@ function ServiceCard({
   note: string;
   stepIndex: number;
   isDone: boolean;
+  balanceDue?: number;
+  cancelled?: boolean;
   onViewReport: () => void;
 }) {
   const statusTones = [
@@ -1804,9 +1828,22 @@ function ServiceCard({
         </div>
 
         {isDone ? (
-          <div className="mt-5 flex items-center gap-2 rounded-lg bg-success/10 px-3 py-2.5 text-xs font-medium text-success">
-            <CheckCircle2 className="h-4 w-4 shrink-0" /> This service has been completed.
-          </div>
+          cancelled ? (
+            <div className="mt-5 flex items-center gap-2 rounded-lg bg-muted px-3 py-2.5 text-xs font-medium text-muted-foreground">
+              <XCircle className="h-4 w-4 shrink-0" /> This service was cancelled.
+            </div>
+          ) : balanceDue > 0 ? (
+            <div className="mt-5 rounded-lg bg-warning/15 px-3 py-2.5 text-xs">
+              <div className="flex items-center gap-2 font-semibold text-[color:oklch(0.55_0.15_60)]">
+                <AlertCircle className="h-4 w-4 shrink-0" /> Service completed — ₱{balanceDue.toLocaleString("en-PH", { minimumFractionDigits: 2 })} balance due
+              </div>
+              <p className="mt-1 text-muted-foreground">Settle the balance to pick up your vehicle.</p>
+            </div>
+          ) : (
+            <div className="mt-5 flex items-center gap-2 rounded-lg bg-success/10 px-3 py-2.5 text-xs font-medium text-success">
+              <CheckCircle2 className="h-4 w-4 shrink-0" /> This service has been completed and paid in full.
+            </div>
+          )
         ) : (
           <div className="mt-6 flex items-start">
             {SERVICE_STEPS.map((step, i) => {
@@ -1848,15 +1885,25 @@ function ServiceCard({
           </div>
         )}
 
-        <div className="mt-5 flex items-center justify-end border-t pt-4">
+        <div className="mt-5 flex items-center justify-end gap-4 border-t pt-4">
           {isDone ? (
-            <button
-              onClick={onViewReport}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-brand transition-colors hover:text-[color:oklch(0.22_0.05_250)]"
-            >
-              View Service Report
-              <ChevronRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" />
-            </button>
+            <>
+              <button
+                onClick={onViewReport}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-brand transition-colors hover:text-[color:oklch(0.22_0.05_250)]"
+              >
+                View Service Report
+                <ChevronRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" />
+              </button>
+              {balanceDue > 0 && (
+                <Link
+                  href={`/dashboard/tracking/completed?jobOrderId=${jobId}`}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+                >
+                  <CreditCard className="h-3.5 w-3.5" /> Pay Balance
+                </Link>
+              )}
+            </>
           ) : (
             <Link
               href={`/dashboard/tracking/${["received", "inspecting", "quotation", "in-progress", "completed"][stepIndex] ?? "received"}?jobOrderId=${jobId}`}
