@@ -298,9 +298,9 @@ function InProgress() {
                 const isLast = idx === timeline.length - 1;
                 const isOnHold = pullOutStatus === "requested" && entry.status !== "completed" && entry.key.startsWith("task-");
 
-                // Service tasks use the exact words the admin picks in the
-                // schedule modal (Not Yet / Started / Finished), so the customer
-                // sees what the shop tagged. Other milestones keep Completed/Pending.
+                // Service tasks mirror what the shop tagged (Started / Finished);
+                // one that hasn't started yet is simply "Upcoming". Other
+                // milestones keep Completed/Pending.
                 const isTask = entry.key.startsWith("task-");
                 const waiting = Boolean((entry as { waitingForParts?: boolean }).waitingForParts);
                 const badgeLabel = isOnHold
@@ -311,7 +311,7 @@ function InProgress() {
                   ? "Started"
                   : waiting
                   ? "Waiting for parts"
-                  : (isTask ? "Not Yet" : "Pending");
+                  : (isTask ? "Upcoming" : "Pending");
                 const badgeClasses = isOnHold
                   ? "bg-destructive/15 text-destructive"
                   : entry.status === "completed"
