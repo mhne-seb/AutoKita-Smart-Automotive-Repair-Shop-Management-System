@@ -18,6 +18,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           spt.billable,
           spt.scheduled_date,
           spt.mechanic_id,
+          spt.completion_photo_url,
           spt.scheduled_date + (jos.estimated_hours * INTERVAL '1 hour') as estimated_finish,
           e.full_name as mechanic_name
         FROM service_progress_tasks spt
