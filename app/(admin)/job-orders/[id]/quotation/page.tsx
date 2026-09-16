@@ -12,7 +12,7 @@ import { getQuotationById, getJobOrderPayment, verifyJobOrderPayment, type JobOr
 import { getLatestPreDiagnostic, sendForApproval, recallApproval } from '@/controllers/preDiagnosticController'
 import { getInspectionById } from '@/controllers/inspectionController'
 import { currency } from '@/data/mockData'
-import { QuotationService, JobOrderCard, QuotationData, MechanicalFinding, findingStatusMeta } from '@/data/types'
+import { QuotationService, JobOrderCard, QuotationData, MechanicalFinding, findingStatusMeta, QuotationPart } from '@/data/types'
 
 export default function page() {
   const jobOrderId = String(useParams().id)
@@ -248,6 +248,7 @@ export default function page() {
   // Add Part modal — replaces the old window.prompt() flow.
   const [showPartModal, setShowPartModal] = useState(false)
   const [partModalServiceId, setPartModalServiceId] = useState<string | null>(null)
+  const [editingPartId, setEditingPartId] = useState<string | null>(null)
   const [partName, setPartName] = useState('')
   const [partNumber, setPartNumber] = useState('')
   // Kept as text while typing — a controlled number input seeded with 0/1
@@ -303,6 +304,7 @@ export default function page() {
 
   function openAddPartModal(serviceId: string) {
     setPartModalServiceId(serviceId)
+    setEditingPartId(null)
     setPartName('')
     setPartNumber('')
     setPartQty('1')
@@ -311,29 +313,44 @@ export default function page() {
     setShowPartModal(true)
   }
 
-  function confirmAddPart() {
+  // Same modal, prefilled — saving replaces the row instead of appending.
+  function openEditPartModal(serviceId: string, part: QuotationPart) {
+    setPartModalServiceId(serviceId)
+    setEditingPartId(part.id)
+    setPartName(part.name)
+    setPartNumber(part.partNo)
+    setPartQty(String(part.qty))
+    setPartUnitPrice(String(part.unitPrice))
+    setPartStatus(part.status)
+    setShowPartModal(true)
+  }
+
+  function removePart(serviceId: string, partId: string) {
+    setServices((prev) =>
+      prev.map((s) => (s.id === serviceId ? { ...s, parts: s.parts.filter((p) => p.id !== partId) } : s)),
+    )
+    setHasUnsavedChanges(true)
+  }
+
+  function confirmPart() {
     const name = partName.trim()
     if (!name || !partModalServiceId) return
     const serviceId = partModalServiceId
+    const draft = {
+      name,
+      partNo: partNumber.trim() || `PRT-${Math.floor(Math.random() * 9000 + 1000)}`,
+      qty: Math.max(1, Number(partQty) || 1),
+      unitPrice: Math.max(0, Number(partUnitPrice) || 0),
+      status: partStatus,
+    }
     setServices((prev) =>
-      prev.map((s) =>
-        s.id === serviceId
-          ? {
-              ...s,
-              parts: [
-                ...s.parts,
-                {
-                  id: `${serviceId}-p${s.parts.length + 1}`,
-                  name,
-                  partNo: partNumber.trim() || `PRT-${Math.floor(Math.random() * 9000 + 1000)}`,
-                  qty: Math.max(1, Number(partQty) || 1),
-                  unitPrice: Math.max(0, Number(partUnitPrice) || 0),
-                  status: partStatus,
-                },
-              ],
-            }
-          : s
-      )
+      prev.map((s) => {
+        if (s.id !== serviceId) return s
+        if (editingPartId) {
+          return { ...s, parts: s.parts.map((p) => (p.id === editingPartId ? { ...p, ...draft } : p)) }
+        }
+        return { ...s, parts: [...s.parts, { id: `${serviceId}-p${Date.now()}`, ...draft }] }
+      }),
     )
     setHasUnsavedChanges(true)
     setShowPartModal(false)
@@ -644,11 +661,12 @@ export default function page() {
                         <th className="px-3 py-2 text-left font-medium">Qty</th>
                         <th className="px-3 py-2 text-left font-medium">Unit Price</th>
                         <th className="px-3 py-2 text-left font-medium">Status</th>
+                        <th className="px-3 py-2 text-right font-medium"></th>
                       </tr>
                     </thead>
                     <tbody>
                       {s.parts.map((p) => (
-                        <tr key={p.id} className="border-t border-slate-100">
+                        <tr key={p.id} className="group border-t border-slate-100">
                           <td className="px-3 py-2">
                             <p className="font-semibold text-slate-800">{p.name}</p>
                             <p className="text-xs text-slate-400">{p.partNo}</p>
@@ -664,11 +682,31 @@ export default function page() {
                               {p.status === 'in-stock' ? 'In Stock' : 'To Order'}
                             </span>
                           </td>
+                          <td className="px-3 py-2 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                onClick={() => openEditPartModal(s.id, p)}
+                                disabled={preDiagnostic?.status === 'pending' || quotationApproved}
+                                title="Edit part"
+                                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                              >
+                                <Pencil size={13} />
+                              </button>
+                              <button
+                                onClick={() => removePart(s.id, p.id)}
+                                disabled={preDiagnostic?.status === 'pending' || quotationApproved}
+                                title="Remove part"
+                                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                       {s.parts.length === 0 && (
                         <tr>
-                          <td colSpan={4} className="px-3 py-4 text-center text-xs text-slate-400">
+                          <td colSpan={5} className="px-3 py-4 text-center text-xs text-slate-400">
                             No parts added yet.
                           </td>
                         </tr>
@@ -915,7 +953,7 @@ export default function page() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setShowPartModal(false)}>
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900"><PackagePlus size={18} className="text-emerald-600" /> Add Part</h3>
+              <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900"><PackagePlus size={18} className="text-emerald-600" /> {editingPartId ? 'Edit Part' : 'Add Part'}</h3>
               <button onClick={() => setShowPartModal(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
             </div>
 
@@ -998,8 +1036,8 @@ export default function page() {
 
             <div className="mt-6 flex justify-end gap-3">
               <button onClick={() => setShowPartModal(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50">Cancel</button>
-              <button onClick={confirmAddPart} disabled={!partName.trim()} className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">
-                <PackagePlus size={14} /> Add Part
+              <button onClick={confirmPart} disabled={!partName.trim()} className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition-all duration-150 hover:bg-emerald-600 active:scale-95 disabled:opacity-50">
+                {editingPartId ? <Check size={14} /> : <PackagePlus size={14} />} {editingPartId ? 'Save Part' : 'Add Part'}
               </button>
             </div>
           </div>
