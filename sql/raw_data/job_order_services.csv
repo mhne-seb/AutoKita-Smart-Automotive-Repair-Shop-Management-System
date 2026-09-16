@@ -1,0 +1,2595 @@
+id,job_order_id,service_id,description_of_work,estimated_duration,actual_duration,estimated_hours,actual_hours,estimated_amount,actual_amount
+1,1,36,Down Clutch / Pulldown Transmission,04:30:00,04:37:48,4.50,4.63,6000,6000
+2,1,54,General Engine Overhaul,23:59:59,23:59:59,24.00,25.86,6000,6000
+3,2,36,Down Clutch / Pulldown Transmission,04:30:00,05:19:48,4.50,5.33,4000,4000
+4,3,36,Down Clutch / Pulldown Transmission,04:30:00,05:16:12,4.50,5.27,1800,1800
+5,5,53,Top Overhaul,14:00:00,14:27:36,14.00,14.46,12000,12000
+6,5,35,Power Steering Pump Overhaul / Replacement,02:00:00,01:45:36,2.00,1.76,1500,1500
+7,5,18,Wheel Alignment,01:00:00,01:03:36,1.00,1.06,800,800
+8,5,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,03:36:36,4.00,3.61,3500,3500
+9,6,49,Replace Timing Belt / Chain,04:00:00,03:50:24,4.00,3.84,3500,3500
+10,6,22,Replace Suspension Bushing,02:30:00,02:27:36,2.50,2.46,1500,1500
+11,6,21,Replace Shock Absorbers,02:00:00,02:00:00,2.00,2.00,2000,2000
+12,7,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:59:24,3.00,2.99,7000,7000
+13,7,58,General Mechanical Inspection & Check-Up,00:30:00,00:32:24,0.50,0.54,21200,21200
+14,8,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:00,0.50,0.45,10000,10000
+15,8,46,Starter Motor Repair / Replacement,01:30:00,01:40:48,1.50,1.68,2300,2300
+16,9,40,Radiator Replacement / Repair,01:30:00,01:17:24,1.50,1.29,1000,1000
+17,10,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,7500,7500
+18,11,36,Down Clutch / Pulldown Transmission,04:30:00,05:11:24,4.50,5.19,3500,3500
+19,12,36,Down Clutch / Pulldown Transmission,04:30:00,04:46:12,4.50,4.77,3500,3500
+20,13,22,Replace Suspension Bushing,02:30:00,03:05:24,2.50,3.09,1500,1500
+21,13,20,Tire Rotation & Balancing,00:45:00,00:45:00,0.75,0.75,1500,1500
+22,13,1,Change Oil,00:45:00,00:42:36,0.75,0.71,650,650
+23,14,22,Replace Suspension Bushing,02:30:00,02:53:24,2.50,2.89,1500,1500
+24,14,31,Replace Wheel Bearing,01:30:00,01:42:36,1.50,1.71,1800,1800
+25,14,1,Change Oil,00:45:00,00:49:48,0.75,0.83,650,650
+26,14,14,Replace Brake Pads,01:00:00,00:53:24,1.00,0.89,1500,1500
+27,15,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,7500,7500
+28,16,36,Down Clutch / Pulldown Transmission,04:30:00,04:43:12,4.50,4.72,3500,3500
+29,17,1,Change Oil,00:45:00,00:49:12,0.75,0.82,650,650
+30,18,18,Wheel Alignment,01:00:00,01:10:48,1.00,1.18,800,800
+31,18,9,Cleaning EGR,03:30:00,03:09:00,3.50,3.15,4500,4500
+32,18,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:57:36,2.00,1.96,4000,4000
+33,18,23,Replace Tie Rod End,01:00:00,00:58:12,1.00,0.97,1000,1000
+34,18,15,Replace Brake Shoes,01:00:00,01:10:12,1.00,1.17,800,800
+35,18,1,Change Oil,00:45:00,00:51:36,0.75,0.86,800,800
+36,18,3,Replace Fuel Filter,00:45:00,00:38:24,0.75,0.64,550,550
+37,18,13,Brake Service & Cleaning,01:15:00,01:06:36,1.25,1.11,500,500
+38,18,7,Replace Fuel Pump,01:30:00,01:30:00,1.50,1.50,200,200
+39,19,21,Replace Shock Absorbers,02:00:00,01:49:48,2.00,1.83,1800,1800
+40,19,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:55:12,2.00,1.92,4000,4000
+41,19,21,Replace Shock Absorbers,02:00:00,02:11:24,2.00,2.19,600,600
+42,20,43,Engine Diagnostics & Electrical Scan,00:45:00,00:47:24,0.75,0.79,1500,1500
+43,20,7,Replace Fuel Pump,01:30:00,01:21:36,1.50,1.36,1300,1300
+44,20,12,Replace Spark Plugs,00:30:00,00:28:48,0.50,0.48,200,200
+45,23,54,General Engine Overhaul,23:59:59,23:59:59,24.00,29.48,18000,18000
+46,23,1,Change Oil,00:45:00,00:45:00,0.75,0.75,800,800
+47,24,18,Wheel Alignment,01:00:00,00:51:36,1.00,0.86,800,800
+48,24,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:59:24,2.00,1.99,4000,4000
+49,24,9,Cleaning EGR,03:30:00,04:00:36,3.50,4.01,4500,4500
+50,24,23,Replace Tie Rod End,01:00:00,01:04:48,1.00,1.08,1000,1000
+51,24,15,Replace Brake Shoes,01:00:00,00:56:24,1.00,0.94,800,800
+52,24,1,Change Oil,00:45:00,00:39:00,0.75,0.65,800,800
+53,24,3,Replace Fuel Filter,00:45:00,00:47:24,0.75,0.79,550,550
+54,24,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,500,500
+55,24,39,Coolant Flush,00:45:00,00:48:00,0.75,0.80,500,500
+56,25,53,Top Overhaul,14:00:00,16:03:00,14.00,16.05,15000,15000
+57,25,1,Change Oil,00:45:00,00:40:12,0.75,0.67,500,500
+58,26,31,Replace Wheel Bearing,01:30:00,01:26:24,1.50,1.44,800,800
+59,26,43,Engine Diagnostics & Electrical Scan,00:45:00,00:56:24,0.75,0.94,1500,1500
+60,26,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:36,0.50,0.51,500,500
+61,27,36,Down Clutch / Pulldown Transmission,04:30:00,05:14:24,4.50,5.24,8500,8500
+62,27,1,Change Oil,00:45:00,00:51:00,0.75,0.85,800,800
+63,27,58,General Mechanical Inspection & Check-Up,00:30:00,00:26:24,0.50,0.44,550,550
+64,27,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:01:48,1.00,1.03,800,800
+65,28,1,Change Oil,00:45:00,00:39:00,0.75,0.65,800,800
+66,28,51,Replace Valve Cover Gasket,01:45:00,01:45:00,1.75,1.75,1200,1200
+67,28,13,Brake Service & Cleaning,01:15:00,01:30:36,1.25,1.51,1200,1200
+68,29,1,Change Oil,00:45:00,00:55:12,0.75,0.92,650,650
+69,29,23,Replace Tie Rod End,01:00:00,01:07:12,1.00,1.12,1200,1200
+70,29,22,Replace Suspension Bushing,02:30:00,02:58:48,2.50,2.98,400,400
+71,29,21,Replace Shock Absorbers,02:00:00,01:57:00,2.00,1.95,1200,1200
+72,29,18,Wheel Alignment,01:00:00,00:57:36,1.00,0.96,800,800
+73,30,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:00:36,2.00,2.01,1500,1500
+74,30,13,Brake Service & Cleaning,01:15:00,01:21:00,1.25,1.35,500,500
+75,30,1,Change Oil,00:45:00,00:47:24,0.75,0.79,650,650
+76,30,21,Replace Shock Absorbers,02:00:00,01:48:36,2.00,1.81,1500,1500
+77,31,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:42:00,1.50,1.70,800,800
+78,31,54,General Engine Overhaul,23:59:59,23:59:59,24.00,26.54,500,500
+79,31,13,Brake Service & Cleaning,01:15:00,01:04:12,1.25,1.07,800,800
+80,32,1,Change Oil,00:45:00,00:54:36,0.75,0.91,800,800
+81,32,13,Brake Service & Cleaning,01:15:00,01:33:36,1.25,1.56,800,800
+82,32,3,Replace Fuel Filter,00:45:00,00:55:48,0.75,0.93,650,650
+83,32,9,Cleaning EGR,03:30:00,03:27:36,3.50,3.46,4500,4500
+84,33,21,Replace Shock Absorbers,02:00:00,01:42:36,2.00,1.71,1200,1200
+85,33,27,Replace Stabilizer Link,00:45:00,00:46:12,0.75,0.77,600,600
+86,34,40,Radiator Replacement / Repair,01:30:00,01:45:36,1.50,1.76,400,400
+87,34,14,Replace Brake Pads,01:00:00,01:09:36,1.00,1.16,400,400
+88,34,13,Brake Service & Cleaning,01:15:00,01:27:36,1.25,1.46,400,400
+89,34,36,Down Clutch / Pulldown Transmission,04:30:00,04:02:24,4.50,4.04,400,400
+90,34,35,Power Steering Pump Overhaul / Replacement,02:00:00,02:19:48,2.00,2.33,400,400
+91,35,36,Down Clutch / Pulldown Transmission,04:30:00,04:49:12,4.50,4.82,4500,4500
+92,36,1,Change Oil,00:45:00,00:40:12,0.75,0.67,600,600
+93,36,22,Replace Suspension Bushing,02:30:00,02:15:36,2.50,2.26,1500,1500
+94,36,13,Brake Service & Cleaning,01:15:00,01:07:48,1.25,1.13,2900,2900
+95,36,51,Replace Valve Cover Gasket,01:45:00,01:29:24,1.75,1.49,800,800
+96,37,36,Down Clutch / Pulldown Transmission,04:30:00,05:09:00,4.50,5.15,2000,2000
+97,37,27,Replace Stabilizer Link,00:45:00,00:52:48,0.75,0.88,1000,1000
+98,37,18,Wheel Alignment,01:00:00,01:12:36,1.00,1.21,1200,1200
+99,37,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,1500,1500
+100,38,36,Down Clutch / Pulldown Transmission,04:30:00,04:45:36,4.50,4.76,12000,12000
+101,40,3,Replace Fuel Filter,00:45:00,00:52:48,0.75,0.88,600,600
+102,40,10,Throttle Body Cleaning,00:45:00,00:38:24,0.75,0.64,600,600
+103,41,52,Reseal Oil Pan / Crankcase,02:00:00,01:58:48,2.00,1.98,1500,1500
+104,41,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:36,0.50,0.61,4500,4500
+105,41,54,General Engine Overhaul,23:59:59,23:59:59,24.00,29.98,2500,2500
+106,42,42,Replace Auxiliary Fan / Motor,01:00:00,00:52:48,1.00,0.88,1500,1500
+107,43,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:00,0.50,0.60,4000,4000
+108,44,46,Starter Motor Repair / Replacement,01:30:00,01:25:12,1.50,1.42,1800,1800
+109,44,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:19:12,2.00,2.32,4000,4000
+110,44,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:17:24,1.50,1.29,900,900
+111,45,36,Down Clutch / Pulldown Transmission,04:30:00,04:53:24,4.50,4.89,2800,2800
+112,46,51,Replace Valve Cover Gasket,01:45:00,01:43:48,1.75,1.73,1200,1200
+113,47,18,Wheel Alignment,01:00:00,01:02:24,1.00,1.04,3000,3000
+114,47,13,Brake Service & Cleaning,01:15:00,01:28:12,1.25,1.47,500,500
+115,47,18,Wheel Alignment,01:00:00,00:59:24,1.00,0.99,900,900
+116,48,36,Down Clutch / Pulldown Transmission,04:30:00,04:37:48,4.50,4.63,4500,4500
+117,49,36,Down Clutch / Pulldown Transmission,04:30:00,04:55:12,4.50,4.92,3500,3500
+118,49,22,Replace Suspension Bushing,02:30:00,02:27:00,2.50,2.45,1200,1200
+119,49,33,Replace Axle Boot,01:00:00,01:12:00,1.00,1.20,500,500
+120,49,51,Replace Valve Cover Gasket,01:45:00,01:46:48,1.75,1.78,850,850
+121,50,52,Reseal Oil Pan / Crankcase,02:00:00,02:03:00,2.00,2.05,1600,1600
+122,50,32,Replace CV Joint,01:30:00,01:38:24,1.50,1.64,2000,2000
+123,50,21,Replace Shock Absorbers,02:00:00,02:09:36,2.00,2.16,1800,1800
+124,50,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:58:12,1.00,0.97,1200,1200
+125,50,50,Replace Engine Support,01:30:00,01:26:24,1.50,1.44,3500,3500
+126,50,13,Brake Service & Cleaning,01:15:00,01:27:00,1.25,1.45,1500,1500
+127,51,14,Replace Brake Pads,01:00:00,00:58:48,1.00,0.98,500,500
+128,51,33,Replace Axle Boot,01:00:00,01:07:12,1.00,1.12,1500,1500
+129,51,24,Replace Rack End,01:15:00,01:10:48,1.25,1.18,3500,3500
+130,51,22,Replace Suspension Bushing,02:30:00,02:38:24,2.50,2.64,4500,4500
+131,51,18,Wheel Alignment,01:00:00,00:55:12,1.00,0.92,900,900
+132,52,40,Radiator Replacement / Repair,01:30:00,01:34:12,1.50,1.57,3500,3500
+133,52,54,General Engine Overhaul,23:59:59,23:59:59,24.00,27.67,8500,8500
+134,52,51,Replace Valve Cover Gasket,01:45:00,02:01:48,1.75,2.03,1500,1500
+135,52,45,Alternator Repair / Replacement,01:30:00,01:36:00,1.50,1.60,3000,3000
+136,52,36,Down Clutch / Pulldown Transmission,04:30:00,04:04:48,4.50,4.08,12000,12000
+137,52,20,Tire Rotation & Balancing,00:45:00,00:54:36,0.75,0.91,1200,1200
+138,52,43,Engine Diagnostics & Electrical Scan,00:45:00,00:41:24,0.75,0.69,3500,3500
+139,52,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:50:24,1.50,1.84,1200,1200
+140,52,10,Throttle Body Cleaning,00:45:00,00:39:00,0.75,0.65,800,800
+141,52,52,Reseal Oil Pan / Crankcase,02:00:00,01:44:24,2.00,1.74,2800,2800
+142,52,8,Intake Manifold Cleaning & Reseal,02:00:00,02:25:48,2.00,2.43,2000,2000
+143,52,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,04:07:48,4.00,4.13,8500,8500
+144,53,1,Change Oil,00:45:00,00:45:00,0.75,0.75,800,800
+145,53,47,Electrical System & Wiring Repair,01:30:00,01:32:24,1.50,1.54,2500,2500
+146,53,13,Brake Service & Cleaning,01:15:00,01:13:48,1.25,1.23,800,800
+147,53,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,350,350
+148,53,3,Replace Fuel Filter,00:45:00,00:45:36,0.75,0.76,550,550
+149,53,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:36,0.50,0.61,700,700
+150,53,15,Replace Brake Shoes,01:00:00,01:06:00,1.00,1.10,800,800
+151,54,1,Change Oil,00:45:00,00:45:36,0.75,0.76,600,600
+152,54,13,Brake Service & Cleaning,01:15:00,01:12:36,1.25,1.21,800,800
+153,54,36,Down Clutch / Pulldown Transmission,04:30:00,05:31:48,4.50,5.53,2800,2800
+154,55,1,Change Oil,00:45:00,00:51:00,0.75,0.85,600,600
+155,55,13,Brake Service & Cleaning,01:15:00,01:13:48,1.25,1.23,800,800
+156,55,10,Throttle Body Cleaning,00:45:00,00:44:24,0.75,0.74,550,550
+157,55,56,Power Window Repair / Motor Replacement,01:15:00,01:32:24,1.25,1.54,500,500
+158,56,9,Cleaning EGR,03:30:00,03:58:12,3.50,3.97,6500,6500
+159,56,54,General Engine Overhaul,23:59:59,23:59:59,24.00,25.94,3500,3500
+160,56,58,General Mechanical Inspection & Check-Up,00:30:00,00:32:24,0.50,0.54,500,500
+161,56,35,Power Steering Pump Overhaul / Replacement,02:00:00,01:49:48,2.00,1.83,1800,1800
+162,56,1,Change Oil,00:45:00,00:49:48,0.75,0.83,800,800
+163,56,3,Replace Fuel Filter,00:45:00,00:50:24,0.75,0.84,550,550
+164,56,51,Replace Valve Cover Gasket,01:45:00,01:30:36,1.75,1.51,2500,2500
+165,57,36,Down Clutch / Pulldown Transmission,04:30:00,04:18:00,4.50,4.30,4000,4000
+166,58,24,Replace Rack End,01:15:00,01:32:24,1.25,1.54,1600,1600
+167,58,18,Wheel Alignment,01:00:00,01:08:24,1.00,1.14,900,900
+168,60,53,Top Overhaul,14:00:00,15:46:12,14.00,15.77,6500,6500
+169,60,54,General Engine Overhaul,23:59:59,23:59:59,24.00,26.84,1500,1500
+170,61,1,Change Oil,00:45:00,00:56:24,0.75,0.94,800,800
+171,61,13,Brake Service & Cleaning,01:15:00,01:19:48,1.25,1.33,1200,1200
+172,61,4,Replace Air Filter,00:15:00,00:15:00,0.25,0.25,550,550
+173,61,9,Cleaning EGR,03:30:00,04:00:36,3.50,4.01,4500,4500
+174,61,58,General Mechanical Inspection & Check-Up,00:30:00,00:32:24,0.50,0.54,500,500
+175,62,23,Replace Tie Rod End,01:00:00,01:06:36,1.00,1.11,800,800
+176,62,22,Replace Suspension Bushing,02:30:00,02:36:36,2.50,2.61,600,600
+177,62,31,Replace Wheel Bearing,01:30:00,01:27:36,1.50,1.46,600,600
+178,62,18,Wheel Alignment,01:00:00,00:58:12,1.00,0.97,900,900
+179,62,53,Top Overhaul,14:00:00,12:42:00,14.00,12.70,1800,1800
+180,64,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,04:38:24,4.00,4.64,2800,2800
+181,64,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,04:46:48,4.00,4.78,12000,12000
+182,64,47,Electrical System & Wiring Repair,01:30:00,01:50:24,1.50,1.84,5500,5500
+183,64,18,Wheel Alignment,01:00:00,00:55:48,1.00,0.93,3000,3000
+184,64,43,Engine Diagnostics & Electrical Scan,00:45:00,00:47:24,0.75,0.79,1500,1500
+185,64,13,Brake Service & Cleaning,01:15:00,01:05:24,1.25,1.09,1800,1800
+186,65,58,General Mechanical Inspection & Check-Up,00:30:00,00:35:24,0.50,0.59,1800,1800
+187,66,1,Change Oil,00:45:00,00:40:12,0.75,0.67,600,600
+188,66,13,Brake Service & Cleaning,01:15:00,01:19:12,1.25,1.32,800,800
+189,66,51,Replace Valve Cover Gasket,01:45:00,01:54:36,1.75,1.91,800,800
+190,66,21,Replace Shock Absorbers,02:00:00,02:26:24,2.00,2.44,1200,1200
+191,68,1,Change Oil,00:45:00,00:54:36,0.75,0.91,800,800
+192,68,13,Brake Service & Cleaning,01:15:00,01:18:36,1.25,1.31,800,800
+193,68,23,Replace Tie Rod End,01:00:00,01:01:48,1.00,1.03,1500,1500
+194,68,22,Replace Suspension Bushing,02:30:00,02:14:24,2.50,2.24,2800,2800
+195,69,22,Replace Suspension Bushing,02:30:00,02:52:48,2.50,2.88,7500,7500
+196,69,31,Replace Wheel Bearing,01:30:00,01:27:36,1.50,1.46,2500,2500
+197,70,21,Replace Shock Absorbers,02:00:00,02:17:24,2.00,2.29,1600,1600
+198,70,22,Replace Suspension Bushing,02:30:00,02:19:12,2.50,2.32,1800,1800
+199,70,23,Replace Tie Rod End,01:00:00,01:06:36,1.00,1.11,1500,1500
+200,70,18,Wheel Alignment,01:00:00,00:52:48,1.00,0.88,2800,2800
+201,72,24,Replace Rack End,01:15:00,01:04:12,1.25,1.07,10000,10000
+202,72,22,Replace Suspension Bushing,02:30:00,02:24:00,2.50,2.40,1500,1500
+203,72,21,Replace Shock Absorbers,02:00:00,02:12:00,2.00,2.20,1500,1500
+204,72,27,Replace Stabilizer Link,00:45:00,00:55:12,0.75,0.92,600,600
+205,72,18,Wheel Alignment,01:00:00,01:09:36,1.00,1.16,2500,2500
+206,73,36,Down Clutch / Pulldown Transmission,04:30:00,05:27:00,4.50,5.45,12000,12000
+207,74,1,Change Oil,00:45:00,00:45:36,0.75,0.76,600,600
+208,74,15,Replace Brake Shoes,01:00:00,01:14:24,1.00,1.24,800,800
+209,74,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:54:00,2.00,1.90,1200,1200
+210,74,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:03:36,2.00,2.06,1200,1200
+211,74,21,Replace Shock Absorbers,02:00:00,01:55:48,2.00,1.93,1200,1200
+212,76,36,Down Clutch / Pulldown Transmission,04:30:00,04:43:12,4.50,4.72,4500,4500
+213,76,51,Replace Valve Cover Gasket,01:45:00,01:33:00,1.75,1.55,1500,1500
+214,76,52,Reseal Oil Pan / Crankcase,02:00:00,01:51:00,2.00,1.85,2500,2500
+215,76,47,Electrical System & Wiring Repair,01:30:00,01:20:24,1.50,1.34,350,350
+216,76,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,1500,1500
+217,78,58,General Mechanical Inspection & Check-Up,00:30:00,00:26:24,0.50,0.44,25000,25000
+218,79,1,Change Oil,00:45:00,00:47:24,0.75,0.79,450,450
+219,79,1,Change Oil,00:45:00,00:41:24,0.75,0.69,350,350
+220,80,9,Cleaning EGR,03:30:00,03:55:12,3.50,3.92,7500,7500
+221,80,1,Change Oil,00:45:00,00:40:48,0.75,0.68,800,800
+222,80,36,Down Clutch / Pulldown Transmission,04:30:00,04:11:24,4.50,4.19,1200,1200
+223,80,13,Brake Service & Cleaning,01:15:00,01:32:24,1.25,1.54,1600,1600
+224,80,3,Replace Fuel Filter,00:45:00,00:54:00,0.75,0.90,800,800
+225,80,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,500,500
+226,81,36,Down Clutch / Pulldown Transmission,04:30:00,04:51:36,4.50,4.86,6500,6500
+227,82,18,Wheel Alignment,01:00:00,01:11:24,1.00,1.19,900,900
+228,82,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,1200,1200
+229,82,27,Replace Stabilizer Link,00:45:00,00:53:24,0.75,0.89,800,800
+230,82,1,Change Oil,00:45:00,00:52:12,0.75,0.87,800,800
+231,82,13,Brake Service & Cleaning,01:15:00,01:09:36,1.25,1.16,1200,1200
+232,83,49,Replace Timing Belt / Chain,04:00:00,04:07:48,4.00,4.13,3500,3500
+233,84,23,Replace Tie Rod End,01:00:00,00:55:12,1.00,0.92,1000,1000
+234,84,15,Replace Brake Shoes,01:00:00,01:06:36,1.00,1.11,800,800
+235,84,31,Replace Wheel Bearing,01:30:00,01:49:48,1.50,1.83,800,800
+236,84,21,Replace Shock Absorbers,02:00:00,01:47:24,2.00,1.79,800,800
+237,84,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:46:12,2.00,1.77,1500,1500
+238,86,1,Change Oil,00:45:00,00:41:24,0.75,0.69,800,800
+239,86,13,Brake Service & Cleaning,01:15:00,01:15:36,1.25,1.26,800,800
+240,86,3,Replace Fuel Filter,00:45:00,00:53:24,0.75,0.89,550,550
+241,87,1,Change Oil,00:45:00,00:52:48,0.75,0.88,800,800
+242,87,2,Change ATF / Transmission Fluid,00:45:00,00:51:00,0.75,0.85,800,800
+243,87,13,Brake Service & Cleaning,01:15:00,01:29:24,1.25,1.49,800,800
+244,87,12,Replace Spark Plugs,00:30:00,00:30:36,0.50,0.51,250,250
+245,88,1,Change Oil,00:45:00,00:45:00,0.75,0.75,800,800
+246,88,13,Brake Service & Cleaning,01:15:00,01:31:48,1.25,1.53,800,800
+247,88,2,Change ATF / Transmission Fluid,00:45:00,00:41:24,0.75,0.69,800,800
+248,88,12,Replace Spark Plugs,00:30:00,00:30:00,0.50,0.50,250,250
+249,89,47,Electrical System & Wiring Repair,01:30:00,01:39:00,1.50,1.65,8000,8000
+250,90,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,4500,4500
+251,91,1,Change Oil,00:45:00,00:43:12,0.75,0.72,800,800
+252,91,13,Brake Service & Cleaning,01:15:00,01:21:00,1.25,1.35,1200,1200
+253,92,49,Replace Timing Belt / Chain,04:00:00,03:46:12,4.00,3.77,6500,6500
+254,92,1,Change Oil,00:45:00,00:38:24,0.75,0.64,600,600
+255,92,23,Replace Tie Rod End,01:00:00,01:13:12,1.00,1.22,800,800
+256,92,27,Replace Stabilizer Link,00:45:00,00:42:00,0.75,0.70,600,600
+257,92,18,Wheel Alignment,01:00:00,01:00:00,1.00,1.00,800,800
+258,92,13,Brake Service & Cleaning,01:15:00,01:09:36,1.25,1.16,400,400
+259,92,41,Replace Water Pump,02:00:00,01:52:48,2.00,1.88,500,500
+260,92,41,Replace Water Pump,02:00:00,02:19:48,2.00,2.33,650,650
+261,93,1,Change Oil,00:45:00,00:48:00,0.75,0.80,800,800
+262,93,13,Brake Service & Cleaning,01:15:00,01:32:24,1.25,1.54,1200,1200
+263,94,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:07:48,3.00,3.13,4500,4500
+264,94,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:01:12,3.00,3.02,500,500
+265,95,43,Engine Diagnostics & Electrical Scan,00:45:00,00:47:24,0.75,0.79,3500,3500
+266,96,22,Replace Suspension Bushing,02:30:00,02:21:00,2.50,2.35,3500,3500
+267,97,1,Change Oil,00:45:00,00:52:12,0.75,0.87,800,800
+268,97,13,Brake Service & Cleaning,01:15:00,01:04:48,1.25,1.08,1200,1200
+269,97,3,Replace Fuel Filter,00:45:00,00:49:48,0.75,0.83,550,550
+270,97,9,Cleaning EGR,03:30:00,03:57:00,3.50,3.95,4500,4500
+271,97,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,500,500
+272,98,36,Down Clutch / Pulldown Transmission,04:30:00,03:52:12,4.50,3.87,2500,2500
+273,98,51,Replace Valve Cover Gasket,01:45:00,02:03:36,1.75,2.06,250,250
+274,99,53,Top Overhaul,14:00:00,14:43:12,14.00,14.72,8000,8000
+275,100,12,Replace Spark Plugs,00:30:00,00:31:12,0.50,0.52,400,400
+276,100,50,Replace Engine Support,01:30:00,01:20:24,1.50,1.34,1500,1500
+277,100,21,Replace Shock Absorbers,02:00:00,02:21:36,2.00,2.36,1200,1200
+278,100,32,Replace CV Joint,01:30:00,01:47:24,1.50,1.79,1800,1800
+279,101,22,Replace Suspension Bushing,02:30:00,02:12:00,2.50,2.20,800,800
+280,101,23,Replace Tie Rod End,01:00:00,01:10:48,1.00,1.18,1000,1000
+281,101,27,Replace Stabilizer Link,00:45:00,00:49:48,0.75,0.83,600,600
+282,101,18,Wheel Alignment,01:00:00,01:00:00,1.00,1.00,2500,2500
+283,101,18,Wheel Alignment,01:00:00,01:12:36,1.00,1.21,800,800
+284,101,22,Replace Suspension Bushing,02:30:00,02:12:36,2.50,2.21,500,500
+285,102,43,Engine Diagnostics & Electrical Scan,00:45:00,00:48:36,0.75,0.81,850,850
+286,102,52,Reseal Oil Pan / Crankcase,02:00:00,02:22:48,2.00,2.38,1500,1500
+287,103,30,Replace Ball Joint,01:15:00,01:08:24,1.25,1.14,850,850
+288,103,52,Reseal Oil Pan / Crankcase,02:00:00,01:52:12,2.00,1.87,1500,1500
+289,104,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,04:58:48,4.00,4.98,3500,3500
+290,105,36,Down Clutch / Pulldown Transmission,04:30:00,04:45:00,4.50,4.75,3500,3500
+291,105,22,Replace Suspension Bushing,02:30:00,02:09:36,2.50,2.16,4500,4500
+292,106,1,Change Oil,00:45:00,00:40:12,0.75,0.67,650,650
+293,107,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,03:58:48,4.00,3.98,3500,3500
+294,107,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,03:24:00,4.00,3.40,3500,3500
+295,108,1,Change Oil,00:45:00,00:40:48,0.75,0.68,850,850
+296,108,14,Replace Brake Pads,01:00:00,00:55:48,1.00,0.93,600,600
+297,108,13,Brake Service & Cleaning,01:15:00,01:04:48,1.25,1.08,600,600
+298,108,3,Replace Fuel Filter,00:45:00,00:52:12,0.75,0.87,550,550
+299,109,21,Replace Shock Absorbers,02:00:00,01:43:12,2.00,1.72,1200,1200
+300,109,35,Power Steering Pump Overhaul / Replacement,02:00:00,01:44:24,2.00,1.74,1800,1800
+301,110,1,Change Oil,00:45:00,00:41:24,0.75,0.69,650,650
+302,110,14,Replace Brake Pads,01:00:00,01:00:00,1.00,1.00,1500,1500
+303,112,34,Replace CV Joint & Axle Boot,01:45:00,01:45:36,1.75,1.76,4500,4500
+304,112,18,Wheel Alignment,01:00:00,00:54:00,1.00,0.90,4500,4500
+305,114,1,Change Oil,00:45:00,00:49:48,0.75,0.83,650,650
+306,114,13,Brake Service & Cleaning,01:15:00,01:20:24,1.25,1.34,800,800
+307,115,1,Change Oil,00:45:00,00:53:24,0.75,0.89,650,650
+308,115,13,Brake Service & Cleaning,01:15:00,01:17:24,1.25,1.29,800,800
+309,115,18,Wheel Alignment,01:00:00,01:04:48,1.00,1.08,900,900
+310,116,22,Replace Suspension Bushing,02:30:00,02:53:24,2.50,2.89,5500,5500
+311,116,47,Electrical System & Wiring Repair,01:30:00,01:31:48,1.50,1.53,1000,1000
+312,116,18,Wheel Alignment,01:00:00,01:12:36,1.00,1.21,800,800
+313,116,21,Replace Shock Absorbers,02:00:00,02:22:12,2.00,2.37,400,400
+314,116,36,Down Clutch / Pulldown Transmission,04:30:00,04:02:24,4.50,4.04,4500,4500
+315,117,1,Change Oil,00:45:00,00:45:00,0.75,0.75,650,650
+316,117,13,Brake Service & Cleaning,01:15:00,01:22:12,1.25,1.37,600,600
+317,117,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:15:36,2.00,2.26,1500,1500
+318,117,12,Replace Spark Plugs,00:30:00,00:31:48,0.50,0.53,200,200
+319,118,1,Change Oil,00:45:00,00:43:12,0.75,0.72,650,650
+320,118,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:51:00,1.50,1.85,600,600
+321,118,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:25:12,2.00,2.42,1500,1500
+322,118,12,Replace Spark Plugs,00:30:00,00:34:48,0.50,0.58,200,200
+323,120,18,Wheel Alignment,01:00:00,01:10:12,1.00,1.17,2800,2800
+324,120,22,Replace Suspension Bushing,02:30:00,02:12:00,2.50,2.20,2000,2000
+325,120,23,Replace Tie Rod End,01:00:00,01:05:24,1.00,1.09,500,500
+326,120,23,Replace Tie Rod End,01:00:00,00:53:24,1.00,0.89,500,500
+327,120,1,Change Oil,00:45:00,00:54:00,0.75,0.90,850,850
+328,120,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:05:24,2.00,2.09,2500,2500
+329,120,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:52:12,2.00,1.87,2000,2000
+330,120,15,Replace Brake Shoes,01:00:00,01:04:12,1.00,1.07,1200,1200
+331,120,3,Replace Fuel Filter,00:45:00,00:50:24,0.75,0.84,550,550
+332,121,1,Change Oil,00:45:00,00:43:12,0.75,0.72,650,650
+333,122,18,Wheel Alignment,01:00:00,00:54:36,1.00,0.91,2800,2800
+334,122,22,Replace Suspension Bushing,02:30:00,02:10:12,2.50,2.17,2000,2000
+335,122,23,Replace Tie Rod End,01:00:00,01:02:24,1.00,1.04,500,500
+336,122,23,Replace Tie Rod End,01:00:00,01:00:36,1.00,1.01,500,500
+337,122,1,Change Oil,00:45:00,00:43:48,0.75,0.73,850,850
+338,122,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:27:00,2.00,2.45,2500,2500
+339,122,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:11:24,2.00,2.19,2000,2000
+340,122,15,Replace Brake Shoes,01:00:00,01:10:48,1.00,1.18,1200,1200
+341,122,3,Replace Fuel Filter,00:45:00,00:55:48,0.75,0.93,550,550
+342,122,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:54:36,1.00,0.91,850,850
+343,123,42,Replace Auxiliary Fan / Motor,01:00:00,00:58:12,1.00,0.97,1500,1500
+344,124,35,Power Steering Pump Overhaul / Replacement,02:00:00,02:13:48,2.00,2.23,1800,1800
+345,124,1,Change Oil,00:45:00,00:40:48,0.75,0.68,650,650
+346,125,18,Wheel Alignment,01:00:00,01:09:36,1.00,1.16,2800,2800
+347,125,22,Replace Suspension Bushing,02:30:00,02:23:24,2.50,2.39,2000,2000
+348,125,23,Replace Tie Rod End,01:00:00,00:54:36,1.00,0.91,1000,1000
+349,125,1,Change Oil,00:45:00,00:54:00,0.75,0.90,850,850
+350,125,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:54:36,2.00,1.91,2500,2500
+351,125,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:42:36,2.00,1.71,2000,2000
+352,125,15,Replace Brake Shoes,01:00:00,01:00:36,1.00,1.01,1200,1200
+353,125,3,Replace Fuel Filter,00:45:00,00:53:24,0.75,0.89,550,550
+354,125,32,Replace CV Joint,01:30:00,01:39:00,1.50,1.65,850,850
+355,126,35,Power Steering Pump Overhaul / Replacement,02:00:00,01:46:48,2.00,1.78,1800,1800
+356,126,1,Change Oil,00:45:00,00:48:36,0.75,0.81,650,650
+357,127,13,Brake Service & Cleaning,01:15:00,01:28:48,1.25,1.48,800,800
+358,127,1,Change Oil,00:45:00,00:41:24,0.75,0.69,650,650
+359,127,31,Replace Wheel Bearing,01:30:00,01:24:36,1.50,1.41,800,800
+360,127,3,Replace Fuel Filter,00:45:00,00:49:48,0.75,0.83,550,550
+361,128,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,600,600
+362,128,22,Replace Suspension Bushing,02:30:00,02:51:00,2.50,2.85,800,800
+363,128,33,Replace Axle Boot,01:00:00,00:55:12,1.00,0.92,1500,1500
+364,129,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,600,600
+365,129,22,Replace Suspension Bushing,02:30:00,02:42:36,2.50,2.71,800,800
+366,129,33,Replace Axle Boot,01:00:00,01:13:12,1.00,1.22,1500,1500
+367,129,2,Change ATF / Transmission Fluid,00:45:00,00:46:48,0.75,0.78,650,650
+368,129,14,Replace Brake Pads,01:00:00,01:06:00,1.00,1.10,1500,1500
+369,129,31,Replace Wheel Bearing,01:30:00,01:41:24,1.50,1.69,1500,1500
+370,130,54,General Engine Overhaul,23:59:59,23:59:59,24.00,27.81,25000,25000
+371,130,54,General Engine Overhaul,23:59:59,23:59:59,24.00,27.46,25000,25000
+372,130,1,Change Oil,00:45:00,00:43:48,0.75,0.73,650,650
+373,130,45,Alternator Repair / Replacement,01:30:00,01:28:48,1.50,1.48,1200,1200
+374,131,22,Replace Suspension Bushing,02:30:00,02:34:12,2.50,2.57,8500,8500
+375,131,18,Wheel Alignment,01:00:00,01:13:12,1.00,1.22,800,800
+376,131,22,Replace Suspension Bushing,02:30:00,02:19:48,2.50,2.33,1500,1500
+377,132,36,Down Clutch / Pulldown Transmission,04:30:00,03:52:48,4.50,3.88,4500,4500
+378,132,1,Change Oil,00:45:00,00:55:12,0.75,0.92,650,650
+379,132,57,Wiper Linkage / Motor Repair,01:30:00,01:44:24,1.50,1.74,1200,1200
+380,133,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:04:12,1.00,1.07,1200,1200
+381,133,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,500,500
+382,134,1,Change Oil,00:45:00,00:39:36,0.75,0.66,650,650
+383,134,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:07:48,1.00,1.13,550,550
+384,134,51,Replace Valve Cover Gasket,01:45:00,01:57:00,1.75,1.95,1200,1200
+385,134,12,Replace Spark Plugs,00:30:00,00:25:48,0.50,0.43,200,200
+386,135,36,Down Clutch / Pulldown Transmission,04:30:00,04:57:36,4.50,4.96,8500,8500
+387,136,1,Change Oil,00:45:00,00:44:24,0.75,0.74,850,850
+388,136,13,Brake Service & Cleaning,01:15:00,01:15:00,1.25,1.25,800,800
+389,136,3,Replace Fuel Filter,00:45:00,00:41:24,0.75,0.69,550,550
+390,137,54,General Engine Overhaul,23:59:59,23:21:00,24.00,23.35,28000,28000
+391,137,54,General Engine Overhaul,23:59:59,20:39:00,24.00,20.65,32000,32000
+392,138,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:08:24,1.00,1.14,2500,2500
+393,138,49,Replace Timing Belt / Chain,04:00:00,04:23:24,4.00,4.39,7000,7000
+394,138,41,Replace Water Pump,02:00:00,02:03:00,2.00,2.05,3200,3200
+395,138,54,General Engine Overhaul,23:59:59,23:59:59,24.00,28.69,5500,5500
+396,138,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:54:36,1.00,0.91,1200,1200
+397,138,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:54:00,3.00,2.90,1000,1000
+398,138,45,Alternator Repair / Replacement,01:30:00,01:52:12,1.50,1.87,1200,1200
+399,139,43,Engine Diagnostics & Electrical Scan,00:45:00,00:52:12,0.75,0.87,1500,1500
+400,140,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:40:12,3.00,3.67,4500,4500
+401,141,1,Change Oil,00:45:00,00:55:12,0.75,0.92,650,650
+402,141,13,Brake Service & Cleaning,01:15:00,01:15:00,1.25,1.25,800,800
+403,141,23,Replace Tie Rod End,01:00:00,01:13:12,1.00,1.22,1000,1000
+404,141,18,Wheel Alignment,01:00:00,00:55:48,1.00,0.93,800,800
+405,141,20,Tire Rotation & Balancing,00:45:00,00:52:12,0.75,0.87,3250,3250
+406,141,19,Wheel Balancing,00:30:00,00:27:36,0.50,0.46,3200,3200
+407,143,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:24:36,3.00,3.41,5000,5000
+408,143,58,General Mechanical Inspection & Check-Up,00:30:00,00:35:24,0.50,0.59,800,800
+409,144,36,Down Clutch / Pulldown Transmission,04:30:00,04:42:36,4.50,4.71,2800,2800
+410,144,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,500,500
+411,144,56,Power Window Repair / Motor Replacement,01:15:00,01:12:00,1.25,1.20,1000,1000
+412,145,22,Replace Suspension Bushing,02:30:00,02:21:36,2.50,2.36,1800,1800
+413,146,43,Engine Diagnostics & Electrical Scan,00:45:00,00:42:00,0.75,0.70,1500,1500
+414,146,47,Electrical System & Wiring Repair,01:30:00,01:33:00,1.50,1.55,800,800
+415,147,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,5500,5500
+416,148,36,Down Clutch / Pulldown Transmission,04:30:00,04:44:24,4.50,4.74,8500,8500
+417,148,43,Engine Diagnostics & Electrical Scan,00:45:00,00:55:48,0.75,0.93,18000,18000
+418,148,40,Radiator Replacement / Repair,01:30:00,01:43:12,1.50,1.72,1500,1500
+419,149,43,Engine Diagnostics & Electrical Scan,00:45:00,00:54:00,0.75,0.90,1500,1500
+420,149,47,Electrical System & Wiring Repair,01:30:00,01:28:12,1.50,1.47,800,800
+421,150,51,Replace Valve Cover Gasket,01:45:00,02:01:12,1.75,2.02,1200,1200
+422,150,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:12:36,1.00,1.21,2000,2000
+423,150,13,Brake Service & Cleaning,01:15:00,01:27:00,1.25,1.45,600,600
+424,150,18,Wheel Alignment,01:00:00,01:00:36,1.00,1.01,800,800
+425,151,42,Replace Auxiliary Fan / Motor,01:00:00,01:05:24,1.00,1.09,800,800
+426,152,36,Down Clutch / Pulldown Transmission,04:30:00,04:43:12,4.50,4.72,8500,8500
+427,152,43,Engine Diagnostics & Electrical Scan,00:45:00,00:48:00,0.75,0.80,18000,18000
+428,152,40,Radiator Replacement / Repair,01:30:00,01:39:36,1.50,1.66,1500,1500
+429,153,1,Change Oil,00:45:00,00:51:00,0.75,0.85,850,850
+430,153,13,Brake Service & Cleaning,01:15:00,01:06:36,1.25,1.11,800,800
+431,154,1,Change Oil,00:45:00,00:51:00,0.75,0.85,650,650
+432,154,22,Replace Suspension Bushing,02:30:00,02:12:00,2.50,2.20,4500,4500
+433,154,36,Down Clutch / Pulldown Transmission,04:30:00,05:17:24,4.50,5.29,3500,3500
+434,154,13,Brake Service & Cleaning,01:15:00,01:14:24,1.25,1.24,800,800
+435,154,18,Wheel Alignment,01:00:00,01:09:00,1.00,1.15,800,800
+436,155,23,Replace Tie Rod End,01:00:00,00:58:12,1.00,0.97,1200,1200
+437,155,22,Replace Suspension Bushing,02:30:00,03:01:12,2.50,3.02,1000,1000
+438,155,21,Replace Shock Absorbers,02:00:00,02:03:00,2.00,2.05,1800,1800
+439,155,27,Replace Stabilizer Link,00:45:00,00:55:48,0.75,0.93,1200,1200
+440,155,56,Power Window Repair / Motor Replacement,01:15:00,01:04:12,1.25,1.07,1200,1200
+441,155,33,Replace Axle Boot,01:00:00,00:51:36,1.00,0.86,1600,1600
+442,155,18,Wheel Alignment,01:00:00,01:13:12,1.00,1.22,1000,1000
+443,155,58,General Mechanical Inspection & Check-Up,00:30:00,00:26:24,0.50,0.44,300,300
+444,156,1,Change Oil,00:45:00,00:38:24,0.75,0.64,450,450
+445,156,50,Replace Engine Support,01:30:00,01:51:36,1.50,1.86,550,550
+446,156,12,Replace Spark Plugs,00:30:00,00:33:00,0.50,0.55,200,200
+447,157,51,Replace Valve Cover Gasket,01:45:00,01:55:48,1.75,1.93,1200,1200
+448,157,2,Change ATF / Transmission Fluid,00:45:00,00:47:24,0.75,0.79,800,800
+449,157,50,Replace Engine Support,01:30:00,01:28:12,1.50,1.47,800,800
+450,157,32,Replace CV Joint,01:30:00,01:41:24,1.50,1.69,1800,1800
+451,158,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:33:00,1.50,1.55,800,800
+452,158,47,Electrical System & Wiring Repair,01:30:00,01:21:00,1.50,1.35,500,500
+453,158,57,Wiper Linkage / Motor Repair,01:30:00,01:25:12,1.50,1.42,3000,3000
+454,158,14,Replace Brake Pads,01:00:00,01:08:24,1.00,1.14,500,500
+455,158,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,1200,1200
+456,159,22,Replace Suspension Bushing,02:30:00,02:46:48,2.50,2.78,5000,5000
+457,159,18,Wheel Alignment,01:00:00,00:55:12,1.00,0.92,2500,2500
+458,160,50,Replace Engine Support,01:30:00,01:19:48,1.50,1.33,1800,1800
+459,160,43,Engine Diagnostics & Electrical Scan,00:45:00,00:49:12,0.75,0.82,1500,1500
+460,161,42,Replace Auxiliary Fan / Motor,01:00:00,00:57:36,1.00,0.96,2800,2800
+461,162,42,Replace Auxiliary Fan / Motor,01:00:00,00:57:00,1.00,0.95,2800,2800
+462,163,41,Replace Water Pump,02:00:00,02:18:36,2.00,2.31,3500,3500
+463,164,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,300,300
+464,164,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:36,0.50,0.61,1200,1200
+465,165,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:42:36,1.50,1.71,800,800
+466,165,47,Electrical System & Wiring Repair,01:30:00,01:33:00,1.50,1.55,500,500
+467,165,14,Replace Brake Pads,01:00:00,01:00:36,1.00,1.01,500,500
+468,166,54,General Engine Overhaul,23:59:59,23:59:59,24.00,26.79,25000,25000
+469,167,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:50:24,1.50,1.84,500,500
+470,168,13,Brake Service & Cleaning,01:15:00,01:07:12,1.25,1.12,800,800
+471,168,23,Replace Tie Rod End,01:00:00,00:58:48,1.00,0.98,1000,1000
+472,168,18,Wheel Alignment,01:00:00,00:52:48,1.00,0.88,800,800
+473,168,19,Wheel Balancing,00:30:00,00:33:36,0.50,0.56,3200,3200
+474,168,47,Electrical System & Wiring Repair,01:30:00,01:21:00,1.50,1.35,7500,7500
+475,168,13,Brake Service & Cleaning,01:15:00,01:33:00,1.25,1.55,250,250
+476,169,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:13:48,3.00,3.23,5000,5000
+477,170,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,600,600
+478,170,22,Replace Suspension Bushing,02:30:00,02:30:36,2.50,2.51,800,800
+479,170,33,Replace Axle Boot,01:00:00,00:58:12,1.00,0.97,1500,1500
+480,170,2,Change ATF / Transmission Fluid,00:45:00,00:45:00,0.75,0.75,650,650
+481,170,14,Replace Brake Pads,01:00:00,01:06:00,1.00,1.10,1500,1500
+482,170,31,Replace Wheel Bearing,01:30:00,01:24:36,1.50,1.41,1500,1500
+483,171,13,Brake Service & Cleaning,01:15:00,01:25:12,1.25,1.42,800,800
+484,171,23,Replace Tie Rod End,01:00:00,01:06:36,1.00,1.11,1000,1000
+485,171,18,Wheel Alignment,01:00:00,00:57:36,1.00,0.96,800,800
+486,171,19,Wheel Balancing,00:30:00,00:31:12,0.50,0.52,3200,3200
+487,171,47,Electrical System & Wiring Repair,01:30:00,01:40:12,1.50,1.67,7500,7500
+488,172,54,General Engine Overhaul,23:59:59,23:59:59,24.00,24.32,30000,30000
+489,172,54,General Engine Overhaul,23:59:59,23:59:59,24.00,24.36,28000,28000
+490,173,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:01:48,3.00,3.03,3500,3500
+491,173,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,500,500
+492,174,36,Down Clutch / Pulldown Transmission,04:30:00,04:56:24,4.50,4.94,4500,4500
+493,174,51,Replace Valve Cover Gasket,01:45:00,01:45:36,1.75,1.76,1200,1200
+494,174,13,Brake Service & Cleaning,01:15:00,01:22:12,1.25,1.37,800,800
+495,174,1,Change Oil,00:45:00,00:55:48,0.75,0.93,800,800
+496,174,3,Replace Fuel Filter,00:45:00,00:42:00,0.75,0.70,550,550
+497,175,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:49:48,3.00,2.83,3500,3500
+498,175,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,500,500
+499,176,54,General Engine Overhaul,23:59:59,23:59:59,24.00,27.38,18000,18000
+500,176,54,General Engine Overhaul,23:59:59,23:59:59,24.00,28.56,22000,22000
+501,177,51,Replace Valve Cover Gasket,01:45:00,01:50:24,1.75,1.84,1200,1200
+502,177,36,Down Clutch / Pulldown Transmission,04:30:00,05:28:12,4.50,5.47,800,800
+503,177,50,Replace Engine Support,01:30:00,01:20:24,1.50,1.34,800,800
+504,177,32,Replace CV Joint,01:30:00,01:19:12,1.50,1.32,1800,1800
+505,177,36,Down Clutch / Pulldown Transmission,04:30:00,04:34:12,4.50,4.57,800,800
+506,178,1,Change Oil,00:45:00,00:47:24,0.75,0.79,800,800
+507,178,12,Replace Spark Plugs,00:30:00,00:31:48,0.50,0.53,300,300
+508,179,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:52:12,1.00,0.87,500,500
+509,180,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:02:24,3.00,3.04,2000,2000
+510,180,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,500,500
+511,181,1,Change Oil,00:45:00,00:44:24,0.75,0.74,600,600
+512,181,2,Change ATF / Transmission Fluid,00:45:00,00:52:12,0.75,0.87,600,600
+513,181,13,Brake Service & Cleaning,01:15:00,01:15:00,1.25,1.25,800,800
+514,182,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:04:48,1.00,1.08,500,500
+515,183,1,Change Oil,00:45:00,00:55:12,0.75,0.92,650,650
+516,183,13,Brake Service & Cleaning,01:15:00,01:05:24,1.25,1.09,400,400
+517,183,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:11:24,2.00,2.19,1500,1500
+518,183,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:24:36,1.50,1.41,600,600
+519,183,47,Electrical System & Wiring Repair,01:30:00,01:18:00,1.50,1.30,200,200
+520,183,18,Wheel Alignment,01:00:00,01:01:48,1.00,1.03,800,800
+521,184,51,Replace Valve Cover Gasket,01:45:00,01:56:24,1.75,1.94,800,800
+522,184,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:40:12,1.50,1.67,1200,1200
+523,184,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:34:12,1.50,1.57,700,700
+524,185,53,Top Overhaul,14:00:00,12:59:24,14.00,12.99,8500,8500
+525,185,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,500,500
+526,186,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,3500,3500
+527,187,53,Top Overhaul,14:00:00,17:02:24,14.00,17.04,3500,3500
+528,188,1,Change Oil,00:45:00,00:43:48,0.75,0.73,800,800
+529,188,13,Brake Service & Cleaning,01:15:00,01:29:24,1.25,1.49,800,800
+530,188,14,Replace Brake Pads,01:00:00,00:57:00,1.00,0.95,500,500
+531,188,15,Replace Brake Shoes,01:00:00,00:51:00,1.00,0.85,800,800
+532,188,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,04:17:24,4.00,4.29,4500,4500
+533,188,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,04:45:36,4.00,4.76,6500,6500
+534,188,36,Down Clutch / Pulldown Transmission,04:30:00,04:37:12,4.50,4.62,3500,3500
+535,188,18,Wheel Alignment,01:00:00,00:55:48,1.00,0.93,2500,2500
+536,189,1,Change Oil,00:45:00,00:45:36,0.75,0.76,650,650
+537,189,13,Brake Service & Cleaning,01:15:00,01:05:24,1.25,1.09,800,800
+538,189,10,Throttle Body Cleaning,00:45:00,00:44:24,0.75,0.74,500,500
+539,189,12,Replace Spark Plugs,00:30:00,00:27:36,0.50,0.46,300,300
+540,190,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:27:00,2.00,2.45,3000,3000
+541,190,14,Replace Brake Pads,01:00:00,01:12:36,1.00,1.21,500,500
+542,190,32,Replace CV Joint,01:30:00,01:18:00,1.50,1.30,1600,1600
+543,191,40,Radiator Replacement / Repair,01:30:00,01:40:48,1.50,1.68,1500,1500
+544,191,21,Replace Shock Absorbers,02:00:00,02:11:24,2.00,2.19,800,800
+545,191,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:19:12,2.00,2.32,1200,1200
+546,191,51,Replace Valve Cover Gasket,01:45:00,01:44:24,1.75,1.74,1500,1500
+547,191,13,Brake Service & Cleaning,01:15:00,01:18:36,1.25,1.31,500,500
+548,192,38,Replace A/C Compressor,02:30:00,02:34:12,2.50,2.57,3500,3500
+549,193,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:11:24,2.00,2.19,1500,1500
+550,193,22,Replace Suspension Bushing,02:30:00,02:42:00,2.50,2.70,4000,4000
+551,193,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,04:00:36,4.00,4.01,3500,3500
+552,193,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:21:00,1.50,1.35,600,600
+553,193,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:36:00,1.50,1.60,600,600
+554,193,1,Change Oil,00:45:00,00:49:12,0.75,0.82,650,650
+555,193,18,Wheel Alignment,01:00:00,01:08:24,1.00,1.14,800,800
+556,194,45,Alternator Repair / Replacement,01:30:00,01:29:24,1.50,1.49,2500,2500
+557,196,1,Change Oil,00:45:00,00:54:00,0.75,0.90,600,600
+558,196,2,Change ATF / Transmission Fluid,00:45:00,00:55:12,0.75,0.92,600,600
+559,196,13,Brake Service & Cleaning,01:15:00,01:05:24,1.25,1.09,800,800
+560,196,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:08:24,1.00,1.14,500,500
+561,196,18,Wheel Alignment,01:00:00,01:06:36,1.00,1.11,800,800
+562,197,14,Replace Brake Pads,01:00:00,00:52:12,1.00,0.87,1000,1000
+563,198,43,Engine Diagnostics & Electrical Scan,00:45:00,00:42:00,0.75,0.70,1500,1500
+564,198,13,Brake Service & Cleaning,01:15:00,01:24:36,1.25,1.41,1000,1000
+565,198,43,Engine Diagnostics & Electrical Scan,00:45:00,00:51:36,0.75,0.86,500,500
+566,199,1,Change Oil,00:45:00,00:40:48,0.75,0.68,1200,1200
+567,199,3,Replace Fuel Filter,00:45:00,00:49:12,0.75,0.82,800,800
+568,199,13,Brake Service & Cleaning,01:15:00,01:06:00,1.25,1.10,1000,1000
+569,200,30,Replace Ball Joint,01:15:00,01:10:12,1.25,1.17,3000,3000
+570,200,22,Replace Suspension Bushing,02:30:00,02:18:00,2.50,2.30,1200,1200
+571,200,23,Replace Tie Rod End,01:00:00,01:10:12,1.00,1.17,500,500
+572,200,21,Replace Shock Absorbers,02:00:00,01:45:00,2.00,1.75,500,500
+573,200,18,Wheel Alignment,01:00:00,00:55:48,1.00,0.93,2700,2700
+574,200,18,Wheel Alignment,01:00:00,00:56:24,1.00,0.94,800,800
+575,201,51,Replace Valve Cover Gasket,01:45:00,02:11:24,1.75,2.19,2800,2800
+576,201,58,General Mechanical Inspection & Check-Up,00:30:00,00:25:48,0.50,0.43,300,300
+577,201,3,Replace Fuel Filter,00:45:00,00:48:36,0.75,0.81,350,350
+578,202,50,Replace Engine Support,01:30:00,01:41:24,1.50,1.69,1800,1800
+579,202,27,Replace Stabilizer Link,00:45:00,00:46:12,0.75,0.77,600,600
+580,203,23,Replace Tie Rod End,01:00:00,00:57:36,1.00,0.96,1000,1000
+581,203,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,1500,1500
+582,203,50,Replace Engine Support,01:30:00,01:27:00,1.50,1.45,800,800
+583,203,14,Replace Brake Pads,01:00:00,01:13:48,1.00,1.23,800,800
+584,203,13,Brake Service & Cleaning,01:15:00,01:30:00,1.25,1.50,500,500
+585,203,22,Replace Suspension Bushing,02:30:00,02:33:36,2.50,2.56,600,600
+586,203,36,Down Clutch / Pulldown Transmission,04:30:00,05:17:24,4.50,5.29,1500,1500
+587,203,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,800,800
+588,203,13,Brake Service & Cleaning,01:15:00,01:18:36,1.25,1.31,1500,1500
+589,204,21,Replace Shock Absorbers,02:00:00,02:23:24,2.00,2.39,2500,2500
+590,205,53,Top Overhaul,14:00:00,16:50:24,14.00,16.84,15000,15000
+591,206,21,Replace Shock Absorbers,02:00:00,01:55:48,2.00,1.93,1500,1500
+592,207,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:47:24,2.00,1.79,1500,1500
+593,207,13,Brake Service & Cleaning,01:15:00,01:19:12,1.25,1.32,500,500
+594,207,1,Change Oil,00:45:00,00:45:36,0.75,0.76,650,650
+595,207,21,Replace Shock Absorbers,02:00:00,02:22:48,2.00,2.38,1500,1500
+596,209,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:52:12,1.50,1.87,600,600
+597,209,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:13:12,1.00,1.22,1000,1000
+598,209,1,Change Oil,00:45:00,00:52:48,0.75,0.88,800,800
+599,210,1,Change Oil,00:45:00,00:39:36,0.75,0.66,600,600
+600,210,51,Replace Valve Cover Gasket,01:45:00,01:33:36,1.75,1.56,1400,1400
+601,210,13,Brake Service & Cleaning,01:15:00,01:33:00,1.25,1.55,1200,1200
+602,211,21,Replace Shock Absorbers,02:00:00,01:43:12,2.00,1.72,1500,1500
+603,212,53,Top Overhaul,14:00:00,13:58:12,14.00,13.97,15000,15000
+604,213,25,Replace Tie Rod & Rack End,01:30:00,01:18:36,1.50,1.31,1000,1000
+605,213,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:49:12,2.00,1.82,1500,1500
+606,213,31,Replace Wheel Bearing,01:30:00,01:39:00,1.50,1.65,1000,1000
+607,213,18,Wheel Alignment,01:00:00,00:51:00,1.00,0.85,800,800
+608,214,47,Electrical System & Wiring Repair,01:30:00,01:30:36,1.50,1.51,500,500
+609,214,12,Replace Spark Plugs,00:30:00,00:28:48,0.50,0.48,400,400
+610,214,10,Throttle Body Cleaning,00:45:00,00:43:48,0.75,0.73,550,550
+611,215,1,Change Oil,00:45:00,00:49:12,0.75,0.82,650,650
+612,215,13,Brake Service & Cleaning,01:15:00,01:21:00,1.25,1.35,800,800
+613,215,18,Wheel Alignment,01:00:00,00:57:00,1.00,0.95,1000,1000
+614,215,2,Change ATF / Transmission Fluid,00:45:00,00:43:48,0.75,0.73,650,650
+615,215,18,Wheel Alignment,01:00:00,00:57:36,1.00,0.96,1000,1000
+616,216,53,Top Overhaul,14:00:00,13:51:36,14.00,13.86,12000,12000
+617,216,54,General Engine Overhaul,23:59:59,23:59:59,24.00,24.98,11400,11400
+618,217,36,Down Clutch / Pulldown Transmission,04:30:00,04:31:12,4.50,4.52,4500,4500
+619,218,1,Change Oil,00:45:00,00:49:12,0.75,0.82,650,650
+620,218,13,Brake Service & Cleaning,01:15:00,01:15:36,1.25,1.26,800,800
+621,218,18,Wheel Alignment,01:00:00,01:13:48,1.00,1.23,800,800
+622,218,19,Wheel Balancing,00:30:00,00:26:24,0.50,0.44,1000,1000
+623,218,2,Change ATF / Transmission Fluid,00:45:00,00:54:36,0.75,0.91,650,650
+624,219,36,Down Clutch / Pulldown Transmission,04:30:00,04:29:24,4.50,4.49,4500,4500
+625,219,22,Replace Suspension Bushing,02:30:00,02:13:12,2.50,2.22,2500,2500
+626,220,1,Change Oil,00:45:00,00:52:48,0.75,0.88,1000,1000
+627,220,13,Brake Service & Cleaning,01:15:00,01:22:48,1.25,1.38,500,500
+628,220,13,Brake Service & Cleaning,01:15:00,01:28:48,1.25,1.48,1500,1500
+629,220,3,Replace Fuel Filter,00:45:00,00:45:00,0.75,0.75,800,800
+630,220,5,Replace Cabin Filter,00:15:00,00:16:48,0.25,0.28,200,200
+631,220,43,Engine Diagnostics & Electrical Scan,00:45:00,00:47:24,0.75,0.79,1500,1500
+632,220,47,Electrical System & Wiring Repair,01:30:00,01:33:36,1.50,1.56,8500,8500
+633,221,1,Change Oil,00:45:00,00:43:48,0.75,0.73,800,800
+634,221,3,Replace Fuel Filter,00:45:00,00:44:24,0.75,0.74,550,550
+635,221,9,Cleaning EGR,03:30:00,04:21:36,3.50,4.36,4500,4500
+636,221,51,Replace Valve Cover Gasket,01:45:00,01:57:36,1.75,1.96,3500,3500
+637,221,41,Replace Water Pump,02:00:00,02:18:36,2.00,2.31,2500,2500
+638,221,6,Fuel Injector Cleaning / Service,01:30:00,01:40:12,1.50,1.67,1500,1500
+639,221,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,500,500
+640,222,1,Change Oil,00:45:00,00:43:48,0.75,0.73,800,800
+641,222,14,Replace Brake Pads,01:00:00,00:53:24,1.00,0.89,1500,1500
+642,222,18,Wheel Alignment,01:00:00,01:05:24,1.00,1.09,1000,1000
+643,222,19,Wheel Balancing,00:30:00,00:35:24,0.50,0.59,1000,1000
+644,223,1,Change Oil,00:45:00,00:45:36,0.75,0.76,1000,1000
+645,223,14,Replace Brake Pads,01:00:00,01:00:00,1.00,1.00,1500,1500
+646,223,3,Replace Fuel Filter,00:45:00,00:40:48,0.75,0.68,500,500
+647,224,1,Change Oil,00:45:00,00:39:36,0.75,0.66,1000,1000
+648,224,13,Brake Service & Cleaning,01:15:00,01:17:24,1.25,1.29,800,800
+649,224,14,Replace Brake Pads,01:00:00,01:01:12,1.00,1.02,800,800
+650,224,3,Replace Fuel Filter,00:45:00,00:39:36,0.75,0.66,550,550
+651,225,1,Change Oil,00:45:00,00:46:48,0.75,0.78,1200,1200
+652,225,12,Replace Spark Plugs,00:30:00,00:27:00,0.50,0.45,500,500
+653,225,21,Replace Shock Absorbers,02:00:00,02:17:24,2.00,2.29,1800,1800
+654,225,14,Replace Brake Pads,01:00:00,00:55:12,1.00,0.92,600,600
+655,225,10,Throttle Body Cleaning,00:45:00,00:41:24,0.75,0.69,500,500
+656,226,53,Top Overhaul,14:00:00,15:12:36,14.00,15.21,25000,25000
+657,227,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,04:12:36,4.00,4.21,4500,4500
+658,228,21,Replace Shock Absorbers,02:00:00,02:27:00,2.00,2.45,1500,1500
+659,228,23,Replace Tie Rod End,01:00:00,01:06:00,1.00,1.10,500,500
+660,228,22,Replace Suspension Bushing,02:30:00,03:03:36,2.50,3.06,1500,1500
+661,228,18,Wheel Alignment,01:00:00,01:09:00,1.00,1.15,950,950
+662,229,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,03:49:12,4.00,3.82,4500,4500
+663,229,22,Replace Suspension Bushing,02:30:00,03:01:48,2.50,3.03,1500,1500
+664,229,51,Replace Valve Cover Gasket,01:45:00,01:58:48,1.75,1.98,1500,1500
+665,229,18,Wheel Alignment,01:00:00,01:15:00,1.00,1.25,2500,2500
+666,230,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,04:51:36,4.00,4.86,4500,4500
+667,230,22,Replace Suspension Bushing,02:30:00,02:46:48,2.50,2.78,1500,1500
+668,230,51,Replace Valve Cover Gasket,01:45:00,01:37:12,1.75,1.62,1500,1500
+669,230,18,Wheel Alignment,01:00:00,00:51:00,1.00,0.85,2500,2500
+670,231,1,Change Oil,00:45:00,00:40:12,0.75,0.67,800,800
+671,231,3,Replace Fuel Filter,00:45:00,00:44:24,0.75,0.74,550,550
+672,231,9,Cleaning EGR,03:30:00,03:26:24,3.50,3.44,4500,4500
+673,231,51,Replace Valve Cover Gasket,01:45:00,01:53:24,1.75,1.89,3500,3500
+674,231,41,Replace Water Pump,02:00:00,02:03:00,2.00,2.05,2500,2500
+675,231,6,Fuel Injector Cleaning / Service,01:30:00,01:30:36,1.50,1.51,1500,1500
+676,231,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,500,500
+677,232,24,Replace Rack End,01:15:00,01:08:24,1.25,1.14,4500,4500
+678,232,22,Replace Suspension Bushing,02:30:00,02:53:24,2.50,2.89,1500,1500
+679,232,51,Replace Valve Cover Gasket,01:45:00,02:11:24,1.75,2.19,1500,1500
+680,232,18,Wheel Alignment,01:00:00,01:04:12,1.00,1.07,2500,2500
+681,234,24,Replace Rack End,01:15:00,01:16:12,1.25,1.27,4500,4500
+682,234,21,Replace Shock Absorbers,02:00:00,02:29:24,2.00,2.49,1200,1200
+683,234,18,Wheel Alignment,01:00:00,00:55:12,1.00,0.92,950,950
+684,234,22,Replace Suspension Bushing,02:30:00,02:33:36,2.50,2.56,3500,3500
+685,235,18,Wheel Alignment,01:00:00,01:04:48,1.00,1.08,950,950
+686,235,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,04:54:00,4.00,4.90,4500,4500
+687,235,22,Replace Suspension Bushing,02:30:00,02:15:00,2.50,2.25,1500,1500
+688,235,51,Replace Valve Cover Gasket,01:45:00,01:36:00,1.75,1.60,1500,1500
+689,237,1,Change Oil,00:45:00,00:52:48,0.75,0.88,600,600
+690,237,12,Replace Spark Plugs,00:30:00,00:28:12,0.50,0.47,300,300
+691,238,18,Wheel Alignment,01:00:00,01:01:48,1.00,1.03,950,950
+692,238,33,Replace Axle Boot,01:00:00,01:04:48,1.00,1.08,1000,1000
+693,238,29,Replace Stabilizer Link & Bushing,01:00:00,01:15:00,1.00,1.25,600,600
+694,239,27,Replace Stabilizer Link,00:45:00,00:52:48,0.75,0.88,600,600
+695,239,50,Replace Engine Support,01:30:00,01:25:48,1.50,1.43,550,550
+696,239,22,Replace Suspension Bushing,02:30:00,02:13:48,2.50,2.23,1500,1500
+697,239,21,Replace Shock Absorbers,02:00:00,01:53:24,2.00,1.89,1200,1200
+698,240,1,Change Oil,00:45:00,00:53:24,0.75,0.89,800,800
+699,240,13,Brake Service & Cleaning,01:15:00,01:11:24,1.25,1.19,800,800
+700,242,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,500,500
+701,242,20,Tire Rotation & Balancing,00:45:00,00:52:12,0.75,0.87,300,300
+702,242,20,Tire Rotation & Balancing,00:45:00,00:55:12,0.75,0.92,2500,2500
+703,242,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,2000,2000
+704,243,53,Top Overhaul,14:00:00,13:49:12,14.00,13.82,15000,15000
+705,244,1,Change Oil,00:45:00,00:49:12,0.75,0.82,600,600
+706,244,13,Brake Service & Cleaning,01:15:00,01:33:00,1.25,1.55,800,800
+707,244,36,Down Clutch / Pulldown Transmission,04:30:00,04:23:24,4.50,4.39,2800,2800
+708,245,58,General Mechanical Inspection & Check-Up,00:30:00,00:35:24,0.50,0.59,800,800
+709,246,1,Change Oil,00:45:00,00:47:24,0.75,0.79,800,800
+710,246,13,Brake Service & Cleaning,01:15:00,01:33:36,1.25,1.56,800,800
+711,246,3,Replace Fuel Filter,00:45:00,00:51:36,0.75,0.86,350,350
+712,246,22,Replace Suspension Bushing,02:30:00,02:22:48,2.50,2.38,600,600
+713,246,23,Replace Tie Rod End,01:00:00,01:09:36,1.00,1.16,1200,1200
+714,246,18,Wheel Alignment,01:00:00,01:09:36,1.00,1.16,1000,1000
+715,248,45,Alternator Repair / Replacement,01:30:00,01:38:24,1.50,1.64,1200,1200
+716,249,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:42:36,2.00,1.71,3000,3000
+717,249,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,2800,2800
+718,250,1,Change Oil,00:45:00,00:55:48,0.75,0.93,800,800
+719,250,13,Brake Service & Cleaning,01:15:00,01:25:12,1.25,1.42,800,800
+720,250,3,Replace Fuel Filter,00:45:00,00:46:48,0.75,0.78,550,550
+721,251,1,Change Oil,00:45:00,00:46:48,0.75,0.78,600,600
+722,251,13,Brake Service & Cleaning,01:15:00,01:25:12,1.25,1.42,800,800
+723,251,21,Replace Shock Absorbers,02:00:00,02:12:36,2.00,2.21,1200,1200
+724,251,23,Replace Tie Rod End,01:00:00,00:58:12,1.00,0.97,1200,1200
+725,251,12,Replace Spark Plugs,00:30:00,00:36:36,0.50,0.61,200,200
+726,251,18,Wheel Alignment,01:00:00,01:07:48,1.00,1.13,800,800
+727,252,47,Electrical System & Wiring Repair,01:30:00,01:38:24,1.50,1.64,1050,1050
+728,252,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:08:24,1.00,1.14,2500,2500
+729,253,2,Change ATF / Transmission Fluid,00:45:00,00:52:12,0.75,0.87,650,650
+730,253,13,Brake Service & Cleaning,01:15:00,01:31:48,1.25,1.53,800,800
+731,253,39,Coolant Flush,00:45:00,00:39:36,0.75,0.66,350,350
+732,253,45,Alternator Repair / Replacement,01:30:00,01:41:24,1.50,1.69,3500,3500
+733,254,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,6500,6500
+734,254,47,Electrical System & Wiring Repair,01:30:00,01:22:12,1.50,1.37,600,600
+735,255,1,Change Oil,00:45:00,00:45:00,0.75,0.75,850,850
+736,255,13,Brake Service & Cleaning,01:15:00,01:06:00,1.25,1.10,1200,1200
+737,255,5,Replace Cabin Filter,00:15:00,00:16:48,0.25,0.28,150,150
+738,256,36,Down Clutch / Pulldown Transmission,04:30:00,05:31:48,4.50,5.53,35000,35000
+739,256,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:27:36,2.00,2.46,1800,1800
+740,256,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,600,600
+741,257,36,Down Clutch / Pulldown Transmission,04:30:00,05:20:24,4.50,5.34,5500,5500
+742,258,36,Down Clutch / Pulldown Transmission,04:30:00,04:01:48,4.50,4.03,5500,5500
+743,259,54,General Engine Overhaul,23:59:59,23:59:59,24.00,30.00,28000,28000
+744,259,58,General Mechanical Inspection & Check-Up,00:30:00,00:32:24,0.50,0.54,35000,35000
+745,260,1,Change Oil,00:45:00,00:42:00,0.75,0.70,650,650
+746,260,57,Wiper Linkage / Motor Repair,01:30:00,01:50:24,1.50,1.84,5800,5800
+747,260,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,6500,6500
+748,260,13,Brake Service & Cleaning,01:15:00,01:06:00,1.25,1.10,800,800
+749,260,58,General Mechanical Inspection & Check-Up,00:30:00,00:25:48,0.50,0.43,2000,2000
+750,261,1,Change Oil,00:45:00,00:46:12,0.75,0.77,650,650
+751,261,57,Wiper Linkage / Motor Repair,01:30:00,01:31:12,1.50,1.52,5800,5800
+752,261,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,6500,6500
+753,261,13,Brake Service & Cleaning,01:15:00,01:08:24,1.25,1.14,800,800
+754,262,36,Down Clutch / Pulldown Transmission,04:30:00,04:27:00,4.50,4.45,12000,12000
+755,262,36,Down Clutch / Pulldown Transmission,04:30:00,04:31:48,4.50,4.53,850,850
+756,262,52,Reseal Oil Pan / Crankcase,02:00:00,02:28:48,2.00,2.48,950,950
+757,262,2,Change ATF / Transmission Fluid,00:45:00,00:39:00,0.75,0.65,1200,1200
+758,262,36,Down Clutch / Pulldown Transmission,04:30:00,04:08:24,4.50,4.14,150,150
+759,263,1,Change Oil,00:45:00,00:44:24,0.75,0.74,850,850
+760,263,13,Brake Service & Cleaning,01:15:00,01:33:36,1.25,1.56,1200,1200
+761,264,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:57:36,2.00,1.96,3500,3500
+762,264,36,Down Clutch / Pulldown Transmission,04:30:00,03:55:12,4.50,3.92,1800,1800
+763,264,58,General Mechanical Inspection & Check-Up,00:30:00,00:25:48,0.50,0.43,600,600
+764,265,54,General Engine Overhaul,23:59:59,23:59:59,24.00,29.57,18000,18000
+765,265,54,General Engine Overhaul,23:59:59,23:30:00,24.00,23.50,22000,22000
+766,266,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:27:00,2.00,2.45,4000,4000
+767,266,1,Change Oil,00:45:00,00:55:12,0.75,0.92,650,650
+768,266,2,Change ATF / Transmission Fluid,00:45:00,00:53:24,0.75,0.89,650,650
+769,266,12,Replace Spark Plugs,00:30:00,00:25:48,0.50,0.43,400,400
+770,266,10,Throttle Body Cleaning,00:45:00,00:52:12,0.75,0.87,800,800
+771,266,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:36:36,1.50,1.61,1200,1200
+772,266,50,Replace Engine Support,01:30:00,01:39:36,1.50,1.66,1200,1200
+773,267,36,Down Clutch / Pulldown Transmission,04:30:00,04:16:48,4.50,4.28,8500,8500
+774,267,52,Reseal Oil Pan / Crankcase,02:00:00,02:23:24,2.00,2.39,2500,2500
+775,267,54,General Engine Overhaul,23:59:59,23:59:59,24.00,25.02,3500,3500
+776,268,58,General Mechanical Inspection & Check-Up,00:30:00,00:26:24,0.50,0.44,350,350
+777,269,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,04:03:00,4.00,4.05,4500,4500
+778,269,22,Replace Suspension Bushing,02:30:00,03:05:24,2.50,3.09,3500,3500
+779,269,18,Wheel Alignment,01:00:00,00:51:00,1.00,0.85,800,800
+780,269,27,Replace Stabilizer Link,00:45:00,00:48:36,0.75,0.81,600,600
+781,269,28,Replace Stabilizer Bushing,00:45:00,00:54:36,0.75,0.91,600,600
+782,270,1,Change Oil,00:45:00,00:51:36,0.75,0.86,650,650
+783,270,13,Brake Service & Cleaning,01:15:00,01:07:48,1.25,1.13,1200,1200
+784,270,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:36:36,1.50,1.61,1200,1200
+785,270,3,Replace Fuel Filter,00:45:00,00:52:12,0.75,0.87,800,800
+786,271,1,Change Oil,00:45:00,00:46:12,0.75,0.77,650,650
+787,271,13,Brake Service & Cleaning,01:15:00,01:28:12,1.25,1.47,1200,1200
+788,271,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:32:24,1.50,1.54,1200,1200
+789,271,3,Replace Fuel Filter,00:45:00,00:43:48,0.75,0.73,800,800
+790,272,49,Replace Timing Belt / Chain,04:00:00,03:55:12,4.00,3.92,3500,3500
+791,272,52,Reseal Oil Pan / Crankcase,02:00:00,01:55:12,2.00,1.92,2800,2800
+792,272,22,Replace Suspension Bushing,02:30:00,02:07:48,2.50,2.13,1800,1800
+793,272,51,Replace Valve Cover Gasket,01:45:00,01:59:24,1.75,1.99,1200,1200
+794,273,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:03:00,2.00,2.05,4000,4000
+795,273,1,Change Oil,00:45:00,00:52:12,0.75,0.87,650,650
+796,273,2,Change ATF / Transmission Fluid,00:45:00,00:51:36,0.75,0.86,650,650
+797,273,12,Replace Spark Plugs,00:30:00,00:26:24,0.50,0.44,400,400
+798,273,10,Throttle Body Cleaning,00:45:00,00:39:00,0.75,0.65,800,800
+799,273,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:45:36,1.50,1.76,1200,1200
+800,273,50,Replace Engine Support,01:30:00,01:39:00,1.50,1.65,1200,1200
+801,273,13,Brake Service & Cleaning,01:15:00,01:32:24,1.25,1.54,1500,1500
+802,274,6,Fuel Injector Cleaning / Service,01:30:00,01:42:36,1.50,1.71,2500,2500
+803,274,13,Brake Service & Cleaning,01:15:00,01:30:36,1.25,1.51,450,450
+804,274,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,4000,4000
+805,275,8,Intake Manifold Cleaning & Reseal,02:00:00,02:29:24,2.00,2.49,1500,1500
+806,275,35,Power Steering Pump Overhaul / Replacement,02:00:00,02:25:12,2.00,2.42,350,350
+807,275,17,Brake Master / Wheel Cylinder Overhaul,01:30:00,01:25:12,1.50,1.42,350,350
+808,275,36,Down Clutch / Pulldown Transmission,04:30:00,03:57:36,4.50,3.96,250,250
+809,277,1,Change Oil,00:45:00,00:39:00,0.75,0.65,650,650
+810,277,13,Brake Service & Cleaning,01:15:00,01:09:36,1.25,1.16,800,800
+811,277,12,Replace Spark Plugs,00:30:00,00:28:12,0.50,0.47,200,200
+812,278,6,Fuel Injector Cleaning / Service,01:30:00,01:42:00,1.50,1.70,3500,3500
+813,278,13,Brake Service & Cleaning,01:15:00,01:21:36,1.25,1.36,450,450
+814,278,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:26:24,2.00,2.44,4000,4000
+815,279,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:37:12,3.00,2.62,3500,3500
+816,279,58,General Mechanical Inspection & Check-Up,00:30:00,00:25:48,0.50,0.43,500,500
+817,279,47,Electrical System & Wiring Repair,01:30:00,01:28:48,1.50,1.48,3500,3500
+818,280,1,Change Oil,00:45:00,00:45:36,0.75,0.76,850,850
+819,280,2,Change ATF / Transmission Fluid,00:45:00,00:44:24,0.75,0.74,650,650
+820,280,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,1200,1200
+821,280,58,General Mechanical Inspection & Check-Up,00:30:00,00:29:24,0.50,0.49,650,650
+822,280,54,General Engine Overhaul,23:59:59,23:59:59,24.00,27.29,3500,3500
+823,280,58,General Mechanical Inspection & Check-Up,00:30:00,00:32:24,0.50,0.54,800,800
+824,281,1,Change Oil,00:45:00,00:41:24,0.75,0.69,850,850
+825,281,2,Change ATF / Transmission Fluid,00:45:00,00:44:24,0.75,0.74,650,650
+826,281,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,1200,1200
+827,281,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,600,600
+828,281,54,General Engine Overhaul,23:59:59,22:39:00,24.00,22.65,3500,3500
+829,281,13,Brake Service & Cleaning,01:15:00,01:30:00,1.25,1.50,1200,1200
+830,281,36,Down Clutch / Pulldown Transmission,04:30:00,04:30:00,4.50,4.50,800,800
+831,282,53,Top Overhaul,14:00:00,16:26:24,14.00,16.44,25000,25000
+832,282,54,General Engine Overhaul,23:59:59,23:59:59,24.00,26.97,25000,25000
+833,283,54,General Engine Overhaul,23:59:59,23:59:59,24.00,27.42,35000,35000
+834,283,54,General Engine Overhaul,23:59:59,23:59:59,24.00,25.51,35000,35000
+835,286,54,General Engine Overhaul,23:59:59,20:31:48,24.00,20.53,25000,25000
+836,286,54,General Engine Overhaul,23:59:59,23:59:59,24.00,27.94,25000,25000
+837,286,36,Down Clutch / Pulldown Transmission,04:30:00,03:51:00,4.50,3.85,8500,8500
+838,288,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:10:48,1.00,1.18,1800,1800
+839,289,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:05:24,1.00,1.09,1800,1800
+840,289,38,Replace A/C Compressor,02:30:00,02:17:24,2.50,2.29,3500,3500
+841,289,13,Brake Service & Cleaning,01:15:00,01:29:24,1.25,1.49,800,800
+842,289,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:21:36,3.00,3.36,500,500
+843,293,52,Reseal Oil Pan / Crankcase,02:00:00,02:12:00,2.00,2.20,2500,2500
+844,293,50,Replace Engine Support,01:30:00,01:17:24,1.50,1.29,4500,4500
+845,294,1,Change Oil,00:45:00,00:39:00,0.75,0.65,650,650
+846,294,13,Brake Service & Cleaning,01:15:00,01:14:24,1.25,1.24,800,800
+847,294,32,Replace CV Joint,01:30:00,01:38:24,1.50,1.64,2000,2000
+848,296,1,Change Oil,00:45:00,00:47:24,0.75,0.79,650,650
+849,296,13,Brake Service & Cleaning,01:15:00,01:07:48,1.25,1.13,800,800
+850,296,31,Replace Wheel Bearing,01:30:00,01:33:00,1.50,1.55,2000,2000
+851,296,55,Sliding Door Repair / Mechanism,01:30:00,01:48:00,1.50,1.80,3500,3500
+852,296,57,Wiper Linkage / Motor Repair,01:30:00,01:42:36,1.50,1.71,4500,4500
+853,297,1,Change Oil,00:45:00,00:49:48,0.75,0.83,650,650
+854,297,13,Brake Service & Cleaning,01:15:00,01:12:00,1.25,1.20,800,800
+855,297,31,Replace Wheel Bearing,01:30:00,01:33:00,1.50,1.55,2000,2000
+856,297,55,Sliding Door Repair / Mechanism,01:30:00,01:21:36,1.50,1.36,1500,1500
+857,297,57,Wiper Linkage / Motor Repair,01:30:00,01:51:36,1.50,1.86,4000,4000
+858,297,55,Sliding Door Repair / Mechanism,01:30:00,01:40:12,1.50,1.67,1500,1500
+859,298,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:45:00,2.00,1.75,3500,3500
+860,298,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,2000,2000
+861,299,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:12:36,2.00,2.21,3500,3500
+862,300,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:21:36,2.00,2.36,3500,3500
+863,301,1,Change Oil,00:45:00,00:48:36,0.75,0.81,500,500
+864,301,13,Brake Service & Cleaning,01:15:00,01:33:36,1.25,1.56,800,800
+865,301,34,Replace CV Joint & Axle Boot,01:45:00,02:06:00,1.75,2.10,1500,1500
+866,301,55,Sliding Door Repair / Mechanism,01:30:00,01:49:48,1.50,1.83,3000,3000
+867,301,57,Wiper Linkage / Motor Repair,01:30:00,01:42:36,1.50,1.71,4000,4000
+868,301,47,Electrical System & Wiring Repair,01:30:00,01:34:12,1.50,1.57,8000,8000
+869,302,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:09:00,2.00,2.15,1500,1500
+870,302,13,Brake Service & Cleaning,01:15:00,01:27:00,1.25,1.45,800,800
+871,303,1,Change Oil,00:45:00,00:54:00,0.75,0.90,500,500
+872,303,13,Brake Service & Cleaning,01:15:00,01:19:12,1.25,1.32,800,800
+873,303,55,Sliding Door Repair / Mechanism,01:30:00,01:16:48,1.50,1.28,3000,3000
+874,303,57,Wiper Linkage / Motor Repair,01:30:00,01:47:24,1.50,1.79,4000,4000
+875,303,47,Electrical System & Wiring Repair,01:30:00,01:45:00,1.50,1.75,8000,8000
+876,304,1,Change Oil,00:45:00,00:40:12,0.75,0.67,650,650
+877,304,13,Brake Service & Cleaning,01:15:00,01:10:12,1.25,1.17,800,800
+878,304,34,Replace CV Joint & Axle Boot,01:45:00,01:32:24,1.75,1.54,2000,2000
+879,304,55,Sliding Door Repair / Mechanism,01:30:00,01:35:24,1.50,1.59,3000,3000
+880,304,57,Wiper Linkage / Motor Repair,01:30:00,01:49:48,1.50,1.83,4000,4000
+881,304,47,Electrical System & Wiring Repair,01:30:00,01:34:12,1.50,1.57,8000,8000
+882,306,49,Replace Timing Belt / Chain,04:00:00,04:59:24,4.00,4.99,2000,2000
+883,306,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:55:48,1.00,0.93,1500,1500
+884,306,36,Down Clutch / Pulldown Transmission,04:30:00,04:57:36,4.50,4.96,350,350
+885,306,36,Down Clutch / Pulldown Transmission,04:30:00,05:31:48,4.50,5.53,1500,1500
+886,307,22,Replace Suspension Bushing,02:30:00,02:24:36,2.50,2.41,1800,1800
+887,307,21,Replace Shock Absorbers,02:00:00,02:04:48,2.00,2.08,1200,1200
+888,307,22,Replace Suspension Bushing,02:30:00,03:00:36,2.50,3.01,8500,8500
+889,307,39,Coolant Flush,00:45:00,00:47:24,0.75,0.79,350,350
+890,307,10,Throttle Body Cleaning,00:45:00,00:42:00,0.75,0.70,500,500
+891,307,12,Replace Spark Plugs,00:30:00,00:32:24,0.50,0.54,300,300
+892,307,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:04:12,1.00,1.07,800,800
+893,307,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:52:48,2.00,1.88,3000,3000
+894,308,22,Replace Suspension Bushing,02:30:00,02:49:48,2.50,2.83,1800,1800
+895,308,21,Replace Shock Absorbers,02:00:00,02:03:00,2.00,2.05,1200,1200
+896,308,39,Coolant Flush,00:45:00,00:51:00,0.75,0.85,350,350
+897,308,10,Throttle Body Cleaning,00:45:00,00:38:24,0.75,0.64,500,500
+898,308,12,Replace Spark Plugs,00:30:00,00:33:36,0.50,0.56,300,300
+899,308,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:04:12,1.00,1.07,800,800
+900,308,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:54:36,2.00,1.91,2800,2800
+901,308,18,Wheel Alignment,01:00:00,00:51:36,1.00,0.86,800,800
+902,310,1,Change Oil,00:45:00,00:42:36,0.75,0.71,650,650
+903,310,13,Brake Service & Cleaning,01:15:00,01:18:00,1.25,1.30,800,800
+904,310,3,Replace Fuel Filter,00:45:00,00:46:48,0.75,0.78,450,450
+905,311,53,Top Overhaul,14:00:00,16:41:24,14.00,16.69,15000,15000
+906,311,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:06:36,2.00,2.11,4500,4500
+907,312,1,Change Oil,00:45:00,00:55:48,0.75,0.93,650,650
+908,312,13,Brake Service & Cleaning,01:15:00,01:31:12,1.25,1.52,800,800
+909,312,12,Replace Spark Plugs,00:30:00,00:25:48,0.50,0.43,350,350
+910,312,43,Engine Diagnostics & Electrical Scan,00:45:00,00:53:24,0.75,0.89,1500,1500
+911,313,13,Brake Service & Cleaning,01:15:00,01:29:24,1.25,1.49,800,800
+912,315,22,Replace Suspension Bushing,02:30:00,02:30:00,2.50,2.50,8000,8000
+913,315,22,Replace Suspension Bushing,02:30:00,02:38:24,2.50,2.64,800,800
+914,315,18,Wheel Alignment,01:00:00,01:12:00,1.00,1.20,1500,1500
+915,316,58,General Mechanical Inspection & Check-Up,00:30:00,00:29:24,0.50,0.49,1500,1500
+916,316,53,Top Overhaul,14:00:00,17:29:24,14.00,17.49,15000,15000
+917,316,31,Replace Wheel Bearing,01:30:00,01:25:48,1.50,1.43,1500,1500
+918,316,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:49:12,2.00,1.82,4500,4500
+919,317,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:08:24,3.00,3.14,2500,2500
+920,317,38,Replace A/C Compressor,02:30:00,02:19:48,2.50,2.33,3500,3500
+921,317,58,General Mechanical Inspection & Check-Up,00:30:00,00:32:24,0.50,0.54,1000,1000
+922,319,22,Replace Suspension Bushing,02:30:00,02:51:00,2.50,2.85,800,800
+923,319,30,Replace Ball Joint,01:15:00,01:07:12,1.25,1.12,1200,1200
+924,319,23,Replace Tie Rod End,01:00:00,01:09:00,1.00,1.15,1000,1000
+925,319,22,Replace Suspension Bushing,02:30:00,02:37:48,2.50,2.63,2000,2000
+926,319,27,Replace Stabilizer Link,00:45:00,00:49:12,0.75,0.82,600,600
+927,319,22,Replace Suspension Bushing,02:30:00,02:43:48,2.50,2.73,800,800
+928,319,18,Wheel Alignment,01:00:00,01:04:48,1.00,1.08,800,800
+929,319,18,Wheel Alignment,01:00:00,01:00:00,1.00,1.00,2500,2500
+930,320,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,04:43:12,4.00,4.72,3500,3500
+931,320,45,Alternator Repair / Replacement,01:30:00,01:18:00,1.50,1.30,1800,1800
+932,320,18,Wheel Alignment,01:00:00,01:12:36,1.00,1.21,800,800
+933,321,1,Change Oil,00:45:00,00:53:24,0.75,0.89,650,650
+934,321,13,Brake Service & Cleaning,01:15:00,01:08:24,1.25,1.14,800,800
+935,321,22,Replace Suspension Bushing,02:30:00,02:36:36,2.50,2.61,8500,8500
+936,321,18,Wheel Alignment,01:00:00,01:10:48,1.00,1.18,800,800
+937,321,22,Replace Suspension Bushing,02:30:00,02:19:12,2.50,2.32,1500,1500
+938,321,31,Replace Wheel Bearing,01:30:00,01:35:24,1.50,1.59,600,600
+939,321,2,Change ATF / Transmission Fluid,00:45:00,00:41:24,0.75,0.69,550,550
+940,322,1,Change Oil,00:45:00,00:48:00,0.75,0.80,650,650
+941,322,13,Brake Service & Cleaning,01:15:00,01:04:48,1.25,1.08,800,800
+942,323,1,Change Oil,00:45:00,00:47:24,0.75,0.79,650,650
+943,323,13,Brake Service & Cleaning,01:15:00,01:14:24,1.25,1.24,800,800
+944,323,26,Overhaul / Replace Steering Rack & Pinion,04:00:00,04:09:00,4.00,4.15,8500,8500
+945,323,18,Wheel Alignment,01:00:00,00:54:36,1.00,0.91,800,800
+946,323,22,Replace Suspension Bushing,02:30:00,02:24:00,2.50,2.40,1500,1500
+947,323,31,Replace Wheel Bearing,01:30:00,01:51:00,1.50,1.85,1200,1200
+948,324,47,Electrical System & Wiring Repair,01:30:00,01:39:36,1.50,1.66,2500,2500
+949,325,1,Change Oil,00:45:00,00:48:36,0.75,0.81,700,700
+950,325,58,General Mechanical Inspection & Check-Up,00:30:00,00:25:48,0.50,0.43,700,700
+951,325,18,Wheel Alignment,01:00:00,01:03:36,1.00,1.06,850,850
+952,326,1,Change Oil,00:45:00,00:49:48,0.75,0.83,550,550
+953,326,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:00,0.50,0.60,500,500
+954,327,1,Change Oil,00:45:00,00:50:24,0.75,0.84,600,600
+955,327,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,700,700
+956,328,13,Brake Service & Cleaning,01:15:00,01:07:48,1.25,1.13,700,700
+957,328,15,Replace Brake Shoes,01:00:00,01:00:36,1.00,1.01,800,800
+958,329,22,Replace Suspension Bushing,02:30:00,02:39:00,2.50,2.65,2050,2050
+959,329,23,Replace Tie Rod End,01:00:00,00:54:00,1.00,0.90,1050,1050
+960,329,18,Wheel Alignment,01:00:00,01:09:36,1.00,1.16,850,850
+961,330,51,Replace Valve Cover Gasket,01:45:00,01:45:36,1.75,1.76,1600,1600
+962,330,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:02:24,1.00,1.04,1050,1050
+963,331,13,Brake Service & Cleaning,01:15:00,01:24:00,1.25,1.40,800,800
+964,331,15,Replace Brake Shoes,01:00:00,01:02:24,1.00,1.04,800,800
+965,331,18,Wheel Alignment,01:00:00,01:12:00,1.00,1.20,1250,1250
+966,332,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:43:48,3.00,3.73,2100,2100
+967,333,53,Top Overhaul,14:00:00,12:45:36,14.00,12.76,11500,11500
+968,333,1,Change Oil,00:45:00,00:39:00,0.75,0.65,550,550
+969,334,1,Change Oil,00:45:00,00:47:24,0.75,0.79,600,600
+970,334,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,700,700
+971,335,1,Change Oil,00:45:00,00:55:48,0.75,0.93,700,700
+972,335,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,450,450
+973,335,3,Replace Fuel Filter,00:45:00,00:48:36,0.75,0.81,550,550
+974,335,4,Replace Air Filter,00:15:00,00:12:36,0.25,0.21,550,550
+975,335,5,Replace Cabin Filter,00:15:00,00:13:48,0.25,0.23,200,200
+976,336,13,Brake Service & Cleaning,01:15:00,01:21:00,1.25,1.35,750,750
+977,336,14,Replace Brake Pads,01:00:00,01:12:36,1.00,1.21,950,950
+978,336,18,Wheel Alignment,01:00:00,00:51:36,1.00,0.86,1000,1000
+979,337,53,Top Overhaul,14:00:00,12:40:48,14.00,12.68,16600,16600
+980,337,1,Change Oil,00:45:00,00:41:24,0.75,0.69,650,650
+981,338,13,Brake Service & Cleaning,01:15:00,01:10:12,1.25,1.17,950,950
+982,338,15,Replace Brake Shoes,01:00:00,01:03:36,1.00,1.06,800,800
+983,339,1,Change Oil,00:45:00,00:41:24,0.75,0.69,650,650
+984,339,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,500,500
+985,340,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:09:36,3.00,3.16,2250,2250
+986,341,13,Brake Service & Cleaning,01:15:00,01:16:12,1.25,1.27,800,800
+987,341,14,Replace Brake Pads,01:00:00,01:09:00,1.00,1.15,800,800
+988,341,18,Wheel Alignment,01:00:00,01:14:24,1.00,1.24,1250,1250
+989,342,22,Replace Suspension Bushing,02:30:00,02:15:00,2.50,2.25,1350,1350
+990,342,23,Replace Tie Rod End,01:00:00,01:14:24,1.00,1.24,900,900
+991,342,18,Wheel Alignment,01:00:00,01:09:36,1.00,1.16,950,950
+992,342,21,Replace Shock Absorbers,02:00:00,01:43:12,2.00,1.72,1450,1450
+993,343,1,Change Oil,00:45:00,00:49:48,0.75,0.83,750,750
+994,343,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,450,450
+995,343,18,Wheel Alignment,01:00:00,01:06:36,1.00,1.11,900,900
+996,344,22,Replace Suspension Bushing,02:30:00,02:28:12,2.50,2.47,2150,2150
+997,344,23,Replace Tie Rod End,01:00:00,01:11:24,1.00,1.19,800,800
+998,344,18,Wheel Alignment,01:00:00,01:03:00,1.00,1.05,1350,1350
+999,344,21,Replace Shock Absorbers,02:00:00,02:30:00,2.00,2.50,1600,1600
+1000,345,13,Brake Service & Cleaning,01:15:00,01:25:12,1.25,1.42,1150,1150
+1001,345,15,Replace Brake Shoes,01:00:00,00:51:00,1.00,0.85,900,900
+1002,345,18,Wheel Alignment,01:00:00,01:08:24,1.00,1.14,900,900
+1003,346,13,Brake Service & Cleaning,01:15:00,01:09:00,1.25,1.15,800,800
+1004,346,15,Replace Brake Shoes,01:00:00,01:07:48,1.00,1.13,950,950
+1005,346,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:09:36,2.00,2.16,4050,4050
+1006,347,1,Change Oil,00:45:00,00:45:00,0.75,0.75,550,550
+1007,347,58,General Mechanical Inspection & Check-Up,00:30:00,00:35:24,0.50,0.59,450,450
+1008,347,4,Replace Air Filter,00:15:00,00:14:24,0.25,0.24,550,550
+1009,347,5,Replace Cabin Filter,00:15:00,00:13:48,0.25,0.23,200,200
+1010,348,51,Replace Valve Cover Gasket,01:45:00,01:45:36,1.75,1.76,1250,1250
+1011,348,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:55:12,1.00,0.92,650,650
+1012,348,1,Change Oil,00:45:00,00:50:24,0.75,0.84,600,600
+1013,349,1,Change Oil,00:45:00,00:53:24,0.75,0.89,700,700
+1014,349,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,700,700
+1015,350,13,Brake Service & Cleaning,01:15:00,01:16:48,1.25,1.28,800,800
+1016,350,15,Replace Brake Shoes,01:00:00,01:00:00,1.00,1.00,650,650
+1017,351,13,Brake Service & Cleaning,01:15:00,01:30:00,1.25,1.50,600,600
+1018,351,15,Replace Brake Shoes,01:00:00,01:06:00,1.00,1.10,750,750
+1019,352,22,Replace Suspension Bushing,02:30:00,02:15:36,2.50,2.26,1650,1650
+1020,352,25,Replace Tie Rod & Rack End,01:30:00,01:44:24,1.50,1.74,1050,1050
+1021,352,18,Wheel Alignment,01:00:00,00:56:24,1.00,0.94,1000,1000
+1022,353,1,Change Oil,00:45:00,00:39:00,0.75,0.65,700,700
+1023,353,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,500,500
+1024,354,22,Replace Suspension Bushing,02:30:00,02:41:24,2.50,2.69,2200,2200
+1025,354,23,Replace Tie Rod End,01:00:00,01:06:36,1.00,1.11,1300,1300
+1026,354,18,Wheel Alignment,01:00:00,00:51:36,1.00,0.86,1250,1250
+1027,355,1,Change Oil,00:45:00,00:55:12,0.75,0.92,700,700
+1028,355,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,500,500
+1029,356,36,Down Clutch / Pulldown Transmission,04:30:00,04:44:24,4.50,4.74,5300,5300
+1030,357,22,Replace Suspension Bushing,02:30:00,02:43:48,2.50,2.73,1300,1300
+1031,357,23,Replace Tie Rod End,01:00:00,00:54:36,1.00,0.91,800,800
+1032,357,18,Wheel Alignment,01:00:00,01:08:24,1.00,1.14,1050,1050
+1033,358,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:35:24,3.00,3.59,2500,2500
+1034,358,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,700,700
+1035,359,51,Replace Valve Cover Gasket,01:45:00,01:51:00,1.75,1.85,1500,1500
+1036,359,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:04:12,1.00,1.07,950,950
+1037,360,53,Top Overhaul,14:00:00,16:39:36,14.00,16.66,13300,13300
+1038,361,1,Change Oil,00:45:00,00:54:36,0.75,0.91,800,800
+1039,361,58,General Mechanical Inspection & Check-Up,00:30:00,00:25:48,0.50,0.43,550,550
+1040,362,1,Change Oil,00:45:00,00:40:48,0.75,0.68,800,800
+1041,362,58,General Mechanical Inspection & Check-Up,00:30:00,00:25:48,0.50,0.43,600,600
+1042,363,13,Brake Service & Cleaning,01:15:00,01:16:12,1.25,1.27,1150,1150
+1043,363,15,Replace Brake Shoes,01:00:00,01:02:24,1.00,1.04,1050,1050
+1044,363,18,Wheel Alignment,01:00:00,01:06:00,1.00,1.10,950,950
+1045,364,51,Replace Valve Cover Gasket,01:45:00,02:10:12,1.75,2.17,1800,1800
+1046,364,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:06:36,1.00,1.11,950,950
+1047,364,1,Change Oil,00:45:00,00:42:00,0.75,0.70,650,650
+1048,365,22,Replace Suspension Bushing,02:30:00,02:37:48,2.50,2.63,2600,2600
+1049,365,23,Replace Tie Rod End,01:00:00,00:57:00,1.00,0.95,750,750
+1050,365,18,Wheel Alignment,01:00:00,01:12:00,1.00,1.20,900,900
+1051,365,21,Replace Shock Absorbers,02:00:00,02:24:00,2.00,2.40,1950,1950
+1052,366,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:46:48,3.00,2.78,3100,3100
+1053,367,1,Change Oil,00:45:00,00:38:24,0.75,0.64,600,600
+1054,367,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,650,650
+1055,367,18,Wheel Alignment,01:00:00,01:01:12,1.00,1.02,1000,1000
+1056,368,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:44:24,3.00,3.74,2750,2750
+1057,369,13,Brake Service & Cleaning,01:15:00,01:10:12,1.25,1.17,800,800
+1058,369,15,Replace Brake Shoes,01:00:00,01:04:48,1.00,1.08,950,950
+1059,370,22,Replace Suspension Bushing,02:30:00,02:58:12,2.50,2.97,2700,2700
+1060,370,23,Replace Tie Rod End,01:00:00,01:07:12,1.00,1.12,1350,1350
+1061,370,18,Wheel Alignment,01:00:00,01:01:48,1.00,1.03,850,850
+1062,371,22,Replace Suspension Bushing,02:30:00,02:26:24,2.50,2.44,1800,1800
+1063,371,23,Replace Tie Rod End,01:00:00,01:08:24,1.00,1.14,1200,1200
+1064,371,18,Wheel Alignment,01:00:00,01:06:36,1.00,1.11,1150,1150
+1065,371,21,Replace Shock Absorbers,02:00:00,02:22:12,2.00,2.37,1300,1300
+1066,372,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:48:36,3.00,2.81,2300,2300
+1067,373,51,Replace Valve Cover Gasket,01:45:00,02:01:12,1.75,2.02,1750,1750
+1068,373,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:06:36,1.00,1.11,1100,1100
+1069,374,36,Down Clutch / Pulldown Transmission,04:30:00,04:35:24,4.50,4.59,3600,3600
+1070,374,1,Change Oil,00:45:00,00:52:12,0.75,0.87,650,650
+1071,375,22,Replace Suspension Bushing,02:30:00,02:34:48,2.50,2.58,1100,1100
+1072,375,23,Replace Tie Rod End,01:00:00,01:14:24,1.00,1.24,900,900
+1073,375,18,Wheel Alignment,01:00:00,01:11:24,1.00,1.19,1200,1200
+1074,376,13,Brake Service & Cleaning,01:15:00,01:27:36,1.25,1.46,700,700
+1075,376,15,Replace Brake Shoes,01:00:00,00:55:12,1.00,0.92,750,750
+1076,377,1,Change Oil,00:45:00,00:51:36,0.75,0.86,750,750
+1077,377,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:00,0.50,0.60,400,400
+1078,378,1,Change Oil,00:45:00,00:39:00,0.75,0.65,600,600
+1079,378,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,600,600
+1080,378,3,Replace Fuel Filter,00:45:00,00:48:36,0.75,0.81,550,550
+1081,378,5,Replace Cabin Filter,00:15:00,00:14:24,0.25,0.24,200,200
+1082,379,1,Change Oil,00:45:00,00:49:12,0.75,0.82,500,500
+1083,379,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,600,600
+1084,380,36,Down Clutch / Pulldown Transmission,04:30:00,04:40:12,4.50,4.67,4500,4500
+1085,381,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:40:12,3.00,3.67,2800,2800
+1086,381,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,750,750
+1087,382,1,Change Oil,00:45:00,00:43:48,0.75,0.73,600,600
+1088,382,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,550,550
+1089,382,18,Wheel Alignment,01:00:00,00:57:36,1.00,0.96,900,900
+1090,383,1,Change Oil,00:45:00,00:46:48,0.75,0.78,800,800
+1091,383,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,600,600
+1092,384,13,Brake Service & Cleaning,01:15:00,01:31:12,1.25,1.52,900,900
+1093,384,15,Replace Brake Shoes,01:00:00,01:01:48,1.00,1.03,800,800
+1094,385,1,Change Oil,00:45:00,00:53:24,0.75,0.89,850,850
+1095,385,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,600,600
+1096,385,18,Wheel Alignment,01:00:00,01:06:00,1.00,1.10,1200,1200
+1097,386,1,Change Oil,00:45:00,00:52:12,0.75,0.87,900,900
+1098,386,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:00,0.50,0.45,550,550
+1099,386,3,Replace Fuel Filter,00:45:00,00:51:00,0.75,0.85,550,550
+1100,386,4,Replace Air Filter,00:15:00,00:15:00,0.25,0.25,550,550
+1101,386,5,Replace Cabin Filter,00:15:00,00:14:24,0.25,0.24,200,200
+1102,387,13,Brake Service & Cleaning,01:15:00,01:12:00,1.25,1.20,1100,1100
+1103,387,14,Replace Brake Pads,01:00:00,01:11:24,1.00,1.19,1100,1100
+1104,388,1,Change Oil,00:45:00,00:54:00,0.75,0.90,700,700
+1105,388,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,450,450
+1106,388,3,Replace Fuel Filter,00:45:00,00:55:12,0.75,0.92,550,550
+1107,388,5,Replace Cabin Filter,00:15:00,00:16:48,0.25,0.28,200,200
+1108,389,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:37:48,3.00,3.63,1800,1800
+1109,390,1,Change Oil,00:45:00,00:41:24,0.75,0.69,600,600
+1110,390,58,General Mechanical Inspection & Check-Up,00:30:00,00:35:24,0.50,0.59,500,500
+1111,391,1,Change Oil,00:45:00,00:40:12,0.75,0.67,650,650
+1112,391,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:00,0.50,0.45,450,450
+1113,392,51,Replace Valve Cover Gasket,01:45:00,01:54:36,1.75,1.91,1450,1450
+1114,392,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:00:36,1.00,1.01,850,850
+1115,392,1,Change Oil,00:45:00,00:52:48,0.75,0.88,800,800
+1116,393,22,Replace Suspension Bushing,02:30:00,02:22:48,2.50,2.38,1150,1150
+1117,393,25,Replace Tie Rod & Rack End,01:30:00,01:35:24,1.50,1.59,1350,1350
+1118,393,18,Wheel Alignment,01:00:00,01:10:48,1.00,1.18,1400,1400
+1119,394,1,Change Oil,00:45:00,00:45:36,0.75,0.76,650,650
+1120,394,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,600,600
+1121,394,3,Replace Fuel Filter,00:45:00,00:42:00,0.75,0.70,550,550
+1122,394,4,Replace Air Filter,00:15:00,00:16:12,0.25,0.27,550,550
+1123,394,5,Replace Cabin Filter,00:15:00,00:15:36,0.25,0.26,200,200
+1124,395,51,Replace Valve Cover Gasket,01:45:00,01:38:24,1.75,1.64,1500,1500
+1125,395,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:14:24,1.00,1.24,1100,1100
+1126,396,36,Down Clutch / Pulldown Transmission,04:30:00,04:39:36,4.50,4.66,3300,3300
+1127,396,2,Change ATF / Transmission Fluid,00:45:00,00:55:12,0.75,0.92,700,700
+1128,397,22,Replace Suspension Bushing,02:30:00,02:31:48,2.50,2.53,2350,2350
+1129,397,23,Replace Tie Rod End,01:00:00,00:51:00,1.00,0.85,1150,1150
+1130,397,18,Wheel Alignment,01:00:00,01:12:00,1.00,1.20,1100,1100
+1131,398,22,Replace Suspension Bushing,02:30:00,02:50:24,2.50,2.84,1500,1500
+1132,398,23,Replace Tie Rod End,01:00:00,01:01:12,1.00,1.02,1000,1000
+1133,398,18,Wheel Alignment,01:00:00,01:09:36,1.00,1.16,1200,1200
+1134,398,21,Replace Shock Absorbers,02:00:00,02:16:12,2.00,2.27,1500,1500
+1135,399,22,Replace Suspension Bushing,02:30:00,02:49:12,2.50,2.82,1000,1000
+1136,399,23,Replace Tie Rod End,01:00:00,01:01:48,1.00,1.03,1050,1050
+1137,399,18,Wheel Alignment,01:00:00,01:03:36,1.00,1.06,950,950
+1138,399,21,Replace Shock Absorbers,02:00:00,02:07:48,2.00,2.13,1600,1600
+1139,400,36,Down Clutch / Pulldown Transmission,04:30:00,04:56:24,4.50,4.94,3300,3300
+1140,401,1,Change Oil,00:45:00,00:52:12,0.75,0.87,800,800
+1141,401,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,600,600
+1142,401,3,Replace Fuel Filter,00:45:00,00:39:36,0.75,0.66,550,550
+1143,401,4,Replace Air Filter,00:15:00,00:15:00,0.25,0.25,550,550
+1144,401,5,Replace Cabin Filter,00:15:00,00:18:00,0.25,0.30,200,200
+1145,402,13,Brake Service & Cleaning,01:15:00,01:11:24,1.25,1.19,1050,1050
+1146,402,15,Replace Brake Shoes,01:00:00,00:55:12,1.00,0.92,800,800
+1147,403,36,Down Clutch / Pulldown Transmission,04:30:00,04:36:36,4.50,4.61,3550,3550
+1148,403,1,Change Oil,00:45:00,00:54:36,0.75,0.91,550,550
+1149,404,1,Change Oil,00:45:00,00:54:00,0.75,0.90,450,450
+1150,404,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,550,550
+1151,404,3,Replace Fuel Filter,00:45:00,00:52:48,0.75,0.88,550,550
+1152,404,4,Replace Air Filter,00:15:00,00:17:24,0.25,0.29,550,550
+1153,404,5,Replace Cabin Filter,00:15:00,00:16:48,0.25,0.28,200,200
+1154,405,53,Top Overhaul,14:00:00,12:49:48,14.00,12.83,21500,21500
+1155,405,1,Change Oil,00:45:00,00:49:48,0.75,0.83,650,650
+1156,406,22,Replace Suspension Bushing,02:30:00,02:39:00,2.50,2.65,2500,2500
+1157,406,23,Replace Tie Rod End,01:00:00,01:13:12,1.00,1.22,950,950
+1158,406,18,Wheel Alignment,01:00:00,00:58:12,1.00,0.97,1200,1200
+1159,406,21,Replace Shock Absorbers,02:00:00,02:06:36,2.00,2.11,1100,1100
+1160,407,22,Replace Suspension Bushing,02:30:00,03:01:12,2.50,3.02,1150,1150
+1161,407,23,Replace Tie Rod End,01:00:00,00:51:36,1.00,0.86,1200,1200
+1162,407,18,Wheel Alignment,01:00:00,01:10:12,1.00,1.17,800,800
+1163,407,21,Replace Shock Absorbers,02:00:00,01:45:00,2.00,1.75,1400,1400
+1164,408,13,Brake Service & Cleaning,01:15:00,01:24:00,1.25,1.40,750,750
+1165,408,15,Replace Brake Shoes,01:00:00,00:54:00,1.00,0.90,1000,1000
+1166,408,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:57:00,2.00,1.95,3050,3050
+1167,409,1,Change Oil,00:45:00,00:48:00,0.75,0.80,600,600
+1168,409,58,General Mechanical Inspection & Check-Up,00:30:00,00:26:24,0.50,0.44,550,550
+1169,409,18,Wheel Alignment,01:00:00,01:09:36,1.00,1.16,800,800
+1170,410,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:33:36,3.00,2.56,2400,2400
+1171,411,22,Replace Suspension Bushing,02:30:00,02:13:12,2.50,2.22,2050,2050
+1172,411,23,Replace Tie Rod End,01:00:00,01:02:24,1.00,1.04,1250,1250
+1173,411,18,Wheel Alignment,01:00:00,01:09:00,1.00,1.15,1200,1200
+1174,411,21,Replace Shock Absorbers,02:00:00,02:06:00,2.00,2.10,1550,1550
+1175,412,1,Change Oil,00:45:00,00:49:12,0.75,0.82,650,650
+1176,412,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,450,450
+1177,413,36,Down Clutch / Pulldown Transmission,04:30:00,04:23:24,4.50,4.39,4350,4350
+1178,413,2,Change ATF / Transmission Fluid,00:45:00,00:45:00,0.75,0.75,800,800
+1179,414,22,Replace Suspension Bushing,02:30:00,02:18:36,2.50,2.31,1950,1950
+1180,414,23,Replace Tie Rod End,01:00:00,01:00:36,1.00,1.01,600,600
+1181,414,18,Wheel Alignment,01:00:00,01:01:48,1.00,1.03,1000,1000
+1182,414,21,Replace Shock Absorbers,02:00:00,02:01:12,2.00,2.02,1150,1150
+1183,415,13,Brake Service & Cleaning,01:15:00,01:24:36,1.25,1.41,1200,1200
+1184,415,15,Replace Brake Shoes,01:00:00,00:58:48,1.00,0.98,850,850
+1185,415,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:03:00,2.00,2.05,2950,2950
+1186,416,22,Replace Suspension Bushing,02:30:00,03:06:36,2.50,3.11,2050,2050
+1187,416,25,Replace Tie Rod & Rack End,01:30:00,01:30:36,1.50,1.51,1250,1250
+1188,416,18,Wheel Alignment,01:00:00,01:03:36,1.00,1.06,900,900
+1189,416,21,Replace Shock Absorbers,02:00:00,02:27:00,2.00,2.45,1400,1400
+1190,417,36,Down Clutch / Pulldown Transmission,04:30:00,05:00:00,4.50,5.00,3750,3750
+1191,418,22,Replace Suspension Bushing,02:30:00,02:34:48,2.50,2.58,1350,1350
+1192,418,23,Replace Tie Rod End,01:00:00,00:53:24,1.00,0.89,650,650
+1193,418,18,Wheel Alignment,01:00:00,00:55:12,1.00,0.92,850,850
+1194,419,13,Brake Service & Cleaning,01:15:00,01:09:00,1.25,1.15,800,800
+1195,419,15,Replace Brake Shoes,01:00:00,01:09:36,1.00,1.16,750,750
+1196,420,36,Down Clutch / Pulldown Transmission,04:30:00,03:56:24,4.50,3.94,3250,3250
+1197,421,1,Change Oil,00:45:00,00:49:12,0.75,0.82,750,750
+1198,421,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,500,500
+1199,422,1,Change Oil,00:45:00,00:39:00,0.75,0.65,550,550
+1200,422,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:36,0.50,0.51,600,600
+1201,423,13,Brake Service & Cleaning,01:15:00,01:21:36,1.25,1.36,650,650
+1202,423,15,Replace Brake Shoes,01:00:00,01:12:00,1.00,1.20,950,950
+1203,423,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:49:12,2.00,1.82,2700,2700
+1204,424,13,Brake Service & Cleaning,01:15:00,01:09:00,1.25,1.15,700,700
+1205,424,15,Replace Brake Shoes,01:00:00,01:07:48,1.00,1.13,550,550
+1206,425,22,Replace Suspension Bushing,02:30:00,03:04:48,2.50,3.08,1550,1550
+1207,425,23,Replace Tie Rod End,01:00:00,01:11:24,1.00,1.19,1000,1000
+1208,425,18,Wheel Alignment,01:00:00,01:13:12,1.00,1.22,950,950
+1209,426,1,Change Oil,00:45:00,00:45:36,0.75,0.76,500,500
+1210,426,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,650,650
+1211,426,18,Wheel Alignment,01:00:00,00:52:48,1.00,0.88,900,900
+1212,427,51,Replace Valve Cover Gasket,01:45:00,01:43:48,1.75,1.73,1200,1200
+1213,427,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:00:36,1.00,1.01,750,750
+1214,428,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:00:36,3.00,3.01,2700,2700
+1215,428,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,800,800
+1216,429,51,Replace Valve Cover Gasket,01:45:00,02:03:36,1.75,2.06,1250,1250
+1217,429,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:03:00,1.00,1.05,950,950
+1218,430,22,Replace Suspension Bushing,02:30:00,03:01:48,2.50,3.03,2250,2250
+1219,430,23,Replace Tie Rod End,01:00:00,00:56:24,1.00,0.94,1000,1000
+1220,430,18,Wheel Alignment,01:00:00,01:07:12,1.00,1.12,900,900
+1221,431,13,Brake Service & Cleaning,01:15:00,01:11:24,1.25,1.19,700,700
+1222,431,15,Replace Brake Shoes,01:00:00,01:04:12,1.00,1.07,650,650
+1223,432,1,Change Oil,00:45:00,00:51:36,0.75,0.86,600,600
+1224,432,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,600,600
+1225,432,18,Wheel Alignment,01:00:00,01:06:36,1.00,1.11,1050,1050
+1226,433,1,Change Oil,00:45:00,00:40:48,0.75,0.68,700,700
+1227,433,58,General Mechanical Inspection & Check-Up,00:30:00,00:32:24,0.50,0.54,450,450
+1228,434,51,Replace Valve Cover Gasket,01:45:00,01:53:24,1.75,1.89,1950,1950
+1229,434,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:01:12,1.00,1.02,700,700
+1230,435,36,Down Clutch / Pulldown Transmission,04:30:00,04:16:12,4.50,4.27,3050,3050
+1231,436,13,Brake Service & Cleaning,01:15:00,01:08:24,1.25,1.14,800,800
+1232,436,15,Replace Brake Shoes,01:00:00,01:07:48,1.00,1.13,1000,1000
+1233,436,18,Wheel Alignment,01:00:00,00:52:12,1.00,0.87,1250,1250
+1234,437,36,Down Clutch / Pulldown Transmission,04:30:00,05:27:00,4.50,5.45,3200,3200
+1235,437,1,Change Oil,00:45:00,00:52:12,0.75,0.87,800,800
+1236,438,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:46:48,3.00,2.78,2450,2450
+1237,438,58,General Mechanical Inspection & Check-Up,00:30:00,00:25:48,0.50,0.43,550,550
+1238,439,36,Down Clutch / Pulldown Transmission,04:30:00,04:11:24,4.50,4.19,4200,4200
+1239,440,1,Change Oil,00:45:00,00:54:36,0.75,0.91,850,850
+1240,440,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,600,600
+1241,441,13,Brake Service & Cleaning,01:15:00,01:07:48,1.25,1.13,800,800
+1242,441,15,Replace Brake Shoes,01:00:00,00:58:12,1.00,0.97,800,800
+1243,441,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:07:12,2.00,2.12,3450,3450
+1244,442,1,Change Oil,00:45:00,00:55:48,0.75,0.93,650,650
+1245,442,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,550,550
+1246,443,1,Change Oil,00:45:00,00:49:48,0.75,0.83,700,700
+1247,443,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,450,450
+1248,444,1,Change Oil,00:45:00,00:43:12,0.75,0.72,600,600
+1249,444,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,450,450
+1250,445,22,Replace Suspension Bushing,02:30:00,02:22:12,2.50,2.37,1350,1350
+1251,445,23,Replace Tie Rod End,01:00:00,01:04:48,1.00,1.08,1000,1000
+1252,445,18,Wheel Alignment,01:00:00,01:07:48,1.00,1.13,1100,1100
+1253,446,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:37:12,3.00,3.62,2300,2300
+1254,446,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,750,750
+1255,447,1,Change Oil,00:45:00,00:50:24,0.75,0.84,600,600
+1256,447,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,400,400
+1257,447,3,Replace Fuel Filter,00:45:00,00:45:36,0.75,0.76,2000,2000
+1258,448,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:42:36,3.00,2.71,2450,2450
+1259,448,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,650,650
+1260,449,1,Change Oil,00:45:00,00:54:00,0.75,0.90,750,750
+1261,449,58,General Mechanical Inspection & Check-Up,00:30:00,00:32:24,0.50,0.54,750,750
+1262,450,53,Top Overhaul,14:00:00,12:40:48,14.00,12.68,15850,15850
+1263,450,1,Change Oil,00:45:00,00:49:12,0.75,0.82,650,650
+1264,451,13,Brake Service & Cleaning,01:15:00,01:13:48,1.25,1.23,950,950
+1265,451,15,Replace Brake Shoes,01:00:00,01:07:12,1.00,1.12,800,800
+1266,452,22,Replace Suspension Bushing,02:30:00,02:52:12,2.50,2.87,1150,1150
+1267,452,23,Replace Tie Rod End,01:00:00,01:11:24,1.00,1.19,1150,1150
+1268,452,18,Wheel Alignment,01:00:00,01:15:00,1.00,1.25,1100,1100
+1269,452,21,Replace Shock Absorbers,02:00:00,01:46:48,2.00,1.78,1150,1150
+1270,453,13,Brake Service & Cleaning,01:15:00,01:13:12,1.25,1.22,850,850
+1271,453,15,Replace Brake Shoes,01:00:00,01:06:36,1.00,1.11,650,650
+1272,453,18,Wheel Alignment,01:00:00,01:14:24,1.00,1.24,950,950
+1273,454,13,Brake Service & Cleaning,01:15:00,01:31:12,1.25,1.52,1000,1000
+1274,454,15,Replace Brake Shoes,01:00:00,00:51:00,1.00,0.85,800,800
+1275,455,22,Replace Suspension Bushing,02:30:00,02:23:24,2.50,2.39,1950,1950
+1276,455,23,Replace Tie Rod End,01:00:00,01:02:24,1.00,1.04,750,750
+1277,455,18,Wheel Alignment,01:00:00,01:01:12,1.00,1.02,950,950
+1278,455,21,Replace Shock Absorbers,02:00:00,02:00:36,2.00,2.01,1450,1450
+1279,456,13,Brake Service & Cleaning,01:15:00,01:15:00,1.25,1.25,700,700
+1280,456,15,Replace Brake Shoes,01:00:00,00:54:00,1.00,0.90,700,700
+1281,457,22,Replace Suspension Bushing,02:30:00,02:18:00,2.50,2.30,2300,2300
+1282,457,23,Replace Tie Rod End,01:00:00,01:11:24,1.00,1.19,1100,1100
+1283,457,18,Wheel Alignment,01:00:00,00:53:24,1.00,0.89,1050,1050
+1284,458,22,Replace Suspension Bushing,02:30:00,02:20:24,2.50,2.34,2200,2200
+1285,458,25,Replace Tie Rod & Rack End,01:30:00,01:51:00,1.50,1.85,1000,1000
+1286,458,18,Wheel Alignment,01:00:00,00:52:12,1.00,0.87,850,850
+1287,459,1,Change Oil,00:45:00,00:42:00,0.75,0.70,550,550
+1288,459,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,650,650
+1289,460,36,Down Clutch / Pulldown Transmission,04:30:00,04:54:00,4.50,4.90,3100,3100
+1290,461,1,Change Oil,00:45:00,00:48:36,0.75,0.81,650,650
+1291,461,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:36,0.50,0.61,500,500
+1292,462,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:22:48,3.00,3.38,2000,2000
+1293,463,22,Replace Suspension Bushing,02:30:00,02:34:12,2.50,2.57,1700,1700
+1294,463,25,Replace Tie Rod & Rack End,01:30:00,01:25:48,1.50,1.43,800,800
+1295,463,18,Wheel Alignment,01:00:00,00:54:36,1.00,0.91,950,950
+1296,463,21,Replace Shock Absorbers,02:00:00,02:09:36,2.00,2.16,900,900
+1297,464,13,Brake Service & Cleaning,01:15:00,01:30:00,1.25,1.50,900,900
+1298,464,15,Replace Brake Shoes,01:00:00,01:00:36,1.00,1.01,950,950
+1299,464,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:51:36,2.00,1.86,2850,2850
+1300,465,13,Brake Service & Cleaning,01:15:00,01:13:12,1.25,1.22,800,800
+1301,465,15,Replace Brake Shoes,01:00:00,00:56:24,1.00,0.94,950,950
+1302,466,1,Change Oil,00:45:00,00:43:48,0.75,0.73,800,800
+1303,466,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,450,450
+1304,467,1,Change Oil,00:45:00,00:48:00,0.75,0.80,500,500
+1305,467,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,550,550
+1306,467,18,Wheel Alignment,01:00:00,01:01:12,1.00,1.02,1300,1300
+1307,468,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:36:36,3.00,2.61,2500,2500
+1308,468,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:36,0.50,0.61,600,600
+1309,469,36,Down Clutch / Pulldown Transmission,04:30:00,04:11:24,4.50,4.19,3900,3900
+1310,469,2,Change ATF / Transmission Fluid,00:45:00,00:40:12,0.75,0.67,700,700
+1311,470,1,Change Oil,00:45:00,00:52:12,0.75,0.87,600,600
+1312,470,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,600,600
+1313,471,1,Change Oil,00:45:00,00:51:36,0.75,0.86,650,650
+1314,471,58,General Mechanical Inspection & Check-Up,00:30:00,00:26:24,0.50,0.44,500,500
+1315,472,36,Down Clutch / Pulldown Transmission,04:30:00,04:58:48,4.50,4.98,3900,3900
+1316,472,2,Change ATF / Transmission Fluid,00:45:00,00:39:00,0.75,0.65,650,650
+1317,473,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:04:12,3.00,3.07,3050,3050
+1318,473,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,650,650
+1319,474,1,Change Oil,00:45:00,00:48:00,0.75,0.80,750,750
+1320,474,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,550,550
+1321,475,13,Brake Service & Cleaning,01:15:00,01:13:12,1.25,1.22,700,700
+1322,475,15,Replace Brake Shoes,01:00:00,00:53:24,1.00,0.89,850,850
+1323,476,13,Brake Service & Cleaning,01:15:00,01:15:36,1.25,1.26,750,750
+1324,476,15,Replace Brake Shoes,01:00:00,00:55:12,1.00,0.92,900,900
+1325,476,18,Wheel Alignment,01:00:00,00:59:24,1.00,0.99,950,950
+1326,477,1,Change Oil,00:45:00,00:38:24,0.75,0.64,500,500
+1327,477,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:00,0.50,0.45,450,450
+1328,478,13,Brake Service & Cleaning,01:15:00,01:28:12,1.25,1.47,1150,1150
+1329,478,15,Replace Brake Shoes,01:00:00,00:56:24,1.00,0.94,900,900
+1330,479,22,Replace Suspension Bushing,02:30:00,02:38:24,2.50,2.64,1250,1250
+1331,479,23,Replace Tie Rod End,01:00:00,01:02:24,1.00,1.04,750,750
+1332,479,18,Wheel Alignment,01:00:00,01:03:00,1.00,1.05,1250,1250
+1333,479,21,Replace Shock Absorbers,02:00:00,01:45:36,2.00,1.76,1550,1550
+1334,480,1,Change Oil,00:45:00,00:55:48,0.75,0.93,700,700
+1335,480,58,General Mechanical Inspection & Check-Up,00:30:00,00:26:24,0.50,0.44,600,600
+1336,481,1,Change Oil,00:45:00,00:40:12,0.75,0.67,650,650
+1337,481,58,General Mechanical Inspection & Check-Up,00:30:00,00:25:48,0.50,0.43,500,500
+1338,482,1,Change Oil,00:45:00,00:40:12,0.75,0.67,600,600
+1339,482,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,450,450
+1340,483,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:05:24,3.00,3.09,2900,2900
+1341,484,1,Change Oil,00:45:00,00:40:12,0.75,0.67,650,650
+1342,484,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:00,0.50,0.60,500,500
+1343,484,18,Wheel Alignment,01:00:00,01:03:36,1.00,1.06,1400,1400
+1344,485,22,Replace Suspension Bushing,02:30:00,02:54:36,2.50,2.91,1450,1450
+1345,485,23,Replace Tie Rod End,01:00:00,01:00:00,1.00,1.00,750,750
+1346,485,18,Wheel Alignment,01:00:00,00:51:36,1.00,0.86,1100,1100
+1347,485,21,Replace Shock Absorbers,02:00:00,01:56:24,2.00,1.94,1550,1550
+1348,486,13,Brake Service & Cleaning,01:15:00,01:33:36,1.25,1.56,900,900
+1349,486,15,Replace Brake Shoes,01:00:00,01:13:12,1.00,1.22,850,850
+1350,487,1,Change Oil,00:45:00,00:52:48,0.75,0.88,600,600
+1351,487,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,550,550
+1352,488,1,Change Oil,00:45:00,00:42:00,0.75,0.70,650,650
+1353,488,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,550,550
+1354,489,22,Replace Suspension Bushing,02:30:00,02:34:48,2.50,2.58,1450,1450
+1355,489,25,Replace Tie Rod & Rack End,01:30:00,01:42:36,1.50,1.71,1450,1450
+1356,489,18,Wheel Alignment,01:00:00,01:11:24,1.00,1.19,1000,1000
+1357,490,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:34:48,3.00,2.58,2650,2650
+1358,490,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,600,600
+1359,491,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:31:48,3.00,3.53,2600,2600
+1360,491,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,600,600
+1361,492,1,Change Oil,00:45:00,00:48:36,0.75,0.81,650,650
+1362,492,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,550,550
+1363,492,18,Wheel Alignment,01:00:00,00:54:36,1.00,0.91,1100,1100
+1364,493,1,Change Oil,00:45:00,00:42:36,0.75,0.71,600,600
+1365,493,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,550,550
+1366,493,18,Wheel Alignment,01:00:00,01:02:24,1.00,1.04,1150,1150
+1367,494,1,Change Oil,00:45:00,00:50:24,0.75,0.84,750,750
+1368,494,58,General Mechanical Inspection & Check-Up,00:30:00,00:29:24,0.50,0.49,600,600
+1369,494,18,Wheel Alignment,01:00:00,00:53:24,1.00,0.89,800,800
+1370,495,13,Brake Service & Cleaning,01:15:00,01:20:24,1.25,1.34,550,550
+1371,495,14,Replace Brake Pads,01:00:00,01:00:00,1.00,1.00,900,900
+1372,495,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:57:00,2.00,1.95,2800,2800
+1373,496,1,Change Oil,00:45:00,00:53:24,0.75,0.89,800,800
+1374,496,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,500,500
+1375,496,4,Replace Air Filter,00:15:00,00:16:12,0.25,0.27,550,550
+1376,496,5,Replace Cabin Filter,00:15:00,00:15:36,0.25,0.26,200,200
+1377,497,13,Brake Service & Cleaning,01:15:00,01:23:24,1.25,1.39,1250,1250
+1378,497,15,Replace Brake Shoes,01:00:00,01:00:00,1.00,1.00,750,750
+1379,498,1,Change Oil,00:45:00,00:42:36,0.75,0.71,650,650
+1380,498,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,750,750
+1381,498,18,Wheel Alignment,01:00:00,01:04:48,1.00,1.08,1300,1300
+1382,499,1,Change Oil,00:45:00,00:45:00,0.75,0.75,800,800
+1383,499,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:00,0.50,0.45,700,700
+1384,500,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:09:00,3.00,3.15,2850,2850
+1385,501,22,Replace Suspension Bushing,02:30:00,02:21:00,2.50,2.35,1850,1850
+1386,501,23,Replace Tie Rod End,01:00:00,00:51:36,1.00,0.86,800,800
+1387,501,18,Wheel Alignment,01:00:00,01:12:00,1.00,1.20,1100,1100
+1388,501,21,Replace Shock Absorbers,02:00:00,02:28:48,2.00,2.48,1700,1700
+1389,502,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:06:36,3.00,3.11,1600,1600
+1390,503,1,Change Oil,00:45:00,00:47:24,0.75,0.79,550,550
+1391,503,58,General Mechanical Inspection & Check-Up,00:30:00,00:25:48,0.50,0.43,500,500
+1392,504,53,Top Overhaul,14:00:00,16:51:36,14.00,16.86,11800,11800
+1393,505,13,Brake Service & Cleaning,01:15:00,01:12:36,1.25,1.21,950,950
+1394,505,14,Replace Brake Pads,01:00:00,00:51:00,1.00,0.85,600,600
+1395,506,22,Replace Suspension Bushing,02:30:00,02:39:36,2.50,2.66,1050,1050
+1396,506,25,Replace Tie Rod & Rack End,01:30:00,01:48:00,1.50,1.80,1100,1100
+1397,506,18,Wheel Alignment,01:00:00,01:13:12,1.00,1.22,950,950
+1398,507,13,Brake Service & Cleaning,01:15:00,01:13:12,1.25,1.22,1200,1200
+1399,507,15,Replace Brake Shoes,01:00:00,00:55:48,1.00,0.93,800,800
+1400,507,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:06:00,2.00,2.10,1900,1900
+1401,508,36,Down Clutch / Pulldown Transmission,04:30:00,04:22:12,4.50,4.37,3450,3450
+1402,509,51,Replace Valve Cover Gasket,01:45:00,01:42:00,1.75,1.70,1000,1000
+1403,509,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:53:24,1.00,0.89,600,600
+1404,510,51,Replace Valve Cover Gasket,01:45:00,02:11:24,1.75,2.19,1400,1400
+1405,510,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:07:12,1.00,1.12,600,600
+1406,510,1,Change Oil,00:45:00,00:52:12,0.75,0.87,650,650
+1407,511,1,Change Oil,00:45:00,00:55:12,0.75,0.92,750,750
+1408,511,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,600,600
+1409,512,36,Down Clutch / Pulldown Transmission,04:30:00,04:15:00,4.50,4.25,3450,3450
+1410,512,2,Change ATF / Transmission Fluid,00:45:00,00:40:12,0.75,0.67,750,750
+1411,513,13,Brake Service & Cleaning,01:15:00,01:24:36,1.25,1.41,950,950
+1412,513,15,Replace Brake Shoes,01:00:00,00:52:48,1.00,0.88,900,900
+1413,514,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:52:48,3.00,2.88,2500,2500
+1414,515,22,Replace Suspension Bushing,02:30:00,02:49:48,2.50,2.83,2200,2200
+1415,515,23,Replace Tie Rod End,01:00:00,01:09:00,1.00,1.15,1200,1200
+1416,515,18,Wheel Alignment,01:00:00,01:07:48,1.00,1.13,900,900
+1417,516,22,Replace Suspension Bushing,02:30:00,02:33:36,2.50,2.56,1750,1750
+1418,516,25,Replace Tie Rod & Rack End,01:30:00,01:45:00,1.50,1.75,1150,1150
+1419,516,18,Wheel Alignment,01:00:00,01:09:36,1.00,1.16,900,900
+1420,517,1,Change Oil,00:45:00,00:49:48,0.75,0.83,850,850
+1421,517,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:36,0.50,0.51,600,600
+1422,518,51,Replace Valve Cover Gasket,01:45:00,01:49:12,1.75,1.82,1600,1600
+1423,518,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:09:36,1.00,1.16,1350,1350
+1424,519,13,Brake Service & Cleaning,01:15:00,01:14:24,1.25,1.24,750,750
+1425,519,15,Replace Brake Shoes,01:00:00,01:15:00,1.00,1.25,600,600
+1426,519,18,Wheel Alignment,01:00:00,00:58:48,1.00,0.98,1050,1050
+1427,520,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:10:48,3.00,3.18,3700,3700
+1428,520,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,600,600
+1429,521,51,Replace Valve Cover Gasket,01:45:00,01:35:24,1.75,1.59,1950,1950
+1430,521,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:53:24,1.00,0.89,1000,1000
+1431,521,1,Change Oil,00:45:00,00:51:00,0.75,0.85,600,600
+1432,522,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:51:36,3.00,2.86,2300,2300
+1433,523,36,Down Clutch / Pulldown Transmission,04:30:00,03:58:12,4.50,3.97,3700,3700
+1434,524,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:33:36,3.00,2.56,2150,2150
+1435,525,1,Change Oil,00:45:00,00:40:12,0.75,0.67,550,550
+1436,525,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,450,450
+1437,525,18,Wheel Alignment,01:00:00,01:12:36,1.00,1.21,950,950
+1438,526,22,Replace Suspension Bushing,02:30:00,02:26:24,2.50,2.44,1950,1950
+1439,526,23,Replace Tie Rod End,01:00:00,00:55:48,1.00,0.93,1100,1100
+1440,526,18,Wheel Alignment,01:00:00,01:09:00,1.00,1.15,850,850
+1441,527,22,Replace Suspension Bushing,02:30:00,02:25:48,2.50,2.43,1450,1450
+1442,527,23,Replace Tie Rod End,01:00:00,01:06:00,1.00,1.10,1100,1100
+1443,527,18,Wheel Alignment,01:00:00,01:00:00,1.00,1.00,1250,1250
+1444,527,21,Replace Shock Absorbers,02:00:00,02:16:12,2.00,2.27,1450,1450
+1445,528,36,Down Clutch / Pulldown Transmission,04:30:00,04:22:48,4.50,4.38,3150,3150
+1446,528,2,Change ATF / Transmission Fluid,00:45:00,00:54:36,0.75,0.91,800,800
+1447,529,1,Change Oil,00:45:00,00:51:00,0.75,0.85,650,650
+1448,529,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,700,700
+1449,530,1,Change Oil,00:45:00,00:53:24,0.75,0.89,800,800
+1450,530,58,General Mechanical Inspection & Check-Up,00:30:00,00:26:24,0.50,0.44,450,450
+1451,531,51,Replace Valve Cover Gasket,01:45:00,01:50:24,1.75,1.84,1700,1700
+1452,531,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:54:36,1.00,0.91,1100,1100
+1453,532,22,Replace Suspension Bushing,02:30:00,02:25:12,2.50,2.42,2300,2300
+1454,532,23,Replace Tie Rod End,01:00:00,01:00:00,1.00,1.00,1050,1050
+1455,532,18,Wheel Alignment,01:00:00,01:10:48,1.00,1.18,950,950
+1456,532,21,Replace Shock Absorbers,02:00:00,01:49:12,2.00,1.82,1050,1050
+1457,533,36,Down Clutch / Pulldown Transmission,04:30:00,04:11:24,4.50,4.19,3650,3650
+1458,533,2,Change ATF / Transmission Fluid,00:45:00,00:51:00,0.75,0.85,750,750
+1459,534,1,Change Oil,00:45:00,00:41:24,0.75,0.69,850,850
+1460,534,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,600,600
+1461,534,3,Replace Fuel Filter,00:45:00,00:54:00,0.75,0.90,550,550
+1462,534,5,Replace Cabin Filter,00:15:00,00:16:12,0.25,0.27,200,200
+1463,535,1,Change Oil,00:45:00,00:39:00,0.75,0.65,750,750
+1464,535,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,700,700
+1465,535,3,Replace Fuel Filter,00:45:00,00:51:36,0.75,0.86,2200,2200
+1466,536,22,Replace Suspension Bushing,02:30:00,02:10:12,2.50,2.17,1600,1600
+1467,536,23,Replace Tie Rod End,01:00:00,00:58:12,1.00,0.97,1300,1300
+1468,536,18,Wheel Alignment,01:00:00,01:09:00,1.00,1.15,1000,1000
+1469,536,21,Replace Shock Absorbers,02:00:00,02:28:12,2.00,2.47,1100,1100
+1470,537,53,Top Overhaul,14:00:00,15:36:36,14.00,15.61,11800,11800
+1471,538,36,Down Clutch / Pulldown Transmission,04:30:00,04:24:00,4.50,4.40,4500,4500
+1472,538,2,Change ATF / Transmission Fluid,00:45:00,00:45:36,0.75,0.76,650,650
+1473,539,22,Replace Suspension Bushing,02:30:00,02:25:12,2.50,2.42,2150,2150
+1474,539,25,Replace Tie Rod & Rack End,01:30:00,01:43:48,1.50,1.73,1000,1000
+1475,539,18,Wheel Alignment,01:00:00,01:10:12,1.00,1.17,1150,1150
+1476,540,13,Brake Service & Cleaning,01:15:00,01:24:36,1.25,1.41,1050,1050
+1477,540,15,Replace Brake Shoes,01:00:00,00:55:12,1.00,0.92,750,750
+1478,541,1,Change Oil,00:45:00,00:51:00,0.75,0.85,850,850
+1479,541,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,550,550
+1480,542,1,Change Oil,00:45:00,00:43:12,0.75,0.72,750,750
+1481,542,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:00,0.50,0.45,650,650
+1482,543,51,Replace Valve Cover Gasket,01:45:00,01:31:12,1.75,1.52,1450,1450
+1483,543,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:54:36,1.00,0.91,1050,1050
+1484,544,13,Brake Service & Cleaning,01:15:00,01:09:36,1.25,1.16,1150,1150
+1485,544,15,Replace Brake Shoes,01:00:00,00:58:12,1.00,0.97,950,950
+1486,545,22,Replace Suspension Bushing,02:30:00,02:08:24,2.50,2.14,1800,1800
+1487,545,23,Replace Tie Rod End,01:00:00,01:12:36,1.00,1.21,1200,1200
+1488,545,18,Wheel Alignment,01:00:00,01:15:00,1.00,1.25,1200,1200
+1489,546,22,Replace Suspension Bushing,02:30:00,03:01:48,2.50,3.03,2100,2100
+1490,546,23,Replace Tie Rod End,01:00:00,01:10:48,1.00,1.18,900,900
+1491,546,18,Wheel Alignment,01:00:00,00:54:36,1.00,0.91,1100,1100
+1492,547,13,Brake Service & Cleaning,01:15:00,01:10:48,1.25,1.18,900,900
+1493,547,15,Replace Brake Shoes,01:00:00,01:07:12,1.00,1.12,800,800
+1494,548,1,Change Oil,00:45:00,00:45:00,0.75,0.75,650,650
+1495,548,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,400,400
+1496,548,3,Replace Fuel Filter,00:45:00,00:46:12,0.75,0.77,550,550
+1497,548,4,Replace Air Filter,00:15:00,00:17:24,0.25,0.29,550,550
+1498,548,5,Replace Cabin Filter,00:15:00,00:15:00,0.25,0.25,200,200
+1499,549,13,Brake Service & Cleaning,01:15:00,01:05:24,1.25,1.09,1000,1000
+1500,549,15,Replace Brake Shoes,01:00:00,01:08:24,1.00,1.14,700,700
+1501,550,22,Replace Suspension Bushing,02:30:00,02:21:00,2.50,2.35,1600,1600
+1502,550,23,Replace Tie Rod End,01:00:00,01:05:24,1.00,1.09,1050,1050
+1503,550,18,Wheel Alignment,01:00:00,01:04:12,1.00,1.07,850,850
+1504,550,21,Replace Shock Absorbers,02:00:00,02:13:12,2.00,2.22,1450,1450
+1505,551,22,Replace Suspension Bushing,02:30:00,02:32:24,2.50,2.54,1600,1600
+1506,551,23,Replace Tie Rod End,01:00:00,01:12:00,1.00,1.20,1300,1300
+1507,551,18,Wheel Alignment,01:00:00,01:07:48,1.00,1.13,1300,1300
+1508,552,36,Down Clutch / Pulldown Transmission,04:30:00,04:28:48,4.50,4.48,4750,4750
+1509,553,1,Change Oil,00:45:00,00:50:24,0.75,0.84,550,550
+1510,553,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,500,500
+1511,554,36,Down Clutch / Pulldown Transmission,04:30:00,04:35:24,4.50,4.59,4100,4100
+1512,555,22,Replace Suspension Bushing,02:30:00,02:18:36,2.50,2.31,2050,2050
+1513,555,23,Replace Tie Rod End,01:00:00,00:56:24,1.00,0.94,1000,1000
+1514,555,18,Wheel Alignment,01:00:00,00:55:48,1.00,0.93,800,800
+1515,556,1,Change Oil,00:45:00,00:42:36,0.75,0.71,750,750
+1516,556,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,600,600
+1517,556,18,Wheel Alignment,01:00:00,01:03:00,1.00,1.05,1200,1200
+1518,557,1,Change Oil,00:45:00,00:40:12,0.75,0.67,550,550
+1519,557,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,600,600
+1520,558,1,Change Oil,00:45:00,00:51:00,0.75,0.85,600,600
+1521,558,58,General Mechanical Inspection & Check-Up,00:30:00,00:26:24,0.50,0.44,550,550
+1522,559,13,Brake Service & Cleaning,01:15:00,01:26:24,1.25,1.44,700,700
+1523,559,15,Replace Brake Shoes,01:00:00,00:55:48,1.00,0.93,1050,1050
+1524,559,18,Wheel Alignment,01:00:00,00:58:12,1.00,0.97,800,800
+1525,560,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:26:24,3.00,3.44,2600,2600
+1526,561,13,Brake Service & Cleaning,01:15:00,01:28:12,1.25,1.47,900,900
+1527,561,15,Replace Brake Shoes,01:00:00,00:55:48,1.00,0.93,800,800
+1528,562,13,Brake Service & Cleaning,01:15:00,01:17:24,1.25,1.29,650,650
+1529,562,15,Replace Brake Shoes,01:00:00,00:56:24,1.00,0.94,750,750
+1530,563,53,Top Overhaul,14:00:00,16:19:48,14.00,16.33,13800,13800
+1531,563,12,Replace Spark Plugs,00:30:00,00:33:00,0.50,0.55,300,300
+1532,564,36,Down Clutch / Pulldown Transmission,04:30:00,04:25:12,4.50,4.42,3000,3000
+1533,565,1,Change Oil,00:45:00,00:44:24,0.75,0.74,500,500
+1534,565,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,550,550
+1535,565,3,Replace Fuel Filter,00:45:00,00:52:12,0.75,0.87,550,550
+1536,565,5,Replace Cabin Filter,00:15:00,00:13:12,0.25,0.22,200,200
+1537,566,53,Top Overhaul,14:00:00,12:48:36,14.00,12.81,18850,18850
+1538,566,12,Replace Spark Plugs,00:30:00,00:26:24,0.50,0.44,250,250
+1539,567,1,Change Oil,00:45:00,00:46:12,0.75,0.77,600,600
+1540,567,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,400,400
+1541,567,3,Replace Fuel Filter,00:45:00,00:47:24,0.75,0.79,550,550
+1542,567,4,Replace Air Filter,00:15:00,00:14:24,0.25,0.24,550,550
+1543,567,5,Replace Cabin Filter,00:15:00,00:15:00,0.25,0.25,200,200
+1544,568,51,Replace Valve Cover Gasket,01:45:00,01:48:00,1.75,1.80,1350,1350
+1545,568,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:54:36,1.00,0.91,900,900
+1546,569,13,Brake Service & Cleaning,01:15:00,01:29:24,1.25,1.49,1150,1150
+1547,569,14,Replace Brake Pads,01:00:00,01:13:48,1.00,1.23,1000,1000
+1548,569,18,Wheel Alignment,01:00:00,01:01:12,1.00,1.02,1250,1250
+1549,570,36,Down Clutch / Pulldown Transmission,04:30:00,04:50:24,4.50,4.84,3050,3050
+1550,571,1,Change Oil,00:45:00,00:40:12,0.75,0.67,650,650
+1551,571,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,550,550
+1552,572,13,Brake Service & Cleaning,01:15:00,01:09:00,1.25,1.15,1000,1000
+1553,572,15,Replace Brake Shoes,01:00:00,01:06:00,1.00,1.10,1000,1000
+1554,573,1,Change Oil,00:45:00,00:51:36,0.75,0.86,650,650
+1555,573,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,650,650
+1556,574,1,Change Oil,00:45:00,00:42:36,0.75,0.71,700,700
+1557,574,58,General Mechanical Inspection & Check-Up,00:30:00,00:29:24,0.50,0.49,600,600
+1558,575,13,Brake Service & Cleaning,01:15:00,01:24:36,1.25,1.41,850,850
+1559,575,14,Replace Brake Pads,01:00:00,01:06:36,1.00,1.11,1050,1050
+1560,576,13,Brake Service & Cleaning,01:15:00,01:09:00,1.25,1.15,600,600
+1561,576,14,Replace Brake Pads,01:00:00,01:05:24,1.00,1.09,700,700
+1562,576,18,Wheel Alignment,01:00:00,01:07:48,1.00,1.13,950,950
+1563,577,51,Replace Valve Cover Gasket,01:45:00,02:08:24,1.75,2.14,1450,1450
+1564,577,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:01:12,1.00,1.02,1050,1050
+1565,578,36,Down Clutch / Pulldown Transmission,04:30:00,04:51:00,4.50,4.85,3750,3750
+1566,579,1,Change Oil,00:45:00,00:49:12,0.75,0.82,750,750
+1567,579,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:00,0.50,0.60,450,450
+1568,579,3,Replace Fuel Filter,00:45:00,00:51:36,0.75,0.86,550,550
+1569,579,4,Replace Air Filter,00:15:00,00:14:24,0.25,0.24,550,550
+1570,580,13,Brake Service & Cleaning,01:15:00,01:16:12,1.25,1.27,650,650
+1571,580,15,Replace Brake Shoes,01:00:00,00:59:24,1.00,0.99,600,600
+1572,581,22,Replace Suspension Bushing,02:30:00,02:13:48,2.50,2.23,1350,1350
+1573,581,23,Replace Tie Rod End,01:00:00,01:06:36,1.00,1.11,750,750
+1574,581,18,Wheel Alignment,01:00:00,00:57:00,1.00,0.95,1300,1300
+1575,582,1,Change Oil,00:45:00,00:48:36,0.75,0.81,600,600
+1576,582,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,700,700
+1577,583,36,Down Clutch / Pulldown Transmission,04:30:00,04:44:24,4.50,4.74,3100,3100
+1578,583,1,Change Oil,00:45:00,00:51:00,0.75,0.85,650,650
+1579,584,36,Down Clutch / Pulldown Transmission,04:30:00,05:04:48,4.50,5.08,3900,3900
+1580,585,13,Brake Service & Cleaning,01:15:00,01:16:48,1.25,1.28,600,600
+1581,585,15,Replace Brake Shoes,01:00:00,01:06:36,1.00,1.11,900,900
+1582,586,1,Change Oil,00:45:00,00:42:00,0.75,0.70,850,850
+1583,586,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,650,650
+1584,586,18,Wheel Alignment,01:00:00,01:04:12,1.00,1.07,1200,1200
+1585,587,22,Replace Suspension Bushing,02:30:00,02:45:00,2.50,2.75,1650,1650
+1586,587,23,Replace Tie Rod End,01:00:00,00:55:12,1.00,0.92,1050,1050
+1587,587,18,Wheel Alignment,01:00:00,01:10:12,1.00,1.17,950,950
+1588,587,21,Replace Shock Absorbers,02:00:00,01:52:12,2.00,1.87,1600,1600
+1589,588,1,Change Oil,00:45:00,00:48:36,0.75,0.81,700,700
+1590,588,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:00,0.50,0.45,500,500
+1591,589,1,Change Oil,00:45:00,00:52:12,0.75,0.87,700,700
+1592,589,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,550,550
+1593,589,18,Wheel Alignment,01:00:00,00:53:24,1.00,0.89,900,900
+1594,590,1,Change Oil,00:45:00,00:46:48,0.75,0.78,800,800
+1595,590,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,400,400
+1596,590,3,Replace Fuel Filter,00:45:00,00:47:24,0.75,0.79,550,550
+1597,590,4,Replace Air Filter,00:15:00,00:16:12,0.25,0.27,550,550
+1598,591,36,Down Clutch / Pulldown Transmission,04:30:00,03:53:24,4.50,3.89,4400,4400
+1599,591,2,Change ATF / Transmission Fluid,00:45:00,00:43:12,0.75,0.72,650,650
+1600,592,36,Down Clutch / Pulldown Transmission,04:30:00,04:13:48,4.50,4.23,4400,4400
+1601,593,13,Brake Service & Cleaning,01:15:00,01:07:48,1.25,1.13,750,750
+1602,593,15,Replace Brake Shoes,01:00:00,01:04:12,1.00,1.07,650,650
+1603,593,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:46:48,2.00,1.78,3850,3850
+1604,594,1,Change Oil,00:45:00,00:40:48,0.75,0.68,800,800
+1605,594,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,650,650
+1606,594,3,Replace Fuel Filter,00:45:00,00:43:12,0.75,0.72,550,550
+1607,594,4,Replace Air Filter,00:15:00,00:15:00,0.25,0.25,550,550
+1608,594,5,Replace Cabin Filter,00:15:00,00:16:48,0.25,0.28,200,200
+1609,595,13,Brake Service & Cleaning,01:15:00,01:15:36,1.25,1.26,800,800
+1610,595,14,Replace Brake Pads,01:00:00,00:58:48,1.00,0.98,700,700
+1611,596,22,Replace Suspension Bushing,02:30:00,03:04:12,2.50,3.07,1250,1250
+1612,596,23,Replace Tie Rod End,01:00:00,00:59:24,1.00,0.99,1100,1100
+1613,596,18,Wheel Alignment,01:00:00,00:55:48,1.00,0.93,800,800
+1614,596,21,Replace Shock Absorbers,02:00:00,01:56:24,2.00,1.94,1650,1650
+1615,597,22,Replace Suspension Bushing,02:30:00,02:45:36,2.50,2.76,1800,1800
+1616,597,23,Replace Tie Rod End,01:00:00,01:11:24,1.00,1.19,1400,1400
+1617,597,18,Wheel Alignment,01:00:00,00:54:36,1.00,0.91,1050,1050
+1618,598,13,Brake Service & Cleaning,01:15:00,01:04:12,1.25,1.07,1000,1000
+1619,598,15,Replace Brake Shoes,01:00:00,01:00:00,1.00,1.00,650,650
+1620,598,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:49:48,2.00,1.83,3350,3350
+1621,599,22,Replace Suspension Bushing,02:30:00,03:06:36,2.50,3.11,1550,1550
+1622,599,23,Replace Tie Rod End,01:00:00,00:52:12,1.00,0.87,1000,1000
+1623,599,18,Wheel Alignment,01:00:00,01:14:24,1.00,1.24,850,850
+1624,600,22,Replace Suspension Bushing,02:30:00,02:15:36,2.50,2.26,1750,1750
+1625,600,23,Replace Tie Rod End,01:00:00,01:01:12,1.00,1.02,1000,1000
+1626,600,18,Wheel Alignment,01:00:00,01:07:48,1.00,1.13,800,800
+1627,601,22,Replace Suspension Bushing,02:30:00,02:37:12,2.50,2.62,2150,2150
+1628,601,23,Replace Tie Rod End,01:00:00,01:10:12,1.00,1.17,950,950
+1629,601,18,Wheel Alignment,01:00:00,01:02:24,1.00,1.04,1050,1050
+1630,601,21,Replace Shock Absorbers,02:00:00,02:28:48,2.00,2.48,1600,1600
+1631,602,53,Top Overhaul,14:00:00,16:34:48,14.00,16.58,17400,17400
+1632,603,36,Down Clutch / Pulldown Transmission,04:30:00,05:09:00,4.50,5.15,4250,4250
+1633,604,13,Brake Service & Cleaning,01:15:00,01:29:24,1.25,1.49,650,650
+1634,604,15,Replace Brake Shoes,01:00:00,01:06:36,1.00,1.11,700,700
+1635,604,18,Wheel Alignment,01:00:00,01:08:24,1.00,1.14,1100,1100
+1636,605,36,Down Clutch / Pulldown Transmission,04:30:00,05:13:48,4.50,5.23,4300,4300
+1637,606,13,Brake Service & Cleaning,01:15:00,01:22:48,1.25,1.38,850,850
+1638,606,15,Replace Brake Shoes,01:00:00,00:54:36,1.00,0.91,950,950
+1639,607,22,Replace Suspension Bushing,02:30:00,02:42:36,2.50,2.71,1450,1450
+1640,607,23,Replace Tie Rod End,01:00:00,01:05:24,1.00,1.09,1050,1050
+1641,607,18,Wheel Alignment,01:00:00,00:51:36,1.00,0.86,1100,1100
+1642,607,21,Replace Shock Absorbers,02:00:00,02:16:12,2.00,2.27,1300,1300
+1643,608,13,Brake Service & Cleaning,01:15:00,01:18:00,1.25,1.30,1150,1150
+1644,608,15,Replace Brake Shoes,01:00:00,00:57:00,1.00,0.95,900,900
+1645,609,13,Brake Service & Cleaning,01:15:00,01:18:00,1.25,1.30,700,700
+1646,609,15,Replace Brake Shoes,01:00:00,01:12:00,1.00,1.20,600,600
+1647,610,1,Change Oil,00:45:00,00:42:36,0.75,0.71,650,650
+1648,610,58,General Mechanical Inspection & Check-Up,00:30:00,00:29:24,0.50,0.49,550,550
+1649,611,22,Replace Suspension Bushing,02:30:00,02:35:24,2.50,2.59,1850,1850
+1650,611,25,Replace Tie Rod & Rack End,01:30:00,01:28:12,1.50,1.47,1150,1150
+1651,611,18,Wheel Alignment,01:00:00,01:10:12,1.00,1.17,1000,1000
+1652,611,21,Replace Shock Absorbers,02:00:00,01:46:48,2.00,1.78,1450,1450
+1653,612,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:37:12,3.00,2.62,2900,2900
+1654,613,1,Change Oil,00:45:00,00:44:24,0.75,0.74,500,500
+1655,613,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,700,700
+1656,614,22,Replace Suspension Bushing,02:30:00,02:36:00,2.50,2.60,2100,2100
+1657,614,23,Replace Tie Rod End,01:00:00,00:52:12,1.00,0.87,900,900
+1658,614,18,Wheel Alignment,01:00:00,01:12:00,1.00,1.20,850,850
+1659,614,21,Replace Shock Absorbers,02:00:00,01:46:12,2.00,1.77,1100,1100
+1660,615,1,Change Oil,00:45:00,00:42:36,0.75,0.71,700,700
+1661,615,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,500,500
+1662,615,18,Wheel Alignment,01:00:00,01:06:36,1.00,1.11,1450,1450
+1663,616,22,Replace Suspension Bushing,02:30:00,02:36:36,2.50,2.61,2050,2050
+1664,616,23,Replace Tie Rod End,01:00:00,00:51:36,1.00,0.86,1000,1000
+1665,616,18,Wheel Alignment,01:00:00,00:58:48,1.00,0.98,1000,1000
+1666,617,53,Top Overhaul,14:00:00,17:28:48,14.00,17.48,19400,19400
+1667,618,22,Replace Suspension Bushing,02:30:00,02:12:36,2.50,2.21,1400,1400
+1668,618,23,Replace Tie Rod End,01:00:00,00:51:36,1.00,0.86,1100,1100
+1669,618,18,Wheel Alignment,01:00:00,01:03:00,1.00,1.05,1400,1400
+1670,619,36,Down Clutch / Pulldown Transmission,04:30:00,04:24:00,4.50,4.40,3100,3100
+1671,620,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:48:00,3.00,2.80,2050,2050
+1672,620,58,General Mechanical Inspection & Check-Up,00:30:00,00:32:24,0.50,0.54,750,750
+1673,621,22,Replace Suspension Bushing,02:30:00,02:08:24,2.50,2.14,1750,1750
+1674,621,23,Replace Tie Rod End,01:00:00,01:06:00,1.00,1.10,1150,1150
+1675,621,18,Wheel Alignment,01:00:00,01:03:36,1.00,1.06,1000,1000
+1676,621,21,Replace Shock Absorbers,02:00:00,02:20:24,2.00,2.34,1200,1200
+1677,622,36,Down Clutch / Pulldown Transmission,04:30:00,04:21:36,4.50,4.36,3950,3950
+1678,623,1,Change Oil,00:45:00,00:39:00,0.75,0.65,850,850
+1679,623,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,600,600
+1680,624,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:25:48,3.00,3.43,2750,2750
+1681,625,13,Brake Service & Cleaning,01:15:00,01:24:00,1.25,1.40,950,950
+1682,625,15,Replace Brake Shoes,01:00:00,01:09:00,1.00,1.15,1050,1050
+1683,626,1,Change Oil,00:45:00,00:54:00,0.75,0.90,450,450
+1684,626,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,600,600
+1685,626,18,Wheel Alignment,01:00:00,00:56:24,1.00,0.94,950,950
+1686,627,36,Down Clutch / Pulldown Transmission,04:30:00,04:52:12,4.50,4.87,3600,3600
+1687,628,13,Brake Service & Cleaning,01:15:00,01:13:48,1.25,1.23,1150,1150
+1688,628,15,Replace Brake Shoes,01:00:00,01:15:00,1.00,1.25,700,700
+1689,629,53,Top Overhaul,14:00:00,15:04:48,14.00,15.08,15250,15250
+1690,630,36,Down Clutch / Pulldown Transmission,04:30:00,04:59:24,4.50,4.99,3450,3450
+1691,631,22,Replace Suspension Bushing,02:30:00,02:55:12,2.50,2.92,1300,1300
+1692,631,23,Replace Tie Rod End,01:00:00,01:00:00,1.00,1.00,1000,1000
+1693,631,18,Wheel Alignment,01:00:00,00:59:24,1.00,0.99,1200,1200
+1694,632,1,Change Oil,00:45:00,00:40:12,0.75,0.67,500,500
+1695,632,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:36,0.50,0.61,500,500
+1696,633,22,Replace Suspension Bushing,02:30:00,02:23:24,2.50,2.39,1350,1350
+1697,633,23,Replace Tie Rod End,01:00:00,01:01:12,1.00,1.02,1200,1200
+1698,633,18,Wheel Alignment,01:00:00,01:06:36,1.00,1.11,950,950
+1699,633,21,Replace Shock Absorbers,02:00:00,01:49:48,2.00,1.83,1750,1750
+1700,634,1,Change Oil,00:45:00,00:52:12,0.75,0.87,700,700
+1701,634,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,750,750
+1702,634,3,Replace Fuel Filter,00:45:00,00:52:48,0.75,0.88,550,550
+1703,634,4,Replace Air Filter,00:15:00,00:13:48,0.25,0.23,550,550
+1704,634,5,Replace Cabin Filter,00:15:00,00:17:24,0.25,0.29,200,200
+1705,635,13,Brake Service & Cleaning,01:15:00,01:13:48,1.25,1.23,700,700
+1706,635,15,Replace Brake Shoes,01:00:00,01:03:00,1.00,1.05,700,700
+1707,635,18,Wheel Alignment,01:00:00,01:01:12,1.00,1.02,1150,1150
+1708,636,1,Change Oil,00:45:00,00:45:36,0.75,0.76,700,700
+1709,636,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,650,650
+1710,637,1,Change Oil,00:45:00,00:49:48,0.75,0.83,550,550
+1711,637,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:00,0.50,0.60,700,700
+1712,637,3,Replace Fuel Filter,00:45:00,00:49:48,0.75,0.83,550,550
+1713,637,4,Replace Air Filter,00:15:00,00:16:12,0.25,0.27,550,550
+1714,637,5,Replace Cabin Filter,00:15:00,00:13:12,0.25,0.22,200,200
+1715,638,22,Replace Suspension Bushing,02:30:00,02:20:24,2.50,2.34,1550,1550
+1716,638,25,Replace Tie Rod & Rack End,01:30:00,01:41:24,1.50,1.69,800,800
+1717,638,18,Wheel Alignment,01:00:00,01:02:24,1.00,1.04,1300,1300
+1718,638,21,Replace Shock Absorbers,02:00:00,02:27:36,2.00,2.46,1600,1600
+1719,639,22,Replace Suspension Bushing,02:30:00,02:24:36,2.50,2.41,1600,1600
+1720,639,23,Replace Tie Rod End,01:00:00,00:56:24,1.00,0.94,1150,1150
+1721,639,18,Wheel Alignment,01:00:00,01:13:12,1.00,1.22,950,950
+1722,639,21,Replace Shock Absorbers,02:00:00,02:07:12,2.00,2.12,1750,1750
+1723,640,1,Change Oil,00:45:00,00:39:36,0.75,0.66,750,750
+1724,640,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,600,600
+1725,641,22,Replace Suspension Bushing,02:30:00,02:40:48,2.50,2.68,1300,1300
+1726,641,23,Replace Tie Rod End,01:00:00,01:03:36,1.00,1.06,1050,1050
+1727,641,18,Wheel Alignment,01:00:00,00:51:00,1.00,0.85,1350,1350
+1728,642,36,Down Clutch / Pulldown Transmission,04:30:00,04:20:24,4.50,4.34,3100,3100
+1729,643,1,Change Oil,00:45:00,00:48:36,0.75,0.81,550,550
+1730,643,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,600,600
+1731,643,18,Wheel Alignment,01:00:00,01:06:00,1.00,1.10,1150,1150
+1732,644,13,Brake Service & Cleaning,01:15:00,01:13:12,1.25,1.22,650,650
+1733,644,14,Replace Brake Pads,01:00:00,00:55:12,1.00,0.92,950,950
+1734,645,36,Down Clutch / Pulldown Transmission,04:30:00,04:40:12,4.50,4.67,3700,3700
+1735,646,1,Change Oil,00:45:00,00:39:00,0.75,0.65,650,650
+1736,646,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,450,450
+1737,646,3,Replace Fuel Filter,00:45:00,00:55:12,0.75,0.92,550,550
+1738,646,4,Replace Air Filter,00:15:00,00:14:24,0.25,0.24,550,550
+1739,646,5,Replace Cabin Filter,00:15:00,00:18:00,0.25,0.30,200,200
+1740,647,51,Replace Valve Cover Gasket,01:45:00,01:54:00,1.75,1.90,1000,1000
+1741,647,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:59:24,1.00,0.99,1350,1350
+1742,648,13,Brake Service & Cleaning,01:15:00,01:31:48,1.25,1.53,1250,1250
+1743,648,15,Replace Brake Shoes,01:00:00,01:13:48,1.00,1.23,650,650
+1744,649,51,Replace Valve Cover Gasket,01:45:00,01:48:36,1.75,1.81,1150,1150
+1745,649,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:03:00,1.00,1.05,850,850
+1746,649,1,Change Oil,00:45:00,00:49:12,0.75,0.82,650,650
+1747,650,36,Down Clutch / Pulldown Transmission,04:30:00,04:41:24,4.50,4.69,4900,4900
+1748,650,2,Change ATF / Transmission Fluid,00:45:00,00:55:48,0.75,0.93,800,800
+1749,651,36,Down Clutch / Pulldown Transmission,04:30:00,04:00:00,4.50,4.00,3100,3100
+1750,652,1,Change Oil,00:45:00,00:39:00,0.75,0.65,650,650
+1751,652,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,500,500
+1752,653,22,Replace Suspension Bushing,02:30:00,02:23:24,2.50,2.39,2500,2500
+1753,653,23,Replace Tie Rod End,01:00:00,00:58:12,1.00,0.97,1550,1550
+1754,653,18,Wheel Alignment,01:00:00,01:12:00,1.00,1.20,900,900
+1755,653,21,Replace Shock Absorbers,02:00:00,01:55:48,2.00,1.93,2050,2050
+1756,654,51,Replace Valve Cover Gasket,01:45:00,01:55:48,1.75,1.93,950,950
+1757,654,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:08:24,1.00,1.14,1050,1050
+1758,654,1,Change Oil,00:45:00,00:52:12,0.75,0.87,850,850
+1759,655,1,Change Oil,00:45:00,00:39:36,0.75,0.66,800,800
+1760,655,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,500,500
+1761,656,13,Brake Service & Cleaning,01:15:00,01:14:24,1.25,1.24,900,900
+1762,656,14,Replace Brake Pads,01:00:00,01:09:36,1.00,1.16,700,700
+1763,657,22,Replace Suspension Bushing,02:30:00,02:20:24,2.50,2.34,1650,1650
+1764,657,23,Replace Tie Rod End,01:00:00,01:14:24,1.00,1.24,1250,1250
+1765,657,18,Wheel Alignment,01:00:00,01:07:12,1.00,1.12,950,950
+1766,658,36,Down Clutch / Pulldown Transmission,04:30:00,03:58:48,4.50,3.98,3700,3700
+1767,658,1,Change Oil,00:45:00,00:47:24,0.75,0.79,800,800
+1768,659,51,Replace Valve Cover Gasket,01:45:00,01:49:48,1.75,1.83,1350,1350
+1769,659,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:12:36,1.00,1.21,950,950
+1770,660,36,Down Clutch / Pulldown Transmission,04:30:00,05:21:36,4.50,5.36,3400,3400
+1771,660,2,Change ATF / Transmission Fluid,00:45:00,00:45:36,0.75,0.76,750,750
+1772,661,53,Top Overhaul,14:00:00,17:03:36,14.00,17.06,17050,17050
+1773,662,13,Brake Service & Cleaning,01:15:00,01:33:00,1.25,1.55,900,900
+1774,662,15,Replace Brake Shoes,01:00:00,01:13:48,1.00,1.23,900,900
+1775,662,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:43:48,2.00,1.73,4200,4200
+1776,663,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:47:24,3.00,2.79,2350,2350
+1777,664,13,Brake Service & Cleaning,01:15:00,01:24:00,1.25,1.40,750,750
+1778,664,15,Replace Brake Shoes,01:00:00,01:10:12,1.00,1.17,1050,1050
+1779,664,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:59:24,2.00,1.99,2450,2450
+1780,665,1,Change Oil,00:45:00,00:53:24,0.75,0.89,850,850
+1781,665,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,500,500
+1782,665,18,Wheel Alignment,01:00:00,01:09:36,1.00,1.16,800,800
+1783,666,13,Brake Service & Cleaning,01:15:00,01:21:36,1.25,1.36,800,800
+1784,666,15,Replace Brake Shoes,01:00:00,00:58:12,1.00,0.97,800,800
+1785,666,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:08:24,2.00,2.14,4100,4100
+1786,667,13,Brake Service & Cleaning,01:15:00,01:21:00,1.25,1.35,950,950
+1787,667,15,Replace Brake Shoes,01:00:00,01:11:24,1.00,1.19,750,750
+1788,667,18,Wheel Alignment,01:00:00,00:51:36,1.00,0.86,1000,1000
+1789,668,36,Down Clutch / Pulldown Transmission,04:30:00,04:14:24,4.50,4.24,4700,4700
+1790,668,2,Change ATF / Transmission Fluid,00:45:00,00:40:48,0.75,0.68,650,650
+1791,669,36,Down Clutch / Pulldown Transmission,04:30:00,04:06:00,4.50,4.10,3450,3450
+1792,669,2,Change ATF / Transmission Fluid,00:45:00,00:45:36,0.75,0.76,750,750
+1793,670,1,Change Oil,00:45:00,00:38:24,0.75,0.64,650,650
+1794,670,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,650,650
+1795,671,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:44:24,3.00,3.74,2850,2850
+1796,671,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:00,0.50,0.60,650,650
+1797,672,13,Brake Service & Cleaning,01:15:00,01:20:24,1.25,1.34,550,550
+1798,672,14,Replace Brake Pads,01:00:00,01:03:36,1.00,1.06,950,950
+1799,673,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:27:00,3.00,3.45,2900,2900
+1800,673,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,800,800
+1801,674,22,Replace Suspension Bushing,02:30:00,02:27:36,2.50,2.46,1850,1850
+1802,674,23,Replace Tie Rod End,01:00:00,01:11:24,1.00,1.19,850,850
+1803,674,18,Wheel Alignment,01:00:00,01:12:00,1.00,1.20,1200,1200
+1804,674,21,Replace Shock Absorbers,02:00:00,02:01:48,2.00,2.03,1600,1600
+1805,675,13,Brake Service & Cleaning,01:15:00,01:22:12,1.25,1.37,750,750
+1806,675,15,Replace Brake Shoes,01:00:00,00:58:48,1.00,0.98,1150,1150
+1807,676,22,Replace Suspension Bushing,02:30:00,02:21:36,2.50,2.36,1800,1800
+1808,676,23,Replace Tie Rod End,01:00:00,01:06:00,1.00,1.10,1100,1100
+1809,676,18,Wheel Alignment,01:00:00,00:51:36,1.00,0.86,1200,1200
+1810,677,13,Brake Service & Cleaning,01:15:00,01:06:00,1.25,1.10,800,800
+1811,677,14,Replace Brake Pads,01:00:00,01:13:48,1.00,1.23,1150,1150
+1812,678,22,Replace Suspension Bushing,02:30:00,02:58:12,2.50,2.97,1850,1850
+1813,678,25,Replace Tie Rod & Rack End,01:30:00,01:47:24,1.50,1.79,1050,1050
+1814,678,18,Wheel Alignment,01:00:00,01:03:00,1.00,1.05,1200,1200
+1815,679,22,Replace Suspension Bushing,02:30:00,02:12:36,2.50,2.21,2500,2500
+1816,679,25,Replace Tie Rod & Rack End,01:30:00,01:34:12,1.50,1.57,750,750
+1817,679,18,Wheel Alignment,01:00:00,01:14:24,1.00,1.24,1050,1050
+1818,679,21,Replace Shock Absorbers,02:00:00,01:52:12,2.00,1.87,1800,1800
+1819,680,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:51:36,3.00,2.86,2400,2400
+1820,681,13,Brake Service & Cleaning,01:15:00,01:24:36,1.25,1.41,1000,1000
+1821,681,14,Replace Brake Pads,01:00:00,01:01:48,1.00,1.03,800,800
+1822,681,18,Wheel Alignment,01:00:00,01:00:36,1.00,1.01,950,950
+1823,682,1,Change Oil,00:45:00,00:46:48,0.75,0.78,900,900
+1824,682,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:36,0.50,0.61,450,450
+1825,682,18,Wheel Alignment,01:00:00,01:00:36,1.00,1.01,950,950
+1826,683,36,Down Clutch / Pulldown Transmission,04:30:00,05:01:48,4.50,5.03,4150,4150
+1827,683,2,Change ATF / Transmission Fluid,00:45:00,00:52:12,0.75,0.87,700,700
+1828,684,13,Brake Service & Cleaning,01:15:00,01:31:48,1.25,1.53,800,800
+1829,684,15,Replace Brake Shoes,01:00:00,01:01:48,1.00,1.03,600,600
+1830,685,1,Change Oil,00:45:00,00:54:36,0.75,0.91,650,650
+1831,685,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,550,550
+1832,686,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:03:36,3.00,3.06,2500,2500
+1833,687,1,Change Oil,00:45:00,00:40:48,0.75,0.68,700,700
+1834,687,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,500,500
+1835,688,1,Change Oil,00:45:00,00:43:48,0.75,0.73,550,550
+1836,688,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,450,450
+1837,689,22,Replace Suspension Bushing,02:30:00,02:10:12,2.50,2.17,2050,2050
+1838,689,25,Replace Tie Rod & Rack End,01:30:00,01:45:36,1.50,1.76,1200,1200
+1839,689,18,Wheel Alignment,01:00:00,01:00:00,1.00,1.00,1350,1350
+1840,690,1,Change Oil,00:45:00,00:52:48,0.75,0.88,600,600
+1841,690,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:36,0.50,0.61,500,500
+1842,691,36,Down Clutch / Pulldown Transmission,04:30:00,05:36:36,4.50,5.61,3100,3100
+1843,692,13,Brake Service & Cleaning,01:15:00,01:20:24,1.25,1.34,1350,1350
+1844,692,15,Replace Brake Shoes,01:00:00,01:09:36,1.00,1.16,650,650
+1845,693,13,Brake Service & Cleaning,01:15:00,01:09:36,1.25,1.16,1000,1000
+1846,693,15,Replace Brake Shoes,01:00:00,01:00:36,1.00,1.01,850,850
+1847,693,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:59:24,2.00,1.99,3600,3600
+1848,694,1,Change Oil,00:45:00,00:39:36,0.75,0.66,600,600
+1849,694,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,550,550
+1850,694,18,Wheel Alignment,01:00:00,01:11:24,1.00,1.19,900,900
+1851,695,22,Replace Suspension Bushing,02:30:00,03:04:12,2.50,3.07,2150,2150
+1852,695,23,Replace Tie Rod End,01:00:00,01:06:00,1.00,1.10,950,950
+1853,695,18,Wheel Alignment,01:00:00,01:06:00,1.00,1.10,850,850
+1854,696,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:54:00,3.00,2.90,3200,3200
+1855,697,13,Brake Service & Cleaning,01:15:00,01:09:00,1.25,1.15,950,950
+1856,697,15,Replace Brake Shoes,01:00:00,00:55:48,1.00,0.93,900,900
+1857,698,1,Change Oil,00:45:00,00:55:48,0.75,0.93,600,600
+1858,698,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,450,450
+1859,699,1,Change Oil,00:45:00,00:44:24,0.75,0.74,500,500
+1860,699,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,550,550
+1861,700,1,Change Oil,00:45:00,00:44:24,0.75,0.74,600,600
+1862,700,58,General Mechanical Inspection & Check-Up,00:30:00,00:32:24,0.50,0.54,650,650
+1863,700,3,Replace Fuel Filter,00:45:00,00:39:36,0.75,0.66,550,550
+1864,700,4,Replace Air Filter,00:15:00,00:17:24,0.25,0.29,550,550
+1865,700,5,Replace Cabin Filter,00:15:00,00:16:48,0.25,0.28,200,200
+1866,701,51,Replace Valve Cover Gasket,01:45:00,02:10:48,1.75,2.18,1200,1200
+1867,701,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:11:24,1.00,1.19,950,950
+1868,701,1,Change Oil,00:45:00,00:41:24,0.75,0.69,600,600
+1869,702,13,Brake Service & Cleaning,01:15:00,01:15:00,1.25,1.25,650,650
+1870,702,15,Replace Brake Shoes,01:00:00,01:10:12,1.00,1.17,700,700
+1871,702,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:51:36,2.00,1.86,3750,3750
+1872,703,13,Brake Service & Cleaning,01:15:00,01:06:36,1.25,1.11,750,750
+1873,703,15,Replace Brake Shoes,01:00:00,01:07:48,1.00,1.13,800,800
+1874,704,51,Replace Valve Cover Gasket,01:45:00,01:35:24,1.75,1.59,1450,1450
+1875,704,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:03:00,1.00,1.05,1000,1000
+1876,705,22,Replace Suspension Bushing,02:30:00,02:16:12,2.50,2.27,1200,1200
+1877,705,25,Replace Tie Rod & Rack End,01:30:00,01:46:12,1.50,1.77,1150,1150
+1878,705,18,Wheel Alignment,01:00:00,01:04:12,1.00,1.07,1250,1250
+1879,706,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:06:00,3.00,3.10,2950,2950
+1880,707,1,Change Oil,00:45:00,00:50:24,0.75,0.84,550,550
+1881,707,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:36,0.50,0.51,650,650
+1882,708,1,Change Oil,00:45:00,00:52:48,0.75,0.88,750,750
+1883,708,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,550,550
+1884,708,3,Replace Fuel Filter,00:45:00,00:45:36,0.75,0.76,550,550
+1885,708,4,Replace Air Filter,00:15:00,00:15:36,0.25,0.26,550,550
+1886,708,5,Replace Cabin Filter,00:15:00,00:13:12,0.25,0.22,200,200
+1887,709,22,Replace Suspension Bushing,02:30:00,02:21:36,2.50,2.36,1450,1450
+1888,709,23,Replace Tie Rod End,01:00:00,00:57:00,1.00,0.95,750,750
+1889,709,18,Wheel Alignment,01:00:00,00:55:48,1.00,0.93,1050,1050
+1890,709,21,Replace Shock Absorbers,02:00:00,02:24:36,2.00,2.41,950,950
+1891,710,36,Down Clutch / Pulldown Transmission,04:30:00,03:56:24,4.50,3.94,4700,4700
+1892,710,2,Change ATF / Transmission Fluid,00:45:00,00:51:00,0.75,0.85,600,600
+1893,711,36,Down Clutch / Pulldown Transmission,04:30:00,03:50:24,4.50,3.84,3100,3100
+1894,712,1,Change Oil,00:45:00,00:49:12,0.75,0.82,600,600
+1895,712,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,500,500
+1896,712,18,Wheel Alignment,01:00:00,01:07:48,1.00,1.13,1100,1100
+1897,713,22,Replace Suspension Bushing,02:30:00,02:13:12,2.50,2.22,1450,1450
+1898,713,23,Replace Tie Rod End,01:00:00,01:06:00,1.00,1.10,1050,1050
+1899,713,18,Wheel Alignment,01:00:00,01:12:36,1.00,1.21,800,800
+1900,713,21,Replace Shock Absorbers,02:00:00,01:57:36,2.00,1.96,1150,1150
+1901,714,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:19:12,3.00,3.32,2700,2700
+1902,714,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,650,650
+1903,715,13,Brake Service & Cleaning,01:15:00,01:10:48,1.25,1.18,1050,1050
+1904,715,15,Replace Brake Shoes,01:00:00,00:54:00,1.00,0.90,800,800
+1905,716,1,Change Oil,00:45:00,00:48:36,0.75,0.81,550,550
+1906,716,58,General Mechanical Inspection & Check-Up,00:30:00,00:35:24,0.50,0.59,650,650
+1907,717,13,Brake Service & Cleaning,01:15:00,01:08:24,1.25,1.14,850,850
+1908,717,15,Replace Brake Shoes,01:00:00,00:51:00,1.00,0.85,750,750
+1909,717,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:07:48,2.00,2.13,2850,2850
+1910,718,22,Replace Suspension Bushing,02:30:00,02:54:36,2.50,2.91,1700,1700
+1911,718,23,Replace Tie Rod End,01:00:00,00:53:24,1.00,0.89,1250,1250
+1912,718,18,Wheel Alignment,01:00:00,01:14:24,1.00,1.24,1100,1100
+1913,718,21,Replace Shock Absorbers,02:00:00,01:44:24,2.00,1.74,1800,1800
+1914,719,22,Replace Suspension Bushing,02:30:00,02:18:36,2.50,2.31,1350,1350
+1915,719,23,Replace Tie Rod End,01:00:00,01:10:48,1.00,1.18,1000,1000
+1916,719,18,Wheel Alignment,01:00:00,01:09:00,1.00,1.15,800,800
+1917,719,21,Replace Shock Absorbers,02:00:00,02:19:12,2.00,2.32,1350,1350
+1918,720,1,Change Oil,00:45:00,00:42:00,0.75,0.70,700,700
+1919,720,58,General Mechanical Inspection & Check-Up,00:30:00,00:35:24,0.50,0.59,650,650
+1920,721,51,Replace Valve Cover Gasket,01:45:00,01:34:48,1.75,1.58,1300,1300
+1921,721,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:56:24,1.00,0.94,1000,1000
+1922,721,1,Change Oil,00:45:00,00:46:12,0.75,0.77,700,700
+1923,722,13,Brake Service & Cleaning,01:15:00,01:04:48,1.25,1.08,750,750
+1924,722,15,Replace Brake Shoes,01:00:00,00:51:36,1.00,0.86,900,900
+1925,723,22,Replace Suspension Bushing,02:30:00,02:33:00,2.50,2.55,2650,2650
+1926,723,23,Replace Tie Rod End,01:00:00,00:51:36,1.00,0.86,1000,1000
+1927,723,18,Wheel Alignment,01:00:00,00:52:48,1.00,0.88,1000,1000
+1928,723,21,Replace Shock Absorbers,02:00:00,01:46:12,2.00,1.77,1400,1400
+1929,724,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:43:12,3.00,2.72,2550,2550
+1930,725,13,Brake Service & Cleaning,01:15:00,01:17:24,1.25,1.29,1000,1000
+1931,725,15,Replace Brake Shoes,01:00:00,00:56:24,1.00,0.94,1100,1100
+1932,725,18,Wheel Alignment,01:00:00,00:55:48,1.00,0.93,800,800
+1933,726,13,Brake Service & Cleaning,01:15:00,01:27:36,1.25,1.46,1300,1300
+1934,726,15,Replace Brake Shoes,01:00:00,01:04:48,1.00,1.08,850,850
+1935,726,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:51:00,2.00,1.85,2250,2250
+1936,727,13,Brake Service & Cleaning,01:15:00,01:10:12,1.25,1.17,950,950
+1937,727,15,Replace Brake Shoes,01:00:00,01:10:48,1.00,1.18,800,800
+1938,728,1,Change Oil,00:45:00,00:42:00,0.75,0.70,550,550
+1939,728,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,500,500
+1940,728,18,Wheel Alignment,01:00:00,01:08:24,1.00,1.14,900,900
+1941,729,22,Replace Suspension Bushing,02:30:00,03:01:48,2.50,3.03,1700,1700
+1942,729,23,Replace Tie Rod End,01:00:00,01:02:24,1.00,1.04,1050,1050
+1943,729,18,Wheel Alignment,01:00:00,01:08:24,1.00,1.14,950,950
+1944,730,22,Replace Suspension Bushing,02:30:00,02:17:24,2.50,2.29,2450,2450
+1945,730,23,Replace Tie Rod End,01:00:00,01:00:00,1.00,1.00,1050,1050
+1946,730,18,Wheel Alignment,01:00:00,01:11:24,1.00,1.19,900,900
+1947,730,21,Replace Shock Absorbers,02:00:00,01:52:48,2.00,1.88,2000,2000
+1948,731,51,Replace Valve Cover Gasket,01:45:00,01:31:12,1.75,1.52,1050,1050
+1949,731,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:10:48,1.00,1.18,750,750
+1950,732,22,Replace Suspension Bushing,02:30:00,02:47:24,2.50,2.79,1700,1700
+1951,732,23,Replace Tie Rod End,01:00:00,01:10:48,1.00,1.18,1450,1450
+1952,732,18,Wheel Alignment,01:00:00,01:04:48,1.00,1.08,900,900
+1953,732,21,Replace Shock Absorbers,02:00:00,02:22:12,2.00,2.37,1850,1850
+1954,733,13,Brake Service & Cleaning,01:15:00,01:31:48,1.25,1.53,650,650
+1955,733,15,Replace Brake Shoes,01:00:00,00:52:12,1.00,0.87,750,750
+1956,733,18,Wheel Alignment,01:00:00,01:03:00,1.00,1.05,1050,1050
+1957,734,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:29:24,3.00,3.49,2500,2500
+1958,734,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,650,650
+1959,735,36,Down Clutch / Pulldown Transmission,04:30:00,04:28:48,4.50,4.48,3050,3050
+1960,736,13,Brake Service & Cleaning,01:15:00,01:31:12,1.25,1.52,650,650
+1961,736,15,Replace Brake Shoes,01:00:00,01:07:48,1.00,1.13,1100,1100
+1962,737,13,Brake Service & Cleaning,01:15:00,01:12:00,1.25,1.20,1000,1000
+1963,737,15,Replace Brake Shoes,01:00:00,01:04:12,1.00,1.07,750,750
+1964,738,1,Change Oil,00:45:00,00:46:12,0.75,0.77,750,750
+1965,738,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,600,600
+1966,739,1,Change Oil,00:45:00,00:49:48,0.75,0.83,650,650
+1967,739,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,600,600
+1968,739,3,Replace Fuel Filter,00:45:00,00:38:24,0.75,0.64,550,550
+1969,739,4,Replace Air Filter,00:15:00,00:13:48,0.25,0.23,550,550
+1970,739,5,Replace Cabin Filter,00:15:00,00:16:48,0.25,0.28,200,200
+1971,740,13,Brake Service & Cleaning,01:15:00,01:09:36,1.25,1.16,1050,1050
+1972,740,15,Replace Brake Shoes,01:00:00,01:04:48,1.00,1.08,600,600
+1973,740,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:21:36,2.00,2.36,3750,3750
+1974,741,1,Change Oil,00:45:00,00:45:36,0.75,0.76,750,750
+1975,741,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,550,550
+1976,742,13,Brake Service & Cleaning,01:15:00,01:13:48,1.25,1.23,750,750
+1977,742,14,Replace Brake Pads,01:00:00,01:00:36,1.00,1.01,900,900
+1978,743,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:09:36,3.00,3.16,2400,2400
+1979,744,51,Replace Valve Cover Gasket,01:45:00,01:44:24,1.75,1.74,1100,1100
+1980,744,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:54:36,1.00,0.91,900,900
+1981,744,1,Change Oil,00:45:00,00:42:36,0.75,0.71,850,850
+1982,745,13,Brake Service & Cleaning,01:15:00,01:21:36,1.25,1.36,850,850
+1983,745,15,Replace Brake Shoes,01:00:00,01:01:48,1.00,1.03,850,850
+1984,746,13,Brake Service & Cleaning,01:15:00,01:08:24,1.25,1.14,850,850
+1985,746,15,Replace Brake Shoes,01:00:00,01:14:24,1.00,1.24,750,750
+1986,747,1,Change Oil,00:45:00,00:53:24,0.75,0.89,550,550
+1987,747,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,750,750
+1988,748,1,Change Oil,00:45:00,00:51:36,0.75,0.86,650,650
+1989,748,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:00,0.50,0.45,600,600
+1990,749,1,Change Oil,00:45:00,00:54:36,0.75,0.91,450,450
+1991,749,58,General Mechanical Inspection & Check-Up,00:30:00,00:35:24,0.50,0.59,500,500
+1992,750,22,Replace Suspension Bushing,02:30:00,02:25:12,2.50,2.42,1000,1000
+1993,750,23,Replace Tie Rod End,01:00:00,01:02:24,1.00,1.04,800,800
+1994,750,18,Wheel Alignment,01:00:00,00:58:48,1.00,0.98,900,900
+1995,751,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:14:24,3.00,3.24,2850,2850
+1996,752,53,Top Overhaul,14:00:00,14:41:24,14.00,14.69,15700,15700
+1997,753,13,Brake Service & Cleaning,01:15:00,01:04:48,1.25,1.08,800,800
+1998,753,15,Replace Brake Shoes,01:00:00,01:07:48,1.00,1.13,900,900
+1999,754,1,Change Oil,00:45:00,00:46:48,0.75,0.78,700,700
+2000,754,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,600,600
+2001,755,36,Down Clutch / Pulldown Transmission,04:30:00,05:26:24,4.50,5.44,3050,3050
+2002,755,2,Change ATF / Transmission Fluid,00:45:00,00:48:00,0.75,0.80,850,850
+2003,756,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:19:12,3.00,3.32,2500,2500
+2004,757,13,Brake Service & Cleaning,01:15:00,01:03:36,1.25,1.06,750,750
+2005,757,14,Replace Brake Pads,01:00:00,00:54:36,1.00,0.91,850,850
+2006,758,1,Change Oil,00:45:00,00:50:24,0.75,0.84,650,650
+2007,758,58,General Mechanical Inspection & Check-Up,00:30:00,00:32:24,0.50,0.54,550,550
+2008,759,36,Down Clutch / Pulldown Transmission,04:30:00,03:57:36,4.50,3.96,4300,4300
+2009,760,13,Brake Service & Cleaning,01:15:00,01:32:24,1.25,1.54,700,700
+2010,760,15,Replace Brake Shoes,01:00:00,00:55:12,1.00,0.92,750,750
+2011,761,1,Change Oil,00:45:00,00:39:00,0.75,0.65,750,750
+2012,761,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,600,600
+2013,761,18,Wheel Alignment,01:00:00,01:03:36,1.00,1.06,950,950
+2014,762,36,Down Clutch / Pulldown Transmission,04:30:00,05:19:12,4.50,5.32,3750,3750
+2015,763,1,Change Oil,00:45:00,00:50:24,0.75,0.84,600,600
+2016,763,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,550,550
+2017,764,13,Brake Service & Cleaning,01:15:00,01:28:12,1.25,1.47,650,650
+2018,764,14,Replace Brake Pads,01:00:00,01:03:36,1.00,1.06,550,550
+2019,765,1,Change Oil,00:45:00,00:48:36,0.75,0.81,800,800
+2020,765,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,650,650
+2021,766,53,Top Overhaul,14:00:00,14:42:36,14.00,14.71,14800,14800
+2022,767,51,Replace Valve Cover Gasket,01:45:00,01:56:24,1.75,1.94,1200,1200
+2023,767,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:04:48,1.00,1.08,800,800
+2024,768,1,Change Oil,00:45:00,00:46:48,0.75,0.78,550,550
+2025,768,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,550,550
+2026,769,22,Replace Suspension Bushing,02:30:00,02:38:24,2.50,2.64,2250,2250
+2027,769,23,Replace Tie Rod End,01:00:00,00:54:36,1.00,0.91,750,750
+2028,769,18,Wheel Alignment,01:00:00,00:56:24,1.00,0.94,900,900
+2029,770,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:43:48,3.00,2.73,2650,2650
+2030,771,51,Replace Valve Cover Gasket,01:45:00,01:55:48,1.75,1.93,1400,1400
+2031,771,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:52:12,1.00,0.87,800,800
+2032,771,1,Change Oil,00:45:00,00:46:12,0.75,0.77,500,500
+2033,772,1,Change Oil,00:45:00,00:39:00,0.75,0.65,700,700
+2034,772,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,700,700
+2035,772,18,Wheel Alignment,01:00:00,01:10:48,1.00,1.18,1150,1150
+2036,773,22,Replace Suspension Bushing,02:30:00,02:35:24,2.50,2.59,1850,1850
+2037,773,23,Replace Tie Rod End,01:00:00,01:10:12,1.00,1.17,1100,1100
+2038,773,18,Wheel Alignment,01:00:00,01:12:00,1.00,1.20,1200,1200
+2039,773,21,Replace Shock Absorbers,02:00:00,02:16:48,2.00,2.28,1200,1200
+2040,774,1,Change Oil,00:45:00,00:46:48,0.75,0.78,800,800
+2041,774,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,450,450
+2042,775,1,Change Oil,00:45:00,00:48:36,0.75,0.81,700,700
+2043,775,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,550,550
+2044,776,53,Top Overhaul,14:00:00,12:12:00,14.00,12.20,10450,10450
+2045,777,53,Top Overhaul,14:00:00,16:58:12,14.00,16.97,17700,17700
+2046,778,51,Replace Valve Cover Gasket,01:45:00,01:30:00,1.75,1.50,1100,1100
+2047,778,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:51:00,1.00,0.85,700,700
+2048,779,53,Top Overhaul,14:00:00,13:11:24,14.00,13.19,17650,17650
+2049,779,1,Change Oil,00:45:00,00:40:48,0.75,0.68,700,700
+2050,780,22,Replace Suspension Bushing,02:30:00,02:27:00,2.50,2.45,1150,1150
+2051,780,23,Replace Tie Rod End,01:00:00,00:56:24,1.00,0.94,900,900
+2052,780,18,Wheel Alignment,01:00:00,00:54:00,1.00,0.90,1200,1200
+2053,781,51,Replace Valve Cover Gasket,01:45:00,02:09:00,1.75,2.15,1350,1350
+2054,781,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:01:48,1.00,1.03,1200,1200
+2055,782,53,Top Overhaul,14:00:00,11:54:36,14.00,11.91,17700,17700
+2056,782,12,Replace Spark Plugs,00:30:00,00:34:48,0.50,0.58,400,400
+2057,783,22,Replace Suspension Bushing,02:30:00,02:47:24,2.50,2.79,2500,2500
+2058,783,23,Replace Tie Rod End,01:00:00,01:06:00,1.00,1.10,1250,1250
+2059,783,18,Wheel Alignment,01:00:00,00:55:12,1.00,0.92,1050,1050
+2060,784,13,Brake Service & Cleaning,01:15:00,01:18:36,1.25,1.31,900,900
+2061,784,14,Replace Brake Pads,01:00:00,00:57:36,1.00,0.96,950,950
+2062,785,1,Change Oil,00:45:00,00:48:36,0.75,0.81,650,650
+2063,785,58,General Mechanical Inspection & Check-Up,00:30:00,00:29:24,0.50,0.49,550,550
+2064,786,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:37:48,3.00,3.63,2750,2750
+2065,786,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,700,700
+2066,787,22,Replace Suspension Bushing,02:30:00,02:57:36,2.50,2.96,1750,1750
+2067,787,25,Replace Tie Rod & Rack End,01:30:00,01:24:00,1.50,1.40,1050,1050
+2068,787,18,Wheel Alignment,01:00:00,01:07:12,1.00,1.12,1100,1100
+2069,788,1,Change Oil,00:45:00,00:46:12,0.75,0.77,650,650
+2070,788,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:36,0.50,0.61,450,450
+2071,789,13,Brake Service & Cleaning,01:15:00,01:19:48,1.25,1.33,950,950
+2072,789,15,Replace Brake Shoes,01:00:00,00:53:24,1.00,0.89,800,800
+2073,789,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:58:48,2.00,1.98,2950,2950
+2074,790,1,Change Oil,00:45:00,00:41:24,0.75,0.69,800,800
+2075,790,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,550,550
+2076,790,5,Replace Cabin Filter,00:15:00,00:18:36,0.25,0.31,1550,1550
+2077,791,1,Change Oil,00:45:00,00:44:24,0.75,0.74,850,850
+2078,791,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,650,650
+2079,791,18,Wheel Alignment,01:00:00,01:00:00,1.00,1.00,950,950
+2080,792,1,Change Oil,00:45:00,00:38:24,0.75,0.64,650,650
+2081,792,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,700,700
+2082,792,18,Wheel Alignment,01:00:00,00:54:36,1.00,0.91,1100,1100
+2083,793,22,Replace Suspension Bushing,02:30:00,02:09:36,2.50,2.16,2700,2700
+2084,793,23,Replace Tie Rod End,01:00:00,01:04:48,1.00,1.08,750,750
+2085,793,18,Wheel Alignment,01:00:00,01:13:12,1.00,1.22,1050,1050
+2086,794,1,Change Oil,00:45:00,00:54:00,0.75,0.90,750,750
+2087,794,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,550,550
+2088,795,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:09:00,3.00,3.15,3650,3650
+2089,796,22,Replace Suspension Bushing,02:30:00,03:07:12,2.50,3.12,1300,1300
+2090,796,23,Replace Tie Rod End,01:00:00,01:15:00,1.00,1.25,1150,1150
+2091,796,18,Wheel Alignment,01:00:00,01:00:36,1.00,1.01,1150,1150
+2092,796,21,Replace Shock Absorbers,02:00:00,02:00:36,2.00,2.01,1650,1650
+2093,797,1,Change Oil,00:45:00,00:53:24,0.75,0.89,650,650
+2094,797,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,550,550
+2095,798,13,Brake Service & Cleaning,01:15:00,01:31:12,1.25,1.52,1250,1250
+2096,798,15,Replace Brake Shoes,01:00:00,00:55:48,1.00,0.93,950,950
+2097,798,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:24:00,2.00,2.40,2200,2200
+2098,799,22,Replace Suspension Bushing,02:30:00,02:37:12,2.50,2.62,1450,1450
+2099,799,23,Replace Tie Rod End,01:00:00,00:52:12,1.00,0.87,800,800
+2100,799,18,Wheel Alignment,01:00:00,00:53:24,1.00,0.89,1000,1000
+2101,799,21,Replace Shock Absorbers,02:00:00,01:48:36,2.00,1.81,1200,1200
+2102,800,22,Replace Suspension Bushing,02:30:00,03:06:00,2.50,3.10,2450,2450
+2103,800,23,Replace Tie Rod End,01:00:00,01:11:24,1.00,1.19,800,800
+2104,800,18,Wheel Alignment,01:00:00,00:55:48,1.00,0.93,850,850
+2105,801,1,Change Oil,00:45:00,00:52:12,0.75,0.87,700,700
+2106,801,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,600,600
+2107,801,18,Wheel Alignment,01:00:00,01:12:00,1.00,1.20,1000,1000
+2108,802,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:38:24,3.00,3.64,3150,3150
+2109,802,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,750,750
+2110,803,22,Replace Suspension Bushing,02:30:00,02:55:12,2.50,2.92,2150,2150
+2111,803,25,Replace Tie Rod & Rack End,01:30:00,01:31:12,1.50,1.52,1000,1000
+2112,803,18,Wheel Alignment,01:00:00,01:14:24,1.00,1.24,1150,1150
+2113,804,22,Replace Suspension Bushing,02:30:00,02:10:48,2.50,2.18,1450,1450
+2114,804,23,Replace Tie Rod End,01:00:00,01:11:24,1.00,1.19,1150,1150
+2115,804,18,Wheel Alignment,01:00:00,01:07:48,1.00,1.13,1400,1400
+2116,804,21,Replace Shock Absorbers,02:00:00,02:15:36,2.00,2.26,1400,1400
+2117,805,36,Down Clutch / Pulldown Transmission,04:30:00,04:56:24,4.50,4.94,3250,3250
+2118,806,51,Replace Valve Cover Gasket,01:45:00,01:54:00,1.75,1.90,1350,1350
+2119,806,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:01:48,1.00,1.03,800,800
+2120,807,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:45:36,3.00,2.76,2050,2050
+2121,807,58,General Mechanical Inspection & Check-Up,00:30:00,00:35:24,0.50,0.59,550,550
+2122,808,36,Down Clutch / Pulldown Transmission,04:30:00,03:50:24,4.50,3.84,3000,3000
+2123,808,1,Change Oil,00:45:00,00:42:00,0.75,0.70,750,750
+2124,809,22,Replace Suspension Bushing,02:30:00,02:31:48,2.50,2.53,1050,1050
+2125,809,23,Replace Tie Rod End,01:00:00,01:11:24,1.00,1.19,1200,1200
+2126,809,18,Wheel Alignment,01:00:00,01:04:12,1.00,1.07,900,900
+2127,809,21,Replace Shock Absorbers,02:00:00,02:27:00,2.00,2.45,1650,1650
+2128,810,51,Replace Valve Cover Gasket,01:45:00,01:57:00,1.75,1.95,1400,1400
+2129,810,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:03:00,1.00,1.05,1150,1150
+2130,810,1,Change Oil,00:45:00,00:55:48,0.75,0.93,650,650
+2131,811,51,Replace Valve Cover Gasket,01:45:00,02:00:00,1.75,2.00,1300,1300
+2132,811,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:58:48,1.00,0.98,900,900
+2133,811,1,Change Oil,00:45:00,00:42:36,0.75,0.71,600,600
+2134,812,51,Replace Valve Cover Gasket,01:45:00,01:57:36,1.75,1.96,1000,1000
+2135,812,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:57:36,1.00,0.96,700,700
+2136,812,1,Change Oil,00:45:00,00:54:36,0.75,0.91,550,550
+2137,813,36,Down Clutch / Pulldown Transmission,04:30:00,03:54:36,4.50,3.91,4400,4400
+2138,814,13,Brake Service & Cleaning,01:15:00,01:15:00,1.25,1.25,850,850
+2139,814,15,Replace Brake Shoes,01:00:00,00:54:36,1.00,0.91,800,800
+2140,815,13,Brake Service & Cleaning,01:15:00,01:22:12,1.25,1.37,1150,1150
+2141,815,15,Replace Brake Shoes,01:00:00,01:04:12,1.00,1.07,800,800
+2142,816,51,Replace Valve Cover Gasket,01:45:00,02:04:12,1.75,2.07,1650,1650
+2143,816,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:03:36,1.00,1.06,1000,1000
+2144,816,1,Change Oil,00:45:00,00:54:36,0.75,0.91,550,550
+2145,817,51,Replace Valve Cover Gasket,01:45:00,02:00:36,1.75,2.01,2050,2050
+2146,817,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:13:12,1.00,1.22,1200,1200
+2147,818,36,Down Clutch / Pulldown Transmission,04:30:00,04:43:48,4.50,4.73,3650,3650
+2148,818,2,Change ATF / Transmission Fluid,00:45:00,00:47:24,0.75,0.79,650,650
+2149,819,1,Change Oil,00:45:00,00:39:00,0.75,0.65,600,600
+2150,819,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,600,600
+2151,820,1,Change Oil,00:45:00,00:51:36,0.75,0.86,550,550
+2152,820,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,400,400
+2153,821,13,Brake Service & Cleaning,01:15:00,01:06:36,1.25,1.11,800,800
+2154,821,14,Replace Brake Pads,01:00:00,00:52:48,1.00,0.88,900,900
+2155,822,13,Brake Service & Cleaning,01:15:00,01:09:00,1.25,1.15,1000,1000
+2156,822,15,Replace Brake Shoes,01:00:00,01:13:48,1.00,1.23,900,900
+2157,823,13,Brake Service & Cleaning,01:15:00,01:12:00,1.25,1.20,900,900
+2158,823,15,Replace Brake Shoes,01:00:00,01:01:12,1.00,1.02,900,900
+2159,824,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:39:00,3.00,2.65,2200,2200
+2160,825,53,Top Overhaul,14:00:00,15:33:36,14.00,15.56,14050,14050
+2161,826,1,Change Oil,00:45:00,00:38:24,0.75,0.64,750,750
+2162,826,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,650,650
+2163,827,22,Replace Suspension Bushing,02:30:00,02:42:36,2.50,2.71,1600,1600
+2164,827,23,Replace Tie Rod End,01:00:00,01:07:12,1.00,1.12,1350,1350
+2165,827,18,Wheel Alignment,01:00:00,01:12:00,1.00,1.20,900,900
+2166,828,13,Brake Service & Cleaning,01:15:00,01:21:36,1.25,1.36,1000,1000
+2167,828,15,Replace Brake Shoes,01:00:00,01:09:00,1.00,1.15,1050,1050
+2168,828,18,Wheel Alignment,01:00:00,01:14:24,1.00,1.24,1050,1050
+2169,829,22,Replace Suspension Bushing,02:30:00,02:26:24,2.50,2.44,2000,2000
+2170,829,23,Replace Tie Rod End,01:00:00,01:03:00,1.00,1.05,1300,1300
+2171,829,18,Wheel Alignment,01:00:00,01:01:48,1.00,1.03,1300,1300
+2172,830,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:21:00,3.00,3.35,2600,2600
+2173,830,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,650,650
+2174,831,1,Change Oil,00:45:00,00:38:24,0.75,0.64,700,700
+2175,831,58,General Mechanical Inspection & Check-Up,00:30:00,00:32:24,0.50,0.54,700,700
+2176,831,18,Wheel Alignment,01:00:00,00:55:48,1.00,0.93,1300,1300
+2177,832,51,Replace Valve Cover Gasket,01:45:00,02:01:48,1.75,2.03,1100,1100
+2178,832,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:12:00,1.00,1.20,850,850
+2179,833,1,Change Oil,00:45:00,00:42:36,0.75,0.71,600,600
+2180,833,58,General Mechanical Inspection & Check-Up,00:30:00,00:35:24,0.50,0.59,650,650
+2181,834,1,Change Oil,00:45:00,00:53:24,0.75,0.89,550,550
+2182,834,58,General Mechanical Inspection & Check-Up,00:30:00,00:35:24,0.50,0.59,400,400
+2183,835,13,Brake Service & Cleaning,01:15:00,01:18:36,1.25,1.31,900,900
+2184,835,15,Replace Brake Shoes,01:00:00,01:05:24,1.00,1.09,1100,1100
+2185,835,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:14:24,2.00,2.24,2950,2950
+2186,836,1,Change Oil,00:45:00,00:42:36,0.75,0.71,750,750
+2187,836,58,General Mechanical Inspection & Check-Up,00:30:00,00:35:24,0.50,0.59,750,750
+2188,837,51,Replace Valve Cover Gasket,01:45:00,01:39:36,1.75,1.66,1700,1700
+2189,837,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:58:12,1.00,0.97,1000,1000
+2190,837,1,Change Oil,00:45:00,00:52:48,0.75,0.88,700,700
+2191,838,22,Replace Suspension Bushing,02:30:00,02:27:00,2.50,2.45,1700,1700
+2192,838,23,Replace Tie Rod End,01:00:00,01:02:24,1.00,1.04,1000,1000
+2193,838,18,Wheel Alignment,01:00:00,01:03:36,1.00,1.06,1050,1050
+2194,839,1,Change Oil,00:45:00,00:47:24,0.75,0.79,700,700
+2195,839,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,450,450
+2196,839,18,Wheel Alignment,01:00:00,00:51:00,1.00,0.85,900,900
+2197,840,53,Top Overhaul,14:00:00,15:24:00,14.00,15.40,17300,17300
+2198,841,1,Change Oil,00:45:00,00:48:36,0.75,0.81,600,600
+2199,841,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,550,550
+2200,842,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:10:48,3.00,3.18,2150,2150
+2201,843,1,Change Oil,00:45:00,00:55:12,0.75,0.92,650,650
+2202,843,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,600,600
+2203,843,18,Wheel Alignment,01:00:00,01:13:48,1.00,1.23,1250,1250
+2204,844,13,Brake Service & Cleaning,01:15:00,01:32:24,1.25,1.54,1050,1050
+2205,844,15,Replace Brake Shoes,01:00:00,01:00:36,1.00,1.01,950,950
+2206,844,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:54:00,2.00,1.90,3350,3350
+2207,845,36,Down Clutch / Pulldown Transmission,04:30:00,04:17:24,4.50,4.29,3450,3450
+2208,845,2,Change ATF / Transmission Fluid,00:45:00,00:55:48,0.75,0.93,700,700
+2209,846,1,Change Oil,00:45:00,00:49:48,0.75,0.83,650,650
+2210,846,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,400,400
+2211,846,3,Replace Fuel Filter,00:45:00,00:42:00,0.75,0.70,550,550
+2212,846,4,Replace Air Filter,00:15:00,00:18:00,0.25,0.30,550,550
+2213,846,5,Replace Cabin Filter,00:15:00,00:16:48,0.25,0.28,200,200
+2214,847,22,Replace Suspension Bushing,02:30:00,02:15:36,2.50,2.26,1650,1650
+2215,847,23,Replace Tie Rod End,01:00:00,01:06:00,1.00,1.10,1350,1350
+2216,847,18,Wheel Alignment,01:00:00,01:14:24,1.00,1.24,900,900
+2217,848,1,Change Oil,00:45:00,00:47:24,0.75,0.79,500,500
+2218,848,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,550,550
+2219,849,1,Change Oil,00:45:00,00:52:12,0.75,0.87,650,650
+2220,849,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,650,650
+2221,850,13,Brake Service & Cleaning,01:15:00,01:13:12,1.25,1.22,700,700
+2222,850,15,Replace Brake Shoes,01:00:00,01:04:48,1.00,1.08,600,600
+2223,851,51,Replace Valve Cover Gasket,01:45:00,01:55:48,1.75,1.93,2150,2150
+2224,851,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:54:00,1.00,0.90,600,600
+2225,851,1,Change Oil,00:45:00,00:45:00,0.75,0.75,550,550
+2226,852,1,Change Oil,00:45:00,00:54:36,0.75,0.91,650,650
+2227,852,58,General Mechanical Inspection & Check-Up,00:30:00,00:25:48,0.50,0.43,400,400
+2228,853,53,Top Overhaul,14:00:00,14:25:48,14.00,14.43,15950,15950
+2229,854,1,Change Oil,00:45:00,00:47:24,0.75,0.79,600,600
+2230,854,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,650,650
+2231,855,36,Down Clutch / Pulldown Transmission,04:30:00,04:33:36,4.50,4.56,4200,4200
+2232,856,13,Brake Service & Cleaning,01:15:00,01:29:24,1.25,1.49,1050,1050
+2233,856,15,Replace Brake Shoes,01:00:00,01:10:48,1.00,1.18,1000,1000
+2234,856,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:20:24,2.00,2.34,3150,3150
+2235,857,53,Top Overhaul,14:00:00,13:01:12,14.00,13.02,15000,15000
+2236,858,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:21:36,3.00,3.36,2950,2950
+2237,859,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:37:48,3.00,3.63,2450,2450
+2238,860,53,Top Overhaul,14:00:00,12:00:00,14.00,12.00,11600,11600
+2239,860,1,Change Oil,00:45:00,00:45:00,0.75,0.75,700,700
+2240,861,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:54:00,3.00,2.90,2700,2700
+2241,862,13,Brake Service & Cleaning,01:15:00,01:12:00,1.25,1.20,750,750
+2242,862,15,Replace Brake Shoes,01:00:00,01:11:24,1.00,1.19,1050,1050
+2243,863,22,Replace Suspension Bushing,02:30:00,02:48:00,2.50,2.80,1150,1150
+2244,863,23,Replace Tie Rod End,01:00:00,01:04:48,1.00,1.08,1300,1300
+2245,863,18,Wheel Alignment,01:00:00,00:56:24,1.00,0.94,900,900
+2246,863,21,Replace Shock Absorbers,02:00:00,02:15:36,2.00,2.26,1000,1000
+2247,864,13,Brake Service & Cleaning,01:15:00,01:19:12,1.25,1.32,900,900
+2248,864,15,Replace Brake Shoes,01:00:00,01:05:24,1.00,1.09,700,700
+2249,865,22,Replace Suspension Bushing,02:30:00,02:18:00,2.50,2.30,2400,2400
+2250,865,23,Replace Tie Rod End,01:00:00,00:58:12,1.00,0.97,800,800
+2251,865,18,Wheel Alignment,01:00:00,01:10:48,1.00,1.18,1000,1000
+2252,866,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:32:24,3.00,3.54,2500,2500
+2253,867,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:58:12,3.00,2.97,3450,3450
+2254,868,22,Replace Suspension Bushing,02:30:00,02:28:12,2.50,2.47,1450,1450
+2255,868,23,Replace Tie Rod End,01:00:00,01:03:36,1.00,1.06,1050,1050
+2256,868,18,Wheel Alignment,01:00:00,01:01:48,1.00,1.03,1050,1050
+2257,869,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:47:24,3.00,2.79,2500,2500
+2258,870,36,Down Clutch / Pulldown Transmission,04:30:00,04:55:48,4.50,4.93,3900,3900
+2259,871,13,Brake Service & Cleaning,01:15:00,01:09:00,1.25,1.15,1150,1150
+2260,871,14,Replace Brake Pads,01:00:00,01:14:24,1.00,1.24,700,700
+2261,872,51,Replace Valve Cover Gasket,01:45:00,02:07:12,1.75,2.12,1350,1350
+2262,872,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:01:12,1.00,1.02,1000,1000
+2263,872,1,Change Oil,00:45:00,00:40:12,0.75,0.67,700,700
+2264,873,13,Brake Service & Cleaning,01:15:00,01:30:00,1.25,1.50,1150,1150
+2265,873,15,Replace Brake Shoes,01:00:00,00:52:48,1.00,0.88,1050,1050
+2266,874,1,Change Oil,00:45:00,00:43:48,0.75,0.73,750,750
+2267,874,58,General Mechanical Inspection & Check-Up,00:30:00,00:29:24,0.50,0.49,750,750
+2268,875,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:40:48,3.00,3.68,1600,1600
+2269,876,13,Brake Service & Cleaning,01:15:00,01:15:00,1.25,1.25,700,700
+2270,876,15,Replace Brake Shoes,01:00:00,00:54:36,1.00,0.91,900,900
+2271,876,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:24:00,2.00,2.40,3050,3050
+2272,877,1,Change Oil,00:45:00,00:45:00,0.75,0.75,650,650
+2273,877,58,General Mechanical Inspection & Check-Up,00:30:00,00:29:24,0.50,0.49,500,500
+2274,877,3,Replace Fuel Filter,00:45:00,00:51:00,0.75,0.85,550,550
+2275,877,4,Replace Air Filter,00:15:00,00:16:12,0.25,0.27,550,550
+2276,877,5,Replace Cabin Filter,00:15:00,00:17:24,0.25,0.29,200,200
+2277,878,13,Brake Service & Cleaning,01:15:00,01:08:24,1.25,1.14,1350,1350
+2278,878,14,Replace Brake Pads,01:00:00,01:09:00,1.00,1.15,700,700
+2279,879,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:18:36,3.00,3.31,3200,3200
+2280,879,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:36,0.50,0.61,700,700
+2281,880,13,Brake Service & Cleaning,01:15:00,01:13:12,1.25,1.22,900,900
+2282,880,15,Replace Brake Shoes,01:00:00,01:03:36,1.00,1.06,750,750
+2283,880,18,Wheel Alignment,01:00:00,01:05:24,1.00,1.09,850,850
+2284,881,53,Top Overhaul,14:00:00,14:36:36,14.00,14.61,14400,14400
+2285,882,1,Change Oil,00:45:00,00:49:12,0.75,0.82,600,600
+2286,882,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,500,500
+2287,882,3,Replace Fuel Filter,00:45:00,00:43:48,0.75,0.73,550,550
+2288,882,4,Replace Air Filter,00:15:00,00:13:12,0.25,0.22,550,550
+2289,883,1,Change Oil,00:45:00,00:46:12,0.75,0.77,550,550
+2290,883,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,550,550
+2291,883,18,Wheel Alignment,01:00:00,00:59:24,1.00,0.99,1150,1150
+2292,884,22,Replace Suspension Bushing,02:30:00,03:01:48,2.50,3.03,2100,2100
+2293,884,23,Replace Tie Rod End,01:00:00,01:04:48,1.00,1.08,1400,1400
+2294,884,18,Wheel Alignment,01:00:00,01:04:12,1.00,1.07,1200,1200
+2295,884,21,Replace Shock Absorbers,02:00:00,01:54:36,2.00,1.91,1750,1750
+2296,885,13,Brake Service & Cleaning,01:15:00,01:04:48,1.25,1.08,1000,1000
+2297,885,15,Replace Brake Shoes,01:00:00,01:07:48,1.00,1.13,700,700
+2298,886,1,Change Oil,00:45:00,00:52:12,0.75,0.87,700,700
+2299,886,58,General Mechanical Inspection & Check-Up,00:30:00,00:32:24,0.50,0.54,450,450
+2300,887,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:37:48,3.00,3.63,2300,2300
+2301,887,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,750,750
+2302,888,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:13:12,3.00,3.22,3050,3050
+2303,889,1,Change Oil,00:45:00,00:55:48,0.75,0.93,500,500
+2304,889,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,600,600
+2305,890,1,Change Oil,00:45:00,00:55:12,0.75,0.92,800,800
+2306,890,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,550,550
+2307,890,3,Replace Fuel Filter,00:45:00,00:41:24,0.75,0.69,550,550
+2308,890,4,Replace Air Filter,00:15:00,00:17:24,0.25,0.29,550,550
+2309,890,5,Replace Cabin Filter,00:15:00,00:16:48,0.25,0.28,200,200
+2310,891,1,Change Oil,00:45:00,00:48:36,0.75,0.81,700,700
+2311,891,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:36,0.50,0.51,450,450
+2312,891,3,Replace Fuel Filter,00:45:00,00:52:12,0.75,0.87,550,550
+2313,891,4,Replace Air Filter,00:15:00,00:17:24,0.25,0.29,550,550
+2314,892,13,Brake Service & Cleaning,01:15:00,01:13:12,1.25,1.22,1250,1250
+2315,892,15,Replace Brake Shoes,01:00:00,00:56:24,1.00,0.94,950,950
+2316,892,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:48:36,2.00,1.81,2700,2700
+2317,893,13,Brake Service & Cleaning,01:15:00,01:28:48,1.25,1.48,1200,1200
+2318,893,15,Replace Brake Shoes,01:00:00,01:08:24,1.00,1.14,800,800
+2319,894,51,Replace Valve Cover Gasket,01:45:00,01:30:36,1.75,1.51,1500,1500
+2320,894,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:51:36,1.00,0.86,950,950
+2321,894,1,Change Oil,00:45:00,00:50:24,0.75,0.84,800,800
+2322,895,13,Brake Service & Cleaning,01:15:00,01:19:48,1.25,1.33,700,700
+2323,895,14,Replace Brake Pads,01:00:00,01:01:12,1.00,1.02,800,800
+2324,895,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:23:24,2.00,2.39,4050,4050
+2325,896,1,Change Oil,00:45:00,00:40:12,0.75,0.67,750,750
+2326,896,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,550,550
+2327,896,3,Replace Fuel Filter,00:45:00,00:49:12,0.75,0.82,1400,1400
+2328,897,51,Replace Valve Cover Gasket,01:45:00,01:32:24,1.75,1.54,1050,1050
+2329,897,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:08:24,1.00,1.14,900,900
+2330,898,13,Brake Service & Cleaning,01:15:00,01:19:48,1.25,1.33,900,900
+2331,898,15,Replace Brake Shoes,01:00:00,00:53:24,1.00,0.89,600,600
+2332,899,51,Replace Valve Cover Gasket,01:45:00,01:57:00,1.75,1.95,1500,1500
+2333,899,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:00:36,1.00,1.01,1450,1450
+2334,899,1,Change Oil,00:45:00,00:46:48,0.75,0.78,800,800
+2335,900,1,Change Oil,00:45:00,00:54:36,0.75,0.91,700,700
+2336,900,58,General Mechanical Inspection & Check-Up,00:30:00,00:29:24,0.50,0.49,500,500
+2337,900,3,Replace Fuel Filter,00:45:00,00:54:36,0.75,0.91,550,550
+2338,900,4,Replace Air Filter,00:15:00,00:13:12,0.25,0.22,550,550
+2339,900,5,Replace Cabin Filter,00:15:00,00:13:48,0.25,0.23,200,200
+2340,901,13,Brake Service & Cleaning,01:15:00,01:15:36,1.25,1.26,750,750
+2341,901,15,Replace Brake Shoes,01:00:00,01:06:36,1.00,1.11,600,600
+2342,902,51,Replace Valve Cover Gasket,01:45:00,01:46:12,1.75,1.77,1100,1100
+2343,902,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:58:48,1.00,0.98,750,750
+2344,903,13,Brake Service & Cleaning,01:15:00,01:25:12,1.25,1.42,1150,1150
+2345,903,15,Replace Brake Shoes,01:00:00,01:07:12,1.00,1.12,1050,1050
+2346,903,18,Wheel Alignment,01:00:00,00:58:48,1.00,0.98,800,800
+2347,904,13,Brake Service & Cleaning,01:15:00,01:27:36,1.25,1.46,950,950
+2348,904,15,Replace Brake Shoes,01:00:00,01:06:36,1.00,1.11,1050,1050
+2349,905,22,Replace Suspension Bushing,02:30:00,02:16:12,2.50,2.27,1650,1650
+2350,905,23,Replace Tie Rod End,01:00:00,01:10:48,1.00,1.18,1000,1000
+2351,905,18,Wheel Alignment,01:00:00,00:51:36,1.00,0.86,1150,1150
+2352,905,21,Replace Shock Absorbers,02:00:00,02:07:12,2.00,2.12,1250,1250
+2353,906,13,Brake Service & Cleaning,01:15:00,01:19:48,1.25,1.33,600,600
+2354,906,15,Replace Brake Shoes,01:00:00,01:15:00,1.00,1.25,950,950
+2355,907,1,Change Oil,00:45:00,00:47:24,0.75,0.79,750,750
+2356,907,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,500,500
+2357,908,1,Change Oil,00:45:00,00:52:48,0.75,0.88,550,550
+2358,908,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,700,700
+2359,909,1,Change Oil,00:45:00,00:42:36,0.75,0.71,550,550
+2360,909,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:12,0.50,0.47,650,650
+2361,909,3,Replace Fuel Filter,00:45:00,00:47:24,0.75,0.79,550,550
+2362,909,4,Replace Air Filter,00:15:00,00:16:48,0.25,0.28,550,550
+2363,909,5,Replace Cabin Filter,00:15:00,00:13:12,0.25,0.22,200,200
+2364,910,22,Replace Suspension Bushing,02:30:00,02:46:48,2.50,2.78,2250,2250
+2365,910,23,Replace Tie Rod End,01:00:00,00:55:48,1.00,0.93,1000,1000
+2366,910,18,Wheel Alignment,01:00:00,00:55:12,1.00,0.92,1150,1150
+2367,911,1,Change Oil,00:45:00,00:51:36,0.75,0.86,700,700
+2368,911,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:36,0.50,0.51,600,600
+2369,912,13,Brake Service & Cleaning,01:15:00,01:28:48,1.25,1.48,1100,1100
+2370,912,15,Replace Brake Shoes,01:00:00,00:55:12,1.00,0.92,750,750
+2371,913,1,Change Oil,00:45:00,00:51:00,0.75,0.85,600,600
+2372,913,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:00,0.50,0.45,600,600
+2373,914,36,Down Clutch / Pulldown Transmission,04:30:00,04:06:36,4.50,4.11,3050,3050
+2374,914,2,Change ATF / Transmission Fluid,00:45:00,00:52:48,0.75,0.88,750,750
+2375,915,36,Down Clutch / Pulldown Transmission,04:30:00,04:53:24,4.50,4.89,3800,3800
+2376,916,13,Brake Service & Cleaning,01:15:00,01:32:24,1.25,1.54,1200,1200
+2377,916,14,Replace Brake Pads,01:00:00,01:05:24,1.00,1.09,700,700
+2378,916,16,Rotor Disc Refacing / Resurfacing,02:00:00,02:24:00,2.00,2.40,3100,3100
+2379,917,13,Brake Service & Cleaning,01:15:00,01:13:12,1.25,1.22,1250,1250
+2380,917,15,Replace Brake Shoes,01:00:00,01:07:48,1.00,1.13,1100,1100
+2381,918,13,Brake Service & Cleaning,01:15:00,01:16:12,1.25,1.27,1050,1050
+2382,918,15,Replace Brake Shoes,01:00:00,01:04:12,1.00,1.07,800,800
+2383,918,18,Wheel Alignment,01:00:00,01:03:00,1.00,1.05,1000,1000
+2384,919,13,Brake Service & Cleaning,01:15:00,01:27:36,1.25,1.46,700,700
+2385,919,15,Replace Brake Shoes,01:00:00,00:51:36,1.00,0.86,800,800
+2386,920,36,Down Clutch / Pulldown Transmission,04:30:00,05:03:00,4.50,5.05,3100,3100
+2387,921,22,Replace Suspension Bushing,02:30:00,02:56:24,2.50,2.94,2250,2250
+2388,921,23,Replace Tie Rod End,01:00:00,01:13:12,1.00,1.22,1200,1200
+2389,921,18,Wheel Alignment,01:00:00,01:06:36,1.00,1.11,950,950
+2390,922,1,Change Oil,00:45:00,00:40:48,0.75,0.68,850,850
+2391,922,58,General Mechanical Inspection & Check-Up,00:30:00,00:36:36,0.50,0.61,550,550
+2392,922,3,Replace Fuel Filter,00:45:00,00:48:36,0.75,0.81,550,550
+2393,922,4,Replace Air Filter,00:15:00,00:15:36,0.25,0.26,550,550
+2394,923,51,Replace Valve Cover Gasket,01:45:00,02:03:00,1.75,2.05,1900,1900
+2395,923,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:04:48,1.00,1.08,1100,1100
+2396,924,13,Brake Service & Cleaning,01:15:00,01:27:36,1.25,1.46,750,750
+2397,924,15,Replace Brake Shoes,01:00:00,00:57:00,1.00,0.95,900,900
+2398,924,18,Wheel Alignment,01:00:00,01:13:48,1.00,1.23,1400,1400
+2399,925,1,Change Oil,00:45:00,00:51:36,0.75,0.86,600,600
+2400,925,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,650,650
+2401,925,18,Wheel Alignment,01:00:00,01:07:48,1.00,1.13,1150,1150
+2402,926,1,Change Oil,00:45:00,00:52:12,0.75,0.87,500,500
+2403,926,58,General Mechanical Inspection & Check-Up,00:30:00,00:26:24,0.50,0.44,550,550
+2404,927,22,Replace Suspension Bushing,02:30:00,02:31:48,2.50,2.53,1850,1850
+2405,927,23,Replace Tie Rod End,01:00:00,01:03:36,1.00,1.06,1000,1000
+2406,927,18,Wheel Alignment,01:00:00,00:54:00,1.00,0.90,950,950
+2407,927,21,Replace Shock Absorbers,02:00:00,02:28:12,2.00,2.47,1400,1400
+2408,928,1,Change Oil,00:45:00,00:39:00,0.75,0.65,700,700
+2409,928,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,400,400
+2410,929,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:45:00,3.00,2.75,2850,2850
+2411,930,22,Replace Suspension Bushing,02:30:00,02:19:48,2.50,2.33,1850,1850
+2412,930,23,Replace Tie Rod End,01:00:00,01:06:00,1.00,1.10,1350,1350
+2413,930,18,Wheel Alignment,01:00:00,00:55:12,1.00,0.92,1100,1100
+2414,931,1,Change Oil,00:45:00,00:52:48,0.75,0.88,850,850
+2415,931,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:48,0.50,0.58,750,750
+2416,931,18,Wheel Alignment,01:00:00,01:08:24,1.00,1.14,950,950
+2417,932,51,Replace Valve Cover Gasket,01:45:00,02:01:48,1.75,2.03,1500,1500
+2418,932,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:04:48,1.00,1.08,650,650
+2419,933,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:26:24,3.00,3.44,2200,2200
+2420,933,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,700,700
+2421,934,1,Change Oil,00:45:00,00:39:36,0.75,0.66,650,650
+2422,934,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,600,600
+2423,935,13,Brake Service & Cleaning,01:15:00,01:12:00,1.25,1.20,700,700
+2424,935,15,Replace Brake Shoes,01:00:00,01:10:48,1.00,1.18,700,700
+2425,936,22,Replace Suspension Bushing,02:30:00,02:40:48,2.50,2.68,1350,1350
+2426,936,25,Replace Tie Rod & Rack End,01:30:00,01:35:24,1.50,1.59,1000,1000
+2427,936,18,Wheel Alignment,01:00:00,01:04:48,1.00,1.08,1350,1350
+2428,937,22,Replace Suspension Bushing,02:30:00,02:37:12,2.50,2.62,1650,1650
+2429,937,25,Replace Tie Rod & Rack End,01:30:00,01:44:24,1.50,1.74,1200,1200
+2430,937,18,Wheel Alignment,01:00:00,01:06:36,1.00,1.11,850,850
+2431,938,1,Change Oil,00:45:00,00:46:12,0.75,0.77,550,550
+2432,938,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,650,650
+2433,938,18,Wheel Alignment,01:00:00,01:09:36,1.00,1.16,850,850
+2434,939,36,Down Clutch / Pulldown Transmission,04:30:00,05:13:12,4.50,5.22,4100,4100
+2435,939,1,Change Oil,00:45:00,00:55:12,0.75,0.92,750,750
+2436,940,22,Replace Suspension Bushing,02:30:00,02:25:12,2.50,2.42,1550,1550
+2437,940,23,Replace Tie Rod End,01:00:00,00:52:48,1.00,0.88,1250,1250
+2438,940,18,Wheel Alignment,01:00:00,01:01:48,1.00,1.03,900,900
+2439,941,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:03:36,3.00,3.06,2450,2450
+2440,941,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,550,550
+2441,942,1,Change Oil,00:45:00,00:40:12,0.75,0.67,650,650
+2442,942,58,General Mechanical Inspection & Check-Up,00:30:00,00:34:12,0.50,0.57,550,550
+2443,943,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:18:36,3.00,3.31,3300,3300
+2444,944,22,Replace Suspension Bushing,02:30:00,02:24:00,2.50,2.40,1550,1550
+2445,944,23,Replace Tie Rod End,01:00:00,01:00:00,1.00,1.00,900,900
+2446,944,18,Wheel Alignment,01:00:00,00:53:24,1.00,0.89,1050,1050
+2447,945,36,Down Clutch / Pulldown Transmission,04:30:00,04:31:12,4.50,4.52,4400,4400
+2448,945,2,Change ATF / Transmission Fluid,00:45:00,00:39:36,0.75,0.66,650,650
+2449,946,1,Change Oil,00:45:00,00:44:24,0.75,0.74,600,600
+2450,946,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:36,0.50,0.51,400,400
+2451,946,3,Replace Fuel Filter,00:45:00,00:47:24,0.75,0.79,550,550
+2452,946,4,Replace Air Filter,00:15:00,00:16:48,0.25,0.28,550,550
+2453,946,5,Replace Cabin Filter,00:15:00,00:18:00,0.25,0.30,200,200
+2454,947,1,Change Oil,00:45:00,00:51:36,0.75,0.86,850,850
+2455,947,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,600,600
+2456,948,51,Replace Valve Cover Gasket,01:45:00,02:09:00,1.75,2.15,1100,1100
+2457,948,48,Replace Fan Belt / Serpentine Belt,01:00:00,00:58:12,1.00,0.97,1300,1300
+2458,948,1,Change Oil,00:45:00,00:41:24,0.75,0.69,600,600
+2459,949,51,Replace Valve Cover Gasket,01:45:00,01:46:12,1.75,1.77,1150,1150
+2460,949,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:13:12,1.00,1.22,850,850
+2461,950,13,Brake Service & Cleaning,01:15:00,01:29:24,1.25,1.49,1250,1250
+2462,950,15,Replace Brake Shoes,01:00:00,00:54:00,1.00,0.90,650,650
+2463,951,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:40:48,3.00,2.68,2400,2400
+2464,952,13,Brake Service & Cleaning,01:15:00,01:31:48,1.25,1.53,1300,1300
+2465,952,15,Replace Brake Shoes,01:00:00,00:57:36,1.00,0.96,800,800
+2466,952,18,Wheel Alignment,01:00:00,00:57:00,1.00,0.95,850,850
+2467,953,22,Replace Suspension Bushing,02:30:00,02:25:48,2.50,2.43,2500,2500
+2468,953,23,Replace Tie Rod End,01:00:00,01:01:12,1.00,1.02,1050,1050
+2469,953,18,Wheel Alignment,01:00:00,00:51:36,1.00,0.86,1200,1200
+2470,953,21,Replace Shock Absorbers,02:00:00,01:54:36,2.00,1.91,1600,1600
+2471,954,22,Replace Suspension Bushing,02:30:00,03:00:36,2.50,3.01,1900,1900
+2472,954,25,Replace Tie Rod & Rack End,01:30:00,01:27:00,1.50,1.45,1300,1300
+2473,954,18,Wheel Alignment,01:00:00,01:03:36,1.00,1.06,850,850
+2474,955,13,Brake Service & Cleaning,01:15:00,01:22:12,1.25,1.37,1250,1250
+2475,955,15,Replace Brake Shoes,01:00:00,01:01:48,1.00,1.03,950,950
+2476,956,1,Change Oil,00:45:00,00:48:36,0.75,0.81,600,600
+2477,956,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:36,0.50,0.51,450,450
+2478,957,22,Replace Suspension Bushing,02:30:00,02:52:12,2.50,2.87,1300,1300
+2479,957,23,Replace Tie Rod End,01:00:00,01:11:24,1.00,1.19,750,750
+2480,957,18,Wheel Alignment,01:00:00,01:09:36,1.00,1.16,850,850
+2481,957,21,Replace Shock Absorbers,02:00:00,02:19:48,2.00,2.33,1300,1300
+2482,958,13,Brake Service & Cleaning,01:15:00,01:04:12,1.25,1.07,950,950
+2483,958,15,Replace Brake Shoes,01:00:00,01:09:36,1.00,1.16,800,800
+2484,958,18,Wheel Alignment,01:00:00,01:04:12,1.00,1.07,900,900
+2485,959,22,Replace Suspension Bushing,02:30:00,02:54:00,2.50,2.90,2500,2500
+2486,959,25,Replace Tie Rod & Rack End,01:30:00,01:39:00,1.50,1.65,1050,1050
+2487,959,18,Wheel Alignment,01:00:00,01:05:24,1.00,1.09,900,900
+2488,959,21,Replace Shock Absorbers,02:00:00,02:22:12,2.00,2.37,1550,1550
+2489,960,1,Change Oil,00:45:00,00:47:24,0.75,0.79,650,650
+2490,960,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:12,0.50,0.52,500,500
+2491,961,22,Replace Suspension Bushing,02:30:00,02:38:24,2.50,2.64,1750,1750
+2492,961,23,Replace Tie Rod End,01:00:00,00:52:12,1.00,0.87,950,950
+2493,961,18,Wheel Alignment,01:00:00,01:13:48,1.00,1.23,950,950
+2494,962,22,Replace Suspension Bushing,02:30:00,02:46:12,2.50,2.77,1950,1950
+2495,962,25,Replace Tie Rod & Rack End,01:30:00,01:39:00,1.50,1.65,850,850
+2496,962,18,Wheel Alignment,01:00:00,00:57:00,1.00,0.95,900,900
+2497,963,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:21:00,3.00,3.35,2550,2550
+2498,964,1,Change Oil,00:45:00,00:40:12,0.75,0.67,700,700
+2499,964,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,650,650
+2500,965,1,Change Oil,00:45:00,00:44:24,0.75,0.74,600,600
+2501,965,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:36,0.50,0.56,450,450
+2502,966,1,Change Oil,00:45:00,00:51:00,0.75,0.85,600,600
+2503,966,58,General Mechanical Inspection & Check-Up,00:30:00,00:30:00,0.50,0.50,550,550
+2504,966,3,Replace Fuel Filter,00:45:00,00:47:24,0.75,0.79,550,550
+2505,966,5,Replace Cabin Filter,00:15:00,00:18:36,0.25,0.31,200,200
+2506,967,1,Change Oil,00:45:00,00:53:24,0.75,0.89,600,600
+2507,967,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,650,650
+2508,968,1,Change Oil,00:45:00,00:42:36,0.75,0.71,650,650
+2509,968,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,450,450
+2510,968,4,Replace Air Filter,00:15:00,00:15:36,0.25,0.26,550,550
+2511,968,5,Replace Cabin Filter,00:15:00,00:18:36,0.25,0.31,200,200
+2512,969,1,Change Oil,00:45:00,00:39:36,0.75,0.66,500,500
+2513,969,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,550,550
+2514,969,18,Wheel Alignment,01:00:00,01:07:48,1.00,1.13,1000,1000
+2515,970,36,Down Clutch / Pulldown Transmission,04:30:00,04:31:12,4.50,4.52,4850,4850
+2516,971,22,Replace Suspension Bushing,02:30:00,02:19:12,2.50,2.32,1650,1650
+2517,971,25,Replace Tie Rod & Rack End,01:30:00,01:38:24,1.50,1.64,1150,1150
+2518,971,18,Wheel Alignment,01:00:00,01:02:24,1.00,1.04,1000,1000
+2519,972,1,Change Oil,00:45:00,00:39:00,0.75,0.65,600,600
+2520,972,58,General Mechanical Inspection & Check-Up,00:30:00,00:33:00,0.50,0.55,450,450
+2521,973,1,Change Oil,00:45:00,00:48:36,0.75,0.81,550,550
+2522,973,58,General Mechanical Inspection & Check-Up,00:30:00,00:27:36,0.50,0.46,450,450
+2523,973,3,Replace Fuel Filter,00:45:00,00:42:00,0.75,0.70,550,550
+2524,973,4,Replace Air Filter,00:15:00,00:15:36,0.25,0.26,550,550
+2525,973,5,Replace Cabin Filter,00:15:00,00:13:12,0.25,0.22,200,200
+2526,974,22,Replace Suspension Bushing,02:30:00,02:16:48,2.50,2.28,1200,1200
+2527,974,23,Replace Tie Rod End,01:00:00,01:14:24,1.00,1.24,1250,1250
+2528,974,18,Wheel Alignment,01:00:00,01:00:36,1.00,1.01,900,900
+2529,975,1,Change Oil,00:45:00,00:49:12,0.75,0.82,550,550
+2530,975,58,General Mechanical Inspection & Check-Up,00:30:00,00:37:12,0.50,0.62,600,600
+2531,976,22,Replace Suspension Bushing,02:30:00,02:49:48,2.50,2.83,1850,1850
+2532,976,23,Replace Tie Rod End,01:00:00,01:14:24,1.00,1.24,850,850
+2533,976,18,Wheel Alignment,01:00:00,00:57:00,1.00,0.95,1050,1050
+2534,977,37,Air Conditioning Cleaning & Freon Charge,03:00:00,03:36:36,3.00,3.61,3000,3000
+2535,977,58,General Mechanical Inspection & Check-Up,00:30:00,00:25:48,0.50,0.43,650,650
+2536,978,53,Top Overhaul,14:00:00,14:22:12,14.00,14.37,19300,19300
+2537,979,1,Change Oil,00:45:00,00:51:00,0.75,0.85,650,650
+2538,979,58,General Mechanical Inspection & Check-Up,00:30:00,00:31:48,0.50,0.53,650,650
+2539,979,3,Replace Fuel Filter,00:45:00,00:53:24,0.75,0.89,550,550
+2540,979,4,Replace Air Filter,00:15:00,00:13:48,0.25,0.23,550,550
+2541,979,5,Replace Cabin Filter,00:15:00,00:18:00,0.25,0.30,200,200
+2542,980,13,Brake Service & Cleaning,01:15:00,01:23:24,1.25,1.39,1050,1050
+2543,980,15,Replace Brake Shoes,01:00:00,00:57:00,1.00,0.95,900,900
+2544,981,51,Replace Valve Cover Gasket,01:45:00,02:11:24,1.75,2.19,1550,1550
+2545,981,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:00:00,1.00,1.00,1000,1000
+2546,982,13,Brake Service & Cleaning,01:15:00,01:33:36,1.25,1.56,500,500
+2547,982,14,Replace Brake Pads,01:00:00,01:14:24,1.00,1.24,600,600
+2548,982,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:45:00,2.00,1.75,2400,2400
+2549,983,22,Replace Suspension Bushing,02:30:00,03:04:12,2.50,3.07,1350,1350
+2550,983,23,Replace Tie Rod End,01:00:00,01:03:00,1.00,1.05,1150,1150
+2551,983,18,Wheel Alignment,01:00:00,01:01:12,1.00,1.02,1300,1300
+2552,984,13,Brake Service & Cleaning,01:15:00,01:05:24,1.25,1.09,900,900
+2553,984,15,Replace Brake Shoes,01:00:00,01:03:36,1.00,1.06,950,950
+2554,984,18,Wheel Alignment,01:00:00,01:07:48,1.00,1.13,1050,1050
+2555,985,22,Replace Suspension Bushing,02:30:00,02:09:36,2.50,2.16,1600,1600
+2556,985,23,Replace Tie Rod End,01:00:00,01:03:00,1.00,1.05,700,700
+2557,985,18,Wheel Alignment,01:00:00,01:00:36,1.00,1.01,800,800
+2558,986,22,Replace Suspension Bushing,02:30:00,02:39:36,2.50,2.66,1600,1600
+2559,986,23,Replace Tie Rod End,01:00:00,00:52:12,1.00,0.87,650,650
+2560,986,18,Wheel Alignment,01:00:00,00:55:12,1.00,0.92,1350,1350
+2561,987,13,Brake Service & Cleaning,01:15:00,01:31:12,1.25,1.52,900,900
+2562,987,15,Replace Brake Shoes,01:00:00,01:02:24,1.00,1.04,700,700
+2563,988,1,Change Oil,00:45:00,00:39:00,0.75,0.65,750,750
+2564,988,58,General Mechanical Inspection & Check-Up,00:30:00,00:29:24,0.50,0.49,500,500
+2565,989,13,Brake Service & Cleaning,01:15:00,01:13:48,1.25,1.23,1250,1250
+2566,989,15,Replace Brake Shoes,01:00:00,00:59:24,1.00,0.99,850,850
+2567,990,37,Air Conditioning Cleaning & Freon Charge,03:00:00,02:35:24,3.00,2.59,2550,2550
+2568,990,58,General Mechanical Inspection & Check-Up,00:30:00,00:25:48,0.50,0.43,650,650
+2569,991,22,Replace Suspension Bushing,02:30:00,02:47:24,2.50,2.79,2450,2450
+2570,991,23,Replace Tie Rod End,01:00:00,01:10:12,1.00,1.17,1400,1400
+2571,991,18,Wheel Alignment,01:00:00,00:54:00,1.00,0.90,800,800
+2572,991,21,Replace Shock Absorbers,02:00:00,02:08:24,2.00,2.14,1650,1650
+2573,992,13,Brake Service & Cleaning,01:15:00,01:03:36,1.25,1.06,850,850
+2574,992,15,Replace Brake Shoes,01:00:00,01:14:24,1.00,1.24,600,600
+2575,993,13,Brake Service & Cleaning,01:15:00,01:07:12,1.25,1.12,600,600
+2576,993,14,Replace Brake Pads,01:00:00,01:01:12,1.00,1.02,700,700
+2577,993,16,Rotor Disc Refacing / Resurfacing,02:00:00,01:58:48,2.00,1.98,3050,3050
+2578,994,51,Replace Valve Cover Gasket,01:45:00,02:06:00,1.75,2.10,1450,1450
+2579,994,48,Replace Fan Belt / Serpentine Belt,01:00:00,01:13:48,1.00,1.23,900,900
+2580,994,1,Change Oil,00:45:00,00:43:48,0.75,0.73,500,500
+2581,995,36,Down Clutch / Pulldown Transmission,04:30:00,04:11:24,4.50,4.19,3300,3300
+2582,995,2,Change ATF / Transmission Fluid,00:45:00,00:43:12,0.75,0.72,750,750
+2583,996,36,Down Clutch / Pulldown Transmission,04:30:00,05:19:48,4.50,5.33,3450,3450
+2584,997,22,Replace Suspension Bushing,02:30:00,02:10:12,2.50,2.17,1150,1150
+2585,997,23,Replace Tie Rod End,01:00:00,01:12:00,1.00,1.20,850,850
+2586,997,18,Wheel Alignment,01:00:00,00:56:24,1.00,0.94,1000,1000
+2587,998,1,Change Oil,00:45:00,00:53:24,0.75,0.89,600,600
+2588,998,58,General Mechanical Inspection & Check-Up,00:30:00,00:28:48,0.50,0.48,550,550
+2589,998,18,Wheel Alignment,01:00:00,00:58:48,1.00,0.98,1150,1150
+2590,999,22,Replace Suspension Bushing,02:30:00,02:36:00,2.50,2.60,2000,2000
+2591,999,23,Replace Tie Rod End,01:00:00,01:09:36,1.00,1.16,1050,1050
+2592,999,18,Wheel Alignment,01:00:00,01:06:36,1.00,1.11,800,800
+2593,1000,1,Change Oil,00:45:00,00:51:36,0.75,0.86,750,750
+2594,1000,58,General Mechanical Inspection & Check-Up,00:30:00,00:35:24,0.50,0.59,650,650

@@ -150,6 +150,7 @@ export interface ServiceTask {
   note: string
   time: string
   status: TaskStatus
+  startedAt?: string
   scheduledDate?: string
   mechanicId?: number
   mechanicName?: string

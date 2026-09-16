@@ -41,15 +41,25 @@ AS $$
         repair_progress_logs.log_time;
 $$;
 
--- get_service_progress_tasks(p_job_order_id)
+ALTER TABLE service_progress_tasks
+ADD COLUMN IF NOT EXISTS started_at TIMESTAMP;
+
+DROP FUNCTION IF EXISTS get_service_progress_tasks(INT);
+
 CREATE OR REPLACE FUNCTION get_service_progress_tasks(p_job_order_id INT)
 RETURNS TABLE (
-    id            INT,
-    section_id    section_type,
-    task_title    VARCHAR(100),
-    note          TEXT,
-    task_status   VARCHAR,
-    completed_at  TIMESTAMP
+    id                INT,
+    section_id        section_type,
+    task_title        VARCHAR(100),
+    note              TEXT,
+    task_status       VARCHAR,
+    started_at        TIMESTAMP,
+    completed_at      TIMESTAMP,
+    price             DECIMAL(10,2),
+    billable          BOOLEAN,
+    scheduled_date    TIMESTAMP,
+    mechanic_id       INT,
+    estimated_finish  TIMESTAMP
 )
 LANGUAGE SQL STABLE
 AS $$
@@ -59,6 +69,7 @@ AS $$
         spt.task_title,
         spt.note,
         spt.task_status,
+        spt.started_at,
         spt.completed_at,
         spt.price,
         spt.billable,
@@ -72,8 +83,6 @@ AS $$
     ORDER BY spt.section_id ASC, spt.id ASC;
 $$;
 
-
--- update_service_progress_task(p_task_id, p_status)
 CREATE OR REPLACE FUNCTION update_service_progress_task(
     p_task_id INT,
     p_status  VARCHAR
@@ -83,8 +92,50 @@ LANGUAGE SQL VOLATILE
 AS $$
     UPDATE service_progress_tasks
     SET task_status  = p_status,
+        started_at   = CASE
+            WHEN p_status IN ('in_progress', 'active') AND started_at IS NULL THEN NOW()
+            WHEN p_status = 'completed' AND started_at IS NULL THEN NOW()
+            WHEN p_status = 'pending' THEN NULL
+            ELSE started_at
+        END,
         completed_at = CASE
             WHEN p_status = 'completed' THEN NOW()
+            WHEN p_status IN ('in_progress', 'active', 'pending') THEN NULL
+            ELSE completed_at
+        END
+    WHERE id = p_task_id;
+$$;
+
+
+DROP FUNCTION IF EXISTS schedule_service_task_with_status(INT, TIMESTAMP, VARCHAR, INT, TEXT);
+DROP FUNCTION IF EXISTS schedule_service_task_with_status(INT, TIMESTAMP, VARCHAR, INT, TEXT, TIMESTAMP);
+
+CREATE OR REPLACE FUNCTION schedule_service_task_with_status(
+    p_task_id        INT,
+    p_scheduled_date TIMESTAMP,
+    p_status         VARCHAR,
+    p_mechanic_id    INT DEFAULT NULL,
+    p_note           TEXT DEFAULT NULL,
+    p_started_at     TIMESTAMP DEFAULT NULL
+)
+RETURNS VOID
+LANGUAGE SQL VOLATILE
+AS $$
+    UPDATE service_progress_tasks
+    SET task_status    = p_status,
+        scheduled_date = p_scheduled_date,
+        mechanic_id    = p_mechanic_id,
+        note           = COALESCE(p_note, note),
+        started_at     = CASE
+            WHEN p_started_at IS NOT NULL THEN p_started_at
+            WHEN p_status IN ('in_progress', 'active') AND started_at IS NULL THEN NOW()
+            WHEN p_status = 'completed' AND started_at IS NULL THEN NOW()
+            WHEN p_status = 'pending' THEN NULL
+            ELSE started_at
+        END,
+        completed_at   = CASE
+            WHEN p_status = 'completed' THEN NOW()
+            WHEN p_status IN ('in_progress', 'active', 'pending') THEN NULL
             ELSE completed_at
         END
     WHERE id = p_task_id;

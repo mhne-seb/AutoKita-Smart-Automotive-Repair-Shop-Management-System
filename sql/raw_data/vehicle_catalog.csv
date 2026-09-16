@@ -1,0 +1,4 @@
+id,make,model,year_start,year_end,trim_variant,engine_type,transmission,drive_type,fuel_type
+1,Toyota,Hilux,2005,2011,Vigo,,,,Diesel
+2,Toyota,Vios,2005,2011,NCP,,,,Gasoline
+3,Toyota,Hiace,2005,2013,KDH200L,,,,Diesel

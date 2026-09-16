@@ -115,3 +115,5 @@ cd Chatbot
 C:\Users\Snow\AppData\Local\Programs\Python\Python313\python.exe extract_manuals.py --vehicle hiace_2012
 # or all vehicles:
 C:\Users\Snow\AppData\Local\Programs\Python\Python313\python.exe extract_manuals.py
+
+py -3 models/predict_server.py

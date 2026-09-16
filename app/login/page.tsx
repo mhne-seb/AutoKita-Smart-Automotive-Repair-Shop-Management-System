@@ -24,8 +24,8 @@ function LoginPage() {
   }, [])
 
   const router = useRouter()
-  const [email, setEmail] = useState('customer@autocare.com')
-  const [password, setPassword] = useState('password')
+  const [email, setEmail] = useState('customer200@example.com')
+  const [password, setPassword] = useState('password123_u200')
   const [showPassword, setShowPassword] = useState(false)
   const [remember, setRemember] = useState(true)
   const [forgot, setForgot] = useState(false)
@@ -47,7 +47,8 @@ function LoginPage() {
     }
 
     startSession(result.role, result.user!.id)
-    router.push(result.role === 'customer' ? '/dashboard' : '/overview')
+    const isCustomer = result.role === 'customer' || result.role === 'c'
+    router.push(isCustomer ? '/dashboard' : '/overview')
   }
 
   const fillDemo = (acc: (typeof demoAccounts)[number]) => {

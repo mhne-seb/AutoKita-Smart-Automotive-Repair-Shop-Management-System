@@ -95,6 +95,7 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
       note: row.note ?? '',
       time: formatTaskTime(row.completed_at),
       status: mapDbTaskStatus(row.task_status),
+      startedAt: row.started_at ? new Date(row.started_at).toISOString() : undefined,
       scheduledDate: row.scheduled_date ? new Date(row.scheduled_date).toISOString() : undefined,
       mechanicId: row.mechanic_id ?? undefined,
       mechanicName: row.mechanic_name ?? undefined,

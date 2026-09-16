@@ -1,0 +1,59 @@
+id,shop_id,service_name,description,base_price,base_duration_hours,is_price_fixed,is_active
+1,1,Change Oil,Standard automotive service: Change Oil,650.00,0.75,true,true
+2,1,Change ATF / Transmission Fluid,Standard automotive service: Change ATF / Transmission Fluid,650.00,0.75,true,true
+3,1,Replace Fuel Filter,Standard automotive service: Replace Fuel Filter,550.00,0.75,true,true
+4,1,Replace Air Filter,Standard automotive service: Replace Air Filter,550.00,0.25,true,true
+5,1,Replace Cabin Filter,Standard automotive service: Replace Cabin Filter,200.00,0.25,true,true
+6,1,Fuel Injector Cleaning / Service,Standard automotive service: Fuel Injector Cleaning / Service,1500.00,1.50,true,true
+7,1,Replace Fuel Pump,Standard automotive service: Replace Fuel Pump,750.00,1.50,false,true
+8,1,Intake Manifold Cleaning & Reseal,Standard automotive service: Intake Manifold Cleaning & Reseal,1750.00,2.00,false,true
+9,1,Cleaning EGR,Standard automotive service: Cleaning EGR,4500.00,3.50,false,true
+10,1,Throttle Body Cleaning,Standard automotive service: Throttle Body Cleaning,550.00,0.75,true,true
+11,1,Cleaning EGR & Throttle Body,Standard automotive service: Cleaning EGR & Throttle Body,5000.00,4.00,false,true
+12,1,Replace Spark Plugs,Standard automotive service: Replace Spark Plugs,300.00,0.50,true,true
+13,1,Brake Service & Cleaning,Standard automotive service: Brake Service & Cleaning,800.00,1.25,true,true
+14,1,Replace Brake Pads,Standard automotive service: Replace Brake Pads,600.00,1.00,true,true
+15,1,Replace Brake Shoes,Standard automotive service: Replace Brake Shoes,800.00,1.00,true,true
+16,1,Rotor Disc Refacing / Resurfacing,Standard automotive service: Rotor Disc Refacing / Resurfacing,2500.00,2.00,true,true
+17,1,Brake Master / Wheel Cylinder Overhaul,Standard automotive service: Brake Master / Wheel Cylinder Overhaul,800.00,1.50,false,true
+18,1,Wheel Alignment,Standard automotive service: Wheel Alignment,900.00,1.00,true,true
+19,1,Wheel Balancing,Standard automotive service: Wheel Balancing,500.00,0.50,true,true
+20,1,Tire Rotation & Balancing,Standard automotive service: Tire Rotation & Balancing,800.00,0.75,true,true
+21,1,Replace Shock Absorbers,Standard automotive service: Replace Shock Absorbers,1200.00,2.00,true,true
+22,1,Replace Suspension Bushing,Standard automotive service: Replace Suspension Bushing,1500.00,2.50,false,true
+23,1,Replace Tie Rod End,Standard automotive service: Replace Tie Rod End,800.00,1.00,true,true
+24,1,Replace Rack End,Standard automotive service: Replace Rack End,900.00,1.25,true,true
+25,1,Replace Tie Rod & Rack End,Standard automotive service: Replace Tie Rod & Rack End,1000.00,1.50,true,true
+26,1,Overhaul / Replace Steering Rack & Pinion,Standard automotive service: Overhaul / Replace Steering Rack & Pinion,4500.00,4.00,false,true
+27,1,Replace Stabilizer Link,Standard automotive service: Replace Stabilizer Link,700.00,0.75,true,true
+28,1,Replace Stabilizer Bushing,Standard automotive service: Replace Stabilizer Bushing,600.00,0.75,true,true
+29,1,Replace Stabilizer Link & Bushing,Standard automotive service: Replace Stabilizer Link & Bushing,600.00,1.00,true,true
+30,1,Replace Ball Joint,Standard automotive service: Replace Ball Joint,1200.00,1.25,true,true
+31,1,Replace Wheel Bearing,Standard automotive service: Replace Wheel Bearing,1350.00,1.50,true,true
+32,1,Replace CV Joint,Standard automotive service: Replace CV Joint,1800.00,1.50,false,true
+33,1,Replace Axle Boot,Standard automotive service: Replace Axle Boot,800.00,1.00,true,true
+34,1,Replace CV Joint & Axle Boot,Standard automotive service: Replace CV Joint & Axle Boot,1600.00,1.75,false,true
+35,1,Power Steering Pump Overhaul / Replacement,Standard automotive service: Power Steering Pump Overhaul / Replacement,1800.00,2.00,false,true
+36,1,Down Clutch / Pulldown Transmission,Standard automotive service: Down Clutch / Pulldown Transmission,3500.00,4.50,false,true
+37,1,Air Conditioning Cleaning & Freon Charge,Standard automotive service: Air Conditioning Cleaning & Freon Charge,3500.00,3.00,false,true
+38,1,Replace A/C Compressor,Standard automotive service: Replace A/C Compressor,3500.00,2.50,false,true
+39,1,Coolant Flush,Standard automotive service: Coolant Flush,350.00,0.75,true,true
+40,1,Radiator Replacement / Repair,Standard automotive service: Radiator Replacement / Repair,1500.00,1.50,false,true
+41,1,Replace Water Pump,Standard automotive service: Replace Water Pump,2500.00,2.00,false,true
+42,1,Replace Auxiliary Fan / Motor,Standard automotive service: Replace Auxiliary Fan / Motor,1500.00,1.00,true,true
+43,1,Engine Diagnostics & Electrical Scan,Standard automotive service: Engine Diagnostics & Electrical Scan,1500.00,0.75,true,true
+44,1,Battery Testing & Replacement,Standard automotive service: Battery Testing & Replacement,300.00,0.25,true,true
+45,1,Alternator Repair / Replacement,Standard automotive service: Alternator Repair / Replacement,1800.00,1.50,false,true
+46,1,Starter Motor Repair / Replacement,Standard automotive service: Starter Motor Repair / Replacement,2050.00,1.50,false,true
+47,1,Electrical System & Wiring Repair,Standard automotive service: Electrical System & Wiring Repair,2500.00,1.50,false,true
+48,1,Replace Fan Belt / Serpentine Belt,Standard automotive service: Replace Fan Belt / Serpentine Belt,1100.00,1.00,true,true
+49,1,Replace Timing Belt / Chain,Standard automotive service: Replace Timing Belt / Chain,3500.00,4.00,false,true
+50,1,Replace Engine Support,Standard automotive service: Replace Engine Support,1200.00,1.50,false,true
+51,1,Replace Valve Cover Gasket,Standard automotive service: Replace Valve Cover Gasket,1200.00,1.75,false,true
+52,1,Reseal Oil Pan / Crankcase,Standard automotive service: Reseal Oil Pan / Crankcase,2050.00,2.00,false,true
+53,1,Top Overhaul,Standard automotive service: Top Overhaul,15000.00,14.00,false,true
+54,1,General Engine Overhaul,Standard automotive service: General Engine Overhaul,22000.00,24.00,false,true
+55,1,Sliding Door Repair / Mechanism,Standard automotive service: Sliding Door Repair / Mechanism,3000.00,1.50,false,true
+56,1,Power Window Repair / Motor Replacement,Standard automotive service: Power Window Repair / Motor Replacement,1000.00,1.25,false,true
+57,1,Wiper Linkage / Motor Repair,Standard automotive service: Wiper Linkage / Motor Repair,4000.00,1.50,false,true
+58,1,General Mechanical Inspection & Check-Up,Standard automotive service: General Mechanical Inspection & Check-Up,800.00,0.50,true,true
