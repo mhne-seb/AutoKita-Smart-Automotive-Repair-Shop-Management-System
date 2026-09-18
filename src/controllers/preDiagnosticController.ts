@@ -41,11 +41,15 @@ export async function getLatestPreDiagnostic(jobOrderId: string): Promise<PreDia
 }
 
 /** Sends a new round for approval (e.g. inspection findings, or a finished quotation). */
-export async function sendForApproval(jobOrderId: string, notes: string): Promise<PreDiagnosticRound | null> {
+export async function sendForApproval(
+  jobOrderId: string,
+  notes: string,
+  context: 'inspection' | 'quotation' = 'inspection',
+): Promise<PreDiagnosticRound | null> {
   const res = await fetch(`/api/job-orders/${jobOrderId}/pre-diagnostic`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ notes }),
+    body: JSON.stringify({ notes, context }),
   })
   const json = await res.json()
   if (!json.success) return null
