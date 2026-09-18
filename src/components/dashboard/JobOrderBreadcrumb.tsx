@@ -34,60 +34,58 @@ export function JobOrderBreadcrumb({ jobOrderId, current, stage }: Props) {
   ]
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex flex-wrap items-center gap-3 text-sm">
-        <Link
-          href="/job-orders"
-          className="flex items-center gap-1 font-medium text-slate-500 hover:text-slate-700 hover:underline"
-        >
-          <ChevronLeft size={14} /> Back to Customers
-        </Link>
+    <div className="space-y-2">
+      <Link
+        href="/job-orders"
+        className="flex w-fit items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
+      >
+        <ChevronLeft size={14} /> Back to Customers
+      </Link>
 
-        <span className="h-4 w-px bg-slate-200" />
-
-        <div className="flex flex-wrap items-center gap-1.5">
-        {crumbs.map((c, i) => {
-          const isCurrent = c.key === current
-          const crumbStage = CRUMB_STAGE[c.key]
-          const reachable = !crumbStage || stageOrder.indexOf(crumbStage) <= reachedIndex
-          return (
-            <span key={c.key} className="flex items-center gap-1.5">
-              {i > 0 && <ChevronRight size={14} className="text-slate-300" />}
-              {isCurrent ? (
-                <span className="font-semibold text-slate-900">{c.label}</span>
-              ) : reachable ? (
-                <Link
-                  href={c.href}
-                  className="text-slate-400 hover:text-slate-700 hover:underline"
-                >
-                  {c.label}
-                </Link>
-              ) : (
-                <span
-                  aria-disabled="true"
-                  title="The job order hasn't reached this stage yet"
-                  className="cursor-not-allowed text-slate-300"
-                >
-                  {c.label}
-                </span>
-              )}
-            </span>
-          )
-        })}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-1.5 text-sm">
+          {crumbs.map((c, i) => {
+            const isCurrent = c.key === current
+            const crumbStage = CRUMB_STAGE[c.key]
+            const reachable = !crumbStage || stageOrder.indexOf(crumbStage) <= reachedIndex
+            return (
+              <span key={c.key} className="flex items-center gap-1.5">
+                {i > 0 && <ChevronRight size={14} className="text-slate-300" />}
+                {isCurrent ? (
+                  <span className="font-semibold text-slate-900">{c.label}</span>
+                ) : reachable ? (
+                  <Link
+                    href={c.href}
+                    className="text-slate-400 hover:text-slate-700 hover:underline"
+                  >
+                    {c.label}
+                  </Link>
+                ) : (
+                  <span
+                    aria-disabled="true"
+                    title="The job order hasn't reached this stage yet"
+                    className="cursor-not-allowed text-slate-300"
+                  >
+                    {c.label}
+                  </span>
+                )}
+              </span>
+            )
+          })}
         </div>
-      </div>
 
-      {/* The printable job order document only makes sense once the quotation
-          is approved and work is actually underway — so it only shows on the
-          Service Progress stage, not Inspection or Quotation. */}
-      {current === 'progress' && (
-        <button
-          onClick={() => setShowGenerateModal(true)}
-          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
-          <FileText size={14} /> Generate Job Order
-        </button>
-      )}
+        {/* The printable job order document only makes sense once the quotation
+            is approved and work is actually underway — so it only shows on the
+            Service Progress stage, not Inspection or Quotation. */}
+        {current === 'progress' && (
+          <button
+            onClick={() => setShowGenerateModal(true)}
+            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            <FileText size={14} /> Generate Job Order
+          </button>
+        )}
+      </div>
 
       {showGenerateModal && (
         <GenerateJobOrderModal jobOrderId={jobOrderId} onClose={() => setShowGenerateModal(false)} />
