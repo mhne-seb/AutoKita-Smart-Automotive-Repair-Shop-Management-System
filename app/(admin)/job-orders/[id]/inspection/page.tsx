@@ -56,6 +56,11 @@ export default function page() {
 
   const [photoSlots, setPhotoSlots] = useState<InspectionData['photoSlots']>([])
   const [findings, setFindings] = useState<MechanicalFinding[]>([])
+  // Passive save indicator beside "Upload to customer portal" — every photo
+  // title/note/finding edit writes to the DB on its own (blur or immediately),
+  // this just reflects whether that write is in flight, done, or failed.
+  const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved')
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [editingFindingId, setEditingFindingId] = useState<string | null>(null)
   const [editFindingName, setEditFindingName] = useState('')
   const [editFindingNote, setEditFindingNote] = useState('')
@@ -127,6 +132,7 @@ export default function page() {
     setPhotoSlots((prev) => prev.map((p) => (p.id === slotId ? { ...p, url: localUrl } : p)))
     setUploadingSlot(slotId)
 
+    setSaveState('saving')
     try {
       const compressed = await compressImage(file)
       const currentTitle = slot?.title || slot?.label || label
@@ -140,9 +146,11 @@ export default function page() {
         ),
       )
       toast.success(`${currentTitle} photo saved`)
+      setSaveState('saved')
     } catch {
       setPhotoSlots((prev) => prev.map((p) => (p.id === slotId ? { ...p, url: previousUrl } : p)))
       toast.error(`Could not save the ${label} photo. Please try again.`)
+      setSaveState('error')
     } finally {
       URL.revokeObjectURL(localUrl)
       setUploadingSlot(null)
@@ -154,27 +162,44 @@ export default function page() {
     if (isLocked || !slot.rowId) return
     const titleToSave = (slot.title ?? slot.label ?? '').trim()
     if (!titleToSave) return
+    setSaveState('saving')
     const ok = await saveWalkaroundTitle(jobOrderId, slot.rowId, titleToSave)
-    if (!ok) toast.error(`Could not save the photo title. Please try again.`)
+    if (!ok) {
+      toast.error(`Could not save the photo title. Please try again.`)
+      setSaveState('error')
+      return
+    }
+    setHasUnsavedChanges(false)
+    setSaveState('saved')
   }
 
   // Condition notes save on blur — one photo, one note, no separate Save button
   // to forget. Needs a row to write to, so a photo must be uploaded first.
   async function persistSlotNote(slot: InspectionPhotoSlot) {
     if (isLocked || !slot.rowId) return
+    setSaveState('saving')
     const ok = await saveWalkaroundNote(jobOrderId, slot.rowId, slot.note ?? '')
-    if (!ok) toast.error(`Could not save the ${slot.title || slot.label} note. Please try again.`)
+    if (!ok) {
+      toast.error(`Could not save the ${slot.title || slot.label} note. Please try again.`)
+      setSaveState('error')
+      return
+    }
+    setHasUnsavedChanges(false)
+    setSaveState('saved')
   }
 
   async function handlePhotoDelete(slot: InspectionPhotoSlot) {
     if (isLocked) return
     if (slot.rowId) {
+      setSaveState('saving')
       const ok = await deleteInspectionPhoto(jobOrderId, slot.rowId)
       if (!ok) {
         toast.error('Could not delete photo. Please try again.')
+        setSaveState('error')
         return
       }
       toast.success('Photo removed')
+      setSaveState('saved')
     }
 
     if (slot.id.startsWith('custom-')) {
@@ -219,7 +244,9 @@ export default function page() {
     setFindings((prev) => prev.map((f) => (f.id === fId ? { ...f, name, note, status } : f)))
     setEditingFindingId(null)
 
-    await updateInspectionFinding(jobOrderId, { id: fId, name, note, status })
+    setSaveState('saving')
+    const ok = await updateInspectionFinding(jobOrderId, { id: fId, name, note, status })
+    setSaveState(ok ? 'saved' : 'error')
   }
 
   async function deleteFinding(fId: string) {
@@ -228,7 +255,9 @@ export default function page() {
     setFindings((prev) => prev.filter((f) => f.id !== fId))
 
     // API Call
-    await deleteInspectionFinding(jobOrderId, fId)
+    setSaveState('saving')
+    const ok = await deleteInspectionFinding(jobOrderId, fId)
+    setSaveState(ok ? 'saved' : 'error')
   }
 
   async function addFinding() {
@@ -240,7 +269,9 @@ export default function page() {
     }
 
     // API Call to get real ID
+    setSaveState('saving')
     const added = await addInspectionFinding(jobOrderId, newFindingData)
+    setSaveState(added ? 'saved' : 'error')
     if (added) {
       setFindings((prev) => [...prev, added])
       setEditingFindingId(added.id)
@@ -298,28 +329,51 @@ export default function page() {
                 </span>
               </div>
             </div>
-            <button
-              onClick={sendInspectionForApproval}
-              disabled={sending || isLocked}
-              className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-default disabled:bg-emerald-600"
-            >
-              {inspectionStatus === 'disputed' ? (
-                  <AlertCircle size={15} /> 
-                ) : inspectionStatus ? (
-                <CheckCircle2 size={15} /> 
-                ) : ( 
-                <Cloud size={15} /> 
-                )}
-              {sending
-                ? 'Sending…'
-                : inspectionStatus === 'pending'
-                ? 'Awaiting customer approval'
-                : inspectionStatus === 'approved'
-                ? 'Approved by customer'
-                : inspectionStatus === 'disputed'
-                ? 'Customer has concerns - revise and send again'
-                : 'Upload to customer portal'}
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Passive save indicator — every field auto-saves on its own,
+                  this just says whether the server has what's on screen. */}
+              {!isLocked && (
+                saveState === 'error' ? (
+                  <span className="flex items-center gap-1.5 text-xs font-semibold text-rose-600">
+                    <AlertCircle size={13} /> Couldn't save
+                  </span>
+                ) : saveState === 'saving' ? (
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
+                    <Loader2 size={13} className="animate-spin" /> Saving…
+                  </span>
+                ) : hasUnsavedChanges ? (
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-amber-600">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Unsaved changes
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
+                    <Check size={13} className="text-emerald-500" /> Saved
+                  </span>
+                )
+              )}
+              <button
+                onClick={sendInspectionForApproval}
+                disabled={sending || isLocked}
+                className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-default disabled:bg-emerald-600"
+              >
+                {inspectionStatus === 'disputed' ? (
+                    <AlertCircle size={15} />
+                  ) : inspectionStatus ? (
+                  <CheckCircle2 size={15} />
+                  ) : (
+                  <Cloud size={15} />
+                  )}
+                {sending
+                  ? 'Sending…'
+                  : inspectionStatus === 'pending'
+                  ? 'Awaiting customer approval'
+                  : inspectionStatus === 'approved'
+                  ? 'Approved by customer'
+                  : inspectionStatus === 'disputed'
+                  ? 'Customer has concerns - revise and send again'
+                  : 'Upload to customer portal'}
+              </button>
+            </div>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
@@ -519,6 +573,7 @@ export default function page() {
                       setPhotoSlots((prev) =>
                         prev.map((p) => (p.id === slot.id ? { ...p, title: val, label: val } : p))
                       )
+                      setHasUnsavedChanges(true)
                     }}
                     onBlur={() => persistSlotTitle(slot)}
                     disabled={isLocked}
@@ -528,9 +583,10 @@ export default function page() {
 
                   <textarea
                     value={slot.note ?? ''}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setPhotoSlots((prev) => prev.map((p) => (p.id === slot.id ? { ...p, note: e.target.value } : p)))
-                    }
+                      setHasUnsavedChanges(true)
+                    }}
                     onBlur={() => persistSlotNote(slot)}
                     disabled={isLocked || !slot.rowId}
                     rows={2}
