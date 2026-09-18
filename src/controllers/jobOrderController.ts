@@ -3,7 +3,6 @@
 import { jobOrders } from '@/data/jobOrders'
 import type { JobOrderCard, Stage } from '@/data/types'
 import { stageOrder } from '@/data/types'
-import { initialServices, initialParts, SERVICE_PRESETS, type ServiceLine, type PartLine } from '@/data/jobOrderWorkOrder'
 
 function simulateDelay<T>(value: T, ms = 250): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), ms))
@@ -166,16 +165,4 @@ export async function assignMechanicToJobOrder(id: string, mechanicName: string)
   if (!job) return simulateDelay(null)
   job.mechanic = mechanicName
   return simulateDelay(job)
-}
-
-/**
- * Returns the starting service/parts line items for the work-order builder
- * on the Job Order Detail page, plus the quick-add service presets.
- */
-export async function getWorkOrderTemplate(): Promise<{
-  services: ServiceLine[]
-  parts: PartLine[]
-  servicePresets: string[]
-}> {
-  return simulateDelay({ services: initialServices, parts: initialParts, servicePresets: SERVICE_PRESETS })
 }
