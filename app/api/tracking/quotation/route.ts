@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       db.query(`SELECT * FROM get_job_order_payment_status($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_parts($1)`, [jobOrder.job_order_id]),
       db.query(
-        `SELECT pd.customer_approval_status
+        `SELECT pd.customer_approval_status, pd.mechanic_notes
          FROM pre_diagnostics pd
          JOIN vehicle_inspections vi ON vi.id = pd.inspection_id
          WHERE vi.job_order_id = $1
@@ -59,8 +59,20 @@ export async function GET(request: NextRequest) {
       ),
     ])
 
-    const latestStatus = preDiagRes.rows[0]?.customer_approval_status
-    const isReady = latestStatus === 'pending' || latestStatus === 'approved' || jobOrder.quotation_approved
+    // pre_diagnostics holds a round per stage (inspection first, then the
+    // quotation) with nothing to say which is which — so "the latest round
+    // is pending/approved" alone isn't enough: right after a customer
+    // approves their INSPECTION, that same round is still the latest one,
+    // and its status is 'approved', which would wrongly say the quotation
+    // is ready too. The quotation admin page always summarizes its round
+    // starting with "Quotation total:" (see sendQuotationForApproval) — use
+    // that to confirm the latest round is actually about the quotation.
+    const latestRound = preDiagRes.rows[0]
+    const isQuotationRound = Boolean(latestRound?.mechanic_notes?.startsWith('Quotation total:'))
+    const latestStatus = latestRound?.customer_approval_status
+    const isReady =
+      (isQuotationRound && (latestStatus === 'pending' || latestStatus === 'approved')) ||
+      jobOrder.quotation_approved
 
     let services = servicesRes.rows
     const parts = partsRes.rows
