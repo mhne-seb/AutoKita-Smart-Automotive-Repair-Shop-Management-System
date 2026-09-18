@@ -241,6 +241,31 @@ export default function page() {
   const [customServiceName, setCustomServiceName] = useState('')
   const [isAddingService, setIsAddingService] = useState(false)
 
+  // Searchable service picker — typing filters the list instead of the admin
+  // scrolling through every service in the database.
+  const [serviceSearch, setServiceSearch] = useState('')
+  const [serviceDropdownOpen, setServiceDropdownOpen] = useState(false)
+  const serviceDropdownRef = useRef<HTMLDivElement>(null)
+  const filteredServices = availableServices.filter((s) =>
+    s.service_name.toLowerCase().includes(serviceSearch.toLowerCase()),
+  )
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (serviceDropdownRef.current && !serviceDropdownRef.current.contains(e.target as Node)) {
+        setServiceDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [])
+
+  function pickService(id: string, label: string) {
+    setSelectedServiceId(id)
+    setServiceSearch(label)
+    setServiceDropdownOpen(false)
+  }
+
   // Add Part modal — replaces the old window.prompt() flow.
   const [showPartModal, setShowPartModal] = useState(false)
   const [partModalServiceId, setPartModalServiceId] = useState<string | null>(null)
@@ -421,6 +446,8 @@ export default function page() {
     setShowServiceModal(true)
     setSelectedServiceId('')
     setCustomServiceName('')
+    setServiceSearch('')
+    setServiceDropdownOpen(false)
   }
 
   function removeService(serviceId: string) {
@@ -929,23 +956,45 @@ export default function page() {
             </div>
             
             <div className="space-y-4">
-              <div>
+              <div ref={serviceDropdownRef} className="relative">
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Select Service</label>
-                <select 
-                  value={selectedServiceId}
-                  onChange={(e) => setSelectedServiceId(e.target.value)}
+                <input
+                  type="text"
+                  value={serviceSearch}
+                  onChange={(e) => {
+                    setServiceSearch(e.target.value)
+                    setSelectedServiceId('')
+                    setServiceDropdownOpen(true)
+                  }}
+                  onFocus={() => setServiceDropdownOpen(true)}
+                  placeholder="Type to search services..."
                   className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
-                >
-                  <option value="" disabled>Select a service from database...</option>
-                  {availableServices.length > 0 ? (
-                    availableServices.map(s => (
-                      <option key={s.id} value={s.id}>{s.service_name}</option>
-                    ))
-                  ) : (
-                    <option value="" disabled>No services available</option>
-                  )}
-                  <option value="custom">+ Custom Service (Not Listed)</option>
-                </select>
+                />
+                {serviceDropdownOpen && (
+                  <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                    {filteredServices.length > 0 ? (
+                      filteredServices.map((s) => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => pickService(String(s.id), s.service_name)}
+                          className="block w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-emerald-100"
+                        >
+                          {s.service_name}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-sm text-slate-400">No matching services</div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => pickService('custom', '+ Custom Service (Not Listed)')}
+                      className="block w-full border-t border-slate-100 px-3 py-2 text-left text-sm font-semibold text-emerald-600 hover:bg-emerald-100"
+                    >
+                      + Custom Service (Not Listed)
+                    </button>
+                  </div>
+                )}
               </div>
 
               {selectedServiceId === 'custom' && (
