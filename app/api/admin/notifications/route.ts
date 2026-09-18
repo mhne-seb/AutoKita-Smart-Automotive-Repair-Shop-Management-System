@@ -84,7 +84,7 @@ export async function GET() {
           title: 'New job order',
           message: `JO-${jo.id} created for ${name(jo.first_name, jo.last_name)} — ${jo.vehicle_model ?? 'vehicle'} (${jo.plate_number ?? 'no plate'}). Start the inspection.`,
           notif_time: createdAt.get(jo.id) ?? jo.jo_date,
-          href: `/job-orders/${jo.id}`,
+          href: `/job-orders/${jo.id}/inspection`,
         })
       }
       // 2. Service finished — check the value (clears once released)
@@ -94,7 +94,10 @@ export async function GET() {
           title: 'Service completed',
           message: `JO-${jo.id} is complete. Total ${peso(jo.actual_grand_total)}. Review final billing and release.`,
           notif_time: jo.jo_date,
-          href: `/job-orders/${jo.id}`,
+          // A finished job order has no page of its own — it's the Service
+          // Progress page with every task checked off (see stageToRoute in
+          // app/(admin)/job-orders/page.tsx).
+          href: `/job-orders/${jo.id}/progress`,
         })
       }
     }
