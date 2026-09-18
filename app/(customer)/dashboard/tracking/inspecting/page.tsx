@@ -57,6 +57,20 @@ function Inspecting() {
   // findings table right now is a draft, not a report the customer should act on.
   const awaitingReport = !inspectionStatus && !isHistorical;
 
+  // Auto-refresh while waiting on the shop: no report yet, or a disputed one
+  // that's being revised. Nothing to poll for once it's the customer's own
+  // turn to act (pending) or the inspection is already settled.
+  const waitingOnShop = awaitingReport || inspectionStatus === "disputed";
+  useEffect(() => {
+    if (!waitingOnShop) return;
+    const userId = Number(sessionStorage.getItem("autokita_user_id"));
+    const jobOrderId = jobOrderIdParam ? Number(jobOrderIdParam) : undefined;
+    const interval = setInterval(() => {
+      getInspectingData(userId, jobOrderId).then(setData);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [waitingOnShop, jobOrderIdParam]);
+
   const [responding, setResponding] = useState(false);
   const [lightbox, setLightbox] = useState<{ url: string; label: string } | null>(null);
   // "I have concerns" opens a one-line box before anything is sent — the line
