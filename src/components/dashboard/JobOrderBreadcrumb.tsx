@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ChevronRight, FileText } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 import { GenerateJobOrderModal } from './GenerateJobOrderModal'
 import { stageOrder, type Stage } from '@/data/types'
 
-type CrumbKey = 'jobOrders' | 'inspection' | 'quotation' | 'progress'
+type CrumbKey = 'inspection' | 'quotation' | 'progress'
 
 // Which job-order stage each crumb belongs to. A crumb is only clickable once
 // the job order has reached that stage — you can always go back, never ahead.
@@ -28,7 +28,6 @@ export function JobOrderBreadcrumb({ jobOrderId, current, stage }: Props) {
   const reachedIndex = stageOrder.indexOf(stage)
 
   const crumbs: { key: CrumbKey; label: string; href: string }[] = [
-    { key: 'jobOrders', label: 'Back to Customers', href: '/job-orders' },
     { key: 'inspection', label: 'Inspection Report', href: `/job-orders/${jobOrderId}/inspection` },
     { key: 'quotation', label: 'Quotation', href: `/job-orders/${jobOrderId}/quotation` },
     { key: 'progress', label: 'Service Progress', href: `/job-orders/${jobOrderId}/progress` },
@@ -36,7 +35,17 @@ export function JobOrderBreadcrumb({ jobOrderId, current, stage }: Props) {
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex flex-wrap items-center gap-1.5 text-sm">
+      <div className="flex flex-wrap items-center gap-3 text-sm">
+        <Link
+          href="/job-orders"
+          className="flex items-center gap-1 font-medium text-slate-500 hover:text-slate-700 hover:underline"
+        >
+          <ChevronLeft size={14} /> Back to Customers
+        </Link>
+
+        <span className="h-4 w-px bg-slate-200" />
+
+        <div className="flex flex-wrap items-center gap-1.5">
         {crumbs.map((c, i) => {
           const isCurrent = c.key === current
           const crumbStage = CRUMB_STAGE[c.key]
@@ -65,6 +74,7 @@ export function JobOrderBreadcrumb({ jobOrderId, current, stage }: Props) {
             </span>
           )
         })}
+        </div>
       </div>
 
       {/* The printable job order document only makes sense once the quotation
