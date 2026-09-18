@@ -99,9 +99,13 @@ export async function GET(request: NextRequest) {
       walkaround: reportSent ? walkaroundRes.rows : [],
       reviewHistory: historyRes.rows,
       canCancel: Boolean(cancelRes.rows[0]?.can_cancel),
-      // Keep reference-photo rows out of the findings list — they're intake
-      // documentation, not something the mechanic diagnosed.
-      findings: reportSent ? findingsRes.rows.filter((r) => r.status !== 'reference-photo') : [],
+      // get_job_order_inspections() mixes inspection_photos rows into its
+      // result (they come back with status: null and a real photo URL) —
+      // keep those out of the findings list, they're intake documentation
+      // shown separately above, not something the mechanic diagnosed.
+      findings: reportSent
+        ? findingsRes.rows.filter((r) => !(r.status === null && r.photo))
+        : [],
       shop: shopRes.rows[0] ?? null,
     })
   } catch (err) {
