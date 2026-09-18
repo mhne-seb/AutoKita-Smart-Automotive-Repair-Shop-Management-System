@@ -403,7 +403,7 @@ export default function page() {
     }
 
     const summary = `Quotation total: ${currency(totals.grandTotal)} (Labor: ${currency(totals.laborTotal)}, Parts: ${currency(totals.partsTotal)}). ${notes}`
-    const round = await sendForApproval(jobOrderId, summary)
+    const round = await sendForApproval(jobOrderId, summary, 'quotation')
     if (round) setPreDiagnostic(round)
     setSending(false)
   }

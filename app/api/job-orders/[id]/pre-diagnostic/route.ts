@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { sendReviewReadyEmail } from '@/lib/mail'
 
 // GET — returns the most recent pre-diagnostic round for a job order, or null.
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -39,7 +40,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const { notes } = await request.json()
+    const { notes, context } = await request.json()
 
     const inspRes = await db.query(
       `SELECT id FROM get_or_create_inspection($1)`,
@@ -56,7 +57,35 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       [inspectionId, notes ?? '']
     )
 
-    return NextResponse.json({ success: true, data: result.rows[0] })
+    // Best-effort — the round is already saved, so a mail failure shouldn't
+    // fail the whole "send for approval" action.
+    let emailed = false
+    try {
+      const customerRes = await db.query(
+        `SELECT u.email, u.first_name, u.last_name, v.vehicle_model, v.plate_number
+         FROM job_orders jo
+         JOIN users u ON u.id = jo.user_id
+         JOIN vehicles v ON v.id = jo.vehicle_id
+         WHERE jo.id = $1`,
+        [id],
+      )
+      const customer = customerRes.rows[0]
+      if (customer?.email) {
+        await sendReviewReadyEmail({
+          to: customer.email,
+          name: `${customer.first_name ?? ''} ${customer.last_name ?? ''}`.trim() || 'there',
+          jobOrderId: id,
+          vehicle: customer.vehicle_model ?? 'your vehicle',
+          plate: customer.plate_number ?? '—',
+          context: context === 'quotation' ? 'quotation' : 'inspection',
+        })
+        emailed = true
+      }
+    } catch (mailErr) {
+      console.error('Review-ready email failed:', mailErr)
+    }
+
+    return NextResponse.json({ success: true, data: result.rows[0], emailed })
   } catch (error) {
     console.error('Pre-diagnostic create error:', error)
     return NextResponse.json(
