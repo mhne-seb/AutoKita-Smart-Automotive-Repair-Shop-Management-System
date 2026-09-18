@@ -45,6 +45,22 @@ export interface DashboardActivity {
   description: string
   time: string
   job_order_id: number
+  href?: string
+}
+
+// Same job_orders.status -> tracking-page mapping the dashboard's own "View
+// Tracking" links use (app/(customer)/dashboard/page.tsx) — so a notification
+// lands on the same page the customer would already land on from their job
+// order card.
+const STATUS_TO_TRACKING_SLUG: Record<string, string> = {
+  inspecting: 'inspecting',
+  pending_customer_approval: 'quotation',
+  revision_pending: 'quotation',
+  waiting_on_parts: 'in-progress',
+  in_progress: 'in-progress',
+  completed: 'completed',
+  released: 'completed',
+  cancelled: 'completed',
 }
 
 // Customer-facing names for job_orders_status values. The stored activity
@@ -203,15 +219,34 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
     job_order_id: number
   }
 
-  return ([...base.rows, ...accepted.rows, ...reportReady.rows] as RawActivityRow[])
-    .map((r) => ({
-      id: r.id,
-      type: r.type,
-      title: r.title,
-      description: r.type === 'status_change' ? humanizeStatusChange(r.description) : r.description,
-      time: r.time ?? r.job_time ?? '',
-      job_order_id: r.job_order_id,
-    }))
+  const rows = [...base.rows, ...accepted.rows, ...reportReady.rows] as RawActivityRow[]
+
+  // So each notification can link straight to the job order it's about,
+  // instead of leaving the customer to go find it themselves.
+  const jobOrderIds = [...new Set(rows.map((r) => r.job_order_id))]
+  const statusByJobOrderId = new Map<number, string>()
+  if (jobOrderIds.length > 0) {
+    const statusRes = await db.query(
+      `SELECT id, status FROM job_orders WHERE id = ANY($1::int[])`,
+      [jobOrderIds],
+    )
+    for (const row of statusRes.rows) statusByJobOrderId.set(row.id, row.status)
+  }
+
+  return rows
+    .map((r) => {
+      const status = statusByJobOrderId.get(r.job_order_id)
+      const slug = (status && STATUS_TO_TRACKING_SLUG[status]) || 'received'
+      return {
+        id: r.id,
+        type: r.type,
+        title: r.title,
+        description: r.type === 'status_change' ? humanizeStatusChange(r.description) : r.description,
+        time: r.time ?? r.job_time ?? '',
+        job_order_id: r.job_order_id,
+        href: `/dashboard/tracking/${slug}?jobOrderId=${r.job_order_id}`,
+      }
+    })
     .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
     .slice(0, 10)
 }

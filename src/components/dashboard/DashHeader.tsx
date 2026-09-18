@@ -58,11 +58,12 @@ export function DashHeader() {
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((json) => {
         const items: NotificationItem[] = (json.notifications ?? []).map(
-          (a: { type: string; id: number; title: string; description: string; time: string }) => ({
+          (a: { type: string; id: number; title: string; description: string; time: string; href?: string }) => ({
             key: `${a.type}-${a.id}`,
             title: a.title,
             message: a.description,
             time: timeAgo(a.time),
+            href: a.href,
           }),
         );
         setNotifications(items);
