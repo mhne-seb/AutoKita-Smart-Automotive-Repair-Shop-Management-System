@@ -102,7 +102,7 @@ function buildPhotoSlots(photoRows: any[]): InspectionPhotoSlot[] {
         slots[i] = {
           id: DEFAULT_PHOTO_SLOTS[i].id,
           label: nextPhoto.title || DEFAULT_PHOTO_SLOTS[i].label,
-          title: nextPhoto.title || DEFAULT_PHOTO_SLOTS[i].label,
+          title: nextPhoto.title || undefined,
           url: nextPhoto.photo_url ?? nextPhoto.photo ?? nextPhoto.url,
           rowId: nextPhoto.id,
           note: nextPhoto.note ?? '',
@@ -111,7 +111,7 @@ function buildPhotoSlots(photoRows: any[]): InspectionPhotoSlot[] {
         slots[i] = {
           id: DEFAULT_PHOTO_SLOTS[i].id,
           label: DEFAULT_PHOTO_SLOTS[i].label,
-          title: DEFAULT_PHOTO_SLOTS[i].label,
+          title: undefined,
           url: undefined,
           rowId: undefined,
           note: '',
@@ -124,7 +124,7 @@ function buildPhotoSlots(photoRows: any[]): InspectionPhotoSlot[] {
   const extraSlots: InspectionPhotoSlot[] = unassignedPhotos.map((p, i) => ({
     id: `custom-${p.id || i}`,
     label: p.title || 'Inspection Photo',
-    title: p.title || 'Inspection Photo',
+    title: p.title || undefined,
     url: p.photo_url ?? p.photo ?? p.url,
     rowId: p.id,
     note: p.note ?? '',

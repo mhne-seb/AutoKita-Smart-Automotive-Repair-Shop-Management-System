@@ -482,7 +482,6 @@ export default function page() {
                         className="flex h-full w-full flex-col items-center justify-center gap-2 disabled:cursor-not-allowed"
                       >
                         <Camera size={20} />
-                        {slot.title || slot.label}
                       </button>
                     )}
                     {uploadingSlot === slot.id && (
@@ -514,7 +513,7 @@ export default function page() {
 
                   <input
                     type="text"
-                    value={slot.title ?? slot.label ?? ''}
+                    value={slot.title ?? ''}
                     onChange={(e) => {
                       const val = e.target.value
                       setPhotoSlots((prev) =>
@@ -523,7 +522,7 @@ export default function page() {
                     }}
                     onBlur={() => persistSlotTitle(slot)}
                     disabled={isLocked}
-                    placeholder="Photo title (e.g. Front Quarter)"
+                    placeholder={slot.label ? `e.g. ${slot.label}` : 'Photo title (e.g. Front Quarter)'}
                     className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-800 placeholder:font-normal placeholder:text-slate-400 focus:border-slate-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-50"
                   />
 
