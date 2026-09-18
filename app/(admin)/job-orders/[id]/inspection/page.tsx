@@ -283,7 +283,7 @@ export default function page() {
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 p-8">
-      <TopBar title="Vehicle Inspection" subtitle="Inspection workflow & time tracking." />
+      <TopBar title="Vehicle Inspection" subtitle="Inspection workflow & time tracking." showSearch={false} />
       <JobOrderBreadcrumb jobOrderId={jobOrderId} current="inspection" stage={jobOrder.stage} />
 
       <div className={hasSidebar ? "grid grid-cols-1 gap-6 xl:grid-cols-[1fr_340px]" : "block"}>
