@@ -278,11 +278,12 @@ export default function page() {
               {section.tasks.map((task) => (
                   <Fragment key={task.id}>
                   <div
-                    className={`flex items-center justify-between rounded-xl border p-4 ${
+                    className={`rounded-xl border p-4 ${
                        task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50 cursor-pointer' : task.status === 'completed' ? 'border-slate-200 bg-white' : 'border-slate-200 bg-white hover:bg-slate-50 cursor-pointer'
                     }`}
                     onClick={() => task.status !== 'completed' && setSchedulingTask(task)}
                   >
+                  <div className="flex items-center justify-between">
                     <div className="flex items-start gap-4 flex-1 min-w-0">
                       <div className="flex-1 min-w-0">
                         <h3 className="flex items-center gap-2 font-semibold text-slate-900 transition-colors">
@@ -405,35 +406,56 @@ export default function page() {
                     })()}
                   </div>
 
-                  {/* Parts this service needs. Tap to mark one received (tap again
-                      to undo a mis-tap). Hidden once the task is finished. */}
-                  {task.status !== 'completed' && (task.parts?.length ?? 0) > 0 && (
-                    <div className="ml-4 rounded-b-xl border border-t-0 border-slate-200 bg-slate-50 px-4 py-2">
-                      <div className="flex flex-wrap gap-2">
-                        {task.parts!.map((p) => {
-                          const ready = partIsReady(p)
-                          const busyP = busyPartId === p.id
-                          return (
-                            <button
-                              key={p.id}
-                              onClick={() => togglePartReceived(p)}
-                              disabled={busyP}
-                              title={ready ? 'Received — tap to undo' : 'Tap when this part arrives'}
-                              className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-all duration-150 active:scale-95 disabled:opacity-50 ${
-                                ready
-                                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                                  : 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
-                              }`}
-                            >
-                              {busyP ? <Loader2 size={12} className="animate-spin" /> : ready ? <PackageCheck size={12} /> : <Package size={12} />}
-                              {p.qty > 1 ? `${p.qty}x ` : ''}{p.name}
-                              <span className="font-normal opacity-70">- {ready ? (p.status === 'in_stock' ? 'in stock' : 'received') : 'to order'}</span>
-                            </button>
-                          )
-                        })}
+                  {/* Parts this service needs, as a table inside the card. One
+                      row per part; "Received" marks it arrived (Undo for a
+                      mis-tap). Hidden once the task is finished. */}
+                  {task.status !== 'completed' && (task.parts?.length ?? 0) > 0 && (() => {
+                    const parts = task.parts!
+                    const received = parts.filter(partIsReady).length
+                    return (
+                      <div className="mt-3 border-t border-slate-200 pt-3" onClick={(e) => e.stopPropagation()}>
+                        <div className="mb-1.5 flex items-center justify-between text-xs text-slate-400">
+                          <span className="flex items-center gap-1.5 font-semibold uppercase tracking-wide"><Package size={12} /> Parts · {received} of {parts.length} received</span>
+                          {received < parts.length && <span>Mark each part when it arrives</span>}
+                        </div>
+                        <table className="w-full text-sm">
+                          <tbody>
+                            {parts.map((p) => {
+                              const ready = partIsReady(p)
+                              const busyP = busyPartId === p.id
+                              return (
+                                <tr key={p.id} className="border-t border-slate-100">
+                                  <td className="py-2 pr-3 font-semibold text-slate-800">{p.name}</td>
+                                  <td className="py-2 pr-3 text-xs text-slate-400">{p.partNo}</td>
+                                  <td className="py-2 pr-3 text-xs text-slate-500">×{p.qty}</td>
+                                  <td className="py-2 pr-3 text-right">
+                                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${ready ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                      {ready ? (p.status === 'in_stock' ? 'In stock' : 'Received') : 'To order'}
+                                    </span>
+                                  </td>
+                                  <td className="w-28 py-2 text-right">
+                                    <button
+                                      onClick={() => togglePartReceived(p)}
+                                      disabled={busyP}
+                                      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all duration-150 active:scale-95 disabled:opacity-50 ${
+                                        ready
+                                          ? 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                                          : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                      }`}
+                                    >
+                                      {busyP ? <Loader2 size={12} className="animate-spin" /> : ready ? null : <PackageCheck size={12} />}
+                                      {ready ? 'Undo' : 'Received'}
+                                    </button>
+                                  </td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
                       </div>
-                    </div>
-                  )}
+                    )
+                  })()}
+                  </div>
                   </Fragment>
               ))}
 
