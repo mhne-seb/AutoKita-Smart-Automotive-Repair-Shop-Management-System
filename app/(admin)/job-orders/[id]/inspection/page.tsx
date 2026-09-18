@@ -94,6 +94,16 @@ export default function page() {
   const isApproved = inspectionStatus === 'approved'
   const isLocked = inspectionStatus === 'pending' || isApproved
 
+  // Auto-refresh while waiting on the customer's decision, so the admin sees
+  // "Approved" / "Customer has concerns" without having to reload the page.
+  useEffect(() => {
+    if (inspectionStatus !== 'pending') return
+    const interval = setInterval(() => {
+      getLatestPreDiagnostic(jobOrderId).then(setPreDiagnostic)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [inspectionStatus, jobOrderId])
+
   // Once the real data arrives, seed the editable state from it.
   useEffect(() => {
     if (initial) {
