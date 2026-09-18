@@ -81,10 +81,13 @@ function buildPhotoSlots(photoRows: any[]): InspectionPhotoSlot[] {
       (d, idx) => slots[idx] === null && d.label.toLowerCase() === String(photo.title ?? '').trim().toLowerCase()
     )
     if (defaultIndex !== -1) {
+      // The saved title exactly matches this slot's default label — that's
+      // the auto-filled default from an upload where the admin never typed
+      // a custom title, not a real one, so keep it as a placeholder.
       slots[defaultIndex] = {
         id: DEFAULT_PHOTO_SLOTS[defaultIndex].id,
         label: photo.title,
-        title: photo.title,
+        title: undefined,
         url: photo.photo_url ?? photo.photo ?? photo.url,
         rowId: photo.id,
         note: photo.note ?? '',

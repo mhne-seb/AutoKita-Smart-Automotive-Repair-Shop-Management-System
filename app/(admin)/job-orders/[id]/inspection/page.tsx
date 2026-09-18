@@ -135,7 +135,7 @@ export default function page() {
       setPhotoSlots((prev) =>
         prev.map((p) =>
           p.id === slotId
-            ? { ...p, url: uploaded.url, rowId: uploaded.rowId, title: uploaded.title || p.title || label }
+            ? { ...p, url: uploaded.url, rowId: uploaded.rowId }
             : p,
         ),
       )
