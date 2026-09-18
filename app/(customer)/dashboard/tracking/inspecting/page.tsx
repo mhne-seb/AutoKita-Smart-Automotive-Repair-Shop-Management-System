@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { FileText, ChevronRight, Loader2, Camera, AlertCircle, Check } from "lucide-react";
 import { toast } from "sonner";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
@@ -43,9 +44,18 @@ function Inspecting() {
 
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
 
+  // pre_diagnostics holds a round per stage (inspection first, then the
+  // quotation), and the API hands back the newest one whatever it is. While
+  // the job is still 'inspecting' that IS the inspection round. Once the job
+  // has moved on, the inspection was approved — that's the only way it moves
+  // — so a pending quotation round must not re-open "please review" here.
+  const stillInspecting = jobOrder?.status === "inspecting";
+  const inspectionStatus: string | undefined = stillInspecting ? preDiagnostic?.approval_status ?? undefined : "approved";
+  const movedOn = !stillInspecting && !isHistorical && Boolean(jobOrder);
+
   // No approval round yet means the mechanic is still working — what's in the
   // findings table right now is a draft, not a report the customer should act on.
-  const awaitingReport = !preDiagnostic?.approval_status && !isHistorical;
+  const awaitingReport = !inspectionStatus && !isHistorical;
 
   const [responding, setResponding] = useState(false);
   const [lightbox, setLightbox] = useState<{ url: string; label: string } | null>(null);
@@ -117,7 +127,7 @@ function Inspecting() {
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
       <StageStepper active={stageForStatus(jobOrder.status)} viewing="inspecting" jobOrderId={jobOrder.job_order_id} />
 
-      {preDiagnostic?.approval_status === "pending" && !isHistorical && (
+      {inspectionStatus === "pending" && !isHistorical && (
         <div className="rounded-xl border-2 border-brand bg-brand-soft/40 p-6">
           <div className="flex items-start gap-3">
             <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand" />
@@ -185,14 +195,24 @@ function Inspecting() {
         </div>
       )}
 
-      {preDiagnostic?.approval_status === "approved" && (
-        <div className="flex items-center gap-2 rounded-lg border border-success/30 bg-success/5 px-4 py-3 text-sm">
-          <Check className="h-4 w-4 flex-shrink-0 text-success" />
-          You approved this inspection. We&apos;re preparing your quotation.
+      {inspectionStatus === "approved" && !isHistorical && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-success/30 bg-success/5 px-4 py-3 text-sm">
+          <span className="flex items-center gap-2">
+            <Check className="h-4 w-4 flex-shrink-0 text-success" />
+            {movedOn ? "You approved this inspection. Your quotation is ready for review." : "You approved this inspection. We’re preparing your quotation."}
+          </span>
+          {movedOn && (
+            <Link
+              href={`/dashboard/tracking/quotation?jobOrderId=${jobOrder!.job_order_id}`}
+              className="inline-flex items-center gap-1 rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+            >
+              View quotation <ChevronRight className="h-3 w-3" />
+            </Link>
+          )}
         </div>
       )}
 
-      {preDiagnostic?.approval_status === "disputed" && (
+      {inspectionStatus === "disputed" && (
         <div className="flex items-center gap-2 rounded-lg border border-warning/40 bg-warning/5 px-4 py-3 text-sm">
           <AlertCircle className="h-4 w-4 flex-shrink-0 text-warning" />
           You raised concerns about this inspection. Our service team will contact you shortly.

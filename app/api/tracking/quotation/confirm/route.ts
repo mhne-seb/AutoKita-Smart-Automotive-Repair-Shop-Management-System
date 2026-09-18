@@ -59,15 +59,18 @@ export async function POST(request: NextRequest) {
     for (const r of feeRes.rows) keepIds.add(Number(r.id))
     const finalIds = [...keepIds]
 
-    // Services the customer declined come off the job order. (999999 is the
-    // page's pseudo-id for "all parts" — if it's absent, the parts go too.)
+    // Services the customer declined come off the job order, and so do the
+    // parts that belong to them. Parts of accepted services stay. (Parts hang
+    // off job_order_service_id — there's no separate "accept the parts" step.)
+    await db.query(
+      `DELETE FROM job_order_parts
+       WHERE job_order_id = $1 AND job_order_service_id IS NOT NULL AND job_order_service_id != ALL($2::int[])`,
+      [jobOrderId, finalIds],
+    )
     await db.query(
       `DELETE FROM job_order_services WHERE job_order_id = $1 AND id != ALL($2::int[])`,
       [jobOrderId, finalIds],
     )
-    if (!keepIds.has(999999)) {
-      await db.query(`DELETE FROM job_order_parts WHERE job_order_id = $1`, [jobOrderId])
-    }
 
     await db.query(`SELECT set_quotation_approval($1, $2)`, [jobOrderId, true])
 
