@@ -6,7 +6,7 @@ import { db } from '@/lib/db'
 // admin acts (advance stage / release / verify payment).
 export async function GET() {
   try {
-    const [tickets, jobOrders, payments, responses] = await Promise.all([
+    const [tickets, jobOrders, payments, responses, jobOrderCreatedAt] = await Promise.all([
       db.query('SELECT * FROM get_service_tickets_queue()'),
       db.query('SELECT * FROM get_job_orders_list()'),
       db.query('SELECT * FROM get_payment_records()'),
@@ -32,7 +32,21 @@ export async function GET() {
          WHERE pd.customer_approval_status IN ('approved', 'disputed')
          ORDER BY vi.job_order_id, pd.datetime_created DESC`,
       ),
+      // get_job_orders_list() only has jo_date (a plain DATE, no time — the
+      // job order was 'created' by create_job_order_from_ticket() at some
+      // exact moment, and that's logged here). Without this, "New job
+      // order" always shows midnight of that day instead of when the
+      // ticket was actually approved.
+      db.query(
+        `SELECT entity_id AS job_order_id, action_date
+         FROM system_audit_logs
+         WHERE entity_type = 'job_orders' AND action_performed = 'created'`,
+      ),
     ])
+
+    const createdAt = new Map<number, string>(
+      jobOrderCreatedAt.rows.map((r: { job_order_id: number; action_date: string }) => [r.job_order_id, r.action_date]),
+    )
 
     type Notif = {
       notif_key: string
@@ -69,7 +83,7 @@ export async function GET() {
           notif_key: `jo-created-${jo.id}`,
           title: 'New job order',
           message: `JO-${jo.id} created for ${name(jo.first_name, jo.last_name)} — ${jo.vehicle_model ?? 'vehicle'} (${jo.plate_number ?? 'no plate'}). Start the inspection.`,
-          notif_time: jo.jo_date,
+          notif_time: createdAt.get(jo.id) ?? jo.jo_date,
           href: `/job-orders/${jo.id}`,
         })
       }
