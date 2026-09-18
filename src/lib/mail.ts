@@ -99,3 +99,40 @@ export async function sendOtpEmail(opts: {
         `,
     })
 }
+
+// Sent when the admin uploads an inspection report or quotation to the
+// customer portal for review ("Upload to customer portal" / "Send to
+// Customer") — the pre_diagnostics round itself has no email of its own yet.
+export async function sendReviewReadyEmail(opts: {
+    to: string
+    name: string
+    jobOrderId: string
+    vehicle: string
+    plate: string
+    context: 'inspection' | 'quotation'
+}) {
+    const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const path = opts.context === 'quotation' ? '/dashboard/tracking/quotation' : '/dashboard/tracking/inspecting'
+    const url = `${base}${path}`
+    const heading = opts.context === 'quotation' ? 'Your quotation is ready for review' : 'Your inspection report is ready for review'
+    const actionLabel = opts.context === 'quotation' ? 'Review quotation' : 'Review inspection report'
+
+    await transporter.sendMail({
+        from: `"AutoKita" <${process.env.GMAIL_USER}>`,
+        to: opts.to,
+        subject: `JO-${opts.jobOrderId}: ${heading}`,
+        text:
+            `Hi ${opts.name},\n\n` +
+            `${heading} — ${opts.vehicle} (${opts.plate}), job order JO-${opts.jobOrderId}.\n\n` +
+            `Log in to review and approve, or raise a concern:\n${url}\n\n— AutoKita`,
+        html: `
+          <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111">
+            <h2 style="color:#1e3a5f">${heading}</h2>
+            <p>Hi ${opts.name},</p>
+            <p>Your <b>${opts.vehicle} (${opts.plate})</b> — job order <b>JO-${opts.jobOrderId}</b> — has an update waiting for you.</p>
+            <a href="${url}" style="display:inline-block;background:#1e3a5f;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none">${actionLabel}</a>
+            <p style="margin-top:20px;font-size:13px;color:#666">Log in to review and approve, or raise a concern.</p>
+          </div>
+        `,
+    })
+}
