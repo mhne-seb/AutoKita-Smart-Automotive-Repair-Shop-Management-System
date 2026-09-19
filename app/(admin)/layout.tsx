@@ -25,7 +25,8 @@ export default function AdminGroupLayout({ children }: { children: ReactNode }) 
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      {/* pt-14 clears the mobile top bar the Sidebar renders below lg. */}
+      <main className="min-w-0 flex-1 overflow-y-auto pt-14 lg:pt-0">{children}</main>
       <MechanicAIAssistant />
     </div>
   )

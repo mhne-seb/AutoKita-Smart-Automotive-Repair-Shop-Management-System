@@ -295,12 +295,12 @@ export default function page() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6 p-8">
+    <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-8">
       <TopBar title="Vehicle Inspection" subtitle="Inspection workflow & time tracking." showSearch={false} />
       <JobOrderBreadcrumb jobOrderId={jobOrderId} current="progress" stage={jobOrder.stage} />
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <div className="grid grid-cols-4 gap-6 text-sm">
+        <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4 sm:gap-6">
           <div>
             <p className="text-slate-400">Vehicle</p>
             <p className="font-bold text-slate-900">{jobOrder.vehicle}</p>
@@ -313,7 +313,7 @@ export default function page() {
             <p className="text-slate-400">Customer</p>
             <p className="font-bold text-slate-900">{jobOrder.customer}</p>
           </div>
-          <div className="text-right">
+          <div className="sm:text-right">
             <p className="text-slate-400">Job Order</p>
             <span className="inline-block rounded bg-slate-900 px-2 py-1 text-xs font-bold text-white">
               JO-{jobOrderId.toUpperCase()}
@@ -353,10 +353,12 @@ export default function page() {
                     }`}
                     onClick={() => task.status !== 'completed' && setSchedulingTask(task)}
                   >
-                  <div className="flex items-center justify-between">
+                  {/* Stacks on small screens (pills wrap, status/action drop below);
+                      side by side from sm up. */}
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-start gap-4 flex-1 min-w-0">
                       <div className="flex-1 min-w-0">
-                        <h3 className="flex items-center gap-2 font-semibold text-slate-900 transition-colors">
+                        <h3 className="flex flex-wrap items-center gap-2 font-semibold text-slate-900 transition-colors">
                           {task.title}
                           {isRoadTest(task) && (
                             <span className="flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-700"><Car size={11} /> Quality check</span>
@@ -365,7 +367,7 @@ export default function page() {
                         {task.note && task.note !== 'Describe the service...' && (
                           <p className="mt-0.5 text-sm text-slate-500 truncate">{task.note}</p>
                         )}
-                        <div className="mt-2 flex items-center gap-4 text-xs text-slate-400">
+                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-400">
                           {/* Finish time — only meaningful once the task is done. (Per-task
                               elapsed needs started_at, which the schema doesn't have yet.) */}
                           {task.status === 'completed' && task.time !== '—' && (
@@ -430,7 +432,7 @@ export default function page() {
                       // "schedule it first" is the whole instruction.
                       const unscheduled = !task.scheduledDate || !task.mechanicId
                       return (
-                        <div className="shrink-0 ml-4 flex flex-col items-end gap-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex flex-wrap items-center gap-2 sm:ml-4 sm:shrink-0 sm:flex-col sm:items-end" onClick={(e) => e.stopPropagation()}>
                           {/* A task that simply hasn't started gets no badge — the Start
                               button (or its "schedule first" hint) already says so.
                               Waiting on parts is a real state, so that one stays. */}
