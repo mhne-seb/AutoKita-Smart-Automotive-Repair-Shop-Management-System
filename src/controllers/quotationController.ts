@@ -31,7 +31,9 @@ function toQuotationData(row: any): QuotationData {
     code: `SVC-${String(s.id).padStart(3, '0')}`,
     name: s.service_name || 'Unnamed Service',
     description: s.description_of_work || '',
-    laborHours: s.estimated_hours ?? 0,
+    // Postgres numerics arrive as strings ("1.50"); without Number() any sum
+    // of these silently becomes string concatenation ("01.501.50...").
+    laborHours: Number(s.estimated_hours ?? 0),
     laborCost: Number(s.actual_amount ?? s.amount ?? 0),
     parts: partsByService[s.id] || [],
     dbServiceId: s.service_id,
