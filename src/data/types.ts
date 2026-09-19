@@ -138,6 +138,24 @@ export interface TaskPart {
   partNo: string
   qty: number
   status: string // job_order_parts_status; app uses in_stock | to_order | received
+  // Set once the part was bought through "Record purchase" — where it came from.
+  purchaseOrderId?: number
+  supplierName?: string
+  purchasedOn?: string
+}
+
+// One "Record purchase" save — a purchase_orders row and the parts it covered.
+export interface PartsPurchase {
+  id: number
+  supplierName: string
+  purchasedOn: string
+  totalCost: number
+  partCount: number
+}
+
+export interface Supplier {
+  id: number
+  name: string
 }
 
 export function partIsReady(p: TaskPart): boolean {
@@ -170,6 +188,7 @@ export interface ServiceProgressData {
   jobOrderId: string
   sections: ServiceSection[]
   quotationConfirmed: boolean
+  purchases: PartsPurchase[]
   // The job-order-level clock (not per-service): when the job went onto the
   // floor, when it's promised back, and the estimated labor. ISO values are
   // kept so the page can tick the running duration live.
