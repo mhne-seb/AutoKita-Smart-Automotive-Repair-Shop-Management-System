@@ -1,7 +1,7 @@
 // serviceProgressController — now backed by the real "service_progress_tasks"
 // table instead of src/data/serviceProgress.ts.
 
-import type { ServiceProgressData, ServiceSection, ServiceTask, TaskStatus, TaskPart } from '@/data/types'
+import type { ServiceProgressData, ServiceSection, ServiceTask, TaskStatus, TaskPart, PartsPurchase, Supplier } from '@/data/types'
 
 // UI section ids use a hyphen ('in-progress'), the database enum uses an
 // underscore ('in_progress') — this bridges the two.
@@ -30,6 +30,11 @@ const SECTION_ORDER = ['received', 'inspecting', 'quotation', 'in-progress', 'co
 function formatDateTime(value: string | null | undefined): string {
   if (!value) return '—'
   return new Date(value).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+}
+
+function formatDate(value: string | null | undefined): string {
+  if (!value) return '—'
+  return new Date(value).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 // job_orders.estimated_duration is a Postgres TIME like "02:30:00" — to decimal hours.
@@ -76,7 +81,16 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
   const partsByService = new Map<string, TaskPart[]>()
   for (const r of (json.parts ?? []) as any[]) {
     const list = partsByService.get(r.service_name) ?? []
-    list.push({ id: r.id, name: r.description || 'Unnamed part', partNo: r.part_number || '—', qty: r.quantity ?? 1, status: r.status })
+    list.push({
+      id: r.id,
+      name: r.description || 'Unnamed part',
+      partNo: r.part_number || '—',
+      qty: r.quantity ?? 1,
+      status: r.status,
+      purchaseOrderId: r.purchase_order_id ?? undefined,
+      supplierName: r.supplier_name ?? undefined,
+      purchasedOn: r.purchased_on ? formatDate(r.purchased_on) : undefined,
+    })
     partsByService.set(r.service_name, list)
   }
 
@@ -118,11 +132,20 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
   const quotationTasks = sectionMap.get('quotation') ?? []
   const quotationConfirmed = quotationTasks.length > 0 && quotationTasks.every((t) => t.status === 'completed')
 
+  const purchases: PartsPurchase[] = ((json.purchases ?? []) as any[]).map((p) => ({
+    id: p.id,
+    supplierName: p.supplier_name,
+    purchasedOn: formatDate(p.purchased_on),
+    totalCost: Number(p.total_supplier_cost ?? 0),
+    partCount: p.part_count ?? 0,
+  }))
+
   const timing = json.timing ?? {}
   return {
     jobOrderId,
     sections,
     quotationConfirmed,
+    purchases,
     timer: {
       startedAtIso: timing.started_at ?? null,
       completedAtIso: timing.completed_at ?? null,
@@ -160,6 +183,43 @@ export async function setPartStatus(jobOrderId: string, partId: number, status: 
   })
   const json = await res.json().catch(() => null)
   return Boolean(res.ok && json?.success)
+}
+
+export async function getSuppliers(): Promise<Supplier[]> {
+  const res = await fetch('/api/suppliers')
+  const json = await res.json().catch(() => null)
+  return json?.success ? json.suppliers : []
+}
+
+/** Adds a supplier by name (or returns the existing one if the name is already there). */
+export async function addSupplier(name: string): Promise<Supplier | null> {
+  const res = await fetch('/api/suppliers', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  })
+  const json = await res.json().catch(() => null)
+  return res.ok && json?.success ? json.supplier : null
+}
+
+/**
+ * Records where a batch of to-order parts was bought. Creates the purchase
+ * record and marks every listed part received.
+ */
+export async function recordPartsPurchase(
+  jobOrderId: string,
+  supplierId: number,
+  purchasedOn: string,
+  parts: { partId: number; unitCost: number }[],
+): Promise<{ ok: boolean; message?: string }> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/purchases`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ supplierId, purchasedOn, parts }),
+  })
+  const json = await res.json().catch(() => null)
+  if (!res.ok || !json?.success) return { ok: false, message: json?.message ?? 'Could not save the purchase.' }
+  return { ok: true }
 }
 
 export async function scheduleTask(
