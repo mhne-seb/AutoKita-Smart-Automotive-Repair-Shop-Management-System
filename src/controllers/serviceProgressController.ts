@@ -1,5 +1,4 @@
-// serviceProgressController — now backed by the real "service_progress_tasks"
-// table instead of src/data/serviceProgress.ts.
+// serviceProgressController — backed by the real "service_progress_tasks" table.
 
 import type { ServiceProgressData, ServiceSection, ServiceTask, TaskStatus, TaskPart, PartsPurchase, Supplier } from '@/data/types'
 
