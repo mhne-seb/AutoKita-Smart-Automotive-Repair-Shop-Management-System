@@ -291,6 +291,23 @@ export default function page() {
     return () => { active = false }
   }, [])
 
+  // Auto-refresh while the quotation is out with the customer, so their
+  // confirmation shows up here without a reload. Same test as
+  // quotationPending below, written with ?. because this runs before the
+  // loading guards. Editing is locked while pending, so re-fetching can't
+  // clobber anything (and seeding is one-shot via hasSeeded anyway).
+  const awaitingCustomer = !initial?.quotationApproved && preDiagnostic?.status === 'pending'
+  useEffect(() => {
+    if (!awaitingCustomer) return
+    const interval = setInterval(() => {
+      getLatestPreDiagnostic(jobOrderId).then(setPreDiagnostic)
+      getQuotationById(jobOrderId).then((data) => setInitial(data ?? null))
+      getJobOrderById(jobOrderId).then((data) => data && setJobOrder(data))
+      getJobOrderPayment(jobOrderId).then(setPayment)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [awaitingCustomer, jobOrderId])
+
   if (jobOrder === undefined || initial === undefined || preDiagnostic === undefined) {
     return (
       <div className="p-8">
