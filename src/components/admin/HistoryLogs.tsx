@@ -402,7 +402,7 @@ export function HistoryLogs({ tab }: Props) {
   }
 
   return (
-    <div className="space-y-6 p-8">
+    <div className="space-y-6 p-4 sm:p-8">
       {/* Page header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-bold text-slate-900">{PAGE_TITLES[tab]}</h1>

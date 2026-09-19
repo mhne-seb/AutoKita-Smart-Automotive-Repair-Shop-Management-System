@@ -323,7 +323,7 @@ export default function page() {
   const hasSidebar = Boolean(initial.request) || Boolean(initial.pullOutRequested) || (isApproved && !initial.quotationStarted)
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6 p-8">
+    <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-8">
       <TopBar title="Vehicle Inspection" subtitle="Inspection workflow & time tracking." showSearch={false} />
       <JobOrderBreadcrumb jobOrderId={jobOrderId} current="inspection" stage={jobOrder.stage} />
 

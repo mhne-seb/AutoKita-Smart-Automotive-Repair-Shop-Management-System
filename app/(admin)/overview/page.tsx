@@ -120,7 +120,7 @@ export default function page() {
   ).length
 
   return (
-    <div className="space-y-6 p-8">
+    <div className="space-y-6 p-4 sm:p-8">
       <TopBar title="Dashboard Overview" subtitle="Real-time pulse of the shop floor." showSearch={false} />
 
       {/* Welcome banner */}
