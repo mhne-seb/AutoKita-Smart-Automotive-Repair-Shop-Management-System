@@ -124,13 +124,16 @@ function InProgress() {
   const [photoView, setPhotoView] = useState<{ url: string; label: string } | null>(null);
   const [pullOutNote, setPullOutNote] = useState("");
 
-  useEffect(() => {
+  const load = () => {
     const userId = Number(sessionStorage.getItem("autokita_user_id"));
     const jobOrderId = jobOrderIdParam ? Number(jobOrderIdParam) : undefined;
+    return getInProgressData(userId, jobOrderId).then(setData);
+  };
+
+  useEffect(() => {
     setLoading(true);
-    getInProgressData(userId, jobOrderId)
-      .then(setData)
-      .finally(() => setLoading(false));
+    load().finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobOrderIdParam]);
 
   const tasks = data?.tasks ?? [];
@@ -144,19 +147,33 @@ function InProgress() {
   // "Pull Out Vehicle" action no longer makes sense and must stay disabled.
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
 
+  // Auto-refresh while the shop is actively working — parts arriving, tasks
+  // starting and finishing all happen on the admin side and should show up
+  // here without a reload. Stops once the job is done.
+  const shopIsWorking = Boolean(jobOrder) && !isHistorical;
+  useEffect(() => {
+    if (!shopIsWorking) return;
+    const interval = setInterval(() => { void load(); }, 5000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shopIsWorking, jobOrderIdParam]);
+
   const [aiTime, setAiTime] = useState<{
     predicted_hours: number;
     predicted_duration_mins: number;
     services?: { service_name: string; predicted_duration_mins: number }[];
   } | null>(null);
 
+  // Keyed on the id, not the object — every poll above hands back a fresh
+  // jobOrder object, and this shouldn't re-hit the AI endpoint each time.
+  const jobOrderKey = jobOrder?.job_order_id;
   useEffect(() => {
-    if (!jobOrder) return;
-    fetch(`/api/predict/time?jobOrderId=${jobOrder.job_order_id}`)
+    if (!jobOrderKey) return;
+    fetch(`/api/predict/time?jobOrderId=${jobOrderKey}`)
       .then(r => r.json())
       .then(d => { if (d.predicted_hours) setAiTime(d); })
       .catch(() => {});
-  }, [jobOrder]);
+  }, [jobOrderKey]);
 
   const completedBillable = tasks.filter(
     (t) => getTag(t.task_status) === "completed" && t.billable
