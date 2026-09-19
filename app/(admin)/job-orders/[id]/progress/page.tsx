@@ -1050,24 +1050,51 @@ function FinishTaskModal({ task, onClose, onSubmit }: { task: ServiceTask; onClo
   )
 }
 
+// "YYYY-MM-DD" in local time. (toISOString() is UTC — in Manila that reads
+// as yesterday until 8 AM, which would let the picker allow a past date.)
+function toLocalDateValue(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+// Same rule as the customer booking form: a slot is past only if it's
+// earlier than right now — a past day, or today at a time already gone.
+function isPastDateTime(date: string, time: string): boolean {
+  if (!date || !time) return false
+  return new Date(`${date}T${time}:00`).getTime() < Date.now()
+}
+
+// 09:00 is the shop's default — unless that's already gone today, in which
+// case the next full hour is the first sensible pick.
+function defaultTimeFor(date: string): string {
+  if (date !== toLocalDateValue(new Date()) || !isPastDateTime(date, '09:00')) return '09:00'
+  const next = new Date()
+  next.setHours(next.getHours() + 1, 0, 0, 0)
+  return `${String(next.getHours()).padStart(2, '0')}:00`
+}
+
 function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { task: ServiceTask, jobOrderId: string, scheduleData: { tasks: any[], mechanics: any[] }, onClose: () => void, onSaved: () => void }) {
+  const today = toLocalDateValue(new Date())
+
   const [date, setDate] = useState(() => {
     if (task.scheduledDate) {
       // Postgres returns local time timestamp natively as UTC Date on some clients,
       // but since we send exact string and read exact string we can extract local values directly
-      const d = new Date(task.scheduledDate)
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      return toLocalDateValue(new Date(task.scheduledDate))
     }
-    return new Date().toISOString().split('T')[0]
+    return today
   })
-  
+
   const [time, setTime] = useState(() => {
     if (task.scheduledDate) {
       const d = new Date(task.scheduledDate)
       return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
     }
-    return '09:00'
+    return defaultTimeFor(today)
   })
+
+  // Only a not-yet-started task can be rescheduled, so that's the only case
+  // where a past pick is a mistake worth blocking.
+  const pickedPast = task.status === 'pending' && isPastDateTime(date, time)
 
   const [mechanicId, setMechanicId] = useState<number | ''>(task.mechanicId || '')
   const [note, setNote] = useState(task.note === 'Describe the service...' ? '' : (task.note || ''))
@@ -1090,7 +1117,9 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
   const handleQuickPick = (daysToAdd: number) => {
     const d = new Date()
     d.setDate(d.getDate() + daysToAdd)
-    setDate(d.toISOString().split('T')[0])
+    const picked = toLocalDateValue(d)
+    setDate(picked)
+    setTime(defaultTimeFor(picked))
   }
 
   return (
@@ -1126,13 +1155,18 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Date</label>
-              <input type="date" value={date} onChange={e => setDate(e.target.value)} disabled={task.status !== 'pending'} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:bg-slate-100 disabled:text-slate-500" />
+              <input type="date" value={date} min={today} onChange={e => setDate(e.target.value)} disabled={task.status !== 'pending'} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:bg-slate-100 disabled:text-slate-500" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Time</label>
-              <input type="time" value={time} onChange={e => setTime(e.target.value)} disabled={task.status !== 'pending'} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:bg-slate-100 disabled:text-slate-500" />
+              <input type="time" value={time} min={date === today ? new Date().toTimeString().slice(0, 5) : undefined} onChange={e => setTime(e.target.value)} disabled={task.status !== 'pending'} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:bg-slate-100 disabled:text-slate-500" />
             </div>
           </div>
+          {pickedPast && (
+            <p className="flex items-center gap-1.5 text-xs font-medium text-rose-600">
+              <XCircle size={13} /> That time has already passed — pick a later one.
+            </p>
+          )}
           {task.status === 'active' && (
             <p className="text-xs text-slate-500">
               Already started — the schedule is locked. You can still reassign the mechanic or update the note.
@@ -1227,7 +1261,7 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
           <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
           <button
             onClick={handleSave}
-            disabled={saving || (() => {
+            disabled={saving || pickedPast || (() => {
               const m = scheduleData.mechanics.find((x) => x.id === mechanicId)
               return Boolean(m && task.mechanicId !== m.id && mechanicIsFull(Number(m.open_tasks ?? 0), Number(m.capacity)))
             })()}
