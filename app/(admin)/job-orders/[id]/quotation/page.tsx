@@ -509,7 +509,7 @@ export default function page() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6 p-8">
+    <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-8">
       <TopBar title="Vehicle Inspection" subtitle="Inspection workflow & time tracking." showSearch={false} />
       <JobOrderBreadcrumb jobOrderId={jobOrderId} current="quotation" stage={jobOrder.stage} />
 

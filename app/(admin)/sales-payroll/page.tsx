@@ -347,7 +347,7 @@ export default function page() {
   }
 
   return (
-    <div className="space-y-6 p-8">
+    <div className="space-y-6 p-4 sm:p-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Sales & Payroll</h1>
@@ -371,7 +371,7 @@ export default function page() {
       </div>
 
       {/* Clickable tab navigation, pill style */}
-      <div className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 p-1.5 text-sm w-fit">
+      <div className="flex w-fit max-w-full items-center gap-1.5 overflow-x-auto rounded-full border border-slate-200 bg-slate-50 p-1.5 text-sm">
         {TABS.map((tab) => {
           const Icon = tab.icon
           const isActive = activeTab === tab.key
@@ -379,7 +379,7 @@ export default function page() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 rounded-full px-4 py-2 font-semibold transition-colors ${
+              className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 font-semibold transition-colors ${
                 isActive
                   ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
@@ -434,7 +434,7 @@ export default function page() {
             </button>
           </div>
 
-          <table className="mt-4 w-full text-left text-sm">
+          <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
                 <th className="py-3 font-semibold">Customer ID</th>
@@ -500,7 +500,7 @@ export default function page() {
                 </tr>
               )}
             </tbody>
-          </table>
+          </table></div>
 
           <div className="mt-3 flex items-center justify-between text-sm text-slate-400">
             <p>* Highlighted rows indicate pending customer payments that require collection or follow-up.</p>
@@ -542,7 +542,7 @@ export default function page() {
             </button>
           </div>
 
-          <table className="mt-4 w-full text-left text-sm">
+          <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
                 <th className="py-3 font-semibold">Employee Name</th>
@@ -640,7 +640,7 @@ export default function page() {
                 </tr>
               )}
             </tbody>
-          </table>
+          </table></div>
 
           <ul className="mt-4 space-y-1 text-xs text-slate-400">
             <li>• Commission Salary is computed automatically as all services divided equally among the active mechanics/workers.</li>
@@ -682,7 +682,7 @@ export default function page() {
             </button>
           </div>
 
-          <table className="mt-4 w-full text-left text-sm">
+          <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
                 <th className="py-3 font-semibold">Services</th>
@@ -713,7 +713,7 @@ export default function page() {
                 </tr>
               )}
             </tbody>
-          </table>
+          </table></div>
           </div>
         </div>
       )}
