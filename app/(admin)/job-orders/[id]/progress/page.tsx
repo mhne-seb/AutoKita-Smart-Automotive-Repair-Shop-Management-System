@@ -3,7 +3,7 @@
 // Admin "Service Progress" page — the final step of the job-order workflow. Shows a section-by-section task checklist; once every task is marked done the job order is written back to "completed" (see jobOrderController.advanceJobOrderStage).
 import { useParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, CreditCard, XCircle, Banknote, Camera, Upload, Car } from 'lucide-react'
+import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, CreditCard, XCircle, Banknote, Camera, Upload, Car, Receipt, Plus } from 'lucide-react'
 import type { ChangeEvent } from 'react'
 import { toast } from 'sonner'
 import { Lightbox } from '@/components/Lightbox'
@@ -11,11 +11,11 @@ import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
 import { getQuotationById, getJobOrderBill, verifyJobOrderPayment, type JobOrderBill } from '@/controllers/quotationController'
-import { getServiceProgressById, scheduleTask, setPartStatus, finishTask } from '@/controllers/serviceProgressController'
+import { getServiceProgressById, scheduleTask, setPartStatus, finishTask, getSuppliers, addSupplier, recordPartsPurchase } from '@/controllers/serviceProgressController'
 import { isRoadTest } from '@/data/roadTest'
 import { mechanicIsFull } from '@/data/mechanicPolicy'
 import { currency } from '@/data/mockData'
-import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, partIsReady } from '@/data/types'
+import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, PartsPurchase, Supplier, partIsReady } from '@/data/types'
 
 const sectionColors: Record<string, string> = {
   received: 'text-emerald-600',
@@ -113,15 +113,37 @@ export default function page() {
   const [busyPartId, setBusyPartId] = useState<number | null>(null)
   const [finishingTask, setFinishingTask] = useState<ServiceTask | null>(null)
 
+  // "Record purchase" — the shop's ledger of where to-order parts were bought.
+  // One save creates one purchase record and marks the ticked parts received.
+  const [purchases, setPurchases] = useState<PartsPurchase[]>([])
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false)
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
+  const [supplierId, setSupplierId] = useState<number | ''>('')
+  const [newSupplierName, setNewSupplierName] = useState('')
+  const [addingSupplier, setAddingSupplier] = useState(false)
+  const [purchaseDate, setPurchaseDate] = useState('')
+  // Per part: is it in this purchase, and what did one unit cost.
+  const [purchaseLines, setPurchaseLines] = useState<Record<number, { checked: boolean; unitCost: string }>>({})
+  const [savingPurchase, setSavingPurchase] = useState(false)
+
   // Once the real data arrives, seed the editable state from it.
   useEffect(() => {
     if (initial) {
       setSections(initial.sections)
       setQuotationConfirmed(initial.quotationConfirmed)
+      setPurchases(initial.purchases)
     }
   }, [initial])
 
   const allTasks = useMemo(() => sections.flatMap((s) => s.tasks), [sections])
+
+  // Every part on this job order still waiting to be bought. Tasks that share
+  // a service name share the same parts list, so dedupe by part id.
+  const partsToBuy = useMemo(() => {
+    const seen = new Map<number, TaskPart>()
+    for (const t of allTasks) for (const p of t.parts ?? []) if (p.status === 'to_order') seen.set(p.id, p)
+    return [...seen.values()]
+  }, [allTasks])
   const completedCount = allTasks.filter((t) => t.status === 'completed').length
   const progressPercent = allTasks.length === 0 ? 0 : Math.round((completedCount / allTasks.length) * 100)
 
@@ -186,7 +208,10 @@ export default function page() {
 
   async function refreshTasks() {
     const data = await getServiceProgressById(jobOrderId)
-    if (data) setSections(data.sections)
+    if (data) {
+      setSections(data.sections)
+      setPurchases(data.purchases)
+    }
   }
 
   // Start lives on the card — one tap, in the moment. Schedule/mechanic/note
@@ -222,6 +247,51 @@ export default function page() {
     await setPartStatus(jobOrderId, part.id, partIsReady(part) ? 'to_order' : 'received')
     await refreshTasks()
     setBusyPartId(null)
+  }
+
+  async function openPurchaseModal() {
+    setSuppliers(await getSuppliers())
+    setSupplierId('')
+    setNewSupplierName('')
+    setAddingSupplier(false)
+    setPurchaseDate(new Date().toISOString().slice(0, 10))
+    // Every to-order part starts ticked — untick the ones bought elsewhere.
+    setPurchaseLines(Object.fromEntries(partsToBuy.map((p) => [p.id, { checked: true, unitCost: '' }])))
+    setShowPurchaseModal(true)
+  }
+
+  async function handleAddSupplier() {
+    const name = newSupplierName.trim()
+    if (!name) return
+    const created = await addSupplier(name)
+    if (!created) return toast.error('Could not add that supplier.')
+    setSuppliers((prev) => (prev.some((s) => s.id === created.id) ? prev : [...prev, created].sort((a, b) => a.name.localeCompare(b.name))))
+    setSupplierId(created.id)
+    setNewSupplierName('')
+    setAddingSupplier(false)
+  }
+
+  const purchaseTotal = partsToBuy.reduce((sum, p) => {
+    const line = purchaseLines[p.id]
+    return line?.checked ? sum + (Number(line.unitCost) || 0) * p.qty : sum
+  }, 0)
+  const purchaseCount = partsToBuy.filter((p) => purchaseLines[p.id]?.checked).length
+
+  async function savePurchase() {
+    if (!supplierId) return toast.error('Pick a supplier first.')
+    const lines = partsToBuy
+      .filter((p) => purchaseLines[p.id]?.checked)
+      .map((p) => ({ partId: p.id, unitCost: Number(purchaseLines[p.id].unitCost) }))
+    if (lines.length === 0) return toast.error('Tick at least one part.')
+    if (lines.some((l) => !(l.unitCost >= 0) || Number.isNaN(l.unitCost))) return toast.error('Enter a cost for every ticked part.')
+
+    setSavingPurchase(true)
+    const result = await recordPartsPurchase(jobOrderId, Number(supplierId), purchaseDate, lines)
+    setSavingPurchase(false)
+    if (!result.ok) return toast.error(result.message ?? 'Could not save the purchase.')
+    toast.success(`Purchase recorded — ${lines.length} part${lines.length === 1 ? '' : 's'} marked received.`)
+    setShowPurchaseModal(false)
+    await refreshTasks()
   }
 
   return (
@@ -431,7 +501,12 @@ export default function page() {
                               const busyP = busyPartId === p.id
                               return (
                                 <tr key={p.id} className="border-t border-slate-100">
-                                  <td className="py-2 pr-3 font-semibold text-slate-800">{p.name}</td>
+                                  <td className="py-2 pr-3">
+                                    <div className="font-semibold text-slate-800">{p.name}</div>
+                                    {p.purchaseOrderId && (
+                                      <div className="text-[11px] text-slate-400">PO-{p.purchaseOrderId} · {p.supplierName} · {p.purchasedOn}</div>
+                                    )}
+                                  </td>
                                   <td className="py-2 pr-3 text-xs text-slate-400">{p.partNo}</td>
                                   <td className="py-2 pr-3 text-xs text-slate-500">×{p.qty}</td>
                                   <td className="py-2 pr-3 text-right">
@@ -608,6 +683,58 @@ export default function page() {
           </p>
         </div>
 
+        {/* Where the shop bought this job's to-order parts. Recording a
+            purchase is what normally marks parts received — the per-row
+            "Received" button on the task cards stays as a manual fallback. */}
+        {(partsToBuy.length > 0 || purchases.length > 0) && (
+          <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400"><Package size={13} /> Parts to Buy</p>
+              {partsToBuy.length > 0 && (
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">{partsToBuy.length}</span>
+              )}
+            </div>
+
+            {partsToBuy.length === 0 ? (
+              <p className="text-sm text-slate-400">Nothing left to buy.</p>
+            ) : (
+              <>
+                <ul className="divide-y divide-slate-100 text-sm">
+                  {partsToBuy.map((p) => (
+                    <li key={p.id} className="flex items-center justify-between py-1.5">
+                      <span className="text-slate-800">{p.name}</span>
+                      <span className="text-xs text-slate-400">×{p.qty}</span>
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={openPurchaseModal}
+                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-900 py-2 text-sm font-semibold text-white transition-all duration-150 hover:bg-slate-800 active:scale-[0.98]"
+                >
+                  <Receipt size={14} /> Record Purchase
+                </button>
+              </>
+            )}
+
+            {purchases.length > 0 && (
+              <div className="mt-4 border-t border-slate-100 pt-3">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Purchases</p>
+                <ul className="space-y-1.5 text-sm">
+                  {purchases.map((pu) => (
+                    <li key={pu.id} className="flex items-center justify-between gap-2">
+                      <span className="min-w-0 truncate text-slate-700">
+                        <span className="font-semibold text-slate-900">PO-{pu.id}</span> · {pu.supplierName}
+                        <span className="text-xs text-slate-400"> · {pu.purchasedOn} · {pu.partCount} part{pu.partCount === 1 ? '' : 's'}</span>
+                      </span>
+                      <span className="shrink-0 font-semibold text-slate-800">{currency(pu.totalCost)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Final bill + verification. Same three numbers the customer sees
             (services + parts − verified payments), so the two screens never
             disagree. Shown once the job is done — that's when the balance is
@@ -702,6 +829,117 @@ export default function page() {
             return ok
           }}
         />
+      )}
+      {showPurchaseModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => !savingPurchase && setShowPurchaseModal(false)}>
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-1 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">Record Parts Purchase</h3>
+              <button onClick={() => setShowPurchaseModal(false)} disabled={savingPurchase} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
+            </div>
+            <p className="mb-4 text-sm text-slate-500">Where these parts came from, for the shop&apos;s records.</p>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-slate-700">Supplier</label>
+                {addingSupplier ? (
+                  <div className="flex gap-2">
+                    <input
+                      autoFocus
+                      type="text"
+                      value={newSupplierName}
+                      onChange={(e) => setNewSupplierName(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') void handleAddSupplier() }}
+                      placeholder="Supplier name"
+                      className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+                    />
+                    <button onClick={handleAddSupplier} disabled={!newSupplierName.trim()} className="rounded-lg bg-emerald-500 px-3 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">Add</button>
+                  </div>
+                ) : (
+                  <select
+                    value={supplierId}
+                    onChange={(e) => setSupplierId(e.target.value ? Number(e.target.value) : '')}
+                    className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+                  >
+                    <option value="">Select a supplier…</option>
+                    {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                )}
+                <button
+                  type="button"
+                  onClick={() => { setAddingSupplier((v) => !v); setNewSupplierName('') }}
+                  className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:underline"
+                >
+                  {addingSupplier ? 'Pick an existing supplier instead' : <><Plus size={12} /> Add new supplier</>}
+                </button>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-slate-700">Date Purchased</label>
+                <input
+                  type="date"
+                  value={purchaseDate}
+                  onChange={(e) => setPurchaseDate(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <p className="mb-1.5 mt-4 text-sm font-semibold text-slate-700">
+              Parts in this purchase <span className="font-normal text-slate-400">— untick anything bought elsewhere</span>
+            </p>
+            <div className="overflow-hidden rounded-lg border border-slate-200">
+              {partsToBuy.map((p) => {
+                const line = purchaseLines[p.id] ?? { checked: false, unitCost: '' }
+                return (
+                  <div key={p.id} className={`flex items-center gap-3 border-t border-slate-100 px-3 py-2 first:border-t-0 ${line.checked ? '' : 'bg-slate-50 text-slate-400'}`}>
+                    <input
+                      type="checkbox"
+                      checked={line.checked}
+                      onChange={(e) => setPurchaseLines((prev) => ({ ...prev, [p.id]: { ...line, checked: e.target.checked } }))}
+                      className="h-4 w-4 accent-emerald-500"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-semibold text-slate-800">{p.name} <span className="font-normal text-slate-400">×{p.qty}</span></div>
+                      <div className="text-xs text-slate-400">{p.partNo}</div>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-slate-400">₱/unit</span>
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={line.unitCost}
+                        disabled={!line.checked}
+                        onChange={(e) => setPurchaseLines((prev) => ({ ...prev, [p.id]: { ...line, unitCost: e.target.value } }))}
+                        onFocus={(e) => e.target.select()}
+                        placeholder="0.00"
+                        className="w-24 rounded-lg border border-slate-200 p-1.5 text-right text-sm text-slate-700 outline-none focus:border-emerald-500 disabled:bg-slate-100"
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+              <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                <span className="font-semibold text-slate-700">Total paid to supplier · {purchaseCount} part{purchaseCount === 1 ? '' : 's'}</span>
+                <span className="font-bold text-slate-900">{currency(purchaseTotal)}</span>
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center justify-between gap-3">
+              <span className="text-xs text-slate-500">Saving marks the ticked parts received.</span>
+              <div className="flex gap-2">
+                <button onClick={() => setShowPurchaseModal(false)} disabled={savingPurchase} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50">Cancel</button>
+                <button
+                  onClick={savePurchase}
+                  disabled={savingPurchase || !supplierId || purchaseCount === 0}
+                  className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
+                >
+                  {savingPurchase ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />} {savingPurchase ? 'Saving…' : 'Save Record'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
       {lightboxPhoto && <Lightbox url={lightboxPhoto.url} label={lightboxPhoto.label} onClose={() => setLightboxPhoto(null)} />}
       {showProof && bill?.latestPayment?.proofOfPaymentImage && (
