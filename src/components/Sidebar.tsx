@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -17,6 +17,7 @@ import {
   MoreVertical,
   LogOut,
   X,
+  Menu,
 } from 'lucide-react'
 import { Logo } from '@/components/site/Logo'
 
@@ -53,13 +54,46 @@ export function Sidebar() {
   const isActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`)
   const historyActive = historyLogNav.some((h) => isActive(h.to))
 
+  // Below lg the sidebar is an off-canvas drawer opened from a slim top bar;
+  // at lg and up it's the always-visible column it has always been.
+  const [mobileOpen, setMobileOpen] = useState(false)
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
+
   const handleLogout = () => {
     sessionStorage.removeItem('autokita_admin')
     router.push('/login')
   }
 
   return (
-    <aside className="sticky top-0 flex h-screen w-[280px] shrink-0 flex-col border-r border-border bg-background">
+    <>
+      <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-3 border-b border-border bg-background px-4 lg:hidden">
+        <button
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+          aria-label="Open menu"
+        >
+          <Menu size={22} />
+        </button>
+        <Link href="/overview" className="flex items-center gap-2">
+          <Logo className="h-7 w-auto" />
+          <span className="bg-clip-text text-xs font-extrabold uppercase tracking-wide text-transparent" style={{ backgroundImage: BRAND_GRADIENT }}>
+            AutoKita Admin
+          </span>
+        </Link>
+      </div>
+
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={() => setMobileOpen(false)} aria-hidden="true" />
+      )}
+
+    <aside
+      className={`fixed inset-y-0 left-0 z-50 flex h-screen w-[280px] shrink-0 flex-col border-r border-border bg-background transition-transform duration-200 lg:sticky lg:top-0 lg:translate-x-0 ${
+        mobileOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}
+    >
       {/* Logo */}
       <div className="flex items-center gap-3 border-b px-6 py-5">
         <Link href="/overview" className="flex items-center gap-3 transition-transform duration-200 hover:scale-[1.02]">
@@ -73,6 +107,14 @@ export function Sidebar() {
             Admin
           </span>
         </Link>
+        <button
+          type="button"
+          onClick={() => setMobileOpen(false)}
+          className="ml-auto rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground lg:hidden"
+          aria-label="Close menu"
+        >
+          <X size={18} />
+        </button>
       </div>
 
       {/* Primary nav */}
@@ -220,5 +262,6 @@ export function Sidebar() {
         document.body,
       )}
     </aside>
+    </>
   )
 }

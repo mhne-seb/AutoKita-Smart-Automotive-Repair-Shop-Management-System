@@ -372,7 +372,7 @@ export default function Page() {
   }
 
   return (
-    <div className="space-y-6 p-8">
+    <div className="space-y-6 p-4 sm:p-8">
       {toast && (
         <div className="fixed right-6 top-6 z-50 rounded-xl bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-3 text-sm font-medium text-white shadow-lg">
           {toast}
@@ -471,7 +471,7 @@ export default function Page() {
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Churn Distribution</p>
             <p className="text-2xl font-bold text-slate-900">ML Predictions</p>
