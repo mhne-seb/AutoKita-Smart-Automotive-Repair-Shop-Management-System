@@ -1155,7 +1155,25 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Date</label>
-              <input type="date" value={date} min={today} onChange={e => setDate(e.target.value)} disabled={task.status !== 'pending'} className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:bg-slate-100 disabled:text-slate-500" />
+              <input
+                type="date"
+                value={date}
+                min={today}
+                onChange={e => {
+                  // min only greys the picker out — it doesn't stop every
+                  // browser from selecting, or anyone from typing, a past date.
+                  const picked = e.target.value
+                  if (picked && picked < today) {
+                    toast.error('That date has already passed.')
+                    setDate(today)
+                    setTime(defaultTimeFor(today))
+                    return
+                  }
+                  setDate(picked)
+                }}
+                disabled={task.status !== 'pending'}
+                className="w-full rounded-lg border border-slate-200 p-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:bg-slate-100 disabled:text-slate-500"
+              />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Time</label>
