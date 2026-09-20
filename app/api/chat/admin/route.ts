@@ -414,10 +414,20 @@ export async function POST(req: NextRequest) {
   // Parse request body
   let messages: ChatCompletionMessageParam[];
   let jobOrderContext: string | undefined;
+  let incomingSessionId: number | null = null;
+  let employeeId: number | null = null;
+  let vehicleId: number | null = null;
+  let queryCategory: string = 'diagnostic';
+
   try {
     const body = await req.json();
     messages = body.messages ?? [];
     jobOrderContext = typeof body.jobOrderContext === 'string' ? body.jobOrderContext : undefined;
+    if (body.sessionId) incomingSessionId = parseInt(String(body.sessionId), 10) || null;
+    if (body.employeeId) employeeId = parseInt(String(body.employeeId), 10) || null;
+    if (body.vehicleId) vehicleId = parseInt(String(body.vehicleId), 10) || null;
+    if (body.category) queryCategory = String(body.category);
+
     if (!Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json({ error: 'messages array is required.' }, { status: 400 });
     }
@@ -432,6 +442,53 @@ export async function POST(req: NextRequest) {
     .filter((m) => m.role === 'user' || m.role === 'assistant')
     .slice(-MAX_HISTORY_MESSAGES);
 
+  // Extract latest user message
+  const userMessage = trimmedMessages.filter((m) => m.role === 'user').slice(-1)[0];
+  const userText = typeof userMessage?.content === 'string' ? userMessage.content : '';
+
+  // ── Session persistence in Supabase (internal_ai_sessions / messages) ───────
+  let activeSessionId = incomingSessionId;
+  try {
+    if (activeSessionId) {
+      const sessCheck = await db.query(
+        `SELECT id FROM internal_ai_sessions WHERE id = $1`,
+        [activeSessionId]
+      );
+      if (sessCheck.rows.length === 0) {
+        activeSessionId = null;
+      }
+    }
+
+    if (!activeSessionId) {
+      const newSess = await db.query(
+        `INSERT INTO internal_ai_sessions (
+          employee_id,
+          query_category,
+          context_vehicle_id,
+          started_at
+        ) VALUES ($1, $2, $3, NOW())
+        RETURNING id`,
+        [employeeId, queryCategory, vehicleId]
+      );
+      activeSessionId = newSess.rows[0]?.id ?? null;
+    }
+
+    // Record incoming user query
+    if (activeSessionId && userText) {
+      await db.query(
+        `INSERT INTO internal_ai_messages (
+          session_id,
+          sender,
+          message_text,
+          sent_at
+        ) VALUES ($1, 'user', $2, NOW())`,
+        [activeSessionId, userText]
+      );
+    }
+  } catch (dbErr) {
+    console.error('Failed to record internal AI session/message into Supabase:', dbErr);
+  }
+
   // Prepend system prompt
   const fullMessages: ChatCompletionMessageParam[] = [
     { role: 'system', content: SYSTEM_PROMPT },
@@ -444,9 +501,6 @@ export async function POST(req: NextRequest) {
     // ── Pinecone Semantic Search (Hybrid RAG) ─────────────────────────────────
     // Embed the latest user message and retrieve the top-3 relevant knowledge
     // chunks from the admin vector index. Inject them into the system prompt.
-    const userMessage = trimmedMessages.filter((m) => m.role === 'user').slice(-1)[0];
-    const userText = typeof userMessage?.content === 'string' ? userMessage.content : '';
-
     const adminIndex = getAdminIndex();
     // top-2 with 0.5 threshold — avoids injecting low-relevance chunks that waste tokens
     const knowledgeChunks = await semanticSearch(userText, adminIndex, 2, 0.5);
@@ -506,9 +560,29 @@ export async function POST(req: NextRequest) {
       const toolCallStatus = hasSql && hasPinecone ? 'both' : hasSql ? 'sql' : hasPinecone ? 'pinecone' : 'none';
 
       // Final answer
+      const replyText = choice.message.content ?? '';
       deduct(ip, 'admin', totalTokens);
+
+      // Record AI assistant reply in internal_ai_messages
+      if (activeSessionId && replyText) {
+        try {
+          await db.query(
+            `INSERT INTO internal_ai_messages (
+              session_id,
+              sender,
+              message_text,
+              sent_at
+            ) VALUES ($1, 'assistant', $2, NOW())`,
+            [activeSessionId, replyText]
+          );
+        } catch (dbErr) {
+          console.error('Failed to record internal AI assistant reply into Supabase:', dbErr);
+        }
+      }
+
       return NextResponse.json({
-        reply: choice.message.content ?? '',
+        reply: replyText,
+        sessionId: activeSessionId,
         tokensUsed: totalTokens,
         tokensRemaining: remaining(ip, 'admin'),
         toolCallStatus,
@@ -516,9 +590,28 @@ export async function POST(req: NextRequest) {
     }
 
     // Fallback if tool loop exhausted without a final text response
+    const fallbackText = 'I was unable to complete the lookup after multiple attempts. Please try rephrasing your question.';
     deduct(ip, 'admin', totalTokens);
+
+    if (activeSessionId) {
+      try {
+        await db.query(
+          `INSERT INTO internal_ai_messages (
+            session_id,
+            sender,
+            message_text,
+            sent_at
+          ) VALUES ($1, 'assistant', $2, NOW())`,
+          [activeSessionId, fallbackText]
+        );
+      } catch (dbErr) {
+        console.error('Failed to record fallback internal AI reply into Supabase:', dbErr);
+      }
+    }
+
     return NextResponse.json({
-      reply: 'I was unable to complete the lookup after multiple attempts. Please try rephrasing your question.',
+      reply: fallbackText,
+      sessionId: activeSessionId,
       tokensUsed: totalTokens,
       tokensRemaining: remaining(ip, 'admin'),
       toolCallStatus: sourcesUsed.has('sql') ? 'sql' : 'none',

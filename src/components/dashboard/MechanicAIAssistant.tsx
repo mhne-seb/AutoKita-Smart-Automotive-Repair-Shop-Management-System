@@ -189,6 +189,7 @@ export function MechanicAIAssistant() {
   const [toolStatus, setToolStatus] = useState<'none' | 'sql' | 'pinecone' | 'both'>('none')
 
   const conversationHistory = useRef<{ role: 'user' | 'assistant'; content: string }[]>([])
+  const sessionIdRef = useRef<number | null>(null)
   const scrollRef   = useRef<HTMLDivElement>(null)
   const inputRef    = useRef<HTMLInputElement>(null)
   const menuRef     = useRef<HTMLDivElement>(null)
@@ -219,6 +220,7 @@ export function MechanicAIAssistant() {
       setSession(null)
       setMessages([WELCOME_MESSAGE])
       conversationHistory.current = []
+      sessionIdRef.current = null
       setSessionError(null)
       setPickerOpen(false)
     }
@@ -232,6 +234,7 @@ export function MechanicAIAssistant() {
     try {
       const data = await getDiagnosticSession(joId)
       setSession(data)
+      sessionIdRef.current = null // Start fresh session for new JO
       // Append a context-loaded message to the existing conversation
       setMessages((prev) => [
         ...prev,
@@ -264,6 +267,7 @@ export function MechanicAIAssistant() {
       },
     ])
     conversationHistory.current = []
+    sessionIdRef.current = null
     setMenuOpen(false)
   }
 
@@ -287,17 +291,25 @@ export function MechanicAIAssistant() {
     conversationHistory.current = [...conversationHistory.current, { role: 'user', content: text }]
     const historyToSend = conversationHistory.current.slice(-6)
 
+    const employeeIdRaw = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
+    const employeeId = employeeIdRaw ? parseInt(employeeIdRaw, 10) : undefined
+
     fetch('/api/chat/admin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: historyToSend,
+        sessionId: sessionIdRef.current,
+        employeeId: isNaN(employeeId as number) ? undefined : employeeId,
         // Inject live JO context so AI always knows what JO we're discussing
         ...(session?.contextString ? { jobOrderContext: session.contextString } : {}),
       }),
     })
       .then(async (res) => {
         const data = await res.json()
+        if (data.sessionId) {
+          sessionIdRef.current = data.sessionId
+        }
         if (!res.ok) { pushBotText(data.error ?? 'Something went wrong.'); return }
         const reply: string = data.reply ?? ''
         conversationHistory.current = [...conversationHistory.current, { role: 'assistant', content: reply }]

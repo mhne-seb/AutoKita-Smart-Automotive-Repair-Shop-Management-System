@@ -1,12 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Download, Pencil, Info, Lock, Search, Check, X, Eye, Phone, Wallet, Wrench, CreditCard, Users } from 'lucide-react'
+import { Download, Pencil, Info, Lock, Search, Check, X, Eye, Phone, Wallet, Wrench, CreditCard, Users, History, RefreshCw, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
-// Still on mock mechanics — this page isn't wired to the DB yet (see
-// mechanicController.ts for the real roster once payroll gets connected).
-import { mechanics as mockMechanics } from '@/data/mockData'
-import { getPaymentRecords, getWeeklyServices } from '@/controllers/billingController'
 import type { Mechanic, PaymentRecord, WeeklyService } from '@/data/mockData'
 import { currency } from '@/data/mockData'
 const autokitaLogo = '/assets/autokita-logo.png' // static asset path (was a bundler import)
@@ -215,26 +211,67 @@ function downloadInvoice(p: PaymentRecord) {
   win.print()
 }
 
+interface SalesPayrollAuditLog {
+  id: number
+  adminId: number
+  adminName: string
+  actionPerformed: string
+  entityType: string
+  entityId: number
+  oldValues: string | null
+  newValues: string | null
+  actionDate: string
+}
+
 export default function page() {
   const [activeTab, setActiveTab] = useState<TabKey>('payments')
 
-  const weeklyGrossSales = 1444900
-  const netProfit = 118350
+  // Live state from Supabase
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [savingId, setSavingId] = useState<string | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
+  const [showAuditModal, setShowAuditModal] = useState(false)
+  const [auditLogs, setAuditLogs] = useState<SalesPayrollAuditLog[]>([])
 
-  // ---------- Editable mechanics state (rank & commission %) ----------
-  // Seeded through the controller (mock API) — see mechanicController.ts.
+  const [kpi, setKpi] = useState({
+    weeklyGrossSales: 0,
+    prevWeeklyGrossSales: 0,
+    salesGrowthPct: '0.0',
+    totalCommissions: 0,
+    netProfit: 0,
+    activeMechanicsCount: 0,
+  })
+
   const [mechanics, setMechanics] = useState<Mechanic[]>([])
   const [paymentRecords, setPaymentRecords] = useState<PaymentRecord[]>([])
   const [weeklyServices, setWeeklyServices] = useState<WeeklyService[]>([])
 
-  useEffect(() => {
-    let active = true
-    Promise.resolve(mockMechanics).then((data) => active && setMechanics(data.map((m) => ({ ...m }))))
-    getPaymentRecords().then((data) => active && setPaymentRecords(data))
-    getWeeklyServices().then((data) => active && setWeeklyServices(data))
-    return () => {
-      active = false
+  const loadData = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true)
+    else setLoading(true)
+    try {
+      const res = await fetch('/api/admin/sales-payroll')
+      const data = await res.json()
+      if (data.success) {
+        setPaymentRecords(data.paymentRecords || [])
+        setMechanics(data.mechanics || [])
+        setWeeklyServices(data.weeklyServices || [])
+        if (data.kpi) setKpi(data.kpi)
+        if (data.auditLogs) setAuditLogs(data.auditLogs)
+      } else {
+        console.error('Failed to load sales and payroll data:', data.message)
+      }
+    } catch (err) {
+      console.error('Failed to connect to sales-payroll API:', err)
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
     }
+  }
+
+  useEffect(() => {
+    loadData()
   }, [])
 
   const [editingField, setEditingField] = useState<{ id: string; field: 'rank' | 'commission' } | null>(null)
@@ -250,30 +287,71 @@ export default function page() {
     setDraftValue('')
   }
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editingField) return
+    const target = mechanics.find((m) => m.id === editingField.id)
+    if (!target) return
+
+    const rawVal = draftValue
+    const val = editingField.field === 'commission' ? Math.max(0, Math.min(100, Number(rawVal) || 0)) : rawVal
+
+    // Optimistically update the UI
     setMechanics((prev) =>
       prev.map((m) => {
         if (m.id !== editingField.id) return m
         if (editingField.field === 'rank') {
-          return { ...m, rank: draftValue }
+          return { ...m, rank: String(val) }
         }
-        const pct = Math.max(0, Math.min(100, Number(draftValue) || 0))
-        return { ...m, commissionPercent: pct }
-      }),
+        return { ...m, commissionPercent: Number(val) }
+      })
     )
+    const editingCopy = { ...editingField }
     setEditingField(null)
     setDraftValue('')
+    setSavingId(target.id)
+
+    try {
+      const adminId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
+      const res = await fetch('/api/admin/sales-payroll', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employeeId: target.id,
+          field: editingCopy.field,
+          value: val,
+          adminId,
+        }),
+      })
+      const result = await res.json()
+      if (result.success) {
+        setToast(`Updated ${target.name}'s ${editingCopy.field} and logged to audit trail!`)
+        setTimeout(() => setToast(null), 4000)
+        // Refresh audit logs in background
+        fetch('/api/admin/sales-payroll')
+          .then((r) => r.json())
+          .then((d) => d.success && setAuditLogs(d.auditLogs || []))
+      } else {
+        alert(result.message || 'Failed to update database.')
+        loadData()
+      }
+    } catch (err) {
+      console.error('Error saving payroll edit:', err)
+      alert('Network error when updating database.')
+      loadData()
+    } finally {
+      setSavingId(null)
+    }
   }
 
-  const totalCommissionsFlat = useMemo(
-    () =>
-      mechanics.reduce(
-        (sum, m) => sum + Math.round((weeklyGrossSales / mechanics.length) * (m.commissionPercent / 100)),
-        0,
-      ),
-    [mechanics],
-  )
+  const weeklyGrossSales = kpi.weeklyGrossSales
+  const netProfit = kpi.netProfit
+  const totalCommissionsFlat = useMemo(() => {
+    if (kpi.totalCommissions > 0) return kpi.totalCommissions
+    return mechanics.reduce(
+      (sum, m) => sum + Math.round((weeklyGrossSales / (mechanics.length || 1)) * (m.commissionPercent / 100)),
+      0,
+    )
+  }, [kpi.totalCommissions, weeklyGrossSales, mechanics])
 
   // ---------- Customer Payment Records: search + status filter ----------
   const [paymentSearch, setPaymentSearch] = useState('')
@@ -347,7 +425,15 @@ export default function page() {
   }
 
   return (
-    <div className="space-y-6 p-4 sm:p-8">
+    <div className="space-y-6 p-8">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl bg-slate-900 px-4 py-3 text-sm text-white shadow-2xl border border-slate-700 animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 size={18} className="text-emerald-400" />
+          <span>{toast}</span>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Sales & Payroll</h1>
@@ -355,20 +441,60 @@ export default function page() {
             Weekly automated payroll summaries, employee commissions, and business sales reports
           </p>
         </div>
-        <select className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600">
-          <option>Payroll Cycle: Weekly</option>
-        </select>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowAuditModal(true)}
+            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition-all"
+          >
+            <History size={16} className="text-blue-600" />
+            Audit Trail
+            {auditLogs.length > 0 && (
+              <span className="ml-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700">
+                {auditLogs.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => loadData(true)}
+            disabled={refreshing}
+            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition-all disabled:opacity-50"
+            title="Refresh live data from Supabase"
+          >
+            <RefreshCw size={15} className={`text-slate-600 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+          <select className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none">
+            <option>Payroll Cycle: Weekly</option>
+          </select>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-        <SummaryCard label="Weekly Gross Sales" value={currency(weeklyGrossSales)} sub="+4.2% vs last week" positive />
-        <SummaryCard
-          label="Total Commissions Allocated"
-          value={currency(totalCommissionsFlat)}
-          sub={`Automated split across ${mechanics.length} active workers`}
-        />
-        <SummaryCard label="Net Financial Profit" value={currency(netProfit)} sub="After employee salaries & commissions" />
-      </div>
+      {loading ? (
+        <div className="flex h-32 items-center justify-center rounded-2xl border border-slate-200 bg-white">
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Loader2 size={18} className="animate-spin text-blue-600" />
+            Loading live sales & payroll records from Supabase...
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <SummaryCard 
+            label="Weekly Gross Sales" 
+            value={currency(weeklyGrossSales)} 
+            sub={`${kpi.salesGrowthPct.startsWith('-') ? '' : '+'}${kpi.salesGrowthPct}% vs last period`} 
+            positive={!kpi.salesGrowthPct.startsWith('-')} 
+          />
+          <SummaryCard
+            label="Total Commissions Allocated"
+            value={currency(totalCommissionsFlat)}
+            sub={`Automated split across ${mechanics.length} active workers`}
+          />
+          <SummaryCard 
+            label="Net Financial Profit" 
+            value={currency(netProfit)} 
+            sub="After employee salaries & commissions" 
+          />
+        </div>
+      )}
 
       {/* Clickable tab navigation, pill style */}
       <div className="flex w-fit max-w-full items-center gap-1.5 overflow-x-auto rounded-full border border-slate-200 bg-slate-50 p-1.5 text-sm">
@@ -872,6 +998,102 @@ export default function page() {
                 className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Audit Trail Modal */}
+      {showAuditModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm animate-in fade-in"
+          onClick={() => setShowAuditModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl max-h-[85vh] flex flex-col"
+          >
+            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                  <History size={20} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Sales & Payroll Audit Trail</h3>
+                  <p className="text-xs text-slate-500">
+                    Live audit logs recorded in <code className="font-mono text-blue-600">system_audit_logs</code>
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAuditModal(false)}
+                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mt-4 flex-1 overflow-y-auto space-y-3 pr-1">
+              {auditLogs.length === 0 ? (
+                <div className="py-12 text-center text-sm text-slate-400">
+                  No audit logs recorded for sales and payroll yet. Changes to mechanics or payments will appear here.
+                </div>
+              ) : (
+                auditLogs.map((log) => {
+                  let oldVal: Record<string, unknown> = {}
+                  let newVal: Record<string, unknown> = {}
+                  try {
+                    oldVal = log.oldValues ? JSON.parse(log.oldValues) : {}
+                    newVal = log.newValues ? JSON.parse(log.newValues) : {}
+                  } catch {
+                    // ignore JSON parse failure
+                  }
+
+                  return (
+                    <div
+                      key={log.id}
+                      className="rounded-xl border border-slate-100 bg-slate-50/70 p-4 transition-all hover:bg-slate-50"
+                    >
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-slate-700 flex items-center gap-1.5">
+                          <span className="h-2 w-2 rounded-full bg-blue-500" />
+                          {log.adminName}
+                        </span>
+                        <span className="text-slate-400">
+                          {new Date(log.actionDate).toLocaleString('en-PH', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                      <div className="mt-2 text-sm text-slate-800">
+                        Updated <span className="font-semibold text-slate-900">{log.entityType}</span> (Target ID #{log.entityId})
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                        {Object.keys(newVal).map((key) => (
+                          <div key={key} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1">
+                            <span className="font-semibold capitalize text-slate-600">{key.replace('_', ' ')}:</span>{' '}
+                            <span className="text-rose-500 line-through">{String(oldVal[key] ?? 'N/A')}</span>
+                            {' → '}
+                            <span className="font-bold text-emerald-600">{String(newVal[key] ?? 'N/A')}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => setShowAuditModal(false)}
+                className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                Done
               </button>
             </div>
           </div>
