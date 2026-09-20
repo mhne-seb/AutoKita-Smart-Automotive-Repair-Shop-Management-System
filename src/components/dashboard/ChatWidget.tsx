@@ -39,6 +39,7 @@ export function ChatWidget() {
   const [waiting, setWaiting] = useState(false);
   // Multi-turn conversation history sent to the API
   const conversationHistory = useRef<{ role: 'user' | 'assistant'; content: string }[]>([]);
+  const sessionIdRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -63,13 +64,23 @@ export function ChatWidget() {
       { role: 'user', content: t },
     ];
 
+    const userIdRaw = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null;
+    const userId = userIdRaw ? parseInt(userIdRaw, 10) : undefined;
+
     fetch('/api/chat/customer', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: conversationHistory.current }),
+      body: JSON.stringify({
+        messages: conversationHistory.current,
+        sessionId: sessionIdRef.current,
+        userId: isNaN(userId as number) ? undefined : userId,
+      }),
     })
       .then(async (res) => {
         const data = await res.json();
+        if (data.sessionId) {
+          sessionIdRef.current = data.sessionId;
+        }
         const reply: string = res.ok
           ? (data.reply ?? '')
           : (data.error ?? 'Something went wrong. Please try again.');
