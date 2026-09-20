@@ -22,11 +22,12 @@ import {
   Loader2,
   UserMinus,
   UserCheck,
+  History,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { StatusBadge } from '@/components/StatusBadge'
 import {
-  getMechanics,
+  getMechanicsData,
   addMechanic,
   updateMechanic,
   removeMechanic,
@@ -34,6 +35,7 @@ import {
   type Mechanic,
   type MechanicInput,
   type MechanicHistoryRow,
+  type MechanicAuditLog,
 } from '@/controllers/mechanicController'
 import { DEFAULT_MECHANIC_CAPACITY } from '@/data/mechanicPolicy'
 
@@ -55,11 +57,14 @@ function avatarUrl(name: string) {
 
 export default function page() {
   const [mechanicsList, setMechanicsList] = useState<Mechanic[]>([])
+  const [auditLogs, setAuditLogs] = useState<MechanicAuditLog[]>([])
+  const [showAuditModal, setShowAuditModal] = useState(false)
   const [loading, setLoading] = useState(true)
 
   async function refresh() {
-    const data = await getMechanics()
-    setMechanicsList(data)
+    const data = await getMechanicsData()
+    setMechanicsList(data.mechanics)
+    setAuditLogs(data.auditLogs)
     setLoading(false)
   }
   useEffect(() => {
@@ -145,12 +150,26 @@ export default function page() {
           <h1 className="text-3xl font-bold text-foreground">Mechanic Management</h1>
           <p className="mt-1 text-sm text-muted-foreground">Manage workshop resources and optimize service throughput.</p>
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className={`flex items-center gap-2 rounded-full ${GRADIENT} px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:opacity-90 active:scale-95`}
-        >
-          <Plus size={15} /> Add Mechanic
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowAuditModal(true)}
+            className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm hover:bg-accent transition-all duration-150 active:scale-95"
+          >
+            <History size={16} className="text-blue-600" />
+            Audit Trail
+            {auditLogs.length > 0 && (
+              <span className="ml-1 rounded-full bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300">
+                {auditLogs.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setShowAdd(true)}
+            className={`flex items-center gap-2 rounded-full ${GRADIENT} px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:opacity-90 active:scale-95`}
+          >
+            <Plus size={15} /> Add Mechanic
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -365,6 +384,7 @@ export default function page() {
 
       {historyTarget && <TaskHistoryModal mechanic={historyTarget} onClose={() => setHistoryTarget(null)} />}
       {profileTarget && <ProfileModal mechanic={profileTarget} onClose={() => setProfileTarget(null)} />}
+      {showAuditModal && <MechanicAuditModal logs={auditLogs} onClose={() => setShowAuditModal(false)} />}
     </div>
   )
 }
@@ -715,6 +735,192 @@ function MechanicFormModal({
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Mechanic Management Audit Trail Modal
+// ---------------------------------------------------------------------------
+
+function MechanicAuditModal({
+  logs,
+  onClose,
+}: {
+  logs: MechanicAuditLog[]
+  onClose: () => void
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in"
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl bg-card border border-border p-6 shadow-2xl"
+      >
+        <div className="flex items-start justify-between border-b border-border pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/10 text-blue-600">
+              <History size={20} />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-foreground">Mechanic Management Audit Trail</h3>
+              <p className="text-xs text-muted-foreground">
+                Live audit logs recorded in <code className="font-mono text-blue-500">system_audit_logs</code>
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+            aria-label="Close modal"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
+          {logs.length === 0 ? (
+            <div className="py-12 text-center text-sm text-muted-foreground">
+              No audit logs recorded for mechanics yet. New hires, profile updates, status toggles, and removals will appear here.
+            </div>
+          ) : (
+            logs.map((log) => {
+              let oldVal: Record<string, unknown> = {}
+              let newVal: Record<string, unknown> = {}
+              try {
+                oldVal = log.oldValues ? JSON.parse(log.oldValues) : {}
+                newVal = log.newValues ? JSON.parse(log.newValues) : {}
+              } catch {
+                // ignore JSON parse failure
+              }
+
+              const isCreated = log.actionPerformed === 'created'
+              const isStatus = log.actionPerformed === 'status_changed'
+
+              const actionBadge = isCreated ? (
+                <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600">
+                  Hired / Created
+                </span>
+              ) : isStatus ? (
+                <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600">
+                  Status Changed
+                </span>
+              ) : (
+                <span className="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-600">
+                  Updated
+                </span>
+              )
+
+              // Find changed fields
+              const changedKeys = Object.keys(newVal).filter((k) => {
+                if (isCreated) return true
+                return String(oldVal[k] ?? '') !== String(newVal[k] ?? '')
+              })
+
+              const mechanicName = String(newVal.full_name || oldVal.full_name || `Mechanic #${log.entityId}`)
+
+              return (
+                <div
+                  key={log.id}
+                  className="rounded-xl border border-border bg-accent/30 p-4 transition-all hover:bg-accent/50"
+                >
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                        <span className="h-2 w-2 rounded-full bg-blue-500" />
+                        {log.adminName}
+                      </span>
+                      {actionBadge}
+                    </div>
+                    <span className="text-muted-foreground">
+                      {new Date(log.actionDate).toLocaleString('en-PH', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
+
+                  <div className="mt-2 text-sm text-foreground">
+                    <span className="font-semibold">{mechanicName}</span>{' '}
+                    <span className="text-xs text-muted-foreground">(Target ID #{log.entityId})</span>
+                  </div>
+
+                  {isCreated ? (
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                      {Boolean(newVal.rank) && (
+                        <div className="rounded-lg border border-border bg-card px-2.5 py-1">
+                          <span className="text-muted-foreground">Rank:</span>{' '}
+                          <span className="font-semibold text-foreground">{String(newVal.rank)}</span>
+                        </div>
+                      )}
+                      {Boolean(newVal.branch) && (
+                        <div className="rounded-lg border border-border bg-card px-2.5 py-1">
+                          <span className="text-muted-foreground">Branch:</span>{' '}
+                          <span className="font-semibold text-foreground">{String(newVal.branch)}</span>
+                        </div>
+                      )}
+                      {newVal.base_salary !== undefined && (
+                        <div className="rounded-lg border border-border bg-card px-2.5 py-1">
+                          <span className="text-muted-foreground">Base Salary:</span>{' '}
+                          <span className="font-semibold text-foreground">₱{Number(newVal.base_salary).toLocaleString()}</span>
+                        </div>
+                      )}
+                      {newVal.commission_percent !== undefined && (
+                        <div className="rounded-lg border border-border bg-card px-2.5 py-1">
+                          <span className="text-muted-foreground">Commission:</span>{' '}
+                          <span className="font-semibold text-foreground">{String(newVal.commission_percent)}%</span>
+                        </div>
+                      )}
+                      {newVal.jobs_capacity !== undefined && (
+                        <div className="rounded-lg border border-border bg-card px-2.5 py-1">
+                          <span className="text-muted-foreground">Capacity:</span>{' '}
+                          <span className="font-semibold text-foreground">{String(newVal.jobs_capacity)} jobs</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : changedKeys.length > 0 ? (
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                      {changedKeys.map((key) => {
+                        const label = key.replace(/_/g, ' ')
+                        const oldFormatted =
+                          key === 'base_salary' && oldVal[key]
+                            ? `₱${Number(oldVal[key]).toLocaleString()}`
+                            : String(oldVal[key] ?? '—')
+                        const newFormatted =
+                          key === 'base_salary' && newVal[key]
+                            ? `₱${Number(newVal[key]).toLocaleString()}`
+                            : String(newVal[key] ?? '—')
+                        return (
+                          <div key={key} className="rounded-lg border border-border bg-card px-2.5 py-1">
+                            <span className="font-semibold capitalize text-muted-foreground">{label}:</span>{' '}
+                            <span className="text-rose-500 line-through">{oldFormatted}</span>
+                            {' → '}
+                            <span className="font-bold text-emerald-600 dark:text-emerald-400">{newFormatted}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ) : null}
+                </div>
+              )
+            })
+          )}
+        </div>
+
+        <div className="mt-4 flex justify-end border-t border-border pt-3">
+          <button
+            onClick={onClose}
+            className="rounded-full bg-foreground px-5 py-2 text-sm font-semibold text-background hover:opacity-90"
+          >
+            Done
+          </button>
+        </div>
       </div>
     </div>
   )

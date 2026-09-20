@@ -53,6 +53,23 @@ export interface MechanicHistoryRow {
   customer: string
 }
 
+export interface MechanicAuditLog {
+  id: number
+  adminId: number
+  adminName: string
+  actionPerformed: string
+  entityType: string
+  entityId: number
+  oldValues: string | null
+  newValues: string | null
+  actionDate: string
+}
+
+export interface MechanicsData {
+  mechanics: Mechanic[]
+  auditLogs: MechanicAuditLog[]
+}
+
 type Result = { ok: boolean; message?: string }
 
 function toMechanic(r: Record<string, unknown>): Mechanic {
@@ -91,18 +108,36 @@ function toMechanic(r: Record<string, unknown>): Mechanic {
   }
 }
 
-export async function getMechanics(): Promise<Mechanic[]> {
-  const res = await fetch('/api/admin/mechanics', { cache: 'no-store' })
-  const json = await res.json().catch(() => null)
-  if (!res.ok || !json?.success) return []
-  return (json.mechanics as Record<string, unknown>[]).map(toMechanic)
+function getActingAdminId(): number | undefined {
+  if (typeof window === 'undefined') return undefined
+  const raw = sessionStorage.getItem('autokita_user_id')
+  if (!raw) return undefined
+  const parsed = parseInt(raw, 10)
+  return isNaN(parsed) ? undefined : parsed
 }
 
-async function send(method: 'POST' | 'PATCH', body: unknown): Promise<Result> {
+export async function getMechanicsData(): Promise<MechanicsData> {
+  const res = await fetch('/api/admin/mechanics', { cache: 'no-store' })
+  const json = await res.json().catch(() => null)
+  if (!res.ok || !json?.success) return { mechanics: [], auditLogs: [] }
+  return {
+    mechanics: ((json.mechanics as Record<string, unknown>[]) || []).map(toMechanic),
+    auditLogs: (json.auditLogs as MechanicAuditLog[]) || [],
+  }
+}
+
+export async function getMechanics(): Promise<Mechanic[]> {
+  const data = await getMechanicsData()
+  return data.mechanics
+}
+
+async function send(method: 'POST' | 'PATCH', body: Record<string, unknown>): Promise<Result> {
+  const adminId = getActingAdminId()
+  const payload = adminId ? { ...body, adminId } : body
   const res = await fetch('/api/admin/mechanics', {
     method,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
   })
   const json = await res.json().catch(() => null)
   if (!res.ok || !json?.success) return { ok: false, message: json?.message ?? 'Request failed.' }
@@ -110,7 +145,7 @@ async function send(method: 'POST' | 'PATCH', body: unknown): Promise<Result> {
 }
 
 export function addMechanic(input: MechanicInput): Promise<Result> {
-  return send('POST', input)
+  return send('POST', input as unknown as Record<string, unknown>)
 }
 
 export function updateMechanic(id: number, input: MechanicInput): Promise<Result> {
@@ -119,7 +154,9 @@ export function updateMechanic(id: number, input: MechanicInput): Promise<Result
 
 // Soft delete — the API refuses while the mechanic still holds open tasks.
 export async function removeMechanic(id: number): Promise<Result> {
-  const res = await fetch(`/api/admin/mechanics?id=${id}`, { method: 'DELETE' })
+  const adminId = getActingAdminId()
+  const query = adminId ? `?id=${id}&adminId=${adminId}` : `?id=${id}`
+  const res = await fetch(`/api/admin/mechanics${query}`, { method: 'DELETE' })
   const json = await res.json().catch(() => null)
   if (!res.ok || !json?.success) return { ok: false, message: json?.message ?? 'Could not remove mechanic.' }
   return { ok: true }

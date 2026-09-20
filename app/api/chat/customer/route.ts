@@ -8,6 +8,7 @@ import { getOpenAIClient, CUSTOMER_MODEL } from '@/lib/openai';
 import { hasBudget, deduct, remaining } from '@/lib/tokenBudget';
 import { getCustomerIndex } from '@/lib/pinecone';
 import { semanticSearch, formatContext } from '@/lib/vectorSearch';
+import { db } from '@/lib/db';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -59,9 +60,17 @@ export async function POST(req: NextRequest) {
 
   // Parse request body
   let messages: ChatCompletionMessageParam[];
+  let incomingSessionId: number | null = null;
+  let customerUserId: number | null = null;
+  let jobOrderId: number | null = null;
+
   try {
     const body = await req.json();
     messages = body.messages ?? [];
+    if (body.sessionId) incomingSessionId = parseInt(String(body.sessionId), 10) || null;
+    if (body.userId) customerUserId = parseInt(String(body.userId), 10) || null;
+    if (body.jobOrderId) jobOrderId = parseInt(String(body.jobOrderId), 10) || null;
+
     if (!Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json({ error: 'messages array is required.' }, { status: 400 });
     }
@@ -73,6 +82,66 @@ export async function POST(req: NextRequest) {
   // Prevents unbounded input token growth as conversations get longer.
   const trimmedMessages = messages.slice(-MAX_HISTORY_MESSAGES);
 
+  // Extract latest user message
+  const userMessage = trimmedMessages.filter((m) => m.role === 'user').slice(-1)[0];
+  const userText = typeof userMessage?.content === 'string' ? userMessage.content : '';
+
+  // ── Session persistence in Supabase ─────────────────────────────────────────
+  let activeSessionId = incomingSessionId;
+  try {
+    if (activeSessionId) {
+      const sessCheck = await db.query(
+        `SELECT id FROM chat_sessions WHERE id = $1`,
+        [activeSessionId]
+      );
+      if (sessCheck.rows.length > 0) {
+        await db.query(
+          `UPDATE chat_sessions 
+           SET last_activity_at = NOW(),
+               customer_user_id = COALESCE(customer_user_id, $2)
+           WHERE id = $1`,
+          [activeSessionId, customerUserId]
+        );
+      } else {
+        activeSessionId = null;
+      }
+    }
+
+    if (!activeSessionId) {
+      const newSess = await db.query(
+        `INSERT INTO chat_sessions (
+          customer_user_id, 
+          reference_type, 
+          reference_id, 
+          session_status, 
+          started_at, 
+          last_activity_at
+        ) VALUES ($1, $2, $3, 'active', NOW(), NOW())
+        RETURNING id`,
+        [customerUserId, jobOrderId ? 'job_order' : 'general', jobOrderId]
+      );
+      activeSessionId = newSess.rows[0]?.id ?? null;
+    }
+
+    // Record incoming customer message
+    if (activeSessionId && userText) {
+      await db.query(
+        `INSERT INTO chat_messages (
+          session_id, 
+          sender_type, 
+          sender_id, 
+          message_text, 
+          sent_at,
+          is_read_by_customer,
+          is_read_by_admin
+        ) VALUES ($1, 'customer', $2, $3, NOW(), TRUE, FALSE)`,
+        [activeSessionId, customerUserId, userText]
+      );
+    }
+  } catch (dbErr) {
+    console.error('Failed to record customer chat session/message into Supabase:', dbErr);
+  }
+
   // Build full message history with system prompt
   const fullMessages: ChatCompletionMessageParam[] = [
     { role: 'system', content: SYSTEM_PROMPT },
@@ -81,13 +150,6 @@ export async function POST(req: NextRequest) {
 
   try {
     // ── Pinecone Static RAG ───────────────────────────────────────────────────
-    // Embed the latest user message and retrieve the top-2 matching services
-    // or FAQs from the customer vector index. Inject them as dynamic context.
-    // Using top-2 (down from 3) and a 0.5 score threshold to avoid injecting
-    // low-relevance noise that wastes tokens.
-    const userMessage = trimmedMessages.filter((m) => m.role === 'user').slice(-1)[0];
-    const userText = typeof userMessage?.content === 'string' ? userMessage.content : '';
-
     const customerIndex = getCustomerIndex();
     const serviceChunks = await semanticSearch(userText, customerIndex, 2, 0.5);
     const serviceContext = formatContext(serviceChunks);
@@ -106,11 +168,33 @@ export async function POST(req: NextRequest) {
       max_completion_tokens: MAX_OUTPUT_TOKENS,
     });
 
+    const replyText = response.choices[0]?.message.content ?? '';
     const totalTokens = response.usage?.total_tokens ?? 0;
     deduct(ip, 'customer', totalTokens);
 
+    // Record AI bot reply in chat_messages
+    if (activeSessionId && replyText) {
+      try {
+        await db.query(
+          `INSERT INTO chat_messages (
+            session_id, 
+            sender_type, 
+            sender_id, 
+            message_text, 
+            sent_at,
+            is_read_by_customer,
+            is_read_by_admin
+          ) VALUES ($1, 'bot', NULL, $2, NOW(), TRUE, TRUE)`,
+          [activeSessionId, replyText]
+        );
+      } catch (dbErr) {
+        console.error('Failed to record bot reply into Supabase:', dbErr);
+      }
+    }
+
     return NextResponse.json({
-      reply: response.choices[0].message.content ?? '',
+      reply: replyText,
+      sessionId: activeSessionId,
       tokensUsed: totalTokens,
       tokensRemaining: remaining(ip, 'customer'),
     });
