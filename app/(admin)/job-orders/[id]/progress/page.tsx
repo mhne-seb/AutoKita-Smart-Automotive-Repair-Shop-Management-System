@@ -3,7 +3,7 @@
 // Admin "Service Progress" page — the final step of the job-order workflow. Shows a section-by-section task checklist; once every task is marked done the job order is written back to "completed" (see jobOrderController.advanceJobOrderStage).
 import { useParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, CreditCard, XCircle, Banknote, Camera, Upload, Car, Receipt, Plus, ChevronDown } from 'lucide-react'
+import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, CreditCard, XCircle, Banknote, Camera, Upload, Car, Receipt, Plus, ChevronDown, AlertTriangle, Hourglass, ClipboardList } from 'lucide-react'
 import type { ChangeEvent } from 'react'
 import { toast } from 'sonner'
 import { Lightbox } from '@/components/Lightbox'
@@ -12,10 +12,11 @@ import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderController'
 import { getQuotationById, getJobOrderBill, verifyJobOrderPayment, type JobOrderBill } from '@/controllers/quotationController'
 import { getServiceProgressById, scheduleTask, setPartStatus, finishTask, getSuppliers, addSupplier, recordPartsPurchase } from '@/controllers/serviceProgressController'
+import { ReportFindingModal } from '@/components/dashboard/ReportFindingModal'
 import { isRoadTest } from '@/data/roadTest'
 import { mechanicIsFull } from '@/data/mechanicPolicy'
 import { currency } from '@/data/mockData'
-import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, PartsPurchase, Supplier, partIsReady } from '@/data/types'
+import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, PartsPurchase, Supplier, ServiceFinding, partIsReady } from '@/data/types'
 
 const sectionColors: Record<string, string> = {
   received: 'text-emerald-600',
@@ -134,12 +135,18 @@ export default function page() {
   const [openPurchaseId, setOpenPurchaseId] = useState<number | null>(null)
   const [savingPurchase, setSavingPurchase] = useState(false)
 
+  // Mid-service findings. "Found a problem?" on a started task ties the
+  // finding to that task; "Report a finding" in the sidebar is a general one.
+  const [findings, setFindings] = useState<ServiceFinding[]>([])
+  const [findingModal, setFindingModal] = useState<{ task?: { id: number; title: string } } | null>(null)
+
   // Once the real data arrives, seed the editable state from it.
   useEffect(() => {
     if (initial) {
       setSections(initial.sections)
       setQuotationConfirmed(initial.quotationConfirmed)
       setPurchases(initial.purchases)
+      setFindings(initial.findings)
     }
   }, [initial])
 
@@ -166,6 +173,19 @@ export default function page() {
     const t = setInterval(() => setNow(Date.now()), 60_000)
     return () => clearInterval(t)
   }, [initial?.timer.startedAtIso, initial?.timer.completedAtIso])
+
+  // Findings can only be reported while the job is on the floor. While one
+  // is waiting on the customer, poll so their answer shows up on its own —
+  // same 5-second pattern as the quotation page.
+  const jobOnFloor = Boolean(initial?.timer.startedAtIso) && !initial?.timer.completedAtIso
+  const pendingFindings = findings.filter((f) => f.decision === 'pending')
+  const declinedFindings = findings.filter((f) => f.decision === 'disputed')
+  useEffect(() => {
+    if (pendingFindings.length === 0) return
+    const t = setInterval(() => { refreshTasks() }, 5000)
+    return () => clearInterval(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingFindings.length])
 
   const currentDurationHours = useMemo(() => {
     const start = initial?.timer.startedAtIso
@@ -222,6 +242,7 @@ export default function page() {
     if (data) {
       setSections(data.sections)
       setPurchases(data.purchases)
+      setFindings(data.findings)
     }
   }
 
@@ -350,6 +371,32 @@ export default function page() {
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_340px]">
       <div>
+      {/* Findings waiting on the customer. The card lists the finding and what
+          it would add; the page polls until they answer. */}
+      {pendingFindings.length > 0 && (
+        <div className="mb-6 space-y-3">
+          {pendingFindings.map((f) => (
+            <div key={f.id} className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4">
+              {f.photoUrl && (
+                <button type="button" onClick={() => setLightboxPhoto({ url: f.photoUrl!, label: 'Finding photo' })} className="shrink-0">
+                  <img src={f.photoUrl} alt="" className="h-14 w-20 rounded-md border border-amber-200 object-cover" />
+                </button>
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="flex items-center gap-1.5 text-sm font-semibold text-amber-900"><Hourglass size={14} /> Finding sent to customer · {currency(f.extraCost)}</span>
+                  <span className="rounded-full bg-amber-200 px-2.5 py-0.5 text-xs font-semibold text-amber-800">Awaiting approval</span>
+                </div>
+                <p className="mt-1 text-sm text-amber-900/80">{f.findings}</p>
+                <p className="mt-1 text-xs text-amber-700/70">
+                  {f.taskTitle ? `While working on ${f.taskTitle}` : 'General inspection'}
+                  {f.reportedByName ? ` · ${f.reportedByName}` : ''} · {f.services.length} service{f.services.length === 1 ? '' : 's'}, {f.parts.length} part{f.parts.length === 1 ? '' : 's'} · sent {new Date(f.createdAt).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       {sections.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-sm text-slate-400">
           No service progress tasks recorded yet for this job order.
@@ -378,6 +425,9 @@ export default function page() {
                           {task.title}
                           {isRoadTest(task) && (
                             <span className="flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-700"><Car size={11} /> Quality check</span>
+                          )}
+                          {task.findingId && (
+                            <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700" title="Approved by the customer from a mid-service finding"><AlertTriangle size={11} /> Added mid-service</span>
                           )}
                         </h3>
                         {task.note && task.note !== 'Describe the service...' && (
@@ -493,6 +543,16 @@ export default function page() {
                               className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-700 active:scale-95 disabled:opacity-40"
                             >
                               <Camera size={13} /> Finish
+                            </button>
+                          )}
+                          {/* Mid-service finding tied to this task — only while the
+                              mechanic is actually working on it (Started, not Finished). */}
+                          {jobOnFloor && task.status === 'active' && !isRoadTest(task) && (
+                            <button
+                              onClick={() => setFindingModal({ task: { id: Number(task.id), title: task.title } })}
+                              className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 transition-all duration-150 hover:bg-amber-100 active:scale-95"
+                            >
+                              <AlertTriangle size={13} /> Found a problem?
                             </button>
                           )}
                         </div>
@@ -633,6 +693,31 @@ export default function page() {
           ))}
         </div>
       )}
+
+      {/* Findings the customer declined stay on the job as "recommended, not
+          done" — the shop's record that it was raised, and a reminder for
+          the customer's next visit. */}
+      {declinedFindings.length > 0 && (
+        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400"><ClipboardList size={13} /> Recommended, not done</p>
+          <ul className="divide-y divide-slate-100">
+            {declinedFindings.map((f) => (
+              <li key={f.id} className="flex items-start justify-between gap-3 py-2.5 text-sm">
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-800">{f.findings}</p>
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    {f.services.map((s) => s.name).join(', ')}{f.parts.length > 0 ? ` + ${f.parts.length} part${f.parts.length === 1 ? '' : 's'}` : ''} · {currency(f.extraCost)}
+                    {f.reportedByName ? ` · noted by ${f.reportedByName}` : ''}
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-500">
+                  Declined {f.decidedAt ? new Date(f.decidedAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }) : ''}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       </div>
 
       <div className="space-y-6">
@@ -702,6 +787,21 @@ export default function page() {
                 : 'Running since the job went onto the floor. Mark each task Started / Finished below to track individual services.'
               : 'The clock starts when the job enters In Progress.'}
           </p>
+
+          {/* A finding not tied to any one task — the mechanic noticed it
+              while the car was in the shop. */}
+          {jobOnFloor && (
+            <>
+              <button
+                type="button"
+                onClick={() => setFindingModal({})}
+                className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+              >
+                <AlertTriangle size={14} /> Report a finding
+              </button>
+              <p className="mt-1.5 text-[11px] text-slate-400">For anything outside the approved services.</p>
+            </>
+          )}
         </div>
 
         {/* Where the shop bought this job's to-order parts. Recording a
@@ -880,6 +980,15 @@ export default function page() {
           }}
         />
       )}
+      {findingModal && (
+        <ReportFindingModal
+          jobOrderId={jobOrderId}
+          task={findingModal.task}
+          onClose={() => setFindingModal(null)}
+          onSent={refreshTasks}
+        />
+      )}
+
       {showPurchaseModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => !savingPurchase && setShowPurchaseModal(false)}>
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>

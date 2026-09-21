@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { DEFAULT_MECHANIC_CAPACITY } from '@/data/mechanicPolicy'
+import { notifyCustomer } from '@/lib/customerNotify'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -73,6 +74,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       )
     }
 
+    // Remember where the task was, so "started" is only announced once.
+    const before = await db.query(
+      `SELECT task_title, task_status FROM service_progress_tasks WHERE id = $1::int AND job_order_id = $2::int`,
+      [taskId, jobOrderId],
+    )
+    const prev = before.rows[0]
+
     // Call the database function to update the task and the job order's scheduled_date
     await db.query(
       `SELECT schedule_service_task_with_status($1, $2, $3, $4, $5)`,
@@ -84,6 +92,19 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         note !== undefined ? (note === '' ? null : note) : null
       ]
     )
+
+    // The customer hears when work on a service actually begins.
+    if (status === 'in_progress' && prev && prev.task_status !== 'in_progress') {
+      await notifyCustomer({
+        jobOrderId: Number(jobOrderId),
+        entityType: 'service_progress_tasks',
+        entityId: Number(taskId),
+        event: 'task_started',
+        title: 'Service Started',
+        message: `Work on ${prev.task_title} has started on your vehicle (Job Order #JO-${jobOrderId}).`,
+        employeeId: mechanicId ? Number(mechanicId) : null,
+      })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

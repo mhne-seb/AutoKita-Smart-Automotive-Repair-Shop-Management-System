@@ -40,7 +40,7 @@ export interface DashboardJobOrder {
 
 export interface DashboardActivity {
   id: number
-  type: 'payment' | 'progress_log' | 'status_change' | 'booking_accepted' | 'report_ready'
+  type: 'payment' | 'progress_log' | 'status_change' | 'booking_accepted' | 'report_ready' | 'job_update'
   title: string
   description: string
   time: string
@@ -209,6 +209,29 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
     [userId],
   )
 
+  // 4. Progress updates written by lib/customerNotify: a service started,
+  //    its parts arrived, it finished, the mechanic found something. The
+  //    audit row's new_values is JSON tagged "notify":true and already holds
+  //    the title/message to show. The CASE guards the jsonb cast so only
+  //    rows that start with that tag are ever parsed.
+  const updates = await db.query(
+    `SELECT
+        sal.id,
+        'job_update'::text AS type,
+        (sal.new_values::jsonb ->> 'title')::text AS title,
+        (sal.new_values::jsonb ->> 'message')::text AS description,
+        sal.action_date AS job_time,
+        (sal.new_values::jsonb ->> 'job_order_id')::int AS job_order_id
+     FROM system_audit_logs sal
+     WHERE sal.new_values LIKE '{"notify":true%'
+       AND CASE WHEN sal.new_values LIKE '{"notify":true%'
+                THEN (sal.new_values::jsonb ->> 'job_order_id')::int END
+           IN (SELECT jo.id FROM job_orders jo WHERE jo.user_id = $1)
+     ORDER BY sal.action_date DESC
+     LIMIT 10`,
+    [userId],
+  )
+
   type RawActivityRow = {
     id: number
     type: DashboardActivity['type']
@@ -219,7 +242,7 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
     job_order_id: number
   }
 
-  const rows = [...base.rows, ...accepted.rows, ...reportReady.rows] as RawActivityRow[]
+  const rows = [...base.rows, ...accepted.rows, ...reportReady.rows, ...updates.rows] as RawActivityRow[]
 
   // So each notification can link straight to the job order it's about,
   // instead of leaving the customer to go find it themselves.

@@ -40,6 +40,13 @@ export async function uploadPaymentProof(jobOrderId: string, file: File): Promis
     return uploadFile(path, file)
 }
 
+// Photo of something the mechanic found mid-service (torn boot, worn pads)
+// that goes to the customer with the approval request. Same bucket, own folder.
+export async function uploadFindingPhoto(jobOrderId: string, file: File): Promise<string> {
+    const path = `job-orders/${jobOrderId}/findings/${Date.now()}.${extensionFor(file)}`
+    return uploadFile(path, file)
+}
+
 // Proof a service was actually done — one photo per finished task (shop
 // policy: no task is marked Finished without it). Same bucket, own folder.
 export async function uploadTaskPhoto(jobOrderId: string, taskId: string, file: File): Promise<string> {
