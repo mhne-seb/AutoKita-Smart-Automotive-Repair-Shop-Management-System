@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { DEFAULT_MECHANIC_CAPACITY } from '@/data/mechanicPolicy'
 import { notifyCustomer } from '@/lib/customerNotify'
+import { ROAD_TEST_TITLE } from '@/data/roadTest'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -67,19 +68,21 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     // A task can't be started with no mechanic or no schedule. The UI checks
     // this too; this is the guarantee. (The client always sends the task's
     // current date/mechanic along with a status change.)
-    if (status === 'in_progress' && (!mechanicId || !scheduledDate)) {
-      return NextResponse.json(
-        { success: false, code: 'TASK_UNSCHEDULED', message: 'Schedule this task and assign a mechanic before starting it.' },
-        { status: 409 },
-      )
-    }
-
     // Remember where the task was, so "started" is only announced once.
     const before = await db.query(
       `SELECT task_title, task_status FROM service_progress_tasks WHERE id = $1::int AND job_order_id = $2::int`,
       [taskId, jobOrderId],
     )
     const prev = before.rows[0]
+    const isRoadTest = prev?.task_title === ROAD_TEST_TITLE
+    // (The road test is the final quality gate, not a scheduled service —
+    // it can start as soon as every service is done.)
+    if (status === 'in_progress' && !isRoadTest && (!mechanicId || !scheduledDate)) {
+      return NextResponse.json(
+        { success: false, code: 'TASK_UNSCHEDULED', message: 'Schedule this task and assign a mechanic before starting it.' },
+        { status: 409 },
+      )
+    }
 
     // Call the database function to update the task and the job order's scheduled_date
     await db.query(

@@ -13,6 +13,7 @@ import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderCon
 import { getQuotationById, getJobOrderBill, verifyJobOrderPayment, type JobOrderBill } from '@/controllers/quotationController'
 import { getServiceProgressById, scheduleTask, setPartStatus, finishTask, getSuppliers, addSupplier, recordPartsPurchase } from '@/controllers/serviceProgressController'
 import { ReportFindingModal } from '@/components/dashboard/ReportFindingModal'
+import { FINDING_TIMEOUT_HOURS, findingAgeHours, findingIsOverdue } from '@/data/findingPolicy'
 import { isRoadTest } from '@/data/roadTest'
 import { mechanicIsFull } from '@/data/mechanicPolicy'
 import { currency } from '@/data/mockData'
@@ -23,6 +24,7 @@ const sectionColors: Record<string, string> = {
   inspecting: 'text-emerald-600',
   quotation: 'text-amber-600',
   'in-progress': 'text-blue-600',
+  finished: 'text-emerald-600',
   complete: 'text-slate-500',
 }
 
@@ -151,6 +153,9 @@ export default function page() {
   }, [initial])
 
   const allTasks = useMemo(() => sections.flatMap((s) => s.tasks), [sections])
+  // The road test is the final quality gate, not a service: it isn't scheduled
+  // like one and doesn't count toward progress. Counts/estimates use these.
+  const serviceTasks = useMemo(() => allTasks.filter((t) => !isRoadTest(t)), [allTasks])
 
   // Every part on this job order still waiting to be bought. Tasks that share
   // a service name share the same parts list, so dedupe by part id.
@@ -162,8 +167,25 @@ export default function page() {
     return [...seen.values()]
   }, [allTasks])
   const partsToBuy = allParts.filter((p) => p.status === 'to_order')
-  const completedCount = allTasks.filter((t) => t.status === 'completed').length
-  const progressPercent = allTasks.length === 0 ? 0 : Math.round((completedCount / allTasks.length) * 100)
+  const completedCount = serviceTasks.filter((t) => t.status === 'completed').length
+
+  // For display only: finished services get their own section under the
+  // open ones, so the mechanic's "what's left" list isn't padded with done
+  // work. Other sections (quotation, road test) are shown as they are.
+  const displaySections = sections.flatMap((section) => {
+    if (section.id !== 'in-progress') return [section]
+    const open = section.tasks.filter((t) => t.status !== 'completed')
+    const done = section.tasks.filter((t) => t.status === 'completed')
+    const out: ServiceSection[] = []
+    if (open.length > 0) out.push({ ...section, tasks: open })
+    if (done.length > 0) out.push({ id: 'finished', title: 'Finished Services', tasks: done })
+    return out
+  })
+  // The road test (section 'complete') lives in the sidebar; everything else
+  // is the main timeline.
+  const roadTestSection = displaySections.find((s) => s.id === 'complete')
+  const mainSections = displaySections.filter((s) => s.id !== 'complete')
+  const progressPercent = serviceTasks.length === 0 ? 0 : Math.round((completedCount / serviceTasks.length) * 100)
 
   // Job-order clock. Ticks once a minute while the job is on the floor so
   // "Current Duration" is live; freezes at completed_at once it's done.
@@ -205,13 +227,13 @@ export default function page() {
   // left. (job_orders.date_promised is never set anywhere in the app, so
   // reading it just gives '—' forever.)
   const estimatedFinish = useMemo(() => {
-    const withEstimate = allTasks.filter((t) => t.estimatedFinish)
+    const withEstimate = serviceTasks.filter((t) => t.estimatedFinish)
     if (withEstimate.length === 0) return null
     return withEstimate.reduce<Date | null>((latest, t) => {
       const d = new Date(t.estimatedFinish!)
       return !latest || d > latest ? d : latest
     }, null)
-  }, [allTasks])
+  }, [serviceTasks])
 
   const quotationTotal = useMemo(() => {
     if (!quotation) return 0
@@ -279,7 +301,8 @@ export default function page() {
   async function togglePartReceived(part: TaskPart) {
     setBusyPartId(part.id)
     const undoTo = part.purchaseOrderId ? 'ordered' : 'to_order'
-    await setPartStatus(jobOrderId, part.id, partIsReady(part) ? undoTo : 'received')
+    const ok = await setPartStatus(jobOrderId, part.id, partIsReady(part) ? undoTo : 'received')
+    if (!ok) toast.error('Record the purchase first — a part is marked received only after it has been ordered.')
     await refreshTasks()
     setBusyPartId(null)
   }
@@ -331,6 +354,301 @@ export default function page() {
     await refreshTasks()
   }
 
+  // One timeline section (header + its task cards). Pulled out so the road
+  // test can be drawn in the sidebar with exactly the same card as the rest.
+  const renderSection = (section: ServiceSection) => (
+    <div key={section.id} className="space-y-3">
+      <p className={`text-sm font-bold uppercase tracking-wide ${sectionColors[section.id] ?? 'text-slate-500'}`}>
+        {section.title}
+      </p>
+      {section.tasks.map((task) => (
+          <Fragment key={task.id}>
+          <div
+            className={`rounded-xl border p-4 ${
+               task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50' : task.status === 'completed' ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200 bg-white'
+            } ${task.status !== 'completed' && !isRoadTest(task) ? 'cursor-pointer hover:bg-slate-50' : ''
+            }`}
+            onClick={() => task.status !== 'completed' && !isRoadTest(task) && setSchedulingTask(task)}
+          >
+          {/* Stacks on small screens (pills wrap, status/action drop below);
+              side by side from sm up. */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-4 flex-1 min-w-0">
+              <div className="flex-1 min-w-0">
+                <h3 className="flex flex-wrap items-center gap-2 font-semibold text-slate-900 transition-colors">
+                  {task.title}
+                  {isRoadTest(task) && (
+                    <span className="flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-700"><Car size={11} /> Quality check</span>
+                  )}
+                  {task.findingId && (
+                    <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700" title="Approved by the customer from a mid-service finding"><AlertTriangle size={11} /> Added mid-service</span>
+                  )}
+                </h3>
+                {task.note && task.note !== 'Describe the service...' && (
+                  <p className="mt-0.5 text-sm text-slate-500 truncate">{task.note}</p>
+                )}
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-400">
+                  {/* Finish time — only meaningful once the task is done. (Per-task
+                      elapsed needs started_at, which the schema doesn't have yet.) */}
+                  {task.status === 'completed' && task.time !== '—' && (
+                    <span className="flex items-center gap-1 font-semibold text-emerald-600">🕐 Finished {task.time}</span>
+                  )}
+                  {task.photoUrl && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setLightboxPhoto({ url: task.photoUrl!, label: `${task.title} — finished work` }) }}
+                      className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700 transition-colors hover:bg-emerald-100"
+                    >
+                      <img src={task.photoUrl} alt="" className="h-4 w-4 rounded-sm object-cover" /> Photo
+                    </button>
+                  )}
+                  {task.startedAt && (
+                    <span className="flex items-center gap-1 font-semibold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full">
+                      <Clock size={13} />
+                      Started: {new Date(task.startedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                    </span>
+                  )}
+                  {task.mechanicName && (
+                    <span className="flex items-center gap-1 font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                      Assigned to: {task.mechanicName}
+                    </span>
+                  )}
+                  {task.scheduledDate && (
+                    <span className="flex items-center gap-1 font-semibold text-indigo-600">
+                      <CalendarDays size={13} />
+                      Scheduled: {new Date(task.scheduledDate).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                    </span>
+                  )}
+                  {/* A Started task past its estimate is overdue. A Not-Yet task past its
+                      estimate is a scheduling problem, not an overdue one, so it stays amber. */}
+                  {task.estimatedFinish && (() => {
+                    const est = new Date(task.estimatedFinish)
+                    const overdueHrs = task.status === 'active' ? (Date.now() - est.getTime()) / 3600000 : 0
+                    const label = est.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+                    // Est. Finish is scheduled start + predicted duration, so the
+                    // duration is just the gap between the two.
+                    const estHrs = task.scheduledDate ? (est.getTime() - new Date(task.scheduledDate).getTime()) / 3600000 : 0
+                    const hrsLabel = estHrs > 0 ? ` (${estHrs % 1 === 0 ? estHrs : estHrs.toFixed(1)} hrs)` : ''
+                    return overdueHrs > 0 ? (
+                      <span className="flex items-center gap-1 font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
+                        Overdue by {overdueHrs < 1 ? `${Math.round(overdueHrs * 60)} min` : `${overdueHrs.toFixed(1)} hrs`} (est. {label})
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                        Est. Finish: {label}{hrsLabel}
+                      </span>
+                    )
+                  })()}
+                </div>
+              </div>
+            </div>
+            
+            {(() => {
+              const parts = task.parts ?? []
+              const missing = parts.filter((p) => !partIsReady(p))
+              const busy = busyTaskId === task.id
+              // Nobody can start work that nobody's been assigned to.
+              // Date + mechanic are both set in the schedule modal, so
+              // "schedule it first" is the whole instruction.
+              const unscheduled = !isRoadTest(task) && (!task.scheduledDate || !task.mechanicId)
+              return (
+                <div className="flex flex-wrap items-center gap-2 sm:ml-4 sm:shrink-0 sm:flex-col sm:items-end" onClick={(e) => e.stopPropagation()}>
+                  {/* A task that simply hasn't started gets no badge — the Start
+                      button (or its "schedule first" hint) already says so.
+                      Waiting on parts is a real state, so that one stays. */}
+                  {(task.status !== 'pending' || missing.length > 0) && (
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        task.status === 'completed'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : task.status === 'active'
+                          ? 'bg-indigo-100 text-indigo-700'
+                          : 'bg-amber-100 text-amber-700'
+                      }`}
+                    >
+                      {task.status === 'completed' ? 'Finished' : task.status === 'active' ? 'Started' : 'Waiting for parts'}
+                    </span>
+                  )}
+
+                  {/* Start is blocked until the task is scheduled to a mechanic
+                      and every part for it has arrived — work doesn't begin on
+                      a car missing parts, or with no one assigned to do it. */}
+                  {task.status === 'pending' && (
+                    <button
+                      onClick={() => setTaskStatus(task, 'active')}
+                      disabled={busy || missing.length > 0 || unscheduled}
+                      title={
+                        unscheduled
+                          ? 'Schedule this task and assign a mechanic first (click the card)'
+                          : missing.length > 0
+                          ? `Waiting for parts (${parts.length - missing.length} of ${parts.length} received)`
+                          : undefined
+                      }
+                      className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-indigo-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100"
+                    >
+                      {busy ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />} Start
+                    </button>
+                  )}
+                  {task.status === 'active' && (
+                    <button
+                      onClick={() => setFinishingTask(task)}
+                      disabled={busy}
+                      title="Upload a photo of the finished work to mark this done"
+                      className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-700 active:scale-95 disabled:opacity-40"
+                    >
+                      <Camera size={13} /> Finish
+                    </button>
+                  )}
+                  {/* Mid-service finding tied to this task — only while the
+                      mechanic is actually working on it (Started, not Finished). */}
+                  {jobOnFloor && task.status === 'active' && !isRoadTest(task) && (
+                    <button
+                      onClick={() => setFindingModal({ task: { id: Number(task.id), title: task.title } })}
+                      className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 transition-all duration-150 hover:bg-amber-100 active:scale-95"
+                    >
+                      <AlertTriangle size={13} /> Found a problem?
+                    </button>
+                  )}
+                </div>
+              )
+            })()}
+          </div>
+
+          {/* Parts this service needs, as a table inside the card. One
+              row per part; "Received" marks it arrived (Undo for a
+              mis-tap). Read-only once the task is finished. */}
+          {(task.parts?.length ?? 0) > 0 && (() => {
+            const parts = task.parts!
+            const received = parts.filter(partIsReady).length
+            const editable = task.status !== 'completed'
+            return (
+              <div className="mt-3 border-t border-slate-200 pt-3" onClick={(e) => e.stopPropagation()}>
+                <div className="mb-1.5 flex items-center justify-between text-xs text-slate-400">
+                  <span className="flex items-center gap-1.5 font-semibold uppercase tracking-wide"><Package size={12} /> Parts · {received} of {parts.length} received</span>
+                  {editable && received < parts.length && (
+                    <span>{parts.some((p) => p.status === 'to_order') ? 'Record the purchase, then mark each part when it arrives' : 'Mark each part when it arrives'}</span>
+                  )}
+                </div>
+                <table className="w-full text-sm">
+                  <tbody>
+                    {parts.map((p) => {
+                      const ready = partIsReady(p)
+                      const busyP = busyPartId === p.id
+                      return (
+                        <tr key={p.id} className="border-t border-slate-100">
+                          <td className="py-2 pr-3">
+                            <div className="font-semibold text-slate-800">{p.name}</div>
+                            {p.purchaseOrderId && (
+                              <div className="text-[11px] text-slate-400">PO-{p.purchaseOrderId} · {p.supplierName} · {p.purchasedOn}</div>
+                            )}
+                          </td>
+                          <td className="py-2 pr-3 text-xs text-slate-400">{p.partNo}</td>
+                          <td className="py-2 pr-3 text-xs text-slate-500">×{p.qty}</td>
+                          <td className="py-2 pr-3 text-right">
+                            <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${ready ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                              {ready ? (p.status === 'in_stock' ? 'In stock' : 'Received') : p.status === 'ordered' ? 'Ordered' : 'To order'}
+                            </span>
+                          </td>
+                          {editable && (
+                          <td className="w-28 py-2 text-right">
+                            <button
+                              onClick={() => togglePartReceived(p)}
+                              disabled={busyP || (!ready && p.status === 'to_order')}
+                              title={!ready && p.status === 'to_order' ? 'Record the purchase first — parts are received only after being ordered' : undefined}
+                              className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 ${
+                                ready
+                                  ? 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                                  : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                              }`}
+                            >
+                              {busyP ? <Loader2 size={12} className="animate-spin" /> : ready ? null : <PackageCheck size={12} />}
+                              {ready ? 'Undo' : 'Received'}
+                            </button>
+                          </td>
+                          )}
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )
+          })()}
+          </div>
+          </Fragment>
+      ))}
+
+      {section.id === 'quotation' && quotation && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="font-bold text-slate-900">Service Quotation</p>
+              <p className="text-sm text-slate-400">Review recommended services and confirm to proceed</p>
+            </div>
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                quotationConfirmed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+              }`}
+            >
+              {quotationConfirmed ? 'Confirmed' : 'Awaiting Approval'}
+            </span>
+          </div>
+
+          <table className="mb-3 w-full text-sm">
+            <thead className="text-xs text-slate-400">
+              <tr>
+                <th className="pb-2 text-left font-medium">Description</th>
+                <th className="pb-2 text-left font-medium">Type</th>
+                <th className="pb-2 text-right font-medium">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {quotation.services.map((s) => (
+                <Fragment key={s.id}>
+                  {s.parts.map((p) => (
+                    <tr key={p.id} className="border-t border-slate-100">
+                      <td className="py-2">{p.name}</td>
+                      <td className="py-2"><span className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-600">Part</span></td>
+                      <td className="py-2 text-right font-semibold">{currency(p.qty * p.unitPrice)}</td>
+                    </tr>
+                  ))}
+                  <tr className="border-t border-slate-100">
+                    <td className="py-2">{s.name}</td>
+                    <td className="py-2"><span className="rounded bg-purple-50 px-2 py-0.5 text-xs text-purple-600">Labor</span></td>
+                    <td className="py-2 text-right font-semibold">{currency(s.laborCost)}</td>
+                  </tr>
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="flex justify-between border-t border-slate-100 pt-3 text-base font-bold text-slate-900">
+            <span>Total Estimate</span>
+            <span>{currency(quotationTotal)}</span>
+          </div>
+
+          {!quotationConfirmed ? (
+            <div className="mt-4 flex gap-3">
+              <button
+                onClick={() => setQuotationConfirmed(true)}
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                <Check size={15} /> Confirm & Proceed
+              </button>
+              <button className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+                Request Changes
+              </button>
+            </div>
+          ) : (
+            <p className="mt-4 text-sm font-semibold text-emerald-600">
+              ✓ Quotation confirmed by customer — proceeding to In Progress.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-8">
       <TopBar title="Vehicle Inspection" subtitle="Inspection workflow & time tracking." showSearch={false} />
@@ -365,7 +683,7 @@ export default function page() {
           <p className="text-sm text-slate-400">Check off each task as it is completed.</p>
         </div>
         <span className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600">
-          <ListChecks size={15} /> {completedCount}/{allTasks.length} Tasks Done
+          <ListChecks size={15} /> {completedCount}/{serviceTasks.length} Tasks Done
         </span>
       </div>
 
@@ -375,26 +693,41 @@ export default function page() {
           it would add; the page polls until they answer. */}
       {pendingFindings.length > 0 && (
         <div className="mb-6 space-y-3">
-          {pendingFindings.map((f) => (
-            <div key={f.id} className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4">
+          {pendingFindings.map((f) => {
+            const overdue = findingIsOverdue(f.createdAt, now)
+            const tone = overdue
+              ? { box: 'border-rose-300 bg-rose-50', text: 'text-rose-900', sub: 'text-rose-900/80', meta: 'text-rose-700/70', pill: 'bg-rose-200 text-rose-800', img: 'border-rose-200' }
+              : { box: 'border-amber-300 bg-amber-50', text: 'text-amber-900', sub: 'text-amber-900/80', meta: 'text-amber-700/70', pill: 'bg-amber-200 text-amber-800', img: 'border-amber-200' }
+            return (
+            <div key={f.id} className={`flex items-start gap-3 rounded-xl border p-4 ${tone.box}`}>
               {f.photoUrl && (
                 <button type="button" onClick={() => setLightboxPhoto({ url: f.photoUrl!, label: 'Finding photo' })} className="shrink-0">
-                  <img src={f.photoUrl} alt="" className="h-14 w-20 rounded-md border border-amber-200 object-cover" />
+                  <img src={f.photoUrl} alt="" className={`h-14 w-20 rounded-md border object-cover ${tone.img}`} />
                 </button>
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="flex items-center gap-1.5 text-sm font-semibold text-amber-900"><Hourglass size={14} /> Finding sent to customer · {currency(f.extraCost)}</span>
-                  <span className="rounded-full bg-amber-200 px-2.5 py-0.5 text-xs font-semibold text-amber-800">Awaiting approval</span>
+                  <span className={`flex items-center gap-1.5 text-sm font-semibold ${tone.text}`}><Hourglass size={14} /> Finding sent to customer · {currency(f.extraCost)}</span>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${tone.pill}`}>
+                    {overdue
+                      ? `No answer for ${findingAgeHours(f.createdAt, now)} h`
+                      : `Waiting ${findingAgeHours(f.createdAt, now)} h · ${Math.round((FINDING_TIMEOUT_HOURS - findingAgeHours(f.createdAt, now)) * 10) / 10} h left to answer`}
+                  </span>
                 </div>
-                <p className="mt-1 text-sm text-amber-900/80">{f.findings}</p>
-                <p className="mt-1 text-xs text-amber-700/70">
+                <p className={`mt-1 text-sm ${tone.sub}`}>{f.findings}</p>
+                {overdue && (
+                  <p className="mt-1 text-xs font-semibold text-rose-700">
+                    Past the {FINDING_TIMEOUT_HOURS}-hour window. Call the customer; per shop policy the vehicle moves to staging until they decide.
+                  </p>
+                )}
+                <p className={`mt-1 text-xs ${tone.meta}`}>
                   {f.taskTitle ? `While working on ${f.taskTitle}` : 'General inspection'}
                   {f.reportedByName ? ` · ${f.reportedByName}` : ''} · {f.services.length} service{f.services.length === 1 ? '' : 's'}, {f.parts.length} part{f.parts.length === 1 ? '' : 's'} · sent {new Date(f.createdAt).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                 </p>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
       {sections.length === 0 ? (
@@ -403,294 +736,7 @@ export default function page() {
         </div>
       ) : (
         <div className="space-y-6">
-          {sections.map((section) => (
-            <div key={section.id} className="space-y-3">
-              <p className={`text-sm font-bold uppercase tracking-wide ${sectionColors[section.id] ?? 'text-slate-500'}`}>
-                {section.title}
-              </p>
-              {section.tasks.map((task) => (
-                  <Fragment key={task.id}>
-                  <div
-                    className={`rounded-xl border p-4 ${
-                       task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50 cursor-pointer' : task.status === 'completed' ? 'border-slate-200 bg-white' : 'border-slate-200 bg-white hover:bg-slate-50 cursor-pointer'
-                    }`}
-                    onClick={() => task.status !== 'completed' && setSchedulingTask(task)}
-                  >
-                  {/* Stacks on small screens (pills wrap, status/action drop below);
-                      side by side from sm up. */}
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-start gap-4 flex-1 min-w-0">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="flex flex-wrap items-center gap-2 font-semibold text-slate-900 transition-colors">
-                          {task.title}
-                          {isRoadTest(task) && (
-                            <span className="flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-700"><Car size={11} /> Quality check</span>
-                          )}
-                          {task.findingId && (
-                            <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700" title="Approved by the customer from a mid-service finding"><AlertTriangle size={11} /> Added mid-service</span>
-                          )}
-                        </h3>
-                        {task.note && task.note !== 'Describe the service...' && (
-                          <p className="mt-0.5 text-sm text-slate-500 truncate">{task.note}</p>
-                        )}
-                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-400">
-                          {/* Finish time — only meaningful once the task is done. (Per-task
-                              elapsed needs started_at, which the schema doesn't have yet.) */}
-                          {task.status === 'completed' && task.time !== '—' && (
-                            <span className="flex items-center gap-1 font-semibold text-emerald-600">🕐 Finished {task.time}</span>
-                          )}
-                          {task.photoUrl && (
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); setLightboxPhoto({ url: task.photoUrl!, label: `${task.title} — finished work` }) }}
-                              className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700 transition-colors hover:bg-emerald-100"
-                            >
-                              <img src={task.photoUrl} alt="" className="h-4 w-4 rounded-sm object-cover" /> Photo
-                            </button>
-                          )}
-                          {task.startedAt && (
-                            <span className="flex items-center gap-1 font-semibold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full">
-                              <Clock size={13} />
-                              Started: {new Date(task.startedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                            </span>
-                          )}
-                          {task.mechanicName && (
-                            <span className="flex items-center gap-1 font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                              Assigned to: {task.mechanicName}
-                            </span>
-                          )}
-                          {task.scheduledDate && (
-                            <span className="flex items-center gap-1 font-semibold text-indigo-600">
-                              <CalendarDays size={13} />
-                              Scheduled: {new Date(task.scheduledDate).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                            </span>
-                          )}
-                          {/* A Started task past its estimate is overdue. A Not-Yet task past its
-                              estimate is a scheduling problem, not an overdue one, so it stays amber. */}
-                          {task.estimatedFinish && (() => {
-                            const est = new Date(task.estimatedFinish)
-                            const overdueHrs = task.status === 'active' ? (Date.now() - est.getTime()) / 3600000 : 0
-                            const label = est.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
-                            // Est. Finish is scheduled start + predicted duration, so the
-                            // duration is just the gap between the two.
-                            const estHrs = task.scheduledDate ? (est.getTime() - new Date(task.scheduledDate).getTime()) / 3600000 : 0
-                            const hrsLabel = estHrs > 0 ? ` (${estHrs % 1 === 0 ? estHrs : estHrs.toFixed(1)} hrs)` : ''
-                            return overdueHrs > 0 ? (
-                              <span className="flex items-center gap-1 font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
-                                Overdue by {overdueHrs < 1 ? `${Math.round(overdueHrs * 60)} min` : `${overdueHrs.toFixed(1)} hrs`} (est. {label})
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-1 font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                                Est. Finish: {label}{hrsLabel}
-                              </span>
-                            )
-                          })()}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {(() => {
-                      const parts = task.parts ?? []
-                      const missing = parts.filter((p) => !partIsReady(p))
-                      const busy = busyTaskId === task.id
-                      // Nobody can start work that nobody's been assigned to.
-                      // Date + mechanic are both set in the schedule modal, so
-                      // "schedule it first" is the whole instruction.
-                      const unscheduled = !task.scheduledDate || !task.mechanicId
-                      return (
-                        <div className="flex flex-wrap items-center gap-2 sm:ml-4 sm:shrink-0 sm:flex-col sm:items-end" onClick={(e) => e.stopPropagation()}>
-                          {/* A task that simply hasn't started gets no badge — the Start
-                              button (or its "schedule first" hint) already says so.
-                              Waiting on parts is a real state, so that one stays. */}
-                          {(task.status !== 'pending' || missing.length > 0) && (
-                            <span
-                              className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                                task.status === 'completed'
-                                  ? 'bg-emerald-100 text-emerald-700'
-                                  : task.status === 'active'
-                                  ? 'bg-indigo-100 text-indigo-700'
-                                  : 'bg-amber-100 text-amber-700'
-                              }`}
-                            >
-                              {task.status === 'completed' ? 'Finished' : task.status === 'active' ? 'Started' : 'Waiting for parts'}
-                            </span>
-                          )}
-
-                          {/* Start is blocked until the task is scheduled to a mechanic
-                              and every part for it has arrived — work doesn't begin on
-                              a car missing parts, or with no one assigned to do it. */}
-                          {task.status === 'pending' && (
-                            <button
-                              onClick={() => setTaskStatus(task, 'active')}
-                              disabled={busy || missing.length > 0 || unscheduled}
-                              title={
-                                unscheduled
-                                  ? 'Schedule this task and assign a mechanic first (click the card)'
-                                  : missing.length > 0
-                                  ? `Waiting for parts (${parts.length - missing.length} of ${parts.length} received)`
-                                  : undefined
-                              }
-                              className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-indigo-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100"
-                            >
-                              {busy ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />} Start
-                            </button>
-                          )}
-                          {task.status === 'active' && (
-                            <button
-                              onClick={() => setFinishingTask(task)}
-                              disabled={busy}
-                              title="Upload a photo of the finished work to mark this done"
-                              className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-700 active:scale-95 disabled:opacity-40"
-                            >
-                              <Camera size={13} /> Finish
-                            </button>
-                          )}
-                          {/* Mid-service finding tied to this task — only while the
-                              mechanic is actually working on it (Started, not Finished). */}
-                          {jobOnFloor && task.status === 'active' && !isRoadTest(task) && (
-                            <button
-                              onClick={() => setFindingModal({ task: { id: Number(task.id), title: task.title } })}
-                              className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 transition-all duration-150 hover:bg-amber-100 active:scale-95"
-                            >
-                              <AlertTriangle size={13} /> Found a problem?
-                            </button>
-                          )}
-                        </div>
-                      )
-                    })()}
-                  </div>
-
-                  {/* Parts this service needs, as a table inside the card. One
-                      row per part; "Received" marks it arrived (Undo for a
-                      mis-tap). Read-only once the task is finished. */}
-                  {(task.parts?.length ?? 0) > 0 && (() => {
-                    const parts = task.parts!
-                    const received = parts.filter(partIsReady).length
-                    const editable = task.status !== 'completed'
-                    return (
-                      <div className="mt-3 border-t border-slate-200 pt-3" onClick={(e) => e.stopPropagation()}>
-                        <div className="mb-1.5 flex items-center justify-between text-xs text-slate-400">
-                          <span className="flex items-center gap-1.5 font-semibold uppercase tracking-wide"><Package size={12} /> Parts · {received} of {parts.length} received</span>
-                          {editable && received < parts.length && <span>Mark each part when it arrives</span>}
-                        </div>
-                        <table className="w-full text-sm">
-                          <tbody>
-                            {parts.map((p) => {
-                              const ready = partIsReady(p)
-                              const busyP = busyPartId === p.id
-                              return (
-                                <tr key={p.id} className="border-t border-slate-100">
-                                  <td className="py-2 pr-3">
-                                    <div className="font-semibold text-slate-800">{p.name}</div>
-                                    {p.purchaseOrderId && (
-                                      <div className="text-[11px] text-slate-400">PO-{p.purchaseOrderId} · {p.supplierName} · {p.purchasedOn}</div>
-                                    )}
-                                  </td>
-                                  <td className="py-2 pr-3 text-xs text-slate-400">{p.partNo}</td>
-                                  <td className="py-2 pr-3 text-xs text-slate-500">×{p.qty}</td>
-                                  <td className="py-2 pr-3 text-right">
-                                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${ready ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                                      {ready ? (p.status === 'in_stock' ? 'In stock' : 'Received') : p.status === 'ordered' ? 'Ordered' : 'To order'}
-                                    </span>
-                                  </td>
-                                  {editable && (
-                                  <td className="w-28 py-2 text-right">
-                                    <button
-                                      onClick={() => togglePartReceived(p)}
-                                      disabled={busyP}
-                                      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all duration-150 active:scale-95 disabled:opacity-50 ${
-                                        ready
-                                          ? 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
-                                          : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                                      }`}
-                                    >
-                                      {busyP ? <Loader2 size={12} className="animate-spin" /> : ready ? null : <PackageCheck size={12} />}
-                                      {ready ? 'Undo' : 'Received'}
-                                    </button>
-                                  </td>
-                                  )}
-                                </tr>
-                              )
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    )
-                  })()}
-                  </div>
-                  </Fragment>
-              ))}
-
-              {section.id === 'quotation' && quotation && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                  <div className="mb-3 flex items-center justify-between">
-                    <div>
-                      <p className="font-bold text-slate-900">Service Quotation</p>
-                      <p className="text-sm text-slate-400">Review recommended services and confirm to proceed</p>
-                    </div>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        quotationConfirmed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                      }`}
-                    >
-                      {quotationConfirmed ? 'Confirmed' : 'Awaiting Approval'}
-                    </span>
-                  </div>
-
-                  <table className="mb-3 w-full text-sm">
-                    <thead className="text-xs text-slate-400">
-                      <tr>
-                        <th className="pb-2 text-left font-medium">Description</th>
-                        <th className="pb-2 text-left font-medium">Type</th>
-                        <th className="pb-2 text-right font-medium">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {quotation.services.map((s) => (
-                        <Fragment key={s.id}>
-                          {s.parts.map((p) => (
-                            <tr key={p.id} className="border-t border-slate-100">
-                              <td className="py-2">{p.name}</td>
-                              <td className="py-2"><span className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-600">Part</span></td>
-                              <td className="py-2 text-right font-semibold">{currency(p.qty * p.unitPrice)}</td>
-                            </tr>
-                          ))}
-                          <tr className="border-t border-slate-100">
-                            <td className="py-2">{s.name}</td>
-                            <td className="py-2"><span className="rounded bg-purple-50 px-2 py-0.5 text-xs text-purple-600">Labor</span></td>
-                            <td className="py-2 text-right font-semibold">{currency(s.laborCost)}</td>
-                          </tr>
-                        </Fragment>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  <div className="flex justify-between border-t border-slate-100 pt-3 text-base font-bold text-slate-900">
-                    <span>Total Estimate</span>
-                    <span>{currency(quotationTotal)}</span>
-                  </div>
-
-                  {!quotationConfirmed ? (
-                    <div className="mt-4 flex gap-3">
-                      <button
-                        onClick={() => setQuotationConfirmed(true)}
-                        className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
-                      >
-                        <Check size={15} /> Confirm & Proceed
-                      </button>
-                      <button className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
-                        Request Changes
-                      </button>
-                    </div>
-                  ) : (
-                    <p className="mt-4 text-sm font-semibold text-emerald-600">
-                      ✓ Quotation confirmed by customer — proceeding to In Progress.
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+          {mainSections.map(renderSection)}
         </div>
       )}
 
@@ -698,24 +744,38 @@ export default function page() {
           done" — the shop's record that it was raised, and a reminder for
           the customer's next visit. */}
       {declinedFindings.length > 0 && (
-        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400"><ClipboardList size={13} /> Recommended, not done</p>
-          <ul className="divide-y divide-slate-100">
-            {declinedFindings.map((f) => (
-              <li key={f.id} className="flex items-start justify-between gap-3 py-2.5 text-sm">
-                <div className="min-w-0">
-                  <p className="font-semibold text-slate-800">{f.findings}</p>
-                  <p className="mt-0.5 text-xs text-slate-400">
-                    {f.services.map((s) => s.name).join(', ')}{f.parts.length > 0 ? ` + ${f.parts.length} part${f.parts.length === 1 ? '' : 's'}` : ''} · {currency(f.extraCost)}
-                    {f.reportedByName ? ` · noted by ${f.reportedByName}` : ''}
-                  </p>
-                </div>
-                <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-500">
-                  Declined {f.decidedAt ? new Date(f.decidedAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }) : ''}
-                </span>
-              </li>
-            ))}
-          </ul>
+        <div className="mt-6 space-y-3">
+          <p className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wide text-slate-500"><ClipboardList size={14} /> Declined Services</p>
+          {declinedFindings.map((f) => (
+            <div key={f.id} className="rounded-xl border border-dashed border-slate-300 bg-slate-50/60 p-4">
+              {/* One row per service the customer said no to, its parts underneath — same
+                  shape as a task card, greyed and dashed so it can't be mistaken for work to do. */}
+              {f.services.map((s) => {
+                const partsFor = f.parts.filter((p) => p.serviceName === s.name)
+                return (
+                  <div key={s.name} className="flex flex-col gap-2 border-b border-slate-200 py-2 first:pt-0 last:border-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-slate-600">{s.name} <span className="text-xs font-normal text-slate-400">· {s.hours} hr{s.hours === 1 ? '' : 's'} · {currency(s.price)}</span></h3>
+                      {partsFor.length > 0 && (
+                        <ul className="mt-1 space-y-0.5 text-xs text-slate-500">
+                          {partsFor.map((p, i) => (
+                            <li key={`${p.name}-${i}`} className="flex items-center gap-1.5"><Package size={11} className="text-slate-400" /> {p.name} · {p.partNo || '—'} · ×{p.qty} · {currency(p.unitPrice * p.qty)}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    <span className="shrink-0 self-start rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-600">
+                      Declined {f.decidedAt ? new Date(f.decidedAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }) : ''}
+                    </span>
+                  </div>
+                )
+              })}
+              <p className="mt-3 border-t border-slate-200 pt-2 text-xs text-slate-500">
+                <span className="font-semibold text-slate-600">Finding:</span> {f.findings}
+                <span className="text-slate-400"> · {currency(f.extraCost)} total{f.reportedByName ? ` · noted by ${f.reportedByName}` : ''}{f.taskTitle ? ` · while working on ${f.taskTitle}` : ''}</span>
+              </p>
+            </div>
+          ))}
         </div>
       )}
       </div>
@@ -756,7 +816,7 @@ export default function page() {
               <span className={`font-semibold ${estimatedFinish && !initial.timer.completedAtIso && estimatedFinish.getTime() < now ? 'text-rose-600' : 'text-slate-800'}`}>
                 {estimatedFinish
                   ? estimatedFinish.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
-                  : allTasks.length === 0
+                  : serviceTasks.length === 0
                   ? '—'
                   : 'Schedule tasks first'}
               </span>
@@ -882,6 +942,14 @@ export default function page() {
                 </ul>
               </div>
             )}
+          </div>
+        )}
+
+        {/* The road test — the last gate before the job is complete. Same card
+            as the timeline, just in the sidebar so it's always in view. */}
+        {roadTestSection && (
+          <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            {renderSection({ ...roadTestSection, title: 'Road Test' })}
           </div>
         )}
 
@@ -1044,7 +1112,7 @@ export default function page() {
             </div>
 
             <p className="mb-1.5 mt-4 text-sm font-semibold text-slate-700">
-              Parts in this purchase <span className="font-normal text-slate-400">— untick anything bought elsewhere</span>
+              Parts in this purchase <span className="font-normal text-slate-400">— enter what the supplier charged, not the quoted price; untick anything not in this purchase</span>
             </p>
             <div className="overflow-hidden rounded-lg border border-slate-200">
               {partsToBuy.map((p) => {
@@ -1059,10 +1127,15 @@ export default function page() {
                     />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-semibold text-slate-800">{p.name} <span className="font-normal text-slate-400">×{p.qty}</span></div>
-                      <div className="text-xs text-slate-400">{p.partNo}</div>
+                      <div className="text-xs text-slate-400">
+                        {p.partNo}
+                        {/* The quotation price is what the customer pays; the box is what
+                            the shop paid the supplier. The gap is the shop's margin. */}
+                        {p.retailPrice != null && <span> · quoted {currency(p.retailPrice)}/unit to customer</span>}
+                      </div>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-slate-400">₱/unit</span>
+                      <span className="text-xs text-slate-400" title="What the shop paid the supplier per unit">Cost ₱/unit</span>
                       <input
                         type="number"
                         min={0}

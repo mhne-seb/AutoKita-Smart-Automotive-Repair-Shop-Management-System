@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Bell } from 'lucide-react'
+import { toast } from 'sonner'
 
 export type NotificationItem = {
   key: string
@@ -59,6 +60,31 @@ export function NotificationBell({
   function markAllRead() {
     persist(new Set(notifications.map((n) => n.key)))
   }
+
+  // Live pop-up: the parent re-fetches every few seconds; anything with a
+  // key we haven't seen before gets a toast (with an Open button) on top of
+  // the badge. The first load is only a baseline — no toasts for history.
+  const seenKeys = useRef<Set<string> | null>(null)
+  useEffect(() => {
+    if (notifications.length === 0 && seenKeys.current === null) return
+    if (seenKeys.current === null) {
+      seenKeys.current = new Set(notifications.map((n) => n.key))
+      return
+    }
+    for (const n of notifications) {
+      if (seenKeys.current.has(n.key)) continue
+      seenKeys.current.add(n.key)
+      if (readKeys.has(n.key)) continue
+      toast(n.title, {
+        description: n.message,
+        duration: 8000,
+        action: n.href
+          ? { label: 'Open', onClick: () => { markRead(n.key); router.push(n.href!) } }
+          : undefined,
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notifications])
 
   const unreadCount = notifications.filter((n) => !readKeys.has(n.key)).length
 
