@@ -59,7 +59,29 @@ export async function GET(request: NextRequest) {
         )).rows
       : []
 
-    return NextResponse.json({ jobOrder, tasks, parts })
+    // The same three numbers the admin's Time Tracking panel computes, so the
+    // customer never sees a different story. job_orders.estimated_duration /
+    // actual_duration / date_promised are never written, so the panel can't
+    // read them — labor hours is the sum of the quoted services' hours, and
+    // the finish estimate is the latest (scheduled start + hours) across tasks.
+    const timing = jobOrder
+      ? (await db.query(
+          `SELECT
+             jo.started_at::text,
+             jo.completed_at::text,
+             (SELECT COALESCE(SUM(jos.estimated_hours), 0)
+                FROM job_order_services jos WHERE jos.job_order_id = jo.id) AS labor_hours_estimate,
+             (SELECT MAX(spt.scheduled_date + (jos.estimated_hours * INTERVAL '1 hour'))::text
+                FROM service_progress_tasks spt
+                JOIN services s ON s.service_name = spt.task_title
+                JOIN job_order_services jos ON jos.service_id = s.id AND jos.job_order_id = spt.job_order_id
+               WHERE spt.job_order_id = jo.id AND spt.scheduled_date IS NOT NULL) AS estimated_finish
+           FROM job_orders jo WHERE jo.id = $1`,
+          [jobOrder.job_order_id],
+        )).rows[0] ?? null
+      : null
+
+    return NextResponse.json({ jobOrder, tasks, parts, timing })
   } catch (err) {
     console.error('[/api/tracking/in-progress] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
