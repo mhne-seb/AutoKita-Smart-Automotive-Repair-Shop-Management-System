@@ -48,7 +48,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     // tasks by service name (service_progress_tasks has no FK to the service).
     const partsResult = await db.query(
       `SELECT p.id, p.job_order_service_id, p.description, p.part_number, p.quantity, p.status::text, s.service_name,
-              p.purchase_order_id, p.supplier_unit_cost, sup.supplier_name, po.order_date::text AS purchased_on
+              p.purchase_order_id, p.supplier_unit_cost, p.retail_unit_price, p.finding_id, sup.supplier_name, po.order_date::text AS purchased_on
        FROM job_order_parts p
        JOIN job_order_services jos ON jos.id = p.job_order_service_id
        JOIN services s ON s.id = jos.service_id

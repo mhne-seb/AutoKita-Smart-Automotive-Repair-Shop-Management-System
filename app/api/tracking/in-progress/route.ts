@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getFindingsForJobOrder } from '@/lib/findings'
+import { getJobOrderBill } from '@/lib/jobOrderBill'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -86,7 +87,11 @@ export async function GET(request: NextRequest) {
     // answer, decided ones show as history.
     const findings = jobOrder ? await getFindingsForJobOrder(jobOrder.job_order_id) : []
 
-    return NextResponse.json({ jobOrder, tasks, parts, timing, findings })
+    // Running bill: services + parts on the job so far, minus verified
+    // payments. Shown for information only — paying happens on Completed.
+    const bill = jobOrder ? await getJobOrderBill(jobOrder.job_order_id) : null
+
+    return NextResponse.json({ jobOrder, tasks, parts, timing, findings, bill: bill && { total: bill.total, paid: bill.paid, balance: bill.balance } })
   } catch (err) {
     console.error('[/api/tracking/in-progress] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

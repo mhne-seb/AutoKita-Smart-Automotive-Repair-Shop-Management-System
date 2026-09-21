@@ -57,12 +57,22 @@ export async function POST(request: NextRequest) {
         // same as the quotation page does for "Custom Service (Not Listed)".
         let serviceId = s.serviceId
         if (!serviceId) {
-          const created = await client.query(
-            `INSERT INTO services (service_name, base_price, base_duration_hours, is_price_fixed, is_active)
-             VALUES ($1, $2, $3, false, true) RETURNING id`,
-            [s.name, Number(s.price || 0), Number(s.hours || 1)],
+          // Reuse the catalog row if this name already exists (case-insensitive)
+          // so custom services don't pile up as duplicates in the catalog.
+          const existing = await client.query(
+            `SELECT id FROM services WHERE LOWER(service_name) = LOWER($1) ORDER BY id LIMIT 1`,
+            [s.name],
           )
-          serviceId = created.rows[0].id
+          if (existing.rows[0]) {
+            serviceId = existing.rows[0].id
+          } else {
+            const created = await client.query(
+              `INSERT INTO services (service_name, base_price, base_duration_hours, is_price_fixed, is_active)
+               VALUES ($1, $2, $3, false, true) RETURNING id`,
+              [s.name, Number(s.price || 0), Number(s.hours || 1)],
+            )
+            serviceId = created.rows[0].id
+          }
         }
         const jos = await client.query(
           `INSERT INTO job_order_services

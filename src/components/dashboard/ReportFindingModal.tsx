@@ -128,6 +128,9 @@ export function ReportFindingModal({
 
   async function send() {
     if (!findings.trim()) return toast.error('Describe what you found.')
+    // A row that's typed but not added would be silently lost — stop here.
+    if (customOpen && customName.trim()) return toast.error('Finish adding the custom service (click Add) or cancel it first.')
+    if (partFor && (partName.trim() || partPrice.trim())) return toast.error('Finish adding the part (click Add) or cancel it first.')
     if (services.length === 0) return toast.error('Add at least one service — parts are listed under a service.')
     setSending(true)
     const r = await reportFinding(jobOrderId, { taskId: task?.id ?? null, findings: findings.trim(), photoUrl, services, parts })
@@ -139,6 +142,11 @@ export function ReportFindingModal({
   }
 
   const input = 'w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500'
+  // Enter in an inline row = its Add button; Escape = its Cancel.
+  const onRowKey = (add: () => void, cancel: () => void) => (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') { e.preventDefault(); add() }
+    if (e.key === 'Escape') { e.preventDefault(); cancel() }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
@@ -194,14 +202,14 @@ export function ReportFindingModal({
             {dropdownOpen && (
               <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
                 {filtered.length > 0 ? filtered.map((s) => (
-                  <button key={s.id} type="button" onClick={() => addService(s)} className="flex w-full items-center justify-between px-3 py-2 text-left text-sm text-slate-700 hover:bg-emerald-100">
+                  <button key={s.id} type="button" onMouseDown={(e) => { e.preventDefault(); addService(s) }} className="flex w-full items-center justify-between px-3 py-2 text-left text-sm text-slate-700 hover:bg-emerald-100">
                     <span>{s.service_name}</span>
                     <span className="text-xs text-slate-400">{peso(Number(s.base_price || 0))}</span>
                   </button>
                 )) : <div className="px-3 py-2 text-sm text-slate-400">No matching services</div>}
                 <button
                   type="button"
-                  onClick={() => { setCustomOpen(true); setCustomName(search.trim()); setSearch(''); setDropdownOpen(false) }}
+                  onMouseDown={(e) => { e.preventDefault(); setCustomOpen(true); setCustomName(search.trim()); setSearch(''); setDropdownOpen(false) }}
                   className="block w-full border-t border-slate-100 px-3 py-2 text-left text-sm font-semibold text-emerald-600 hover:bg-emerald-100"
                 >
                   + Custom Service (Not Listed)
@@ -211,11 +219,18 @@ export function ReportFindingModal({
           </div>
 
           {customOpen && (
-            <div className="mt-2 space-y-1.5 rounded-lg border border-emerald-200 bg-emerald-50/50 p-2">
-              <input value={customName} onChange={(e) => setCustomName(e.target.value)} placeholder="Service name" className="w-full rounded-md border border-slate-200 p-1.5 text-xs" autoFocus />
-              <div className="grid grid-cols-[80px_1fr_auto] items-center gap-1.5">
-                <input value={customHours} onChange={(e) => setCustomHours(e.target.value)} type="number" min={0.5} step={0.5} className="min-w-0 rounded-md border border-slate-200 p-1.5 text-xs" aria-label="Hours" title="Labor hours" />
-                <input value={customPrice} onChange={(e) => setCustomPrice(e.target.value)} type="number" min={0} placeholder="Labor price" className="min-w-0 rounded-md border border-slate-200 p-1.5 text-xs" />
+            <div className="mt-2 space-y-1.5 rounded-lg border border-emerald-200 bg-emerald-50/50 p-2.5" onKeyDown={onRowKey(addCustomService, () => setCustomOpen(false))}>
+              <p className="text-xs font-semibold text-emerald-700">New custom service <span className="font-normal text-slate-500">— fill this in and click Add; you can add its parts after.</span></p>
+              <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">Service name
+                <input value={customName} onChange={(e) => setCustomName(e.target.value)} placeholder="e.g. Cabin Filter Replacement" className="mt-0.5 w-full rounded-md border border-slate-200 p-1.5 text-xs font-normal normal-case tracking-normal text-slate-700" autoFocus />
+              </label>
+              <div className="grid grid-cols-[90px_1fr_auto] items-end gap-1.5">
+                <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">Hours
+                  <input value={customHours} onChange={(e) => setCustomHours(e.target.value)} type="number" min={0.5} step={0.5} className="mt-0.5 w-full min-w-0 rounded-md border border-slate-200 p-1.5 text-xs font-normal text-slate-700" />
+                </label>
+                <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">Labor price (₱)
+                  <input value={customPrice} onChange={(e) => setCustomPrice(e.target.value)} type="number" min={0} placeholder="0" className="mt-0.5 w-full min-w-0 rounded-md border border-slate-200 p-1.5 text-xs font-normal text-slate-700" />
+                </label>
                 <div className="flex gap-1">
                   <button type="button" onClick={addCustomService} className="rounded-md bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">Add</button>
                   <button type="button" onClick={() => setCustomOpen(false)} className="rounded-md border border-slate-200 px-2 py-1.5 text-xs text-slate-500 hover:bg-slate-50">Cancel</button>
@@ -246,12 +261,21 @@ export function ReportFindingModal({
                     </div>
                   ))}
                   {partFor === s.name ? (
-                    <div className="mt-2 space-y-1.5 pl-3">
-                      <input value={partName} onChange={(e) => setPartName(e.target.value)} placeholder="Part name" className="w-full rounded-md border border-slate-200 p-1.5 text-xs" autoFocus />
-                      <div className="grid grid-cols-[1fr_64px_1fr_auto] items-center gap-1.5">
-                        <input value={partNo} onChange={(e) => setPartNo(e.target.value)} placeholder="Part no." className="min-w-0 rounded-md border border-slate-200 p-1.5 text-xs" />
-                        <input value={partQty} onChange={(e) => setPartQty(e.target.value)} type="number" min={1} className="min-w-0 rounded-md border border-slate-200 p-1.5 text-xs" aria-label="Quantity" title="Quantity" />
-                        <input value={partPrice} onChange={(e) => setPartPrice(e.target.value)} type="number" min={0} placeholder="Unit price" className="min-w-0 rounded-md border border-slate-200 p-1.5 text-xs" />
+                    <div className="mt-2 space-y-1.5 rounded-md bg-slate-50 p-2 pl-3" onKeyDown={onRowKey(addPart, () => setPartFor(null))}>
+                      <p className="text-[11px] text-slate-500">New part for <span className="font-semibold text-slate-700">{s.name}</span></p>
+                      <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">Part name
+                        <input value={partName} onChange={(e) => setPartName(e.target.value)} placeholder="e.g. Cabin air filter" className="mt-0.5 w-full rounded-md border border-slate-200 p-1.5 text-xs font-normal normal-case tracking-normal text-slate-700" autoFocus />
+                      </label>
+                      <div className="grid grid-cols-[1fr_64px_1fr_auto] items-end gap-1.5">
+                        <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">Part no.
+                          <input value={partNo} onChange={(e) => setPartNo(e.target.value)} placeholder="optional" className="mt-0.5 w-full min-w-0 rounded-md border border-slate-200 p-1.5 text-xs font-normal normal-case tracking-normal text-slate-700" />
+                        </label>
+                        <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">Qty
+                          <input value={partQty} onChange={(e) => setPartQty(e.target.value)} type="number" min={1} className="mt-0.5 w-full min-w-0 rounded-md border border-slate-200 p-1.5 text-xs font-normal text-slate-700" />
+                        </label>
+                        <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">Price (₱)
+                          <input value={partPrice} onChange={(e) => setPartPrice(e.target.value)} type="number" min={0} placeholder="0" className="mt-0.5 w-full min-w-0 rounded-md border border-slate-200 p-1.5 text-xs font-normal text-slate-700" />
+                        </label>
                         <div className="flex gap-1">
                           <button type="button" onClick={addPart} className="rounded-md bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">Add</button>
                           <button type="button" onClick={() => setPartFor(null)} className="rounded-md border border-slate-200 px-2 py-1.5 text-xs text-slate-500 hover:bg-slate-50">Cancel</button>
