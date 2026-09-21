@@ -394,6 +394,12 @@ export async function getInProgressData(userId: number, jobOrderId?: number) {
       billable: boolean
       scheduled_date?: string
     }[]
+    timing: {
+      started_at: string | null
+      completed_at: string | null
+      labor_hours_estimate: string | number | null
+      estimated_finish: string | null
+    } | null
   }>
 }
 

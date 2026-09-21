@@ -117,7 +117,8 @@ function InProgress() {
   const searchParams = useSearchParams();
   const jobOrderIdParam = searchParams.get("jobOrderId");
 
-  const [data, setData] = useState<{ jobOrder: JobOrder | null; tasks: Task[]; parts?: Part[] } | null>(null);
+  type Timing = { started_at: string | null; completed_at: string | null; labor_hours_estimate: string | number | null; estimated_finish: string | null };
+  const [data, setData] = useState<{ jobOrder: JobOrder | null; tasks: Task[]; parts?: Part[]; timing?: Timing | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showWarn, setShowWarn] = useState(false);
   const [pullOutStatus, setPullOutStatus] = useState<"none" | "requested">("none");
@@ -157,23 +158,6 @@ function InProgress() {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shopIsWorking, jobOrderIdParam]);
-
-  const [aiTime, setAiTime] = useState<{
-    predicted_hours: number;
-    predicted_duration_mins: number;
-    services?: { service_name: string; predicted_duration_mins: number }[];
-  } | null>(null);
-
-  // Keyed on the id, not the object — every poll above hands back a fresh
-  // jobOrder object, and this shouldn't re-hit the AI endpoint each time.
-  const jobOrderKey = jobOrder?.job_order_id;
-  useEffect(() => {
-    if (!jobOrderKey) return;
-    fetch(`/api/predict/time?jobOrderId=${jobOrderKey}`)
-      .then(r => r.json())
-      .then(d => { if (d.predicted_hours) setAiTime(d); })
-      .catch(() => {});
-  }, [jobOrderKey]);
 
   const completedBillable = tasks.filter(
     (t) => getTag(t.task_status) === "completed" && t.billable
@@ -465,49 +449,28 @@ function InProgress() {
                   <Clock className="h-3 w-3" /> Estimated Finish
                 </span>
                 <b>
-                  {(() => {
-                    const allScheduled = tasks.length > 0 && tasks.every(t => t.scheduled_date || t.completed_at);
-                    if (allScheduled && aiTime?.predicted_duration_mins) {
-                       const maxDate = new Date(Math.max(...tasks.map(t => new Date(t.scheduled_date || t.completed_at || 0).getTime())));
-                       
-                       // Find all tasks that happen on the same day as the maxDate (the last day of service)
-                       const lastDayString = maxDate.toDateString();
-                       const lastDayTasks = tasks.filter(t => {
-                         const d = new Date(t.scheduled_date || t.completed_at || 0);
-                         return d.toDateString() === lastDayString;
-                       });
-                       
-                       // Sum the AI predicted duration for these specific tasks
-                       let additionalMins = 0;
-                       if (aiTime.services) {
-                         for (const task of lastDayTasks) {
-                           const servicePred = aiTime.services.find((s: any) => s.service_name === task.task_title);
-                           if (servicePred) {
-                             additionalMins += servicePred.predicted_duration_mins;
-                           }
-                         }
-                       }
-                       // Fallback if no specific services match or no services available
-                       if (additionalMins === 0) {
-                          additionalMins = Math.max(60, Math.round(aiTime.predicted_duration_mins / tasks.length));
-                       }
-                       
-                       maxDate.setMinutes(maxDate.getMinutes() + additionalMins);
-                       return maxDate.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-                    }
-                    return jobOrder.date_promised ? new Date(jobOrder.date_promised).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Not scheduled';
-                  })()}
+                  {/* Latest (scheduled start + quoted hours) across the tasks —
+                      the same number the shop's own panel shows. */}
+                  {fmtWhen(data?.timing?.estimated_finish) ?? 'Not scheduled'}
                 </b>
               </div>
             </div>
             <div className="mt-4 border-t border-white/20 pt-3 text-xs">
               <div className="flex items-center justify-between">
                 <span>Labor Hours (Est.)</span>
-                <b>{jobOrder.estimated_duration}</b>
+                <b>{Math.round(Number(data?.timing?.labor_hours_estimate ?? 0) * 10) / 10} hrs</b>
               </div>
               <div className="mt-1 flex items-center justify-between">
-                <span>Current Duration</span>
-                <b>{jobOrder.actual_duration}</b>
+                <span>Time in Shop</span>
+                <b>
+                  {(() => {
+                    // Wall clock since work started; frozen at completion.
+                    const start = data?.timing?.started_at;
+                    if (!start) return '—';
+                    const end = data?.timing?.completed_at ? new Date(data.timing.completed_at).getTime() : Date.now();
+                    return `${Math.max(0, Math.round(((end - new Date(start).getTime()) / 36e5) * 10) / 10)} hrs`;
+                  })()}
+                </b>
               </div>
             </div>
           </div>
