@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import type { ServiceFinding } from "@/data/types";
 import { TwoFAModal } from "@/components/dashboard/TwoFAModal";
 import { requestFindingOtp, respondToFinding } from "@/controllers/findingsController";
+import { FINDING_TIMEOUT_HOURS, findingAgeHours, findingIsOverdue } from "@/data/findingPolicy";
 
 const peso = (n: number) => `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 
@@ -30,6 +31,9 @@ export function FindingApprovalCard({
   const [declining, setDeclining] = useState(false);
 
   const when = new Date(finding.createdAt).toLocaleString("en-PH", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  // Shop policy: answer within 4 hours or the vehicle is moved to staging.
+  const overdue = findingIsOverdue(finding.createdAt);
+  const hoursLeft = Math.max(0, Math.round((FINDING_TIMEOUT_HOURS - findingAgeHours(finding.createdAt)) * 10) / 10);
 
   const requestOtp = async () => {
     const r = await requestFindingOtp(userId, finding.id);
@@ -85,7 +89,12 @@ export function FindingApprovalCard({
             </div>
           </div>
 
-          <p className="mt-3 text-xs text-muted-foreground">
+          <p className={`mt-3 text-xs font-semibold ${overdue ? "text-destructive" : "text-warning"}`}>
+            {overdue
+              ? `The ${FINDING_TIMEOUT_HOURS}-hour response window has passed — the shop may move your vehicle to staging until you decide.`
+              : `Please answer within ${FINDING_TIMEOUT_HOURS} hours of the request (about ${hoursLeft} h left) so work isn't held up.`}
+          </p>
+          <p className="mt-1.5 text-xs text-muted-foreground">
             Approving sends a code to your email. Your approved services continue either way; if you decline, this stays on your record as a recommendation.
           </p>
 

@@ -77,9 +77,12 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
 
   // Parts grouped by service name — tasks are matched to their service by
   // title (service_progress_tasks has no FK to job_order_services).
+  // Key = service name + which finding added it (blank for quotation work),
+  // so two same-named services from different findings don't share parts.
+  const partsKey = (name: string, findingId: number | null | undefined) => `${name}|${findingId ?? ''}`
   const partsByService = new Map<string, TaskPart[]>()
   for (const r of (json.parts ?? []) as any[]) {
-    const list = partsByService.get(r.service_name) ?? []
+    const list = partsByService.get(partsKey(r.service_name, r.finding_id)) ?? []
     list.push({
       id: r.id,
       name: r.description || 'Unnamed part',
@@ -90,8 +93,9 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
       supplierName: r.supplier_name ?? undefined,
       purchasedOn: r.purchased_on ? formatDate(r.purchased_on) : undefined,
       unitCost: r.purchase_order_id ? Number(r.supplier_unit_cost ?? 0) : undefined,
+      retailPrice: r.retail_unit_price != null ? Number(r.retail_unit_price) : undefined,
     })
-    partsByService.set(r.service_name, list)
+    partsByService.set(partsKey(r.service_name, r.finding_id), list)
   }
 
   // Group raw rows by section
@@ -116,7 +120,7 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
       estimatedFinish: row.estimated_finish ? new Date(row.estimated_finish).toISOString() : undefined,
       photoUrl: row.completion_photo_url ?? undefined,
       findingId: row.finding_id ?? undefined,
-      parts: partsByService.get(row.task_title) ?? [],
+      parts: partsByService.get(partsKey(row.task_title, row.finding_id)) ?? [],
     }
     if (!sectionMap.has(sectionId)) sectionMap.set(sectionId, [])
     sectionMap.get(sectionId)!.push(task)
@@ -405,6 +409,7 @@ export async function getInProgressData(userId: number, jobOrderId?: number) {
       estimated_finish: string | null
     } | null
     findings: ServiceFinding[]
+    bill: { total: number; paid: number; balance: number } | null
   }>
 }
 

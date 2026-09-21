@@ -51,26 +51,34 @@ export function DashHeader() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  // Polls every 10 s so a new notification pops up (see NotificationBell)
+  // without the customer reloading the page.
   useEffect(() => {
-   const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
+    const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
     const userId = stored ? parseInt(stored, 10) : FALLBACK_USER_ID;
-    fetch(`/api/customer/notifications?userId=${userId}`)
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((json) => {
-        const items: NotificationItem[] = (json.notifications ?? []).map(
-          (a: { type: string; id: number; title: string; description: string; time: string; href?: string }) => ({
-            key: `${a.type}-${a.id}`,
-            title: a.title,
-            message: a.description,
-            time: timeAgo(a.time),
-            href: a.href,
-          }),
-        );
-        setNotifications(items);
-      })
-      .catch(() => {
-        /* leave the bell empty if the fetch fails */
-      });
+    let alive = true;
+    const load = () =>
+      fetch(`/api/customer/notifications?userId=${userId}`)
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((json) => {
+          if (!alive) return;
+          const items: NotificationItem[] = (json.notifications ?? []).map(
+            (a: { type: string; id: number; title: string; description: string; time: string; href?: string }) => ({
+              key: `${a.type}-${a.id}`,
+              title: a.title,
+              message: a.description,
+              time: timeAgo(a.time),
+              href: a.href,
+            }),
+          );
+          setNotifications(items);
+        })
+        .catch(() => {
+          /* leave the bell as it was if the fetch fails */
+        });
+    load();
+    const t = setInterval(load, 10000);
+    return () => { alive = false; clearInterval(t); };
   }, []);
 
     useEffect(() => {

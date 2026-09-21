@@ -1,12 +1,18 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { sweepPendingFindings } from '@/lib/findingsSweep'
+import { FINDING_TIMEOUT_HOURS } from '@/data/findingPolicy'
 
 // No new DB objects. Reads only existing stored functions and builds the
 // admin notification list in application code. Each row self-clears once the
 // admin acts (advance stage / release / verify payment).
 export async function GET() {
   try {
-    const [tickets, jobOrders, payments, responses, jobOrderCreatedAt] = await Promise.all([
+    // The bell polls every 45 s while the shop has the app open — that's
+    // the app's clock for finding reminders (see lib/findingsSweep).
+    sweepPendingFindings().catch((e) => console.error('[notifications] sweep failed:', e))
+
+    const [tickets, jobOrders, payments, responses, jobOrderCreatedAt, overdueFindings] = await Promise.all([
       db.query('SELECT * FROM get_service_tickets_queue()'),
       db.query('SELECT * FROM get_job_orders_list()'),
       db.query('SELECT * FROM get_payment_records()'),
@@ -42,6 +48,17 @@ export async function GET() {
         `SELECT entity_id AS job_order_id, action_date
          FROM system_audit_logs
          WHERE entity_type = 'job_orders' AND action_performed = 'created'`,
+      ),
+      // Findings the customer hasn't answered inside the policy window
+      // (paper: UC 14, Exception 1). Shows until they answer.
+      db.query(
+        `SELECT f.id, f.job_order_id, f.extra_cost, f.created_at, u.first_name, u.last_name, u.contact_number
+         FROM service_findings f
+         JOIN job_orders jo ON jo.id = f.job_order_id
+         JOIN users u ON u.id = jo.user_id
+         WHERE f.decision = 'pending' AND f.created_at < NOW() - ($1 * INTERVAL '1 hour')
+         ORDER BY f.created_at ASC`,
+        [FINDING_TIMEOUT_HOURS],
       ),
     ])
 
@@ -144,7 +161,19 @@ export async function GET() {
       notifs.push({ notif_key: `decision-${r.id}`, title, message, notif_time: r.action_date, href })
     }
 
-    // 4. Payment proof waiting for manual verification (clears once verified)
+    // 4. No answer on a finding within the policy window — someone has to
+    //    call. Clears the moment the customer approves or declines.
+    for (const f of overdueFindings.rows) {
+      notifs.push({
+        notif_key: `finding-overdue-${f.id}`,
+        title: 'Customer has not answered',
+        message: `${name(f.first_name, f.last_name)} hasn't responded to ${peso(f.extra_cost)} of additional work on JO-${f.job_order_id} for over ${FINDING_TIMEOUT_HOURS} hours. Call them${f.contact_number ? ` (${f.contact_number})` : ''}; per policy the vehicle moves to staging until they decide.`,
+        notif_time: f.created_at,
+        href: `/job-orders/${f.job_order_id}/progress`,
+      })
+    }
+
+    // 5. Payment proof waiting for manual verification (clears once verified)
     for (const p of payments.rows) {
       if (p.verification_status === 'pending') {
         notifs.push({

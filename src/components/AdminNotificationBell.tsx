@@ -47,7 +47,7 @@ export function AdminNotificationBell({ buttonClassName }: { buttonClassName?: s
       }
     }
     load()
-    const t = setInterval(load, 45000)
+    const t = setInterval(load, 10000) // fast enough to feel live; the server throttles its own work
     return () => {
       alive = false
       clearInterval(t)

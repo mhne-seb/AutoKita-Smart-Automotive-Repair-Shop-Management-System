@@ -107,10 +107,11 @@ function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [lastSynced, setLastSynced] = useState<string>("");
 
-  const fetchDashboard = async (isManualRefresh = false) => {
+  // silent = a background poll: update the data in place with no spinner.
+  const fetchDashboard = async (isManualRefresh = false, silent = false) => {
     if (isManualRefresh) setIsRefreshing(true);
-    else setLoading(true);
-    setError(null);
+    else if (!silent) setLoading(true);
+    if (!silent) setError(null);
     try {
       // Get the logged in user ID from sessionStorage
       const storedUserId = sessionStorage.getItem('autokita_user_id');
@@ -128,7 +129,9 @@ function Dashboard() {
         }),
       );
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+      // A failed background poll shouldn't replace the page with an error —
+      // the data on screen is still good; the next poll will try again.
+      if (!silent) setError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -159,6 +162,15 @@ function Dashboard() {
   };
 
   useEffect(() => { fetchDashboard(); }, []);
+
+  // Keep the page live: alerts, recent activity and service status re-fetch
+  // every 10 s in the background, so what the shop does shows up here
+  // without a reload (the bell in the header does the same).
+  useEffect(() => {
+    const t = setInterval(() => fetchDashboard(false, true), 10000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Activity icon/colour helpers
   const activityMeta = (type: DashboardActivity["type"]) => {
@@ -543,8 +555,11 @@ function formatRelativeTime(dateStr: string): string {
 function formatBadgeTime(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
+  // Clamped at 0: a row written a second ago can read as "in the future" if
+  // the server's clock is slightly ahead of the browser's.
+  const diffMs = Math.max(0, now.getTime() - date.getTime());
   const diffMins = Math.floor(diffMs / 60_000);
+  if (diffMins < 1) return "JUST NOW";
   if (diffMins < 60) return `${diffMins}M AGO`;
   const diffHours = Math.floor(diffMins / 60);
   if (diffHours < 24) return `${diffHours}H AGO`;

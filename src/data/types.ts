@@ -143,6 +143,7 @@ export interface TaskPart {
   supplierName?: string
   purchasedOn?: string
   unitCost?: number // what the shop paid per unit (supplier_unit_cost)
+  retailPrice?: number // what the customer is charged per unit (retail_unit_price, from the quotation)
 }
 
 // One "Record purchase" save — a purchase_orders row and the parts it covered.

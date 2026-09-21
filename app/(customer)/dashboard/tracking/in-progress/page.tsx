@@ -14,6 +14,7 @@ import {
   Send,
   Camera,
   Upload,
+  Receipt,
 } from "lucide-react";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getInProgressData } from "@/controllers/serviceProgressController";
@@ -102,7 +103,7 @@ function InProgress() {
   const jobOrderIdParam = searchParams.get("jobOrderId");
 
   type Timing = { started_at: string | null; completed_at: string | null; labor_hours_estimate: string | number | null; estimated_finish: string | null };
-  const [data, setData] = useState<{ jobOrder: JobOrder | null; tasks: Task[]; parts?: Part[]; timing?: Timing | null; findings?: ServiceFinding[] } | null>(null);
+  const [data, setData] = useState<{ jobOrder: JobOrder | null; tasks: Task[]; parts?: Part[]; timing?: Timing | null; findings?: ServiceFinding[]; bill?: { total: number; paid: number; balance: number } | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showWarn, setShowWarn] = useState(false);
   const [pullOutStatus, setPullOutStatus] = useState<"none" | "requested">("none");
@@ -154,9 +155,11 @@ function InProgress() {
     0
   );
 
-  const completionPct = tasks.length
+  // Progress is over the services; the road test is the final check, not work.
+  const serviceTasks = tasks.filter((t) => !isRoadTest(t));
+  const completionPct = serviceTasks.length
     ? Math.round(
-        (tasks.filter((t) => getTag(t.task_status) === "completed").length / tasks.length) * 100
+        (serviceTasks.filter((t) => getTag(t.task_status) === "completed").length / serviceTasks.length) * 100
       )
     : 0;
 
@@ -473,6 +476,22 @@ function InProgress() {
               </div>
             </div>
           </div>
+
+          {/* Running bill — what the job costs so far and what's still owed.
+              Read-only here; payment happens once the job is Completed. */}
+          {data?.bill && (
+            <div className="rounded-xl border bg-card p-4">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <Receipt className="h-4 w-4 text-teal" /> Bill So Far
+              </div>
+              <div className="mt-3 space-y-1.5 text-sm">
+                <div className="flex justify-between text-muted-foreground"><span>Services &amp; parts</span><span>₱{data.bill.total.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span></div>
+                <div className="flex justify-between text-muted-foreground"><span>Paid</span><span>− ₱{data.bill.paid.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span></div>
+                <div className="flex items-center justify-between border-t pt-2 font-semibold"><span>Balance to pay</span><span className="text-lg text-teal">₱{data.bill.balance.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span></div>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">Updates as work is added. You'll settle this once the service is completed.</p>
+            </div>
+          )}
 
           <div className="rounded-xl border bg-card p-4">
             <div className="flex items-center gap-2 text-sm font-semibold">
