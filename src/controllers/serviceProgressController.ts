@@ -89,6 +89,7 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
       purchaseOrderId: r.purchase_order_id ?? undefined,
       supplierName: r.supplier_name ?? undefined,
       purchasedOn: r.purchased_on ? formatDate(r.purchased_on) : undefined,
+      unitCost: r.purchase_order_id ? Number(r.supplier_unit_cost ?? 0) : undefined,
     })
     partsByService.set(r.service_name, list)
   }
@@ -137,6 +138,7 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
     purchasedOn: formatDate(p.purchased_on),
     totalCost: Number(p.total_supplier_cost ?? 0),
     partCount: p.part_count ?? 0,
+    status: p.status,
   }))
 
   const timing = json.timing ?? {}
@@ -174,7 +176,7 @@ export async function finishTask(
   return { ok: true, roadTestCreated: json.roadTestCreated, jobCompleted: json.jobCompleted }
 }
 
-export async function setPartStatus(jobOrderId: string, partId: number, status: 'received' | 'to_order'): Promise<boolean> {
+export async function setPartStatus(jobOrderId: string, partId: number, status: 'received' | 'to_order' | 'ordered'): Promise<boolean> {
   const res = await fetch(`/api/job-orders/${jobOrderId}/parts`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },

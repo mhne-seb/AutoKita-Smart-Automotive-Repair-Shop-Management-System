@@ -21,7 +21,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       { status: 400 },
     )
   }
-  if (parts.some((p) => !p.partId || !(Number(p.unitCost) >= 0))) {
+  // unitCost must be a real number (0 is fine — warranty replacements are free);
+  // a blank box coerced with Number('') would sneak in as 0, so no coercion here.
+  if (parts.some((p) => !p.partId || typeof p.unitCost !== 'number' || !Number.isFinite(p.unitCost) || p.unitCost < 0)) {
     return NextResponse.json({ success: false, message: 'Every part needs a partId and a unit cost' }, { status: 400 })
   }
 
@@ -48,9 +50,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const qtyById = new Map<number, number>(owned.rows.map((r) => [r.id, r.quantity ?? 1]))
     const totalCost = parts.reduce((sum, p) => sum + Number(p.unitCost) * (qtyById.get(Number(p.partId)) ?? 1), 0)
 
+    // Recording the purchase means the parts are on order — they're marked
+    // received one by one on the task cards as they arrive, which is also
+    // what closes the PO (see parts/route.ts).
     const po = await client.query(
-      `INSERT INTO purchase_orders (supplier_id, order_date, actual_delivery_date, total_supplier_cost, status)
-       VALUES ($1, $2, $2, $3, 'fulfilled')
+      `INSERT INTO purchase_orders (supplier_id, order_date, total_supplier_cost, status)
+       VALUES ($1, $2, $3, 'sent')
        RETURNING id`,
       [supplierId, purchasedOn, totalCost],
     )
@@ -59,7 +64,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     for (const p of parts) {
       await client.query(
         `UPDATE job_order_parts
-         SET purchase_order_id = $1, supplier_unit_cost = $2, status = 'received'
+         SET purchase_order_id = $1, supplier_unit_cost = $2, status = 'ordered'
          WHERE id = $3`,
         [purchaseOrderId, Number(p.unitCost), Number(p.partId)],
       )
