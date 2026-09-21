@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { uploadTaskPhoto } from '@/lib/storage'
 import { afterTaskFinished } from '@/lib/taskCompletion'
+import { notifyCustomer } from '@/lib/customerNotify'
 
 const MAX_BYTES = 5 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   try {
     const task = await db.query(
-      `SELECT task_status, mechanic_id, scheduled_date FROM service_progress_tasks WHERE id = $1::int AND job_order_id = $2::int`,
+      `SELECT task_title, task_status, mechanic_id, scheduled_date FROM service_progress_tasks WHERE id = $1::int AND job_order_id = $2::int`,
       [taskId, jobOrderId],
     )
     const row = task.rows[0]
@@ -53,6 +54,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     )
 
     const outcome = await afterTaskFinished(jobOrderId)
+
+    await notifyCustomer({
+      jobOrderId,
+      entityType: 'service_progress_tasks',
+      entityId: Number(taskId),
+      event: 'task_finished',
+      title: 'Service Finished',
+      message: `${row.task_title} is done on your vehicle (Job Order #JO-${jobOrderId}). A photo of the finished work is on your service tracker.`,
+      employeeId: row.mechanic_id ?? null,
+    })
+
     return NextResponse.json({ success: true, photoUrl, ...outcome })
   } catch (error) {
     console.error('Task finish error:', error)

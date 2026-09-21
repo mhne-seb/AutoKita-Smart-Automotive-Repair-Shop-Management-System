@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { getFindingsForJobOrder } from '@/lib/findings'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -81,7 +82,11 @@ export async function GET(request: NextRequest) {
         )).rows[0] ?? null
       : null
 
-    return NextResponse.json({ jobOrder, tasks, parts, timing })
+    // Mid-service findings for this job: pending ones need the customer's
+    // answer, decided ones show as history.
+    const findings = jobOrder ? await getFindingsForJobOrder(jobOrder.job_order_id) : []
+
+    return NextResponse.json({ jobOrder, tasks, parts, timing, findings })
   } catch (err) {
     console.error('[/api/tracking/in-progress] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

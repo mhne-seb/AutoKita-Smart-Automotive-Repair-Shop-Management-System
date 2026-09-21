@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { notifyCustomer } from '@/lib/customerNotify'
 
 // The shop has no inventory system — parts are ordered as needed and the
 // only fact worth recording is "has it arrived yet". So this flips a part
@@ -20,7 +21,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const result = await db.query(
       `UPDATE job_order_parts SET status = $1::job_order_parts_status
        WHERE id = $2::int AND job_order_id = $3::int
-       RETURNING id, purchase_order_id`,
+       RETURNING id, purchase_order_id, job_order_service_id`,
       [status, partId, jobOrderId],
     )
     if (result.rows.length === 0) {
@@ -48,6 +49,33 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
          WHERE po.id = $1`,
         [purchaseOrderId],
       )
+    }
+
+    // Once the last part for a service is in, the customer hears that the
+    // wait is over. (Only on receiving — Undo doesn't un-announce.)
+    const serviceRowId = result.rows[0].job_order_service_id
+    if (status === 'received' && serviceRowId) {
+      const check = await db.query(
+        `SELECT s.service_name,
+                COUNT(*) FILTER (WHERE p.status IN ('to_order', 'ordered', 'in_transit'))::int AS still_waiting
+         FROM job_order_parts p
+         JOIN job_order_services jos ON jos.id = p.job_order_service_id
+         JOIN services s ON s.id = jos.service_id
+         WHERE p.job_order_service_id = $1
+         GROUP BY s.service_name`,
+        [serviceRowId],
+      )
+      const svc = check.rows[0]
+      if (svc && svc.still_waiting === 0) {
+        await notifyCustomer({
+          jobOrderId: Number(jobOrderId),
+          entityType: 'job_order_parts',
+          entityId: Number(partId),
+          event: 'parts_received',
+          title: 'Parts Received',
+          message: `All parts for ${svc.service_name} have arrived at the shop (Job Order #JO-${jobOrderId}). Work can begin as scheduled.`,
+        })
+      }
     }
 
     return NextResponse.json({ success: true })

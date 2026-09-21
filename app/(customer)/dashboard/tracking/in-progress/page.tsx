@@ -19,6 +19,8 @@ import { StageStepper, stageForStatus } from "@/components/dashboard/StageSteppe
 import { getInProgressData } from "@/controllers/serviceProgressController";
 import { Lightbox } from "@/components/Lightbox";
 import { isRoadTest } from "@/data/roadTest";
+import type { ServiceFinding } from "@/data/types";
+import { FindingApprovalCard } from "@/components/dashboard/FindingApprovalCard";
 
 // A part one of the services is waiting on. Only "still to order" vs "here"
 // matters to the shop (no inventory system), so that's all we show.
@@ -100,7 +102,7 @@ function InProgress() {
   const jobOrderIdParam = searchParams.get("jobOrderId");
 
   type Timing = { started_at: string | null; completed_at: string | null; labor_hours_estimate: string | number | null; estimated_finish: string | null };
-  const [data, setData] = useState<{ jobOrder: JobOrder | null; tasks: Task[]; parts?: Part[]; timing?: Timing | null } | null>(null);
+  const [data, setData] = useState<{ jobOrder: JobOrder | null; tasks: Task[]; parts?: Part[]; timing?: Timing | null; findings?: ServiceFinding[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showWarn, setShowWarn] = useState(false);
   const [pullOutStatus, setPullOutStatus] = useState<"none" | "requested">("none");
@@ -121,6 +123,9 @@ function InProgress() {
 
   const tasks = data?.tasks ?? [];
   const parts = data?.parts ?? [];
+  // Mid-service findings waiting on this customer's yes/no.
+  const pendingFindings = (data?.findings ?? []).filter((f) => f.decision === "pending");
+  const userId = Number(typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : 0);
   // Parts still to be ordered, grouped by the service (task title) they belong to.
   const missingPartsFor = (taskTitle: string) => parts.filter((p) => p.service_name === taskTitle && !partIsReady(p));
   const partsFor = (taskTitle: string) => parts.filter((p) => p.service_name === taskTitle);
@@ -277,6 +282,18 @@ function InProgress() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <div className="space-y-6">
+          {/* Anything the mechanic found that needs a yes/no goes first — it's
+              the one thing on this page that's waiting on the customer. */}
+          {!isHistorical && pendingFindings.map((f) => (
+            <FindingApprovalCard
+              key={f.id}
+              finding={f}
+              userId={userId}
+              onAnswered={load}
+              onViewPhoto={(url) => setPhotoView({ url, label: "What the mechanic found" })}
+            />
+          ))}
+
           <div className="rounded-xl border bg-card p-6">
             <div className="flex items-center justify-between border-l-4 border-brand pl-3">
               <h2 className="text-xl font-bold">Service Timeline</h2>
