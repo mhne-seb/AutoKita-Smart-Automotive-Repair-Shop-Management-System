@@ -3,7 +3,7 @@
 // Admin "Service Progress" page — the final step of the job-order workflow. Shows a section-by-section task checklist; once every task is marked done the job order is written back to "completed" (see jobOrderController.advanceJobOrderStage).
 import { useParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, CreditCard, XCircle, Banknote, Camera, Upload, Car, Receipt, Plus } from 'lucide-react'
+import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, CreditCard, XCircle, Banknote, Camera, Upload, Car, Receipt, Plus, ChevronDown } from 'lucide-react'
 import type { ChangeEvent } from 'react'
 import { toast } from 'sonner'
 import { Lightbox } from '@/components/Lightbox'
@@ -23,6 +23,13 @@ const sectionColors: Record<string, string> = {
   quotation: 'text-amber-600',
   'in-progress': 'text-blue-600',
   complete: 'text-slate-500',
+}
+
+// purchase_orders.status → what the shop sees in the Purchases ledger.
+const PO_STATUS_LABEL: Record<string, string> = {
+  sent: 'Ordered',
+  partially_received: 'Partly received',
+  fulfilled: 'Received',
 }
 
 export default function page() {
@@ -124,6 +131,7 @@ export default function page() {
   const [purchaseDate, setPurchaseDate] = useState('')
   // Per part: is it in this purchase, and what did one unit cost.
   const [purchaseLines, setPurchaseLines] = useState<Record<number, { checked: boolean; unitCost: string }>>({})
+  const [openPurchaseId, setOpenPurchaseId] = useState<number | null>(null)
   const [savingPurchase, setSavingPurchase] = useState(false)
 
   // Once the real data arrives, seed the editable state from it.
@@ -139,11 +147,14 @@ export default function page() {
 
   // Every part on this job order still waiting to be bought. Tasks that share
   // a service name share the same parts list, so dedupe by part id.
-  const partsToBuy = useMemo(() => {
+  // Every part on this job order once, keyed by id (a part can appear under
+  // more than one task when tasks share a service).
+  const allParts = useMemo(() => {
     const seen = new Map<number, TaskPart>()
-    for (const t of allTasks) for (const p of t.parts ?? []) if (p.status === 'to_order') seen.set(p.id, p)
+    for (const t of allTasks) for (const p of t.parts ?? []) seen.set(p.id, p)
     return [...seen.values()]
   }, [allTasks])
+  const partsToBuy = allParts.filter((p) => p.status === 'to_order')
   const completedCount = allTasks.filter((t) => t.status === 'completed').length
   const progressPercent = allTasks.length === 0 ? 0 : Math.round((completedCount / allTasks.length) * 100)
 
@@ -242,9 +253,12 @@ export default function page() {
   }
 
   // No inventory system — the only fact about a part is "has it arrived".
+  // Undo sends a purchased part back to "ordered" (it's still on the PO),
+  // anything else back to "to order".
   async function togglePartReceived(part: TaskPart) {
     setBusyPartId(part.id)
-    await setPartStatus(jobOrderId, part.id, partIsReady(part) ? 'to_order' : 'received')
+    const undoTo = part.purchaseOrderId ? 'ordered' : 'to_order'
+    await setPartStatus(jobOrderId, part.id, partIsReady(part) ? undoTo : 'received')
     await refreshTasks()
     setBusyPartId(null)
   }
@@ -279,17 +293,19 @@ export default function page() {
 
   async function savePurchase() {
     if (!supplierId) return toast.error('Pick a supplier first.')
-    const lines = partsToBuy
-      .filter((p) => purchaseLines[p.id]?.checked)
-      .map((p) => ({ partId: p.id, unitCost: Number(purchaseLines[p.id].unitCost) }))
-    if (lines.length === 0) return toast.error('Tick at least one part.')
-    if (lines.some((l) => !(l.unitCost >= 0) || Number.isNaN(l.unitCost))) return toast.error('Enter a cost for every ticked part.')
+    const ticked = partsToBuy.filter((p) => purchaseLines[p.id]?.checked)
+    if (ticked.length === 0) return toast.error('Tick at least one part.')
+    // Check the raw text first: Number('') is 0, which would pass a >= 0 check
+    // and silently record the part as free.
+    if (ticked.some((p) => purchaseLines[p.id].unitCost.trim() === '')) return toast.error('Enter a cost for every ticked part.')
+    const lines = ticked.map((p) => ({ partId: p.id, unitCost: Number(purchaseLines[p.id].unitCost) }))
+    if (lines.some((l) => !(l.unitCost >= 0))) return toast.error('Costs must be 0 or more.')
 
     setSavingPurchase(true)
     const result = await recordPartsPurchase(jobOrderId, Number(supplierId), purchaseDate, lines)
     setSavingPurchase(false)
     if (!result.ok) return toast.error(result.message ?? 'Could not save the purchase.')
-    toast.success(`Purchase recorded — ${lines.length} part${lines.length === 1 ? '' : 's'} marked received.`)
+    toast.success(`Purchase recorded — ${lines.length} part${lines.length === 1 ? '' : 's'} marked ordered. Tap Received on each as it arrives.`)
     setShowPurchaseModal(false)
     await refreshTasks()
   }
@@ -486,15 +502,16 @@ export default function page() {
 
                   {/* Parts this service needs, as a table inside the card. One
                       row per part; "Received" marks it arrived (Undo for a
-                      mis-tap). Hidden once the task is finished. */}
-                  {task.status !== 'completed' && (task.parts?.length ?? 0) > 0 && (() => {
+                      mis-tap). Read-only once the task is finished. */}
+                  {(task.parts?.length ?? 0) > 0 && (() => {
                     const parts = task.parts!
                     const received = parts.filter(partIsReady).length
+                    const editable = task.status !== 'completed'
                     return (
                       <div className="mt-3 border-t border-slate-200 pt-3" onClick={(e) => e.stopPropagation()}>
                         <div className="mb-1.5 flex items-center justify-between text-xs text-slate-400">
                           <span className="flex items-center gap-1.5 font-semibold uppercase tracking-wide"><Package size={12} /> Parts · {received} of {parts.length} received</span>
-                          {received < parts.length && <span>Mark each part when it arrives</span>}
+                          {editable && received < parts.length && <span>Mark each part when it arrives</span>}
                         </div>
                         <table className="w-full text-sm">
                           <tbody>
@@ -513,9 +530,10 @@ export default function page() {
                                   <td className="py-2 pr-3 text-xs text-slate-500">×{p.qty}</td>
                                   <td className="py-2 pr-3 text-right">
                                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${ready ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                                      {ready ? (p.status === 'in_stock' ? 'In stock' : 'Received') : 'To order'}
+                                      {ready ? (p.status === 'in_stock' ? 'In stock' : 'Received') : p.status === 'ordered' ? 'Ordered' : 'To order'}
                                     </span>
                                   </td>
+                                  {editable && (
                                   <td className="w-28 py-2 text-right">
                                     <button
                                       onClick={() => togglePartReceived(p)}
@@ -530,6 +548,7 @@ export default function page() {
                                       {ready ? 'Undo' : 'Received'}
                                     </button>
                                   </td>
+                                  )}
                                 </tr>
                               )
                             })}
@@ -686,8 +705,8 @@ export default function page() {
         </div>
 
         {/* Where the shop bought this job's to-order parts. Recording a
-            purchase is what normally marks parts received — the per-row
-            "Received" button on the task cards stays as a manual fallback. */}
+            purchase marks its parts "ordered"; they're marked received one by
+            one on the task cards as they arrive. */}
         {(partsToBuy.length > 0 || purchases.length > 0) && (
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
             <div className="mb-3 flex items-center justify-between">
@@ -722,15 +741,44 @@ export default function page() {
               <div className="mt-4 border-t border-slate-100 pt-3">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Purchases</p>
                 <ul className="space-y-1.5 text-sm">
-                  {purchases.map((pu) => (
-                    <li key={pu.id} className="flex items-center justify-between gap-2">
-                      <span className="min-w-0 truncate text-slate-700">
-                        <span className="font-semibold text-slate-900">PO-{pu.id}</span> · {pu.supplierName}
-                        <span className="text-xs text-slate-400"> · {pu.purchasedOn} · {pu.partCount} part{pu.partCount === 1 ? '' : 's'}</span>
-                      </span>
-                      <span className="shrink-0 font-semibold text-slate-800">{currency(pu.totalCost)}</span>
-                    </li>
-                  ))}
+                  {purchases.map((pu) => {
+                    const isOpen = openPurchaseId === pu.id
+                    const poParts = allParts.filter((p) => p.purchaseOrderId === pu.id)
+                    return (
+                      <li key={pu.id}>
+                        {/* Click to expand the parts this PO covered. */}
+                        <button
+                          type="button"
+                          onClick={() => setOpenPurchaseId(isOpen ? null : pu.id)}
+                          className="flex w-full items-center justify-between gap-2 rounded-md px-1 py-0.5 text-left hover:bg-slate-50"
+                          aria-expanded={isOpen}
+                        >
+                          <span className="min-w-0 truncate text-slate-700">
+                            <span className="font-semibold text-slate-900">PO-{pu.id}</span> · {pu.supplierName}
+                            <span className="text-xs text-slate-400"> · {pu.purchasedOn} · {pu.partCount} part{pu.partCount === 1 ? '' : 's'} · {PO_STATUS_LABEL[pu.status] ?? pu.status}</span>
+                          </span>
+                          <span className="flex shrink-0 items-center gap-1 font-semibold text-slate-800">
+                            {currency(pu.totalCost)}
+                            <ChevronDown size={14} className={`text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                          </span>
+                        </button>
+                        {isOpen && (
+                          <ul className="mb-1 ml-3 mt-1 space-y-1 border-l border-slate-200 pl-3 text-xs text-slate-600">
+                            {poParts.map((p) => (
+                              <li key={p.id} className="flex items-center justify-between gap-2">
+                                <span className="min-w-0 truncate">
+                                  {p.name} <span className="text-slate-400">· {p.partNo} · ×{p.qty}</span>
+                                </span>
+                                <span className="shrink-0 tabular-nums">
+                                  {currency(p.unitCost ?? 0)}<span className="text-slate-400"> ea</span>
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    )
+                  })}
                 </ul>
               </div>
             )}
@@ -876,7 +924,7 @@ export default function page() {
                 </button>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-semibold text-slate-700">Date Purchased</label>
+                <label className="mb-1 block text-sm font-semibold text-slate-700">Date Ordered</label>
                 <input
                   type="date"
                   value={purchaseDate}

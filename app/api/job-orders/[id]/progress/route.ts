@@ -46,7 +46,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     // tasks by service name (service_progress_tasks has no FK to the service).
     const partsResult = await db.query(
       `SELECT p.id, p.job_order_service_id, p.description, p.part_number, p.quantity, p.status::text, s.service_name,
-              p.purchase_order_id, sup.supplier_name, po.order_date::text AS purchased_on
+              p.purchase_order_id, p.supplier_unit_cost, sup.supplier_name, po.order_date::text AS purchased_on
        FROM job_order_parts p
        JOIN job_order_services jos ON jos.id = p.job_order_service_id
        JOIN services s ON s.id = jos.service_id
@@ -59,13 +59,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
     // Every purchase recorded for this job order — the sidebar's ledger.
     const purchasesResult = await db.query(
-      `SELECT po.id, sup.supplier_name, po.order_date::text AS purchased_on, po.total_supplier_cost,
+      `SELECT po.id, sup.supplier_name, po.order_date::text AS purchased_on, po.total_supplier_cost, po.status::text,
               COUNT(p.id)::int AS part_count
        FROM purchase_orders po
        JOIN suppliers sup ON sup.id = po.supplier_id
        JOIN job_order_parts p ON p.purchase_order_id = po.id
        WHERE p.job_order_id = $1
-       GROUP BY po.id, sup.supplier_name, po.order_date, po.total_supplier_cost
+       GROUP BY po.id, sup.supplier_name, po.order_date, po.total_supplier_cost, po.status
        ORDER BY po.order_date DESC, po.id DESC`,
       [id],
     )
