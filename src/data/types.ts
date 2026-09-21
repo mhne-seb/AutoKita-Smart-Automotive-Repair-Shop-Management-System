@@ -178,6 +178,8 @@ export interface ServiceTask {
   parts?: TaskPart[]
   // Photo of the finished work — set when the task is completed (required).
   photoUrl?: string
+  // Set when the task was added mid-service from an approved finding.
+  findingId?: number
 }
 
 export interface ServiceSection {
@@ -186,11 +188,44 @@ export interface ServiceSection {
   tasks: ServiceTask[]
 }
 
+// A mid-service finding: something the mechanic noticed that the approved
+// quotation didn't cover. Proposed services/parts live on the finding as
+// plain lists until the customer decides; only on approval do they become
+// real job_order_services / job_order_parts / service_progress_tasks rows.
+export interface ProposedService {
+  serviceId: number | null // null = custom service not in the catalog yet
+  name: string
+  hours: number
+  price: number
+}
+export interface ProposedPart {
+  name: string
+  partNo: string
+  qty: number
+  unitPrice: number
+  serviceName: string // which proposed service this part is for
+}
+export interface ServiceFinding {
+  id: number
+  taskId: number | null // null = general finding, not tied to a task
+  taskTitle: string | null
+  reportedByName: string | null
+  findings: string
+  photoUrl: string | null
+  services: ProposedService[]
+  parts: ProposedPart[]
+  extraCost: number
+  decision: 'pending' | 'approved' | 'disputed' // disputed = customer declined
+  decidedAt: string | null
+  createdAt: string
+}
+
 export interface ServiceProgressData {
   jobOrderId: string
   sections: ServiceSection[]
   quotationConfirmed: boolean
   purchases: PartsPurchase[]
+  findings: ServiceFinding[]
   // The job-order-level clock (not per-service): when the job went onto the
   // floor, when it's promised back, and the estimated labor. ISO values are
   // kept so the page can tick the running duration live.

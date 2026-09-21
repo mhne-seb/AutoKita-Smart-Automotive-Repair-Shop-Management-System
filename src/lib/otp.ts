@@ -70,3 +70,4 @@ export const OTP_TTL_MINUTES = TTL_MS / 60_000
 // Purposes are part of the signature, so a code issued for one action can't
 // be replayed against another.
 export const QUOTATION_OTP_PURPOSE = 'quotation-approve'
+export const FINDING_OTP_PURPOSE = 'finding-approve'

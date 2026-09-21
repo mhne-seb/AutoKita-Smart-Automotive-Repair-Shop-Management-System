@@ -173,6 +173,8 @@ function Dashboard() {
         return { icon: CheckCircle2, color: "text-success"};
       case "report_ready":
         return { icon: ClipboardCheck, color: "text-brand" };
+      case "job_update":
+        return { icon: Wrench, color: "text-brand" };
       default:
         return { icon: FileText, color: "text-muted-foreground" };
     }

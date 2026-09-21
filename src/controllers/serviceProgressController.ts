@@ -1,6 +1,6 @@
 // serviceProgressController — backed by the real "service_progress_tasks" table.
 
-import type { ServiceProgressData, ServiceSection, ServiceTask, TaskStatus, TaskPart, PartsPurchase, Supplier } from '@/data/types'
+import type { ServiceProgressData, ServiceSection, ServiceTask, TaskStatus, TaskPart, PartsPurchase, Supplier, ServiceFinding } from '@/data/types'
 
 // UI section ids use a hyphen ('in-progress'), the database enum uses an
 // underscore ('in_progress') — this bridges the two.
@@ -115,6 +115,7 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
       mechanicName: row.mechanic_name ?? undefined,
       estimatedFinish: row.estimated_finish ? new Date(row.estimated_finish).toISOString() : undefined,
       photoUrl: row.completion_photo_url ?? undefined,
+      findingId: row.finding_id ?? undefined,
       parts: partsByService.get(row.task_title) ?? [],
     }
     if (!sectionMap.has(sectionId)) sectionMap.set(sectionId, [])
@@ -147,6 +148,7 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
     sections,
     quotationConfirmed,
     purchases,
+    findings: json.findings ?? [],
     timer: {
       startedAtIso: timing.started_at ?? null,
       completedAtIso: timing.completed_at ?? null,
@@ -402,6 +404,7 @@ export async function getInProgressData(userId: number, jobOrderId?: number) {
       labor_hours_estimate: string | number | null
       estimated_finish: string | null
     } | null
+    findings: ServiceFinding[]
   }>
 }
 

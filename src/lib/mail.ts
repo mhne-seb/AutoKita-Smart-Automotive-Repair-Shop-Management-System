@@ -103,19 +103,67 @@ export async function sendOtpEmail(opts: {
 // Sent when the admin uploads an inspection report or quotation to the
 // customer portal for review ("Upload to customer portal" / "Send to
 // Customer") — the pre_diagnostics round itself has no email of its own yet.
+// Plain progress update — a service started, its parts arrived, it finished.
+// Nothing for the customer to do; the button just opens the tracker.
+export async function sendJobUpdateEmail(opts: {
+    to: string
+    name: string
+    jobOrderId: string | number
+    vehicle: string
+    plate: string
+    title: string
+    message: string
+}) {
+    const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const url = `${base}/dashboard/tracking/in-progress?jobOrderId=${opts.jobOrderId}`
+
+    await transporter.sendMail({
+        from: `"AutoKita" <${process.env.GMAIL_USER}>`,
+        to: opts.to,
+        subject: `JO-${opts.jobOrderId}: ${opts.title}`,
+        text:
+            `Hi ${opts.name},
+
+` +
+            `${opts.message}
+
+` +
+            `Vehicle: ${opts.vehicle} (${opts.plate}), job order JO-${opts.jobOrderId}.
+` +
+            `Track it here:
+${url}
+
+— AutoKita`,
+        html: `
+          <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
+            <h2 style="color:#1e3a5f;font-size:26px">${opts.title}</h2>
+            <p style="font-size:16px">Hi ${opts.name},</p>
+            <p style="font-size:16px">${opts.message}</p>
+            <p style="font-size:16px">Your <b>${opts.vehicle} (${opts.plate})</b> — job order <b>JO-${opts.jobOrderId}</b>.</p>
+            <a href="${url}" style="display:inline-block;background:#1e3a5f;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-size:16px">Open service tracker</a>
+          </div>
+        `,
+    })
+}
+
 export async function sendReviewReadyEmail(opts: {
     to: string
     name: string
     jobOrderId: string
     vehicle: string
     plate: string
-    context: 'inspection' | 'quotation'
+    context: 'inspection' | 'quotation' | 'finding'
 }) {
     const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const path = opts.context === 'quotation' ? '/dashboard/tracking/quotation' : '/dashboard/tracking/inspecting'
-    const url = `${base}${path}`
-    const heading = opts.context === 'quotation' ? 'Your quotation is ready for review' : 'Your inspection report is ready for review'
-    const actionLabel = opts.context === 'quotation' ? 'Review quotation' : 'Review inspection report'
+    // One template, three moments the customer is asked to review something.
+    const copy = {
+        inspection: { path: '/dashboard/tracking/inspecting', heading: 'Your inspection report is ready for review', action: 'Review inspection report' },
+        quotation: { path: '/dashboard/tracking/quotation', heading: 'Your quotation is ready for review', action: 'Review quotation' },
+        finding: { path: '/dashboard/tracking/in-progress', heading: 'Your mechanic found something that needs your approval', action: 'Review the finding' },
+    }[opts.context]
+    const url = `${base}${copy.path}`
+    const heading = copy.heading
+    const actionLabel = copy.action
 
     await transporter.sendMail({
         from: `"AutoKita" <${process.env.GMAIL_USER}>`,

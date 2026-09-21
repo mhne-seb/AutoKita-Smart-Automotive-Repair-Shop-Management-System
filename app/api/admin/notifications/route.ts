@@ -10,27 +10,28 @@ export async function GET() {
       db.query('SELECT * FROM get_service_tickets_queue()'),
       db.query('SELECT * FROM get_job_orders_list()'),
       db.query('SELECT * FROM get_payment_records()'),
-      // The customer's latest answer on each job order's inspection report.
-      // DISTINCT ON keeps only the newest round per job order, so a dispute
-      // that was later revised and approved shows the approval, not both.
-      // Inline query — no stored function covers pre_diagnostics + audit log.
+      // Every yes/no the customer has given, newest first — inspection report
+      // (pre_diagnostics round), quotation (2FA confirm on job_orders), and
+      // mid-service findings. These are history, not to-dos: they stay in
+      // the list so the shop can always see what the customer decided.
+      // A customer's audit row always has user_id set; staff rows don't.
       db.query(
-        `SELECT DISTINCT ON (vi.job_order_id)
-                vi.job_order_id,
-                pd.customer_approval_status::text AS status,
-                sal.new_values                     AS reason,
-                sal.action_date                    AS responded_at,
-                u.first_name, u.last_name
-         FROM pre_diagnostics pd
-         JOIN vehicle_inspections vi ON vi.id = pd.inspection_id
-         JOIN job_orders jo          ON jo.id = vi.job_order_id
-         JOIN users u                ON u.id = jo.user_id
-         LEFT JOIN system_audit_logs sal
-           ON sal.entity_type = 'pre_diagnostics'
-          AND sal.entity_id = pd.id
-          AND sal.action_performed IN ('approved', 'rejected')
-         WHERE pd.customer_approval_status IN ('approved', 'disputed')
-         ORDER BY vi.job_order_id, pd.datetime_created DESC`,
+        `SELECT sal.id, sal.entity_type, sal.action_performed::text AS action,
+                sal.new_values, sal.action_date,
+                jo.id AS job_order_id, u.first_name, u.last_name,
+                pd.mechanic_notes, sf.extra_cost
+         FROM system_audit_logs sal
+         LEFT JOIN pre_diagnostics pd     ON sal.entity_type = 'pre_diagnostics'  AND pd.id = sal.entity_id
+         LEFT JOIN vehicle_inspections vi ON vi.id = pd.inspection_id
+         LEFT JOIN service_findings sf    ON sal.entity_type = 'service_findings' AND sf.id = sal.entity_id
+         JOIN job_orders jo ON jo.id = COALESCE(vi.job_order_id, sf.job_order_id,
+                                                CASE WHEN sal.entity_type = 'job_orders' THEN sal.entity_id END)
+         JOIN users u ON u.id = jo.user_id
+         WHERE sal.user_id IS NOT NULL
+           AND sal.action_performed IN ('approved', 'rejected')
+           AND sal.entity_type IN ('pre_diagnostics', 'job_orders', 'service_findings')
+         ORDER BY sal.action_date DESC
+         LIMIT 30`,
       ),
       // get_job_orders_list() only has jo_date (a plain DATE, no time — the
       // job order was 'created' by create_job_order_from_ticket() at some
@@ -102,33 +103,45 @@ export async function GET() {
       }
     }
 
-    // 3. Customer answered the inspection report.
-    //    - Disputed: shows until the mechanic sends a revised round (the
-    //      DISTINCT ON above then returns that newer 'pending' round, which
-    //      isn't in this set — so it self-clears).
-    //    - Approved: shows while the job order still sits at
-    //      pending_customer_approval, i.e. until the admin builds the quotation.
-    const joStatus = new Map(jobOrders.rows.map((jo: { id: number; status: string }) => [jo.id, jo.status]))
+    // 3. What the customer decided — one entry per answer, kept as history.
     for (const r of responses.rows) {
-      if (r.status === 'disputed') {
-        notifs.push({
-          notif_key: `inspection-disputed-${r.job_order_id}`,
-          title: 'Customer has a concern',
-          message: `${name(r.first_name, r.last_name)} raised a concern on JO-${r.job_order_id}${
-            r.reason ? `: "${short(r.reason, 100)}"` : ''
-          }. Call them, revise the findings, and send the report again.`,
-          notif_time: r.responded_at,
-          href: `/job-orders/${r.job_order_id}/inspection`,
-        })
-      } else if (r.status === 'approved' && joStatus.get(r.job_order_id) === 'pending_customer_approval') {
-        notifs.push({
-          notif_key: `inspection-approved-${r.job_order_id}`,
-          title: 'Inspection approved',
-          message: `${name(r.first_name, r.last_name)} approved the inspection for JO-${r.job_order_id}. Prepare the quotation.`,
-          notif_time: r.responded_at,
-          href: `/job-orders/${r.job_order_id}/quotation`,
-        })
+      const who = name(r.first_name, r.last_name)
+      const jo = `JO-${r.job_order_id}`
+      const approved = r.action === 'approved'
+      let title = ''
+      let message = ''
+      let href = `/job-orders/${r.job_order_id}/progress`
+
+      if (r.entity_type === 'pre_diagnostics') {
+        // Both stages share pre_diagnostics; quotation rounds are the ones
+        // whose notes start with "Quotation total:" (see tracking/quotation).
+        const isQuotation = String(r.mechanic_notes ?? '').startsWith('Quotation total:')
+        const stage = isQuotation ? 'quotation' : 'inspection'
+        href = `/job-orders/${r.job_order_id}/${stage}`
+        if (approved) {
+          title = isQuotation ? 'Quotation approved' : 'Inspection approved'
+          message = `${who} approved the ${stage} for ${jo}.${isQuotation ? '' : ' Prepare the quotation.'}`
+        } else {
+          title = 'Customer has a concern'
+          message = `${who} raised a concern on the ${stage} for ${jo}${r.new_values ? `: "${short(r.new_values, 100)}"` : ''}. Revise it and send it again.`
+        }
+      } else if (r.entity_type === 'job_orders') {
+        // The 2FA confirm on the quotation (see tracking/quotation/confirm).
+        let accepted = 0
+        try { accepted = (JSON.parse(r.new_values ?? '{}').accepted_service_ids ?? []).length } catch { /* not JSON */ }
+        title = 'Quotation confirmed'
+        message = `${who} confirmed the quotation for ${jo}${accepted ? ` (${accepted} service${accepted === 1 ? '' : 's'})` : ''}. Schedule the work.`
+      } else if (r.entity_type === 'service_findings') {
+        const cost = peso(r.extra_cost)
+        title = approved ? 'Additional work approved' : 'Additional work declined'
+        message = approved
+          ? `${who} approved ${cost} of additional work on ${jo}. Schedule the new service and order its parts.`
+          : `${who} declined ${cost} of additional work on ${jo}. It stays on the job as a recommendation.`
+      } else {
+        continue
       }
+
+      notifs.push({ notif_key: `decision-${r.id}`, title, message, notif_time: r.action_date, href })
     }
 
     // 4. Payment proof waiting for manual verification (clears once verified)
