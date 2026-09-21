@@ -142,6 +142,7 @@ export interface TaskPart {
   purchaseOrderId?: number
   supplierName?: string
   purchasedOn?: string
+  unitCost?: number // what the shop paid per unit (supplier_unit_cost)
 }
 
 // One "Record purchase" save — a purchase_orders row and the parts it covered.
@@ -151,6 +152,7 @@ export interface PartsPurchase {
   purchasedOn: string
   totalCost: number
   partCount: number
+  status: string // purchase_orders.status: sent | partially_received | fulfilled
 }
 
 export interface Supplier {
