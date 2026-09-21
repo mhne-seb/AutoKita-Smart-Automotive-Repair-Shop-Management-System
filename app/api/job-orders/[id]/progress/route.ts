@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { getFindingsForJobOrder } from '@/lib/findings'
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -20,6 +21,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           spt.scheduled_date,
           spt.mechanic_id,
           spt.completion_photo_url,
+          spt.finding_id,
           spt.scheduled_date + (jos.estimated_hours * INTERVAL '1 hour') as estimated_finish,
           e.full_name as mechanic_name
         FROM service_progress_tasks spt
@@ -70,12 +72,17 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       [id],
     )
 
+    // Mid-service findings — pending ones drive the "awaiting approval"
+    // banner and the page's polling; decided ones are history.
+    const findings = await getFindingsForJobOrder(Number(id))
+
     return NextResponse.json({
       success: true,
       data: result.rows,
       timing: timingResult.rows[0] ?? null,
       parts: partsResult.rows,
       purchases: purchasesResult.rows,
+      findings,
     })
   } catch (error) {
     console.error('Service progress fetch error:', error)
