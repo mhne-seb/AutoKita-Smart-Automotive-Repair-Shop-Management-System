@@ -1,303 +1,275 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { Plus, Printer, Trash2, X } from 'lucide-react'
-import { getJobOrderById } from '../../data/jobOrders'
-import { getQuotationById } from '../../data/quotations'
-import { currency } from '../../data/mockData'
-const autokitaLogo = '/assets/autokita-logo.png' 
+// GenerateJobOrderModal — the printable Job Order, laid out like the shop's
+// paper form (letterhead; name / date / address / date promised / phone /
+// plate / year & model; parts on the left, work on the right; totals;
+// partial payment; balance). Pre-filled from the database
+// (/api/job-orders/[id]/document); every line stays editable so the shop
+// can tidy wording or add a hand-written extra before printing.
+
+import { useEffect, useMemo, useState } from 'react'
+import { Loader2, Plus, Printer, Trash2, X } from 'lucide-react'
+import { SHOP_PROFILE } from '@/data/shopProfile'
 
 interface Props {
   jobOrderId: string
   onClose: () => void
 }
 
-interface PartRow {
-  id: string
-  qty: number
-  description: string
-  unitPrice: number
-}
+interface PartRow { id: string; qty: number; description: string; unitPrice: number }
+interface WorkRow { id: string; description: string; amount: number }
+interface PayRow { id: string; label: string; amount: number }
 
-interface WorkRow {
-  id: string
-  description: string
-  amount: number
-}
+const peso = (n: number) => n.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+const fmtDate = (iso: string | null | undefined) =>
+  iso ? new Date(iso).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase() : ''
 
-function LineInput({
-  value,
-  onChange,
-  className = '',
-  align = 'left',
-}: {
-  value: string
-  onChange: (v: string) => void
-  className?: string
-  align?: 'left' | 'right' | 'center'
-}) {
+let seq = 0
+const rid = (p: string) => `${p}-${++seq}`
+
+function Line({ value, onChange, align = 'left', bold = false }: { value: string; onChange: (v: string) => void; align?: 'left' | 'right'; bold?: boolean }) {
   return (
     <input
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full border-b border-dotted border-slate-300 bg-transparent px-1 py-0.5 text-sm text-slate-900 outline-none focus:border-slate-500 ${
-        align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left'
-      } ${className}`}
+      className={`w-full min-w-0 bg-transparent px-1 py-0.5 text-[13px] text-slate-900 outline-none focus:bg-amber-50 ${align === 'right' ? 'text-right' : ''} ${bold ? 'font-semibold' : ''}`}
     />
   )
 }
-
-function NumberInput({
-  value,
-  onChange,
-  className = '',
-}: {
-  value: number
-  onChange: (v: number) => void
-  className?: string
-}) {
+function Num({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
     <input
       type="number"
-      value={value}
+      value={value === 0 ? '' : value}
+      placeholder="0"
       onChange={(e) => onChange(Number(e.target.value) || 0)}
-      className={`w-full border-b border-dotted border-slate-300 bg-transparent px-1 py-0.5 text-right text-sm text-slate-900 outline-none focus:border-slate-500 ${className}`}
+      className="w-full min-w-0 bg-transparent px-1 py-0.5 text-right text-[13px] text-slate-900 outline-none focus:bg-amber-50"
     />
   )
 }
 
 export function GenerateJobOrderModal({ jobOrderId, onClose }: Props) {
-  const jobOrder = getJobOrderById(jobOrderId)
-  const quotation = getQuotationById(jobOrderId)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const [name, setName] = useState(jobOrder?.customer ?? '')
+  const [name, setName] = useState('')
   const [address, setAddress] = useState('')
   const [phone, setPhone] = useState('')
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
+  const [date, setDate] = useState('')
   const [datePromised, setDatePromised] = useState('')
-  const [motorNo, setMotorNo] = useState(jobOrder?.plate ?? '')
-  const [yearModel, setYearModel] = useState(jobOrder?.vehicle ?? '')
+  const [plate, setPlate] = useState('')
+  const [yearModel, setYearModel] = useState('')
+  const [partRows, setPartRows] = useState<PartRow[]>([])
+  const [workRows, setWorkRows] = useState<WorkRow[]>([])
+  const [payRows, setPayRows] = useState<PayRow[]>([])
 
-  const [partRows, setPartRows] = useState<PartRow[]>(() => {
-    const fromQuotation = quotation?.services.flatMap((s) =>
-      s.parts.map((p) => ({ id: p.id, qty: p.qty, description: p.name, unitPrice: p.unitPrice }))
-    )
-    return fromQuotation && fromQuotation.length > 0
-      ? fromQuotation
-      : [{ id: `part-${Date.now()}`, qty: 1, description: '', unitPrice: 0 }]
-  })
+  useEffect(() => {
+    let active = true
+    fetch(`/api/job-orders/${jobOrderId}/document`, { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!active) return
+        if (!d.success) { setError(d.message ?? 'Could not load the job order.'); return }
+        setName(d.customer.name)
+        setAddress(d.customer.address)
+        setPhone(d.customer.phone)
+        setDate(fmtDate(d.date))
+        setDatePromised(fmtDate(d.datePromised))
+        setPlate(d.vehicle.plate)
+        setYearModel(d.vehicle.yearModel)
+        setPartRows(d.parts.map((p: Omit<PartRow, 'id'>) => ({ id: rid('p'), ...p })))
+        setWorkRows(d.services.map((s: Omit<WorkRow, 'id'>) => ({ id: rid('w'), ...s })))
+        setPayRows(d.payments.map((p: { amount: number; label: string }) => ({ id: rid('pay'), label: `PARTIAL PAYMENT ${p.label}`.trim(), amount: p.amount })))
+      })
+      .catch(() => active && setError('Could not load the job order.'))
+      .finally(() => active && setLoading(false))
+    return () => { active = false }
+  }, [jobOrderId])
 
-  const [workRows, setWorkRows] = useState<WorkRow[]>(() => {
-    const fromQuotation = quotation?.services.map((s) => ({ id: s.id, description: s.name, amount: s.laborCost }))
-    return fromQuotation && fromQuotation.length > 0
-      ? fromQuotation
-      : [{ id: `work-${Date.now()}`, description: '', amount: 0 }]
-  })
-
-  const [partialPayment, setPartialPayment] = useState(0)
-  const [partialPaymentMode, setPartialPaymentMode] = useState('BDO')
-
-  const totalParts = useMemo(() => partRows.reduce((sum, p) => sum + p.qty * p.unitPrice, 0), [partRows])
-  const totalService = useMemo(() => workRows.reduce((sum, w) => sum + w.amount, 0), [workRows])
+  const totalParts = useMemo(() => partRows.reduce((s, p) => s + p.qty * p.unitPrice, 0), [partRows])
+  const totalService = useMemo(() => workRows.reduce((s, w) => s + w.amount, 0), [workRows])
+  const totalPaid = useMemo(() => payRows.reduce((s, p) => s + p.amount, 0), [payRows])
   const grandTotal = totalParts + totalService
-  const balance = grandTotal - partialPayment
+  const balance = grandTotal - totalPaid
 
-  function updatePart(id: string, patch: Partial<PartRow>) {
-    setPartRows((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)))
-  }
-  function addPartRow() {
-    setPartRows((prev) => [...prev, { id: `part-${Date.now()}`, qty: 1, description: '', unitPrice: 0 }])
-  }
-  function removePartRow(id: string) {
-    setPartRows((prev) => prev.filter((p) => p.id !== id))
-  }
+  const patch = <T extends { id: string }>(set: React.Dispatch<React.SetStateAction<T[]>>) => (id: string, p: Partial<T>) =>
+    set((prev) => prev.map((r) => (r.id === id ? { ...r, ...p } : r)))
+  const remove = <T extends { id: string }>(set: React.Dispatch<React.SetStateAction<T[]>>) => (id: string) =>
+    set((prev) => prev.filter((r) => r.id !== id))
+  const updatePart = patch(setPartRows), removePart = remove(setPartRows)
+  const updateWork = patch(setWorkRows), removeWork = remove(setWorkRows)
+  const updatePay = patch(setPayRows), removePay = remove(setPayRows)
 
-  function updateWork(id: string, patch: Partial<WorkRow>) {
-    setWorkRows((prev) => prev.map((w) => (w.id === id ? { ...w, ...patch } : w)))
-  }
-  function addWorkRow() {
-    setWorkRows((prev) => [...prev, { id: `work-${Date.now()}`, description: '', amount: 0 }])
-  }
-  function removeWorkRow(id: string) {
-    setWorkRows((prev) => prev.filter((w) => w.id !== id))
-  }
+  const rowCount = Math.max(partRows.length, workRows.length, 8) // paper form has room for a few blank lines
 
-  const rowCount = Math.max(partRows.length, workRows.length)
+  const cell = 'border border-slate-400 px-1.5 py-1 align-top'
+  const head = 'border border-slate-400 bg-slate-100 px-1.5 py-1.5 text-left text-[11px] font-bold uppercase tracking-wide text-slate-700'
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-4 no-print-overlay">
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-4">
       <style>{`
         @media print {
+          @page { size: A4 portrait; margin: 12mm; }
           body * { visibility: hidden; }
-          .jo-print-area, .jo-print-area * { visibility: visible; }
-          .jo-print-area { position: absolute; inset: 0; width: 100%; box-shadow: none !important; border: none !important; }
+          .jo-sheet, .jo-sheet * { visibility: visible; }
+          .jo-sheet { position: absolute; inset: 0; width: 100%; margin: 0; padding: 0; box-shadow: none !important; border: none !important; }
           .no-print { display: none !important; }
+          input { border: none !important; background: transparent !important; }
         }
       `}</style>
 
-      <div className="jo-print-area flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
-        {/* Toolbar (hidden on print) */}
-        <div className="no-print flex items-center justify-between border-b border-slate-200 px-6 py-4">
+      <div className="flex max-h-[94vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
+        {/* Toolbar */}
+        <div className="no-print flex items-center justify-between border-b border-slate-200 px-6 py-3">
           <div>
-            <p className="font-bold text-slate-900">Generate Job Order</p>
-            <p className="text-xs text-slate-400">Edit any field below, then print or download.</p>
+            <p className="font-bold text-slate-900">Job Order · JO-{jobOrderId}</p>
+            <p className="text-xs text-slate-400">Pre-filled from the quotation. Click any line to edit before printing.</p>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => window.print()}
-              className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-            >
+            <button onClick={() => window.print()} disabled={loading} className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50">
               <Printer size={14} /> Print
             </button>
-            <button onClick={onClose} aria-label="Close" className="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-50">
-              <X size={16} />
-            </button>
+            <button onClick={onClose} aria-label="Close" className="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"><X size={16} /></button>
           </div>
         </div>
 
-        {/* Printable sheet */}
-        <div className="overflow-y-auto px-8 py-6">
-          <div className="flex items-start gap-4">
-            <img src={autokitaLogo} alt="AutoKita" className="h-16 w-16 shrink-0 object-contain" />
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">JOB ORDER</h1>
-              <div className="mt-1 text-sm">
-                <p className="font-bold text-slate-900">AUTOKITA AUTOMOTIVE MECHANICAL SERVICES</p>
-                <p className="text-slate-600">971 Domingo Santiago, Brgy. 576, Sampaloc, Manila</p>
-                <p className="text-slate-600">0921-758-2490 / 0945-456-8431</p>
+        {loading ? (
+          <div className="flex items-center justify-center gap-2 p-16 text-sm text-slate-400"><Loader2 size={16} className="animate-spin" /> Loading job order…</div>
+        ) : error ? (
+          <div className="p-16 text-center text-sm text-rose-600">{error}</div>
+        ) : (
+          <div className="overflow-y-auto bg-slate-100 p-4 sm:p-6">
+            {/* The A4 sheet */}
+            <div className="jo-sheet mx-auto w-full max-w-[210mm] bg-white p-8 text-slate-900 shadow-md">
+              {/* Letterhead */}
+              <div className="flex items-start justify-between gap-4 border-b-2 border-slate-900 pb-3">
+                <div className="flex items-center gap-3">
+                  <img src={SHOP_PROFILE.logo} alt="" className="h-14 w-14 object-contain" />
+                  <div className="text-[12px] leading-snug">
+                    <p className="text-[14px] font-bold">{SHOP_PROFILE.name}</p>
+                    <p>{SHOP_PROFILE.address}</p>
+                    <p>{SHOP_PROFILE.phones.join(' / ')}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <h1 className="text-2xl font-black tracking-tight">JOB ORDER</h1>
+                  <p className="mt-0.5 inline-block rounded bg-slate-900 px-2 py-0.5 text-xs font-bold text-white">No. JO-{jobOrderId}</p>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-x-8 gap-y-2 rounded-lg border border-slate-200 p-4 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="w-28 shrink-0 font-semibold text-slate-500">Name:</span>
-              <LineInput value={name} onChange={setName} />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-28 shrink-0 font-semibold text-slate-500">Date:</span>
-              <LineInput value={date} onChange={setDate} />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-28 shrink-0 font-semibold text-slate-500">Address:</span>
-              <LineInput value={address} onChange={setAddress} />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-28 shrink-0 font-semibold text-slate-500">Date Promised:</span>
-              <LineInput value={datePromised} onChange={setDatePromised} />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-28 shrink-0 font-semibold text-slate-500">Phone:</span>
-              <LineInput value={phone} onChange={setPhone} />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-28 shrink-0 font-semibold text-slate-500">Motor No.:</span>
-              <LineInput value={motorNo} onChange={setMotorNo} />
-            </div>
-            <div className="col-span-2 flex items-center gap-2">
-              <span className="w-28 shrink-0 font-semibold text-slate-500">Year &amp; Model:</span>
-              <LineInput value={yearModel} onChange={setYearModel} />
-            </div>
-          </div>
+              {/* Customer / vehicle block — same fields, same order, as the paper form */}
+              <div className="mt-4 grid grid-cols-2 border border-slate-400 text-[13px]">
+                {[
+                  ['Name', name, setName], ['Date', date, setDate],
+                  ['Address', address, setAddress], ['Date Promised', datePromised, setDatePromised],
+                  ['Phone', phone, setPhone], ['Plate No.', plate, setPlate],
+                ].map(([label, value, set], i) => (
+                  <div key={label as string} className={`flex items-center gap-2 border-slate-400 px-2 py-1 ${i % 2 === 0 ? 'border-r' : ''} ${i < 4 ? 'border-b' : ''}`}>
+                    <span className="w-28 shrink-0 font-semibold text-slate-600">{label as string}:</span>
+                    <Line value={value as string} onChange={set as (v: string) => void} />
+                  </div>
+                ))}
+                <div className="col-span-2 flex items-center gap-2 border-t border-slate-400 px-2 py-1">
+                  <span className="w-28 shrink-0 font-semibold text-slate-600">Year &amp; Model:</span>
+                  <Line value={yearModel} onChange={setYearModel} />
+                </div>
+              </div>
 
-          {/* Line items table */}
-          <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 bg-rose-50 text-rose-700">
-                  <th className="w-12 border-r border-slate-200 px-2 py-2 text-left font-bold">QTY</th>
-                  <th className="border-r border-slate-200 px-2 py-2 text-left font-bold">PARTS NO. AND DESCRIPTION</th>
-                  <th className="w-20 border-r border-slate-200 px-2 py-2 text-right font-bold">Unit Price</th>
-                  <th className="w-24 border-r border-slate-200 px-2 py-2 text-right font-bold">AMOUNT</th>
-                  <th className="border-r border-slate-200 px-2 py-2 text-left font-bold">DESCRIPTION OF WORK</th>
-                  <th className="w-24 px-2 py-2 text-right font-bold">AMOUNT</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Array.from({ length: rowCount }).map((_, i) => {
-                  const part = partRows[i]
-                  const work = workRows[i]
-                  return (
-                    <tr key={i} className="border-b border-slate-100 last:border-0">
-                      <td className="border-r border-slate-100 px-2 py-1.5 align-top">
-                        {part && <NumberInput value={part.qty} onChange={(v) => updatePart(part.id, { qty: v })} />}
-                      </td>
-                      <td className="border-r border-slate-100 px-2 py-1.5 align-top">
-                        {part && (
-                          <div className="flex items-center gap-1">
-                            <LineInput value={part.description} onChange={(v) => updatePart(part.id, { description: v })} />
-                            <button onClick={() => removePartRow(part.id)} className="no-print shrink-0 text-slate-300 hover:text-rose-500">
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                      <td className="border-r border-slate-100 px-2 py-1.5 align-top">
-                        {part && <NumberInput value={part.unitPrice} onChange={(v) => updatePart(part.id, { unitPrice: v })} />}
-                      </td>
-                      <td className="border-r border-slate-100 px-2 py-1.5 text-right align-top font-semibold text-slate-800">
-                        {part ? currency(part.qty * part.unitPrice) : ''}
-                      </td>
-                      <td className="border-r border-slate-100 px-2 py-1.5 align-top">
-                        {work && (
-                          <div className="flex items-center gap-1">
-                            <LineInput value={work.description} onChange={(v) => updateWork(work.id, { description: v })} />
-                            <button onClick={() => removeWorkRow(work.id)} className="no-print shrink-0 text-slate-300 hover:text-rose-500">
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-2 py-1.5 align-top">
-                        {work && <NumberInput value={work.amount} onChange={(v) => updateWork(work.id, { amount: v })} />}
-                      </td>
+              {/* Parts | Work */}
+              <table className="mt-4 w-full border-collapse text-[13px]">
+                <thead>
+                  <tr>
+                    <th className={`${head} w-12`}>Qty</th>
+                    <th className={head}>Parts No. and Description</th>
+                    <th className={`${head} w-20 text-right`}>Unit Price</th>
+                    <th className={`${head} w-24 text-right`}>Amount</th>
+                    <th className={head}>Description of Work</th>
+                    <th className={`${head} w-24 text-right`}>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: rowCount }).map((_, i) => {
+                    const part = partRows[i]
+                    const work = workRows[i]
+                    return (
+                      <tr key={i}>
+                        <td className={cell}>{part && <Num value={part.qty} onChange={(v) => updatePart(part.id, { qty: v })} />}</td>
+                        <td className={cell}>
+                          {part && (
+                            <div className="flex items-center gap-1">
+                              <Line value={part.description} onChange={(v) => updatePart(part.id, { description: v })} />
+                              <button onClick={() => removePart(part.id)} className="no-print shrink-0 text-slate-300 hover:text-rose-500" aria-label="Remove part"><Trash2 size={12} /></button>
+                            </div>
+                          )}
+                        </td>
+                        <td className={cell}>{part && <Num value={part.unitPrice} onChange={(v) => updatePart(part.id, { unitPrice: v })} />}</td>
+                        <td className={`${cell} text-right tabular-nums`}>{part ? peso(part.qty * part.unitPrice) : ''}</td>
+                        <td className={cell}>
+                          {work && (
+                            <div className="flex items-center gap-1">
+                              <Line value={work.description} onChange={(v) => updateWork(work.id, { description: v })} />
+                              <button onClick={() => removeWork(work.id)} className="no-print shrink-0 text-slate-300 hover:text-rose-500" aria-label="Remove work"><Trash2 size={12} /></button>
+                            </div>
+                          )}
+                        </td>
+                        <td className={cell}>{work && <Num value={work.amount} onChange={(v) => updateWork(work.id, { amount: v })} />}</td>
+                      </tr>
+                    )
+                  })}
+                  <tr className="font-bold">
+                    <td colSpan={3} className={`${cell} bg-slate-50`}>TOTAL PARTS</td>
+                    <td className={`${cell} bg-slate-50 text-right tabular-nums`}>{peso(totalParts)}</td>
+                    <td className={`${cell} bg-slate-50`}>TOTAL SERVICE</td>
+                    <td className={`${cell} bg-slate-50 text-right tabular-nums`}>{peso(totalService)}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div className="no-print mt-1 flex gap-4 text-xs">
+                <button onClick={() => setPartRows((p) => [...p, { id: rid('p'), qty: 1, description: '', unitPrice: 0 }])} className="flex items-center gap-1 font-semibold text-emerald-600 hover:underline"><Plus size={12} /> Add part line</button>
+                <button onClick={() => setWorkRows((w) => [...w, { id: rid('w'), description: '', amount: 0 }])} className="flex items-center gap-1 font-semibold text-emerald-600 hover:underline"><Plus size={12} /> Add work line</button>
+              </div>
+
+              {/* Totals + signatures */}
+              <div className="mt-4 flex flex-col items-start justify-between gap-6 sm:flex-row">
+                <div className="text-[12px]">
+                  <p className="mb-8 text-slate-500">Received the vehicle and agreed to the above:</p>
+                  <div className="w-56 border-t border-slate-900 pt-1">Customer signature over printed name</div>
+                  <div className="mt-8 w-56 border-t border-slate-900 pt-1">Prepared by</div>
+                </div>
+                <table className="w-full max-w-[320px] border-collapse text-[13px]">
+                  <tbody>
+                    <tr className="font-bold">
+                      <td className={cell}>GRAND TOTAL</td>
+                      <td className={`${cell} text-right tabular-nums`}>{peso(grandTotal)}</td>
                     </tr>
-                  )
-                })}
-                <tr className="border-t border-slate-200 font-bold text-rose-700">
-                  <td colSpan={3} className="border-r border-slate-100 px-2 py-2">
-                    TOTAL PARTS
-                  </td>
-                  <td className="border-r border-slate-100 px-2 py-2 text-right">{currency(totalParts)}</td>
-                  <td className="border-r border-slate-100 px-2 py-2">TOTAL SERVICE</td>
-                  <td className="px-2 py-2 text-right">{currency(totalService)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                    {payRows.map((p) => (
+                      <tr key={p.id}>
+                        <td className={cell}>
+                          <div className="flex items-center gap-1">
+                            <Line value={p.label} onChange={(v) => updatePay(p.id, { label: v })} />
+                            <button onClick={() => removePay(p.id)} className="no-print shrink-0 text-slate-300 hover:text-rose-500" aria-label="Remove payment"><Trash2 size={12} /></button>
+                          </div>
+                        </td>
+                        <td className={`${cell} text-right tabular-nums`}>
+                          <div className="flex items-center justify-end">(<Num value={p.amount} onChange={(v) => updatePay(p.id, { amount: v })} />)</div>
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="text-[15px] font-black">
+                      <td className={`${cell} bg-slate-50`}>BALANCE</td>
+                      <td className={`${cell} bg-slate-50 text-right tabular-nums`}>{peso(balance)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="no-print mt-1 flex justify-end text-xs">
+                <button onClick={() => setPayRows((p) => [...p, { id: rid('pay'), label: 'PARTIAL PAYMENT', amount: 0 }])} className="flex items-center gap-1 font-semibold text-emerald-600 hover:underline"><Plus size={12} /> Add payment line</button>
+              </div>
 
-          <div className="no-print mt-2 flex gap-3">
-            <button onClick={addPartRow} className="flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:underline">
-              <Plus size={12} /> Add Part Row
-            </button>
-            <button onClick={addWorkRow} className="flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:underline">
-              <Plus size={12} /> Add Work Row
-            </button>
-          </div>
-
-          {/* Totals block */}
-          <div className="mt-5 ml-auto w-full max-w-xs space-y-1 rounded-lg border border-slate-200 p-4 text-sm">
-            <div className="flex items-center justify-between text-base font-bold text-slate-900">
-              <span>GRAND TOTAL</span>
-              <span>{currency(grandTotal)}</span>
-            </div>
-            <div className="flex items-center justify-between gap-2">
-              <span className="flex items-center gap-1 text-slate-500">
-                PARTIAL PAYMENT
-                <input
-                  value={partialPaymentMode}
-                  onChange={(e) => setPartialPaymentMode(e.target.value)}
-                  className="w-14 border-b border-dotted border-slate-300 bg-transparent text-xs outline-none"
-                />
-              </span>
-              <NumberInput value={partialPayment} onChange={setPartialPayment} className="w-24" />
-            </div>
-            <div className="flex items-center justify-between border-t border-slate-100 pt-1.5 text-base font-bold text-rose-600">
-              <span>BALANCE</span>
-              <span>{currency(balance)}</span>
+              <p className="mt-6 text-[10px] text-slate-400">Generated by AutoKita · {new Date().toLocaleString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
