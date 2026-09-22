@@ -68,8 +68,7 @@ export function DashHeader() {
               title: a.title,
               message: a.description,
               time: timeAgo(a.time),
-            href: a.job_order_id ? `/dashboard/tracking/${a.job_order_id}` : '/dashboard',
-              href: a.href,
+              href: a.href || (a.job_order_id ? `/dashboard/tracking/${a.job_order_id}` : '/dashboard'),
             }),
           );
           setNotifications(items);

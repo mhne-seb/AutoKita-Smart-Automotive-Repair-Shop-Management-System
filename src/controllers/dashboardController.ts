@@ -304,9 +304,9 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
         description: r.type === 'status_change' ? humanizeStatusChange(r.description) : r.description,
         time: r.time ?? r.job_time ?? '',
         job_order_id: r.job_order_id,
-        href: `/dashboard/tracking/${slug}?jobOrderId=${r.job_order_id}`,
+        href: r.job_order_id ? `/dashboard/tracking/${slug}?jobOrderId=${r.job_order_id}` : '/dashboard',
+        days_remaining: r.days_remaining,
       }
-      days_remaining: r.days_remaining,
     })
     .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
     .slice(0, 10)
