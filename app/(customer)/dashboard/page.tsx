@@ -33,6 +33,7 @@ import {
   ShieldCheck,
   Download,
   Calendar,
+  CalendarClock,
   Camera,
   XCircle,
 } from "lucide-react";
@@ -189,6 +190,8 @@ function Dashboard() {
         return { icon: CheckCircle2, color: "text-success"};
       case "report_ready":
         return { icon: ClipboardCheck, color: "text-brand" };
+      case "appointment_reminder":
+        return { icon: CalendarClock, color: "text-amber-500" };
       case "job_update":
         return { icon: Wrench, color: "text-brand" };
       default:
@@ -698,6 +701,12 @@ function HistoryModal({ activities, onClose }: { activities: DashboardActivity[]
         return { icon: Wrench, color: "text-brand" };
       case "status_change":
         return { icon: RefreshCw, color: "text-warning" };
+      case "booking_accepted":
+        return { icon: CheckCircle2, color: "text-success" };
+      case "report_ready":
+        return { icon: ClipboardCheck, color: "text-brand" };
+      case "appointment_reminder":
+        return { icon: CalendarClock, color: "text-amber-500" };
       default:
         return { icon: FileText, color: "text-muted-foreground" };
     }

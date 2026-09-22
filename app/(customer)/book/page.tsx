@@ -348,6 +348,23 @@ function BookPage() {
         f.province === OTHERS ? f.provinceOther : f.province,
       ].filter(Boolean).join(", ");
 
+      let preferredDatetime: string | null = null;
+      if (f.date instanceof Date && !isNaN(f.date.getTime())) {
+        const dt = new Date(f.date);
+        if (f.time) {
+          const match = f.time.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+          if (match) {
+            let hours = parseInt(match[1], 10);
+            const minutes = parseInt(match[2], 10);
+            const ampm = match[3]?.toUpperCase();
+            if (ampm === "PM" && hours < 12) hours += 12;
+            if (ampm === "AM" && hours === 12) hours = 0;
+            dt.setHours(hours, minutes, 0, 0);
+          }
+        }
+        preferredDatetime = dt.toISOString();
+      }
+
       const res = await fetch("/api/customer/booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -370,6 +387,7 @@ function BookPage() {
           },
           serviceMode: f.pickup === "home" ? "Home Service" : "Walk In",
           homeAddress: address,
+          preferredDatetime,
           customerConcern: `Requested: ${slot} | Service: ${category} | ${f.concern || "No specific concerns"}`,
           // Only true when the category needs the scanner AND the box was ticked;
           // the server records it as a consent event against the ticket.

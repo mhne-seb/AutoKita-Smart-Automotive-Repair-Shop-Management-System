@@ -87,12 +87,12 @@ const TOOLS: ChatCompletionTool[] = [
     type: 'function',
     function: {
       name: 'get_part_fitment',
-      description: 'Look up OEM parts compatible with a vehicle from the shop database. Covers Toyota Hiace 2012 only. Always use this tool for part number lookups — never guess or fabricate part numbers.',
+      description: 'Look up OEM parts compatible with a vehicle from the shop database. Covers Toyota Hiace (2005–2013), Toyota Hilux (2005–2011), and Toyota Vios (2005–2011). Always use this tool for part number lookups — never guess or fabricate part numbers.',
       parameters: {
         type: 'object',
         properties: {
-          vehicle_model:  { type: 'string', description: 'Model name — use "Hiace"' },
-          vehicle_year:   { type: 'number', description: 'Year of the vehicle — use 2012' },
+          vehicle_model:  { type: 'string', description: 'Model name (e.g. "Hiace", "Hilux", or "Vios")' },
+          vehicle_year:   { type: 'number', description: 'Year of the vehicle (e.g. 2010, 2011, 2012)' },
           part_category:  { type: 'string', description: 'Category filter: "Body", "Chassis & Driveline", "Electrical", or "Engine & Fuel"' },
         },
         required: [],
@@ -103,12 +103,12 @@ const TOOLS: ChatCompletionTool[] = [
     type: 'function',
     function: {
       name: 'search_parts_by_name',
-      description: 'Search the shop\'s OEM parts database by part name keyword (e.g. "oil filter", "brake pad", "timing belt"). Returns exact OEM part numbers with vehicle fitment. Covers Toyota Hiace 2012 only. Always use this for parts questions — never fabricate part numbers.',
+      description: 'Search the shop\'s OEM parts database by part name keyword (e.g. "oil filter", "brake pad", "timing belt"). Returns exact OEM part numbers with vehicle fitment. Covers Toyota Hiace, Hilux, and Vios. Always use this for parts questions — never fabricate part numbers.',
       parameters: {
         type: 'object',
         properties: {
           keyword:        { type: 'string', description: 'Part name keyword to search (e.g. "oil filter")' },
-          vehicle_model:  { type: 'string', description: 'Optional: use "Hiace" to narrow results' },
+          vehicle_model:  { type: 'string', description: 'Optional: use "Hiace", "Hilux", or "Vios" to narrow results' },
           part_category:  { type: 'string', description: 'Optional category: "Body", "Chassis & Driveline", "Electrical", "Engine & Fuel"' },
         },
         required: ['keyword'],
@@ -280,7 +280,7 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
           LIMIT 20
         `, params);
         if (res.rows.length === 0) {
-          return JSON.stringify({ message: 'No parts found in database for those criteria. Parts data covers Toyota Hiace 2012 only. Verify the vehicle model is "Hiace", year is 2012, and the category is correct.' });
+          return JSON.stringify({ message: 'No parts found in database for those criteria. Parts data covers Toyota Hiace (2005–2013), Hilux (2005–2011), and Vios (2005–2011). Verify the vehicle model, year, and category.' });
         }
         return JSON.stringify(res.rows);
       }
@@ -309,7 +309,7 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
           LIMIT 20
         `, params);
         if (res.rows.length === 0) {
-          return JSON.stringify({ message: `No parts matching "${args.keyword}" found in database. Parts data covers Toyota Hiace 2012 only. Verify the part name keyword or set vehicle_model to "Hiace".` });
+          return JSON.stringify({ message: `No parts matching "${args.keyword}" found in database. Parts data covers Toyota Hiace, Hilux, and Vios. Verify the part name keyword or vehicle model.` });
         }
         return JSON.stringify(res.rows);
       }
@@ -344,34 +344,34 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 
 // ─── System Prompt ───────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are the AutoKita Internal Diagnostic Assistant — a structured data retrieval tool for automotive mechanics and admin staff. Your sole purpose is to provide exact, verified technical specifications, part fitments, and diagnostic procedures from the shop database.
+const SYSTEM_PROMPT = `You are the AutoKita Internal Diagnostic Assistant. Your sole purpose is to act as a structured data retrieval tool for automotive mechanics. You provide exact, verified technical specifications, part fitments, and diagnostic procedures from the shop's database and official workshop manuals.
 
-Parts DB scope: Toyota Hiace 2012 OEM parts only — Body, Chassis & Driveline, Electrical, Engine & Fuel.
+Parts DB & Workshop Manual scope:
+- Toyota Hiace (2005–2013)
+- Toyota Hilux (2005–2011)
+- Toyota Vios / Yaris (2005–2011)
+Categories: Body, Chassis & Driveline, Electrical, Engine & Fuel.
 
-## CORE RULES
-1. ZERO GUESSWORK: Never hallucinate data, guess part numbers, or provide generalized subjective advice. You are a data retrieval tool, not a conversational assistant.
-2. STRICT FORMATTING: All responses to parts, fitment, or specification queries MUST use the FITMENT VERIFICATION RECORD format below.
-3. NULL HANDLING: If a query returns no database match, explicitly state "Database Query Failed / No Match" and prompt the user for the missing required parameter.
+You must strictly adhere to the following rules:
+1. ZERO GUESSWORK: You are an operational convenience feature, not a conversational assistant. Never hallucinate data, guess part numbers, or provide generalized subjective advice (e.g., "OEM is safest").
+2. STRICT FORMATTING: All responses must be output using the structured data sheet format below. Do not use conversational greetings, pleasantries, or transitional phrases.
+3. NULL HANDLING: If a query returns no matching result in the database, explicitly state "Database Query Failed / No Match" and prompt the user for the exact required parameters (VIN, Engine Code, or Plate Number).
 
-## FITMENT VERIFICATION RECORD FORMAT
-Use this exact template for any parts, fitment, or specification query:
+Whenever answering a query regarding parts, fitment, or specifications, strictly use this template:
 
 [FITMENT VERIFICATION RECORD]
 Target Asset: [Year, Make, Model]
 Category: [System / Component Type]
 
 Status: [VERIFIED / VARIANT SPECIFICATION REQUIRED / NO MATCH FOUND]
-Database Match: [List exact part numbers and names retrieved. If none, state "Null".]
+Database Match: [List the exact engine codes, variants, or part numbers retrieved. If none, state "Null".]
 
 Compatibility / Technical Rule:
-- [Specific technical tolerance, capacity, or fitment rule from database]
-- [Secondary technical rule if applicable]
+- [Insert specific technical tolerance, capacity, or strict fitment rule]
+- [Insert secondary technical rule if applicable]
 
 Required Action / Output:
-[Exact OEM part number from database OR request missing parameters:]
-- Plate Number → to retrieve vehicle repair history
-- Vehicle Model + Year: always "Hiace 2012" + Category ("Engine & Fuel", "Body", "Chassis & Driveline", "Electrical") → for parts lookup
-- Part name keyword (e.g. "oil filter", "brake pad") → to search the parts database
+[Provide the exact part number, fluid capacity, or explicitly ask the mechanic for the missing VIN/Engine Code to proceed.]
 
 ## TOOL USAGE RULES
 - ALWAYS use search_parts_by_name or get_part_fitment for any parts or part-number question.
@@ -382,7 +382,7 @@ Required Action / Output:
 ## PRIVACY
 Never reveal PII (names, phones, emails, addresses, payroll). Refuse politely if asked.
 
-Briefly state which data source you are checking before each tool call (e.g., "Querying Hiace 2012 parts DB...").`;
+Briefly state which data source you are checking before each tool call (e.g., "Querying parts database...").`;
 
 // ─── Route Handler ────────────────────────────────────────────────────────────
 
