@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { notifyCustomer } from '@/lib/customerNotify'
 
 // Admin-side view of the latest payment submitted for a job order, plus the
 // action to verify/reject it. Raw queries straight against `payments` —
@@ -42,7 +43,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const result = await db.query(
       `UPDATE payments SET verification_status = $1::payment_verification_status
        WHERE id = $2::int AND job_order_id = $3::int
-       RETURNING id`,
+       RETURNING id, amount_paid, payment_channel, payment_method::text`,
       [decision, paymentId, id],
     )
 
@@ -62,6 +63,24 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         [id],
       )
     }
+
+    const row = result.rows[0]
+    const amount = `₱${Number(row.amount_paid ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
+    const cash = row.payment_method === 'cash'
+    // Cash: "verified" means the shop received it; "rejected" means the
+    // customer never paid at the counter. Transfers: matched / not matched.
+    await notifyCustomer({
+      jobOrderId: Number(id), entityType: 'payments', entityId: Number(paymentId),
+      event: decision === 'verified' ? 'payment_verified' : 'payment_rejected',
+      title: decision === 'verified' ? (cash ? 'Payment Received' : 'Payment Verified') : (cash ? 'Cash Payment Not Recorded' : 'Payment Not Accepted'),
+      message: decision === 'verified'
+        ? cash
+          ? `We received your cash payment of ${amount} at the counter for Job Order #JO-${id}. Thank you!`
+          : `Your payment of ${amount}${row.payment_channel ? ` via ${row.payment_channel}` : ''} for Job Order #JO-${id} has been verified. Thank you!`
+        : cash
+          ? `Your counter payment of ${amount} for Job Order #JO-${id} wasn't received. You can pay at the shop or choose bank / e-wallet on your Billing page.`
+          : `We couldn't match your payment of ${amount} for Job Order #JO-${id} against our records. Please check the reference number and resubmit, or call the shop.`,
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

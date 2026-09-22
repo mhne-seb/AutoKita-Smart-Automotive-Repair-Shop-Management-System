@@ -2,15 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Check, FileText, Wrench, ShieldCheck, Printer, Download, Clock, Car, User, PackageCheck, CreditCard, HourglassIcon, AlertCircle, BadgeCheck } from "lucide-react";
+import { Check, FileText, Wrench, ShieldCheck, Download, Clock, Car, User, PackageCheck, CreditCard, HourglassIcon, AlertCircle, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 import { PaymentModal, type PaymentMethod } from "@/components/dashboard/PaymentModal";
 import type { PaymentProof } from "@/controllers/quotationController";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getCompletedData, submitBalancePayment } from "@/controllers/serviceProgressController";
-import { getShopInfo } from "@/controllers/billingController";
-// npm install jspdf
-import jsPDF from "jspdf";
+import { fetchJobOrderPdfData, generateJobOrderPdf } from "@/lib/jobOrderPdf";
 
 function formatMoney(v: string | number | null | undefined) {
   const n = Number(v ?? 0);
@@ -40,7 +38,7 @@ function statusLabel(status: string) {
 type CompletedData = Awaited<ReturnType<typeof getCompletedData>>;
 
 function Completed() {
-  useEffect(() => { document.title = "Service Completed — AutoKita"; }, []);
+  useEffect(() => { document.title = "Billing & Completion — AutoKita"; }, []);
 
   const searchParams = useSearchParams();
   const jobOrderIdParam = searchParams.get("jobOrderId");
@@ -63,6 +61,16 @@ function Completed() {
     void load().finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobOrderIdParam]);
+
+  // Verification and release happen on the admin side — poll until the
+  // vehicle is released so those show up here without a reload.
+  const stillOpen = Boolean(data?.jobOrder) && !(data?.jobOrder as { released_at?: string | null } | null)?.released_at;
+  useEffect(() => {
+    if (!stillOpen) return;
+    const t = setInterval(() => { void load(); }, 5000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stillOpen, jobOrderIdParam]);
 
   // Remaining balance → same modal as the downpayment. The server decides the
   // amount; a cash choice is recorded as a pending row the shop confirms at
@@ -105,13 +113,17 @@ function Completed() {
   const paymentPending = latestPayment?.verification_status === "pending";
   const paymentRejected = latestPayment?.verification_status === "rejected" && balanceDue > 0;
 
-  const handleDownload = () => {
-    void generateServiceReportPDF({ jobOrder, services, parts, warranties, releasedAt, releasedTo });
+  // The same Job Order document the shop prints (see lib/jobOrderPdf).
+  const handleDownload = async () => {
+    if (!jobOrder) return;
+    const d = await fetchJobOrderPdfData(jobOrder.job_order_id);
+    if (!d) return toast.error("Could not build the job order PDF.");
+    await generateJobOrderPdf(d);
   };
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active={stageForStatus(jobOrder.status)} viewing="completed" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper active={stageForStatus(jobOrder.status)} viewing={jobOrder.status === "completed" ? "billing" : "completed"} jobOrderId={jobOrder.job_order_id} />
 
       <div className="relative overflow-hidden rounded-2xl bg-brand-soft/60 p-8">
         <Check className="absolute right-8 top-8 h-32 w-32 text-brand/10" />
@@ -122,13 +134,14 @@ function Completed() {
               <span className="rounded-full bg-background px-3 py-1 text-xs font-semibold">{statusLabel(jobOrder.status)}</span>
               <span className="text-xs text-muted-foreground">JOB ORDER #JO-{jobOrder.job_order_id}</span>
             </div>
-            <h1 className="mt-3 text-3xl font-bold">Final Service Report</h1>
+            <h1 className="mt-3 text-3xl font-bold">{jobOrder.status === "completed" ? "Billing & Payment" : "Final Service Report"}</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Complete summary for your {jobOrder.vehicle_year} {jobOrder.vehicle_model} ({jobOrder.plate_number}) — services performed, parts and labor, payment, warranties, and release details.
+              {jobOrder.status === "completed"
+                ? `Work on your ${jobOrder.vehicle_year} ${jobOrder.vehicle_model} (${jobOrder.plate_number}) is done and road-tested. Settle the balance below and the shop will release your vehicle.`
+                : `Complete summary for your ${jobOrder.vehicle_year} ${jobOrder.vehicle_model} (${jobOrder.plate_number}) — services performed, parts and labor, payment, warranties, and release details.`}
             </p>
           </div>
           <div className="ml-auto flex shrink-0 gap-2">
-            <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-xs hover:bg-accent"><Printer className="h-3 w-3" /> Print</button>
             <button onClick={handleDownload} className="inline-flex items-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-xs hover:bg-accent"><Download className="h-3 w-3" /> Download</button>
           </div>
         </div>
@@ -252,7 +265,7 @@ function Completed() {
             {/* What happens next depends on where the money is. */}
             {balanceDue <= 0 ? (
               <div className="mt-4 flex items-center gap-2 rounded-lg bg-success/10 p-3 text-sm font-semibold text-success">
-                <BadgeCheck className="h-4 w-4" /> Paid in full — ready for pickup
+                <BadgeCheck className="h-4 w-4" /> {releasedAt ? "Paid in full — vehicle released" : "Paid in full — ready for pickup"}
               </div>
             ) : paymentPending ? (
               <div className="mt-4 rounded-lg bg-warning/15 p-3 text-xs">
@@ -311,186 +324,3 @@ export default Completed;
 // DESCRIPTION/AMOUNT table covering both labor and parts, total, footer note),
 // just sourced from the completed job order's data instead of a history row.
 // ---------------------------------------------------------------------------
-
-function loadCompletedLogoAsDataURL(src: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("Canvas context unavailable"));
-      ctx.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/png"));
-    };
-    img.onerror = reject;
-    img.src = src;
-  });
-}
-
-async function generateServiceReportPDF({
-  jobOrder,
-  services,
-  parts,
-  warranties,
-  releasedAt,
-  releasedTo,
-}: {
-  jobOrder: CompletedData["jobOrder"];
-  services: CompletedData["services"];
-  parts: CompletedData["parts"];
-  warranties: CompletedData["warranties"];
-  releasedAt: string | null;
-  releasedTo: string;
-}) {
-  if (!jobOrder) return;
-
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = 48;
-  let y = 56;
-
-  const SHOP_INFO = await getShopInfo();
-
-  // --- Logo ---
-  const logoX = margin;
-  const logoY = y;
-  try {
-    const logoDataUrl = await loadCompletedLogoAsDataURL("/autokita-logo.png");
-    doc.addImage(logoDataUrl, "PNG", logoX, logoY - 14, 28, 28);
-  } catch {
-    doc.setDrawColor(15, 76, 92);
-    doc.setLineWidth(1.5);
-    doc.circle(logoX + 14, logoY + 10, 14, "S");
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(15, 76, 92);
-    doc.text("A", logoX + 14, logoY + 15, { align: "center" });
-  }
-
-  // --- Shop name / tagline ---
-  doc.setFontSize(16);
-  doc.setTextColor(20, 20, 20);
-  doc.text(SHOP_INFO.name, logoX + 36, logoY + 8);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(110, 110, 110);
-  doc.text(SHOP_INFO.tagline, logoX + 36, logoY + 21);
-
-  // --- Shop address block (right-aligned) ---
-  doc.setFontSize(9);
-  doc.setTextColor(90, 90, 90);
-  const addressLines = doc.splitTextToSize(SHOP_INFO.address, 220);
-  doc.text(addressLines, pageWidth - margin, y - 4, { align: "right" });
-  doc.text(`Tel: ${SHOP_INFO.phone}`, pageWidth - margin, y + 22, { align: "right" });
-  doc.text(SHOP_INFO.email, pageWidth - margin, y + 34, { align: "right" });
-  doc.text(`TIN: ${SHOP_INFO.tin}`, pageWidth - margin, y + 46, { align: "right" });
-
-  y += 66;
-  doc.setDrawColor(220, 220, 220);
-  doc.line(margin, y, pageWidth - margin, y);
-  y += 28;
-
-  // --- Invoice title + booking meta ---
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(20, 20, 20);
-  doc.text("SERVICE INVOICE", margin, y);
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(90, 90, 90);
-  doc.text(`Job Order: JO-${jobOrder.job_order_id}`, pageWidth - margin, y - 12, { align: "right" });
-  doc.text(`Date: ${formatDate(releasedAt) || new Date().toLocaleDateString("en-PH")}`, pageWidth - margin, y, { align: "right" });
-  doc.text(`Status: ${statusLabel(jobOrder.status)}`, pageWidth - margin, y + 12, { align: "right" });
-
-  y += 34;
-
-  // --- Booking details grid ---
-  const primaryService = services[0]?.service_name ?? "General Service";
-  const serviceLabel = services.length > 1 ? `${primaryService} +${services.length - 1} more` : primaryService;
-  const activeWarranty = warranties[0];
-  const warrantyLabel = activeWarranty
-    ? `${warrantyDuration(activeWarranty.start_date, activeWarranty.expiration_date)} — ${activeWarranty.coverage_description}`
-    : "—";
-
-  const details: [string, string][] = [
-    ["Vehicle", `${jobOrder.vehicle_year} ${jobOrder.vehicle_model} (${jobOrder.plate_number})`],
-    ["Mechanic", "AutoKita Service Team"],
-    ["Location", SHOP_INFO.name],
-    ["Warranty", warrantyLabel],
-    ["Service", serviceLabel],
-    ["Released To", releasedTo],
-  ];
-  doc.setFontSize(9);
-  details.forEach(([label, value]) => {
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(60, 60, 60);
-    doc.text(`${label}:`, margin, y);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(20, 20, 20);
-    doc.text(value, margin + 90, y);
-    y += 16;
-  });
-
-  y += 12;
-
-  // --- Line items table — labor and parts together, same as the invoice sample ---
-  const col1 = margin;
-  const col2 = pageWidth - margin;
-  const items: [string, number][] = [
-    ...services.map((s): [string, number] => [
-      `${s.service_name}${s.actual_hours ? ` (${s.actual_hours} hrs)` : ""}`,
-      Number(s.actual_amount ?? 0),
-    ]),
-    ...parts.map((p): [string, number] => [`${p.description} x${p.quantity}`, Number(p.total_retail_amount ?? 0)]),
-  ];
-
-  doc.setFillColor(15, 76, 92);
-  doc.rect(margin, y, pageWidth - margin * 2, 22, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text("DESCRIPTION", col1 + 8, y + 15);
-  doc.text("AMOUNT (PHP)", col2 - 8, y + 15, { align: "right" });
-  y += 22;
-
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(30, 30, 30);
-  items.forEach(([desc, amt], idx) => {
-    const rowHeight = 22;
-    if (idx % 2 === 1) {
-      doc.setFillColor(246, 247, 248);
-      doc.rect(margin, y, pageWidth - margin * 2, rowHeight, "F");
-    }
-    doc.text(desc, col1 + 8, y + 15);
-    doc.text(formatMoney(amt), col2 - 8, y + 15, { align: "right" });
-    y += rowHeight;
-  });
-
-  // Total row
-  doc.setDrawColor(15, 76, 92);
-  doc.setLineWidth(1);
-  doc.line(margin, y, pageWidth - margin, y);
-  y += 20;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.setTextColor(15, 76, 92);
-  doc.text("TOTAL", col1 + 8, y);
-  doc.text(`₱ ${formatMoney(jobOrder.actual_grand_total)}`, col2 - 8, y, { align: "right" });
-
-  y += 40;
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(8.5);
-  doc.setTextColor(140, 140, 140);
-  doc.text(
-    "Thank you for choosing AutoKita. This invoice was generated electronically and is valid without a signature.",
-    margin,
-    y,
-    { maxWidth: pageWidth - margin * 2 }
-  );
-
-  doc.save(`AutoKita_ServiceReport_JO-${jobOrder.job_order_id}.pdf`);
-}

@@ -36,6 +36,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ jobOrder: null, logs: [], warranties: [], services: [], parts: [], bill: null })
     }
 
+    // get_job_order_by_id() doesn't return the two hand-over timestamps.
+    const stamps = await db.query(`SELECT completed_at::text, released_at::text FROM job_orders WHERE id = $1`, [jobOrder.job_order_id])
+    jobOrder = { ...jobOrder, ...stamps.rows[0] }
+
     const [logsRes, warrantiesRes, servicesRes, partsRes, bill] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_repair_logs($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_warranties($1)`, [jobOrder.job_order_id]),
