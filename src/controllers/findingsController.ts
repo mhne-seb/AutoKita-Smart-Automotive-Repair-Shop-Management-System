@@ -22,7 +22,7 @@ export async function reportFinding(
   jobOrderId: string,
   input: { taskId: number | null; findings: string; photoUrl: string | null; services: ProposedService[]; parts: ProposedPart[] },
 ): Promise<Result & { emailed?: boolean }> {
-  const res = await fetch(`/api/job-orders/${jobOrderId}/findings`, {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/service-findings`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),

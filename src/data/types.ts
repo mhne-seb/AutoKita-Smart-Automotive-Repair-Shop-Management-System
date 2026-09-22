@@ -36,10 +36,28 @@ export interface JobOrderCard {
 
 export type FindingStatus = 'ok' | 'needs-attention' | 'urgent'
 
-export const findingStatusMeta: Record<FindingStatus, { label: string; classes: string }> = {
-  ok: { label: 'OK', classes: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  'needs-attention': { label: 'Needs Attention', classes: 'bg-amber-50 text-amber-700 border-amber-200' },
-  urgent: { label: 'Replace/Urgent', classes: 'bg-rose-50 text-rose-700 border-rose-200' },
+// The shop's three severity levels — the usual green / yellow / red an
+// inspection sheet uses. `meaning` is the rule the mechanic picks by, and
+// `action` is what happens to the item on the quotation.
+export const findingStatusMeta: Record<FindingStatus, { label: string; classes: string; meaning: string; action: string }> = {
+  ok: {
+    label: 'OK',
+    classes: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    meaning: 'Checked and still within spec. No work needed on this visit.',
+    action: 'Not quoted — recorded so the customer sees it was checked.',
+  },
+  'needs-attention': {
+    label: 'Needs Attention',
+    classes: 'bg-amber-50 text-amber-700 border-amber-200',
+    meaning: 'Worn or near its limit. Safe to drive now, but it will need work soon (about 3 months or the next visit).',
+    action: 'Quoted as recommended — the customer decides whether to approve it now.',
+  },
+  urgent: {
+    label: 'Replace/Urgent',
+    classes: 'bg-rose-50 text-rose-700 border-rose-200',
+    meaning: 'Failed, leaking, or unsafe to drive. Replace before the vehicle leaves the shop.',
+    action: 'Quoted as required — flag it to the customer before releasing the vehicle.',
+  },
 }
 
 export interface MechanicalFinding {
