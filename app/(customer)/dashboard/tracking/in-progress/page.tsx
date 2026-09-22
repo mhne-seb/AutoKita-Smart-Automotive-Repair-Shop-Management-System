@@ -24,6 +24,7 @@ import { isRoadTest } from "@/data/roadTest";
 import type { ServiceFinding } from "@/data/types";
 import { FindingApprovalCard } from "@/components/dashboard/FindingApprovalCard";
 import { requestPullOut, withdrawPullOut } from "@/controllers/pullOutController";
+import { ShopLoading } from "@/components/ShopLoading";
 import type { PullOutRequest } from "@/data/types";
 import { toast } from "sonner";
 
@@ -282,11 +283,7 @@ function InProgress() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <div className="flex items-center justify-center gap-2 py-20 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" /> Loading service progress…
-        </div>
-      </div>
+      <ShopLoading message="Loading your service progress" />
     );
   }
 

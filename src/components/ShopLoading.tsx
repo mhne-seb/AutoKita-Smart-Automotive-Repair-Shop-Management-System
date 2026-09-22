@@ -1,6 +1,6 @@
 import { Loader2 } from 'lucide-react'
 
-// Loading scene for admin pages: a line-art car in the brand palette driving
+// Loading scene used across the app: a line-art car in the brand palette driving
 // past a faint city skyline. Wheels spin and the body bobs. Shown in place of the page's cards until the data arrives.
 export function ShopLoading({ message = 'Loading your shop floor' }: { message?: string }) {
   const navy = '#1e3a5f'

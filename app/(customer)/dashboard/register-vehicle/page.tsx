@@ -18,6 +18,7 @@ import {
   Hash,
 } from "lucide-react";
 import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceModal";
+import { ShopLoading } from "@/components/ShopLoading";
 
 function RegisterVehicle() {
   useEffect(() => { document.title = "Register New Vehicle — AutoKita"; }, []);
@@ -142,9 +143,7 @@ function RegisterVehicle() {
 
   if (loading) {
     return (
-      <div className="mx-auto flex max-w-6xl items-center justify-center px-6 py-20 text-muted-foreground">
-        Loading...
-      </div>
+      <ShopLoading message="Loading the booking form" />
     );
   }
 

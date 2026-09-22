@@ -11,7 +11,7 @@ import {
   Wallet,
   ChevronRight,
 } from 'lucide-react'
-import { ShopLoading } from '@/components/admin/ShopLoading'
+import { ShopLoading } from '@/components/ShopLoading'
 import {
   AreaChart,
   Area,

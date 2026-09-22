@@ -32,7 +32,7 @@ import {
 import { DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 import { TopBar } from '@/components/TopBar'
 import { StatCard } from '@/components/StatCard'
-import { ShopLoading } from '@/components/admin/ShopLoading'
+import { ShopLoading } from '@/components/ShopLoading'
 import { StatusBadge } from '@/components/StatusBadge'
 import { PROVINCES, SERVICE_CATEGORIES, YEARS } from '@/data/ticketFormOptions'
 

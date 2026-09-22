@@ -13,6 +13,7 @@ import { Gauge, CheckCircle2, XCircle, Clock, AlertCircle, Wrench, ShieldCheck, 
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { Lightbox } from "@/components/Lightbox";
 import { getTestingData } from "@/controllers/serviceProgressController";
+import { ShopLoading } from "@/components/ShopLoading";
 
 type TestingData = Awaited<ReturnType<typeof getTestingData>>;
 
@@ -50,7 +51,7 @@ function Testing() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [live, jobOrderIdParam]);
 
-  if (loading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (loading) return <ShopLoading message="Loading the road test" />;
   if (!jobOrder) {
     return (
       <div className="mx-auto max-w-3xl p-8 text-center">

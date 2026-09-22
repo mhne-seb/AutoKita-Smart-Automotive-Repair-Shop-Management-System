@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceModal";
+import { ShopLoading } from "@/components/ShopLoading";
 import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
 import type {
   DashboardData,
@@ -200,9 +201,7 @@ function Dashboard() {
   // Loading / error states
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-brand" />
-      </div>
+      <ShopLoading message="Loading your dashboard" />
     );
   }
 
