@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
       homeAddress,
       customerConcern,
       diagnosticScanAuthorized,
+      preferredDatetime,
     } = body
 
     if (!vehicleId && !newVehicleDetails) {
@@ -94,14 +95,15 @@ export async function POST(req: NextRequest) {
     const mappedServiceMode = serviceMode === 'Home Service' ? 'home_service' : 'walk_in'
     const address = mappedServiceMode === 'home_service' ? (homeAddress || 'None') : 'None'
 
-    // Call SQL function to create ticket
-    const ticketQuery = `SELECT * FROM create_service_ticket($1, $2, $3, $4, $5)`
+    // Call SQL function to create ticket (6 arguments including preferred_datetime)
+    const ticketQuery = `SELECT * FROM create_service_ticket($1, $2, $3, $4, $5, $6)`
     const ticketResult = await db.query(ticketQuery, [
       finalUserId,
       finalVehicleId,
       mappedServiceMode,
       address,
-      customerConcern || 'No specific concerns'
+      customerConcern || 'No specific concerns',
+      preferredDatetime || null,
     ])
 
     const ticket = ticketResult.rows[0]
