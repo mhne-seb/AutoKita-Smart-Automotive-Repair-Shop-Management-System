@@ -17,12 +17,15 @@ import {
   Gauge,
   Hash,
 } from "lucide-react";
+import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceModal";
 
 function RegisterVehicle() {
   useEffect(() => { document.title = "Register New Vehicle — AutoKita"; }, []);
 
   const [pickup, setPickup] = useState<"shop" | "home">("shop");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  // Plate of a car that already has an open job order (see the modal below).
+  const [inServicePlate, setInServicePlate] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -93,7 +96,7 @@ function RegisterVehicle() {
         return;
       }
       if (isVehicleActive(vehiclePlate)) {
-        alert("This vehicle is currently in an active job order and cannot be booked for a new service.");
+        setInServicePlate(vehiclePlate);
         return;
       }
       reqBody.newVehicleDetails = {
@@ -322,6 +325,10 @@ function RegisterVehicle() {
           {isSubmitting ? "Confirming..." : "Confirm Booking"}
         </button>
       </div>
+
+      {inServicePlate && (
+        <VehicleInServiceModal plate={inServicePlate} onClose={() => setInServicePlate(null)} />
+      )}
 
       {showConfirmModal && (
         <div
