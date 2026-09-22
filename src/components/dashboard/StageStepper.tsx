@@ -70,8 +70,8 @@ export function StageStepper({
   const fillPct = (activeIdx / (STAGES.length - 1)) * 100;
 
   return (
-    <div className="mx-auto max-w-4xl rounded-2xl border bg-card px-8 py-7 shadow-sm">
-      <div className="relative flex items-start">
+    <div className="mx-auto max-w-4xl overflow-x-auto rounded-2xl border bg-card px-4 py-7 shadow-sm sm:px-8">
+      <div className="relative flex min-w-[560px] items-start">
         {/* Continuous track, sitting behind the icon row */}
         <div
           className="absolute left-0 right-0 top-5 h-1 rounded-full bg-muted-foreground/25"
