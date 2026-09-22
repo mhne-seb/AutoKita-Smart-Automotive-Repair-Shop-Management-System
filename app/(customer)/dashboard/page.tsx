@@ -59,8 +59,8 @@ const STATUS_TO_STEP: Record<string, number> = {
   in_progress:                3,
   testing:                    4,
   completed:                  5,
-  released:                   5,
-  cancelled:                  5,
+  released:                   6,
+  cancelled:                  6,
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -70,12 +70,13 @@ const STATUS_LABEL: Record<string, string> = {
   waiting_on_parts:           "Waiting on Parts",
   in_progress:                "In Progress",
   testing:                    "Road Testing",
-  completed:                  "Completed",
+  completed:                  "Billing & Payment",
   released:                   "Released",
   cancelled:                  "Cancelled",
 };
 
-const DONE_STATUSES = new Set(["completed", "released", "cancelled"]);
+// A job is off the active list only once the car has gone home (or the job was cancelled).
+const DONE_STATUSES = new Set(["released", "cancelled"]);
 // Labels for a submitted booking that hasn't become a job order yet.
 const TICKET_STATUS_LABEL: Record<string, string> = {
   pending:              "Awaiting Confirmation",
@@ -1511,7 +1512,7 @@ function ServiceReportModal({ jobId, onClose }: { jobId: number; onClose: () => 
 
               {(data.bill?.balance ?? 0) > 0 && (
                 <Link
-                  href={`/dashboard/tracking/completed?jobOrderId=${jobId}`}
+                  href={`/dashboard/tracking/billing?jobOrderId=${jobId}`}
                   className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
                 >
                   <CreditCard className="h-4 w-4" /> Pay Remaining Balance
@@ -1780,6 +1781,7 @@ const SERVICE_STEPS = [
   { label: "Quotation", icon: FileText },
   { label: "In Progress", icon: Wrench },
   { label: "Testing", icon: Gauge },
+  { label: "Billing", icon: CreditCard },
   { label: "Completed", icon: CheckCircle2 },
 ];
 
@@ -1814,7 +1816,8 @@ function ServiceCard({
     "bg-purple-500/10 text-purple-600",                // pending approval / revision
     "bg-brand-soft text-brand",                       // waiting on parts / in progress
     "bg-sky-500/10 text-sky-600",                      // testing
-    "bg-success/10 text-success",                     // completed / released
+    "bg-teal/10 text-teal",                            // billing
+    "bg-success/10 text-success",                     // released
   ];
   const statusTone = statusTones[Math.min(Math.max(stepIndex, 0), statusTones.length - 1)];
 
@@ -1919,7 +1922,7 @@ function ServiceCard({
               </button>
               {balanceDue > 0 && (
                 <Link
-                  href={`/dashboard/tracking/completed?jobOrderId=${jobId}`}
+                  href={`/dashboard/tracking/billing?jobOrderId=${jobId}`}
                   className="inline-flex items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
                 >
                   <CreditCard className="h-3.5 w-3.5" /> Pay Balance
@@ -1928,7 +1931,7 @@ function ServiceCard({
             </>
           ) : (
             <Link
-              href={`/dashboard/tracking/${["received", "inspecting", "quotation", "in-progress", "testing", "completed"][stepIndex] ?? "received"}?jobOrderId=${jobId}`}
+              href={`/dashboard/tracking/${["received", "inspecting", "quotation", "in-progress", "testing", "billing", "completed"][stepIndex] ?? "received"}?jobOrderId=${jobId}`}
               className="inline-flex items-center gap-1 text-xs font-semibold text-brand transition-colors hover:text-[color:oklch(0.22_0.05_250)]"
             >
               View Tracking

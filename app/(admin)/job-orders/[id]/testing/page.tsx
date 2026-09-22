@@ -12,7 +12,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { Gauge, Play, CheckCircle2, XCircle, Camera, Loader2, ArrowLeft, Wrench, Package, History, AlertTriangle, RotateCcw } from 'lucide-react'
+import { Gauge, Play, CheckCircle2, XCircle, Camera, Loader2, ArrowLeft, ArrowRight, Wrench, Package, History, AlertTriangle, RotateCcw } from 'lucide-react'
 import { toast } from 'sonner'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
@@ -120,8 +120,8 @@ export default function TestingPage() {
           {passed ? (
             <div className="rounded-2xl border border-emerald-300 bg-emerald-50 p-6">
               <p className="flex items-center gap-2 text-lg font-bold text-emerald-800"><CheckCircle2 size={22} /> Road test passed</p>
-              <p className="mt-1 text-sm text-emerald-800/80">The job order is complete. Final billing and release continue on the Service Progress page.</p>
-              <Link href={`/job-orders/${jobOrderId}/progress`} className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:underline"><ArrowLeft size={14} /> Back to Service Progress</Link>
+              <p className="mt-1 text-sm text-emerald-800/80">The job order is complete. Collect the balance and release the vehicle on the Billing page.</p>
+              <Link href={`/job-orders/${jobOrderId}/billing`} className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Proceed to Billing <ArrowRight size={14} /></Link>
             </div>
           ) : current ? (
             <div className="rounded-2xl border border-sky-300 bg-white p-6">

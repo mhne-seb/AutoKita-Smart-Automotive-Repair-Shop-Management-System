@@ -79,8 +79,8 @@ function Testing() {
                 Your {jobOrder.vehicle_year} {jobOrder.vehicle_model} ({jobOrder.plate_number}) was driven by {passed.testerName} on {fmt(passed.endedAt)} and the repairs held up. The service is complete.
               </p>
               {passed.notes && <p className="mt-3 rounded-lg bg-muted/30 p-3 text-sm">{passed.notes}</p>}
-              <Link href={`/dashboard/tracking/completed?jobOrderId=${jobOrder.job_order_id}`} className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90">
-                View final bill <ArrowRight className="h-4 w-4" />
+              <Link href={`/dashboard/tracking/billing?jobOrderId=${jobOrder.job_order_id}`} className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90">
+                Go to Billing <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           ) : current ? (

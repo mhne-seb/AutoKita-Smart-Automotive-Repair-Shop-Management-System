@@ -110,15 +110,15 @@ export async function GET() {
         notifs.push({
           notif_key: `jo-done-${jo.id}`,
           title: 'Service completed',
-          message: `JO-${jo.id} is complete. Total ${peso(jo.actual_grand_total)}. Review final billing and release.`,
+          message: `JO-${jo.id} is complete. Collect the balance and release the vehicle.`,
           notif_time: jo.jo_date,
-          // A finished job order has no page of its own — it's the Service
-          // Progress page with every task checked off (see stageToRoute in
-          // app/(admin)/job-orders/page.tsx).
-          href: `/job-orders/${jo.id}/progress`,
+          href: `/job-orders/${jo.id}/billing`,
         })
       }
     }
+
+    const joStatusMap = new Map(jobOrders.rows.map((jo: { id: number; status: string }) => [jo.id, jo.status]))
+    const joStatusFor = (id: number) => joStatusMap.get(id)
 
     // 3. What the customer decided — one entry per answer, kept as history.
     for (const r of responses.rows) {
@@ -176,12 +176,20 @@ export async function GET() {
     // 5. Payment proof waiting for manual verification (clears once verified)
     for (const p of payments.rows) {
       if (p.verification_status === 'pending') {
+        // A pending CASH row is the customer saying "I'll pay at the counter" —
+        // no money has moved yet. A pending transfer is money they say they
+        // sent, waiting for the shop to match it against the account.
+        const cash = p.payment_method === 'cash'
         notifs.push({
           notif_key: `payment-${p.payment_id}`,
-          title: 'Payment needs verification',
-          message: `${name(p.first_name, p.last_name)} submitted a payment of ${peso(p.amount_paid)} for JO-${p.job_order_id}.`,
+          title: cash ? 'Customer will pay at the counter' : 'Payment needs verification',
+          message: cash
+            ? `${name(p.first_name, p.last_name)} chose to pay ${peso(p.amount_paid)} in cash at the shop for JO-${p.job_order_id}. Confirm it once the money is in hand.`
+            : `${name(p.first_name, p.last_name)} submitted a ${peso(p.amount_paid)} transfer for JO-${p.job_order_id}. Check it against the shop's account.`,
           notif_time: p.payment_date,
-          href: `/job-orders/${p.job_order_id}/quotation`,
+          // Downpayments are verified on the quotation page; final-balance
+          // payments on the Billing page.
+          href: joStatusFor(p.job_order_id) === 'pending_customer_approval' ? `/job-orders/${p.job_order_id}/quotation` : `/job-orders/${p.job_order_id}/billing`,
         })
       }
     }

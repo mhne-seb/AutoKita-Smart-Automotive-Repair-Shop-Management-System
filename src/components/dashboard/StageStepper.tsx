@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, Search, FileText, Wrench, CheckCircle2, Check, Gauge, type LucideIcon } from "lucide-react";
+import { Package, Search, FileText, Wrench, CheckCircle2, Check, Gauge, CreditCard, type LucideIcon } from "lucide-react";
 
 const BRAND_GRADIENT = "linear-gradient(90deg, #0b1730 0%, #1d3a68 55%, #3b6cb4 100%)";
 
@@ -9,6 +9,7 @@ const STAGES: { key: string; label: string; icon: LucideIcon; to: string }[] = [
   { key: "quotation", label: "QUOTATION", icon: FileText, to: "/dashboard/tracking/quotation" },
   { key: "in-progress", label: "IN PROGRESS", icon: Wrench, to: "/dashboard/tracking/in-progress" },
   { key: "testing", label: "TESTING", icon: Gauge, to: "/dashboard/tracking/testing" },
+  { key: "billing", label: "BILLING", icon: CreditCard, to: "/dashboard/tracking/billing" },
   { key: "completed", label: "COMPLETED", icon: CheckCircle2, to: "/dashboard/tracking/completed" },
 ];
 
@@ -30,7 +31,9 @@ export function stageForStatus(status: string | null | undefined): StageKey {
       return "in-progress";
     case "testing":
       return "testing";
+    // The work is done but the car is still at the shop: pay, then release.
     case "completed":
+      return "billing";
     case "released":
     case "cancelled":
       return "completed";
