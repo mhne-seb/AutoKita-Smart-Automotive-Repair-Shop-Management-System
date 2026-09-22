@@ -130,7 +130,7 @@ export interface QuotationData {
   quotationApproved: boolean
 }
 
-export type TaskStatus = 'completed' | 'active' | 'pending'
+export type TaskStatus = 'completed' | 'active' | 'pending' | 'cancelled' // cancelled = dropped by an approved pull-out
 
 // A part a task is waiting on. The shop orders as needed (no inventory
 // system), so the app only distinguishes "still to order" from "here".
@@ -223,12 +223,24 @@ export interface ServiceFinding {
   createdAt: string
 }
 
+// A customer's request to take the vehicle back mid-repair (UC 15).
+export interface PullOutRequest {
+  id: number
+  reason: string | null
+  decision: 'pending' | 'approved' | 'disputed' // disputed = denied
+  adminNote: string | null
+  createdAt: string
+  decidedAt: string | null
+}
+
 export interface ServiceProgressData {
   jobOrderId: string
   sections: ServiceSection[]
   quotationConfirmed: boolean
   purchases: PartsPurchase[]
   findings: ServiceFinding[]
+  // Latest pull-out request on the job (pending or decided), if any.
+  pullOut: PullOutRequest | null
   // The job-order-level clock (not per-service): when the job went onto the
   // floor, when it's promised back, and the estimated labor. ISO values are
   // kept so the page can tick the running duration live.
