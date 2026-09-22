@@ -23,7 +23,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       // Service tasks — what a failed test can send back to the floor.
       db.query(
         `SELECT id, task_title, task_status::text, completion_photo_url, rework_count
-         FROM service_progress_tasks WHERE job_order_id = $1 AND section_id = 'in_progress' ORDER BY id`,
+         FROM service_progress_tasks WHERE job_order_id = $1 AND section_id = 'in_progress' AND task_status <> 'cancelled' ORDER BY id`,
         [jobOrderId],
       ),
       // Installed parts — what a failed test can flag for warranty replacement.

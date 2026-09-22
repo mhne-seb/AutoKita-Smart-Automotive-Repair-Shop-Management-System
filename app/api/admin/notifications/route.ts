@@ -12,7 +12,7 @@ export async function GET() {
     // the app's clock for finding reminders (see lib/findingsSweep).
     sweepPendingFindings().catch((e) => console.error('[notifications] sweep failed:', e))
 
-    const [tickets, jobOrders, payments, responses, jobOrderCreatedAt, overdueFindings] = await Promise.all([
+    const [tickets, jobOrders, payments, responses, jobOrderCreatedAt, pullOuts, overdueFindings] = await Promise.all([
       db.query('SELECT * FROM get_service_tickets_queue()'),
       db.query('SELECT * FROM get_job_orders_list()'),
       db.query('SELECT * FROM get_payment_records()'),
@@ -48,6 +48,12 @@ export async function GET() {
         `SELECT entity_id AS job_order_id, action_date
          FROM system_audit_logs
          WHERE entity_type = 'job_orders' AND action_performed = 'created'`,
+      ),
+      // Pull-out requests waiting for the shop's answer (UC 15 step 2).
+      db.query(
+        `SELECT r.id, r.job_order_id, r.reason, r.created_at, u.first_name, u.last_name
+         FROM pull_out_requests r JOIN job_orders jo ON jo.id = r.job_order_id JOIN users u ON u.id = jo.user_id
+         WHERE r.decision = 'pending' ORDER BY r.created_at ASC`,
       ),
       // Findings the customer hasn't answered inside the policy window
       // (paper: UC 14, Exception 1). Shows until they answer.
@@ -161,7 +167,19 @@ export async function GET() {
       notifs.push({ notif_key: `decision-${r.id}`, title, message, notif_time: r.action_date, href })
     }
 
-    // 4. No answer on a finding within the policy window — someone has to
+    // 4. Customer wants the vehicle back mid-repair — approve or deny on
+    //    Service Progress. Clears once answered.
+    for (const r of pullOuts.rows) {
+      notifs.push({
+        notif_key: `pullout-${r.id}`,
+        title: 'Vehicle pull-out requested',
+        message: `${name(r.first_name, r.last_name)} wants to take the vehicle back from JO-${r.job_order_id}${r.reason ? `: "${short(r.reason, 100)}"` : ''}. Review and approve or deny.`,
+        notif_time: r.created_at,
+        href: `/job-orders/${r.job_order_id}/progress`,
+      })
+    }
+
+    // 5. No answer on a finding within the policy window — someone has to
     //    call. Clears the moment the customer approves or declines.
     for (const f of overdueFindings.rows) {
       notifs.push({

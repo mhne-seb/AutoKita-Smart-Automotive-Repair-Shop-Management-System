@@ -1,6 +1,6 @@
 // serviceProgressController — backed by the real "service_progress_tasks" table.
 
-import type { ServiceProgressData, ServiceSection, ServiceTask, TaskStatus, TaskPart, PartsPurchase, Supplier, ServiceFinding } from '@/data/types'
+import type { ServiceProgressData, ServiceSection, ServiceTask, TaskStatus, TaskPart, PartsPurchase, Supplier, ServiceFinding, PullOutRequest } from '@/data/types'
 import type { RoadTestAttempt } from '@/data/roadTest'
 
 // UI section ids use a hyphen ('in-progress'), the database enum uses an
@@ -47,6 +47,7 @@ function timeToHours(time: string | null | undefined): number {
 function mapDbTaskStatus(dbStatus: string): TaskStatus {
   if (dbStatus === 'completed') return 'completed'
   if (dbStatus === 'in_progress') return 'active'
+  if (dbStatus === 'cancelled') return 'cancelled'
   return 'pending'
 }
 
@@ -154,6 +155,7 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
     quotationConfirmed,
     purchases,
     findings: json.findings ?? [],
+    pullOut: json.pullOut ?? null,
     timer: {
       startedAtIso: timing.started_at ?? null,
       completedAtIso: timing.completed_at ?? null,
@@ -410,6 +412,7 @@ export async function getInProgressData(userId: number, jobOrderId?: number) {
       estimated_finish: string | null
     } | null
     findings: ServiceFinding[]
+    pullOut: PullOutRequest | null
     bill: { total: number; paid: number; balance: number } | null
   }>
 }
