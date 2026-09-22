@@ -1,6 +1,7 @@
 // serviceProgressController — backed by the real "service_progress_tasks" table.
 
 import type { ServiceProgressData, ServiceSection, ServiceTask, TaskStatus, TaskPart, PartsPurchase, Supplier, ServiceFinding } from '@/data/types'
+import type { RoadTestAttempt } from '@/data/roadTest'
 
 // UI section ids use a hyphen ('in-progress'), the database enum uses an
 // underscore ('in_progress') — this bridges the two.
@@ -173,13 +174,13 @@ export async function finishTask(
   jobOrderId: string,
   taskId: string,
   photo: File,
-): Promise<{ ok: boolean; message?: string; roadTestCreated?: boolean; jobCompleted?: boolean }> {
+): Promise<{ ok: boolean; message?: string; allServicesDone?: boolean }> {
   const form = new FormData()
   form.set('file', photo)
   const res = await fetch(`/api/job-orders/${jobOrderId}/progress/tasks/${taskId}/finish`, { method: 'POST', body: form })
   const json = await res.json().catch(() => null)
   if (!res.ok || !json?.success) return { ok: false, message: json?.message ?? 'Could not finish the task.' }
-  return { ok: true, roadTestCreated: json.roadTestCreated, jobCompleted: json.jobCompleted }
+  return { ok: true, allServicesDone: json.allServicesDone }
 }
 
 export async function setPartStatus(jobOrderId: string, partId: number, status: 'received' | 'to_order' | 'ordered'): Promise<boolean> {
@@ -447,6 +448,25 @@ export async function submitBalancePayment(
   }
   const res = await fetch('/api/tracking/completed/payment', { method: 'POST', body: form })
   return res.json() as Promise<{ success?: boolean; paymentId?: number; amount?: number; error?: string }>
+}
+
+/** Customer's Testing stage: the job order and its road-test attempts. */
+export async function getTestingData(userId: number, jobOrderId?: number) {
+  const qs = new URLSearchParams({ userId: String(userId) })
+  if (jobOrderId) qs.set('jobOrderId', String(jobOrderId))
+  const res = await fetch(`/api/tracking/testing?${qs}`, { cache: 'no-store' })
+  return res.json() as Promise<{
+    jobOrder: {
+      job_order_id: number
+      status: string
+      vehicle_model: string
+      vehicle_year: number
+      plate_number: string
+    } | null
+    history: RoadTestAttempt[]
+    current: RoadTestAttempt | null
+    allServicesDone: boolean
+  }>
 }
 
 export async function getCompletedData(userId: number, jobOrderId?: number) {
