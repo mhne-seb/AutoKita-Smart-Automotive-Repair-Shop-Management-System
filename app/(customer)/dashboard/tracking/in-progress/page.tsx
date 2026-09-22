@@ -15,6 +15,7 @@ import {
   Camera,
   Upload,
   Receipt,
+  PackageCheck,
 } from "lucide-react";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getInProgressData } from "@/controllers/serviceProgressController";
@@ -22,11 +23,15 @@ import { Lightbox } from "@/components/Lightbox";
 import { isRoadTest } from "@/data/roadTest";
 import type { ServiceFinding } from "@/data/types";
 import { FindingApprovalCard } from "@/components/dashboard/FindingApprovalCard";
+import { requestPullOut, withdrawPullOut } from "@/controllers/pullOutController";
+import type { PullOutRequest } from "@/data/types";
+import { toast } from "sonner";
 
 // A part one of the services is waiting on. Only "still to order" vs "here"
 // matters to the shop (no inventory system), so that's all we show.
 type Part = {
   id: number;
+  total_retail_amount?: string | number | null;
   service_name: string;
   description: string;
   quantity: number;
@@ -78,7 +83,7 @@ type TimelineEntry = {
   label: string;
   detail?: string;
   time?: string | null;
-  status: "completed" | "active" | "pending";
+  status: "completed" | "active" | "pending" | "cancelled";
   image?: string;
 };
 
@@ -90,9 +95,10 @@ function fmtWhen(iso: string | null | undefined): string | null {
   return isNaN(d.getTime()) ? null : d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
-function getTag(status: string): "completed" | "active" | "pending" {
+function getTag(status: string): "completed" | "active" | "pending" | "cancelled" {
   if (status === "completed") return "completed";
   if (status === "in_progress") return "active";
+  if (status === "cancelled") return "cancelled";
   return "pending";
 }
 
@@ -103,12 +109,11 @@ function InProgress() {
   const jobOrderIdParam = searchParams.get("jobOrderId");
 
   type Timing = { started_at: string | null; completed_at: string | null; labor_hours_estimate: string | number | null; estimated_finish: string | null };
-  const [data, setData] = useState<{ jobOrder: JobOrder | null; tasks: Task[]; parts?: Part[]; timing?: Timing | null; findings?: ServiceFinding[]; bill?: { total: number; paid: number; balance: number } | null } | null>(null);
+  const [data, setData] = useState<{ jobOrder: JobOrder | null; tasks: Task[]; parts?: Part[]; timing?: Timing | null; findings?: ServiceFinding[]; pullOut?: PullOutRequest | null; bill?: { total: number; paid: number; balance: number } | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showWarn, setShowWarn] = useState(false);
-  const [pullOutStatus, setPullOutStatus] = useState<"none" | "requested">("none");
   const [photoView, setPhotoView] = useState<{ url: string; label: string } | null>(null);
-  const [pullOutNote, setPullOutNote] = useState("");
+  const [draftNote, setDraftNote] = useState("");
 
   const load = () => {
     const userId = Number(sessionStorage.getItem("autokita_user_id"));
@@ -124,6 +129,14 @@ function InProgress() {
 
   const tasks = data?.tasks ?? [];
   const parts = data?.parts ?? [];
+  // The pull-out request lives on the server (UC 15). "requested" = waiting
+  // for the shop; a decided one shows its note until the page moves on.
+  const pullOut = data?.pullOut ?? null;
+  const pullOutStatus: "none" | "requested" = pullOut?.decision === "pending" ? "requested" : "none";
+  const pullOutNote = pullOut?.reason ?? "";
+  // Exception 1: nothing to pull out of once every service is finished.
+  const serviceTasksForPullOut = tasks.filter((t) => !isRoadTest(t) && getTag(t.task_status) !== "cancelled");
+  const allServicesDone = serviceTasksForPullOut.length > 0 && serviceTasksForPullOut.every((t) => getTag(t.task_status) === "completed");
   // Mid-service findings waiting on this customer's yes/no.
   const pendingFindings = (data?.findings ?? []).filter((f) => f.decision === "pending");
   const userId = Number(typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : 0);
@@ -150,13 +163,27 @@ function InProgress() {
   const completedBillable = tasks.filter(
     (t) => getTag(t.task_status) === "completed" && t.billable
   );
-  const payableTotal = completedBillable.reduce(
+  // Pull-out policy (paper UC 15 step 5–6): finished AND started services are
+  // billed — work and parts are already committed; only services that haven't
+  // started are cancelled at no charge.
+  const inProgressBillable = tasks.filter((t) => !isRoadTest(t) && getTag(t.task_status) === "active" && t.billable);
+  const notStartedTasks = tasks.filter((t) => !isRoadTest(t) && getTag(t.task_status) === "pending");
+  // Shop policy: an unstarted service whose parts have already been ordered
+  // is committed — it can't be cancelled, the shop completes it, it's billed.
+  // Only unstarted services with nothing ordered are cancelled (free).
+  const orderedFor = new Set(parts.filter((p) => p.status !== "to_order").map((p) => p.service_name));
+  const committedTasks = notStartedTasks.filter((t) => orderedFor.has(t.task_title));
+  const cancellableTasks = notStartedTasks.filter((t) => !orderedFor.has(t.task_title));
+  const committedPartsTotal = parts
+    .filter((p) => orderedFor.has(p.service_name) && committedTasks.some((t) => t.task_title === p.service_name))
+    .reduce((s, p) => s + Number(p.total_retail_amount ?? 0), 0);
+  const payableTotal = committedPartsTotal + [...completedBillable, ...inProgressBillable, ...committedTasks].reduce(
     (sum, t) => sum + parseFloat(t.price || "0"),
     0
   );
 
   // Progress is over the services; the road test is the final check, not work.
-  const serviceTasks = tasks.filter((t) => !isRoadTest(t));
+  const serviceTasks = tasks.filter((t) => !isRoadTest(t) && getTag(t.task_status) !== "cancelled");
   const completionPct = serviceTasks.length
     ? Math.round(
         (serviceTasks.filter((t) => getTag(t.task_status) === "completed").length / serviceTasks.length) * 100
@@ -315,7 +342,9 @@ function InProgress() {
                 // milestones keep Completed/Pending.
                 const isTask = entry.key.startsWith("task-");
                 const waiting = Boolean((entry as { waitingForParts?: boolean }).waitingForParts);
-                const badgeLabel = isOnHold
+                const badgeLabel = entry.status === "cancelled"
+                  ? "Cancelled"
+                  : isOnHold
                   ? "On Hold"
                   : entry.status === "completed"
                   ? (isTask ? "Finished" : "Completed")
@@ -324,7 +353,9 @@ function InProgress() {
                   : waiting
                   ? "Waiting for parts"
                   : (isTask ? "Upcoming" : "Pending");
-                const badgeClasses = isOnHold
+                const badgeClasses = entry.status === "cancelled"
+                  ? "bg-muted text-muted-foreground line-through"
+                  : isOnHold
                   ? "bg-destructive/15 text-destructive"
                   : entry.status === "completed"
                   ? "bg-success/15 text-[color:oklch(0.5_0.16_145)]"
@@ -511,16 +542,32 @@ function InProgress() {
               <div className="mt-3 rounded-lg bg-muted/30 p-3 text-xs text-muted-foreground">
                 This service has been completed. Vehicle actions are no longer available.
               </div>
+            ) : pullOut?.decision === "approved" ? (
+              <div className="mt-3 rounded-lg bg-success/10 p-3">
+                <div className="flex items-center gap-2 text-sm font-semibold text-success">
+                  <CheckCircle2 className="h-4 w-4" /> Pull-Out Approved
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {(() => {
+                    const cancelled = tasks.filter((t) => getTag(t.task_status) === "cancelled").length;
+                    const open = tasks.filter((t) => !isRoadTest(t) && ["active", "pending"].includes(getTag(t.task_status))).length;
+                    return `${cancelled} service${cancelled === 1 ? "" : "s"} cancelled, no charge. ${open > 0 ? `The shop will finish ${open} remaining service${open === 1 ? "" : "s"}, then test and release your car.` : "The shop will test and release your car."}`;
+                  })()}
+                </p>
+                {pullOut.adminNote && (
+                  <div className="mt-2 rounded-md bg-background/60 p-2">
+                    <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Note from the shop</div>
+                    <p className="mt-1 text-xs text-muted-foreground">{pullOut.adminNote}</p>
+                  </div>
+                )}
+              </div>
             ) : pullOutStatus === "requested" ? (
               <div className="mt-3 rounded-lg bg-warning/15 p-3">
                 <div className="flex items-center gap-2 text-sm font-semibold text-[color:oklch(0.55_0.15_60)]">
                   <Info className="h-4 w-4" /> Pull-Out Requested
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Your admin has been notified. You'll be billed only for the{" "}
-                  {completedBillable.length} completed service
-                  {completedBillable.length !== 1 ? "s" : ""} (₱{payableTotal.toLocaleString()})
-                  once approved.
+                  Waiting for the shop to answer. If approved, you'd pay about ₱{payableTotal.toLocaleString()}.
                 </p>
                 {pullOutNote && (
                   <div className="mt-2 rounded-md bg-background/60 p-2">
@@ -531,9 +578,11 @@ function InProgress() {
                   </div>
                 )}
                 <button
-                  onClick={() => {
-                    setPullOutStatus("none");
-                    setPullOutNote("");
+                  onClick={async () => {
+                    const r = await withdrawPullOut(userId, jobOrder.job_order_id);
+                    if (!r.ok) return toast.error(r.message);
+                    toast.success("Pull-out request withdrawn — work continues.");
+                    await load();
                   }}
                   className="mt-3 w-full rounded-md border py-2 text-xs font-semibold hover:bg-accent"
                 >
@@ -543,28 +592,35 @@ function InProgress() {
             ) : (
               <div className="mt-3 rounded-lg bg-[color:oklch(0.97_0.04_10)] p-3">
                 <div className="flex items-center gap-2 text-sm font-semibold text-[color:oklch(0.55_0.2_10)]">
-                  <AlertCircle className="h-4 w-4" /> Approval Required
+                  <AlertCircle className="h-4 w-4" /> Need your car back early?
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Manage your vehicle's current service session.
+                  {allServicesDone ? "All services are finished — please go to Billing instead." : "Ask the shop to release your car before all services are done. The shop will review and reply."}
                 </p>
+                {pullOut?.decision === "disputed" && (
+                  <div className="mt-2 rounded-md bg-background/60 p-2 text-xs">
+                    <div className="font-semibold text-destructive">Your last request was denied</div>
+                    {pullOut.adminNote && <p className="mt-1 text-muted-foreground">{pullOut.adminNote}</p>}
+                  </div>
+                )}
                 <button
                   onClick={() => setShowWarn(true)}
-                  className="mt-3 w-full rounded-md bg-[color:oklch(0.6_0.22_350)] py-2 text-xs font-semibold text-white hover:opacity-90"
+                  disabled={allServicesDone}
+                  className="mt-3 w-full rounded-md bg-[color:oklch(0.6_0.22_350)] py-2 text-xs font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Pull Out Vehicle
                 </button>
               </div>
             )}
 
-            {!isHistorical && (
+            {!isHistorical && pullOut?.decision !== "approved" && (
               <div className="mt-3 rounded-md bg-muted/40 p-3 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1 font-semibold">
                   <Info className="h-3 w-3" /> Note
                 </div>
                 <p className="mt-1">
-                  Use this to request pulling your vehicle out of service. Only completed work will
-                  be charged; ongoing and pending services will be cancelled.
+                  Need your car back early? You pay for work that's done or started. Work that hasn't
+                  started is free to cancel — unless its parts are already bought.
                 </p>
               </div>
             )}
@@ -577,13 +633,21 @@ function InProgress() {
       {showWarn && !isHistorical && (
         <PullOutModal
           completedBillable={completedBillable}
+          inProgressBillable={inProgressBillable}
+          notStarted={cancellableTasks}
+          committedTasks={committedTasks}
+          committedPartsTotal={committedPartsTotal}
           payableTotal={payableTotal}
-          note={pullOutNote}
-          onNoteChange={setPullOutNote}
+          note={draftNote}
+          onNoteChange={setDraftNote}
           onClose={() => setShowWarn(false)}
-          onConfirm={() => {
-            setPullOutStatus("requested");
+          onConfirm={async () => {
+            const r = await requestPullOut(userId, jobOrder.job_order_id, draftNote);
+            if (!r.ok) { toast.error(r.message); return false; }
             setShowWarn(false);
+            setDraftNote("");
+            await load();
+            return true;
           }}
         />
       )}
@@ -593,6 +657,10 @@ function InProgress() {
 
 function PullOutModal({
   completedBillable,
+  inProgressBillable,
+  notStarted,
+  committedTasks,
+  committedPartsTotal,
   payableTotal,
   note,
   onNoteChange,
@@ -600,20 +668,23 @@ function PullOutModal({
   onConfirm,
 }: {
   completedBillable: Task[];
+  inProgressBillable: Task[];
+  notStarted: Task[];
+  committedTasks: Task[];
+  committedPartsTotal: number;
   payableTotal: number;
   note: string;
   onNoteChange: (value: string) => void;
   onClose: () => void;
-  onConfirm: () => void;
+  // Sends the request to the server; resolves false if it was refused.
+  onConfirm: () => Promise<boolean>;
 }) {
   const [status, setStatus] = useState<"idle" | "submitting" | "done">("idle");
 
-  const submit = () => {
+  const submit = async () => {
     setStatus("submitting");
-    setTimeout(() => {
-      setStatus("done");
-      setTimeout(onConfirm, 800);
-    }, 900);
+    const ok = await onConfirm();
+    setStatus(ok ? "done" : "idle");
   };
 
   return (
@@ -622,7 +693,7 @@ function PullOutModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-xl bg-card p-6 shadow-2xl"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl bg-card p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {status === "done" ? (
@@ -630,7 +701,7 @@ function PullOutModal({
             <CheckCircle2 className="h-10 w-10 text-success" />
             <div className="font-semibold">Pull-Out Request Sent</div>
             <p className="text-xs text-muted-foreground">
-              The admin/ops manager has been notified.
+              The shop has been notified. We&apos;ll let you know once they reply.
             </p>
           </div>
         ) : (
@@ -644,34 +715,74 @@ function PullOutModal({
               </button>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              Only the services that have already been completed will be billed. Any ongoing or
-              pending work will be stopped and removed from your invoice.
+              Here's what you'd pay if the shop approves. Work that's done or started is charged. Work that
+              hasn't started is free — unless its parts are already bought.
             </p>
 
-            <div className="mt-4 rounded-lg border bg-muted/20 p-4">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Completed & Billable
-              </div>
-              {completedBillable.length > 0 ? (
-                <div className="mt-2 space-y-2 text-sm">
-                  {completedBillable.map((t) => (
-                    <div key={t.id} className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-success" /> {t.task_title}
-                      </span>
-                      <span className="font-medium">
-                        ₱{parseFloat(t.price || "0").toLocaleString()}
-                      </span>
-                    </div>
-                  ))}
+            {/* One card per outcome so the customer can see at a glance what
+                each service means for them. */}
+            <div className="mt-4 space-y-3 text-sm">
+              {completedBillable.length > 0 && (
+                <div className="rounded-lg border border-success/40 bg-success/5 p-3">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-success">Done — you pay</div>
+                  <div className="mt-2 space-y-2">
+                    {completedBillable.map((t) => (
+                      <div key={t.id} className="flex items-center justify-between">
+                        <span className="flex items-center gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> {t.task_title}</span>
+                        <span className="font-medium">₱{parseFloat(t.price || "0").toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ) : (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  No billable services have been completed yet — pulling out now means no charge.
-                </p>
               )}
-              <div className="mt-3 flex items-center justify-between border-t pt-3">
-                <span className="font-semibold text-sm">Total Payable</span>
+              {inProgressBillable.length > 0 && (
+                <div className="rounded-lg border border-brand/40 bg-brand-soft/40 p-3">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-brand">Started — you pay</div>
+                  <div className="mt-2 space-y-2">
+                    {inProgressBillable.map((t) => (
+                      <div key={t.id} className="flex items-center justify-between">
+                        <span className="flex items-center gap-2"><Wrench className="h-3.5 w-3.5 text-brand" /> {t.task_title}</span>
+                        <span className="font-medium">₱{parseFloat(t.price || "0").toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {committedTasks.length > 0 && (
+                <div className="rounded-lg border border-warning/50 bg-warning/10 p-3">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-[color:oklch(0.5_0.13_50)]">Parts already bought — you pay</div>
+                  <div className="mt-2 space-y-2">
+                    {committedTasks.map((t) => (
+                      <div key={t.id} className="flex items-center justify-between">
+                        <span className="flex items-center gap-2"><PackageCheck className="h-3.5 w-3.5 text-[color:oklch(0.5_0.13_50)]" /> {t.task_title}</span>
+                        <span className="font-medium">₱{parseFloat(t.price || "0").toLocaleString()}</span>
+                      </div>
+                    ))}
+                    {committedPartsTotal > 0 && (
+                      <div className="flex items-center justify-between text-xs text-muted-foreground"><span className="pl-5">Parts for the above</span><span>₱{committedPartsTotal.toLocaleString()}</span></div>
+                    )}
+                  </div>
+                  <p className="mt-2 text-[11px] text-muted-foreground">The shop already paid for these parts, so this can't be cancelled.</p>
+                </div>
+              )}
+              {notStarted.length > 0 && (
+                <div className="rounded-lg border border-dashed bg-muted/30 p-3">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Not started — free, cancelled</div>
+                  <div className="mt-2 space-y-2 text-muted-foreground">
+                    {notStarted.map((t) => (
+                      <div key={t.id} className="flex items-center justify-between">
+                        <span className="flex items-center gap-2 line-through"><X className="h-3.5 w-3.5" /> {t.task_title}</span>
+                        <span className="text-xs">₱0</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {completedBillable.length + inProgressBillable.length + committedTasks.length === 0 && (
+                <p className="text-xs text-muted-foreground">Nothing has started or been bought yet — no charge.</p>
+              )}
+              <div className="flex items-center justify-between rounded-lg border bg-card px-3 py-3">
+                <span className="text-sm font-semibold">You'd pay</span>
                 <span className="text-lg font-bold">₱{payableTotal.toLocaleString()}</span>
               </div>
             </div>
