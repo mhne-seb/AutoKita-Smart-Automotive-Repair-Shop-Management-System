@@ -707,6 +707,8 @@ function HistoryModal({ activities, onClose }: { activities: DashboardActivity[]
         return { icon: ClipboardCheck, color: "text-brand" };
       case "appointment_reminder":
         return { icon: CalendarClock, color: "text-amber-500" };
+      case "job_update":
+        return { icon: Wrench, color: "text-brand" };
       default:
         return { icon: FileText, color: "text-muted-foreground" };
     }

@@ -40,7 +40,7 @@ type Task = {
   task_title: string;
   note: string;
   task_status: string;
-  started_at: string | null;
+  started_at?: string | null;
   completed_at: string | null;
   price: string;
   billable: boolean;

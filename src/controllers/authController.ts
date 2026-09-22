@@ -4,7 +4,7 @@
 // data. This file now talks to the real database via /api/auth/login,
 // instead of the old mock data in src/data/users.ts.
 
-export type UserRole = 'admin' | 'customer'
+export type UserRole = 'admin' | 'customer' | 'c'
 
 export interface AuthUser {
   id: number
