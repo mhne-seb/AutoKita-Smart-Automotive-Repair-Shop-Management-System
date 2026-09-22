@@ -14,11 +14,12 @@ import { getJobOrderById, advanceJobOrderStage } from '@/controllers/jobOrderCon
 import { getQuotationById, getJobOrderBill, type JobOrderBill } from '@/controllers/quotationController'
 import { getServiceProgressById, scheduleTask, setPartStatus, finishTask, getSuppliers, addSupplier, recordPartsPurchase } from '@/controllers/serviceProgressController'
 import { ReportFindingModal } from '@/components/dashboard/ReportFindingModal'
+import { decidePullOut } from '@/controllers/pullOutController'
 import { FINDING_TIMEOUT_HOURS, findingAgeHours, findingIsOverdue } from '@/data/findingPolicy'
 import { isRoadTest } from '@/data/roadTest'
 import { mechanicIsFull } from '@/data/mechanicPolicy'
 import { currency } from '@/data/mockData'
-import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, PartsPurchase, Supplier, ServiceFinding, partIsReady } from '@/data/types'
+import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, PartsPurchase, Supplier, ServiceFinding, PullOutRequest, partIsReady } from '@/data/types'
 
 const sectionColors: Record<string, string> = {
   received: 'text-emerald-600',
@@ -26,6 +27,7 @@ const sectionColors: Record<string, string> = {
   quotation: 'text-amber-600',
   'in-progress': 'text-blue-600',
   finished: 'text-emerald-600',
+  cancelled: 'text-slate-400',
   complete: 'text-slate-500',
 }
 
@@ -129,6 +131,11 @@ export default function page() {
   // Mid-service findings. "Found a problem?" on a started task ties the
   // finding to that task; "Report a finding" in the sidebar is a general one.
   const [findings, setFindings] = useState<ServiceFinding[]>([])
+  // Customer's pull-out request (UC 15) — pending ones get a banner with
+  // Approve / Deny; the shop's note goes back to the customer on deny.
+  const [pullOut, setPullOut] = useState<PullOutRequest | null>(null)
+  const [pullOutNote, setPullOutNote] = useState('')
+  const [decidingPullOut, setDecidingPullOut] = useState<'approve' | 'deny' | null>(null)
   const [findingModal, setFindingModal] = useState<{ task?: { id: number; title: string } } | null>(null)
 
   // Once the real data arrives, seed the editable state from it.
@@ -138,13 +145,14 @@ export default function page() {
       setQuotationConfirmed(initial.quotationConfirmed)
       setPurchases(initial.purchases)
       setFindings(initial.findings)
+      setPullOut(initial.pullOut)
     }
   }, [initial])
 
   const allTasks = useMemo(() => sections.flatMap((s) => s.tasks), [sections])
   // The road test is the final quality gate, not a service: it isn't scheduled
   // like one and doesn't count toward progress. Counts/estimates use these.
-  const serviceTasks = useMemo(() => allTasks.filter((t) => !isRoadTest(t)), [allTasks])
+  const serviceTasks = useMemo(() => allTasks.filter((t) => !isRoadTest(t) && t.status !== 'cancelled'), [allTasks])
 
   // Every part on this job order still waiting to be bought. Tasks that share
   // a service name share the same parts list, so dedupe by part id.
@@ -163,11 +171,13 @@ export default function page() {
   // work. Other sections (quotation, road test) are shown as they are.
   const displaySections = sections.flatMap((section) => {
     if (section.id !== 'in-progress') return [section]
-    const open = section.tasks.filter((t) => t.status !== 'completed')
+    const open = section.tasks.filter((t) => t.status !== 'completed' && t.status !== 'cancelled')
     const done = section.tasks.filter((t) => t.status === 'completed')
+    const dropped = section.tasks.filter((t) => t.status === 'cancelled')
     const out: ServiceSection[] = []
     if (open.length > 0) out.push({ ...section, tasks: open })
     if (done.length > 0) out.push({ id: 'finished', title: 'Finished Services', tasks: done })
+    if (dropped.length > 0) out.push({ id: 'cancelled', title: 'Cancelled (pull-out)', tasks: dropped })
     return out
   })
   // The road test (section 'complete') lives in the sidebar; everything else
@@ -191,12 +201,30 @@ export default function page() {
   const jobOnFloor = Boolean(initial?.timer.startedAtIso) && !initial?.timer.completedAtIso
   const pendingFindings = findings.filter((f) => f.decision === 'pending')
   const declinedFindings = findings.filter((f) => f.decision === 'disputed')
+  const pullOutPending = pullOut?.decision === 'pending'
   useEffect(() => {
-    if (pendingFindings.length === 0) return
+    if (pendingFindings.length === 0 && !pullOutPending) return
     const t = setInterval(() => { refreshTasks() }, 5000)
     return () => clearInterval(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingFindings.length])
+  }, [pendingFindings.length, pullOutPending])
+
+  async function onDecidePullOut(action: 'approve' | 'deny') {
+    if (action === 'deny' && !pullOutNote.trim()) return toast.error('Tell the customer why — the note goes to them.')
+    setDecidingPullOut(action)
+    const r = await decidePullOut(jobOrderId, action, pullOutNote.trim())
+    setDecidingPullOut(null)
+    if (!r.ok) return toast.error(r.message)
+    if (action === 'approve') {
+      toast.success(`Pull-out approved${r.cancelled?.length ? ` — ${r.cancelled.length} service${r.cancelled.length === 1 ? '' : 's'} cancelled` : ''}${r.committed?.length ? `, ${r.committed.length} kept (parts ordered)` : ''}.`)
+      const jo = await getJobOrderById(jobOrderId)
+      if (jo) setJobOrder(jo)
+    } else {
+      toast.success('Request denied — the customer has been sent your note.')
+    }
+    setPullOutNote('')
+    await refreshTasks()
+  }
 
   const currentDurationHours = useMemo(() => {
     const start = initial?.timer.startedAtIso
@@ -254,6 +282,7 @@ export default function page() {
       setSections(data.sections)
       setPurchases(data.purchases)
       setFindings(data.findings)
+      setPullOut(data.pullOut)
     }
   }
 
@@ -352,10 +381,10 @@ export default function page() {
           <Fragment key={task.id}>
           <div
             className={`rounded-xl border p-4 ${
-               task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50' : task.status === 'completed' ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200 bg-white'
-            } ${task.status !== 'completed' && !isRoadTest(task) ? 'cursor-pointer hover:bg-slate-50' : ''
+               task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50' : task.status === 'completed' ? 'border-emerald-200 bg-emerald-50/40' : task.status === 'cancelled' ? 'border-dashed border-slate-300 bg-slate-50 opacity-70' : 'border-slate-200 bg-white'
+            } ${task.status !== 'completed' && task.status !== 'cancelled' && !isRoadTest(task) ? 'cursor-pointer hover:bg-slate-50' : ''
             }`}
-            onClick={() => task.status !== 'completed' && !isRoadTest(task) && setSchedulingTask(task)}
+            onClick={() => task.status !== 'completed' && task.status !== 'cancelled' && !isRoadTest(task) && setSchedulingTask(task)}
           >
           {/* Stacks on small screens (pills wrap, status/action drop below);
               side by side from sm up. */}
@@ -450,10 +479,12 @@ export default function page() {
                           ? 'bg-emerald-100 text-emerald-700'
                           : task.status === 'active'
                           ? 'bg-indigo-100 text-indigo-700'
+                          : task.status === 'cancelled'
+                          ? 'bg-slate-200 text-slate-500 line-through'
                           : 'bg-amber-100 text-amber-700'
                       }`}
                     >
-                      {task.status === 'completed' ? 'Finished' : task.status === 'active' ? 'Started' : 'Waiting for parts'}
+                      {task.status === 'completed' ? 'Finished' : task.status === 'active' ? 'Started' : task.status === 'cancelled' ? 'Cancelled' : 'Waiting for parts'}
                     </span>
                   )}
 
@@ -678,6 +709,43 @@ export default function page() {
       <div>
       {/* Findings waiting on the customer. The card lists the finding and what
           it would add; the page polls until they answer. */}
+      {/* Customer wants the vehicle back (UC 15). Approve: unstarted work is
+          cancelled and the job goes to Billing for what's done. Deny: work
+          continues and the customer sees the note. */}
+      {pullOutPending && pullOut && (
+        <div className="mb-6 rounded-xl border border-rose-300 bg-rose-50 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-rose-900"><Car size={15} /> Customer requested a vehicle pull-out</span>
+            <span className="text-xs text-rose-700/70">{new Date(pullOut.createdAt).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
+          </div>
+          <p className="mt-1 text-sm text-rose-900/80">{pullOut.reason ? `"${pullOut.reason}"` : 'No reason given.'}</p>
+          <p className="mt-2 text-xs text-rose-800/80">
+            {(() => {
+              const pending = serviceTasks.filter((t) => t.status === 'pending')
+              const committed = pending.filter((t) => (t.parts ?? []).some((p) => p.status !== 'to_order'))
+              const free = pending.length - committed.length
+              return `Approving cancels ${free} unstarted service${free === 1 ? '' : 's'} at no charge. ${committed.length ? `${committed.length} unstarted service${committed.length === 1 ? ' has' : 's have'} parts already ordered — ${committed.length === 1 ? 'it stays' : 'they stay'} and must be completed. ` : ''}Finished and started work is billed as usual.`
+            })()}
+          </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start">
+            <textarea
+              value={pullOutNote}
+              onChange={(e) => setPullOutNote(e.target.value)}
+              rows={2}
+              placeholder="Note to the customer (required to deny — e.g. the engine is currently disassembled)"
+              className="min-w-0 flex-1 rounded-lg border border-rose-200 bg-white p-2 text-sm text-slate-700 outline-none focus:border-rose-400"
+            />
+            <div className="flex shrink-0 gap-2">
+              <button type="button" onClick={() => onDecidePullOut('deny')} disabled={decidingPullOut !== null} className="flex items-center gap-1 rounded-lg border border-rose-300 bg-white px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50">
+                {decidingPullOut === 'deny' ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />} Deny
+              </button>
+              <button type="button" onClick={() => onDecidePullOut('approve')} disabled={decidingPullOut !== null} className="flex items-center gap-1 rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50">
+                {decidingPullOut === 'approve' ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Approve pull-out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {pendingFindings.length > 0 && (
         <div className="mb-6 space-y-3">
           {pendingFindings.map((f) => {

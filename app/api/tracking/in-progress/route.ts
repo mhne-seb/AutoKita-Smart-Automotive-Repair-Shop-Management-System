@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getFindingsForJobOrder } from '@/lib/findings'
 import { getJobOrderBill } from '@/lib/jobOrderBill'
+import { getLatestPullOut } from '@/lib/pullOut'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
     // of a task just sitting at Not Yet with no explanation.
     const parts = jobOrder
       ? (await db.query(
-          `SELECT p.id, p.job_order_service_id, p.description, p.part_number, p.quantity, p.status::text, s.service_name
+          `SELECT p.id, p.job_order_service_id, p.description, p.part_number, p.quantity, p.status::text, p.total_retail_amount, s.service_name
        FROM job_order_parts p
        JOIN job_order_services jos ON jos.id = p.job_order_service_id
        JOIN services s ON s.id = jos.service_id
@@ -91,7 +92,9 @@ export async function GET(request: NextRequest) {
     // payments. Shown for information only — paying happens on Completed.
     const bill = jobOrder ? await getJobOrderBill(jobOrder.job_order_id) : null
 
-    return NextResponse.json({ jobOrder, tasks, parts, timing, findings, bill: bill && { total: bill.total, paid: bill.paid, balance: bill.balance } })
+    const pullOut = jobOrder ? await getLatestPullOut(jobOrder.job_order_id) : null
+
+    return NextResponse.json({ jobOrder, tasks, parts, timing, findings, pullOut, bill: bill && { total: bill.total, paid: bill.paid, balance: bill.balance } })
   } catch (err) {
     console.error('[/api/tracking/in-progress] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
