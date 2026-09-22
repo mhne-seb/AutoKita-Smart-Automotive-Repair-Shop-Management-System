@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 import { GenerateJobOrderModal } from './GenerateJobOrderModal'
 import { stageOrder, type Stage } from '@/data/types'
 
-type CrumbKey = 'inspection' | 'quotation' | 'progress'
+type CrumbKey = 'inspection' | 'quotation' | 'progress' | 'testing'
 
 // Which job-order stage each crumb belongs to. A crumb is only clickable once
 // the job order has reached that stage — you can always go back, never ahead.
@@ -14,6 +14,7 @@ const CRUMB_STAGE: Partial<Record<CrumbKey, Stage>> = {
   inspection: 'inspecting',
   quotation: 'quotation',
   progress: 'in-progress',
+  testing: 'testing',
 }
 
 interface Props {
@@ -31,6 +32,7 @@ export function JobOrderBreadcrumb({ jobOrderId, current, stage }: Props) {
     { key: 'inspection', label: 'Inspection Report', href: `/job-orders/${jobOrderId}/inspection` },
     { key: 'quotation', label: 'Quotation', href: `/job-orders/${jobOrderId}/quotation` },
     { key: 'progress', label: 'Service Progress', href: `/job-orders/${jobOrderId}/progress` },
+    { key: 'testing', label: 'Testing', href: `/job-orders/${jobOrderId}/testing` },
   ]
 
   return (

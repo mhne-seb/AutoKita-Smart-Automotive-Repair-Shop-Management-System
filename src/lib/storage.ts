@@ -47,6 +47,12 @@ export async function uploadFindingPhoto(jobOrderId: string, file: File): Promis
     return uploadFile(path, file)
 }
 
+// Photo from the road test (dashboard, odometer, the fault if it failed).
+export async function uploadRoadTestPhoto(jobOrderId: string, roadTestId: number, file: File): Promise<string> {
+    const path = `job-orders/${jobOrderId}/road-tests/${roadTestId}-${Date.now()}.${extensionFor(file)}`
+    return uploadFile(path, file)
+}
+
 // Proof a service was actually done — one photo per finished task (shop
 // policy: no task is marked Finished without it). Same bucket, own folder.
 export async function uploadTaskPhoto(jobOrderId: string, taskId: string, file: File): Promise<string> {
