@@ -27,6 +27,7 @@ import { requestPullOut, withdrawPullOut } from "@/controllers/pullOutController
 import { ShopLoading } from "@/components/ShopLoading";
 import type { PullOutRequest } from "@/data/types";
 import { toast } from "sonner";
+import { formatStamp } from "@/lib/utils";
 
 // A part one of the services is waiting on. Only "still to order" vs "here"
 // matters to the shop (no inventory system), so that's all we show.
@@ -91,9 +92,7 @@ type TimelineEntry = {
 // Same short format the admin pages use — the raw ISO string was leaking
 // through to the customer ("2026-09-13T02:00:00.000Z").
 function fmtWhen(iso: string | null | undefined): string | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  return isNaN(d.getTime()) ? null : d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  return formatStamp(iso) || null;
 }
 
 function getTag(status: string): "completed" | "active" | "pending" | "cancelled" {
@@ -202,28 +201,28 @@ function InProgress() {
           key: "received",
           label: "Vehicle Received",
           detail: `${jobOrder.vehicle_year} ${jobOrder.vehicle_model} checked in at the shop.`,
-          time: jobOrder.date_arrived ?? null,
+          time: fmtWhen(jobOrder.date_arrived),
           status: "completed",
         },
         {
           key: "inspecting",
           label: "Mechanic Inspecting Vehicle",
           detail: "Technician performed the pre-diagnostic inspection.",
-          time: jobOrder.date_arrived ?? null,
+          time: fmtWhen(jobOrder.date_arrived),
           status: "completed",
         },
         {
           key: "inspection_completed",
           label: "Inspection Completed",
           detail: "Findings logged and quotation drafting started.",
-          time: jobOrder.inspection_completed_at ?? null,
+          time: fmtWhen(jobOrder.inspection_completed_at),
           status: "completed",
         },
         {
           key: "quotation_prepared",
           label: "Quotation Prepared",
           detail: "Service quotation was sent for your review.",
-          time: jobOrder.quotation_prepared_at ?? null,
+          time: fmtWhen(jobOrder.quotation_prepared_at),
           status: "completed",
         },
         {
@@ -232,7 +231,7 @@ function InProgress() {
           detail: jobOrder.quotation_approved
             ? "Quotation confirmed and servicing authorized."
             : "Waiting for customer to confirm the quotation.",
-          time: jobOrder.downpayment_received_at ?? null,
+          time: fmtWhen(jobOrder.downpayment_received_at),
           status: jobOrder.quotation_approved ? "completed" : "pending",
         },
         ...tasks.map((t) => {
@@ -260,7 +259,7 @@ function InProgress() {
           key: "service_completed",
           label: "Vehicle Service Completed",
           detail: "All confirmed services finished by our technicians.",
-          time: isHistorical ? (jobOrder.date_promised ?? null) : null,
+          time: isHistorical ? fmtWhen(jobOrder.date_promised) : null,
           status: isHistorical ? "completed" : completionPct === 100 ? "completed" : "pending",
         },
         {
@@ -274,7 +273,7 @@ function InProgress() {
           key: "released",
           label: "Vehicle Released",
           detail: "Vehicle handed back to the customer.",
-          time: jobOrder.released_at ?? null,
+          time: fmtWhen(jobOrder.released_at),
           status: jobOrder.status === "released" ? "completed" : "pending",
           image: jobOrder.release_photo_url,
         },
@@ -470,7 +469,7 @@ function InProgress() {
                         })()
                       : null);
                     
-                    return startedRaw ? new Date(startedRaw).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Not yet started';
+                    return startedRaw ? formatStamp(startedRaw) : 'Not yet started';
                   })()}
                 </b>
               </div>
