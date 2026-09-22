@@ -621,6 +621,18 @@ export default function page() {
               </button>
             </div>
 
+            {/* What each level means — the mechanic shouldn't have to guess. */}
+            <div className="mb-4 grid gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:grid-cols-3">
+              {(['ok', 'needs-attention', 'urgent'] as FindingStatus[]).map((s) => (
+                <div key={s}>
+                  <span className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-semibold ${findingStatusMeta[s].classes}`}>
+                    {findingStatusMeta[s].label}
+                  </span>
+                  <p className="mt-1 text-[11px] leading-snug text-slate-500">{findingStatusMeta[s].meaning}</p>
+                </div>
+              ))}
+            </div>
+
             <div className="space-y-3">
               {findings.map((f) => {
                 const meta = findingStatusMeta[f.status] ?? findingStatusMeta['needs-attention']
@@ -673,6 +685,7 @@ export default function page() {
                                 key={s}
                                 onClick={() => setEditFindingStatus(s)}
                                 aria-pressed={editFindingStatus === s}
+                                title={`${findingStatusMeta[s].meaning} ${findingStatusMeta[s].action}`}
                                 className={`rounded-full border px-2.5 py-1 text-xs font-semibold transition-opacity ${findingStatusMeta[s].classes} ${
                                   editFindingStatus === s
                                     ? 'ring-2 ring-slate-900/20 ring-offset-1'

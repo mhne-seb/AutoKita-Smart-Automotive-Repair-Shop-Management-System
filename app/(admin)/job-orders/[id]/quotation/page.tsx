@@ -134,6 +134,10 @@ export default function page() {
   // Auto-save logic — only fires after the initial DB data has been seeded,
   // and skips the very first change triggered by seeding itself.
   const isFirstRender = useRef(true)
+  // One save at a time. Auto-save fires on a timer, and two saves running
+  // together would each replace the whole quotation — the job order would
+  // then end up with two copies of every service.
+  const saveInFlight = useRef(false)
   // AI predictions for each service
   const [aiPredictions, setAiPredictions] = useState<Record<string, { predicted_amount: number; predicted_duration_mins?: number; is_mock?: boolean }>>({})
 
@@ -237,33 +241,29 @@ export default function page() {
 
   const [availableServices, setAvailableServices] = useState<any[]>([])
   const [showServiceModal, setShowServiceModal] = useState(false)
-  const [selectedServiceId, setSelectedServiceId] = useState<string>('')
+  // Several services are usually added in one go, so the picker is a
+  // checkbox list rather than a single choice.
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
+  const [addCustomService, setAddCustomService] = useState(false)
   const [customServiceName, setCustomServiceName] = useState('')
   const [isAddingService, setIsAddingService] = useState(false)
 
   // Searchable service picker — typing filters the list instead of the admin
   // scrolling through every service in the database.
+  // Last look before the quotation leaves the shop (see sendWarnings).
+  const [showSendReview, setShowSendReview] = useState(false)
   const [serviceSearch, setServiceSearch] = useState('')
-  const [serviceDropdownOpen, setServiceDropdownOpen] = useState(false)
-  const serviceDropdownRef = useRef<HTMLDivElement>(null)
   const filteredServices = availableServices.filter((s) =>
     s.service_name.toLowerCase().includes(serviceSearch.toLowerCase()),
   )
+  // Services already on this quotation can't be added twice.
+  const alreadyAdded = new Set(services.map((s) => s.name.toLowerCase()))
 
-  useEffect(() => {
-    function onClickOutside(e: MouseEvent) {
-      if (serviceDropdownRef.current && !serviceDropdownRef.current.contains(e.target as Node)) {
-        setServiceDropdownOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', onClickOutside)
-    return () => document.removeEventListener('mousedown', onClickOutside)
-  }, [])
+  // Ticked catalog services plus the custom one, if it has a name.
+  const pickedCount = selectedServiceIds.length + (addCustomService && customServiceName.trim() ? 1 : 0)
 
-  function pickService(id: string, label: string) {
-    setSelectedServiceId(id)
-    setServiceSearch(label)
-    setServiceDropdownOpen(false)
+  function toggleService(id: string) {
+    setSelectedServiceIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
   }
 
   // Add Part modal — replaces the old window.prompt() flow.
@@ -344,6 +344,12 @@ export default function page() {
     setHasUnsavedChanges(true)
   }
 
+  // The line the customer reads under the service name on their quotation.
+  function updateDescription(serviceId: string, description: string) {
+    setServices((prev) => prev.map((s) => (s.id === serviceId ? { ...s, description } : s)))
+    setHasUnsavedChanges(true)
+  }
+
   function openAddPartModal(serviceId: string) {
     setPartModalServiceId(serviceId)
     setEditingPartId(null)
@@ -401,6 +407,8 @@ export default function page() {
   // and by Send to Customer (which needs the latest edits on the server
   // before it opens a round). Returns whether the write succeeded.
   async function persistQuotation(): Promise<boolean> {
+    if (saveInFlight.current) return true
+    saveInFlight.current = true
     setSaveState('saving')
     try {
       const servicesWithEstimates = services.map(s => {
@@ -428,12 +436,50 @@ export default function page() {
       console.error('Failed to save quotation', e)
       setSaveState('error')
       return false
+    } finally {
+      saveInFlight.current = false
     }
   }
 
   // Sends the full quotation (services + parts + total) for approval — a
   // real, persisted database write (creates a new pre_diagnostics round).
+  // Problems worth catching before the customer sees them. The page already
+  // shows the services and the total, so this modal only earns its place by
+  // pointing at what's easy to miss.
+  const sendWarnings = (() => {
+    const list: string[] = []
+    // Naming every row makes the panel unreadable on a long quotation.
+    const names = (all: string[]) => {
+      const unique = [...new Set(all)]
+      return unique.length > 3 ? `${unique.slice(0, 3).join(', ')} and ${unique.length - 3} more` : unique.join(', ')
+    }
+    if (services.length === 0) list.push('No services on this quotation yet.')
+    const placeholder = services.filter((s) => !s.description.trim() || s.description.trim() === 'Describe the service...')
+    if (placeholder.length > 0) {
+      list.push(`No description yet: ${names(placeholder.map((s) => s.name))}`)
+    }
+    const freeLabor = services.filter((s) => !s.laborCost)
+    if (freeLabor.length > 0) {
+      list.push(`Labor is \u20b10 on: ${names(freeLabor.map((s) => s.name))}`)
+    }
+    const seen = new Map<string, number>()
+    for (const s of services) {
+      const key = s.name.trim().toLowerCase()
+      seen.set(key, (seen.get(key) ?? 0) + 1)
+    }
+    const dupes = services.filter((s) => (seen.get(s.name.trim().toLowerCase()) ?? 0) > 1).map((s) => s.name)
+    if (dupes.length > 0) {
+      list.push(`Listed twice: ${names(dupes)}`)
+    }
+    const freeParts = services.flatMap((s) => s.parts.filter((pt) => !pt.unitPrice).map((pt) => `${pt.name} (${s.name})`))
+    if (freeParts.length > 0) {
+      list.push(`Part price is \u20b10 on: ${names(freeParts)}`)
+    }
+    return list
+  })()
+
   async function sendQuotationForApproval() {
+    setShowSendReview(false)
     setSending(true)
 
     // The round summarises what's on the server, so the latest edits have to
@@ -461,10 +507,10 @@ export default function page() {
 
   function openAddServiceModal() {
     setShowServiceModal(true)
-    setSelectedServiceId('')
+    setSelectedServiceIds([])
+    setAddCustomService(false)
     setCustomServiceName('')
     setServiceSearch('')
-    setServiceDropdownOpen(false)
   }
 
   function removeService(serviceId: string) {
@@ -473,37 +519,41 @@ export default function page() {
   }
 
   async function confirmAddService() {
-    let name = ''
-    let laborHours = 1
-    let laborCost = 0
+    const picked: QuotationService[] = []
+    let next = services.length
 
-    if (selectedServiceId === 'custom') {
-      name = customServiceName.trim()
-      if (!name) return
-    } else if (selectedServiceId) {
-      const srv = availableServices.find((s) => String(s.id) === selectedServiceId)
-      if (srv) {
-        name = srv.service_name
-        laborHours = Number(srv.base_duration_hours) || 1
-        laborCost = Number(srv.base_price) || 0
-      } else {
-        return
-      }
-    } else {
-      return
+    for (const id of selectedServiceIds) {
+      const srv = availableServices.find((s) => String(s.id) === id)
+      if (!srv) continue
+      next += 1
+      picked.push({
+        id: `SVC-${next}`,
+        code: `SVC-${String(next).padStart(3, '0')}`,
+        name: srv.service_name,
+        description: srv.service_name,
+        laborHours: Number(srv.base_duration_hours) || 1,
+        laborCost: Number(srv.base_price) || 0,
+        parts: [],
+        dbServiceId: Number(srv.id),
+      })
     }
 
-    const newService: QuotationService = {
-      id: `SVC-${services.length + 1}`,
-      code: `SVC-${String(services.length + 1).padStart(3, '0')}`,
-      name,
-      description: 'Describe the service...',
-      laborHours,
-      laborCost,
-      parts: [],
-      dbServiceId: selectedServiceId === 'custom' ? undefined : Number(selectedServiceId)
+    if (addCustomService && customServiceName.trim()) {
+      next += 1
+      picked.push({
+        id: `SVC-${next}`,
+        code: `SVC-${String(next).padStart(3, '0')}`,
+        name: customServiceName.trim(),
+        description: customServiceName.trim(),
+        laborHours: 1,
+        laborCost: 0,
+        parts: [],
+        dbServiceId: undefined,
+      })
     }
-    setServices((prev) => [...prev, newService])
+
+    if (picked.length === 0) return
+    setServices((prev) => [...prev, ...picked])
     setShowServiceModal(false)
     setHasUnsavedChanges(true)
   }
@@ -586,7 +636,7 @@ export default function page() {
                 )
               )}
               <button
-                onClick={sendQuotationForApproval}
+                onClick={() => setShowSendReview(true)}
                 disabled={sending || quotationApproved}
                 className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
               >
@@ -627,7 +677,19 @@ export default function page() {
                     <div>
                       <p className="text-xs text-slate-400">{s.code}</p>
                       <p className="font-bold text-slate-900">{s.name}</p>
-                      <p className="text-sm text-slate-500">{s.description}</p>
+                      {editing ? (
+                        <input
+                          type="text"
+                          defaultValue={s.description}
+                          onBlur={(e) => updateDescription(s.id, e.target.value)}
+                          placeholder="What the customer sees under the service name"
+                          className="mt-0.5 w-full min-w-[260px] rounded border border-slate-300 px-2 py-1 text-sm focus:border-emerald-500 focus:outline-none"
+                        />
+                      ) : (
+                        <p className={`text-sm ${s.description.trim() ? 'text-slate-500' : 'italic text-slate-300'}`}>
+                          {s.description.trim() || 'No description — click Edit to add one.'}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-6 text-sm">
@@ -964,57 +1026,155 @@ export default function page() {
         </div>
       </div>
 
+      {showSendReview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setShowSendReview(false)}>
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">Review before sending</h3>
+              <button onClick={() => setShowSendReview(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
+            </div>
+
+            <p className="text-sm text-slate-500">
+              We&apos;ll email this to <span className="font-semibold text-slate-700">{jobOrder.customer}</span> and
+              wait for their answer. You can recall it, but the email is already sent.
+            </p>
+
+            {sendWarnings.length > 0 ? (
+              <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4">
+                <p className="flex items-center gap-2 text-sm font-bold text-amber-900">
+                  <AlertCircle size={15} /> Please check first
+                </p>
+                <ul className="mt-2 space-y-1.5 text-sm text-amber-900">
+                  {sendWarnings.map((w) => (
+                    <li key={w} className="flex gap-2"><span>&bull;</span><span>{w}</span></li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-amber-700">You can still send this if it&apos;s correct.</p>
+              </div>
+            ) : (
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">
+                Ready to send — {services.length} service{services.length === 1 ? '' : 's'}, nothing missing.
+              </div>
+            )}
+
+            <div className="mt-4 rounded-xl border border-slate-200">
+              {services.map((s) => (
+                <div key={s.id} className="border-b border-slate-100 px-3 py-2.5 text-sm last:border-b-0">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="font-semibold text-slate-800">{s.name}</p>
+                    <span className="shrink-0 font-semibold text-slate-700">
+                      {currency(s.laborCost + s.parts.reduce((sum, pt) => sum + pt.qty * pt.unitPrice, 0))}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
+                    <span>Labor · {s.laborHours} hr{s.laborHours === 1 ? '' : 's'}</span>
+                    <span>{currency(s.laborCost)}</span>
+                  </div>
+                  {s.parts.length > 0 ? (
+                    s.parts.map((pt) => (
+                      <div key={pt.id} className="mt-0.5 flex items-center justify-between text-xs text-slate-500">
+                        <span>Part · {pt.name} ×{pt.qty}</span>
+                        <span>{currency(pt.qty * pt.unitPrice)}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="mt-0.5 text-xs italic text-slate-400">No parts</p>
+                  )}
+                </div>
+              ))}
+              <div className="space-y-1 bg-slate-50 px-3 py-2.5 text-sm">
+                <div className="flex items-center justify-between text-slate-500">
+                  <span>Labor total</span><span>{currency(totals.laborTotal)}</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-500">
+                  <span>Parts total</span><span>{currency(totals.partsTotal)}</span>
+                </div>
+                <div className="flex items-center justify-between border-t border-slate-200 pt-1 font-bold text-slate-900">
+                  <span>Grand total</span><span>{currency(totals.grandTotal)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button onClick={() => setShowSendReview(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50">
+                Keep editing
+              </button>
+              <button
+                onClick={sendQuotationForApproval}
+                disabled={sending || services.length === 0}
+                className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
+              >
+                <Send size={14} /> {sending ? 'Sending\u2026' : 'Send to Customer'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showServiceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setShowServiceModal(false)}>
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-900">Add Service</h3>
+              <h3 className="text-lg font-bold text-slate-900">Add Services</h3>
               <button onClick={() => setShowServiceModal(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
             </div>
             
             <div className="space-y-4">
-              <div ref={serviceDropdownRef} className="relative">
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Select Service</label>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Select Services</label>
                 <input
                   type="text"
                   value={serviceSearch}
-                  onChange={(e) => {
-                    setServiceSearch(e.target.value)
-                    setSelectedServiceId('')
-                    setServiceDropdownOpen(true)
-                  }}
-                  onFocus={() => setServiceDropdownOpen(true)}
+                  onChange={(e) => setServiceSearch(e.target.value)}
                   placeholder="Type to search services..."
                   className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
                 />
-                {serviceDropdownOpen && (
-                  <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
-                    {filteredServices.length > 0 ? (
-                      filteredServices.map((s) => (
-                        <button
+
+                {/* Tick every service this job needs, then add them in one go. */}
+                <div className="mt-2 max-h-56 overflow-y-auto rounded-lg border border-slate-200">
+                  {filteredServices.length > 0 ? (
+                    filteredServices.map((s) => {
+                      const added = alreadyAdded.has(s.service_name.toLowerCase())
+                      return (
+                        <label
                           key={s.id}
-                          type="button"
-                          onClick={() => pickService(String(s.id), s.service_name)}
-                          className="block w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-emerald-100"
+                          className={`flex items-center gap-2.5 border-b border-slate-100 px-3 py-2 text-sm last:border-b-0 ${
+                            added ? 'cursor-not-allowed text-slate-400' : 'cursor-pointer text-slate-700 hover:bg-emerald-50'
+                          }`}
                         >
-                          {s.service_name}
-                        </button>
-                      ))
-                    ) : (
-                      <div className="px-3 py-2 text-sm text-slate-400">No matching services</div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => pickService('custom', '+ Custom Service (Not Listed)')}
-                      className="block w-full border-t border-slate-100 px-3 py-2 text-left text-sm font-semibold text-emerald-600 hover:bg-emerald-100"
-                    >
-                      + Custom Service (Not Listed)
-                    </button>
-                  </div>
-                )}
+                          <input
+                            type="checkbox"
+                            disabled={added}
+                            checked={selectedServiceIds.includes(String(s.id))}
+                            onChange={() => toggleService(String(s.id))}
+                            className="h-4 w-4 accent-emerald-600"
+                          />
+                          <span className="flex-1">{s.service_name}</span>
+                          {added ? (
+                            <span className="text-xs">Already added</span>
+                          ) : (
+                            <span className="text-xs text-slate-400">₱{Number(s.base_price || 0).toLocaleString()}</span>
+                          )}
+                        </label>
+                      )
+                    })
+                  ) : (
+                    <div className="px-3 py-2 text-sm text-slate-400">No matching services</div>
+                  )}
+                </div>
               </div>
 
-              {selectedServiceId === 'custom' && (
+              <label className="flex cursor-pointer items-center gap-2.5 text-sm font-semibold text-emerald-700">
+                <input
+                  type="checkbox"
+                  checked={addCustomService}
+                  onChange={(e) => setAddCustomService(e.target.checked)}
+                  className="h-4 w-4 accent-emerald-600"
+                />
+                Custom service (not listed)
+              </label>
+
+              {addCustomService && (
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Custom Service Name</label>
                   <input
@@ -1029,11 +1189,16 @@ export default function page() {
               )}
             </div>
 
-            <div className="mt-6 flex justify-end gap-3">
-              <button onClick={() => setShowServiceModal(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50">Cancel</button>
-              <button onClick={confirmAddService} disabled={!selectedServiceId || (selectedServiceId === 'custom' && !customServiceName.trim())} className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">
-                Add Service
-              </button>
+            <div className="mt-6 flex items-center justify-between gap-3">
+              <span className="text-xs text-slate-500">
+                {pickedCount > 0 ? `${pickedCount} selected` : 'Nothing selected yet'}
+              </span>
+              <div className="flex gap-3">
+                <button onClick={() => setShowServiceModal(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50">Cancel</button>
+                <button onClick={confirmAddService} disabled={pickedCount === 0} className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">
+                  {pickedCount > 1 ? `Add ${pickedCount} Services` : 'Add Service'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

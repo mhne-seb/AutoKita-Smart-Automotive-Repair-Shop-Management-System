@@ -9,6 +9,7 @@ import { StageStepper, stageForStatus } from "@/components/dashboard/StageSteppe
 import { Lightbox } from "@/components/Lightbox";
 import { getInspectingData, respondToInspection, cancelJobOrder } from "@/controllers/serviceProgressController";
 import { ShopLoading } from "@/components/ShopLoading";
+import { formatStamp } from "@/lib/utils";
 
 function toneClass(status: string | null) {
   if (!status) return "bg-muted text-muted-foreground";
@@ -329,7 +330,7 @@ function Inspecting() {
                         {w.note?.trim() ? w.note : <span className="italic">No condition notes recorded for this area.</span>}
                       </p>
                       {w.logged_date && (
-                        <p className="mt-2 text-[11px] text-muted-foreground">{w.logged_date}</p>
+                        <p className="mt-2 text-[11px] text-muted-foreground">{formatStamp(w.logged_date)}</p>
                       )}
                     </div>
                   </div>
@@ -350,7 +351,7 @@ function Inspecting() {
                     <div>
                       {f.name && <div className="font-semibold">{f.name}</div>}
                       <p className="mt-1 text-xs text-muted-foreground">{f.findings_description}</p>
-                      <div className="mt-1 text-[10px] text-muted-foreground/70">{f.logged_date}</div>
+                      <div className="mt-1 text-[10px] text-muted-foreground/70">{formatStamp(f.logged_date)}</div>
                     </div>
                     {f.status && (
                       <span className={`shrink-0 rounded-md px-2.5 py-1 text-[11px] font-semibold ${toneClass(f.status)}`}>
@@ -383,7 +384,7 @@ function Inspecting() {
                     <div className="font-semibold">
                       Report {reviewHistory.length > 1 ? `#${i + 1} ` : ""}sent
                     </div>
-                    <div className="text-[11px] text-muted-foreground">{round.sent_at}</div>
+                    <div className="text-[11px] text-muted-foreground">{formatStamp(round.sent_at)}</div>
                     {round.mechanic_notes && (
                       <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{round.mechanic_notes}</p>
                     )}
@@ -394,7 +395,7 @@ function Inspecting() {
                           <Check className="h-3.5 w-3.5" /> You approved
                         </div>
                         {round.responded_at && (
-                          <div className="text-[11px] text-muted-foreground">{round.responded_at}</div>
+                          <div className="text-[11px] text-muted-foreground">{formatStamp(round.responded_at)}</div>
                         )}
                       </div>
                     )}
@@ -407,7 +408,7 @@ function Inspecting() {
                           <p className="mt-1 text-xs italic">&ldquo;{round.customer_reason}&rdquo;</p>
                         )}
                         {round.responded_at && (
-                          <div className="mt-0.5 text-[11px] text-muted-foreground">{round.responded_at}</div>
+                          <div className="mt-0.5 text-[11px] text-muted-foreground">{formatStamp(round.responded_at)}</div>
                         )}
                       </div>
                     )}
