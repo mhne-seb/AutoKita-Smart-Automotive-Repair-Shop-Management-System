@@ -24,6 +24,8 @@ function mapDbStatusToStage(dbStatus: string): Stage {
     case 'in_progress':
     case 'waiting_on_parts':
       return 'in-progress'
+    case 'testing':
+      return 'testing'
     case 'completed':
     case 'released':
     // Terminal, nothing left to do — sits with the finished ones. The card's
@@ -42,7 +44,8 @@ const STAGE_STEP_NUMBER: Record<Stage, number> = {
   inspecting: 1,
   quotation: 2,
   'in-progress': 3,
-  completed: 4,
+  testing: 4,
+  completed: 5,
 }
 
 // Converts one raw database row into the shape the JobOrders page expects.

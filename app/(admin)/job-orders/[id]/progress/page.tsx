@@ -2,8 +2,9 @@
 
 // Admin "Service Progress" page — the final step of the job-order workflow. Shows a section-by-section task checklist; once every task is marked done the job order is written back to "completed" (see jobOrderController.advanceJobOrderStage).
 import { useParams } from 'next/navigation'
+import Link from 'next/link'
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, CreditCard, XCircle, Banknote, Camera, Upload, Car, Receipt, Plus, ChevronDown, AlertTriangle, Hourglass, ClipboardList } from 'lucide-react'
+import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, CreditCard, XCircle, Banknote, Camera, Upload, Car, Receipt, Plus, ChevronDown, AlertTriangle, Hourglass, ClipboardList, Gauge, ArrowRight } from 'lucide-react'
 import type { ChangeEvent } from 'react'
 import { toast } from 'sonner'
 import { Lightbox } from '@/components/Lightbox'
@@ -287,11 +288,9 @@ export default function page() {
       toast.error(result.message ?? 'Could not finish the task.')
       return false
     }
-    if (result.roadTestCreated) toast.success('All services done — Road Test added. Drive it before handing it back.')
-    else if (result.jobCompleted) toast.success('Road test finished — job order is now Completed.')
+    if (result.allServicesDone) toast.success('All services done — proceed to Testing for the road test.')
     else toast.success(`${task.title} finished.`)
     await refreshTasks()
-    if (result.jobCompleted) getJobOrderById(jobOrderId).then((jo) => jo && setJobOrder(jo))
     return true
   }
 
@@ -945,11 +944,42 @@ export default function page() {
           </div>
         )}
 
-        {/* The road test — the last gate before the job is complete. Same card
-            as the timeline, just in the sidebar so it's always in view. */}
+        {/* Hand-off to the Testing stage. Unlocks once every service is
+            finished; the road test itself lives on the Testing page. */}
+        {jobOrder.stage !== 'completed' && (() => {
+          const allDone = serviceTasks.length > 0 && serviceTasks.every((t) => t.status === 'completed')
+          const inTesting = jobOrder.stage === 'testing'
+          return (
+            <div className={`rounded-2xl border p-5 ${allDone || inTesting ? 'border-sky-300 bg-sky-50' : 'border-slate-200 bg-white'}`}>
+              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400"><Gauge size={13} /> Testing</p>
+              <p className="mt-2 text-sm text-slate-600">
+                {inTesting
+                  ? 'The vehicle is out on its road test.'
+                  : allDone
+                  ? 'Every service is finished. Road-test the vehicle before it goes back to the customer.'
+                  : `${completedCount} of ${serviceTasks.length} services finished. The road test unlocks when they're all done.`}
+              </p>
+              {allDone || inTesting ? (
+                <Link
+                  href={`/job-orders/${jobOrderId}/testing`}
+                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
+                >
+                  {inTesting ? 'Open Testing' : 'Proceed to Testing'} <ArrowRight size={14} />
+                </Link>
+              ) : (
+                <button type="button" disabled className="mt-3 flex w-full cursor-not-allowed items-center justify-center gap-1.5 rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold text-slate-400">
+                  Proceed to Testing <ArrowRight size={14} />
+                </button>
+              )}
+            </div>
+          )
+        })()}
+
+        {/* Legacy: job orders from before the Testing stage carried the road
+            test as a task row. Still shown so those can be closed out. */}
         {roadTestSection && (
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            {renderSection({ ...roadTestSection, title: 'Road Test' })}
+            {renderSection({ ...roadTestSection, title: 'Road Test (legacy task)' })}
           </div>
         )}
 
