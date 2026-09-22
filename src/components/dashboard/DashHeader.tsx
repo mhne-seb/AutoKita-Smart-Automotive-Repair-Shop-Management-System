@@ -58,11 +58,12 @@ export function DashHeader() {
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((json) => {
         const items: NotificationItem[] = (json.notifications ?? []).map(
-          (a: { type: string; id: number; title: string; description: string; time: string }) => ({
-            key: `${a.type}-${a.id}`,
+          (a: { type: string; id: number; title: string; description: string; time: string; days_remaining?: number; job_order_id?: number }) => ({
+            key: a.days_remaining !== undefined ? `${a.type}-${a.id}-${a.days_remaining}` : `${a.type}-${a.id}`,
             title: a.title,
             message: a.description,
             time: timeAgo(a.time),
+            href: a.job_order_id ? `/dashboard/tracking/${a.job_order_id}` : '/dashboard',
           }),
         );
         setNotifications(items);

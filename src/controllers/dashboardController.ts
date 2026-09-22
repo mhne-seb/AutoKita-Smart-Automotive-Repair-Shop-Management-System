@@ -40,11 +40,12 @@ export interface DashboardJobOrder {
 
 export interface DashboardActivity {
   id: number
-  type: 'payment' | 'progress_log' | 'status_change' | 'booking_accepted' | 'report_ready'
+  type: 'payment' | 'progress_log' | 'status_change' | 'booking_accepted' | 'report_ready' | 'appointment_reminder'
   title: string
   description: string
   time: string
   job_order_id: number
+  days_remaining?: number
 }
 
 // Customer-facing names for job_orders_status values. The stored activity
@@ -193,6 +194,40 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
     [userId],
   )
 
+  // 4. Appointment reminders: notify customer 2 days and 1 day (tomorrow)
+  //    before their preferred_datetime.
+  const reminders = await db.query(
+    `SELECT
+        st.id,
+        'appointment_reminder'::text AS type,
+        CASE 
+            WHEN (st.preferred_datetime::date - CURRENT_DATE) = 2 THEN 'Service in 2 Days'
+            WHEN (st.preferred_datetime::date - CURRENT_DATE) = 1 THEN 'Service Scheduled Tomorrow'
+            WHEN (st.preferred_datetime::date - CURRENT_DATE) = 0 THEN 'Service Scheduled Today'
+        END::text AS title,
+        CASE
+            WHEN (st.preferred_datetime::date - CURRENT_DATE) = 2 THEN 
+                'Reminder: Your service for ' || v.vehicle_model || ' (' || v.plate_number || ') is scheduled in 2 days on ' || TO_CHAR(st.preferred_datetime, 'Mon DD, YYYY at HH:MI AM') || '.'
+            WHEN (st.preferred_datetime::date - CURRENT_DATE) = 1 THEN 
+                'Reminder: Your service for ' || v.vehicle_model || ' (' || v.plate_number || ') is scheduled for tomorrow at ' || TO_CHAR(st.preferred_datetime, 'HH:MI AM') || '.'
+            WHEN (st.preferred_datetime::date - CURRENT_DATE) = 0 THEN 
+                'Reminder: Your service for ' || v.vehicle_model || ' (' || v.plate_number || ') is scheduled for today at ' || TO_CHAR(st.preferred_datetime, 'HH:MI AM') || '.'
+        END::text AS description,
+        st.preferred_datetime AS job_time,
+        COALESCE(jo.id, 0) AS job_order_id,
+        (st.preferred_datetime::date - CURRENT_DATE)::int AS days_remaining
+     FROM service_tickets st
+     JOIN vehicles v ON v.id = st.vehicle_id
+     LEFT JOIN job_orders jo ON jo.ticket_id = st.id
+     WHERE st.user_id = $1
+       AND st.preferred_datetime IS NOT NULL
+       AND st.ticket_status::text NOT IN ('cancelled', 'declined')
+       AND (jo.status IS NULL OR jo.status NOT IN ('completed', 'cancelled'))
+       AND (st.preferred_datetime::date - CURRENT_DATE) BETWEEN 0 AND 2
+     ORDER BY st.preferred_datetime ASC`,
+    [userId],
+  )
+
   type RawActivityRow = {
     id: number
     type: DashboardActivity['type']
@@ -201,9 +236,10 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
     time?: string
     job_time?: string
     job_order_id: number
+    days_remaining?: number
   }
 
-  return ([...base.rows, ...accepted.rows, ...reportReady.rows] as RawActivityRow[])
+  return ([...base.rows, ...accepted.rows, ...reportReady.rows, ...reminders.rows] as RawActivityRow[])
     .map((r) => ({
       id: r.id,
       type: r.type,
@@ -211,6 +247,7 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
       description: r.type === 'status_change' ? humanizeStatusChange(r.description) : r.description,
       time: r.time ?? r.job_time ?? '',
       job_order_id: r.job_order_id,
+      days_remaining: r.days_remaining,
     }))
     .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
     .slice(0, 10)
