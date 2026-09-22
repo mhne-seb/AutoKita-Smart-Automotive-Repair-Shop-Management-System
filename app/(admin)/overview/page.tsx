@@ -11,6 +11,7 @@ import {
   Wallet,
   ChevronRight,
 } from 'lucide-react'
+import { ShopLoading } from '@/components/ShopLoading'
 import {
   AreaChart,
   Area,
@@ -50,13 +51,16 @@ export default function page() {
   const [pendingTicketsCount, setPendingTicketsCount] = useState<number>(0)
   const [techniciansCount, setTechniciansCount] = useState<number>(0)
   const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([])
+  // Show "loading" instead of zeros until every fetch below has settled —
+  // otherwise a reload flashes "0 pending / ₱0" before the real numbers land.
+  const [loading, setLoading] = useState(true)
   const totalRevenue = revenueTrend.reduce((sum, item) => sum + item.revenue, 0)
 
   useEffect(() => {
     let active = true
 
     // 2. Fetching chart data (revenue trend + service mix)
-    fetch('/api/analytics')
+    const analyticsLoad = fetch('/api/analytics')
       .then((res) => res.json())
       .then((json) => {
         if (active && json.success && json.data) {
@@ -70,7 +74,7 @@ export default function page() {
       .catch(console.error)
 
     // 3. Fetching background job order counts for the stat cards
-    getJobOrders(1, 1000000).then((result) => {
+    const jobOrdersLoad = getJobOrders(1, 1000000).then((result) => {
       if (active) {
         setJobOrders(result.data)
       }
@@ -78,7 +82,7 @@ export default function page() {
 
     // 4. Fetching job queue data — pending tickets count, technicians count,
     //    and a live preview of the bookings still waiting for approval.
-    fetch('/api/admin/job-queue')
+    const queueLoad = fetch('/api/admin/job-queue')
       .then((res) => res.json())
       .then((data) => {
         if (active && data.success && data.tickets) {
@@ -110,6 +114,10 @@ export default function page() {
       })
       .catch(console.error)
 
+    Promise.allSettled([analyticsLoad, jobOrdersLoad, queueLoad]).then(() => {
+      if (active) setLoading(false)
+    })
+
     return () => {
       active = false
     }
@@ -121,8 +129,12 @@ export default function page() {
 
   return (
     <div className="space-y-6 p-4 sm:p-8">
-      <TopBar title="Dashboard Overview" subtitle="Real-time pulse of the shop floor." showSearch={false} />
+      <TopBar title="Dashboard Overview" subtitle="Today's shop activity at a glance." showSearch={false} />
 
+      {loading ? (
+        <ShopLoading />
+      ) : (
+      <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-6">
       {/* Welcome banner */}
       <div className="relative overflow-hidden rounded-2xl">
         <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
@@ -134,7 +146,7 @@ export default function page() {
             </p>
             <h2 className="mt-1 text-2xl font-bold">Boss Boyet, here's today's shop floor.</h2>
             <p className="mt-1 max-w-md text-sm text-brand-foreground/80">
-              {inProgressOrders} in progress and {pendingTicketsCount} {pendingTicketsCount === 1 ? 'ticket' : 'tickets'} tickets waiting for triage.
+              {inProgressOrders} in progress and {pendingTicketsCount} {pendingTicketsCount === 1 ? 'ticket' : 'tickets'} waiting for triage.
             </p>
           </div>
         </div>
@@ -325,6 +337,8 @@ export default function page() {
           </div>
         </div>
       </div>
+      </div>
+      )}
     </div>
   )
 }

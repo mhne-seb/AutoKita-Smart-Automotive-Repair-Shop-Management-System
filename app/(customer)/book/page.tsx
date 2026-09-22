@@ -706,14 +706,12 @@ function BookPage() {
                       <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
                       <div className="flex-1">
                         <p className="font-semibold text-amber-950">
-                          This service uses the OBD-II diagnostic scanner — {formatPeso(DIAGNOSTIC_SCAN_FEE)}
+                          Scan fee: {formatPeso(DIAGNOSTIC_SCAN_FEE)}
                         </p>
                         <p className="mt-1 text-sm text-amber-900">
-                          To inspect this properly, our mechanic connects a diagnostic scanner to your
-                          vehicle&apos;s onboard computer. The scan fee of{" "}
-                          <b>{formatPeso(DIAGNOSTIC_SCAN_FEE)}</b> is charged whenever the scanner is
-                          used — <b>even if you decide not to go ahead with the repairs afterward</b>.
-                          Any repair costs will be quoted separately for your approval.
+                          To find the problem, we plug a scanner into your car. You pay this fee{" "}
+                          <b>even if you decide not to push through with the repair</b>. Repairs are priced
+                          separately, and we&apos;ll ask you first.
                         </p>
                         <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-sm text-amber-950">
                           <input
@@ -723,7 +721,7 @@ function BookPage() {
                             className="mt-0.5 h-4 w-4 rounded border-amber-400 accent-amber-600"
                           />
                           <span>
-                            I understand and agree to the {formatPeso(DIAGNOSTIC_SCAN_FEE)} diagnostic scan fee.
+                            I agree to pay the {formatPeso(DIAGNOSTIC_SCAN_FEE)} scan fee.
                           </span>
                         </label>
                         {showError && !f.scanAcknowledged && (
