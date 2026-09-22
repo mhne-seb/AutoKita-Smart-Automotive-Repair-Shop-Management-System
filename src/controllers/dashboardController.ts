@@ -59,7 +59,7 @@ const STATUS_TO_TRACKING_SLUG: Record<string, string> = {
   waiting_on_parts: 'in-progress',
   in_progress: 'in-progress',
   testing: 'testing',
-  completed: 'completed',
+  completed: 'billing',
   released: 'completed',
   cancelled: 'completed',
 }
