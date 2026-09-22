@@ -1,8 +1,9 @@
+import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
 
 interface StatCardProps {
   label: string
-  value: string
+  value: ReactNode
   icon: LucideIcon
   iconBg?: string
   iconColor?: string

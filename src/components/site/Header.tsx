@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { Logo } from "./Logo";
 import { useScrolled } from "@/hooks/use-scrolled";
 import { groups } from "@/controllers/servicesController";
@@ -19,6 +19,8 @@ export function Header({ variant = "light" }: { variant?: "light" | "transparent
   const pathname = usePathname();
   const scrolled = useScrolled(20);
   const [servicesOpen, setServicesOpen] = useState(false);
+  // Phones have no room for the nav row, so it moves into a drop-down panel.
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Auto-hide the matching action button when you're already on that page
   const isLoginPage = pathname?.startsWith("/login");
@@ -148,8 +150,57 @@ export function Header({ variant = "light" }: { variant?: "light" | "transparent
                 <span className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-500 ease-out hover:translate-x-0" />
               </Link>
             )}
-          </div> 
+          </div>
+
+          {/* Burger — phones and small tablets */}
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            className={`rounded-md p-2 md:hidden ${textOnDark ? "text-white hover:bg-white/10" : "text-foreground hover:bg-accent"}`}
+          >
+            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
+
+        {/* Mobile menu: the same links plus both action buttons */}
+        {menuOpen && (
+          <div className="border-t bg-white px-6 py-4 shadow-lg md:hidden">
+            <nav className="flex flex-col">
+              {NAV.map((item) => (
+                <Link
+                  key={item.to}
+                  href={item.to}
+                  onClick={() => setMenuOpen(false)}
+                  className={`border-b py-3 text-base last:border-b-0 ${
+                    pathname === item.to ? "font-semibold text-brand" : "text-foreground"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="mt-4 flex flex-col gap-2">
+              {!isLoginPage && (
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-md bg-[#1e3a5f] px-5 py-3 text-center text-base font-semibold text-white"
+                >
+                  Log in
+                </Link>
+              )}
+              {!isBookingPage && (
+                <Link
+                  href="/book"
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-md bg-brand px-5 py-3 text-center text-base font-semibold text-brand-foreground"
+                >
+                  Book Service
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </header>
       {variant !== "transparent" && <div className="h-16" />}
     </>

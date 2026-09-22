@@ -112,7 +112,7 @@ export function DashHeader() {
           scrolled ? "shadow-sm shadow-black/5" : ""
         }`}
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-6">
           <Link href="/dashboard" className="transition-transform duration-200 hover:scale-[1.03]">
             <Logo />
           </Link>
@@ -124,15 +124,15 @@ export function DashHeader() {
                 <Link
                   key={t.to}
                   href={t.to}
-                  className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 sm:px-4 ${
                     active
                       ? "text-white shadow-sm"
                       : "text-muted-foreground hover:bg-background hover:text-foreground"
                   }`}
                   style={active ? { backgroundImage: BRAND_GRADIENT } : undefined}
                 >
-                  <t.icon className="h-4 w-4" />
-                  {t.label}
+                  <t.icon className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">{t.label}</span>
                 </Link>
               );
             })}

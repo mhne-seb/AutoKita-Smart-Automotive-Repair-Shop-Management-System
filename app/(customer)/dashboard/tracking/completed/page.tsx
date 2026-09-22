@@ -9,6 +9,7 @@ import type { PaymentProof } from "@/controllers/quotationController";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getCompletedData, submitBalancePayment } from "@/controllers/serviceProgressController";
 import { fetchJobOrderPdfData, generateJobOrderPdf } from "@/lib/jobOrderPdf";
+import { ShopLoading } from "@/components/ShopLoading";
 
 function formatMoney(v: string | number | null | undefined) {
   const n = Number(v ?? 0);
@@ -88,7 +89,7 @@ function Completed() {
   };
 
   if (loading) {
-    return <div className="mx-auto max-w-6xl px-6 py-8 text-sm text-muted-foreground">Loading service report…</div>;
+    return <ShopLoading message="Loading your service report" />;
   }
   if (error || !data?.jobOrder) {
     return <div className="mx-auto max-w-6xl px-6 py-8 text-sm text-muted-foreground">{error ?? "No completed job order found."}</div>;

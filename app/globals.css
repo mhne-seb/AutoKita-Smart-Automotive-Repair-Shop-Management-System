@@ -72,6 +72,11 @@
   * {
     border-color: var(--color-border);
   }
+  html {
+    /* Decorative glows and slide-in animations sit a little outside their
+       section, which made phones scroll sideways. Clip that at the viewport. */
+    overflow-x: hidden;
+  }
   html, body {
     background-color: var(--color-background);
     color: var(--color-foreground);

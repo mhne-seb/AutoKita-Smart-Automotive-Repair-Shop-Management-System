@@ -601,12 +601,12 @@ function Home() {
                 Our Services
               </Link>
             </div>
-            <div ref={statsRef} className="mt-12 flex gap-10 text-white animate-fade-up" style={{ animationDelay: "0.4s" }}>
+            <div ref={statsRef} className="mt-12 flex gap-5 text-white animate-fade-up sm:gap-10" style={{ animationDelay: "0.4s" }}>
               <StatCounter value="15k+" label="Services Done" isActive={statsVisible} delayMs={0} />
-              <div className="border-l border-white/20 pl-10">
+              <div className="border-l border-white/20 pl-5 sm:pl-10">
                 <StatCounter value="4.9/5" label="User Rating" isActive={statsVisible} delayMs={150} />
               </div>
-              <div className="border-l border-white/20 pl-10">
+              <div className="border-l border-white/20 pl-5 sm:pl-10">
                 <StatCounter value="100%" label="Transparency" isActive={statsVisible} delayMs={300} />
               </div>
             </div>

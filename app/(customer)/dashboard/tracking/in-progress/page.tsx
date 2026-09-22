@@ -24,6 +24,7 @@ import { isRoadTest } from "@/data/roadTest";
 import type { ServiceFinding } from "@/data/types";
 import { FindingApprovalCard } from "@/components/dashboard/FindingApprovalCard";
 import { requestPullOut, withdrawPullOut } from "@/controllers/pullOutController";
+import { ShopLoading } from "@/components/ShopLoading";
 import type { PullOutRequest } from "@/data/types";
 import { toast } from "sonner";
 
@@ -282,11 +283,7 @@ function InProgress() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <div className="flex items-center justify-center gap-2 py-20 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" /> Loading service progress…
-        </div>
-      </div>
+      <ShopLoading message="Loading your service progress" />
     );
   }
 
@@ -311,7 +308,7 @@ function InProgress() {
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           {/* Anything the mechanic found that needs a yes/no goes first — it's
               the one thing on this page that's waiting on the customer. */}
           {!isHistorical && pendingFindings.map((f) => (
@@ -444,7 +441,7 @@ function InProgress() {
           </div>
         </div>
 
-        <aside className="space-y-4">
+        <aside className="min-w-0 space-y-4">
           <div className="rounded-xl bg-brand p-5 text-brand-foreground">
             <div className="text-3xl font-bold">{completionPct}%</div>
             <div className="text-[10px] font-bold uppercase tracking-wider text-white/70">
