@@ -1,13 +1,14 @@
 // Shared types for the Job Orders → Inspection → Quotation → Service Progress flow.
 
-export type Stage = 'inspecting' | 'quotation' | 'in-progress' | 'completed'
+export type Stage = 'inspecting' | 'quotation' | 'in-progress' | 'testing' | 'completed'
 
-export const stageOrder: Stage[] = ['inspecting', 'quotation', 'in-progress', 'completed']
+export const stageOrder: Stage[] = ['inspecting', 'quotation', 'in-progress', 'testing', 'completed']
 
 export const stageLabels: Record<Stage, string> = {
   inspecting: 'Inspecting',
   quotation: 'Quotation',
   'in-progress': 'In Progress',
+  testing: 'Testing',
   completed: 'Completed',
 }
 

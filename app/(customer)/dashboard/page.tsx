@@ -6,6 +6,7 @@ import {
   Phone,
   Mail,
   Wrench,
+  Gauge,
   Plus,
   MessageCircle,
   Clock,
@@ -56,9 +57,10 @@ const STATUS_TO_STEP: Record<string, number> = {
   revision_pending:           2,
   waiting_on_parts:           3,
   in_progress:                3,
-  completed:                  4,
-  released:                   4,
-  cancelled:                  4,
+  testing:                    4,
+  completed:                  5,
+  released:                   5,
+  cancelled:                  5,
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -67,6 +69,7 @@ const STATUS_LABEL: Record<string, string> = {
   revision_pending:           "Revision Pending",
   waiting_on_parts:           "Waiting on Parts",
   in_progress:                "In Progress",
+  testing:                    "Road Testing",
   completed:                  "Completed",
   released:                   "Released",
   cancelled:                  "Cancelled",
@@ -1776,6 +1779,7 @@ const SERVICE_STEPS = [
   { label: "Inspecting", icon: Search },
   { label: "Quotation", icon: FileText },
   { label: "In Progress", icon: Wrench },
+  { label: "Testing", icon: Gauge },
   { label: "Completed", icon: CheckCircle2 },
 ];
 
@@ -1809,6 +1813,7 @@ function ServiceCard({
     "bg-brand-soft text-brand",                       // inspecting
     "bg-purple-500/10 text-purple-600",                // pending approval / revision
     "bg-brand-soft text-brand",                       // waiting on parts / in progress
+    "bg-sky-500/10 text-sky-600",                      // testing
     "bg-success/10 text-success",                     // completed / released
   ];
   const statusTone = statusTones[Math.min(Math.max(stepIndex, 0), statusTones.length - 1)];
@@ -1923,7 +1928,7 @@ function ServiceCard({
             </>
           ) : (
             <Link
-              href={`/dashboard/tracking/${["received", "inspecting", "quotation", "in-progress", "completed"][stepIndex] ?? "received"}?jobOrderId=${jobId}`}
+              href={`/dashboard/tracking/${["received", "inspecting", "quotation", "in-progress", "testing", "completed"][stepIndex] ?? "received"}?jobOrderId=${jobId}`}
               className="inline-flex items-center gap-1 text-xs font-semibold text-brand transition-colors hover:text-[color:oklch(0.22_0.05_250)]"
             >
               View Tracking
