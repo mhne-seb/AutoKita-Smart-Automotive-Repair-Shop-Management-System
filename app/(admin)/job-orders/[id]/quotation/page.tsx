@@ -114,7 +114,7 @@ export default function page() {
   const [startingWork, setStartingWork] = useState(false)
   async function continueToServiceProgress() {
     setStartingWork(true)
-    if (jobOrder && jobOrder.stage !== 'in-progress' && jobOrder.stage !== 'completed') {
+    if (jobOrder && ['inspecting', 'quotation'].includes(jobOrder.stage)) {
       const updated = await advanceJobOrderStage(jobOrderId, 'in-progress')
       if (updated) setJobOrder(updated)
     }
@@ -943,7 +943,7 @@ export default function page() {
               page: hidden once the job is actually on the floor. Blocked while
               a downpayment is still unverified — the shop's policy is that
               work doesn't start until the money is confirmed. */}
-          {quotationApproved && jobOrder.stage !== 'in-progress' && jobOrder.stage !== 'completed' && (() => {
+          {quotationApproved && ['inspecting', 'quotation'].includes(jobOrder.stage) && (() => {
             const paymentBlocks =
               payment?.verificationStatus === 'pending'
                 ? "Verify the customer's payment first"

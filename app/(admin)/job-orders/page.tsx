@@ -3,7 +3,7 @@
 // Admin "Job Orders" board — lists every job order across all stages (inspecting/quotation/in-progress/completed), searchable and filterable by stage tab.
 import { useEffect, useMemo, useState } from 'react'
 import Link from "next/link";
-import { ClipboardList, Search, FileText, Wrench, CheckCircle2, Eye, ChevronLeft, ChevronRight, Car, Hash, Calendar, UserCog, Gauge } from 'lucide-react'
+import { ClipboardList, Search, FileText, Wrench, CheckCircle2, Eye, ChevronLeft, ChevronRight, Car, Hash, Calendar, UserCog, Gauge, Receipt } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { getJobOrders } from '@/controllers/jobOrderController'
 import { JobOrderCard, Stage, stageOrder, stageLabels } from '@/data/types'
@@ -15,7 +15,8 @@ const stageIcons: Record<Stage, typeof Search> = {
   quotation: FileText,
   'in-progress': Wrench,
   testing: Gauge,
-  completed: CheckCircle2,
+  completed: Receipt,
+  released: CheckCircle2,
 }
 
 const PAGE_SIZE = 12
@@ -28,7 +29,8 @@ const stageToRoute: Record<Stage, string> = {
   quotation: 'quotation',
   'in-progress': 'progress',
   testing: 'testing',
-  completed: 'testing',
+  completed: 'billing',
+  released: 'completed',
 }
 
 export default function page() {

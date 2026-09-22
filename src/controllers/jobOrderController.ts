@@ -27,11 +27,12 @@ function mapDbStatusToStage(dbStatus: string): Stage {
     case 'testing':
       return 'testing'
     case 'completed':
+      return 'completed'
     case 'released':
     // Terminal, nothing left to do — sits with the finished ones. The card's
     // `cancelled` flag keeps the label honest.
     case 'cancelled':
-      return 'completed'
+      return 'released'
     default:
       return 'inspecting'
   }
@@ -46,6 +47,7 @@ const STAGE_STEP_NUMBER: Record<Stage, number> = {
   'in-progress': 3,
   testing: 4,
   completed: 5,
+  released: 6,
 }
 
 // Converts one raw database row into the shape the JobOrders page expects.
