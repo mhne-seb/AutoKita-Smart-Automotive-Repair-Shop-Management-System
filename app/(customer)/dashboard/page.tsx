@@ -52,6 +52,7 @@ import { getCompletedData } from "@/controllers/serviceProgressController";
 import { getShopInfo } from "@/controllers/billingController";
 // npm install jspdf
 import jsPDF from "jspdf";
+import { formatStamp } from "@/lib/utils";
 
 // Status
 const STATUS_TO_STEP: Record<string, number> = {
@@ -1277,13 +1278,7 @@ function BookSumRow({ label, value }: { label: string; value: string }) {
 // Reuses the same data source as the Completed tracking page so the numbers always match.
 
 function formatDashboardLogTime(iso: string | null | undefined) {
-  if (!iso) return "";
-  return new Date(iso).toLocaleString("en-PH", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return formatStamp(iso);
 }
 
 type ReportTimelineEntry = {
@@ -1311,35 +1306,35 @@ function buildReportTimeline(data: Awaited<ReturnType<typeof getCompletedData>>)
       key: "received",
       label: "Vehicle Received",
       detail: `${jobOrder.vehicle_year} ${jobOrder.vehicle_model} checked in at the shop.`,
-      time: jo.date_arrived ?? null,
+      time: formatDashboardLogTime(jo.date_arrived) || null,
       status: "completed",
     },
     {
       key: "inspecting",
       label: "Mechanic Inspecting Vehicle",
       detail: "Technician performed the pre-diagnostic inspection.",
-      time: jo.date_arrived ?? null,
+      time: formatDashboardLogTime(jo.date_arrived) || null,
       status: "completed",
     },
     {
       key: "inspection_completed",
       label: "Inspection Completed",
       detail: "Findings logged and quotation drafting started.",
-      time: jo.inspection_completed_at ?? null,
+      time: formatDashboardLogTime(jo.inspection_completed_at) || null,
       status: "completed",
     },
     {
       key: "quotation_prepared",
       label: "Quotation Prepared",
       detail: "Service quotation was sent for your review.",
-      time: jo.quotation_prepared_at ?? null,
+      time: formatDashboardLogTime(jo.quotation_prepared_at) || null,
       status: "completed",
     },
     {
       key: "downpayment",
       label: "Downpayment / Confirmation Received",
       detail: "Quotation confirmed and servicing authorized.",
-      time: jo.downpayment_received_at ?? null,
+      time: formatDashboardLogTime(jo.downpayment_received_at) || null,
       status: "completed",
     },
     ...logs.map((log) => ({
@@ -1366,7 +1361,7 @@ function buildReportTimeline(data: Awaited<ReturnType<typeof getCompletedData>>)
       key: "released",
       label: "Vehicle Released",
       detail: "Vehicle handed back to the customer.",
-      time: jo.released_at ?? null,
+      time: formatDashboardLogTime(jo.released_at) || null,
       status: isReleased ? "completed" : "pending",
       image: jo.release_photo_url,
     },
