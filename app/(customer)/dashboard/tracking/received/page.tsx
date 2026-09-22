@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Car, Clock, ShieldCheck, ClipboardList, Wrench, AlertCircle, Loader2 } from "lucide-react";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getReceivedData } from "@/controllers/serviceProgressController";
+import { ShopLoading } from "@/components/ShopLoading";
 
 function Received() {
   useEffect(() => { document.title = "Vehicle Received — AutoKita"; }, []);
@@ -32,11 +33,7 @@ function Received() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <div className="flex items-center justify-center gap-2 py-20 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" /> Loading check-in details…
-        </div>
-      </div>
+      <ShopLoading message="Loading your check-in" />
     );
   }
 

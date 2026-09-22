@@ -17,6 +17,7 @@ import {
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from "@/data/diagnosticScan";
 import { PAYMENT_CHANNELS } from "@/data/paymentChannels";
 import { PaymentModal, type PaymentMethod } from "@/components/dashboard/PaymentModal";
+import { ShopLoading } from "@/components/ShopLoading";
 
 type FetchedService = {
   id: number;
@@ -156,11 +157,7 @@ function Quotation() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <div className="flex items-center justify-center gap-2 py-20 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" /> Loading quotation…
-        </div>
-      </div>
+      <ShopLoading message="Loading your quotation" />
     );
   }
 

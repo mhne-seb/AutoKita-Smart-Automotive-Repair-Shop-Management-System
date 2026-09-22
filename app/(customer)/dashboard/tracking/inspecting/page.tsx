@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { Lightbox } from "@/components/Lightbox";
 import { getInspectingData, respondToInspection, cancelJobOrder } from "@/controllers/serviceProgressController";
+import { ShopLoading } from "@/components/ShopLoading";
 
 function toneClass(status: string | null) {
   if (!status) return "bg-muted text-muted-foreground";
@@ -119,11 +120,7 @@ function Inspecting() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <div className="flex items-center justify-center gap-2 py-20 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" /> Loading inspection details…
-        </div>
-      </div>
+      <ShopLoading message="Loading your inspection" />
     );
   }
 
