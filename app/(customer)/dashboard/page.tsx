@@ -37,6 +37,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceModal";
 import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
 import type {
   DashboardData,
@@ -763,6 +764,9 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  // Plate of a car that already has an open job order — shows a modal instead
+  // of a browser alert when the customer tries to book it again.
+  const [inServicePlate, setInServicePlate] = useState<string | null>(null);
 
   const [user, setUser] = useState<any>(null);
   const [vehicles, setVehicles] = useState<any[]>([]);
@@ -842,7 +846,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
         return;
       }
       if (isVehicleActive(vehiclePlate)) {
-        alert("This vehicle is currently in an active job order and cannot be booked for a new service.");
+        setInServicePlate(vehiclePlate);
         return;
       }
       reqBody.newVehicleDetails = {
@@ -1048,13 +1052,12 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                       <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
                       <div className="flex-1">
                         <p className="font-semibold text-amber-950">
-                          This service uses the OBD-II diagnostic scanner — {formatPeso(DIAGNOSTIC_SCAN_FEE)}
+                          Scan fee: {formatPeso(DIAGNOSTIC_SCAN_FEE)}
                         </p>
                         <p className="mt-1 text-sm text-amber-900">
-                          Our mechanic connects a diagnostic scanner to your vehicle&apos;s onboard computer.
-                          The scan fee of <b>{formatPeso(DIAGNOSTIC_SCAN_FEE)}</b> is charged whenever the
-                          scanner is used — <b>even if you decide not to go ahead with the repairs afterward</b>.
-                          Any repair costs will be quoted separately for your approval.
+                          To find the problem, we plug a scanner into your car. You pay this fee{" "}
+                          <b>even if you decide not to push through with the repair</b>. Repairs are priced
+                          separately, and we&apos;ll ask you first.
                         </p>
                         <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-sm text-amber-950">
                           <input
@@ -1063,7 +1066,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                             onChange={(e) => setScanAcknowledged(e.target.checked)}
                             className="mt-0.5 h-4 w-4 rounded border-amber-400 accent-amber-600"
                           />
-                          <span>I understand and agree to the {formatPeso(DIAGNOSTIC_SCAN_FEE)} diagnostic scan fee.</span>
+                          <span>I agree to pay the {formatPeso(DIAGNOSTIC_SCAN_FEE)} scan fee.</span>
                         </label>
                       </div>
                     </div>
@@ -1137,6 +1140,10 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
           </div>
         )}
       </div>
+
+      {inServicePlate && (
+        <VehicleInServiceModal plate={inServicePlate} onClose={() => setInServicePlate(null)} />
+      )}
 
       {showConfirmModal && (
         <div

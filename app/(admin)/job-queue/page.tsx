@@ -32,6 +32,7 @@ import {
 import { DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 import { TopBar } from '@/components/TopBar'
 import { StatCard } from '@/components/StatCard'
+import { ShopLoading } from '@/components/admin/ShopLoading'
 import { StatusBadge } from '@/components/StatusBadge'
 import { PROVINCES, SERVICE_CATEGORIES, YEARS } from '@/data/ticketFormOptions'
 
@@ -78,6 +79,9 @@ const getServiceLabel = (raw: string): string => {
 export default function page() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [mechanics, setMechanics] = useState<any[]>([])
+  // Show the loading scene instead of empty cards ("0 Tickets", "No tickets
+  // found") while the first fetch is still on its way.
+  const [loading, setLoading] = useState(true)
 
   const fetchJobs = () => {
     fetch('/api/admin/job-queue')
@@ -109,6 +113,7 @@ export default function page() {
         }
       })
       .catch(console.error)
+      .finally(() => setLoading(false))
   }
 
   useEffect(() => {
@@ -248,7 +253,7 @@ export default function page() {
     <div className="space-y-6 p-4 sm:p-8">
       <TopBar
         title="Job Queueing"
-        subtitle="Intake of customer service tickets — shop visits, home service, walk-ins."
+        subtitle="Customer booking requests waiting to be approved."
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         rightSlot={
@@ -261,6 +266,10 @@ export default function page() {
         }
       />
 
+      {loading ? (
+        <ShopLoading message="Loading the job queue" />
+      ) : (
+      <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-6">
       <div className="flex flex-wrap gap-5">
         <StatCard label="Total Tickets" value={`${counts.all} Tickets`} icon={Wrench} iconBg="bg-gradient-to-br from-brand/20 to-brand/5" iconColor="text-brand" />
         <StatCard label="Waiting Approval" value={`${counts.pending} Pending`} icon={ShieldAlert} iconBg="bg-gradient-to-br from-violet-100 to-violet-50" iconColor="text-violet-600" />
@@ -448,6 +457,8 @@ export default function page() {
         </table>
         </div>
       </div>
+      </div>
+      )}
 
       {showNewTicket && <NewTicketModal onClose={() => setShowNewTicket(false)} onSubmit={addTicket} />}
 
