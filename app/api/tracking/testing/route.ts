@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     const svc = jobOrder
       ? await db.query(
           `SELECT COUNT(*)::int AS total, COUNT(*) FILTER (WHERE task_status = 'completed')::int AS done
-           FROM service_progress_tasks WHERE job_order_id = $1 AND section_id = 'in_progress'`,
+           FROM service_progress_tasks WHERE job_order_id = $1 AND section_id = 'in_progress' AND task_status <> 'cancelled'`,
           [jobOrder.job_order_id],
         )
       : null
