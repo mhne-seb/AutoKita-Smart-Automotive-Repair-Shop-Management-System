@@ -78,11 +78,16 @@ export async function sendOtpEmail(opts: {
     code: string
     expiresMinutes: number
     context: string // e.g. "confirm the quotation for JO-1882"
+    // Named work for the subject line, so two codes waiting in the inbox at
+    // the same time can be told apart.
+    subjectSuffix?: string
 }) {
     await transporter.sendMail({
         from: `"AutoKita" <${process.env.GMAIL_USER}>`,
         to: opts.to,
-        subject: `${opts.code} is your AutoKita verification code`,
+        subject: opts.subjectSuffix
+            ? `${opts.code} — code to approve ${opts.subjectSuffix}`
+            : `${opts.code} is your AutoKita verification code`,
         text:
             `Hi ${opts.name},\n\n` +
             `Use this code to ${opts.context}:\n\n` +

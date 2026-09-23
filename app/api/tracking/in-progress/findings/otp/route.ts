@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     // Ownership: the finding's job order must belong to this customer, and it
     // must still be waiting on them.
     const f = await db.query(
-      `SELECT f.decision::text, jo.user_id, jo.id AS job_order_id
+      `SELECT f.decision::text, f.proposed_services, f.extra_cost, jo.user_id, jo.id AS job_order_id
        FROM service_findings f JOIN job_orders jo ON jo.id = f.job_order_id
        WHERE f.id = $1`,
       [findingId],
@@ -39,6 +39,17 @@ export async function POST(request: NextRequest) {
     const user = u.rows[0]
     if (!user?.email) return NextResponse.json({ success: false, message: 'No email on file' }, { status: 400 })
 
+    // What this particular code approves, in the customer's words.
+    const proposed: { name?: string }[] = Array.isArray(finding.proposed_services) ? finding.proposed_services : []
+    const names = proposed.map((s) => s.name).filter(Boolean) as string[]
+    const workLabel = names.length === 0
+      ? 'the additional work'
+      : names.length === 1
+      ? names[0]
+      : `${names[0]} and ${names.length - 1} more`
+    const cost = Number(finding.extra_cost ?? 0)
+    const costLabel = cost > 0 ? ` (₱${cost.toLocaleString('en-PH')})` : ''
+
     const { code, token, expiresAt } = issueOtp(FINDING_OTP_PURPOSE, `${userId}:${findingId}`)
 
     const mailConfigured = Boolean(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD)
@@ -49,7 +60,8 @@ export async function POST(request: NextRequest) {
         name: user.first_name || user.nickname || 'there',
         code,
         expiresMinutes: OTP_TTL_MINUTES,
-        context: `approve the additional work on Job Order #JO-${finding.job_order_id}`,
+        context: `approve ${workLabel}${costLabel} on Job Order #JO-${finding.job_order_id}`,
+        subjectSuffix: workLabel,
       })
     } else {
       console.warn(`[findings/otp] GMAIL creds not set — OTP for finding ${findingId} is ${code}`)
@@ -59,6 +71,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       token,
+      // Echoed back so the modal can show which approval this code belongs to.
+      forWork: `${workLabel}${costLabel}`,
       sentTo: maskEmail(user.email),
       expiresAt,
       expiresMinutes: OTP_TTL_MINUTES,

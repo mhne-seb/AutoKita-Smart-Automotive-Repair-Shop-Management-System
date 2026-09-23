@@ -41,7 +41,7 @@ export async function requestFindingOtp(userId: number, findingId: number) {
   })
   const json = await res.json().catch(() => null)
   if (!res.ok || !json?.success) return { ok: false as const, message: json?.message ?? 'Could not send the code.' }
-  return { ok: true as const, token: json.token as string, sentTo: json.sentTo as string, expiresMinutes: json.expiresMinutes as number }
+  return { ok: true as const, token: json.token as string, sentTo: json.sentTo as string, expiresMinutes: json.expiresMinutes as number, forWork: json.forWork as string | undefined }
 }
 
 /** Customer: approve (with the emailed code) or decline (no code needed). */
