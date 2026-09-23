@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
+import { getLatestScanAuthorization } from '@/lib/scanAuthorization'
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -67,6 +68,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       [id, DIAGNOSTIC_SCAN_SERVICE_NAME],
     )
 
+    // Pending / approved / declined mid-inspection scan request, if the
+    // customer wasn't already asked at booking — see scan-authorization/route.ts.
+    const scanAuthorization = await getLatestScanAuthorization(Number(id))
+
     return NextResponse.json({
       success: true,
       data: {
@@ -74,6 +79,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         findings: findingsResult.rows,
         referencePhotos: photoResult.rows,
         diagnosticScanAuthorized: Boolean(scanResult.rows[0]?.authorized),
+        scanAuthorization,
         ticket: ticketResult.rows[0] ?? null,
         quotationStarted: Boolean(startedResult.rows[0]?.started),
       },

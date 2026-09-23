@@ -10,6 +10,7 @@ import { Lightbox } from "@/components/Lightbox";
 import { getInspectingData, respondToInspection, cancelJobOrder } from "@/controllers/serviceProgressController";
 import { ShopLoading } from "@/components/ShopLoading";
 import { formatStamp } from "@/lib/utils";
+import { ScanAuthorizationCard } from "@/components/dashboard/ScanAuthorizationCard";
 
 function toneClass(status: string | null) {
   if (!status) return "bg-muted text-muted-foreground";
@@ -43,6 +44,7 @@ function Inspecting() {
   const findings = data?.findings ?? [];
   const reviewHistory = data?.reviewHistory ?? [];
   const walkaround = data?.walkaround ?? [];
+  const scanAuthorization = data?.scanAuthorization ?? null;
 
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
 
@@ -138,6 +140,19 @@ function Inspecting() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
       <StageStepper active={stageForStatus(jobOrder.status)} viewing="inspecting" jobOrderId={jobOrder.job_order_id} />
+
+      {scanAuthorization?.decision === "pending" && !isHistorical && (
+        <ScanAuthorizationCard
+          authorizationId={scanAuthorization.id}
+          userId={Number(sessionStorage.getItem("autokita_user_id"))}
+          onAnswered={async () => {
+            const userId = Number(sessionStorage.getItem("autokita_user_id"));
+            const jobOrderId = jobOrderIdParam ? Number(jobOrderIdParam) : undefined;
+            const fresh = await getInspectingData(userId, jobOrderId);
+            setData(fresh);
+          }}
+        />
+      )}
 
       {inspectionStatus === "pending" && !isHistorical && (
         <div className="rounded-xl border-2 border-brand bg-brand-soft/40 p-6">
