@@ -18,21 +18,20 @@ export function uid(): string {
   return `id-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
 }
 
-// Postgres timestamps arrive as raw text ("2026-09-22 19:51:57.896302"),
-// which is no use to a customer. Show them as 09/22/2026 07:51 PM.
+// Postgres gives "2026-09-22 19:51:57.896302+08": the space isn't valid ISO,
+// and a "+08" offset needs its minutes before any browser will parse it.
+export function parseStamp(value: string | Date | null | undefined): Date | null {
+  if (!value) return null
+  if (value instanceof Date) return isNaN(value.getTime()) ? null : value
+  const iso = String(value).replace(' ', 'T').replace(/([+-]\d{2})$/, '$1:00')
+  let d = new Date(iso)
+  if (isNaN(d.getTime())) d = new Date(String(value))
+  return isNaN(d.getTime()) ? null : d
+}
+
 export function formatStamp(value: string | Date | null | undefined): string {
-  if (!value) return ''
-  let d: Date
-  if (value instanceof Date) {
-    d = value
-  } else {
-    // Postgres gives "2026-09-22 19:51:57.896302+08": the space isn't valid
-    // ISO, and a "+08" offset needs its minutes to parse.
-    const iso = String(value).replace(' ', 'T').replace(/([+-]\d{2})$/, '$1:00')
-    d = new Date(iso)
-    if (isNaN(d.getTime())) d = new Date(String(value))
-  }
-  if (isNaN(d.getTime())) return ''
+  const d = parseStamp(value)
+  if (!d) return ''
   return d.toLocaleString('en-PH', {
     month: '2-digit',
     day: '2-digit',
