@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceModal";
+import { isValidPhPlate, PLATE_FORMAT_ERROR } from "@/lib/plateNumber";
 import { ShopLoading } from "@/components/ShopLoading";
 import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
 import type {
@@ -900,6 +901,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
   const [vehicleTransmission, setVehicleTransmission] = useState("");
   const [vehicleMileage, setVehicleMileage] = useState("");
   const [vehiclePlate, setVehiclePlate] = useState("");
+  const [plateError, setPlateError] = useState<string | undefined>(undefined);
 
   const [pickup, setPickup] = useState<"shop" | "home">("shop");
   const [serviceCategory, setServiceCategory] = useState("");
@@ -964,6 +966,10 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
     if (selectedVehicleId === "new") {
       if (!vehicleModel || !vehiclePlate) {
         alert("Please provide the new vehicle's model and license plate.");
+        return;
+      }
+      if (!isValidPhPlate(vehiclePlate)) {
+        setPlateError(PLATE_FORMAT_ERROR);
         return;
       }
       if (isVehicleActive(vehiclePlate)) {
@@ -1126,7 +1132,8 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                         placeholder="e.g., ABC-1234"
                         wide
                         value={vehiclePlate}
-                        onChange={(e) => setVehiclePlate(e.target.value)}
+                        onChange={(e) => { setVehiclePlate(e.target.value); setPlateError(undefined); }}
+                        error={plateError}
                       />
                     </div>
                   </>
@@ -1328,12 +1335,19 @@ function BookModalCard({
 function BookModalInput({
   label,
   wide,
+  error,
   ...p
-}: { label: string; wide?: boolean } & React.InputHTMLAttributes<HTMLInputElement>) {
+}: { label: string; wide?: boolean; error?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div className={wide ? "md:col-span-2" : ""}>
       <label className="text-[10px] font-semibold uppercase text-muted-foreground">{label}</label>
-      <input {...p} className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none" />
+      <input
+        {...p}
+        className={`mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none ${
+          error ? "border-rose-400 focus:border-rose-400" : "focus:border-brand"
+        }`}
+      />
+      {error && <p className="mt-1 text-[11px] text-rose-500">{error}</p>}
     </div>
   );
 }

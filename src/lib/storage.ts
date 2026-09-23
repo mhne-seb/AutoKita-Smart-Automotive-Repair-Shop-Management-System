@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-const BUCKET = 'inspection-photos'
+const BUCKET = 'job-orders'
 
 const supabase = createClient(
     process.env.SUPABASE_URL ?? '',
