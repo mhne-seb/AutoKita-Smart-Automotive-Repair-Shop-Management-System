@@ -109,6 +109,17 @@ export interface DashboardShop {
   operating_hours: Record<string, string> | null
 }
 
+export interface DashboardRetentionOffer {
+  id: number
+  promo_code: string | null
+  offer_type: string
+  discount_value: number | null
+  description: string | null
+  issue_date: string
+  expiration_date: string | null
+  is_claimed: boolean
+}
+
 export interface DashboardData {
   user: DashboardUser | null
   vehicles: DashboardVehicle[]
@@ -116,6 +127,7 @@ export interface DashboardData {
   pendingTickets: DashboardPendingTicket[]
   recentActivity: DashboardActivity[]
   shop: DashboardShop | null
+  retentionOffers: DashboardRetentionOffer[]
 }
 
 
@@ -345,16 +357,43 @@ export async function getDashboardShop(): Promise<DashboardShop | null> {
   return rows[0] ?? null
 }
 
+export async function getDashboardRetentionOffers(userId: number): Promise<DashboardRetentionOffer[]> {
+  try {
+    const { rows } = await db.query(
+      `SELECT
+          id,
+          promo_code,
+          offer_type::text AS offer_type,
+          discount_value::float AS discount_value,
+          description,
+          issue_date::text AS issue_date,
+          expiration_date::text AS expiration_date,
+          is_claimed
+       FROM retention_offers
+       WHERE user_id = $1
+         AND is_claimed = false
+         AND (expiration_date IS NULL OR expiration_date >= CURRENT_DATE)
+       ORDER BY issue_date DESC, id DESC
+       LIMIT 5`,
+      [userId],
+    )
+    return rows
+  } catch (e) {
+    console.error('[getDashboardRetentionOffers] Error:', e)
+    return []
+  }
+}
 
 export async function getFullDashboardData(userId: number): Promise<DashboardData> {
-  const [user, vehicles, activeJobOrders, pendingTickets, recentActivity, shop] = await Promise.all([
+  const [user, vehicles, activeJobOrders, pendingTickets, recentActivity, shop, retentionOffers] = await Promise.all([
     getDashboardUser(userId),
     getDashboardVehicles(userId),
     getDashboardActiveJobOrders(userId),
     getDashboardPendingTickets(userId),
     getDashboardRecentActivity(userId),
     getDashboardShop(),
+    getDashboardRetentionOffers(userId),
   ])
 
-  return { user, vehicles, activeJobOrders, pendingTickets, recentActivity, shop }
+  return { user, vehicles, activeJobOrders, pendingTickets, recentActivity, shop, retentionOffers }
 }

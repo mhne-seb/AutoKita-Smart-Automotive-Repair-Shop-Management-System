@@ -200,42 +200,56 @@ const OFFER_CATALOG = [
     label: 'Free Oil Change Reminder',
     description: 'No-cost oil change coupon, good for one visit.',
     recommendedFor: ['High Churn Risk'],
+    offerType: 'free_service',
+    discountValue: 0,
   },
   {
     id: 'discount-15',
     label: '15% Discount Maintenance Promo',
     description: '15% off any single maintenance service.',
     recommendedFor: ['Medium Churn Risk'],
+    offerType: 'percentage_discount',
+    discountValue: 15,
   },
   {
     id: 'discount-25',
     label: '25% Win-Back Discount',
     description: 'Bigger discount reserved for high-risk, high-value customers.',
     recommendedFor: ['High Churn Risk'],
+    offerType: 'percentage_discount',
+    discountValue: 25,
   },
   {
     id: 'quick-service',
     label: 'Quick-Service Special Offer',
     description: 'Priority scheduling + minor perks for loyal customers.',
     recommendedFor: ['Loyal Customer'],
+    offerType: 'loyalty_reward',
+    discountValue: 0,
   },
   {
     id: 'welcome-promo',
     label: 'Welcome New Customer Promo',
     description: 'Intro discount for customers on their first visit.',
     recommendedFor: ['New Customer'],
+    offerType: 'percentage_discount',
+    discountValue: 10,
   },
   {
     id: 'loyalty-points',
     label: 'Bonus Loyalty Points',
     description: 'Extra points added to the customer’s rewards balance.',
     recommendedFor: ['Loyal Customer', 'Medium Churn Risk'],
+    offerType: 'loyalty_reward',
+    discountValue: 100,
   },
   {
     id: 'custom',
     label: 'Custom Offer',
     description: 'Write your own offer text for this customer.',
     recommendedFor: [],
+    offerType: 'fixed_discount',
+    discountValue: 0,
   },
 ] as const
 
@@ -271,10 +285,30 @@ export default function Page() {
     }
   }, [timeRange])
 
+  // Load existing retention offers from Supabase
+  useEffect(() => {
+    fetch('/api/admin/retention-offers')
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.success && Array.isArray(j.offers)) {
+          const map: Record<string, string> = {}
+          j.offers.forEach((o: any) => {
+            const key = `CUST-${o.user_id}`
+            if (!map[key] || !o.is_claimed) {
+              map[key] = o.promo_code ? `${o.promo_code}: ${o.description}` : o.description
+            }
+          })
+          setOffersSent(map)
+        }
+      })
+      .catch((e) => console.error('Error fetching retention offers:', e))
+  }, [])
+
   // Offer modal state
   const [offerTarget, setOfferTarget] = useState<any | null>(null)
   const [selectedOfferId, setSelectedOfferId] = useState<string>('')
   const [customOfferText, setCustomOfferText] = useState('')
+  const [isSubmittingOffer, setIsSubmittingOffer] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
   function showToast(message: string) {
@@ -355,7 +389,7 @@ export default function Page() {
     setCustomOfferText('')
   }
 
-  function confirmGiveOffer() {
+  async function confirmGiveOffer() {
     if (!offerTarget) return
     const chosen = OFFER_CATALOG.find((o) => o.id === selectedOfferId)
     const offerText =
@@ -366,9 +400,38 @@ export default function Page() {
       return
     }
 
-    setOffersSent((prev) => ({ ...prev, [offerTarget.customerId]: offerText }))
-    showToast(`"${offerText}" sent to ${offerTarget.name}.`)
-    closeOfferModal()
+    const rawUserId = offerTarget.id ?? parseInt(String(offerTarget.customerId).replace(/\D/g, ''), 10)
+    setIsSubmittingOffer(true)
+
+    try {
+      const res = await fetch('/api/admin/retention-offers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: rawUserId,
+          offerType: chosen?.offerType ?? 'percentage_discount',
+          discountValue: chosen?.discountValue ?? 0,
+          description: offerText,
+          expirationDays: 30,
+        }),
+      })
+      const json = await res.json()
+      if (json.success && json.offer) {
+        const promo = json.offer.promo_code
+        const displayLabel = promo ? `${promo}: ${offerText}` : offerText
+        setOffersSent((prev) => ({ ...prev, [offerTarget.customerId]: displayLabel }))
+        showToast(`Promo ${promo || ''} issued & saved for ${offerTarget.name}.`)
+      } else {
+        setOffersSent((prev) => ({ ...prev, [offerTarget.customerId]: offerText }))
+        showToast(`"${offerText}" sent to ${offerTarget.name}.`)
+      }
+    } catch {
+      setOffersSent((prev) => ({ ...prev, [offerTarget.customerId]: offerText }))
+      showToast(`"${offerText}" sent to ${offerTarget.name}.`)
+    } finally {
+      setIsSubmittingOffer(false)
+      closeOfferModal()
+    }
   }
 
   return (
@@ -878,9 +941,10 @@ export default function Page() {
               </button>
               <button
                 onClick={confirmGiveOffer}
-                className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+                disabled={isSubmittingOffer}
+                className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
               >
-                <Gift size={15} /> Send Offer
+                <Gift size={15} /> {isSubmittingOffer ? 'Saving...' : 'Send Offer'}
               </button>
             </div>
           </div>

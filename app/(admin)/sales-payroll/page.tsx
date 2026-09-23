@@ -1,16 +1,16 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Download, Pencil, Info, Lock, Search, Check, X, Eye, Phone, Wallet, Wrench, CreditCard, Users, History, RefreshCw, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { Download, Pencil, Info, Lock, Search, Check, X, Eye, Phone, Wallet, Wrench, CreditCard, Users, History, RefreshCw, CheckCircle2, AlertCircle, Loader2, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
-import type { Mechanic, PaymentRecord, WeeklyService } from '@/data/mockData'
+import type { Mechanic, PaymentRecord, WeeklyService, ServicesDoneRecord } from '@/data/mockData'
 import { currency } from '@/data/mockData'
 const autokitaLogo = '/assets/autokita-logo.png' // static asset path (was a bundler import)
 
 const TABS = [
   { key: 'payments', label: 'Customer Payment Records', icon: CreditCard },
   { key: 'payroll', label: 'Employee Payroll & Commission', icon: Users },
-  { key: 'services', label: 'Weekly Services & Commission', icon: Wrench },
+  { key: 'services', label: 'Services Done & Commission Breakdown', icon: Wrench },
 ] as const
 
 type TabKey = (typeof TABS)[number]['key']
@@ -211,30 +211,26 @@ function downloadInvoice(p: PaymentRecord) {
   win.print()
 }
 
-interface SalesPayrollAuditLog {
-  id: number
-  adminId: number
-  adminName: string
-  actionPerformed: string
-  entityType: string
-  entityId: number
-  oldValues: string | null
-  newValues: string | null
-  actionDate: string
-}
-
 export default function page() {
   const [activeTab, setActiveTab] = useState<TabKey>('payments')
 
   // Live state from Supabase
+  const [cycle, setCycle] = useState<'weekly' | 'daily' | 'monthly' | 'all'>('weekly')
+  const [poolRate, setPoolRate] = useState<number>(20)
+  const [isEditingPoolRate, setIsEditingPoolRate] = useState(false)
+  const [draftPoolRate, setDraftPoolRate] = useState('20')
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [savingId, setSavingId] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
-  const [showAuditModal, setShowAuditModal] = useState(false)
-  const [auditLogs, setAuditLogs] = useState<SalesPayrollAuditLog[]>([])
 
   const [kpi, setKpi] = useState({
+    cycle: 'weekly',
+    finishedServicesTotal: 0,
+    totalCommissionPool: 0,
+    commissionRatePct: 20,
+    sharedCommissionPerEmployee: 0,
+    servicesCount: 0,
     weeklyGrossSales: 0,
     prevWeeklyGrossSales: 0,
     salesGrowthPct: '0.0',
@@ -246,19 +242,25 @@ export default function page() {
   const [mechanics, setMechanics] = useState<Mechanic[]>([])
   const [paymentRecords, setPaymentRecords] = useState<PaymentRecord[]>([])
   const [weeklyServices, setWeeklyServices] = useState<WeeklyService[]>([])
+  const [servicesDone, setServicesDone] = useState<ServicesDoneRecord[]>([])
+  const [servicesViewMode, setServicesViewMode] = useState<'aggregate' | 'itemized'>('aggregate')
+  const [servicesDoneSearch, setServicesDoneSearch] = useState('')
+  const [itemizedPage, setItemizedPage] = useState(1)
+  const itemizedPageSize = 25
 
-  const loadData = async (isRefresh = false) => {
+  const loadData = async (isRefresh = false, selectedCycle = cycle, selectedPoolRate = poolRate) => {
     if (isRefresh) setRefreshing(true)
     else setLoading(true)
     try {
-      const res = await fetch('/api/admin/sales-payroll')
+      const res = await fetch(`/api/admin/sales-payroll?cycle=${selectedCycle}&poolRate=${selectedPoolRate}`)
       const data = await res.json()
       if (data.success) {
         setPaymentRecords(data.paymentRecords || [])
         setMechanics(data.mechanics || [])
         setWeeklyServices(data.weeklyServices || [])
+        setServicesDone(data.servicesDone || [])
+        if (data.poolRate !== undefined) setPoolRate(data.poolRate)
         if (data.kpi) setKpi(data.kpi)
-        if (data.auditLogs) setAuditLogs(data.auditLogs)
       } else {
         console.error('Failed to load sales and payroll data:', data.message)
       }
@@ -271,8 +273,47 @@ export default function page() {
   }
 
   useEffect(() => {
-    loadData()
-  }, [])
+    loadData(false, cycle, poolRate)
+  }, [cycle])
+
+  const savePoolRate = () => {
+    const parsed = Math.max(0, Math.min(100, parseFloat(draftPoolRate) || 0))
+    setPoolRate(parsed)
+    setIsEditingPoolRate(false)
+    loadData(false, cycle, parsed)
+    setToast(`Updated commission pool rate to ${parsed}% of finished services!`)
+    setTimeout(() => setToast(null), 4000)
+  }
+
+  const resetAllToEqualShare = async () => {
+    if (mechanics.length === 0) return
+    const equalPercent = Math.round(100 / mechanics.length)
+    setLoading(true)
+    try {
+      const adminId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
+      await Promise.all(
+        mechanics.map((m) =>
+          fetch('/api/admin/sales-payroll', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              employeeId: m.id,
+              field: 'commission',
+              value: equalPercent,
+              adminId,
+            }),
+          })
+        )
+      )
+      await loadData(false, cycle, poolRate)
+      setToast(`All ${mechanics.length} mechanics set to equal share (${equalPercent}% each)!`)
+      setTimeout(() => setToast(null), 4000)
+    } catch (err) {
+      console.error('Failed to equalize shares:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const [editingField, setEditingField] = useState<{ id: string; field: 'rank' | 'commission' } | null>(null)
   const [draftValue, setDraftValue] = useState('')
@@ -326,10 +367,14 @@ export default function page() {
       if (result.success) {
         setToast(`Updated ${target.name}'s ${editingCopy.field} and logged to audit trail!`)
         setTimeout(() => setToast(null), 4000)
-        // Refresh audit logs in background
-        fetch('/api/admin/sales-payroll')
+        // Refresh audit logs and mechanics in background
+        fetch(`/api/admin/sales-payroll?cycle=${cycle}&poolRate=${poolRate}`)
           .then((r) => r.json())
-          .then((d) => d.success && setAuditLogs(d.auditLogs || []))
+          .then((d) => {
+            if (d.success && d.mechanics) {
+              setMechanics(d.mechanics)
+            }
+          })
       } else {
         alert(result.message || 'Failed to update database.')
         loadData()
@@ -346,12 +391,13 @@ export default function page() {
   const weeklyGrossSales = kpi.weeklyGrossSales
   const netProfit = kpi.netProfit
   const totalCommissionsFlat = useMemo(() => {
+    if (kpi.totalCommissionPool > 0) return kpi.totalCommissionPool
     if (kpi.totalCommissions > 0) return kpi.totalCommissions
     return mechanics.reduce(
-      (sum, m) => sum + Math.round((weeklyGrossSales / (mechanics.length || 1)) * (m.commissionPercent / 100)),
+      (sum, m) => sum + (m.commissionSalary || Math.round((weeklyGrossSales / (mechanics.length || 1)) * (poolRate / 100))),
       0,
     )
-  }, [kpi.totalCommissions, weeklyGrossSales, mechanics])
+  }, [kpi.totalCommissionPool, kpi.totalCommissions, weeklyGrossSales, mechanics, poolRate])
 
   // ---------- Customer Payment Records: search + status filter ----------
   const [paymentSearch, setPaymentSearch] = useState('')
@@ -392,35 +438,78 @@ export default function page() {
   }, [payrollSearch, mechanics])
 
   const exportPayroll = () => {
+    const equalShare = mechanics.length > 0 ? Math.round(100 / mechanics.length) : 25
     downloadCsv(
-      'employee-payroll-commission.csv',
-      ['Employee Name', 'Contact', 'Rank', 'Base Salary', 'Commission %', 'Commission Salary', 'Services Done (Weekly)'],
-      filteredMechanics.map((m) => [
-        m.name,
-        m.phone,
-        m.rank,
-        m.baseSalary,
-        `${m.commissionPercent}%`,
-        Math.round((weeklyGrossSales / mechanics.length) * (m.commissionPercent / 100)),
-        m.servicesDoneWeekly,
-      ]),
+      `employee-payroll-${cycle}.csv`,
+      ['Employee Name', 'Contact', 'Rank', 'Base Salary', 'Commission Share %', `Commission Payout (${poolRate}% Pool)`, 'Total Estimated Pay', 'Services Done in Period'],
+      filteredMechanics.map((m) => {
+        const share = m.commissionPercent !== undefined ? m.commissionPercent : equalShare
+        const comm = Math.round((kpi.totalCommissionPool || 0) * (share / 100))
+        const total = (m.baseSalary || 0) + comm
+        return [
+          m.name,
+          m.phone,
+          m.rank,
+          m.baseSalary,
+          `${share}% Share`,
+          comm,
+          total,
+          kpi.servicesCount || m.servicesDoneWeekly || 0,
+        ]
+      }),
     )
   }
 
-  // ---------- Weekly Services: search ----------
+  // ---------- Services Breakdown: search & pagination ----------
   const [servicesSearch, setServicesSearch] = useState('')
 
   const filteredServices = useMemo(() => {
     const q = servicesSearch.trim().toLowerCase()
     if (!q) return weeklyServices
     return weeklyServices.filter((s) => s.name.toLowerCase().includes(q))
-  }, [servicesSearch])
+  }, [servicesSearch, weeklyServices])
 
   const exportServices = () => {
     downloadCsv(
-      'weekly-services-commission.csv',
-      ['Service', 'Qty', 'Price', 'Allocated Commission'],
-      filteredServices.map((s) => [s.name, s.qty, s.price, s.allocatedCommission]),
+      `services-summary-${cycle}.csv`,
+      ['Service Name', 'Qty Done', 'Avg Price', 'Total Service Billed', '20% Commission Generated'],
+      filteredServices.map((s) => [s.name, s.qty, s.price, s.totalAmount || (s.qty * s.price), s.allocatedCommission]),
+    )
+  }
+
+  const filteredServicesDone = useMemo(() => {
+    const q = servicesDoneSearch.trim().toLowerCase()
+    if (!q) return servicesDone
+    return servicesDone.filter(
+      (s) =>
+        s.serviceName.toLowerCase().includes(q) ||
+        s.customerName.toLowerCase().includes(q) ||
+        s.vehicleModel.toLowerCase().includes(q) ||
+        s.plateNumber.toLowerCase().includes(q) ||
+        s.jobOrderId.toLowerCase().includes(q),
+    )
+  }, [servicesDoneSearch, servicesDone])
+
+  const totalPagesItemized = Math.max(1, Math.ceil(filteredServicesDone.length / itemizedPageSize))
+  const paginatedServicesDone = useMemo(() => {
+    const start = (itemizedPage - 1) * itemizedPageSize
+    return filteredServicesDone.slice(start, start + itemizedPageSize)
+  }, [filteredServicesDone, itemizedPage, itemizedPageSize])
+
+  const exportServicesDone = () => {
+    downloadCsv(
+      `finished-services-detailed-${cycle}.csv`,
+      ['Job Order ID', 'Service Name', 'Customer Name', 'Vehicle Model', 'Plate Number', 'Completed At', 'Amount Billed', '20% Commission Pool Contribution'],
+      filteredServicesDone.map((s) => [
+        s.jobOrderId,
+        s.serviceName,
+        s.customerName,
+        s.vehicleModel,
+        s.plateNumber,
+        new Date(s.completedAt).toLocaleString('en-PH'),
+        s.amount,
+        s.commission,
+      ]),
     )
   }
 
@@ -443,18 +532,6 @@ export default function page() {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setShowAuditModal(true)}
-            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition-all"
-          >
-            <History size={16} className="text-blue-600" />
-            Audit Trail
-            {auditLogs.length > 0 && (
-              <span className="ml-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700">
-                {auditLogs.length}
-              </span>
-            )}
-          </button>
-          <button
             onClick={() => loadData(true)}
             disabled={refreshing}
             className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition-all disabled:opacity-50"
@@ -462,8 +539,19 @@ export default function page() {
           >
             <RefreshCw size={15} className={`text-slate-600 ${refreshing ? 'animate-spin' : ''}`} />
           </button>
-          <select className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none">
-            <option>Payroll Cycle: Weekly</option>
+          <select 
+            value={cycle}
+            onChange={(e) => {
+              const newCycle = e.target.value as 'weekly' | 'daily' | 'monthly' | 'all'
+              setCycle(newCycle)
+              loadData(false, newCycle)
+            }}
+            className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-blue-500 shadow-sm cursor-pointer"
+          >
+            <option value="weekly">Payroll Cycle: Weekly (7 Days)</option>
+            <option value="daily">Payroll Cycle: Daily (Today / 24h)</option>
+            <option value="monthly">Payroll Cycle: Monthly (30 Days)</option>
+            <option value="all">Payroll Cycle: All Time</option>
           </select>
         </div>
       </div>
@@ -476,17 +564,25 @@ export default function page() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <SummaryCard 
-            label="Weekly Gross Sales" 
-            value={currency(weeklyGrossSales)} 
-            sub={`${kpi.salesGrowthPct.startsWith('-') ? '' : '+'}${kpi.salesGrowthPct}% vs last period`} 
-            positive={!kpi.salesGrowthPct.startsWith('-')} 
+            label="Finished Services Total" 
+            value={currency(kpi.finishedServicesTotal || weeklyGrossSales)} 
+            sub={`${kpi.servicesCount || 0} completed services in ${cycle === 'daily' ? 'last 24 hours' : cycle === 'weekly' ? 'last 7 days' : cycle === 'monthly' ? 'last 30 days' : 'all recorded time'}`} 
+            badge={cycle.toUpperCase()}
           />
           <SummaryCard
-            label="Total Commissions Allocated"
-            value={currency(totalCommissionsFlat)}
-            sub={`Automated split across ${mechanics.length} active workers`}
+            label="Commission Pool"
+            value={currency(kpi.totalCommissionPool || totalCommissionsFlat)}
+            sub={`Configured at ${poolRate}% • ${currency(kpi.sharedCommissionPerEmployee)} / equal share`}
+            positive={true}
+            badge={`${poolRate}% Pool`}
+          />
+          <SummaryCard 
+            label="Gross Sales & Collections" 
+            value={currency(weeklyGrossSales)} 
+            sub={`${kpi.salesGrowthPct.startsWith('-') ? '' : '+'}${kpi.salesGrowthPct}% vs prior cycle`} 
+            positive={!kpi.salesGrowthPct.startsWith('-')} 
           />
           <SummaryCard 
             label="Net Financial Profit" 
@@ -641,12 +737,79 @@ export default function page() {
           <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
           <div className="p-6">
           <div className="flex items-center justify-between border-l-4 border-slate-900 pl-3">
-            <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">
-              Employee Payroll & Commission Summary
-            </h3>
-            <span className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-600">
-              <Info size={13} /> Rank & Commission % are manually editable
-            </span>
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">
+                Employee Payroll & Commission Summary
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Total finished services across {cycle === 'daily' ? 'today' : cycle === 'weekly' ? 'the week' : cycle === 'monthly' ? 'the month' : 'all time'} are pooled at {poolRate}% and shared among mechanics.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 border border-blue-200">
+                <Sparkles size={13} className="text-amber-500" /> {poolRate}% Commission Pool Model
+              </span>
+            </div>
+          </div>
+
+          {/* Commission Pool Highlights Banner with Editable Pool % */}
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-blue-200/80 bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-slate-50 p-4 shadow-xs">
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#0b1730] to-[#1d3a68] text-white shadow-md">
+                <Wrench size={20} className="text-amber-300" />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-blue-950">
+                  {cycle.toUpperCase()} Finished Services Commission Sharing
+                </p>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Total Finished Services: <strong className="text-slate-900">{currency(kpi.finishedServicesTotal)}</strong> ({kpi.servicesCount} services completed). 
+                  Commission Pool ({poolRate}%): <strong className="text-blue-700">{currency(kpi.totalCommissionPool)}</strong>, divided among <strong className="text-slate-900">{mechanics.length} active mechanics</strong>: <strong className="text-emerald-700 font-bold">{currency(kpi.sharedCommissionPerEmployee)}</strong> avg / equal share.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {isEditingPoolRate ? (
+                <div className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm border border-emerald-300">
+                  <span className="text-xs font-bold text-slate-700">Pool:</span>
+                  <input
+                    autoFocus
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={draftPoolRate}
+                    onChange={(e) => setDraftPoolRate(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') savePoolRate()
+                      if (e.key === 'Escape') setIsEditingPoolRate(false)
+                    }}
+                    className="w-14 rounded border border-slate-300 px-1.5 py-0.5 text-xs font-bold text-slate-800 outline-none focus:border-emerald-500"
+                  />
+                  <span className="text-xs font-bold text-slate-600">%</span>
+                  <button onClick={savePoolRate} className="text-emerald-600 hover:text-emerald-700 p-0.5" title="Save pool percentage">
+                    <Check size={15} />
+                  </button>
+                  <button onClick={() => setIsEditingPoolRate(false)} className="text-rose-500 hover:text-rose-600 p-0.5" title="Cancel">
+                    <X size={15} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setDraftPoolRate(String(poolRate))
+                    setIsEditingPoolRate(true)
+                  }}
+                  className="flex items-center gap-1.5 rounded-full bg-emerald-100 hover:bg-emerald-200/80 px-3.5 py-1.5 text-xs font-extrabold text-emerald-800 shadow-xs transition-colors cursor-pointer group"
+                  title="Click to edit the commission pool percentage"
+                >
+                  <span>{poolRate}% Pool: {currency(kpi.totalCommissionPool)}</span>
+                  <Pencil size={11} className="text-emerald-600 group-hover:scale-110 transition-transform" />
+                </button>
+              )}
+              <span className="rounded-full bg-blue-100 px-3 py-1.5 text-xs font-extrabold text-blue-800 shadow-xs">
+                {currency(kpi.sharedCommissionPerEmployee)} / Equal Share
+              </span>
+            </div>
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -660,6 +823,13 @@ export default function page() {
                 className="w-full rounded-full border border-slate-200 py-2 pl-9 pr-4 text-sm text-slate-700 outline-none focus:border-slate-400"
               />
             </div>
+            <button
+              onClick={resetAllToEqualShare}
+              className="flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-2 text-xs font-bold text-blue-700 shadow-xs hover:bg-blue-100 transition-colors cursor-pointer"
+              title="Reset all mechanics to equal share of the pool"
+            >
+              <RefreshCw size={13} className="text-blue-600" /> Equalize Shares ({mechanics.length > 0 ? Math.round(100 / mechanics.length) : 25}% each)
+            </button>
             <button
               onClick={exportPayroll}
               className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
@@ -675,19 +845,35 @@ export default function page() {
                 <th className="py-3 font-semibold">Contact</th>
                 <th className="py-3 font-semibold">Rank Number (Editable)</th>
                 <th className="py-3 font-semibold">Base Salary</th>
-                <th className="py-3 font-semibold">Commission % (Editable)</th>
-                <th className="py-3 font-semibold">Commission Salary (Automated Split)</th>
-                <th className="py-3 font-semibold">Services Done (Weekly)</th>
+                <th className="py-3 font-semibold">Commission Share % (Editable)</th>
+                <th className="py-3 font-semibold">Commission Payout ({poolRate}% Pool)</th>
+                <th className="py-3 font-semibold">Total Estimated Pay</th>
+                <th className="py-3 font-semibold">Services in Period</th>
               </tr>
             </thead>
             <tbody>
               {filteredMechanics.map((m) => {
-                const commissionSalary = Math.round((weeklyGrossSales / mechanics.length) * (m.commissionPercent / 100))
+                const equalShare = mechanics.length > 0 ? Math.round(100 / mechanics.length) : 25
+                const sharePercent = m.commissionPercent !== undefined ? m.commissionPercent : equalShare
+                const isDefaultEqual = sharePercent === equalShare
+                const commissionSalary = Math.round((kpi.totalCommissionPool || 0) * (sharePercent / 100))
+                const totalEstimatedPay = (m.baseSalary || 0) + commissionSalary
                 const isEditingRank = editingField?.id === m.id && editingField.field === 'rank'
                 const isEditingCommission = editingField?.id === m.id && editingField.field === 'commission'
+
                 return (
-                  <tr key={m.id} className="border-b border-slate-50 last:border-0">
-                    <td className="py-4 font-semibold text-slate-800">{m.name}</td>
+                  <tr key={m.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/70 transition-colors">
+                    <td className="py-4 font-semibold text-slate-800">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white shadow-xs">
+                          {m.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-900">{m.name}</p>
+                          <p className="text-[11px] text-slate-400">{m.branch || 'AutoKita Main'}</p>
+                        </div>
+                      </div>
+                    </td>
                     <td className="py-4 text-slate-500">{m.phone}</td>
                     <td className="py-4">
                       {isEditingRank ? (
@@ -719,7 +905,7 @@ export default function page() {
                         </button>
                       )}
                     </td>
-                    <td className="py-4 text-slate-700">{currency(m.baseSalary)}</td>
+                    <td className="py-4 font-medium text-slate-700">{currency(m.baseSalary)}</td>
                     <td className="py-4">
                       {isEditingCommission ? (
                         <div className="flex items-center gap-1.5">
@@ -734,33 +920,48 @@ export default function page() {
                               if (e.key === 'Enter') saveEdit()
                               if (e.key === 'Escape') cancelEdit()
                             }}
-                            className="w-20 rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 outline-none focus:border-slate-500"
+                            className="w-16 rounded-lg border border-blue-400 bg-white px-2 py-1 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-200"
                           />
-                          <button onClick={saveEdit} className="text-emerald-600 hover:text-emerald-700">
+                          <span className="text-xs font-bold text-slate-500">%</span>
+                          <button onClick={saveEdit} className="text-emerald-600 hover:text-emerald-700 p-0.5">
                             <Check size={16} />
                           </button>
-                          <button onClick={cancelEdit} className="text-rose-500 hover:text-rose-600">
+                          <button onClick={cancelEdit} className="text-rose-500 hover:text-rose-600 p-0.5">
                             <X size={16} />
                           </button>
                         </div>
                       ) : (
                         <button
-                          onClick={() => startEdit(m.id, 'commission', m.commissionPercent)}
-                          className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:border-slate-400"
+                          onClick={() => startEdit(m.id, 'commission', sharePercent)}
+                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold transition-all border group cursor-pointer ${
+                            isDefaultEqual
+                              ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
+                              : 'bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200'
+                          }`}
+                          title="Click to edit this mechanic's commission share %"
                         >
-                          {m.commissionPercent}%
-                          <Pencil size={12} className="text-slate-400" />
+                          <span>{isDefaultEqual ? `Equal Share (${sharePercent}%)` : `Custom (${sharePercent}% Share)`}</span>
+                          <Pencil size={11} className={isDefaultEqual ? 'text-blue-400 group-hover:text-blue-700' : 'text-purple-400 group-hover:text-purple-700'} />
                         </button>
                       )}
                     </td>
-                    <td className="py-4 font-bold text-blue-600">{currency(commissionSalary)}</td>
-                    <td className="py-4 text-slate-700">{m.servicesDoneWeekly} Completed</td>
+                    <td className="py-4 font-bold text-emerald-600">
+                      +{currency(commissionSalary)}
+                    </td>
+                    <td className="py-4 font-extrabold text-slate-900">
+                      {currency(totalEstimatedPay)}
+                    </td>
+                    <td className="py-4 text-slate-700">
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                        {kpi.servicesCount || m.servicesDoneWeekly || 0} Finished
+                      </span>
+                    </td>
                   </tr>
                 )
               })}
               {filteredMechanics.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-sm text-slate-400">
+                  <td colSpan={8} className="py-8 text-center text-sm text-slate-400">
                     No matching employees.
                   </td>
                 </tr>
@@ -769,8 +970,9 @@ export default function page() {
           </table></div>
 
           <ul className="mt-4 space-y-1 text-xs text-slate-400">
-            <li>• Commission Salary is computed automatically as all services divided equally among the active mechanics/workers.</li>
-            <li>• Newly added mechanics from the Employee Tab are automatically cascaded here with a default rank, salary, and commission percentage.</li>
+            <li>• <strong>Commission Model</strong>: All completed & released services within the selected {cycle} cycle are totaled ({currency(kpi.finishedServicesTotal)}), and {poolRate}% is allocated to the commission pool ({currency(kpi.totalCommissionPool)}).</li>
+            <li>• <strong>Editable Shares</strong>: Both the overall pool rate ({poolRate}%) and each mechanic&apos;s individual share percentage are editable. Click on any mechanic&apos;s share badge or the pool badge to adjust and save.</li>
+            <li>• Base salaries are configured per employee rank, and total estimated pay automatically combines base salary + commission payout.</li>
           </ul>
           </div>
         </div>
@@ -780,66 +982,247 @@ export default function page() {
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
           <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
           <div className="p-6">
-          <div className="flex items-center justify-between border-l-4 border-emerald-500 pl-3">
-            <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">
-              Weekly Services Completed & Commission Breakdown
-            </h3>
-            <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-              <Lock size={12} /> Recorded and Paid Services (Locked)
-            </span>
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 min-w-[220px]">
-              <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                value={servicesSearch}
-                onChange={(e) => setServicesSearch(e.target.value)}
-                placeholder="Search by service name..."
-                className="w-full rounded-full border border-slate-200 py-2 pl-9 pr-4 text-sm text-slate-700 outline-none focus:border-slate-400"
-              />
+            <div className="flex flex-wrap items-center justify-between gap-4 border-l-4 border-emerald-500 pl-3">
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">
+                  Services Done & {poolRate}% Commission Breakdown ({cycle.toUpperCase()})
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Inspect completed services and their {poolRate}% commission contributions shared across mechanics.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
+                  <Sparkles size={12} className="text-emerald-600" /> Total {poolRate}% Pool: {currency(kpi.totalCommissionPool)}
+                </span>
+                <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+                  <Lock size={12} /> Verified Completed Records
+                </span>
+              </div>
             </div>
-            <button
-              onClick={exportServices}
-              className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
-            >
-              <Download size={14} /> Export CSV
-            </button>
-          </div>
 
-          <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
-                <th className="py-3 font-semibold">Services</th>
-                <th className="py-3 font-semibold">Qty</th>
-                <th className="py-3 font-semibold">Price (cannot be edited)</th>
-                <th className="py-3 font-semibold">Allocated Commission</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredServices.map((s) => (
-                <tr key={s.name} className="border-b border-slate-50 last:border-0">
-                  <td className="py-4 font-semibold text-slate-800">{s.name}</td>
-                  <td className="py-4 text-slate-600">{s.qty}</td>
-                  <td className="py-4 text-slate-600">
-                    <span className="flex items-center gap-1.5">
-                      {currency(s.price)}
-                      <Lock size={11} className="text-slate-300" />
+            {/* Sub-view toggle (Aggregate Catalog vs Itemized Services Done) */}
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-2 rounded-xl bg-slate-100 p-1">
+                <button
+                  onClick={() => setServicesViewMode('aggregate')}
+                  className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+                    servicesViewMode === 'aggregate'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Aggregated Service Categories ({weeklyServices.length})
+                </button>
+                <button
+                  onClick={() => setServicesViewMode('itemized')}
+                  className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+                    servicesViewMode === 'itemized'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Itemized Finished Services Log ({servicesDone.length})
+                </button>
+              </div>
+
+              <div className="text-xs font-medium text-slate-500">
+                Cycle: <strong className="text-slate-800">{cycle === 'daily' ? 'Past 24 Hours' : cycle === 'weekly' ? 'Past 7 Days' : cycle === 'monthly' ? 'Past 30 Days' : 'All Recorded Time'}</strong>
+              </div>
+            </div>
+
+            {servicesViewMode === 'aggregate' ? (
+              <>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <div className="relative flex-1 min-w-[220px]">
+                    <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={servicesSearch}
+                      onChange={(e) => setServicesSearch(e.target.value)}
+                      placeholder="Search service categories..."
+                      className="w-full rounded-full border border-slate-200 py-2 pl-9 pr-4 text-sm text-slate-700 outline-none focus:border-slate-400"
+                    />
+                  </div>
+                  <button
+                    onClick={exportServices}
+                    className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+                  >
+                    <Download size={14} /> Export Summary CSV
+                  </button>
+                </div>
+
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
+                        <th className="py-3 font-semibold">Service Name</th>
+                        <th className="py-3 font-semibold text-center">Services Done (Qty)</th>
+                        <th className="py-3 font-semibold">Average Rate</th>
+                        <th className="py-3 font-semibold">Total Revenue Billed</th>
+                        <th className="py-3 font-semibold text-right">{poolRate}% Commission Pool Share</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredServices.map((s) => {
+                        const billedTotal = s.totalAmount || (s.qty * s.price)
+                        return (
+                          <tr key={s.name} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
+                            <td className="py-4 font-semibold text-slate-800">{s.name}</td>
+                            <td className="py-4 text-center">
+                              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">
+                                {s.qty}
+                              </span>
+                            </td>
+                            <td className="py-4 text-slate-600">
+                              <span className="flex items-center gap-1.5">
+                                {currency(s.price)}
+                                <Lock size={11} className="text-slate-300" />
+                              </span>
+                            </td>
+                            <td className="py-4 font-bold text-slate-900">{currency(billedTotal)}</td>
+                            <td className="py-4 text-right font-bold text-emerald-600">
+                              +{currency(s.allocatedCommission)}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                      {filteredServices.length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="py-8 text-center text-sm text-slate-400">
+                            No matching services in this cycle.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                    {filteredServices.length > 0 && (
+                      <tfoot>
+                        <tr className="border-t-2 border-slate-200 bg-slate-50/80 font-bold text-slate-900 text-sm">
+                          <td className="py-3.5 pl-3">Total Services Done</td>
+                          <td className="py-3.5 text-center">{kpi.servicesCount || filteredServices.reduce((acc, s) => acc + s.qty, 0)}</td>
+                          <td className="py-3.5">—</td>
+                          <td className="py-3.5 text-slate-900">{currency(kpi.finishedServicesTotal)}</td>
+                          <td className="py-3.5 text-right text-emerald-600">{currency(kpi.totalCommissionPool)}</td>
+                        </tr>
+                      </tfoot>
+                    )}
+                  </table>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <div className="relative flex-1 min-w-[220px]">
+                    <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={servicesDoneSearch}
+                      onChange={(e) => {
+                        setServicesDoneSearch(e.target.value)
+                        setItemizedPage(1)
+                      }}
+                      placeholder="Search by Job Order ID, Customer, Vehicle, Plate, or Service..."
+                      className="w-full rounded-full border border-slate-200 py-2 pl-9 pr-4 text-sm text-slate-700 outline-none focus:border-slate-400"
+                    />
+                  </div>
+                  <button
+                    onClick={exportServicesDone}
+                    className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+                  >
+                    <Download size={14} /> Export Itemized CSV
+                  </button>
+                </div>
+
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
+                        <th className="py-3 font-semibold">Job Order #</th>
+                        <th className="py-3 font-semibold">Completed Date</th>
+                        <th className="py-3 font-semibold">Customer</th>
+                        <th className="py-3 font-semibold">Vehicle & Plate</th>
+                        <th className="py-3 font-semibold">Service Performed</th>
+                        <th className="py-3 font-semibold">Amount Billed</th>
+                        <th className="py-3 font-semibold text-right">{poolRate}% Pool Share</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedServicesDone.map((item, idx) => (
+                        <tr key={`${item.jobOrderId}-${idx}`} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/70 transition-colors">
+                          <td className="py-3.5 font-bold text-slate-900">{item.jobOrderId}</td>
+                          <td className="py-3.5 text-xs text-slate-500 whitespace-nowrap">
+                            {new Date(item.completedAt).toLocaleDateString('en-PH', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </td>
+                          <td className="py-3.5 font-medium text-slate-800">{item.customerName}</td>
+                          <td className="py-3.5 text-slate-600">
+                            <div>
+                              <p className="font-medium text-slate-800">{item.vehicleModel || 'Vehicle'}</p>
+                              <p className="text-[11px] font-mono text-slate-400">{item.plateNumber || 'No Plate'}</p>
+                            </div>
+                          </td>
+                          <td className="py-3.5 text-slate-800 font-medium">
+                            <span className="inline-block rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                              {item.serviceName}
+                            </span>
+                          </td>
+                          <td className="py-3.5 font-bold text-slate-900">{currency(item.amount)}</td>
+                          <td className="py-3.5 text-right font-bold text-emerald-600">
+                            +{currency(item.commission)}
+                          </td>
+                        </tr>
+                      ))}
+                      {paginatedServicesDone.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="py-8 text-center text-sm text-slate-400">
+                            No finished services found matching your search.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500">
+                  <p>
+                    Showing {filteredServicesDone.length > 0 ? (itemizedPage - 1) * itemizedPageSize + 1 : 0} to{' '}
+                    {Math.min(itemizedPage * itemizedPageSize, filteredServicesDone.length)} of {filteredServicesDone.length} finished services
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setItemizedPage((p) => Math.max(1, p - 1))}
+                      disabled={itemizedPage === 1}
+                      className="flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                    >
+                      <ChevronLeft size={14} /> Prev
+                    </button>
+                    <span className="font-semibold text-slate-700">
+                      Page {itemizedPage} of {totalPagesItemized}
                     </span>
-                  </td>
-                  <td className="py-4 font-bold text-emerald-600">{currency(s.allocatedCommission)}</td>
-                </tr>
-              ))}
-              {filteredServices.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="py-8 text-center text-sm text-slate-400">
-                    No matching services.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table></div>
+                    <button
+                      onClick={() => setItemizedPage((p) => Math.min(totalPagesItemized, p + 1))}
+                      disabled={itemizedPage >= totalPagesItemized}
+                      className="flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                    >
+                      Next <ChevronRight size={14} />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="mt-5 rounded-xl border border-emerald-100 bg-emerald-50/60 p-3.5 text-xs text-emerald-900 flex items-start gap-2.5">
+              <Sparkles size={16} className="text-emerald-600 shrink-0 mt-0.5" />
+              <div>
+                <strong>Commission Allocation Rule:</strong> {poolRate}% of every completed service actual billed revenue is accumulated into the {cycle} commission pool ({currency(kpi.totalCommissionPool)}). This pool is allocated to all active shop mechanics based on their individual commission share, fostering team collaboration and fair reward.
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1003,102 +1386,6 @@ export default function page() {
           </div>
         </div>
       )}
-
-      {/* Audit Trail Modal */}
-      {showAuditModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm animate-in fade-in"
-          onClick={() => setShowAuditModal(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl max-h-[85vh] flex flex-col"
-          >
-            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                  <History size={20} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">Sales & Payroll Audit Trail</h3>
-                  <p className="text-xs text-slate-500">
-                    Live audit logs recorded in <code className="font-mono text-blue-600">system_audit_logs</code>
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowAuditModal(false)}
-                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="mt-4 flex-1 overflow-y-auto space-y-3 pr-1">
-              {auditLogs.length === 0 ? (
-                <div className="py-12 text-center text-sm text-slate-400">
-                  No audit logs recorded for sales and payroll yet. Changes to mechanics or payments will appear here.
-                </div>
-              ) : (
-                auditLogs.map((log) => {
-                  let oldVal: Record<string, unknown> = {}
-                  let newVal: Record<string, unknown> = {}
-                  try {
-                    oldVal = log.oldValues ? JSON.parse(log.oldValues) : {}
-                    newVal = log.newValues ? JSON.parse(log.newValues) : {}
-                  } catch {
-                    // ignore JSON parse failure
-                  }
-
-                  return (
-                    <div
-                      key={log.id}
-                      className="rounded-xl border border-slate-100 bg-slate-50/70 p-4 transition-all hover:bg-slate-50"
-                    >
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-slate-700 flex items-center gap-1.5">
-                          <span className="h-2 w-2 rounded-full bg-blue-500" />
-                          {log.adminName}
-                        </span>
-                        <span className="text-slate-400">
-                          {new Date(log.actionDate).toLocaleString('en-PH', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
-                      </div>
-                      <div className="mt-2 text-sm text-slate-800">
-                        Updated <span className="font-semibold text-slate-900">{log.entityType}</span> (Target ID #{log.entityId})
-                      </div>
-                      <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                        {Object.keys(newVal).map((key) => (
-                          <div key={key} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1">
-                            <span className="font-semibold capitalize text-slate-600">{key.replace('_', ' ')}:</span>{' '}
-                            <span className="text-rose-500 line-through">{String(oldVal[key] ?? 'N/A')}</span>
-                            {' → '}
-                            <span className="font-bold text-emerald-600">{String(newVal[key] ?? 'N/A')}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                })
-              )}
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end">
-              <button
-                onClick={() => setShowAuditModal(false)}
-                className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -1108,16 +1395,25 @@ function SummaryCard({
   value,
   sub,
   positive,
+  badge,
 }: {
   label: string
   value: string
   sub: string
   positive?: boolean
+  badge?: string
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
-      <p className="mt-2 text-3xl font-bold text-slate-900">{value}</p>
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:shadow-md transition-shadow">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+        {badge && (
+          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold tracking-wider text-blue-700 uppercase border border-blue-100">
+            {badge}
+          </span>
+        )}
+      </div>
+      <p className="mt-2 text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">{value}</p>
       <p className={`mt-2 text-xs font-medium ${positive ? 'text-emerald-600' : 'text-slate-400'}`}>{sub}</p>
     </div>
   )

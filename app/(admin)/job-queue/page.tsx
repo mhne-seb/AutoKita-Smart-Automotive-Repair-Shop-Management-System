@@ -191,34 +191,50 @@ export default function page() {
       return;
     }
     setApproving(true);
-    try{
-    await fetch('/api/admin/job-queue', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'approve', ticketId: job.ticketId, mechanicId: job.assignedMechanic })
-    });
-    setApproveTarget(null);
-    fetchJobs();
-  } finally {
-    setApproving(false);
-  }
+    try {
+      const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
+      await fetch('/api/admin/job-queue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'approve',
+          ticketId: job.ticketId,
+          mechanicId: job.assignedMechanic,
+          employeeId: activeEmployeeId ? Number(activeEmployeeId) : null,
+        })
+      });
+      setApproveTarget(null);
+      fetchJobs();
+    } finally {
+      setApproving(false);
+    }
   }
 
   const confirmReject = async (job: Job) => {
+    const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
     await fetch('/api/admin/job-queue', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'reject', ticketId: job.ticketId })
+      body: JSON.stringify({
+        action: 'reject',
+        ticketId: job.ticketId,
+        employeeId: activeEmployeeId ? Number(activeEmployeeId) : null,
+      })
     });
     setRejectTarget(null);
     fetchJobs();
   }
 
   const confirmDelete = async (job: Job) => {
+    const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
     await fetch('/api/admin/job-queue', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'reject', ticketId: job.ticketId }) // treat delete as reject for now
+      body: JSON.stringify({
+        action: 'reject',
+        ticketId: job.ticketId,
+        employeeId: activeEmployeeId ? Number(activeEmployeeId) : null,
+      }) // treat delete as reject for now
     });
     setDeleteTarget(null);
     fetchJobs();
@@ -226,10 +242,14 @@ export default function page() {
 
   const addTicket = async (data: NewTicketData) => {
     try {
+      const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
       const res = await fetch('/api/admin/booking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticketData: data })
+        body: JSON.stringify({
+          ticketData: data,
+          employeeId: activeEmployeeId ? Number(activeEmployeeId) : null,
+        })
       });
 
       const result = await res.json();

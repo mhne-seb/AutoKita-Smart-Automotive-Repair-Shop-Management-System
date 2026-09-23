@@ -64,8 +64,12 @@ export function ChatWidget() {
       { role: 'user', content: t },
     ];
 
-    const userIdRaw = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null;
-    const userId = userIdRaw ? parseInt(userIdRaw, 10) : undefined;
+    const isAdmin = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_admin') === 'true' : false;
+    const storedIdRaw = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null;
+    const parsedId = storedIdRaw ? parseInt(storedIdRaw, 10) : undefined;
+    const validId = !isNaN(parsedId as number) ? parsedId : undefined;
+    const employeeId = isAdmin ? validId : undefined;
+    const customerUserId = !isAdmin ? validId : undefined;
 
     fetch('/api/chat/customer', {
       method: 'POST',
@@ -73,7 +77,8 @@ export function ChatWidget() {
       body: JSON.stringify({
         messages: conversationHistory.current,
         sessionId: sessionIdRef.current,
-        userId: isNaN(userId as number) ? undefined : userId,
+        userId: customerUserId,
+        employeeId: employeeId,
       }),
     })
       .then(async (res) => {

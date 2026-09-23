@@ -1,9 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const [paymentsRes, mechanicsRes, servicesRes, kpiRes, auditRes] = await Promise.all([
+    const { searchParams } = new URL(request.url)
+    const cycle = searchParams.get('cycle') || 'weekly'
+    const poolRateParam = searchParams.get('poolRate')
+    const poolRate = poolRateParam !== null ? Math.max(0, Math.min(100, parseFloat(poolRateParam) || 0)) : 20
+    const poolMultiplier = poolRate / 100
+    
+    // Determine interval for SQL filtering
+    let intervalStr = '7 days'
+    if (cycle === 'daily') intervalStr = '1 day'
+    else if (cycle === 'monthly') intervalStr = '30 days'
+    else if (cycle === 'all') intervalStr = '100 years'
+
+    const [
+      paymentsRes,
+      mechanicsRes,
+      servicesSummaryRes,
+      servicesDoneRes,
+      finishedTotalsRes,
+      kpiRes,
+      auditRes
+    ] = await Promise.all([
       // 1. Payment records with itemized parts & services
       db.query(`
         SELECT 
@@ -27,8 +47,8 @@ export async function GET() {
             ELSE INITCAP(REPLACE(p.payment_method::TEXT, '_', ' '))
           END AS "modeOfPayment",
           CASE 
-            WHEN COALESCE(jo.balance, 0) <= 0 THEN 'Full Payment'
-            ELSE 'Downpayment'
+            WHEN jo.partial_payment > 0 AND COALESCE(jo.balance, 0) > 0 THEN 'Downpayment'
+            ELSE 'Full Payment'
           END AS "paymentType",
           p.amount_paid::float AS amount,
           CASE 
@@ -77,7 +97,7 @@ export async function GET() {
           COALESCE(ep.jobs_capacity, 5) AS "jobsCapacity",
           COALESCE(ep.rank, 'Mechanic') AS rank,
           COALESCE(ep.base_salary, 15000)::float AS "baseSalary",
-          COALESCE(ep.commission_percent, 5)::float AS "commissionPercent",
+          COALESCE(ep.commission_percent, 25)::float AS "commissionPercent",
           COALESCE((
             SELECT COUNT(*)::int 
             FROM service_progress_tasks spt
@@ -91,37 +111,76 @@ export async function GET() {
         ORDER BY e.id ASC
       `),
 
-      // 3. Weekly services and aggregated commission
+      // 3. Services done summary for the cycle (aggregated by service name)
       db.query(`
         SELECT 
           s.service_name AS name,
           COUNT(jos.id)::int AS qty,
           ROUND(AVG(jos.actual_amount))::float AS price,
-          ROUND(SUM(jos.actual_amount * 0.05))::float AS "allocatedCommission"
+          ROUND(SUM(jos.actual_amount))::float AS "totalAmount",
+          ROUND(SUM(jos.actual_amount * $2::float))::float AS "allocatedCommission"
         FROM job_order_services jos
         JOIN services s ON s.id = jos.service_id
+        JOIN job_orders jo ON jo.id = jos.job_order_id
+        WHERE jo.status IN ('completed', 'released')
+          AND jo.completed_at >= NOW() - $1::interval
         GROUP BY s.service_name
         ORDER BY qty DESC
-        LIMIT 15
-      `),
+        LIMIT 25
+      `, [intervalStr, poolMultiplier]),
 
-      // 4. Sales & Profit KPI metrics
+      // 4. Detailed itemized log of all services finished during the cycle
+      db.query(`
+        SELECT 
+          jos.id,
+          jo.id AS "jobOrderId",
+          s.service_name AS "serviceName",
+          COALESCE(u.first_name || ' ' || u.last_name, u.nickname, 'Customer #' || u.id) AS "customerName",
+          COALESCE(v.vehicle_model, 'Vehicle') AS "vehicleModel",
+          COALESCE(v.plate_number, 'N/A') AS "plateNumber",
+          jo.completed_at AS "completedAt",
+          jos.actual_amount::float AS "amount",
+          ROUND(jos.actual_amount * $2::float)::float AS "commission"
+        FROM job_order_services jos
+        JOIN services s ON s.id = jos.service_id
+        JOIN job_orders jo ON jo.id = jos.job_order_id
+        LEFT JOIN users u ON u.id = jo.user_id
+        LEFT JOIN vehicles v ON v.id = jo.vehicle_id
+        WHERE jo.status IN ('completed', 'released')
+          AND jo.completed_at >= NOW() - $1::interval
+        ORDER BY jo.completed_at DESC
+        LIMIT 200
+      `, [intervalStr, poolMultiplier]),
+
+      // 5. Finished services total & commission pool
+      db.query(`
+        SELECT 
+          COUNT(jos.id)::int AS "servicesCount",
+          COALESCE(SUM(jos.actual_amount), 0)::float AS "finishedServicesTotal",
+          ROUND(COALESCE(SUM(jos.actual_amount * $2::float), 0))::float AS "totalCommissionPool"
+        FROM job_order_services jos
+        JOIN job_orders jo ON jo.id = jos.job_order_id
+        WHERE jo.status IN ('completed', 'released')
+          AND jo.completed_at >= NOW() - $1::interval
+      `, [intervalStr, poolMultiplier]),
+
+      // 6. Sales & Profit KPI metrics
       db.query(`
         SELECT 
           COALESCE((
             SELECT SUM(amount_paid)::float 
             FROM payments 
-            WHERE payment_date >= NOW() - INTERVAL '7 days'
-          ), 0) AS "weeklyGrossSales",
+            WHERE payment_date >= NOW() - $1::interval
+          ), 0) AS "grossSales",
           COALESCE((
             SELECT SUM(amount_paid)::float 
             FROM payments 
-            WHERE payment_date >= NOW() - INTERVAL '14 days' 
-              AND payment_date < NOW() - INTERVAL '7 days'
-          ), 0) AS "prevWeeklyGrossSales"
-      `),
+            WHERE payment_date >= NOW() - ($1::interval * 2) 
+              AND payment_date < NOW() - $1::interval
+          ), 0) AS "prevGrossSales"
+      `, [intervalStr]),
 
-      // 5. Recent audit logs for sales & payroll
+      // 7. Recent audit logs for sales & payroll
       db.query(`
         SELECT
           sal.id,
@@ -141,38 +200,76 @@ export async function GET() {
       `)
     ])
 
-    const mechanics = mechanicsRes.rows
+    const mechanicsRaw = mechanicsRes.rows
     const paymentRecords = paymentsRes.rows
-    const weeklyServices = servicesRes.rows
+    const weeklyServices = servicesSummaryRes.rows
+    const servicesDone = servicesDoneRes.rows
     const auditLogs = auditRes.rows
 
-    const weeklyGross = kpiRes.rows[0]?.weeklyGrossSales || 1238925
-    const prevWeeklyGross = kpiRes.rows[0]?.prevWeeklyGrossSales || 1180000
-    const salesGrowthPct = prevWeeklyGross > 0 
-      ? (((weeklyGross - prevWeeklyGross) / prevWeeklyGross) * 100).toFixed(1)
-      : '4.2'
+    const finishedTotals = finishedTotalsRes.rows[0] || {
+      servicesCount: 0,
+      finishedServicesTotal: 0,
+      totalCommissionPool: 0,
+    }
 
-    // Compute total commission across mechanics
-    const totalCommissions = mechanics.reduce((sum, m) => {
-      const split = mechanics.length > 0 ? (weeklyGross / mechanics.length) * (m.commissionPercent / 100) : 0
-      return sum + Math.round(split)
-    }, 0)
+    const servicesCount = finishedTotals.servicesCount || 0
+    const finishedServicesTotal = finishedTotals.finishedServicesTotal || 0
+    const totalCommissionPool = finishedTotals.totalCommissionPool || Math.round(finishedServicesTotal * poolMultiplier)
 
-    const netProfit = Math.round(weeklyGross * 0.42) // Estimated net profit after costs & commissions
+    const grossSales = kpiRes.rows[0]?.grossSales || finishedServicesTotal
+    const prevGrossSales = kpiRes.rows[0]?.prevGrossSales || 0
+    const salesGrowthPct = prevGrossSales > 0 
+      ? (((grossSales - prevGrossSales) / prevGrossSales) * 100).toFixed(1)
+      : '0.0'
+
+    // Compute shared commission among the active mechanics
+    const activeMechanicsCount = mechanicsRaw.length
+    const equalSharePercent = activeMechanicsCount > 0 ? Math.round(100 / activeMechanicsCount) : 0
+    const sharedCommissionPerEmployee = activeMechanicsCount > 0 
+      ? Math.round(totalCommissionPool / activeMechanicsCount)
+      : 0
+
+    const mechanics = mechanicsRaw.map((m: any) => {
+      const rawComm = Number(m.commissionPercent)
+      // If employee has a customized commission share, use it; otherwise default to equal share
+      const sharePercent = (!isNaN(rawComm) && rawComm > 0 && rawComm <= 100) ? rawComm : equalSharePercent
+      const commissionPay = Math.round(totalCommissionPool * (sharePercent / 100))
+      const baseSalary = m.baseSalary || 0
+      const totalEstimatedPay = baseSalary + commissionPay
+
+      return {
+        ...m,
+        commissionPercent: sharePercent,
+        commissionSalary: commissionPay,
+        totalEstimatedPay,
+        servicesDoneWeekly: servicesCount,
+      }
+    })
+
+    const netProfit = Math.max(0, Math.round(grossSales - totalCommissionPool))
 
     return NextResponse.json({
       success: true,
+      cycle,
+      poolRate,
       kpi: {
-        weeklyGrossSales: weeklyGross,
-        prevWeeklyGrossSales: prevWeeklyGross,
+        cycle,
+        finishedServicesTotal,
+        totalCommissionPool,
+        commissionRatePct: poolRate,
+        sharedCommissionPerEmployee,
+        servicesCount,
+        weeklyGrossSales: grossSales,
+        prevWeeklyGrossSales: prevGrossSales,
         salesGrowthPct,
-        totalCommissions,
+        totalCommissions: totalCommissionPool,
         netProfit,
-        activeMechanicsCount: mechanics.length,
+        activeMechanicsCount,
       },
       paymentRecords,
       mechanics,
       weeklyServices,
+      servicesDone,
       auditLogs,
     })
   } catch (error) {

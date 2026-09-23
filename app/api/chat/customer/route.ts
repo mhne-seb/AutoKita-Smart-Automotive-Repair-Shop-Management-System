@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
   let messages: ChatCompletionMessageParam[];
   let incomingSessionId: number | null = null;
   let customerUserId: number | null = null;
+  let employeeId: number | null = null;
   let jobOrderId: number | null = null;
 
   try {
@@ -69,6 +70,7 @@ export async function POST(req: NextRequest) {
     messages = body.messages ?? [];
     if (body.sessionId) incomingSessionId = parseInt(String(body.sessionId), 10) || null;
     if (body.userId) customerUserId = parseInt(String(body.userId), 10) || null;
+    if (body.employeeId) employeeId = parseInt(String(body.employeeId), 10) || null;
     if (body.jobOrderId) jobOrderId = parseInt(String(body.jobOrderId), 10) || null;
 
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -86,60 +88,139 @@ export async function POST(req: NextRequest) {
   const userMessage = trimmedMessages.filter((m) => m.role === 'user').slice(-1)[0];
   const userText = typeof userMessage?.content === 'string' ? userMessage.content : '';
 
+  // ── Verify sender identity depending on employeeId ──────────────────────────
+  let isEmployeeSender = false;
+  let validatedEmployeeId: number | null = null;
+  let validatedCustomerId: number | null = null;
+
+  try {
+    if (employeeId) {
+      const empRes = await db.query(`SELECT id FROM employees WHERE id = $1`, [employeeId]);
+      if (empRes.rows.length > 0) {
+        isEmployeeSender = true;
+        validatedEmployeeId = empRes.rows[0].id;
+      }
+    }
+
+    // If employeeId was not provided, but customerUserId was, check if it belongs to an employee
+    if (!isEmployeeSender && customerUserId) {
+      const empRes = await db.query(`SELECT id FROM employees WHERE id = $1`, [customerUserId]);
+      if (empRes.rows.length > 0) {
+        isEmployeeSender = true;
+        validatedEmployeeId = empRes.rows[0].id;
+      } else {
+        const userRes = await db.query(`SELECT id FROM users WHERE id = $1`, [customerUserId]);
+        if (userRes.rows.length > 0) {
+          validatedCustomerId = userRes.rows[0].id;
+        } else {
+          validatedCustomerId = customerUserId;
+        }
+      }
+    }
+  } catch (idErr) {
+    console.error('Error verifying sender identity:', idErr);
+  }
+
   // ── Session persistence in Supabase ─────────────────────────────────────────
   let activeSessionId = incomingSessionId;
   try {
     if (activeSessionId) {
       const sessCheck = await db.query(
-        `SELECT id FROM chat_sessions WHERE id = $1`,
+        `SELECT id, customer_user_id, assigned_employee_id FROM chat_sessions WHERE id = $1`,
         [activeSessionId]
       );
       if (sessCheck.rows.length > 0) {
-        await db.query(
-          `UPDATE chat_sessions 
-           SET last_activity_at = NOW(),
-               customer_user_id = COALESCE(customer_user_id, $2)
-           WHERE id = $1`,
-          [activeSessionId, customerUserId]
-        );
+        if (isEmployeeSender && validatedEmployeeId) {
+          await db.query(
+            `UPDATE chat_sessions 
+             SET last_activity_at = NOW(),
+                 assigned_employee_id = COALESCE(assigned_employee_id, $2),
+                 session_status = 'admin_handling'
+             WHERE id = $1`,
+            [activeSessionId, validatedEmployeeId]
+          );
+        } else {
+          await db.query(
+            `UPDATE chat_sessions 
+             SET last_activity_at = NOW(),
+                 customer_user_id = COALESCE(customer_user_id, $2)
+             WHERE id = $1`,
+            [activeSessionId, validatedCustomerId]
+          );
+        }
       } else {
         activeSessionId = null;
       }
     }
 
     if (!activeSessionId) {
-      const newSess = await db.query(
-        `INSERT INTO chat_sessions (
-          customer_user_id, 
-          reference_type, 
-          reference_id, 
-          session_status, 
-          started_at, 
-          last_activity_at
-        ) VALUES ($1, $2, $3, 'active', NOW(), NOW())
-        RETURNING id`,
-        [customerUserId, jobOrderId ? 'job_order' : 'general', jobOrderId]
-      );
-      activeSessionId = newSess.rows[0]?.id ?? null;
+      if (isEmployeeSender && validatedEmployeeId) {
+        const newSess = await db.query(
+          `INSERT INTO chat_sessions (
+            customer_user_id, 
+            assigned_employee_id,
+            reference_type, 
+            reference_id, 
+            session_status, 
+            started_at, 
+            last_activity_at
+          ) VALUES ($1, $2, $3, $4, 'admin_handling', NOW(), NOW())
+          RETURNING id`,
+          [validatedCustomerId, validatedEmployeeId, jobOrderId ? 'job_order' : 'general', jobOrderId]
+        );
+        activeSessionId = newSess.rows[0]?.id ?? null;
+      } else {
+        const newSess = await db.query(
+          `INSERT INTO chat_sessions (
+            customer_user_id, 
+            assigned_employee_id,
+            reference_type, 
+            reference_id, 
+            session_status, 
+            started_at, 
+            last_activity_at
+          ) VALUES ($1, NULL, $2, $3, 'bot_handling', NOW(), NOW())
+          RETURNING id`,
+          [validatedCustomerId, jobOrderId ? 'job_order' : 'general', jobOrderId]
+        );
+        activeSessionId = newSess.rows[0]?.id ?? null;
+      }
     }
 
-    // Record incoming customer message
+    // Record incoming message depending on employee id / sender identity
     if (activeSessionId && userText) {
-      await db.query(
-        `INSERT INTO chat_messages (
-          session_id, 
-          sender_type, 
-          sender_id, 
-          message_text, 
-          sent_at,
-          is_read_by_customer,
-          is_read_by_admin
-        ) VALUES ($1, 'customer', $2, $3, NOW(), TRUE, FALSE)`,
-        [activeSessionId, customerUserId, userText]
-      );
+      if (isEmployeeSender && validatedEmployeeId) {
+        // Admin / Employee message
+        await db.query(
+          `INSERT INTO chat_messages (
+            session_id, 
+            sender_type, 
+            sender_id, 
+            message_text, 
+            sent_at,
+            is_read_by_customer,
+            is_read_by_admin
+          ) VALUES ($1, 'admin', $2, $3, NOW(), FALSE, TRUE)`,
+          [activeSessionId, validatedEmployeeId, userText]
+        );
+      } else {
+        // Customer message
+        await db.query(
+          `INSERT INTO chat_messages (
+            session_id, 
+            sender_type, 
+            sender_id, 
+            message_text, 
+            sent_at,
+            is_read_by_customer,
+            is_read_by_admin
+          ) VALUES ($1, 'customer', $2, $3, NOW(), TRUE, FALSE)`,
+          [activeSessionId, validatedCustomerId, userText]
+        );
+      }
     }
   } catch (dbErr) {
-    console.error('Failed to record customer chat session/message into Supabase:', dbErr);
+    console.error('Failed to record chat session/message into Supabase:', dbErr);
   }
 
   // Build full message history with system prompt

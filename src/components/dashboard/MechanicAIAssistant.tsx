@@ -167,7 +167,7 @@ const WELCOME_MESSAGE: DiagnosticMsg = {
   role: 'bot',
   kind: 'text',
   time: '',
-  text: "Hi! I'm the AutoKita AI assistant. I can help with OBD-II codes, service procedures, parts lookups, job order stats, and more.\n\nYou can chat freely, or **load a job order** using the button above for vehicle-specific context.",
+  text: "Hi! I'm the AutoKita AI assistant. I can help verify OEM parts and fitment, provide official workshop manual procedures, torque specifications, and diagnose OBD-II codes.\n\nYou can click any test query on the right, chat freely, or **load a job order** for vehicle-specific context.",
 }
 
 export function MechanicAIAssistant() {
@@ -182,14 +182,20 @@ export function MechanicAIAssistant() {
   const [sessionError, setSessionError]       = useState<string | null>(null)
 
   // Chat state — starts immediately in chat mode
-  const [messages, setMessages]   = useState<DiagnosticMsg[]>([WELCOME_MESSAGE])
-  const [input, setInput]         = useState('')
-  const [waiting, setWaiting]     = useState(false)
+  const [messages, setMessages]       = useState<DiagnosticMsg[]>([WELCOME_MESSAGE])
+  const [input, setInput]             = useState('')
+  const [waiting, setWaiting]         = useState(false)
+  const [historyLoading, setHistoryLoading] = useState(false)
   const [tokensRemaining, setTokensRemaining] = useState<number | null>(null)
-  const [toolStatus, setToolStatus] = useState<'none' | 'sql' | 'pinecone' | 'both'>('none')
+  const [toolStatus, setToolStatus]   = useState<'none' | 'sql' | 'pinecone' | 'both'>('none')
 
   const conversationHistory = useRef<{ role: 'user' | 'assistant'; content: string }[]>([])
-  const sessionIdRef = useRef<number | null>(null)
+  // Persisted across panel re-opens via sessionStorage so the same DB session is reused
+  const sessionIdRef = useRef<number | null>(
+    typeof window !== 'undefined'
+      ? parseInt(sessionStorage.getItem('autokita_ai_session_id') ?? '', 10) || null
+      : null
+  )
   const scrollRef   = useRef<HTMLDivElement>(null)
   const inputRef    = useRef<HTMLInputElement>(null)
   const menuRef     = useRef<HTMLDivElement>(null)
@@ -214,16 +220,51 @@ export function MechanicAIAssistant() {
     return () => document.removeEventListener('mousedown', onClick)
   }, [menuOpen])
 
-  // Reset everything when assistant is closed
+  // Load chat history when the panel opens
   useEffect(() => {
     if (!open) {
+      // Only reset UI state, NOT the sessionId — it persists in sessionStorage
       setSession(null)
-      setMessages([WELCOME_MESSAGE])
-      conversationHistory.current = []
-      sessionIdRef.current = null
       setSessionError(null)
       setPickerOpen(false)
+      return
     }
+
+    const employeeIdRaw = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
+    const employeeId = employeeIdRaw ? parseInt(employeeIdRaw, 10) : null
+    if (!employeeId || isNaN(employeeId)) return // guest / unauthenticated — skip history load
+
+    setHistoryLoading(true)
+    fetch(`/api/chat/admin/history?employee_id=${employeeId}&limit=40`)
+      .then(async (res) => {
+        if (!res.ok) return
+        const data = await res.json()
+        if (data.sessionId && data.messages?.length > 0) {
+          // Restore DB session ID so new messages go into the same session
+          sessionIdRef.current = data.sessionId
+          sessionStorage.setItem('autokita_ai_session_id', String(data.sessionId))
+          // Rebuild the UI messages list from history + welcome message
+          const historyMsgs: DiagnosticMsg[] = data.messages.map(
+            (m: { role: string; text: string; time: string }) => ({
+              id: uid(),
+              role: m.role as 'user' | 'bot',
+              kind: 'text' as const,
+              text: m.text,
+              time: m.time,
+            })
+          )
+          setMessages([WELCOME_MESSAGE, ...historyMsgs])
+          // Rebuild conversationHistory ref so the AI has context for follow-up questions
+          conversationHistory.current = data.messages
+            .filter((m: { role: string }) => m.role === 'user' || m.role === 'bot')
+            .map((m: { role: string; text: string }) => ({
+              role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
+              content: m.text,
+            }))
+        }
+      })
+      .catch(() => { /* silently skip if history load fails */ })
+      .finally(() => setHistoryLoading(false))
   }, [open])
 
   // ── Job Order Selection ─────────────────────────────────────────────────────
@@ -301,6 +342,7 @@ export function MechanicAIAssistant() {
         messages: historyToSend,
         sessionId: sessionIdRef.current,
         employeeId: isNaN(employeeId as number) ? undefined : employeeId,
+        vehicleId: session?.vehicle?.id,
         // Inject live JO context so AI always knows what JO we're discussing
         ...(session?.contextString ? { jobOrderContext: session.contextString } : {}),
       }),
@@ -309,6 +351,8 @@ export function MechanicAIAssistant() {
         const data = await res.json()
         if (data.sessionId) {
           sessionIdRef.current = data.sessionId
+          // Persist the active session ID so it survives panel close/reopen
+          sessionStorage.setItem('autokita_ai_session_id', String(data.sessionId))
         }
         if (!res.ok) { pushBotText(data.error ?? 'Something went wrong.'); return }
         const reply: string = data.reply ?? ''
@@ -339,6 +383,9 @@ export function MechanicAIAssistant() {
         : 'Conversation cleared. Ask me anything!',
     }])
     conversationHistory.current = []
+    // Start a fresh DB session on next send
+    sessionIdRef.current = null
+    sessionStorage.removeItem('autokita_ai_session_id')
     setMenuOpen(false)
   }
 
@@ -514,6 +561,12 @@ export function MechanicAIAssistant() {
                 {/* Chat feed */}
                 <div className="flex flex-1 flex-col overflow-hidden">
                   <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto bg-muted/10 px-5 py-4">
+                    {historyLoading && (
+                      <div className="flex items-center justify-center gap-2 py-3 text-xs text-muted-foreground">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        Loading conversation history…
+                      </div>
+                    )}
                     {messages.map((m) => (
                       <MessageBubble key={m.id} msg={m} />
                     ))}
@@ -540,7 +593,7 @@ export function MechanicAIAssistant() {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && send()}
-                        placeholder={session ? 'Ask about this job order, parts, services…' : 'Ask about OBD codes, parts, job orders, services…'}
+                        placeholder={session ? 'Ask about this job order, parts, services…' : 'Ask about parts fitment, torque specs, manual procedures, OBD-II codes…'}
                         className="flex-1 bg-transparent py-2.5 text-sm outline-none placeholder:text-muted-foreground"
                       />
                       <button onClick={send} className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-brand-foreground hover:opacity-90">
@@ -653,33 +706,66 @@ export function MechanicAIAssistant() {
                       </div>
                     </>
                   ) : (
-                    /* No-JO sidebar: general prompts */
+                    /* No-JO sidebar: two parts for testing (Parts Inquiries & Manuals Inquiries) */
                     <>
-                      <div className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-                        General Queries
+                      {/* Part 1: Parts Inquiries */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-foreground">
+                          <Package className="h-3.5 w-3.5 text-blue-600" />
+                          Parts Inquiries
+                        </div>
+                        <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[9px] font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                          Fitment &amp; OEM
+                        </span>
                       </div>
                       <div className="mt-2 space-y-2">
                         {[
-                          'How many job orders are pending?',
-                          "Show me today's active jobs",
-                          'What are our available services?',
-                          'Search for oil filter parts (Hilux)',
-                          'What does OBD code P0301 mean?',
-                          'Revenue summary this month',
+                          'What is the OEM part number for the oil filter on a 2010 Toyota Hilux?',
+                          'Verify front brake pad part number for 2012 Toyota Hiace',
+                          'What is the OEM fuel filter for Toyota Hilux 2.5 D-4D?',
+                          'Search for spark plug part numbers for Toyota Vios 1.5L',
+                          'Check alternator part number for 2008 Toyota Vios',
                         ].map((p) => (
                           <button
                             key={p}
                             onClick={() => pushUser(p)}
-                            className="w-full rounded-lg border bg-muted/20 px-3 py-2 text-left text-xs font-medium hover:bg-accent"
+                            className="w-full rounded-lg border bg-muted/20 px-3 py-2 text-left text-xs font-medium transition hover:border-blue-400 hover:bg-blue-50/60 hover:text-blue-900 dark:hover:bg-blue-950/40 dark:hover:text-blue-200"
                           >
                             {p}
                           </button>
                         ))}
                       </div>
+
+                      {/* Part 2: Manuals Inquiries */}
+                      <div className="mt-5 flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-foreground">
+                          <Wrench className="h-3.5 w-3.5 text-amber-600" />
+                          Manuals Inquiries
+                        </div>
+                        <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-semibold text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                          SSTs &amp; Specs
+                        </span>
+                      </div>
+                      <div className="mt-2 space-y-2">
+                        {[
+                          'What are the torque specs and procedure to replace front brake pads on a 2012 Toyota Hiace?',
+                          'What are the SSTs and procedure for replacing shock absorbers on a Hilux?',
+                          'What does OBD code P0301 mean and what manual checks are needed?',
+                          'What is the alternator belt inspection procedure and deflection spec for Vios?',
+                          'Diagnostic steps and causes for OBD code P0171 (System Too Lean)',
+                        ].map((p) => (
+                          <button
+                            key={p}
+                            onClick={() => pushUser(p)}
+                            className="w-full rounded-lg border bg-muted/20 px-3 py-2 text-left text-xs font-medium transition hover:border-amber-400 hover:bg-amber-50/60 hover:text-amber-900 dark:hover:bg-amber-950/40 dark:hover:text-amber-200"
+                          >
+                            {p}
+                          </button>
+                        ))}
+                      </div>
+
                       <div className="mt-5 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
-                        <span className="font-semibold text-foreground">Tip:</span> Click{' '}
-                        <span className="font-medium">Load JO</span> in the header to attach a job
-                        order for vehicle-specific context.
+                        <span className="font-semibold text-foreground">Testing Tip:</span> Click any inquiry to test the structured Parts Verification Record or the Official Workshop Manual Guide.
                       </div>
                     </>
                   )}
@@ -717,7 +803,9 @@ function MessageBubble({ msg }: { msg: DiagnosticMsg }) {
           [&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:px-2 [&_th]:py-1 [&_th]:text-left [&_th]:font-semibold
           [&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1
           [&_strong]:font-semibold [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs
-          [&_ul]:my-1 [&_ul]:pl-4 [&_li]:my-0 [&_p]:my-1 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0">
+          [&_ul]:my-1.5 [&_ul]:pl-5 [&_ul]:list-disc
+          [&_ol]:my-1.5 [&_ol]:pl-5 [&_ol]:list-decimal
+          [&_li]:my-0.5 [&_p]:my-1 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text ?? ''}</ReactMarkdown>
         </div>
         <span className="mt-1 text-[10px] text-muted-foreground">{msg.time}</span>

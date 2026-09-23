@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { action, ticketId, mechanicId, holdReason } = body
+    const { action, ticketId, mechanicId, holdReason, employeeId } = body
 
     if (!action) {
       return NextResponse.json({ success: false, message: 'Missing action parameter' }, { status: 400 })
@@ -72,6 +72,26 @@ export async function POST(req: NextRequest) {
     // 2. If the action is NOT 'create', then we absolutely need a ticketId
     if (action !== 'create' && !ticketId) {
       return NextResponse.json({ success: false, message: 'Missing ticketId' }, { status: 400 })
+    }
+
+    // Resolve employee who performed this action
+    let actingEmpId = employeeId ? parseInt(String(employeeId), 10) : null
+    let employeeName = 'Shop Administrator'
+    try {
+      if (actingEmpId) {
+        const empLookup = await db.query(`SELECT full_name FROM employees WHERE id = $1`, [actingEmpId])
+        if (empLookup.rows.length > 0) {
+          employeeName = empLookup.rows[0].full_name
+        }
+      } else {
+        const fallbackEmp = await db.query(`SELECT id, full_name FROM employees WHERE role = 'owner' LIMIT 1`)
+        if (fallbackEmp.rows.length > 0) {
+          actingEmpId = fallbackEmp.rows[0].id
+          employeeName = fallbackEmp.rows[0].full_name
+        }
+      }
+    } catch (empErr) {
+      console.warn('Could not resolve employee details for audit:', empErr)
     }
 
     if (action === 'approve') {
@@ -94,17 +114,50 @@ export async function POST(req: NextRequest) {
 
       const newJo = joResult.rows[0]
 
+      let mechanicName = 'Unassigned'
       if (mechanicId && newJo) {
         const assignQuery = `SELECT assign_mechanic_to_job_order($1, $2)`
         await db.query(assignQuery, [newJo.id, mechanicId])
+        try {
+          const mRes = await db.query(`SELECT full_name FROM employees WHERE id = $1`, [mechanicId])
+          if (mRes.rows.length > 0) mechanicName = mRes.rows[0].full_name
+        } catch {}
+      }
+
+      // Record ticket acceptance in system_audit_logs
+      try {
+        await db.query(
+          `INSERT INTO system_audit_logs (
+            employees_id,
+            action_performed,
+            entity_type,
+            entity_id,
+            old_values,
+            new_values,
+            action_date
+          ) VALUES ($1, 'approved', 'service_tickets', $2, $3, $4, NOW())`,
+          [
+            actingEmpId,
+            ticketId,
+            JSON.stringify({ ticket_status: 'pending' }),
+            JSON.stringify({
+              ticket_status: 'approved',
+              accepted_by_employee_id: actingEmpId,
+              accepted_by: employeeName,
+              assigned_mechanic_id: mechanicId || null,
+              assigned_mechanic: mechanicName,
+              job_order_id: newJo?.id || null,
+              description: `Ticket #${ticketId} accepted by ${employeeName} and assigned to ${mechanicName}`
+            })
+          ]
+        )
+      } catch (auditErr) {
+        console.error('Failed to write ticket acceptance audit log:', auditErr)
       }
 
       // If the customer authorized the OBD-II scan at booking, attach the fee
       // to the job order NOW — not at quotation time. That way declining the
       // quotation later can't erase a charge they already agreed to.
-      // create_job_order_from_ticket() is a stored function we don't modify,
-      // so this is a follow-up insert. Skips silently if the migration that
-      // seeds the service row hasn't been run yet.
       if (newJo) {
         const consent = await db.query(
           `SELECT 1 FROM system_audit_logs
@@ -128,17 +181,68 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, jobOrder: newJo })
     }
     else if (action === 'reject') {
-      // update_ticket_status
       const rejectQuery = `SELECT update_ticket_status($1, 'declined')`
       await db.query(rejectQuery, [ticketId])
+
+      try {
+        await db.query(
+          `INSERT INTO system_audit_logs (
+            employees_id,
+            action_performed,
+            entity_type,
+            entity_id,
+            old_values,
+            new_values,
+            action_date
+          ) VALUES ($1, 'rejected', 'service_tickets', $2, $3, $4, NOW())`,
+          [
+            actingEmpId,
+            ticketId,
+            JSON.stringify({ ticket_status: 'pending' }),
+            JSON.stringify({
+              ticket_status: 'declined',
+              rejected_by_employee_id: actingEmpId,
+              rejected_by: employeeName
+            })
+          ]
+        )
+      } catch (auditErr) {
+        console.error('Failed to log ticket rejection audit:', auditErr)
+      }
+
       return NextResponse.json({ success: true })
     }
     else if (action === 'hold') {
-      // Assuming 'inspection_scheduled' or 'queued' for hold
-      // We will just use 'queued' and we could store the reason in customer_concern if needed,
-      // but for now we'll just set it back to 'queued' or a similar pending state.
       const holdQuery = `SELECT update_ticket_status($1, 'queued')`
       await db.query(holdQuery, [ticketId])
+
+      try {
+        await db.query(
+          `INSERT INTO system_audit_logs (
+            employees_id,
+            action_performed,
+            entity_type,
+            entity_id,
+            old_values,
+            new_values,
+            action_date
+          ) VALUES ($1, 'status_changed', 'service_tickets', $2, $3, $4, NOW())`,
+          [
+            actingEmpId,
+            ticketId,
+            JSON.stringify({ ticket_status: 'pending' }),
+            JSON.stringify({
+              ticket_status: 'queued',
+              hold_reason: holdReason || 'Pending parts / technician schedule',
+              placed_on_hold_by_employee_id: actingEmpId,
+              placed_on_hold_by: employeeName
+            })
+          ]
+        )
+      } catch (auditErr) {
+        console.error('Failed to log ticket hold audit:', auditErr)
+      }
+
       return NextResponse.json({ success: true, reason: holdReason })
     }
     return NextResponse.json({ success: false, message: 'Invalid action' }, { status: 400 })
