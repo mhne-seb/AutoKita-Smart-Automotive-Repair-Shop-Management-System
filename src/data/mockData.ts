@@ -113,6 +113,8 @@ export interface Mechanic {
   baseSalary: number
   commissionPercent: number
   servicesDoneWeekly: number
+  commissionSalary?: number
+  totalEstimatedPay?: number
   color: string
 }
 
@@ -390,7 +392,19 @@ export interface WeeklyService {
   name: string
   qty: number
   price: number
+  totalAmount?: number
   allocatedCommission: number
+}
+
+export interface ServicesDoneRecord {
+  jobOrderId: string
+  serviceName: string
+  customerName: string
+  vehicleModel: string
+  plateNumber: string
+  completedAt: string
+  amount: number
+  commission: number
 }
 
 export const weeklyServices: WeeklyService[] = [

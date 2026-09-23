@@ -162,6 +162,18 @@ TABLE: repair_progress_logs
   - activity_description (text)
   - log_time (timestamp without time zone)
 
+TABLE: retention_offers
+  - id (integer)
+  - user_id (integer)
+  - promo_code (character varying)
+  - offer_type (USER-DEFINED)
+  - discount_value (numeric)
+  - description (text)
+  - issue_date (date)
+  - expiration_date (date)
+  - is_claimed (boolean)
+  - claimed_on_job_order_id (integer)
+
 
 TABLE: rewards_catalog
   - id (integer)

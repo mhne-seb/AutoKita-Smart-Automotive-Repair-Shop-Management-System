@@ -41,6 +41,7 @@ export interface JobOrderSession {
   status: string;
   jo_date: string;
   vehicle: {
+    id?: number;
     plate: string;
     make: string;
     model: string;

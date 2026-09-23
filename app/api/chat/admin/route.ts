@@ -7,8 +7,11 @@
 // Keep only the last N user/assistant messages (tool messages excluded from this
 // count — they're managed separately during the agentic loop).
 const MAX_HISTORY_MESSAGES = 14; // ~7 turns of back-and-forth
-// Hard cap on generated output. Admin answers can be detailed — 600 is generous.
-const MAX_OUTPUT_TOKENS = 600;
+// Hard cap on generated output. Concise What/Why/How format — 800 tokens is enough for any procedure answer.
+const MAX_OUTPUT_TOKENS = 800;
+// Cap each RAG chunk to this many characters before injecting into the system prompt.
+// Reduces prompt tokens while keeping the most relevant part of each manual excerpt.
+const MAX_RAG_CHUNK_CHARS = 900;
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getOpenAIClient, ADMIN_MODEL } from '@/lib/openai';
@@ -157,6 +160,21 @@ const TOOLS: ChatCompletionTool[] = [
       name: 'get_kpi_summary',
       description: 'Shop KPI summary (revenue, active jobs).',
       parameters: { type: 'object', properties: {}, required: [] },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'lookup_obd2_diagnostics',
+      description: 'Look up diagnostic trouble codes (DTCs) or OBD-II scan reports for a job order. Returns trouble code descriptions, affected systems, and logged states.',
+      parameters: {
+        type: 'object',
+        properties: {
+          job_order_id: { type: 'number', description: 'Optional: Job order ID to retrieve linked OBD-II report and DTCs' },
+          dtc_code: { type: 'string', description: 'Optional: Specific diagnostic code (e.g. "P0300", "P0171", "C1401")' },
+        },
+        required: [],
+      },
     },
   },
 ];
@@ -332,6 +350,31 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
         return JSON.stringify(res.rows);
       }
 
+      case 'lookup_obd2_diagnostics': {
+        if (args.job_order_id) {
+          const res = await db.query(`SELECT * FROM get_obd2_report_for_job_order($1)`, [args.job_order_id]);
+          if (res.rows.length === 0) {
+            return JSON.stringify({ message: `No OBD-II scan report linked to Job Order #${args.job_order_id} yet.` });
+          }
+          return JSON.stringify(res.rows);
+        }
+        if (args.dtc_code) {
+          const res = await db.query(
+            `SELECT dtc_code, description, state, system, datetime_logged
+             FROM obd2_dtc_codes
+             WHERE dtc_code ILIKE $1
+             ORDER BY id DESC
+             LIMIT 10`,
+            [`%${String(args.dtc_code).trim()}%`]
+          );
+          if (res.rows.length === 0) {
+            return JSON.stringify({ message: `DTC code "${args.dtc_code}" not logged in recent scan records. Proceed with official manual diagnostic flow.` });
+          }
+          return JSON.stringify(res.rows);
+        }
+        return JSON.stringify({ error: 'Please provide either job_order_id or dtc_code.' });
+      }
+
       default:
         return JSON.stringify({ error: `Unknown tool: ${name}` });
     }
@@ -344,45 +387,69 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 
 // ─── System Prompt ───────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are the AutoKita Internal Diagnostic Assistant. Your sole purpose is to act as a structured data retrieval tool for automotive mechanics. You provide exact, verified technical specifications, part fitments, and diagnostic procedures from the shop's database and official workshop manuals.
+const SYSTEM_PROMPT = `You are a concise automotive technical assistant for AutoKita workshop. You assist mechanics with OEM parts, official workshop manual procedures, diagnostics, and shop operations.
 
-Parts DB & Workshop Manual scope:
-- Toyota Hiace (2005–2013)
-- Toyota Hilux (2005–2011)
-- Toyota Vios / Yaris (2005–2011)
-Categories: Body, Chassis & Driveline, Electrical, Engine & Fuel.
+Coverage: Toyota Hiace (2005–2013), Toyota Hilux (2005–2011), Toyota Vios/Yaris (2005–2011).
 
-You must strictly adhere to the following rules:
-1. ZERO GUESSWORK: You are an operational convenience feature, not a conversational assistant. Never hallucinate data, guess part numbers, or provide generalized subjective advice (e.g., "OEM is safest").
-2. STRICT FORMATTING: All responses must be output using the structured data sheet format below. Do not use conversational greetings, pleasantries, or transitional phrases.
-3. NULL HANDLING: If a query returns no matching result in the database, explicitly state "Database Query Failed / No Match" and prompt the user for the exact required parameters (VIN, Engine Code, or Plate Number).
+━━━ RESPONSE MODES ━━━
 
-Whenever answering a query regarding parts, fitment, or specifications, strictly use this template:
+### MODE 1 — PARTS & FITMENT
+Triggered when the user asks about parts, OEM numbers, fitment, compatibility, or inventory.
+- NEVER guess or fabricate part numbers. ALWAYS call \`search_parts_by_name\` or \`get_part_fitment\` first.
+- Output format:
 
-[FITMENT VERIFICATION RECORD]
-Target Asset: [Year, Make, Model]
-Category: [System / Component Type]
+🔩 **Parts & Fitment**
+- **Vehicle**: [Year Make Model]
+- **Status**: VERIFIED / VARIANT REQUIRED / NOT FOUND
 
-Status: [VERIFIED / VARIANT SPECIFICATION REQUIRED / NO MATCH FOUND]
-Database Match: [List the exact engine codes, variants, or part numbers retrieved. If none, state "Null".]
+| Part Name | OEM # | Brand | Notes |
+|:---|:---|:---|:---|
+| ... | \`..\` | ... | ... |
 
-Compatibility / Technical Rule:
-- [Insert specific technical tolerance, capacity, or strict fitment rule]
-- [Insert secondary technical rule if applicable]
+- **Action**: [exact order quantities or request VIN/engine code if variants exist]
 
-Required Action / Output:
-[Provide the exact part number, fluid capacity, or explicitly ask the mechanic for the missing VIN/Engine Code to proceed.]
+---
 
-## TOOL USAGE RULES
-- ALWAYS use search_parts_by_name or get_part_fitment for any parts or part-number question.
-- NEVER fabricate or guess part numbers — only output results from tool calls.
-- Use get_vehicle_repair_history with plate_number for vehicle history.
-- Use tools for: parts, OEM numbers, job orders, revenue, vehicle history, service stats.
+### MODE 2 — MANUAL PROCEDURE / DIAGNOSTIC
+Triggered when the user asks HOW to repair, diagnose, or service a component.
+You MUST use the exact format below — no introduction, no conclusion.
 
-## PRIVACY
-Never reveal PII (names, phones, emails, addresses, payroll). Refuse politely if asked.
+**What:** [One sentence. The component/system and the procedure being performed.]
 
-Briefly state which data source you are checking before each tool call (e.g., "Querying parts database...").`;
+**Why:**
+- [Root cause or symptom 1]
+- [Root cause or symptom 2]
+- [Root cause or symptom 3 — optional]
+
+**How (Step-by-Step):**
+1. [First actionable step]
+2. [Next step]
+3. [...]
+
+**Specs:** [Only include if present in retrieved context — torque in N·m/kgf·cm, voltage in V, clearance in mm, SST numbers]
+
+CRITICAL CONSTRAINTS for Mode 2:
+- Output ONLY the four headers above. No intro. No summary. No closing remarks.
+- Do NOT list standard hand tools, basic shop fluids, or generic safety steps (e.g. disconnect battery, raise the vehicle) UNLESS the context specifies a special OEM tool (SST).
+- If specs exist in the retrieved manual context, include them under **Specs**. If not, omit the **Specs** line entirely.
+
+---
+
+### MODE 3 — HYBRID (Parts + Procedure)
+Present Mode 1 first, then Mode 2 below it.
+
+---
+
+### MODE 4 — SHOP / JOB ORDER QUERIES
+For revenue, job order status, service history, or mechanic workload: use concise tables and bullet points.
+
+━━━ TOOL RULES ━━━
+- Parts → \`search_parts_by_name\` / \`get_part_fitment\`
+- OBD / DTC → \`lookup_obd2_diagnostics\`
+- Vehicle history → \`get_vehicle_repair_history\`
+- Job order → \`get_job_order_parts\` / \`get_job_order_services\`
+- Retrieved manual chunks take priority for exact torque, clearance, and SST values.
+- Never disclose customer passwords or personal records.`;
 
 // ─── Route Handler ────────────────────────────────────────────────────────────
 
@@ -446,15 +513,46 @@ export async function POST(req: NextRequest) {
   const userMessage = trimmedMessages.filter((m) => m.role === 'user').slice(-1)[0];
   const userText = typeof userMessage?.content === 'string' ? userMessage.content : '';
 
+  // ── Validate employeeId for internal AI session ─────────────────────────────
+  let validatedEmployeeId: number | null = null;
+  try {
+    if (employeeId) {
+      const empRes = await db.query(`SELECT id FROM employees WHERE id = $1`, [employeeId]);
+      if (empRes.rows.length > 0) {
+        validatedEmployeeId = empRes.rows[0].id;
+      }
+    }
+    // If still null, fallback to the primary active employee so session is always attributed to an employee
+    if (!validatedEmployeeId) {
+      const defaultEmp = await db.query(`SELECT id FROM employees ORDER BY id ASC LIMIT 1`);
+      if (defaultEmp.rows.length > 0) {
+        validatedEmployeeId = defaultEmp.rows[0].id;
+      }
+    }
+  } catch (empErr) {
+    console.error('Error validating employee id for internal AI chat:', empErr);
+  }
+
   // ── Session persistence in Supabase (internal_ai_sessions / messages) ───────
   let activeSessionId = incomingSessionId;
   try {
     if (activeSessionId) {
       const sessCheck = await db.query(
-        `SELECT id FROM internal_ai_sessions WHERE id = $1`,
+        `SELECT id, employee_id, context_vehicle_id FROM internal_ai_sessions WHERE id = $1`,
         [activeSessionId]
       );
-      if (sessCheck.rows.length === 0) {
+      if (sessCheck.rows.length > 0) {
+        // Update employee_id and vehicle_id if missing or updated
+        if (validatedEmployeeId || vehicleId) {
+          await db.query(
+            `UPDATE internal_ai_sessions 
+             SET employee_id = COALESCE(employee_id, $2),
+                 context_vehicle_id = COALESCE(context_vehicle_id, $3)
+             WHERE id = $1`,
+            [activeSessionId, validatedEmployeeId, vehicleId]
+          );
+        }
+      } else {
         activeSessionId = null;
       }
     }
@@ -468,12 +566,12 @@ export async function POST(req: NextRequest) {
           started_at
         ) VALUES ($1, $2, $3, NOW())
         RETURNING id`,
-        [employeeId, queryCategory, vehicleId]
+        [validatedEmployeeId, queryCategory, vehicleId]
       );
       activeSessionId = newSess.rows[0]?.id ?? null;
     }
 
-    // Record incoming user query
+    // Record incoming employee query
     if (activeSessionId && userText) {
       await db.query(
         `INSERT INTO internal_ai_messages (
@@ -481,7 +579,7 @@ export async function POST(req: NextRequest) {
           sender,
           message_text,
           sent_at
-        ) VALUES ($1, 'user', $2, NOW())`,
+        ) VALUES ($1, 'employee', $2, NOW())`,
         [activeSessionId, userText]
       );
     }
@@ -502,9 +600,15 @@ export async function POST(req: NextRequest) {
     // Embed the latest user message and retrieve the top-3 relevant knowledge
     // chunks from the admin vector index. Inject them into the system prompt.
     const adminIndex = getAdminIndex();
-    // top-2 with 0.5 threshold — avoids injecting low-relevance chunks that waste tokens
-    const knowledgeChunks = await semanticSearch(userText, adminIndex, 2, 0.5);
-    const pineconeContext = formatContext(knowledgeChunks);
+    // top-3 with 0.40 threshold — higher threshold keeps only highly-relevant manual chunks,
+    // reducing hallucination risk and prompt token cost.
+    const knowledgeChunks = await semanticSearch(userText, adminIndex, 3, 0.40);
+    // Cap each chunk to MAX_RAG_CHUNK_CHARS before formatting to limit prompt token bloat.
+    const cappedChunks = knowledgeChunks.map((c) => ({
+      ...c,
+      text: c.text.length > MAX_RAG_CHUNK_CHARS ? c.text.slice(0, MAX_RAG_CHUNK_CHARS) + '…' : c.text,
+    }));
+    const pineconeContext = formatContext(cappedChunks);
     if (knowledgeChunks.length > 0) sourcesUsed.add('pinecone');
 
     // Rebuild system prompt with injected Pinecone context (if any)
@@ -572,7 +676,7 @@ export async function POST(req: NextRequest) {
               sender,
               message_text,
               sent_at
-            ) VALUES ($1, 'assistant', $2, NOW())`,
+            ) VALUES ($1, 'bot', $2, NOW())`,
             [activeSessionId, replyText]
           );
         } catch (dbErr) {
@@ -601,7 +705,7 @@ export async function POST(req: NextRequest) {
             sender,
             message_text,
             sent_at
-          ) VALUES ($1, 'assistant', $2, NOW())`,
+          ) VALUES ($1, 'bot', $2, NOW())`,
           [activeSessionId, fallbackText]
         );
       } catch (dbErr) {

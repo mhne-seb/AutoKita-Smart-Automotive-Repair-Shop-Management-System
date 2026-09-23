@@ -127,7 +127,8 @@ export async function GET(req: NextRequest) {
         COALESCE(v.vehicle_model, 'Unknown')   AS model,
         v.vehicle_year                          AS year,
         v.mileage,
-        v.vehicle_type
+        v.vehicle_type,
+        v.id                                   AS vehicle_id
       FROM job_orders jo
       JOIN vehicles v ON v.id = jo.vehicle_id
       WHERE jo.id = $1
@@ -179,6 +180,7 @@ export async function GET(req: NextRequest) {
       status: jo.status,
       jo_date: jo.jo_date,
       vehicle: {
+        id: jo.vehicle_id != null ? Number(jo.vehicle_id) : undefined,
         plate: jo.plate,
         make:  jo.make,
         model: jo.model,

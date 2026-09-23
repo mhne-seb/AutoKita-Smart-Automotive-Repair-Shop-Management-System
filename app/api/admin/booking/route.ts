@@ -84,9 +84,44 @@ export async function POST(req: NextRequest) {
       ticketData.serviceCategory || 'General Service'
     ])
 
+    const newTicket = ticketResult.rows[0]
+
+    // Record audit log for admin creating the ticket
+    try {
+      const actingEmpId = body.employeeId ? parseInt(String(body.employeeId), 10) : 1
+      let empName = 'Shop Administrator'
+      const eRes = await db.query(`SELECT full_name FROM employees WHERE id = $1`, [actingEmpId])
+      if (eRes.rows.length > 0) empName = eRes.rows[0].full_name
+
+      await db.query(
+        `INSERT INTO system_audit_logs (
+          employees_id,
+          action_performed,
+          entity_type,
+          entity_id,
+          new_values,
+          action_date
+        ) VALUES ($1, 'created', 'service_tickets', $2, $3, NOW())`,
+        [
+          actingEmpId,
+          newTicket?.id,
+          JSON.stringify({
+            ticket_id: newTicket?.id,
+            customer_name: `${firstName} ${lastName}`.trim(),
+            vehicle_plate: ticketData.licensePlate,
+            service_mode: mappedServiceMode,
+            service_category: ticketData.serviceCategory || 'General Service',
+            created_by: empName,
+          })
+        ]
+      )
+    } catch (auditErr) {
+      console.warn('Could not record admin booking audit log:', auditErr)
+    }
+
     return NextResponse.json({ 
-      success: true,
-      ticket: ticketResult.rows[0]
+      success: true, 
+      ticket: newTicket
     })
 
   } catch (err: any) {
