@@ -23,6 +23,9 @@ import {
 } from "lucide-react";
 import { getServiceHistory, getShopInfo } from "@/controllers/billingController";
 import type { ServiceRecord } from "@/data/history";
+import { ShopLoading } from "@/components/ShopLoading";
+
+const CURRENT_USER_ID = 280;
 
 // npm install jspdf
 import jsPDF from "jspdf";
@@ -50,11 +53,18 @@ function History() {
   const [vehicleOpen, setVehicleOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
 
-  // Loaded through the controller (mock API) — see billingController.ts.
+  // Loaded through the controller — see billingController.ts.
   const [serviceHistory, setServiceHistory] = useState<ServiceRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     let active = true;
-    getServiceHistory().then((data) => active && setServiceHistory(data));
+    const storedUserId = sessionStorage.getItem("autokita_user_id");
+    const userId = storedUserId ? parseInt(storedUserId, 10) : CURRENT_USER_ID;
+    getServiceHistory(userId).then((data) => {
+      if (!active) return;
+      setServiceHistory(data);
+      setLoading(false);
+    });
     return () => {
       active = false;
     };
@@ -106,7 +116,7 @@ function History() {
     return [...rows].sort((a, b) =>
       sortDir === "desc" ? (a.isoDate < b.isoDate ? 1 : -1) : a.isoDate < b.isoDate ? -1 : 1
     );
-  }, [search, dateFrom, dateTo, vehicleFilter, statusFilter, sortDir]);
+  }, [serviceHistory, search, dateFrom, dateTo, vehicleFilter, statusFilter, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -161,6 +171,10 @@ function History() {
   }
   if (statusFilter !== "All") {
     activeFilters.push({ key: "status", label: statusFilter, onClear: () => setStatusFilter("All") });
+  }
+
+  if (loading) {
+    return <ShopLoading message="Loading your service history" />;
   }
 
   return (
@@ -396,7 +410,7 @@ function History() {
             {pagedRows.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-6 py-14">
-                  <EmptyState onReset={resetFilters} />
+                  <EmptyState onReset={resetFilters} hasRecords={serviceHistory.length > 0} />
                 </td>
               </tr>
             )}
@@ -446,7 +460,7 @@ function History() {
       <div className="mt-6 space-y-3 md:hidden">
         {pagedRows.length === 0 ? (
           <div className="rounded-xl border bg-card px-6 py-14">
-            <EmptyState onReset={resetFilters} />
+            <EmptyState onReset={resetFilters} hasRecords={serviceHistory.length > 0} />
           </div>
         ) : (
           <>
@@ -515,20 +529,29 @@ function StatusBadge({ status }: { status: ServiceRecord["status"] }) {
   );
 }
 
-function EmptyState({ onReset }: { onReset: () => void }) {
+function EmptyState({ onReset, hasRecords }: { onReset: () => void; hasRecords: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center text-center">
       <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted/60 text-muted-foreground">
         <Inbox className="h-5 w-5" />
       </div>
-      <p className="text-sm font-medium">No records match your filters</p>
-      <p className="mt-1 text-xs text-muted-foreground">Try adjusting your search or filters.</p>
-      <button
-        onClick={onReset}
-        className="mt-4 rounded-md border px-4 py-1.5 text-xs font-medium hover:bg-accent"
-      >
-        Reset Filters
-      </button>
+      {hasRecords ? (
+        <>
+          <p className="text-sm font-medium">No records match your filters</p>
+          <p className="mt-1 text-xs text-muted-foreground">Try adjusting your search or filters.</p>
+          <button
+            onClick={onReset}
+            className="mt-4 rounded-md border px-4 py-1.5 text-xs font-medium hover:bg-accent"
+          >
+            Reset Filters
+          </button>
+        </>
+      ) : (
+        <>
+          <p className="text-sm font-medium">No service history yet</p>
+          <p className="mt-1 text-xs text-muted-foreground">Completed or cancelled bookings will show up here.</p>
+        </>
+      )}
     </div>
   );
 }
