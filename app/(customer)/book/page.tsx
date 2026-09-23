@@ -12,6 +12,7 @@ import { Footer } from "@/components/site/Footer";
 import phAddress from "@/data/ph-address.json";
 import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
 import { fy } from "date-fns/locale";
+import { isValidPhPlate, PLATE_FORMAT_ERROR } from "@/lib/plateNumber";
 
 const TIMES = ["08:00 AM", "09:30 AM", "10:30 AM", "01:00 PM", "02:30 PM", "04:00 PM"];
 const DAYS_TO_SHOW = 30;
@@ -192,6 +193,7 @@ function isStepValid(step: number, f: Form): boolean {
         isSelectValid(f.transmission, f.transmissionOther) &&
         isFilled(f.mileage) &&
         isFilled(f.plate) &&
+        isValidPhPlate(f.plate) &&
         isSelectValid(f.category, f.categoryOther) &&
         isFilled(f.concern) &&
         // The scan fee has to be agreed to before the ticket can be submitted,
@@ -669,9 +671,11 @@ function BookPage() {
                     error={
                       showError && !isFilled(f.plate)
                         ? "License plate is required"
-                        : plateTaken
-                          ? "This vehicle is already registered. Please log in to book service for it."
-                          : undefined
+                        : showError && !isValidPhPlate(f.plate)
+                          ? PLATE_FORMAT_ERROR
+                          : plateTaken
+                            ? "This vehicle is already registered. Please log in to book service for it."
+                            : undefined
                     }
                   />
                 </div>

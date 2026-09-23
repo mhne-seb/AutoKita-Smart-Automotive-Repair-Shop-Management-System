@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceModal";
 import { ShopLoading } from "@/components/ShopLoading";
+import { isValidPhPlate, PLATE_FORMAT_ERROR } from "@/lib/plateNumber";
 
 function RegisterVehicle() {
   useEffect(() => { document.title = "Register New Vehicle — AutoKita"; }, []);
@@ -43,6 +44,7 @@ function RegisterVehicle() {
   const [vehicleTransmission, setVehicleTransmission] = useState("");
   const [vehicleMileage, setVehicleMileage] = useState("");
   const [vehiclePlate, setVehiclePlate] = useState("");
+  const [plateError, setPlateError] = useState<string | undefined>(undefined);
   const [serviceCategory, setServiceCategory] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -94,6 +96,10 @@ function RegisterVehicle() {
     if (selectedVehicleId === "new") {
       if (!vehicleModel || !vehiclePlate) {
         alert("Please provide the new vehicle's model and license plate.");
+        return;
+      }
+      if (!isValidPhPlate(vehiclePlate)) {
+        setPlateError(PLATE_FORMAT_ERROR);
         return;
       }
       if (isVehicleActive(vehiclePlate)) {
@@ -224,7 +230,15 @@ function RegisterVehicle() {
                   <S label="Year" placeholder="Select Year" value={vehicleYear} onChange={(e) => setVehicleYear(e.target.value)} options={["2025", "2024", "2023", "2022", "2021", "2020", "2019"]} />
                   <S label="Transmission" placeholder="Select Transmission" value={vehicleTransmission} onChange={(e) => setVehicleTransmission(e.target.value)} options={["Automatic", "Manual"]} />
                   <F label="Mileage" placeholder="e.g., 50000" type="number" value={vehicleMileage} onChange={(e) => setVehicleMileage(e.target.value)} icon={Gauge} />
-                  <F label="License Plate" placeholder="e.g., ABC-1234" wide value={vehiclePlate} onChange={(e) => setVehiclePlate(e.target.value)} icon={Hash} />
+                  <F
+                    label="License Plate"
+                    placeholder="e.g., ABC-1234"
+                    wide
+                    value={vehiclePlate}
+                    onChange={(e) => { setVehiclePlate(e.target.value); setPlateError(undefined); }}
+                    icon={Hash}
+                    error={plateError}
+                  />
                 </div>
                 <label className="mt-4 flex items-center gap-2 text-sm">
                   <input type="checkbox" defaultChecked className="h-4 w-4 accent-[color:var(--brand)]" />
@@ -389,7 +403,7 @@ function Card({ icon: Icon, title, subtitle, children }: { icon: any; title: str
   );
 }
 
-function F({ label, wide, icon: Icon, ...p }: { label: string; wide?: boolean; icon?: any } & React.InputHTMLAttributes<HTMLInputElement>) {
+function F({ label, wide, icon: Icon, error, ...p }: { label: string; wide?: boolean; icon?: any; error?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div className={wide ? "md:col-span-2" : ""}>
       <label className="text-[10px] font-semibold uppercase text-muted-foreground">{label}</label>
@@ -397,9 +411,12 @@ function F({ label, wide, icon: Icon, ...p }: { label: string; wide?: boolean; i
         {Icon && <Icon className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />}
         <input
           {...p}
-          className={`w-full rounded-md border bg-background py-2 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 ${Icon ? "pl-8 pr-3" : "px-3"}`}
+          className={`w-full rounded-md border bg-background py-2 text-sm transition-colors focus:outline-none focus:ring-2 ${
+            error ? "border-rose-400 focus:border-rose-400 focus:ring-rose-400/15" : "focus:border-brand focus:ring-brand/15"
+          } ${Icon ? "pl-8 pr-3" : "px-3"}`}
         />
       </div>
+      {error && <p className="mt-1 text-[11px] text-rose-500">{error}</p>}
     </div>
   );
 }

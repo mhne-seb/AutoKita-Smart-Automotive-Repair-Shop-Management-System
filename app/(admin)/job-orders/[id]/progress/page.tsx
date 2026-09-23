@@ -472,6 +472,11 @@ export default function page() {
                   {/* A task that simply hasn't started gets no badge — the Start
                       button (or its "schedule first" hint) already says so.
                       Waiting on parts is a real state, so that one stays. */}
+                  {task.status === 'pending' && unscheduled && missing.length === 0 && (
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+                      Not scheduled
+                    </span>
+                  )}
                   {(task.status !== 'pending' || missing.length > 0) && (
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${
@@ -491,14 +496,21 @@ export default function page() {
                   {/* Start is blocked until the task is scheduled to a mechanic
                       and every part for it has arrived — work doesn't begin on
                       a car missing parts, or with no one assigned to do it. */}
-                  {task.status === 'pending' && (
+                  {task.status === 'pending' && unscheduled && (
+                    <button
+                      onClick={() => setSchedulingTask(task)}
+                      title="Pick a date and time and assign a mechanic"
+                      className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-indigo-700 active:scale-95"
+                    >
+                      <CalendarDays size={13} /> Schedule
+                    </button>
+                  )}
+                  {task.status === 'pending' && !unscheduled && (
                     <button
                       onClick={() => setTaskStatus(task, 'active')}
-                      disabled={busy || missing.length > 0 || unscheduled}
+                      disabled={busy || missing.length > 0}
                       title={
-                        unscheduled
-                          ? 'Schedule this task and assign a mechanic first (click the card)'
-                          : missing.length > 0
+                        missing.length > 0
                           ? `Waiting for parts (${parts.length - missing.length} of ${parts.length} received)`
                           : undefined
                       }
@@ -1041,7 +1053,7 @@ export default function page() {
 
         {/* Hand-off to Billing once the road test has passed. The bill,
             payment verification and vehicle release all live there. */}
-        {(jobOrder.stage === 'completed' || jobOrder.stage === 'released' || bill?.paid) && (
+        {(jobOrder.stage === 'completed' || jobOrder.stage === 'released') && (
           <div className={`rounded-2xl border p-5 ${jobOrder.stage === 'released' ? 'border-slate-900 bg-slate-900 text-white' : jobOrder.stage === 'completed' ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 bg-white'}`}>
             <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400"><Receipt size={13} /> Billing</p>
             {bill && (
@@ -1051,7 +1063,7 @@ export default function page() {
               </div>
             )}
             <p className="mt-1 text-xs text-slate-500">
-              {jobOrder.stage === 'released' ? 'Paid and released. The summary and Job Order are on the Completed page.' : jobOrder.stage === 'completed' ? 'Road test passed. Collect the balance and release the vehicle.' : 'A downpayment was verified. The final bill opens once the job is complete.'}
+              {jobOrder.stage === 'released' ? 'Paid and released. The summary and Job Order are on the Completed page.' : 'Road test passed. Collect the balance and release the vehicle.'}
             </p>
             <Link href={`/job-orders/${jobOrderId}/${jobOrder.stage === 'released' ? 'completed' : 'billing'}`} className={`mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold ${jobOrder.stage === 'released' ? 'bg-white text-slate-900 hover:bg-slate-100' : 'bg-slate-900 text-white hover:bg-slate-800'}`}>
               {jobOrder.stage === 'released' ? 'Open Completed' : 'Open Billing'} <ArrowRight size={14} />
@@ -1328,8 +1340,13 @@ function defaultTimeFor(date: string): string {
 function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { task: ServiceTask, jobOrderId: string, scheduleData: { tasks: any[], mechanics: any[] }, onClose: () => void, onSaved: () => void }) {
   const today = toLocalDateValue(new Date())
 
+  // A saved time that has already passed is stale, not a choice — fall back
+  // to today so the modal doesn't open showing an error.
+  const savedIsPast =
+    task.status === 'pending' && !!task.scheduledDate && new Date(task.scheduledDate).getTime() < Date.now()
+
   const [date, setDate] = useState(() => {
-    if (task.scheduledDate) {
+    if (task.scheduledDate && !savedIsPast) {
       // Postgres returns local time timestamp natively as UTC Date on some clients,
       // but since we send exact string and read exact string we can extract local values directly
       return toLocalDateValue(new Date(task.scheduledDate))
@@ -1338,7 +1355,7 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
   })
 
   const [time, setTime] = useState(() => {
-    if (task.scheduledDate) {
+    if (task.scheduledDate && !savedIsPast) {
       const d = new Date(task.scheduledDate)
       return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
     }
@@ -1350,15 +1367,16 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
   const pickedPast = task.status === 'pending' && isPastDateTime(date, time)
 
   const [mechanicId, setMechanicId] = useState<number | ''>(task.mechanicId || '')
-  const [note, setNote] = useState(task.note === 'Describe the service...' ? '' : (task.note || ''))
-  
+  // Read-only here: the text belongs to the quotation (description_of_work).
+  const note = task.note || ''
+
   const [saving, setSaving] = useState(false)
 
   const handleSave = async () => {
     setSaving(true)
     const datetime = `${date}T${time}:00`
     // Status isn't set here — Start/Finish live on the task card.
-    const result = await scheduleTask(jobOrderId, task.id, datetime, task.status, mechanicId === '' ? undefined : mechanicId, note)
+    const result = await scheduleTask(jobOrderId, task.id, datetime, task.status, mechanicId === '' ? undefined : mechanicId)
     setSaving(false)
     if (!result.ok) {
       toast.error(result.message ?? 'Could not save the schedule.')
@@ -1384,13 +1402,10 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
         </div>
         
         <div className="mb-6 rounded-lg bg-slate-50 p-4 border border-slate-100">
-          <p className="font-semibold text-slate-900 mb-2">{task.title}</p>
-          <textarea
-            value={note}
-            onChange={e => setNote(e.target.value)}
-            placeholder="Service notes (optional)..."
-            className="w-full rounded-md border border-slate-200 p-2 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none min-h-[80px]"
-          />
+          <p className="font-semibold text-slate-900">{task.title}</p>
+          {note.trim() && note.trim() !== 'Describe the service...' && (
+            <p className="mt-1 text-sm text-slate-500">{note}</p>
+          )}
         </div>
 
         <div className="space-y-4">
@@ -1403,8 +1418,8 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
             </div>
           )}
 
-          {/* Once started, the schedule is history — read-only. Mechanic and
-              note below stay editable (reassignment mid-task is legitimate). */}
+          {/* Once started, the schedule is history — read-only. The mechanic
+              stays editable (reassignment mid-task is legitimate). */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Date</label>

@@ -38,7 +38,7 @@ export function FindingApprovalCard({
   const requestOtp = async () => {
     const r = await requestFindingOtp(userId, finding.id);
     if (!r.ok) { toast.error(r.message); return null; }
-    return { token: r.token, sentTo: r.sentTo, expiresMinutes: r.expiresMinutes };
+    return { token: r.token, sentTo: r.sentTo, expiresMinutes: r.expiresMinutes, forWork: r.forWork };
   };
   const submitOtp = (token: string, code: string) => respondToFinding(userId, finding.id, true, { token, code });
 

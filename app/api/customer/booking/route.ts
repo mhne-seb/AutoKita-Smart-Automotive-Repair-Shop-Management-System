@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { sendTempPasswordEmail } from '@/lib/mail'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
+import { isValidPhPlate, normalizePlate, PLATE_FORMAT_ERROR } from '@/lib/plateNumber'
 
 export async function POST(req: NextRequest) {
   try {
@@ -72,8 +73,12 @@ export async function POST(req: NextRequest) {
       if (!plate) {
         return NextResponse.json({ success: false, message: 'License plate is required for new vehicles' }, { status: 400 })
       }
+      if (!isValidPhPlate(plate)) {
+        return NextResponse.json({ success: false, message: PLATE_FORMAT_ERROR }, { status: 400 })
+      }
+      const normalizedPlate = normalizePlate(plate)
 
-      const existingVeh = await db.query(`SELECT id FROM vehicles WHERE UPPER(plate_number) = UPPER($1)`, [plate])
+      const existingVeh = await db.query(`SELECT id FROM vehicles WHERE UPPER(plate_number) = UPPER($1)`, [normalizedPlate])
 
       if (existingVeh.rows.length > 0) {
         return NextResponse.json({
@@ -86,7 +91,7 @@ export async function POST(req: NextRequest) {
         const vehicleResult = await db.query(
           `INSERT INTO vehicles (user_id, vehicle_make, vehicle_model, vehicle_year, plate_number, vehicle_type, mileage)
            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-          [finalUserId, make || null, model || 'Unknown', parseInt(year) || 2026, plate, type || 'Sedan', parseFloat(mileage) || 0]
+          [finalUserId, make || null, model || 'Unknown', parseInt(year) || 2026, normalizedPlate, type || 'Sedan', parseFloat(mileage) || 0]
         )
         finalVehicleId = vehicleResult.rows[0].id
       }

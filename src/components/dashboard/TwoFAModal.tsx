@@ -19,7 +19,7 @@ export function TwoFAModal({
 }: {
   onClose: () => void;
   // Asks the server to email a code; resolves with the signed token to send back with it.
-  onRequest: () => Promise<{ token: string; sentTo: string; expiresMinutes: number } | null>;
+  onRequest: () => Promise<{ token: string; sentTo: string; expiresMinutes: number; forWork?: string } | null>;
   // Sends token + typed code; the server does the actual check and the confirm.
   onSubmit: (token: string, code: string) => Promise<{ ok: boolean; message?: string }>;
   onVerified: () => void | Promise<void>;
@@ -31,7 +31,7 @@ export function TwoFAModal({
   const [status, setStatus] = useState<"sending" | "idle" | "verifying" | "success" | "error">("sending");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [resent, setResent] = useState(false);
-  const [challenge, setChallenge] = useState<{ token: string; sentTo: string; expiresMinutes: number } | null>(null);
+  const [challenge, setChallenge] = useState<{ token: string; sentTo: string; expiresMinutes: number; forWork?: string } | null>(null);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
   const code = digits.join("");
@@ -103,6 +103,11 @@ export function TwoFAModal({
         <div className="flex items-start justify-between">
           <div>
             <h3 className="text-lg font-bold">Verify It's You</h3>
+            {/* Several approvals can be waiting at once, each with its own
+                code. Say which one this code is for. */}
+            {challenge?.forWork && (
+              <p className="mt-1 text-sm font-semibold text-foreground">Approving: {challenge.forWork}</p>
+            )}
             <p className="mt-1 text-sm text-muted-foreground">
               {status === "sending" && !challenge
                 ? "Sending a code to your email…"
