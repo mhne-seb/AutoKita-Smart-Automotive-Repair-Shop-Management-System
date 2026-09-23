@@ -84,3 +84,30 @@ export async function simulateCustomerResponse(
   if (!json.success) return null
   return toPreDiagnosticRound(json.data)
 }
+// --- Mid-inspection OBD-II scan authorization -------------------------------
+// Only reachable when diagnosticScanAuthorized is false on the inspection
+// page — the customer wasn't asked about the scanner at booking, so using it
+// now needs a fresh, explicit approval. See scan-authorization/route.ts.
+
+export interface ScanAuthorization {
+  id: number
+  adminNote: string | null
+  decision: 'pending' | 'approved' | 'disputed' // disputed = declined
+  requestedAt: string
+  decidedAt: string | null
+}
+
+/** Asks the customer to approve using the scanner. Refused if one is already pending. */
+export async function requestScanAuthorization(
+  jobOrderId: string,
+  note: string,
+): Promise<{ ok: boolean; message?: string }> {
+  const res = await fetch(`/api/job-orders/${jobOrderId}/scan-authorization`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ note }),
+  })
+  const json = await res.json().catch(() => null)
+  if (!res.ok || !json?.success) return { ok: false, message: json?.message ?? 'Could not send the request.' }
+  return { ok: true }
+}

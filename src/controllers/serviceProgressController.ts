@@ -336,6 +336,14 @@ export async function getInspectingData(userId: number, jobOrderId?: number) {
     }[]
     // True only while the shop hasn't started (no photos, findings, or report).
     canCancel: boolean
+    // Pending / decided mid-inspection scan request — see ScanAuthorizationCard.
+    scanAuthorization: {
+      id: number
+      adminNote: string | null
+      decision: 'pending' | 'approved' | 'disputed'
+      requestedAt: string
+      decidedAt: string | null
+    } | null
     findings: {
       id: number
       name: string | null
@@ -373,6 +381,22 @@ export async function respondToInspection(
     body: JSON.stringify({ userId, jobOrderId, decision, reason }),
   })
   return res.json() as Promise<{ success: boolean; message?: string; decision?: string }>
+}
+
+// --- Mid-inspection OBD-II scan authorization -------------------------------
+// The customer's side of preDiagnosticController.ts's requestScanAuthorization.
+// No OTP — the fee is fixed and disclosed the same way every time, so being
+// logged in is enough. Approve or decline is one plain click either way.
+
+export async function respondToScan(userId: number, authorizationId: number, approved: boolean) {
+  const res = await fetch('/api/tracking/inspecting/scan-authorization/respond', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, authorizationId, approved }),
+  })
+  const json = await res.json().catch(() => null)
+  if (!res.ok || !json?.success) return { ok: false as const, message: json?.message ?? 'Something went wrong.' }
+  return { ok: true as const }
 }
 
 export async function getInProgressData(userId: number, jobOrderId?: number) {

@@ -98,6 +98,15 @@ export interface InspectionData {
   approvalRequired: boolean
   // Customer agreed to the OBD-II scan fee at booking — mechanic may scan.
   diagnosticScanAuthorized?: boolean
+  // Pending / decided mid-inspection scan request — only relevant when
+  // diagnosticScanAuthorized is false (never asked, or asked and declined).
+  scanAuthorization?: {
+    id: number
+    adminNote: string | null
+    decision: 'pending' | 'approved' | 'disputed' // disputed = declined
+    requestedAt: string
+    decidedAt: string | null
+  } | null
   pullOutRequested?: boolean
   // The admin has added at least one service to the quotation.
   quotationStarted?: boolean
@@ -225,6 +234,10 @@ export interface ProposedPart {
   qty: number
   unitPrice: number
   serviceName: string // which proposed service this part is for
+  // True when the shop already has it on the shelf. On approval that part is
+  // created as 'in_stock' instead of 'to_order', so nobody has to record a
+  // purchase for something already owned.
+  inStock?: boolean
 }
 export interface ServiceFinding {
   id: number

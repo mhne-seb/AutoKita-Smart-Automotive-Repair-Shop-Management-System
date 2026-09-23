@@ -13,6 +13,7 @@ import { DIAGNOSTIC_SCAN_FEE, formatPeso } from '@/data/diagnosticScan'
 import { getJobOrderById } from '@/controllers/jobOrderController'
 import { getInspectionById, addInspectionFinding, updateInspectionFinding, deleteInspectionFinding, uploadInspectionPhoto, saveWalkaroundNote, saveWalkaroundTitle, deleteInspectionPhoto } from '@/controllers/inspectionController'
 import { getLatestPreDiagnostic, sendForApproval, type PreDiagnosticRound } from '@/controllers/preDiagnosticController'
+import { requestScanAuthorization } from '@/controllers/preDiagnosticController'
 import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData, InspectionPhotoSlot } from '@/data/types'
 
 export default function page() {
@@ -55,6 +56,10 @@ export default function page() {
   }, [jobOrderId])
 
   const [photoSlots, setPhotoSlots] = useState<InspectionData['photoSlots']>([])
+  // Set true after a blocked send attempt, so empty slots highlight red
+  // until the admin fixes them (paper's Exception 1 on this use case).
+  const [showPhotoWarning, setShowPhotoWarning] = useState(false)
+  const [requestingScan, setRequestingScan] = useState(false)
   const [findings, setFindings] = useState<MechanicalFinding[]>([])
   // Passive save indicator beside "Upload to customer portal" — every photo
   // title/note/finding edit writes to the DB on its own (blur or immediately),
@@ -484,7 +489,34 @@ export default function page() {
 
   // Sends the current findings for approval — a real, persisted database
   // write (creates a pre_diagnostics round) instead of the old fake local flag.
-  async function sendInspectionForApproval() {
+  async function askToUseScanner() {
+    if (!jobOrder) return
+    setRequestingScan(true)
+    const result = await requestScanAuthorization(jobOrderId, '')
+    setRequestingScan(false)
+    if (!result.ok) {
+      toast.error(result.message ?? 'Could not send the request.')
+      return
+    }
+    toast.success("Sent — the customer needs to approve the scan fee before you can attach a report.")
+    // Re-fetch so the banner switches to "waiting on customer" immediately.
+    const data = await getInspectionById(jobOrderId)
+    if (data) setInitial(data)
+  }
+
+    async function sendInspectionForApproval() {
+    // Exception 1 (paper, Manage Real-Time Progress): the report can't go
+    // out without photo evidence of the vehicle's condition — that's what
+    // protects the shop and the customer if the car's state is disputed
+    // later. An empty gallery or an empty slot both count as missing.
+    const missingPhotos = photoSlots.length === 0 || photoSlots.some((slot) => !slot.url)
+    if (missingPhotos) {
+      setShowPhotoWarning(true)
+      toast.error('Please upload all intake photos to complete the pre-assessment condition report.')
+      return
+    }
+    setShowPhotoWarning(false)
+
     setSending(true)
     const summary = findings.map((f) => `${f.name}: ${f.note}`).join(' | ') || 'No findings logged.'
     const round = await sendForApproval(jobOrderId, summary)
@@ -600,18 +632,40 @@ export default function page() {
                   this job order.
                 </span>
               </div>
-            ) : (
-              // The customer was never asked about the scanner at booking (their
-              // category didn't require it, or they booked under "Others"). If
-              // you end up using it anyway, tell them about the fee before you
-              // plug it in — don't let them find out for the first time on the
-              // quotation.
-              <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                <Info size={16} className="flex-shrink-0" />
+            ) : initial.scanAuthorization?.decision === 'pending' ? (
+              <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <Loader2 size={16} className="flex-shrink-0 animate-spin" />
                 <span>
-                  <b>Heads up:</b> the customer wasn&apos;t told about the {formatPeso(DIAGNOSTIC_SCAN_FEE)} scanner
-                  fee when they booked. If you need to use the scanner, tell the customer about the fee first.
+                  <b>Waiting on the customer.</b> They were notified to approve the{' '}
+                  {formatPeso(DIAGNOSTIC_SCAN_FEE)} scan fee. You can attach a report once they approve.
                 </span>
+              </div>
+            ) : (
+              // The customer was never asked about the scanner at booking (only
+              // 2 of 8 categories ask, and "Others" never does), or they were
+              // asked mid-inspection and said no. Either way, don't plug the
+              // scanner in without a fresh yes — ask again from here.
+              <div className="mb-5 flex flex-col gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 sm:flex-row sm:items-center sm:justify-between">
+                <span className="flex items-start gap-2.5">
+                  <Info size={16} className="mt-0.5 flex-shrink-0" />
+                  <span>
+                    {initial.scanAuthorization?.decision === 'disputed' ? (
+                      <><b>Customer declined</b> the scan request. You can ask again.</>
+                    ) : (
+                      <><b>Heads up:</b> the customer wasn&apos;t told about the {formatPeso(DIAGNOSTIC_SCAN_FEE)} scanner fee when they booked.</>
+                    )}{' '}
+                    Using the scanner needs their approval first.
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={askToUseScanner}
+                  disabled={requestingScan || isLocked}
+                  className="flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {requestingScan ? <Loader2 size={13} className="animate-spin" /> : <ScanLine size={13} />}
+                  {initial.scanAuthorization?.decision === 'disputed' ? 'Ask Again' : 'Use Scanner'}
+                </button>
               </div>
             )}
 
@@ -667,6 +721,11 @@ export default function page() {
               <div>
                 <p className="text-sm font-bold text-slate-900">Inspection Photos</p>
                 <p className="text-xs text-slate-500">Walkaround condition photos and reference views</p>
+                {showPhotoWarning && (photoSlots.length === 0 || photoSlots.some((s) => !s.url)) && (
+                  <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-rose-600">
+                    <AlertCircle size={12} /> Please upload all intake photos to complete the pre-assessment condition report.
+                  </p>
+                )}
               </div>
               <button
                 type="button"
@@ -682,7 +741,11 @@ export default function page() {
               {photoSlots.map((slot) => (
                 <div key={slot.id} className="flex flex-col gap-2">
                   <div
-                    className="group relative h-40 overflow-hidden rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-400 hover:border-slate-300"
+                    className={`group relative h-40 overflow-hidden rounded-xl border-2 border-dashed bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-400 ${
+                      showPhotoWarning && !slot.url
+                        ? 'border-rose-400 bg-rose-50 hover:border-rose-500'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
                   >
                     {slot.url ? (
                       <>
@@ -960,15 +1023,26 @@ export default function page() {
               <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
                 <FileText size={32} className="mx-auto mb-2 text-slate-300" />
                 <p className="text-sm font-semibold text-slate-500">No OBD-II report attached</p>
-                <p className="mt-0.5 text-xs text-slate-400">Attach an existing report or upload a scanner PDF directly.</p>
+                <p className="mt-0.5 text-xs text-slate-400">
+                  {initial.diagnosticScanAuthorized
+                    ? 'Attach an existing report or upload a scanner PDF directly.'
+                    : "Get the customer’s approval above before using the scanner."}
+                </p>
                 <div className="mt-4 flex items-center justify-center gap-2">
                   <button
                     onClick={openPicker}
-                    className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 active:scale-95"
+                    disabled={!initial.diagnosticScanAuthorized}
+                    title={!initial.diagnosticScanAuthorized ? 'The customer needs to approve the scan fee first' : undefined}
+                    className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-slate-900 disabled:active:scale-100"
                   >
                     <Link2 size={13} /> Attach Report
                   </button>
-                  <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 active:scale-95">
+                  <label
+                    title={!initial.diagnosticScanAuthorized ? 'The customer needs to approve the scan fee first' : undefined}
+                    className={`flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 ${
+                      initial.diagnosticScanAuthorized ? 'cursor-pointer hover:bg-slate-100 active:scale-95' : 'cursor-not-allowed opacity-40'
+                    }`}
+                  >
                     {uploadingPdf ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
                     {uploadingPdf ? 'Uploading…' : 'Upload PDF'}
                     <input
@@ -976,6 +1050,7 @@ export default function page() {
                       type="file"
                       accept="application/pdf"
                       className="hidden"
+                      disabled={!initial.diagnosticScanAuthorized}
                       onChange={(e) => {
                         const file = e.target.files?.[0]
                         if (file) handlePdfUpload(file)

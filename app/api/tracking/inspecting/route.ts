@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { getLatestScanAuthorization } from '@/lib/scanAuthorization'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     if (!jobOrder) {
       return NextResponse.json({
         jobOrder: null, preDiagnostic: null, walkaround: [], findings: [], reviewHistory: [], shop: null,
-        canCancel: false,
+        canCancel: false, scanAuthorization: null,
       })
     }
 
@@ -93,12 +94,17 @@ export async function GET(request: NextRequest) {
     const isHistorical = jobOrder.status === 'completed' || jobOrder.status === 'released'
     const reportSent = Boolean(preDiagnostic?.approval_status) || isHistorical
 
+    // Pending / decided mid-inspection scan request — the card the customer
+    // approves/declines from this page (see scan-authorization/*).
+    const scanAuthorization = await getLatestScanAuthorization(jobOrder.job_order_id)
+
     return NextResponse.json({
       jobOrder,
       preDiagnostic,
       walkaround: reportSent ? walkaroundRes.rows : [],
       reviewHistory: historyRes.rows,
       canCancel: Boolean(cancelRes.rows[0]?.can_cancel),
+      scanAuthorization,
       // get_job_order_inspections() mixes inspection_photos rows into its
       // result (they come back with status: null and a real photo URL) —
       // keep those out of the findings list, they're intake documentation
