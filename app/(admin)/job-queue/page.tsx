@@ -35,6 +35,7 @@ import { StatCard } from '@/components/StatCard'
 import { ShopLoading } from '@/components/ShopLoading'
 import { StatusBadge } from '@/components/StatusBadge'
 import { PROVINCES, SERVICE_CATEGORIES, YEARS } from '@/data/ticketFormOptions'
+import { isValidPhPlate, PLATE_FORMAT_ERROR } from '@/lib/plateNumber'
 
 export type JobStatus = 'Pending' | 'In Progress' | 'Approved' | 'Cancelled' | 'Completed'
 
@@ -823,6 +824,7 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
     if (!form.transmission) next.transmission = 'Transmission is required'
     if (!form.mileage.trim()) next.mileage = 'Mileage is required'
     if (!form.licensePlate.trim()) next.licensePlate = 'License plate is required'
+    else if (!isValidPhPlate(form.licensePlate)) next.licensePlate = PLATE_FORMAT_ERROR
     if (!form.serviceCategory) next.serviceCategory = 'Service category is required'
     setErrors(next)
     return Object.keys(next).length === 0

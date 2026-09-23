@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { isValidPhPlate, normalizePlate, PLATE_FORMAT_ERROR } from '@/lib/plateNumber'
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,6 +9,9 @@ export async function POST(req: NextRequest) {
 
     if (!ticketData) {
       return NextResponse.json({ success: false, message: 'Missing ticket data' }, { status: 400 })
+    }
+    if (!ticketData.licensePlate || !isValidPhPlate(ticketData.licensePlate)) {
+      return NextResponse.json({ success: false, message: PLATE_FORMAT_ERROR }, { status: 400 })
     }
 
     // 1. Handle User creation / lookup
@@ -45,9 +49,10 @@ export async function POST(req: NextRequest) {
     // vehicles.plate_number is UNIQUE, so reuse the car if it is already
     // registered — same lookup-then-insert we do for the user above.
     let vehicleId
+    const normalizedPlate = normalizePlate(ticketData.licensePlate)
     const checkVeh = await db.query(
       `SELECT id FROM vehicles WHERE plate_number = $1`,
-      [ticketData.licensePlate]
+      [normalizedPlate]
     )
 
     if (checkVeh.rows.length > 0) {
@@ -60,7 +65,7 @@ export async function POST(req: NextRequest) {
           userId,
           ticketData.vehicleModel || 'Unknown',
           parseInt(ticketData.year) || 2026,
-          ticketData.licensePlate,
+          normalizedPlate,
           ticketData.transmission || 'Automatic',
           parseFloat(ticketData.mileage) || 0
         ]
