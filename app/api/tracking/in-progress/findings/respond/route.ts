@@ -94,8 +94,9 @@ export async function POST(request: NextRequest) {
         await client.query(
           `INSERT INTO job_order_parts
              (job_order_id, job_order_service_id, status, part_number, description, quantity, retail_unit_price, total_retail_amount, finding_id)
-           VALUES ($1, $2, 'to_order', $3, $4, $5, $6, $7, $8)`,
-          [jobOrderId, serviceRowIdByName.get(p.serviceName) ?? null, p.partNo || '', p.name, qty, unit, qty * unit, findingId],
+           VALUES ($1, $2, $3::job_order_parts_status, $4, $5, $6, $7, $8, $9)`,
+          [jobOrderId, serviceRowIdByName.get(p.serviceName) ?? null, p.inStock ? 'in_stock' : 'to_order',
+           p.partNo || '', p.name, qty, unit, qty * unit, findingId],
         )
       }
     }

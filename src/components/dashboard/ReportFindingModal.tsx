@@ -59,6 +59,7 @@ export function ReportFindingModal({
   const [partNo, setPartNo] = useState('')
   const [partQty, setPartQty] = useState('1')
   const [partPrice, setPartPrice] = useState('')
+  const [partInStock, setPartInStock] = useState(false)
 
   const [sending, setSending] = useState(false)
 
@@ -107,8 +108,8 @@ export function ReportFindingModal({
     if (!partName.trim()) return toast.error('Give the part a name.')
     if (partPrice.trim() === '' || !(Number(partPrice) >= 0)) return toast.error('Enter the part price.')
     const qty = Math.max(1, Math.round(Number(partQty) || 1))
-    setParts((prev) => [...prev, { name: partName.trim(), partNo: partNo.trim(), qty, unitPrice: Number(partPrice), serviceName: partFor }])
-    setPartName(''); setPartNo(''); setPartQty('1'); setPartPrice('')
+    setParts((prev) => [...prev, { name: partName.trim(), partNo: partNo.trim(), qty, unitPrice: Number(partPrice), serviceName: partFor, inStock: partInStock }])
+    setPartName(''); setPartNo(''); setPartQty('1'); setPartPrice(''); setPartInStock(false)
     setPartFor(null)
   }
 
@@ -253,7 +254,10 @@ export function ReportFindingModal({
                   {/* Parts under this service */}
                   {parts.filter((p) => p.serviceName === s.name).map((p, i) => (
                     <div key={`${p.name}-${i}`} className="mt-1.5 flex items-center justify-between pl-3 text-xs text-slate-600">
-                      <span>{p.name} <span className="text-slate-400">· {p.partNo || '—'} · ×{p.qty}</span></span>
+                      <span>
+                        {p.name} <span className="text-slate-400">· {p.partNo || '—'} · ×{p.qty}</span>
+                        {p.inStock && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">In stock</span>}
+                      </span>
                       <span className="flex items-center gap-3">
                         {peso(p.unitPrice * p.qty)}
                         <button type="button" onClick={() => setParts((prev) => prev.filter((x) => x !== p))} className="text-slate-400 hover:text-red-500" aria-label={`Remove ${p.name}`}><X size={12} /></button>
@@ -265,6 +269,15 @@ export function ReportFindingModal({
                       <p className="text-[11px] text-slate-500">New part for <span className="font-semibold text-slate-700">{s.name}</span></p>
                       <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">Part name
                         <input value={partName} onChange={(e) => setPartName(e.target.value)} placeholder="e.g. Cabin air filter" className="mt-0.5 w-full rounded-md border border-slate-200 p-1.5 text-xs font-normal normal-case tracking-normal text-slate-700" autoFocus />
+                      </label>
+                      <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
+                        <input
+                          type="checkbox"
+                          checked={partInStock}
+                          onChange={(e) => setPartInStock(e.target.checked)}
+                          className="h-3.5 w-3.5 accent-emerald-600"
+                        />
+                        Already in stock (no need to order)
                       </label>
                       <div className="grid grid-cols-[1fr_64px_1fr_auto] items-end gap-1.5">
                         <label className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">Part no.
@@ -278,7 +291,7 @@ export function ReportFindingModal({
                         </label>
                         <div className="flex gap-1">
                           <button type="button" onClick={addPart} className="rounded-md bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">Add</button>
-                          <button type="button" onClick={() => setPartFor(null)} className="rounded-md border border-slate-200 px-2 py-1.5 text-xs text-slate-500 hover:bg-slate-50">Cancel</button>
+                          <button type="button" onClick={() => { setPartFor(null); setPartInStock(false) }} className="rounded-md border border-slate-200 px-2 py-1.5 text-xs text-slate-500 hover:bg-slate-50">Cancel</button>
                         </div>
                       </div>
                     </div>
