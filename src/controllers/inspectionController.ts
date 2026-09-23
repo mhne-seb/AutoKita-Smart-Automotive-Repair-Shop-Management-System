@@ -172,6 +172,7 @@ function toInspectionData(row: any): InspectionData {
     },
     approvalRequired: row.status === 'pending_customer_approval',
     diagnosticScanAuthorized: Boolean(row.diagnosticScanAuthorized),
+    scanAuthorization: row.scanAuthorization ?? null,
     request: toRequest(row.ticket),
     quotationStarted: Boolean(row.quotationStarted),
   }
