@@ -13,7 +13,7 @@ import { sendJobUpdateEmail } from '@/lib/mail'
 
 export async function notifyCustomer(opts: {
   jobOrderId: number
-  entityType: 'service_progress_tasks' | 'service_findings' | 'job_order_parts' | 'road_tests' | 'payments' | 'job_orders' | 'pull_out_requests'
+  entityType: 'service_progress_tasks' | 'service_findings' | 'job_order_parts' | 'road_tests' | 'payments' | 'job_orders' | 'pull_out_requests' | 'scan_authorizations'
   entityId: number
   event: string // short machine name, e.g. 'task_started'
   title: string
