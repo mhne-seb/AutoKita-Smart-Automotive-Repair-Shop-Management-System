@@ -42,9 +42,8 @@ export function ScanAuthorizationCard({
         <div className="min-w-0 flex-1">
           <h3 className="font-semibold">Your mechanic wants to use the diagnostic scanner</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            This wasn&apos;t part of your original booking, so we&apos;re asking first. Plugging in the scanner
-            costs <b>{formatPeso(DIAGNOSTIC_SCAN_FEE)}</b>, charged even if you decide not to go ahead with
-            whatever it finds.
+            This wasn&apos;t in your original booking. It costs <b>{formatPeso(DIAGNOSTIC_SCAN_FEE)}</b>, billed
+            even if no repair follows.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">

@@ -48,7 +48,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       entityId: authId,
       event: 'scan_authorization_requested',
       title: 'Scanner Fee Approval Needed',
-      message: `Our mechanic needs to plug a diagnostic scanner into your vehicle for Job Order #JO-${jobOrderId} — this costs ₱1,500, charged even if you decide not to go ahead with any repairs it finds. Please review it on your tracking page.${note ? ` Note from the shop: ${note}` : ''}`,
+      message: `We'd like to run a diagnostic scan on JO-${jobOrderId} — ₱1,500. Please approve on your tracking page.${note ? ` Note: ${note}` : ''}`,
     })
 
     return NextResponse.json({ success: true, id: authId })
