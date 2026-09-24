@@ -737,7 +737,7 @@ export default function page() {
               </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               {photoSlots.map((slot) => (
                 <div key={slot.id} className="flex flex-col gap-2">
                   <div
@@ -844,7 +844,13 @@ export default function page() {
                     onBlur={() => persistSlotNote(slot)}
                     disabled={isLocked || !slot.rowId}
                     rows={2}
-                    placeholder={slot.rowId ? 'Condition on arrival — scratches, dents, existing damage…' : 'Upload a photo first'}
+                    placeholder={
+                      !slot.rowId
+                        ? 'Upload a photo first'
+                        : slot.id === 'fuel'
+                        ? 'e.g. 3/4 tank'
+                        : 'Condition on arrival — scratches, dents, existing damage…'
+                    }
                     className="w-full resize-none rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-50"
                   />
                 </div>

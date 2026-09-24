@@ -21,6 +21,7 @@ const DEFAULT_PHOTO_SLOTS: InspectionPhotoSlot[] = [
   { id: 'front', label: 'Front Quarter' },
   { id: 'engine', label: 'Engine Bay' },
   { id: 'under', label: 'Underchassis' },
+  { id: 'fuel', label: 'Fuel Gauge' },
 ]
 
 function formatDateTime(value: string | null): string {
@@ -71,8 +72,8 @@ function toRequest(ticket: any): InspectionData['request'] {
 }
 
 function buildPhotoSlots(photoRows: any[]): InspectionPhotoSlot[] {
-  // Start with 3 slots corresponding to the defaults
-  const slots: (InspectionPhotoSlot | null)[] = [null, null, null]
+  // Start with one slot per default (Front Quarter, Engine Bay, Underchassis, Fuel Gauge)
+  const slots: (InspectionPhotoSlot | null)[] = DEFAULT_PHOTO_SLOTS.map(() => null)
   const unassignedPhotos: any[] = []
 
   // Pass 1: Match by exact title (case-insensitive) to default slot labels
