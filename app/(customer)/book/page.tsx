@@ -11,8 +11,8 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import phAddress from "@/data/ph-address.json";
 import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
+import { normalizePlateNumber, isValidPlateNumber } from "@/lib/plate";
 import { fy } from "date-fns/locale";
-import { isValidPhPlate, PLATE_FORMAT_ERROR } from "@/lib/plateNumber";
 
 const TIMES = ["08:00 AM", "09:30 AM", "10:30 AM", "01:00 PM", "02:30 PM", "04:00 PM"];
 const DAYS_TO_SHOW = 30;
@@ -192,8 +192,7 @@ function isStepValid(step: number, f: Form): boolean {
         isSelectValid(f.year, f.yearOther) &&
         isSelectValid(f.transmission, f.transmissionOther) &&
         isFilled(f.mileage) &&
-        isFilled(f.plate) &&
-        isValidPhPlate(f.plate) &&
+        isValidPlateNumber(f.plate) &&
         isSelectValid(f.category, f.categoryOther) &&
         isFilled(f.concern) &&
         // The scan fee has to be agreed to before the ticket can be submitted,
@@ -291,8 +290,12 @@ function BookPage() {
       setCheckingEmail(false);
     }
 
-    // Leaving the Vehicle step: block if this plate is already registered.
+    // Leaving the Vehicle step: block if this plate is invalid or already registered.
     if (step === 2) {
+      if (!isValidPlateNumber(f.plate)) {
+        setAttemptedNext(true);
+        return;
+      }
       setCheckingPlate(true);
       try {
         const res = await fetch(
@@ -383,7 +386,7 @@ function BookPage() {
             make: f.make === OTHERS ? f.makeOther : f.make,
             model: f.model,
             year: f.year === OTHERS ? f.yearOther : f.year,
-            plate: f.plate,
+            plate: normalizePlateNumber(f.plate),
             type: f.transmission === OTHERS ? f.transmissionOther : f.transmission,
             mileage: f.mileage,
           },
@@ -415,10 +418,15 @@ function BookPage() {
         setPlateTaken(true);
         setAttemptedNext(true);
         toast.error("This vehicle is already registered. Please log in to book service for it.");
+      } else if (result.code === "INVALID_PLATE_FORMAT") {
+        setShowReview(false);
+        setStep(2);
+        setAttemptedNext(true);
+        toast.error(result.message || "Invalid license plate format.");
       }
       else {
         console.error("Booking failed:", result.debug || result.message);
-        toast.error("Could not submit your booking. Pleaes try again.");
+        toast.error(result.message || "Could not submit your booking. Please try again.");
       }
     } catch (err) {
       console.error(err);
@@ -667,12 +675,12 @@ function BookPage() {
                   <IField
                     icon={Hash} label="License Plate" required value={f.plate}
                     onChange={(v) => { set("plate", v); setPlateTaken(false); }}
-                    placeholder="e.g., ABC-1234"
+                    placeholder="e.g., ABC-1234 or AB-1234"
                     error={
                       showError && !isFilled(f.plate)
                         ? "License plate is required"
-                        : showError && !isValidPhPlate(f.plate)
-                          ? PLATE_FORMAT_ERROR
+                        : showError && !isValidPlateNumber(f.plate)
+                          ? "Invalid plate format (e.g., ABC-1234, AB-1234, or AB-12345)"
                           : plateTaken
                             ? "This vehicle is already registered. Please log in to book service for it."
                             : undefined

@@ -42,7 +42,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceModal";
-import { isValidPhPlate, PLATE_FORMAT_ERROR } from "@/lib/plateNumber";
 import { ShopLoading } from "@/components/ShopLoading";
 import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
 import type {
@@ -56,7 +55,8 @@ import { getCompletedData } from "@/controllers/serviceProgressController";
 import { getShopInfo } from "@/controllers/billingController";
 // npm install jspdf
 import jsPDF from "jspdf";
-import { formatStamp } from "@/lib/utils";
+import { formatStamp, cn } from "@/lib/utils";
+import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from "@/lib/plate";
 
 // Status
 const STATUS_TO_STEP: Record<string, number> = {
@@ -901,7 +901,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
   const [vehicleTransmission, setVehicleTransmission] = useState("");
   const [vehicleMileage, setVehicleMileage] = useState("");
   const [vehiclePlate, setVehiclePlate] = useState("");
-  const [plateError, setPlateError] = useState<string | undefined>(undefined);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [pickup, setPickup] = useState<"shop" | "home">("shop");
   const [serviceCategory, setServiceCategory] = useState("");
@@ -938,19 +938,50 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
     if (isSubmitting) return;
     const userId = sessionStorage.getItem("autokita_user_id");
     if (!userId) {
-      alert("You must be logged in to book a service.");
+      toast.error("You must be logged in to book a service.");
       return;
     }
+
+    const errs: Record<string, string> = {};
+
     if (!selectedVehicleId) {
-      alert('Please select a vehicle, or choose "+ Register New Vehicle".');
-      return;
+      errs.selectedVehicleId = "Please select a vehicle or choose '+ Register New Vehicle'.";
     }
+
+    if (selectedVehicleId === "new") {
+      if (!vehicleModel.trim()) {
+        errs.vehicleModel = "Vehicle model is required (e.g., Civic, Vios).";
+      }
+      if (!vehiclePlate.trim()) {
+        errs.vehiclePlate = "License plate is required.";
+      } else {
+        const cleanPlate = normalizePlateNumber(vehiclePlate);
+        if (!isValidPlateNumber(cleanPlate)) {
+          errs.vehiclePlate = PLATE_FORMAT_ERROR_MESSAGE;
+        } else if (isVehicleActive(cleanPlate) || isVehicleActive(vehiclePlate)) {
+          setInServicePlate(vehiclePlate);
+          return;
+        }
+      }
+      if (vehicleMileage && parseFloat(vehicleMileage) < 0) {
+        errs.vehicleMileage = "Mileage cannot be negative.";
+      }
+    }
+
+    if (!serviceCategory) {
+      errs.serviceCategory = "Please select a service category.";
+    } else if (serviceCategory === BOOK_OTHERS && !serviceCategoryOther.trim()) {
+      errs.serviceCategoryOther = "Please describe the service you need.";
+    }
+
     if (needsScan && !scanAcknowledged) {
       toast.error("Please agree to the diagnostic scan fee to continue.");
       return;
     }
-    if (serviceCategory === BOOK_OTHERS && !serviceCategoryOther.trim()) {
-      toast.error("Please describe the service you need.");
+
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      toast.error("Please fill in the required fields highlighted in red.");
       return;
     }
 
@@ -964,25 +995,14 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
     };
 
     if (selectedVehicleId === "new") {
-      if (!vehicleModel || !vehiclePlate) {
-        alert("Please provide the new vehicle's model and license plate.");
-        return;
-      }
-      if (!isValidPhPlate(vehiclePlate)) {
-        setPlateError(PLATE_FORMAT_ERROR);
-        return;
-      }
-      if (isVehicleActive(vehiclePlate)) {
-        setInServicePlate(vehiclePlate);
-        return;
-      }
+      const cleanPlate = normalizePlateNumber(vehiclePlate);
       reqBody.newVehicleDetails = {
         make: vehicleMake || null,
-        model: vehicleModel,
+        model: vehicleModel.trim(),
         year: vehicleYear || new Date().getFullYear().toString(),
         type: vehicleTransmission || "Sedan",
         mileage: vehicleMileage || "0",
-        plate: vehiclePlate,
+        plate: cleanPlate,
       };
     } else {
       reqBody.vehicleId = parseInt(selectedVehicleId, 10);
@@ -999,12 +1019,24 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
       if (data.success) {
         setShowConfirmModal(true);
         onBooked();
+      } else if (data.code === 'INVALID_PLATE_FORMAT') {
+        setFieldErrors((prev) => ({
+          ...prev,
+          vehiclePlate: data.message || "Invalid license plate format (e.g., ABC-1234 or 123-ABC)."
+        }));
+        toast.error("Invalid license plate format.");
+      } else if (data.code === 'PLATE_REGISTERED') {
+        setFieldErrors((prev) => ({
+          ...prev,
+          vehiclePlate: "This vehicle is already registered. Please select it from your saved vehicles."
+        }));
+        toast.error("Vehicle already registered.");
       } else {
-        alert("Booking failed: " + data.message);
+        toast.error("Booking failed: " + (data.message || "Please check details and try again."));
       }
     } catch (err) {
       console.error(err);
-      alert("An error occurred while confirming your booking.");
+      toast.error("An error occurred while confirming your booking. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -1023,8 +1055,8 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
   const userEmail = user?.email || "—";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 py-8" onClick={onClose}>
-      <div className="w-full max-w-4xl rounded-xl border bg-card p-6 shadow-2xl md:p-8" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 py-8">
+      <div className="w-full max-w-4xl rounded-xl border bg-card p-6 shadow-2xl md:p-8">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold">Book New Service</h1>
@@ -1066,8 +1098,16 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                   <label className="text-[10px] font-semibold uppercase text-muted-foreground">Select Vehicle</label>
                   <select
                     value={selectedVehicleId}
-                    onChange={(e) => setSelectedVehicleId(e.target.value)}
-                    className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
+                    onChange={(e) => {
+                      setSelectedVehicleId(e.target.value);
+                      if (fieldErrors.selectedVehicleId) setFieldErrors((p) => ({ ...p, selectedVehicleId: "" }));
+                    }}
+                    className={cn(
+                      "mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground focus:outline-none transition-colors",
+                      fieldErrors.selectedVehicleId
+                        ? "border-rose-500 focus:border-rose-500 ring-1 ring-rose-500"
+                        : "border-input focus:border-brand"
+                    )}
                   >
                     <option value="" disabled>
                       {" "}Select a vehicle...
@@ -1082,11 +1122,13 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                     })}
                     <option value="new">+ Register New Vehicle</option>
                   </select>
-                  {selectedVehicleId === "" && (
+                  {fieldErrors.selectedVehicleId ? (
+                    <p className="mt-1 text-xs text-rose-500 font-medium">{fieldErrors.selectedVehicleId}</p>
+                  ) : selectedVehicleId === "" ? (
                     <p className="mt-2 text-xs text-muted-foreground">
                       Choose one of your saved vehicles, or register a new one.
                     </p>
-                  )}
+                  ) : null}
                 </div>
 
                 {selectedVehicleId === "new" && (
@@ -1097,14 +1139,22 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                         label="Vehicle Make (Brand)"
                         placeholder="Select Brand"
                         value={vehicleMake}
-                        onChange={(e) => setVehicleMake(e.target.value)}
+                        onChange={(e) => {
+                          setVehicleMake(e.target.value);
+                          if (fieldErrors.vehicleMake) setFieldErrors((p) => ({ ...p, vehicleMake: "" }));
+                        }}
                         options={BOOK_VEHICLE_MAKES}
+                        error={fieldErrors.vehicleMake}
                       />
                       <BookModalInput
                         label="Vehicle Model"
                         placeholder="e.g., Vios, Civic, Montero"
                         value={vehicleModel}
-                        onChange={(e) => setVehicleModel(e.target.value)}
+                        onChange={(e) => {
+                          setVehicleModel(e.target.value);
+                          if (fieldErrors.vehicleModel) setFieldErrors((p) => ({ ...p, vehicleModel: "" }));
+                        }}
+                        error={fieldErrors.vehicleModel}
                       />
                       <BookModalSelect
                         label="Year"
@@ -1125,15 +1175,22 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                         placeholder="e.g., 50000"
                         type="number"
                         value={vehicleMileage}
-                        onChange={(e) => setVehicleMileage(e.target.value)}
+                        onChange={(e) => {
+                          setVehicleMileage(e.target.value);
+                          if (fieldErrors.vehicleMileage) setFieldErrors((p) => ({ ...p, vehicleMileage: "" }));
+                        }}
+                        error={fieldErrors.vehicleMileage}
                       />
                       <BookModalInput
                         label="License Plate"
                         placeholder="e.g., ABC-1234"
                         wide
                         value={vehiclePlate}
-                        onChange={(e) => { setVehiclePlate(e.target.value); setPlateError(undefined); }}
-                        error={plateError}
+                        onChange={(e) => {
+                          setVehiclePlate(e.target.value);
+                          if (fieldErrors.vehiclePlate) setFieldErrors((p) => ({ ...p, vehiclePlate: "" }));
+                        }}
+                        error={fieldErrors.vehiclePlate}
                       />
                     </div>
                   </>
@@ -1150,8 +1207,17 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                   <label className="text-sm font-medium">Service Category</label>
                   <select
                     value={serviceCategory}
-                    onChange={(e) => { setServiceCategory(e.target.value); setScanAcknowledged(false); }}
-                    className="mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
+                    onChange={(e) => {
+                      setServiceCategory(e.target.value);
+                      setScanAcknowledged(false);
+                      if (fieldErrors.serviceCategory) setFieldErrors((p) => ({ ...p, serviceCategory: "" }));
+                    }}
+                    className={cn(
+                      "mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground focus:outline-none transition-colors",
+                      fieldErrors.serviceCategory
+                        ? "border-rose-500 focus:border-rose-500 ring-1 ring-rose-500"
+                        : "border-input focus:border-brand"
+                    )}
                   >
                     <option value="">Select a Service</option>
                     {BOOK_CATEGORIES.map((c) => (
@@ -1161,14 +1227,30 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                     ))}
                     <option value={BOOK_OTHERS}>Others (type your own)</option>
                   </select>
+                  {fieldErrors.serviceCategory && (
+                    <p className="mt-1 text-xs text-rose-500 font-medium">{fieldErrors.serviceCategory}</p>
+                  )}
                   {serviceCategory === BOOK_OTHERS && (
-                    <input
-                      value={serviceCategoryOther}
-                      onChange={(e) => setServiceCategoryOther(e.target.value)}
-                      placeholder="Please describe the service you need"
-                      autoFocus
-                      className="mt-2 w-full rounded-md border border-brand/50 bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
-                    />
+                    <>
+                      <input
+                        value={serviceCategoryOther}
+                        onChange={(e) => {
+                          setServiceCategoryOther(e.target.value);
+                          if (fieldErrors.serviceCategoryOther) setFieldErrors((p) => ({ ...p, serviceCategoryOther: "" }));
+                        }}
+                        placeholder="Please describe the service you need"
+                        autoFocus
+                        className={cn(
+                          "mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none transition-colors",
+                          fieldErrors.serviceCategoryOther
+                            ? "border-rose-500 focus:border-rose-500 ring-1 ring-rose-500"
+                            : "border-brand/50 focus:border-brand"
+                        )}
+                      />
+                      {fieldErrors.serviceCategoryOther && (
+                        <p className="mt-1 text-xs text-rose-500 font-medium">{fieldErrors.serviceCategoryOther}</p>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -1336,6 +1418,7 @@ function BookModalInput({
   label,
   wide,
   error,
+  className,
   ...p
 }: { label: string; wide?: boolean; error?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
@@ -1343,11 +1426,15 @@ function BookModalInput({
       <label className="text-[10px] font-semibold uppercase text-muted-foreground">{label}</label>
       <input
         {...p}
-        className={`mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none ${
-          error ? "border-rose-400 focus:border-rose-400" : "focus:border-brand"
-        }`}
+        className={cn(
+          "mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm transition-colors focus:outline-none",
+          error
+            ? "border-rose-500 text-rose-950 dark:text-rose-100 focus:border-rose-500 ring-1 ring-rose-500"
+            : "border-input focus:border-brand",
+          className
+        )}
       />
-      {error && <p className="mt-1 text-[11px] text-rose-500">{error}</p>}
+      {error && <p className="mt-1 text-xs text-rose-500 font-medium">{error}</p>}
     </div>
   );
 }
@@ -1356,12 +1443,23 @@ function BookModalSelect({
   label,
   placeholder,
   options,
+  error,
+  className,
   ...p
-}: { label: string; placeholder: string; options?: string[] } & React.SelectHTMLAttributes<HTMLSelectElement>) {
+}: { label: string; placeholder: string; options?: string[]; error?: string } & React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <div>
       <label className="text-[10px] font-semibold uppercase text-muted-foreground">{label}</label>
-      <select {...p} className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none">
+      <select
+        {...p}
+        className={cn(
+          "mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground transition-colors focus:outline-none",
+          error
+            ? "border-rose-500 focus:border-rose-500 ring-1 ring-rose-500"
+            : "border-input focus:border-brand",
+          className
+        )}
+      >
         <option value="">{placeholder}</option>
         {options?.map((opt) => (
           <option key={opt} value={opt}>
@@ -1369,6 +1467,7 @@ function BookModalSelect({
           </option>
         ))}
       </select>
+      {error && <p className="mt-1 text-xs text-rose-500 font-medium">{error}</p>}
     </div>
   );
 }

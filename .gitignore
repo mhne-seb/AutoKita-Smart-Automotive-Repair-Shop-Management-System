@@ -9,3 +9,5 @@ tsconfig.tsbuildinfo
 src/data/job_order_extracts
 models/synthetic_job_orders/
 seed_synthetic.js
+docs/*.md
+obd2_scanner stuff

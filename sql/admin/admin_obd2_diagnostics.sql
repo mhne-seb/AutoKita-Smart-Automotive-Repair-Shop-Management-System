@@ -73,3 +73,80 @@ AS $$
         linked_at    = NULL
     WHERE id = p_report_id;
 $$;
+
+
+-- get_obd2_code_details(p_code)
+-- Deterministic lookup for an OBD-II diagnostic trouble code from obd2_codes.
+-- Returns verified description, symptoms, causes, seriousness, driving safety,
+-- diagnosis steps, and parent/sibling code relationships.
+CREATE OR REPLACE FUNCTION get_obd2_code_details(p_code VARCHAR)
+RETURNS TABLE (
+    code                  VARCHAR(10),
+    category              VARCHAR(50),
+    description           TEXT,
+    meaning               TEXT,
+    symptoms              TEXT,
+    causes                TEXT,
+    seriousness           TEXT,
+    can_i_still_drive     TEXT,
+    how_to_diagnose       TEXT,
+    inspection_difficulty TEXT,
+    more_about            TEXT,
+    related_codes         TEXT[],
+    is_primary            BOOLEAN,
+    parent_code           VARCHAR(10),
+    source_url            TEXT
+)
+LANGUAGE SQL STABLE
+AS $$
+    SELECT
+        c.code,
+        c.category,
+        c.description,
+        c.meaning,
+        c.symptoms,
+        c.causes,
+        c.seriousness,
+        c.can_i_still_drive,
+        c.how_to_diagnose,
+        c.inspection_difficulty,
+        c.more_about,
+        c.related_codes,
+        c.is_primary,
+        c.parent_code,
+        c.source_url
+    FROM obd2_codes c
+    WHERE c.code = UPPER(TRIM(p_code))
+       OR UPPER(TRIM(p_code)) = ANY(c.related_codes)
+    ORDER BY (c.code = UPPER(TRIM(p_code))) DESC, c.is_primary DESC
+    LIMIT 1;
+$$;
+
+
+-- search_obd2_codes(p_query, p_limit)
+-- Full-text / ILIKE keyword search across code, description, symptoms, and causes.
+CREATE OR REPLACE FUNCTION search_obd2_codes(p_query VARCHAR, p_limit INT DEFAULT 5)
+RETURNS TABLE (
+    code        VARCHAR(10),
+    category    VARCHAR(50),
+    description TEXT,
+    is_primary  BOOLEAN,
+    parent_code VARCHAR(10)
+)
+LANGUAGE SQL STABLE
+AS $$
+    SELECT
+        c.code,
+        c.category,
+        c.description,
+        c.is_primary,
+        c.parent_code
+    FROM obd2_codes c
+    WHERE c.code ILIKE '%' || TRIM(p_query) || '%'
+       OR c.description ILIKE '%' || TRIM(p_query) || '%'
+       OR c.symptoms ILIKE '%' || TRIM(p_query) || '%'
+       OR c.causes ILIKE '%' || TRIM(p_query) || '%'
+    ORDER BY (c.code ILIKE TRIM(p_query)) DESC, c.is_primary DESC
+    LIMIT LEAST(p_limit, 10);
+$$;
+

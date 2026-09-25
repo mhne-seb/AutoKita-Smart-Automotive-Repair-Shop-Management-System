@@ -77,14 +77,23 @@ export async function getServiceHistory(userId: number): Promise<ServiceRecord[]
   })
 }
 
-/** Shop details (name/address/contact) shown on generated PDF invoices. */
+/** Shop details (name/address/contact) shown on generated PDF invoices — live from Supabase shops table. */
 export async function getShopInfo() {
-  // The real shop, the same one the printed Job Order uses. Keeps the
-  // remaining mock fields (tagline/TIN) until the shop supplies them.
-  return simulateDelay({
-    ...SHOP_INFO,
-    name: SHOP_PROFILE.name,
-    address: SHOP_PROFILE.address,
-    phone: SHOP_PROFILE.phones.join(' / '),
-  })
+  try {
+    const res = await fetch('/api/shop')
+    const json = await res.json()
+    if (json.success && json.shop) {
+      return {
+        name: json.shop.name || SHOP_INFO.name,
+        tagline: SHOP_INFO.tagline,
+        address: json.shop.address || SHOP_INFO.address,
+        phone: json.shop.contact_number || SHOP_INFO.phone,
+        email: json.shop.email || SHOP_INFO.email,
+        tin: SHOP_INFO.tin,
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to fetch live shop info, using default:', err)
+  }
+  return simulateDelay(SHOP_INFO)
 }

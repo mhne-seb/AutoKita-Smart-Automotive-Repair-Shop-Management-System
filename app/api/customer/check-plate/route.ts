@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { normalizePlateNumber } from '@/lib/plate'
 
 // Tells the booking form whether this license plate is already registered to a
 // vehicle. If it is, the customer is asked to log in first instead of booking
@@ -13,9 +14,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'Missing plate' }, { status: 400 })
     }
 
+    const cleanPlate = normalizePlateNumber(plate)
+
     const found = await db.query(
-      `SELECT id FROM vehicles WHERE UPPER(plate_number) = UPPER($1) LIMIT 1`,
-      [plate]
+      `SELECT id FROM vehicles WHERE UPPER(plate_number) = UPPER($1) OR UPPER(plate_number) = UPPER($2) LIMIT 1`,
+      [cleanPlate, plate]
     )
 
     return NextResponse.json({ success: true, exists: found.rows.length > 0 })
