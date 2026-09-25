@@ -19,6 +19,7 @@ import { hasBudget, deduct, remaining } from '@/lib/tokenBudget';
 import { db } from '@/lib/db';
 import { getAdminIndex } from '@/lib/pinecone';
 import { semanticSearch, formatContext } from '@/lib/vectorSearch';
+import { getObd2CodeDetails, extractObd2Code, formatObd2NotFoundContext } from '@/lib/obd2';
 import type { ChatCompletionTool, ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
 // ─── SQL Tool Definitions ────────────────────────────────────────────────────
@@ -165,13 +166,27 @@ const TOOLS: ChatCompletionTool[] = [
   {
     type: 'function',
     function: {
+      name: 'lookup_obd2_code',
+      description: 'Look up verified OBD-II Diagnostic Trouble Code (DTC) information from the database (covers Powertrain P-codes, Body B-codes, Chassis C-codes, Network U-codes, plus sibling sub-codes like P0002-P0004). Returns exact technical definition, symptoms, causes, severity, driving safety advice, diagnostic procedures, and related sibling codes to eliminate AI hallucinations. ALWAYS call this tool whenever a diagnostic code like P0001, P0002, P0008, C0035, U0100, etc. is mentioned. If the code does not exist in the database, you CANNOT say much about it and must not speculate.',
+      parameters: {
+        type: 'object',
+        properties: {
+          code: { type: 'string', description: 'The OBD-II DTC code (e.g. "P0001", "P0002", "P0008", "C0035", "U0100")' },
+        },
+        required: ['code'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'lookup_obd2_diagnostics',
-      description: 'Look up diagnostic trouble codes (DTCs) or OBD-II scan reports for a job order. Returns trouble code descriptions, affected systems, and logged states.',
+      description: 'Retrieve OBD-II diagnostic scan reports linked to a job order or search recent shop vehicle scans by DTC code.',
       parameters: {
         type: 'object',
         properties: {
           job_order_id: { type: 'number', description: 'Optional: Job order ID to retrieve linked OBD-II report and DTCs' },
-          dtc_code: { type: 'string', description: 'Optional: Specific diagnostic code (e.g. "P0300", "P0171", "C1401")' },
+          dtc_code: { type: 'string', description: 'Optional: Specific diagnostic code to search in recent vehicle scans (e.g. "P0300", "C1401")' },
         },
         required: [],
       },
@@ -350,29 +365,99 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
         return JSON.stringify(res.rows);
       }
 
-      case 'lookup_obd2_diagnostics': {
-        if (args.job_order_id) {
-          const res = await db.query(`SELECT * FROM get_obd2_report_for_job_order($1)`, [args.job_order_id]);
-          if (res.rows.length === 0) {
-            return JSON.stringify({ message: `No OBD-II scan report linked to Job Order #${args.job_order_id} yet.` });
-          }
-          return JSON.stringify(res.rows);
+      case 'lookup_obd2_code': {
+        const code = String(args.code ?? '').trim();
+        if (!code) {
+          return JSON.stringify({ error: 'Please provide an OBD-II diagnostic trouble code (e.g. "P0001", "P0008", "C1401").' });
         }
+        const record = await getObd2CodeDetails(code);
+        if (!record) {
+          const upperCode = code.toUpperCase();
+          return JSON.stringify({
+            found: false,
+            code: upperCode,
+            status: 'NOT_FOUND_IN_DATABASE',
+            message: `DTC code "${upperCode}" is NOT registered in AutoKita's verified diagnostic database.`,
+            directive: `STRICT ZERO-HALLUCINATION GUARDRAIL: You do NOT have verified data for code ${upperCode}. You CANNOT say much about this code. Do NOT speculate, guess root causes, invent symptoms, or guess diagnostic procedures. State plainly: "Code ${upperCode} is not registered in AutoKita's verified diagnostic database. Please verify the code on your scan tool or perform an official in-shop diagnostic scan at AutoKita."`
+          });
+        }
+        return JSON.stringify({
+          found: true,
+          code: record.code,
+          category: record.category,
+          description: record.description,
+          is_primary: record.is_primary,
+          parent_code: record.parent_code,
+          related_codes: record.related_codes,
+          meaning: record.meaning,
+          symptoms: record.symptoms,
+          causes: record.causes,
+          seriousness: record.seriousness,
+          can_i_still_drive: record.can_i_still_drive,
+          how_to_diagnose: record.how_to_diagnose,
+          inspection_difficulty: record.inspection_difficulty,
+          more_about: record.more_about,
+          directive: 'CRITICAL ANTI-HALLUCINATION RULE: All explanations of symptoms, causes, severity, driving risks, and diagnosis procedures MUST strictly reflect this verified database record. Do NOT invent causes or guess safety consequences.'
+        });
+      }
+
+      case 'lookup_obd2_diagnostics': {
+        const results: Record<string, unknown> = {};
+
         if (args.dtc_code) {
-          const res = await db.query(
+          const rawCode = String(args.dtc_code).trim().toUpperCase();
+          const codeMatch = rawCode.match(/[PBCU][0-9A-Z]{4}/i);
+          const cleanCode = codeMatch ? codeMatch[0].toUpperCase() : rawCode;
+
+          // 1. Deterministic reference lookup in obd2_codes
+          const refRes = await db.query(
+            `SELECT code, category, description, meaning, symptoms, causes,
+                    seriousness, can_i_still_drive, how_to_diagnose, inspection_difficulty,
+                    more_about, related_codes, is_primary, parent_code
+             FROM obd2_codes
+             WHERE code = $1 OR $1 = ANY(related_codes)
+             LIMIT 1`,
+            [cleanCode]
+          );
+
+          if (refRes.rows.length > 0) {
+            results.code_reference = refRes.rows[0];
+          }
+
+          // 2. Also check recent job order scans
+          const scanRes = await db.query(
             `SELECT dtc_code, description, state, system, datetime_logged
              FROM obd2_dtc_codes
              WHERE dtc_code ILIKE $1
              ORDER BY id DESC
-             LIMIT 10`,
-            [`%${String(args.dtc_code).trim()}%`]
+             LIMIT 5`,
+            [`%${cleanCode}%`]
           );
-          if (res.rows.length === 0) {
-            return JSON.stringify({ message: `DTC code "${args.dtc_code}" not logged in recent scan records. Proceed with official manual diagnostic flow.` });
+          if (scanRes.rows.length > 0) {
+            results.recent_job_scans = scanRes.rows;
           }
-          return JSON.stringify(res.rows);
+
+          if (!results.code_reference && !results.recent_job_scans) {
+            return JSON.stringify({
+              message: `DTC code "${args.dtc_code}" not found in OBD-II reference database or recent shop scans.`
+            });
+          }
         }
-        return JSON.stringify({ error: 'Please provide either job_order_id or dtc_code.' });
+
+        if (args.job_order_id) {
+          const res = await db.query(`SELECT * FROM get_obd2_report_for_job_order($1)`, [args.job_order_id]);
+          if (res.rows.length > 0) {
+            results.job_order_scan_report = res.rows;
+          } else if (!results.code_reference) {
+            return JSON.stringify({ message: `No OBD-II scan report linked to Job Order #${args.job_order_id} yet.` });
+          }
+        }
+
+        if (Object.keys(results).length === 0) {
+          return JSON.stringify({ error: 'Please provide either job_order_id or dtc_code.' });
+        }
+
+        return JSON.stringify(results);
       }
 
       default:
@@ -443,9 +528,33 @@ Present Mode 1 first, then Mode 2 below it.
 ### MODE 4 — SHOP / JOB ORDER QUERIES
 For revenue, job order status, service history, or mechanic workload: use concise tables and bullet points.
 
+---
+
+### MODE 5 — OBD-II DIAGNOSTIC CODE (Token-Optimized)
+Triggered when the user asks about an OBD-II diagnostic trouble code (e.g. P0001, P0002, P0008, C0035, U0100).
+You MUST use the exact token-optimized format below to conserve tokens (~120-150 tokens max). No conversational filler, no polite intro, no generic closing remarks.
+
+🔍 **DTC [CODE] — [Definition]** ([Category])
+- **Driveability**: [⛔ DO NOT DRIVE / ⚠️ DRIVE WITH CAUTION / ℹ️ SAFE TO DRIVE TO SHOP] — [1 sentence safety verdict]
+- **Top Causes**:
+  • [Cause 1]
+  • [Cause 2]
+  • [Cause 3]
+- **Symptoms**: [Comma-separated: e.g. Check Engine Light, rough idle, hard start, rattle]
+- **Shop Diagnostics**:
+  1. [Actionable test step 1]
+  2. [Actionable test step 2]
+- **Related Codes**: [Sibling codes e.g. P0002–P0004 or omit line if none]
+
+*If code is NOT found in database*: You CANNOT say much. Do NOT speculate or invent causes. Output ONLY:
+🔍 **DTC [CODE] — Not in Verified Database**
+- **Status**: Code [CODE] is not registered in AutoKita's verified database.
+- **Action**: Verify the code on the scan tool or perform an official diagnostic scan. Do not guess root causes or driving risks.
+
 ━━━ TOOL RULES ━━━
 - Parts → \`search_parts_by_name\` / \`get_part_fitment\`
-- OBD / DTC → \`lookup_obd2_diagnostics\`
+- OBD-II DTC Codes → \`lookup_obd2_code\` (ALWAYS call this whenever an OBD-II code is mentioned. If the code does NOT exist in the database, you CANNOT say much about it—do NOT speculate or invent causes/procedures; state plainly that it is not in the verified database and advise an in-shop scan).
+- Job Order OBD Scans → \`lookup_obd2_diagnostics\` (for vehicle scan reports or recent vehicle scan logs)
 - Vehicle history → \`get_vehicle_repair_history\`
 - Job order → \`get_job_order_parts\` / \`get_job_order_services\`
 - Retrieved manual chunks take priority for exact torque, clearance, and SST values.
@@ -619,6 +728,17 @@ export async function POST(req: NextRequest) {
 
     if (jobOrderContext) {
       enrichedSystem += `\n\n## Currently Active Job Order\n${jobOrderContext}\n\nWhen answering questions, refer to this job order's vehicle, services, parts, and inspection notes as the primary context. Be specific and use the real data above.`;
+    }
+
+    // ── Deterministic OBD-II Pre-Check Guardrail ──────────────────────────────
+    // If the query mentions an OBD-II code that does NOT exist in the verified database,
+    // inject the strict not-found guardrail directly into the prompt so the bot cannot say much.
+    const detectedAdminObdCode = extractObd2Code(userText);
+    if (detectedAdminObdCode) {
+      const codeRecord = await getObd2CodeDetails(detectedAdminObdCode);
+      if (!codeRecord) {
+        enrichedSystem += `\n\n${formatObd2NotFoundContext(detectedAdminObdCode)}`;
+      }
     }
 
     // Replace the system message in fullMessages with the enriched version
