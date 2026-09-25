@@ -13,6 +13,7 @@
 // a quotation refuses a second time), so a replay can't do anything new.
 
 import { createHmac, randomInt, timingSafeEqual } from 'crypto'
+import { isVerificationBypassed } from '@/lib/testMode'
 
 const TTL_MS = 10 * 60 * 1000 // 10 minutes
 
@@ -42,6 +43,10 @@ export function verifyOtp(
   purpose: string,
   subject: string,
 ): { ok: true } | { ok: false; reason: 'expired' | 'invalid' } {
+  if (isVerificationBypassed()) {
+    return { ok: true }
+  }
+
   let parts: string[]
   try {
     parts = Buffer.from(token, 'base64url').toString('utf8').split('|')

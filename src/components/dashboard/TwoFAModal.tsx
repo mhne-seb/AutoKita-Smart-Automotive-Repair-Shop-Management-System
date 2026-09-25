@@ -19,7 +19,7 @@ export function TwoFAModal({
 }: {
   onClose: () => void;
   // Asks the server to email a code; resolves with the signed token to send back with it.
-  onRequest: () => Promise<{ token: string; sentTo: string; expiresMinutes: number; forWork?: string } | null>;
+  onRequest: () => Promise<{ token: string; sentTo: string; expiresMinutes: number; forWork?: string; devCode?: string; bypassed?: boolean } | null>;
   // Sends token + typed code; the server does the actual check and the confirm.
   onSubmit: (token: string, code: string) => Promise<{ ok: boolean; message?: string }>;
   onVerified: () => void | Promise<void>;
@@ -31,7 +31,7 @@ export function TwoFAModal({
   const [status, setStatus] = useState<"sending" | "idle" | "verifying" | "success" | "error">("sending");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [resent, setResent] = useState(false);
-  const [challenge, setChallenge] = useState<{ token: string; sentTo: string; expiresMinutes: number; forWork?: string } | null>(null);
+  const [challenge, setChallenge] = useState<{ token: string; sentTo: string; expiresMinutes: number; forWork?: string; devCode?: string; bypassed?: boolean } | null>(null);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
   const code = digits.join("");
@@ -50,6 +50,24 @@ export function TwoFAModal({
       if (!c) { onClose(); return; }
       setChallenge(c);
       setStatus("idle");
+      if (c.bypassed || c.devCode) {
+        const autoDigits = (c.devCode || "123456").split("");
+        setDigits(autoDigits);
+        if (c.bypassed) {
+          // In bypass mode, auto verify after brief visual confirmation
+          setTimeout(async () => {
+            setStatus("verifying");
+            const res = await onSubmit(c.token, autoDigits.join(""));
+            if (res.ok) {
+              setStatus("success");
+              setTimeout(() => onVerified(), 600);
+            } else {
+              setStatus("idle");
+            }
+          }, 350);
+          return;
+        }
+      }
       setTimeout(() => inputsRef.current[0]?.focus(), 50);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,9 +126,16 @@ export function TwoFAModal({
             {challenge?.forWork && (
               <p className="mt-1 text-sm font-semibold text-foreground">Approving: {challenge.forWork}</p>
             )}
+            {challenge?.bypassed && (
+              <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600">
+                ⚡ Test Mode: Auto-confirming without OTP
+              </div>
+            )}
             <p className="mt-1 text-sm text-muted-foreground">
               {status === "sending" && !challenge
                 ? "Sending a code to your email…"
+                : challenge?.bypassed
+                ? "Verification is turned OFF for testing. Proceeding automatically…"
                 : <>Enter the 6-digit code sent to <b>{challenge?.sentTo}</b>. It expires in {challenge?.expiresMinutes} minutes.</>}
             </p>
           </div>

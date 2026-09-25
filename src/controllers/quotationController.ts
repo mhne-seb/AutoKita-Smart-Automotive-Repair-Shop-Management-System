@@ -124,11 +124,12 @@ export async function confirmQuotationVia2FA(
   acceptedServiceIds: number[],
   otpToken: string,
   otpCode: string,
+  declinedServiceIds?: number[],
 ) {
   const res = await fetch('/api/tracking/quotation/confirm', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, jobOrderId, acceptedServiceIds, otpToken, otpCode }),
+    body: JSON.stringify({ userId, jobOrderId, acceptedServiceIds, declinedServiceIds, otpToken, otpCode }),
   })
   return res.json() as Promise<{ success: boolean; message?: string; code?: 'expired' | 'invalid' }>
 }
@@ -146,12 +147,16 @@ export async function submitQuotationPayment(
   amount: number,
   acceptedServiceIds: number[],
   proof?: PaymentProof,
+  declinedServiceIds?: number[],
 ) {
   const form = new FormData()
   form.set('jobOrderId', String(jobOrderId))
   form.set('method', method)
   form.set('amount', String(amount))
   form.set('acceptedServiceIds', JSON.stringify(acceptedServiceIds))
+  if (declinedServiceIds) {
+    form.set('declinedServiceIds', JSON.stringify(declinedServiceIds))
+  }
   if (proof) {
     form.set('channel', proof.channelId)
     form.set('referenceNumber', proof.referenceNumber)

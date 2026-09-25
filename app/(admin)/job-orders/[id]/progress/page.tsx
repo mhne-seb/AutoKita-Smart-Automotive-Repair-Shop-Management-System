@@ -318,19 +318,31 @@ export default function page() {
     setBusyPartId(part.id)
     const undoTo = part.purchaseOrderId ? 'ordered' : 'to_order'
     const ok = await setPartStatus(jobOrderId, part.id, partIsReady(part) ? undoTo : 'received')
-    if (!ok) toast.error('Record the purchase first — a part is marked received only after it has been ordered.')
+    if (!ok) toast.error('Could not update part status.')
     await refreshTasks()
     setBusyPartId(null)
   }
 
-  async function openPurchaseModal() {
-    setSuppliers(await getSuppliers())
-    setSupplierId('')
+  async function openPurchaseModal(focusPartId?: number | unknown) {
+    const targetPartId = typeof focusPartId === 'number' ? focusPartId : undefined
+    const sups = await getSuppliers()
+    setSuppliers(sups)
+    setSupplierId(sups.length > 0 ? sups[0].id : '')
     setNewSupplierName('')
     setAddingSupplier(false)
     setPurchaseDate(new Date().toISOString().slice(0, 10))
-    // Every to-order part starts ticked — untick the ones bought elsewhere.
-    setPurchaseLines(Object.fromEntries(partsToBuy.map((p) => [p.id, { checked: true, unitCost: '' }])))
+    // Every to-order part starts ticked (or only targetPartId if specified)
+    setPurchaseLines(
+      Object.fromEntries(
+        partsToBuy.map((p) => [
+          p.id,
+          {
+            checked: targetPartId ? p.id === targetPartId : true,
+            unitCost: p.retailPrice ? String(Math.round(p.retailPrice * 0.7)) : '',
+          },
+        ]),
+      ),
+    )
     setShowPurchaseModal(true)
   }
 
@@ -363,9 +375,16 @@ export default function page() {
 
     setSavingPurchase(true)
     const result = await recordPartsPurchase(jobOrderId, Number(supplierId), purchaseDate, lines)
+    if (!result.ok) {
+      setSavingPurchase(false)
+      return toast.error(result.message ?? 'Could not save the purchase.')
+    }
+    // Auto-mark the purchased parts as received
+    for (const l of lines) {
+      await setPartStatus(jobOrderId, l.partId, 'received')
+    }
     setSavingPurchase(false)
-    if (!result.ok) return toast.error(result.message ?? 'Could not save the purchase.')
-    toast.success(`Purchase recorded — ${lines.length} part${lines.length === 1 ? '' : 's'} marked ordered. Tap Received on each as it arrives.`)
+    toast.success(`Purchase recorded — ${lines.length} part${lines.length === 1 ? '' : 's'} marked received and ready.`)
     setShowPurchaseModal(false)
     await refreshTasks()
   }
@@ -556,7 +575,7 @@ export default function page() {
                 <div className="mb-1.5 flex items-center justify-between text-xs text-slate-400">
                   <span className="flex items-center gap-1.5 font-semibold uppercase tracking-wide"><Package size={12} /> Parts · {received} of {parts.length} received</span>
                   {editable && received < parts.length && (
-                    <span>{parts.some((p) => p.status === 'to_order') ? 'Record the purchase, then mark each part when it arrives' : 'Mark each part when it arrives'}</span>
+                    <span>{parts.some((p) => p.status === 'to_order') ? 'Record purchase to log supplier cost, or click Received directly' : 'Mark each part when it arrives'}</span>
                   )}
                 </div>
                 <table className="w-full text-sm">
@@ -580,20 +599,34 @@ export default function page() {
                             </span>
                           </td>
                           {editable && (
-                          <td className="w-28 py-2 text-right">
-                            <button
-                              onClick={() => togglePartReceived(p)}
-                              disabled={busyP || (!ready && p.status === 'to_order')}
-                              title={!ready && p.status === 'to_order' ? 'Record the purchase first — parts are received only after being ordered' : undefined}
-                              className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 ${
-                                ready
-                                  ? 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
-                                  : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                              }`}
-                            >
-                              {busyP ? <Loader2 size={12} className="animate-spin" /> : ready ? null : <PackageCheck size={12} />}
-                              {ready ? 'Undo' : 'Received'}
-                            </button>
+                          <td className="py-2 text-right whitespace-nowrap">
+                            <div className="inline-flex items-center gap-1.5 justify-end">
+                              {p.status === 'to_order' && (
+                                <button
+                                  type="button"
+                                  onClick={() => openPurchaseModal(p.id)}
+                                  disabled={busyP}
+                                  title="Record purchase order from supplier"
+                                  className="inline-flex items-center gap-1 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800 transition-all duration-150 hover:bg-amber-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  <Receipt size={12} /> Record Purchase
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => togglePartReceived(p)}
+                                disabled={busyP}
+                                title={ready ? 'Undo received status' : 'Mark part as received'}
+                                className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${
+                                  ready
+                                    ? 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                                    : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                }`}
+                              >
+                                {busyP ? <Loader2 size={12} className="animate-spin" /> : ready ? null : <PackageCheck size={12} />}
+                                {ready ? 'Undo' : 'Received'}
+                              </button>
+                            </div>
                           </td>
                           )}
                         </tr>
@@ -956,7 +989,7 @@ export default function page() {
                   ))}
                 </ul>
                 <button
-                  onClick={openPurchaseModal}
+                  onClick={() => openPurchaseModal()}
                   className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-900 py-2 text-sm font-semibold text-white transition-all duration-150 hover:bg-slate-800 active:scale-[0.98]"
                 >
                   <Receipt size={14} /> Record Purchase

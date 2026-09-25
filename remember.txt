@@ -119,3 +119,9 @@ C:\Users\Snow\AppData\Local\Programs\Python\Python313\python.exe extract_manuals
 py -3 models/predict_server.py
 
 py Email_parser/gmail_fetcher.py
+
+npm run verify:off
+
+npm run verify:on
+
+npm run verify:status

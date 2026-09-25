@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { verifyOtp, FINDING_OTP_PURPOSE } from '@/lib/otp'
 import type { ProposedService, ProposedPart } from '@/data/types'
+import { isVerificationBypassed } from '@/lib/testMode'
 
 // The customer answers a mid-service finding.
 //   approve -> needs the emailed code; the proposed services/parts become real
@@ -15,7 +16,8 @@ export async function POST(request: NextRequest) {
   if (!userId || !findingId || typeof approved !== 'boolean') {
     return NextResponse.json({ success: false, message: 'userId, findingId and approved are required' }, { status: 400 })
   }
-  if (approved) {
+  const bypass = isVerificationBypassed()
+  if (approved && !bypass) {
     if (!otpToken || !otpCode) {
       return NextResponse.json({ success: false, message: 'Verification code is required' }, { status: 400 })
     }
