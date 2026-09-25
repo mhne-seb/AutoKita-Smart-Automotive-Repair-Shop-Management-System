@@ -236,17 +236,21 @@ def build_training_dataset(
 
         actual_dur_mins = max(15.0, round(est_dur_mins * dur_noise, 1))
 
-        # Actual labor cost in PHP
+        # Actual labor cost in PHP (with outlier suppression and time harmonization)
         unit_price_val = float(row.get("unit_price") or 0.0)
-        if unit_price_val <= 0:
+        # Suppress historical transcription outliers (< 40% or > 250% of catalog baseline)
+        if unit_price_val <= 0 or unit_price_val < base_price * 0.40 or unit_price_val > base_price * 2.50:
             unit_price_val = base_price
 
         if is_fixed:
-            cost_noise = rng.normal(loc=1.0, scale=0.05)
+            # Fixed price services stick strictly to catalog baseline price
+            cost_noise = rng.normal(loc=1.0, scale=0.03)
+            actual_amount = max(200.0, round((base_price * cost_noise) / 25.0) * 25.0)
         else:
-            cost_noise = rng.normal(loc=1.05, scale=0.12)
-
-        actual_amount = max(200.0, round(unit_price_val * cost_noise / 25.0) * 25.0)
+            # Variable services scale harmoniously with actual duration ratio and vehicle wear
+            time_scale = (actual_dur_mins / est_dur_mins) if est_dur_mins > 0 else 1.0
+            cost_noise = rng.normal(loc=1.0, scale=0.06)
+            actual_amount = max(200.0, round((unit_price_val * time_scale * cost_noise) / 25.0) * 25.0)
 
         # Churn classification proxy (aging vehicles with high unexpected costs churn more often)
         cost_ratio = actual_amount / base_price if base_price > 0 else 1.0
@@ -371,7 +375,7 @@ def train_models(df: pd.DataFrame) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     return artifacts, metrics
 
 
-def save_artifacts(artifacts: Dict[str, Any], base_prices: Dict[int, float], base_durations: Dict[int, float]):
+def save_artifacts(artifacts: Dict[str, Any], base_prices: Dict[int, float], base_durations: Dict[int, float], sample_counts: Optional[Dict[int, int]] = None):
     """Saves all model and lookup pickles to models/exported/."""
     joblib.dump(artifacts["time_model"], EXPORTED_DIR / "time_model.pkl")
     joblib.dump(artifacts["cost_model"], EXPORTED_DIR / "cost_model.pkl")
@@ -379,7 +383,9 @@ def save_artifacts(artifacts: Dict[str, Any], base_prices: Dict[int, float], bas
     joblib.dump(artifacts["veh_type_encoder"], EXPORTED_DIR / "veh_type_encoder.pkl")
     joblib.dump(base_prices, EXPORTED_DIR / "service_base_prices.pkl")
     joblib.dump(base_durations, EXPORTED_DIR / "service_base_durations.pkl")
-    print(f" All 6 model and baseline artifacts successfully saved to {EXPORTED_DIR}")
+    if sample_counts is not None:
+        joblib.dump(sample_counts, EXPORTED_DIR / "service_sample_counts.pkl")
+    print(f" All model, baseline, and sample count artifacts successfully saved to {EXPORTED_DIR}")
 
 
 def execute_initial_training():
@@ -400,8 +406,9 @@ def execute_initial_training():
         sys.exit(1)
 
     df = build_training_dataset(svc_csv, jo_csv, base_prices, base_durations)
+    sample_counts = {int(sid): int(count) for sid, count in df["service_id"].value_counts().items()}
     artifacts, metrics = train_models(df)
-    save_artifacts(artifacts, base_prices, base_durations)
+    save_artifacts(artifacts, base_prices, base_durations, sample_counts)
 
     # Save sync metadata
     meta_payload = {
@@ -412,6 +419,7 @@ def execute_initial_training():
         "metrics": metrics,
         "base_prices": base_prices,
         "base_durations": base_durations,
+        "sample_counts": sample_counts,
     }
     with open(SYNC_META_FILE, "w", encoding="utf-8") as f:
         json.dump(meta_payload, f, indent=2)
@@ -563,14 +571,16 @@ def execute_batch_sync(min_batch_size: int = 10, alpha: float = 0.15, dry_run: b
     svc_csv = BASE_DIR / "job_order_services_1000.csv"
     jo_csv = BASE_DIR / "job_orders_1000.csv"
     df = build_training_dataset(svc_csv, jo_csv, base_prices, base_durations)
+    sample_counts = {int(sid): int(count) for sid, count in df["service_id"].value_counts().items()}
     artifacts, metrics = train_models(df)
-    save_artifacts(artifacts, base_prices, base_durations)
+    save_artifacts(artifacts, base_prices, base_durations, sample_counts)
 
     # Update sync metadata cursor
     sync_meta["last_sync_timestamp"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
     sync_meta["last_synced_jo_id"] = max_jo_id_seen
     sync_meta["base_prices"] = base_prices
     sync_meta["base_durations"] = base_durations
+    sync_meta["sample_counts"] = sample_counts
     sync_meta["last_batch_count"] = new_count
     sync_meta["metrics"] = metrics
 

@@ -166,10 +166,23 @@ def fetch_and_process():
     mail.login(GMAIL_EMAIL, GMAIL_APP_PASSWORD)
     mail.select("INBOX")
 
-    # Search for UNSEEN emails only
-    _, msg_ids_raw = mail.search(None, "UNSEEN")
-    msg_ids = msg_ids_raw[0].split()
-    print(f"[>>] Found {len(msg_ids)} unseen email(s).")
+    # Server-side IMAP search: find UNSEEN emails that have "Diagnostic Report" in the subject.
+    # Searching server-side ensures that even if there are 1,000+ unrelated unread emails (newsletters,
+    # receipts, notifications), Gmail discards them instantly without downloading their headers.
+    status, msg_ids_raw = mail.search(None, 'UNSEEN', 'SUBJECT', '"Diagnostic Report"')
+    msg_ids = msg_ids_raw[0].split() if status == 'OK' and msg_ids_raw and msg_ids_raw[0] else []
+    print(f"[>>] Found {len(msg_ids)} unseen diagnostic report email(s).")
+
+    if not msg_ids:
+        mail.logout()
+        print("\n[Done] fetched=0 validated=0 stored=0 skipped=0")
+        return {"fetched": 0, "validated": 0, "stored": 0, "skipped": 0}
+
+    # Safety cap: process up to 25 latest emails per run so the web request never hangs or times out
+    MAX_BATCH = 25
+    if len(msg_ids) > MAX_BATCH:
+        print(f"[>>] Capping run to the {MAX_BATCH} most recent emails.")
+        msg_ids = msg_ids[-MAX_BATCH:]
 
     stats = {"fetched": 0, "validated": 0, "skipped": 0, "stored": 0}
 

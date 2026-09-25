@@ -88,6 +88,7 @@ export interface InspectionData {
   vehicleTitle: string
   plate: string
   customer: string
+  contactNumber?: string
   photoSlots: InspectionPhotoSlot[]
   findings: MechanicalFinding[]
   timer: {
