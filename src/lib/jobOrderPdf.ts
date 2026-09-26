@@ -13,9 +13,11 @@ export interface JobOrderPdfData {
   jobOrderId: number | string
   date: string | null
   datePromised: string | null
+  releasedAt: string | null
   customer: { name: string; phone: string; address: string }
   vehicle: { yearModel: string; plate: string }
   parts: { qty: number; description: string; unitPrice: number }[]
+  warranties: { description: string; expiresAt: string }[]
   services: { description: string; amount: number }[]
   payments: { label: string; amount: number }[]
 }
@@ -49,9 +51,11 @@ export async function fetchJobOrderPdfData(jobOrderId: number | string): Promise
     jobOrderId: d.jobOrderId,
     date: d.date,
     datePromised: d.datePromised,
+    releasedAt: d.releasedAt,
     customer: d.customer,
     vehicle: d.vehicle,
     parts: d.parts,
+    warranties: d.warranties,
     services: d.services,
     payments: d.payments.map((p: { amount: number; label: string }) => ({ label: `PARTIAL PAYMENT ${p.label}`.trim(), amount: p.amount })),
   }
@@ -151,6 +155,26 @@ export async function generateJobOrderPdf(data: JobOrderPdfData): Promise<void> 
     },
   })
   y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 16
+
+  // ---- Warranty coverage — one row per part, from the warranties table
+  // (set once, at release; nothing there yet just means not released).
+  if (data.warranties.length > 0) {
+    autoTable(doc, {
+      startY: y,
+      margin: { left: M, right: M },
+      theme: 'grid',
+      head: [['WARRANTY COVERAGE', 'COVERED UNTIL']],
+      body: data.warranties.map((w) => [w.description, upperDate(w.expiresAt)]),
+      styles: { font: 'helvetica', fontSize: 8.5, cellPadding: 4, lineColor: [120, 120, 120], lineWidth: 0.6, textColor: 20 },
+      headStyles: { fillColor: [241, 245, 249], textColor: [51, 65, 85], fontStyle: 'bold', fontSize: 7.5 },
+      columnStyles: { 1: { halign: 'right' } },
+    })
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 16
+  } else if (!data.releasedAt) {
+    doc.setFont('helvetica', 'italic').setFontSize(8.5).setTextColor(120)
+    doc.text('Warranty coverage will be added once the vehicle is released.', M, y)
+    y += 20
+  }
 
   // ---- Totals (right) + signatures (left)
   const grand = totalParts + totalService
