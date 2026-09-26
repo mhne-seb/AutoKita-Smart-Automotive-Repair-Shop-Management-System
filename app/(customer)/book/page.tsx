@@ -721,7 +721,7 @@ function BookPage() {
                           Scan fee: {formatPeso(DIAGNOSTIC_SCAN_FEE)}
                         </p>
                         <p className="mt-1 text-sm text-amber-900">
-                          To find the problem, we plug a scanner into your car. You pay this fee{" "}
+                          To find the problem, we will plug a scanner into your car. You will pay this fee{" "}
                           <b>even if you decide not to push through with the repair</b>. Repairs are priced
                           separately, and we&apos;ll ask you first.
                         </p>

@@ -12,7 +12,7 @@ export async function GET() {
     // the app's clock for finding reminders (see lib/findingsSweep).
     sweepPendingFindings().catch((e) => console.error('[notifications] sweep failed:', e))
 
-    const [tickets, jobOrders, payments, responses, jobOrderCreatedAt, pullOuts, overdueFindings] = await Promise.all([
+    const [tickets, jobOrders, payments, responses, jobOrderCreatedAt, pullOuts, overdueFindings, warrantyClaims] = await Promise.all([
       db.query('SELECT * FROM get_service_tickets_queue()'),
       db.query('SELECT * FROM get_job_orders_list()'),
       db.query('SELECT * FROM get_payment_records()'),
@@ -65,6 +65,18 @@ export async function GET() {
          WHERE f.decision = 'pending' AND f.created_at < NOW() - ($1 * INTERVAL '1 hour')
          ORDER BY f.created_at ASC`,
         [FINDING_TIMEOUT_HOURS],
+      ),
+      // A customer just filed a claim — surfaces even before the ticket is
+      // accepted into a job order, since that's where the admin decides
+      // whether to take the vehicle in at all.
+      db.query(
+        `SELECT wc.id, wc.customer_description, wc.created_at, w.coverage_description, u.first_name, u.last_name
+         FROM warranty_claims wc
+         JOIN warranties w ON w.id = wc.warranty_id
+         JOIN service_tickets st ON st.id = wc.ticket_id
+         JOIN users u ON u.id = st.user_id
+         WHERE wc.decision = 'pending'
+         ORDER BY wc.created_at ASC`,
       ),
     ])
 
@@ -210,6 +222,19 @@ export async function GET() {
           href: joStatusFor(p.job_order_id) === 'pending_customer_approval' ? `/job-orders/${p.job_order_id}/quotation` : `/job-orders/${p.job_order_id}/billing`,
         })
       }
+    }
+
+    // 6. A customer filed a warranty claim — clears once the admin decides it
+    //    (see /api/job-orders/[id]/warranty-claim). Points at Job Queue since
+    //    the ticket may not be a job order yet.
+    for (const c of warrantyClaims.rows) {
+      notifs.push({
+        notif_key: `warranty-claim-${c.id}`,
+        title: 'Warranty claim submitted',
+        message: `${name(c.first_name, c.last_name)} reports an issue with ${c.coverage_description}: "${short(c.customer_description, 100)}"`,
+        notif_time: c.created_at,
+        href: '/job-queue',
+      })
     }
 
     notifs.sort((a, b) => {

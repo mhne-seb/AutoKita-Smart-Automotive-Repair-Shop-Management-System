@@ -26,8 +26,10 @@ export async function GET(req: NextRequest) {
                 AND c.entity_id = st.id
                 AND c.action_performed = 'approved'
           ) AS diagnostic_scan_authorized,
-          COALESCE(st.assigned_mechanic_id, jo.assigned_mechanic_id) as mechanic_id
+          COALESCE(st.assigned_mechanic_id, jo.assigned_mechanic_id) as mechanic_id,
+          wc.id IS NOT NULL AS is_warranty_claim
       FROM service_tickets st
+      LEFT JOIN warranty_claims wc ON wc.ticket_id = st.id
       JOIN users u ON u.id = st.user_id
       JOIN vehicles v ON v.id = st.vehicle_id
       LEFT JOIN job_orders jo ON jo.ticket_id = st.id

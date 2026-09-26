@@ -5,7 +5,7 @@
 
 import { INITIAL_SERVICES, WARRANTIES, WARRANTY_HISTORY, REWARDS, type Service, type Warranty, type Rewards } from '@/data/billings'
 import { paymentRecords, weeklyServices, type PaymentRecord, type WeeklyService } from '@/data/mockData'
-import { SERVICE_HISTORY, SHOP_INFO, type ServiceRecord } from '@/data/history'
+import type { ServiceRecord } from '@/data/history'
 import { parseStamp } from '@/lib/utils'
 import { SHOP_PROFILE } from '@/data/shopProfile'
 
@@ -37,7 +37,7 @@ export async function getWeeklyServices(): Promise<WeeklyService[]> {
   return simulateDelay(weeklyServices)
 }
 
-/** The Customer's completed/cancelled service history — feeds the History tab and its PDF invoice export. */
+/** The Customer's completed/cancelled service history — feeds the History tab. */
 export async function getServiceHistory(userId: number): Promise<ServiceRecord[]> {
   const res = await fetch(`/api/customer/history?userId=${userId}`)
   const json = await res.json().catch(() => null)
@@ -45,6 +45,7 @@ export async function getServiceHistory(userId: number): Promise<ServiceRecord[]
 
   type ApiRecord = {
     id: string
+    jobOrderId: number
     closedAt: string | null
     vehicle: string
     desc: string
@@ -60,6 +61,7 @@ export async function getServiceHistory(userId: number): Promise<ServiceRecord[]
     const d = parseStamp(r.closedAt)
     return {
       id: r.id,
+      jobOrderId: r.jobOrderId,
       date: d ? d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : '—',
       // Local date, not toISOString() — in Manila that would read as the day
       // before for anything in the first 8 hours, breaking the date filter.
@@ -70,30 +72,7 @@ export async function getServiceHistory(userId: number): Promise<ServiceRecord[]
       status: r.status,
       mechanic: r.mechanics.length > 0 ? r.mechanics.join(', ') : 'Not recorded',
       location: SHOP_PROFILE.name,
-      // No warranty terms are stored per job order yet, so don't invent one.
-      warranty: 'See your job order',
       items: r.items.map((i) => [i.label, peso(i.amount)] as [string, string]),
     }
   })
-}
-
-/** Shop details (name/address/contact) shown on generated PDF invoices — live from Supabase shops table. */
-export async function getShopInfo() {
-  try {
-    const res = await fetch('/api/shop')
-    const json = await res.json()
-    if (json.success && json.shop) {
-      return {
-        name: json.shop.name || SHOP_INFO.name,
-        tagline: SHOP_INFO.tagline,
-        address: json.shop.address || SHOP_INFO.address,
-        phone: json.shop.contact_number || SHOP_INFO.phone,
-        email: json.shop.email || SHOP_INFO.email,
-        tin: SHOP_INFO.tin,
-      }
-    }
-  } catch (err) {
-    console.warn('Failed to fetch live shop info, using default:', err)
-  }
-  return simulateDelay(SHOP_INFO)
 }

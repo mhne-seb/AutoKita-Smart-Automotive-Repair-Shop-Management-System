@@ -32,7 +32,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         [jobOrderId],
       ),
       db.query(
-        `SELECT description AS name, part_number, quantity, retail_unit_price, total_retail_amount, is_warranty_replacement
+        `SELECT id, description AS name, part_number, quantity, retail_unit_price, total_retail_amount, is_warranty_replacement
          FROM job_order_parts WHERE job_order_id = $1 ORDER BY id`,
         [jobOrderId],
       ),
@@ -50,7 +50,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       payments: payments.rows.map((p) => ({ ...p, amount_paid: Number(p.amount_paid) })),
       services: services.rows.map((s) => ({ name: s.name, amount: Number(s.amount ?? 0), addedMidService: s.finding_id != null })),
       parts: parts.rows.map((p) => ({
-        name: p.name, partNo: p.part_number, qty: Number(p.quantity ?? 1),
+        id: p.id, name: p.name, partNo: p.part_number, qty: Number(p.quantity ?? 1),
         unitPrice: Number(p.retail_unit_price ?? 0), amount: Number(p.total_retail_amount ?? 0),
         warranty: Boolean(p.is_warranty_replacement),
       })),
@@ -97,8 +97,43 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       if (status !== 'completed') return NextResponse.json({ success: false, message: 'Only a completed job order can be released' }, { status: 409 })
       const bill = await getJobOrderBill(jobOrderId)
       if (bill.balance > 0) return NextResponse.json({ success: false, message: `Balance of ₱${bill.balance.toLocaleString('en-PH')} is still unpaid` }, { status: 409 })
-      // advance_job_order_stage stamps released_at.
-      await db.query(`SELECT advance_job_order_stage($1, 'released'::job_orders_status)`, [jobOrderId])
+
+      // { partId: warrantyMonths } — admin-entered at release, one field per
+      // part so a battery can carry a longer term than a brake pad. Each
+      // becomes its own row in `warranties` (already read by
+      // get_customer_warranties / get_customer_warranty_history — this was
+      // the only piece of that feature never wired up). Written in the same
+      // transaction as the release stamp, and there's no edit endpoint
+      // afterward, so once set it can't be changed.
+      const warrantyByPart = (body.warrantyByPart ?? {}) as Record<string, number>
+      const client = await db.connect()
+      try {
+        await client.query('BEGIN')
+        for (const [partId, months] of Object.entries(warrantyByPart)) {
+          const m = Number(months)
+          if (!(m > 0)) continue
+          const part = await client.query(
+            `SELECT description, part_number FROM job_order_parts WHERE id = $1 AND job_order_id = $2`,
+            [Number(partId), jobOrderId],
+          )
+          const row = part.rows[0]
+          if (!row) continue
+          const coverage = [row.part_number, row.description].filter(Boolean).join(' — ')
+          await client.query(
+            `INSERT INTO warranties (job_order_id, job_order_part_id, coverage_description, start_date, expiration_date, status)
+             VALUES ($1, $2, $3, CURRENT_DATE, CURRENT_DATE + ($4 || ' months')::interval, 'active'::warranty_status)`,
+            [jobOrderId, Number(partId), coverage, m],
+          )
+        }
+        // advance_job_order_stage stamps released_at.
+        await client.query(`SELECT advance_job_order_stage($1, 'released'::job_orders_status)`, [jobOrderId])
+        await client.query('COMMIT')
+      } catch (error) {
+        await client.query('ROLLBACK')
+        throw error
+      } finally {
+        client.release()
+      }
       await notifyCustomer({
         jobOrderId, entityType: 'job_orders', entityId: jobOrderId, event: 'vehicle_released',
         title: 'Vehicle Released',
