@@ -6,7 +6,16 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "verify": "node scripts/toggle-verification.js",
+    "verify:on": "node scripts/toggle-verification.js on",
+    "verify:off": "node scripts/toggle-verification.js off",
+    "verify:status": "node scripts/toggle-verification.js status",
+    "verify:toggle": "node scripts/toggle-verification.js toggle",
+    "2fa:on": "node scripts/toggle-verification.js on",
+    "2fa:off": "node scripts/toggle-verification.js off",
+    "2fa:status": "node scripts/toggle-verification.js status",
+    "2fa:toggle": "node scripts/toggle-verification.js toggle"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

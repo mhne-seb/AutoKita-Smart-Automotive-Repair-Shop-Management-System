@@ -90,6 +90,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No parsed data provided' }, { status: 400 })
     }
 
+    // Deduplicate: if this email UID was already stored, don't create a duplicate row
+    if (parsed.source_email_uid) {
+      const existing = await db.query<{ id: number }>(
+        `SELECT id FROM obd2_diagnostic_reports WHERE source_email_uid = $1 LIMIT 1`,
+        [parsed.source_email_uid]
+      )
+      if (existing.rows.length > 0) {
+        return NextResponse.json({
+          success: true,
+          report_id: existing.rows[0].id,
+          duplicate: true,
+          message: 'Report already stored for this email UID',
+        })
+      }
+    }
+
     const vi = parsed.vehicle_info ?? {}
 
     // Insert the report header row (including filename for identification when VIN is absent)

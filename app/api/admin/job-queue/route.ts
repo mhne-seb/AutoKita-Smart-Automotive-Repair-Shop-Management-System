@@ -26,19 +26,13 @@ export async function GET(req: NextRequest) {
                 AND c.entity_id = st.id
                 AND c.action_performed = 'approved'
           ) AS diagnostic_scan_authorized,
-          (
-              SELECT sal.employees_id
-              FROM job_orders jo
-              JOIN system_audit_logs sal ON sal.entity_id = jo.id AND sal.entity_type = 'job_orders'
-              WHERE jo.ticket_id = st.id AND sal.employees_id IS NOT NULL
-              ORDER BY sal.action_date DESC
-              LIMIT 1
-          ) as mechanic_id,
+          COALESCE(st.assigned_mechanic_id, jo.assigned_mechanic_id) as mechanic_id,
           wc.id IS NOT NULL AS is_warranty_claim
       FROM service_tickets st
       LEFT JOIN warranty_claims wc ON wc.ticket_id = st.id
       JOIN users u ON u.id = st.user_id
       JOIN vehicles v ON v.id = st.vehicle_id
+      LEFT JOIN job_orders jo ON jo.ticket_id = st.id
       ORDER BY st.request_date DESC
     `
     const result = await db.query(query)
@@ -170,12 +164,12 @@ export async function POST(req: NextRequest) {
         if (consent.rows.length > 0) {
           await db.query(
             `INSERT INTO job_order_services
-               (job_order_id, service_id, description_of_work, estimated_hours, estimated_amount, actual_amount)
-             SELECT $1, s.id, $2, s.base_duration_hours, s.base_price, s.base_price
+               (job_order_id, service_id, assigned_mechanic_id, description_of_work, estimated_hours, estimated_amount, actual_amount)
+             SELECT $1, s.id, $2, $3, s.base_duration_hours, s.base_price, s.base_price
              FROM services s
-             WHERE s.service_name = $3 AND s.is_active
+             WHERE s.service_name = $4 AND s.is_active
              LIMIT 1`,
-            [newJo.id, 'OBD-II diagnostic scan — authorized by customer at booking. Payable even if repairs are declined.', DIAGNOSTIC_SCAN_SERVICE_NAME],
+            [newJo.id, mechanicId || null, 'OBD-II diagnostic scan — authorized by customer at booking. Payable even if repairs are declined.', DIAGNOSTIC_SCAN_SERVICE_NAME],
           )
         }
       }

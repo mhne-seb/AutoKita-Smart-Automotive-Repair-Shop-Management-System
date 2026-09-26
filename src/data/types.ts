@@ -13,6 +13,8 @@ export const stageLabels: Record<Stage, string> = {
   released: 'Completed',   // paid and handed back
 }
 
+export type PaymentStatus = 'Pending' | 'Unpaid' | 'Paid'
+
 export interface JobOrderCard {
   id: string
   customer: string
@@ -24,6 +26,7 @@ export interface JobOrderCard {
   plate: string
   payment: string
   paid: boolean
+  paymentStatus?: PaymentStatus
   mechanic: string
   stepsDone: number
   stepsTotal: number
@@ -85,6 +88,7 @@ export interface InspectionData {
   vehicleTitle: string
   plate: string
   customer: string
+  contactNumber?: string
   photoSlots: InspectionPhotoSlot[]
   findings: MechanicalFinding[]
   timer: {

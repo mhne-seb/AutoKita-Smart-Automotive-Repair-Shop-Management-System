@@ -18,6 +18,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'acceptedServiceIds must be a JSON array' }, { status: 400 })
   }
 
+  let declinedServiceIds: number[] = []
+  try {
+    const raw = form.get('declinedServiceIds')
+    if (raw) declinedServiceIds = JSON.parse(String(raw))
+  } catch {
+    // ignore
+  }
+
   if (!jobOrderId || !method || Number.isNaN(amount) || !Array.isArray(acceptedServiceIds)) {
     return NextResponse.json({ error: 'jobOrderId, method, amount, and acceptedServiceIds are required' }, { status: 400 })
   }
@@ -48,17 +56,58 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Quotation already confirmed' }, { status: 409 })
     }
 
-    // Declined services come off the job order together with their parts;
-    // parts of accepted services stay (they hang off job_order_service_id).
-    await db.query(
-      `DELETE FROM job_order_parts
-       WHERE job_order_id = $1 AND job_order_service_id IS NOT NULL AND job_order_service_id != ALL($2::int[])`,
-      [jobOrderId, acceptedServiceIds]
+    // 1. Fetch current services on the job order
+    const curRes = await db.query(
+      `SELECT jos.id, jos.service_id, s.service_name
+       FROM job_order_services jos
+       JOIN services s ON s.id = jos.service_id
+       WHERE jos.job_order_id = $1`,
+      [jobOrderId],
     )
-    await db.query(
-      `DELETE FROM job_order_services WHERE job_order_id = $1 AND id != ALL($2::int[])`,
-      [jobOrderId, acceptedServiceIds]
+    const currentServices = curRes.rows
+
+    const feeServiceIds = new Set(
+      currentServices
+        .filter((s) => s.service_name === 'OBD-II Diagnostic Scan')
+        .map((s) => Number(s.id)),
     )
+
+    const acceptedSet = new Set<number>(acceptedServiceIds.map(Number))
+    const declinedSet = new Set<number>(Array.isArray(declinedServiceIds) ? declinedServiceIds.map(Number) : [])
+
+    const customerAcceptedAll =
+      (Array.isArray(declinedServiceIds) && declinedServiceIds.length === 0) ||
+      (declinedSet.size === 0 && acceptedSet.size >= currentServices.length)
+
+    let idsToDelete: number[] = []
+
+    if (!customerAcceptedAll && currentServices.length > 0) {
+      const currentIds = currentServices.map((s) => Number(s.id))
+      const hasDeclinedOverlap = currentIds.some((id) => declinedSet.has(id))
+      const hasAcceptedOverlap = currentIds.some((id) => acceptedSet.has(id))
+
+      if (hasDeclinedOverlap) {
+        idsToDelete = currentIds.filter((id) => declinedSet.has(id) && !feeServiceIds.has(id))
+      } else if (hasAcceptedOverlap) {
+        idsToDelete = currentIds.filter((id) => !acceptedSet.has(id) && !feeServiceIds.has(id))
+      } else {
+        console.warn(
+          `[/api/tracking/quotation/payment] Warning: ID desynchronization detected for JO-${jobOrderId}. Client IDs: [${acceptedServiceIds}], Current IDs: [${currentIds}]. Skipping deletion to prevent data loss.`,
+        )
+      }
+    }
+
+    if (idsToDelete.length > 0) {
+      await db.query(
+        `DELETE FROM job_order_parts
+         WHERE job_order_id = $1 AND job_order_service_id IS NOT NULL AND job_order_service_id = ANY($2::int[])`,
+        [jobOrderId, idsToDelete],
+      )
+      await db.query(
+        `DELETE FROM job_order_services WHERE job_order_id = $1 AND id = ANY($2::int[])`,
+        [jobOrderId, idsToDelete],
+      )
+    }
 
     const { rows } = await db.query(
       `INSERT INTO payments

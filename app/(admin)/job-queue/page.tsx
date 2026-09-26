@@ -1,7 +1,7 @@
 'use client'
 
 import { toast } from 'sonner'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import {
   Wrench,
   ShieldAlert,
@@ -29,6 +29,7 @@ import {
   ChevronRight,
   ScanLine,
   ShieldCheck,
+  Search,
 } from 'lucide-react'
 import { DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 import { TopBar } from '@/components/TopBar'
@@ -36,7 +37,7 @@ import { StatCard } from '@/components/StatCard'
 import { ShopLoading } from '@/components/ShopLoading'
 import { StatusBadge } from '@/components/StatusBadge'
 import { PROVINCES, SERVICE_CATEGORIES, YEARS } from '@/data/ticketFormOptions'
-import { isValidPhPlate, PLATE_FORMAT_ERROR } from '@/lib/plateNumber'
+import { isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
 
 export type JobStatus = 'Pending' | 'In Progress' | 'Approved' | 'Cancelled' | 'Completed'
 
@@ -135,6 +136,59 @@ export default function page() {
   const [searchQuery, setSearchQuery] = useState('')
   const itemsPerPage = 9
 
+  // Filter criteria states
+  const [selectedVehicle, setSelectedVehicle] = useState('all')
+  const [selectedMode, setSelectedMode] = useState('all') // 'all' | 'Shop Visit' | 'Home Service'
+  const [selectedMechanic, setSelectedMechanic] = useState('all') // 'all' | 'unassigned' | mechanicId
+  const [showFilterMenu, setShowFilterMenu] = useState(false)
+  const filterMenuRef = useRef<HTMLDivElement>(null)
+
+  // Close filter popover when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterMenuRef.current && !filterMenuRef.current.contains(event.target as Node)) {
+        setShowFilterMenu(false)
+      }
+    }
+    if (showFilterMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showFilterMenu])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, tab, warrantyOnly, selectedVehicle, selectedMode, selectedMechanic])
+
+  const vehicleOptions = useMemo(() => {
+    const set = new Set<string>()
+    jobs.forEach((j) => {
+      if (j.vehicle && j.vehicle.trim()) set.add(j.vehicle.trim())
+    })
+    return Array.from(set).sort()
+  }, [jobs])
+
+  const mechanicOptions = useMemo(() => {
+    return mechanics.map((m) => ({
+      id: m.id?.toString(),
+      name: m.full_name || `${m.first_name || ''} ${m.last_name || ''}`.trim() || `Mechanic #${m.id}`,
+    }))
+  }, [mechanics])
+
+  const activeFilterCount =
+    (selectedVehicle !== 'all' ? 1 : 0) +
+    (selectedMode !== 'all' ? 1 : 0) +
+    (selectedMechanic !== 'all' ? 1 : 0)
+
+  const resetFilters = () => {
+    setSelectedVehicle('all')
+    setSelectedMode('all')
+    setSelectedMechanic('all')
+    setCurrentPage(1)
+  }
+
   const [showNewTicket, setShowNewTicket] = useState(false)
   const [approveTarget, setApproveTarget] = useState<Job | null>(null)
   const [viewTarget, setViewTarget] = useState<Job | null>(null)
@@ -177,10 +231,21 @@ export default function page() {
 
     const matchesWarranty = !warrantyOnly || c.isWarrantyClaim
 
-    return matchesSearch && matchesTab && matchesWarranty
+    const matchesVehicle =
+      selectedVehicle === 'all' || c.vehicle.toLowerCase() === selectedVehicle.toLowerCase()
+
+    const matchesMode =
+      selectedMode === 'all' || c.serviceMode.toLowerCase() === selectedMode.toLowerCase()
+
+    const matchesMechanic =
+      selectedMechanic === 'all' ||
+      (selectedMechanic === 'unassigned' && (!c.assignedMechanic || c.assignedMechanic === 'Unassigned')) ||
+      c.assignedMechanic === selectedMechanic
+
+    return matchesSearch && matchesTab && matchesWarranty && matchesVehicle && matchesMode && matchesMechanic
   })
 
-  const totalPages = Math.ceil(filtered.length / itemsPerPage)
+  const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage))
   const paginatedJobs = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   const tabs: { label: Tab; count: number; icon: typeof Wrench }[] = [
@@ -287,8 +352,7 @@ export default function page() {
       <TopBar
         title="Job Queueing"
         subtitle="Customer booking requests waiting to be approved."
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        showSearch={false}
         rightSlot={
           <button
             onClick={() => setShowNewTicket(true)}
@@ -342,27 +406,176 @@ export default function page() {
         </span>
       </button>
 
-      {totalPages > 1 && (
-        <div className="mb-4 flex items-center justify-between">
-          <p className="text-sm text-slate-500">
-            Page {currentPage} of {totalPages} · {filtered.length} total service tickets
-          </p>
-          <div className="flex gap-2">
+      {/* Unified Toolbar: Page count on left, Search Bar next to Filter next to Prev/Next buttons on right */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm font-medium text-muted-foreground">
+          Page {currentPage} of {totalPages} · {filtered.length} total service tickets
+        </p>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Search bar */}
+          <div className="relative">
+            <Search
+              size={15}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search tickets, plates, customer..."
+              className="w-56 sm:w-64 rounded-xl border border-border bg-card py-2 pl-9 pr-7 text-sm text-foreground placeholder:text-muted-foreground shadow-sm transition-all focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          {/* Filter Popover Button & Menu */}
+          <div className="relative" ref={filterMenuRef}>
             <button
+              onClick={() => setShowFilterMenu((v) => !v)}
+              className={`flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold shadow-sm transition-all ${
+                activeFilterCount > 0
+                  ? 'border-brand bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-brand-foreground'
+                  : 'border-border bg-card text-foreground hover:bg-accent'
+              }`}
+            >
+              <SlidersHorizontal size={15} />
+              <span>Filter</span>
+              {activeFilterCount > 0 && (
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs font-bold text-slate-900">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
+            {showFilterMenu && (
+              <div className="absolute right-0 z-30 mt-2 w-80 sm:w-96 rounded-2xl border border-border bg-card p-4 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <SlidersHorizontal size={15} className="text-brand" />
+                    <span>Filter Service Tickets</span>
+                  </div>
+                  {activeFilterCount > 0 && (
+                    <button
+                      onClick={resetFilters}
+                      className="text-xs font-medium text-rose-500 hover:underline"
+                    >
+                      Reset All
+                    </button>
+                  )}
+                </div>
+
+                <div className="mt-3 space-y-3.5">
+                  {/* Vehicle */}
+                  <div>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Vehicle</label>
+                    <select
+                      value={selectedVehicle}
+                      onChange={(e) => setSelectedVehicle(e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
+                    >
+                      <option value="all">All Vehicles</option>
+                      {vehicleOptions.map((v) => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Service Mode */}
+                  <div>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Service Mode</label>
+                    <select
+                      value={selectedMode}
+                      onChange={(e) => setSelectedMode(e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
+                    >
+                      <option value="all">All Service Modes</option>
+                      <option value="Shop Visit">Shop Visit</option>
+                      <option value="Home Service">Home Service</option>
+                    </select>
+                  </div>
+
+                  {/* Mechanic */}
+                  <div>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Mechanic Assignment</label>
+                    <select
+                      value={selectedMechanic}
+                      onChange={(e) => setSelectedMechanic(e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
+                    >
+                      <option value="all">All</option>
+                      <option value="unassigned">Unassigned Only</option>
+                      {mechanicOptions.map((m) => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex justify-end border-t border-border pt-3">
+                  <button
+                    onClick={() => setShowFilterMenu(false)}
+                    className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-1.5 text-xs font-semibold text-brand-foreground hover:opacity-90"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Prev / Next Pagination */}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage(p => p - 1)}
-              className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+              className="flex items-center gap-1 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground shadow-sm transition-all hover:bg-accent disabled:opacity-40"
             >
               <ChevronLeft size={14} /> Prev
             </button>
             <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(p => p + 1)}
-              className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+              className="flex items-center gap-1 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground shadow-sm transition-all hover:bg-accent disabled:opacity-40"
             >
               Next <ChevronRight size={14} />
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Active filter chips (if any) */}
+      {activeFilterCount > 0 && (
+        <div className="flex flex-wrap items-center gap-2 pt-0.5">
+          <span className="text-xs font-semibold uppercase text-muted-foreground">Active Filters:</span>
+          {selectedVehicle !== 'all' && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
+              Vehicle: {selectedVehicle}
+              <button onClick={() => setSelectedVehicle('all')} className="hover:opacity-70"><X size={12} /></button>
+            </span>
+          )}
+          {selectedMode !== 'all' && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
+              Mode: {selectedMode}
+              <button onClick={() => setSelectedMode('all')} className="hover:opacity-70"><X size={12} /></button>
+            </span>
+          )}
+          {selectedMechanic !== 'all' && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
+              Mechanic: {selectedMechanic === 'unassigned' ? 'Unassigned' : (mechanicOptions.find(m => m.id === selectedMechanic)?.name || selectedMechanic)}
+              <button onClick={() => setSelectedMechanic('all')} className="hover:opacity-70"><X size={12} /></button>
+            </span>
+          )}
+          <button onClick={resetFilters} className="text-xs text-muted-foreground hover:text-rose-500 hover:underline">
+            Clear all
+          </button>
         </div>
       )}
 
@@ -855,8 +1068,11 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
     if (!form.year) next.year = 'Year is required'
     if (!form.transmission) next.transmission = 'Transmission is required'
     if (!form.mileage.trim()) next.mileage = 'Mileage is required'
-    if (!form.licensePlate.trim()) next.licensePlate = 'License plate is required'
-    else if (!isValidPhPlate(form.licensePlate)) next.licensePlate = PLATE_FORMAT_ERROR
+    if (!form.licensePlate.trim()) {
+      next.licensePlate = 'License plate is required'
+    } else if (!isValidPlateNumber(form.licensePlate)) {
+      next.licensePlate = PLATE_FORMAT_ERROR_MESSAGE
+    }
     if (!form.serviceCategory) next.serviceCategory = 'Service category is required'
     setErrors(next)
     return Object.keys(next).length === 0

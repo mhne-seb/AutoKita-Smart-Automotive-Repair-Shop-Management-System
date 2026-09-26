@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from "next/link";
-import { Camera, Plus, Pencil, Trash2, Check, X, Cloud, Clock, ChevronRight, CheckCircle2, Loader2, Maximize2, AlertCircle, ScanLine, Info, ClipboardList, MapPin, FileText, Upload, Link2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Camera, Plus, Pencil, Trash2, Check, X, Cloud, Clock, ChevronRight, CheckCircle2, Loader2, Maximize2, AlertCircle, ScanLine, Info, ClipboardList, MapPin, FileText, Upload, Link2, ChevronDown, ChevronUp, Mail, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
@@ -135,6 +135,7 @@ export default function page() {
   const [pickerLoading, setPickerLoading] = useState(false)
   const [linkingId, setLinkingId] = useState<number | null>(null)
   const [uploadingPdf, setUploadingPdf] = useState(false)
+  const [syncingGmail, setSyncingGmail] = useState(false)
   const [showDtcs, setShowDtcs] = useState(true)
   const [unlinking, setUnlinking] = useState(false)
   const [showRemoveDialog, setShowRemoveDialog] = useState(false)
@@ -169,6 +170,31 @@ export default function page() {
       setUnlinkedReports([])
     } finally {
       setPickerLoading(false)
+    }
+  }
+
+  async function handleSyncGmail() {
+    if (syncingGmail) return
+    setSyncingGmail(true)
+    try {
+      const res = await fetch('/api/diagnostics/sync-gmail', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to check Gmail inbox')
+      }
+      if (data.stored > 0) {
+        toast.success(`Found & stored ${data.stored} diagnostic report${data.stored > 1 ? 's' : ''} from Gmail!`)
+        await openPicker()
+      } else if (data.fetched > 0) {
+        toast.info(`Checked ${data.fetched} email(s), but no valid diagnostic PDF attachments were found.`)
+      } else {
+        toast.info('No new unread diagnostic reports found in Gmail.')
+      }
+    } catch (err: any) {
+      console.error('Gmail sync error:', err)
+      toast.error(err.message || 'Failed to check Gmail inbox. Ensure credentials are set.')
+    } finally {
+      setSyncingGmail(false)
     }
   }
 
@@ -619,7 +645,7 @@ export default function page() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <div className="mb-6 grid grid-cols-4 gap-6 text-sm">
+            <div className="mb-6 grid grid-cols-2 sm:grid-cols-5 gap-6 text-sm">
               <div>
                 <p className="text-slate-400">Vehicle</p>
                 <p className="font-bold text-slate-900">{initial.vehicleTitle}</p>
@@ -631,6 +657,10 @@ export default function page() {
               <div>
                 <p className="text-slate-400">Customer</p>
                 <p className="font-bold text-slate-900">{initial.customer}</p>
+              </div>
+              <div>
+                <p className="text-slate-400">Phone Number</p>
+                <p className="font-bold text-slate-900">{initial.contactNumber || '—'}</p>
               </div>
               <div>
                 <p className="text-slate-400">Job Order</p>
@@ -1011,7 +1041,7 @@ export default function page() {
                   <p className="text-xs text-slate-400">Scanner findings from LAUNCH X-431 or compatible tools</p>
                 </div>
               </div>
-              {obd2Report && (
+              {obd2Report ? (
                 <div className="flex items-center gap-2">
                   {!isLocked && (
                     <button
@@ -1033,6 +1063,17 @@ export default function page() {
                     {showDtcs ? 'Collapse' : 'Expand'}
                   </button>
                 </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSyncGmail}
+                  disabled={syncingGmail || !initial?.diagnosticScanAuthorized}
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                  title={!initial?.diagnosticScanAuthorized ? 'The customer needs to approve the scan fee first' : 'Run Gmail fetcher to check for scanner diagnostic reports'}
+                >
+                  {syncingGmail ? <Loader2 size={13} className="animate-spin text-indigo-600" /> : <Mail size={13} className="text-rose-500" />}
+                  {syncingGmail ? 'Checking Gmail…' : 'Check Gmail'}
+                </button>
               )}
             </div>
 
@@ -1049,23 +1090,23 @@ export default function page() {
                 <FileText size={32} className="mx-auto mb-2 text-slate-300" />
                 <p className="text-sm font-semibold text-slate-500">No OBD-II report attached</p>
                 <p className="mt-0.5 text-xs text-slate-400">
-                  {initial.diagnosticScanAuthorized
+                  {initial?.diagnosticScanAuthorized
                     ? 'Attach an existing report or upload a scanner PDF directly.'
                     : "Get the customer’s approval above before using the scanner."}
                 </p>
                 <div className="mt-4 flex items-center justify-center gap-2">
                   <button
                     onClick={openPicker}
-                    disabled={!initial.diagnosticScanAuthorized}
-                    title={!initial.diagnosticScanAuthorized ? 'The customer needs to approve the scan fee first' : undefined}
+                    disabled={!initial?.diagnosticScanAuthorized}
+                    title={!initial?.diagnosticScanAuthorized ? 'The customer needs to approve the scan fee first' : undefined}
                     className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-slate-900 disabled:active:scale-100"
                   >
                     <Link2 size={13} /> Attach Report
                   </button>
                   <label
-                    title={!initial.diagnosticScanAuthorized ? 'The customer needs to approve the scan fee first' : undefined}
+                    title={!initial?.diagnosticScanAuthorized ? 'The customer needs to approve the scan fee first' : undefined}
                     className={`flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 ${
-                      initial.diagnosticScanAuthorized ? 'cursor-pointer hover:bg-slate-100 active:scale-95' : 'cursor-not-allowed opacity-40'
+                      initial?.diagnosticScanAuthorized ? 'cursor-pointer hover:bg-slate-100 active:scale-95' : 'cursor-not-allowed opacity-40'
                     }`}
                   >
                     {uploadingPdf ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
@@ -1075,7 +1116,7 @@ export default function page() {
                       type="file"
                       accept="application/pdf"
                       className="hidden"
-                      disabled={!initial.diagnosticScanAuthorized}
+                      disabled={!initial?.diagnosticScanAuthorized}
                       onChange={(e) => {
                         const file = e.target.files?.[0]
                         if (file) handlePdfUpload(file)
@@ -1092,7 +1133,18 @@ export default function page() {
               <div>
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-xs font-semibold text-slate-500">Select a stored report to attach:</p>
-                  <button onClick={() => setShowPicker(false)} className="text-xs text-slate-400 hover:text-slate-600">Cancel</button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleSyncGmail}
+                      disabled={syncingGmail}
+                      className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 disabled:opacity-50"
+                    >
+                      {syncingGmail ? <Loader2 size={12} className="animate-spin" /> : <Mail size={12} className="text-rose-500" />}
+                      {syncingGmail ? 'Checking Gmail…' : 'Check Gmail'}
+                    </button>
+                    <button onClick={() => setShowPicker(false)} className="text-xs text-slate-400 hover:text-slate-600">Cancel</button>
+                  </div>
                 </div>
                 {pickerLoading && (
                   <div className="flex items-center gap-2 py-4 text-sm text-slate-400">
@@ -1102,15 +1154,26 @@ export default function page() {
                 {!pickerLoading && unlinkedReports.length === 0 && (
                   <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center">
                     <p className="text-sm text-slate-400">No unlinked diagnostic reports found.</p>
-                    <p className="mt-1 text-xs text-slate-400">Use "Sync Gmail" in the admin panel or upload a PDF below.</p>
-                    <label className="mt-3 inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
-                      {uploadingPdf ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
-                      {uploadingPdf ? 'Uploading…' : 'Upload PDF'}
-                      <input
-                        type="file" accept="application/pdf" className="hidden"
-                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePdfUpload(f); e.target.value = '' }}
-                      />
-                    </label>
+                    <p className="mt-1 text-xs text-slate-400">Check Gmail for newly emailed reports or upload a PDF below.</p>
+                    <div className="mt-3 flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleSyncGmail}
+                        disabled={syncingGmail}
+                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 active:scale-95 disabled:opacity-50"
+                      >
+                        {syncingGmail ? <Loader2 size={13} className="animate-spin text-indigo-600" /> : <Mail size={13} className="text-rose-500" />}
+                        {syncingGmail ? 'Checking Gmail…' : 'Check Gmail'}
+                      </button>
+                      <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+                        {uploadingPdf ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+                        {uploadingPdf ? 'Uploading…' : 'Upload PDF'}
+                        <input
+                          type="file" accept="application/pdf" className="hidden"
+                          onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePdfUpload(f); e.target.value = '' }}
+                        />
+                      </label>
+                    </div>
                   </div>
                 )}
                 {!pickerLoading && unlinkedReports.length > 0 && (

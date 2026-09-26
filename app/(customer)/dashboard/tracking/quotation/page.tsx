@@ -121,7 +121,8 @@ function Quotation() {
   ): Promise<boolean> => {
     if (!jobOrder) return false;
     const acceptedServiceIds = Object.entries(checked).filter(([, v]) => v).map(([k]) => Number(k));
-    const res = await submitQuotationPayment(jobOrder.job_order_id, method, actual_amount, acceptedServiceIds, proof);
+    const declinedServiceIds = Object.entries(checked).filter(([, v]) => !v).map(([k]) => Number(k));
+    const res = await submitQuotationPayment(jobOrder.job_order_id, method, actual_amount, acceptedServiceIds, proof, declinedServiceIds);
     if (!res.success) {
       toast.error(res.error ?? "Could not submit your payment. Please try again.");
       return false;
@@ -150,7 +151,8 @@ function Quotation() {
     if (!jobOrder) return { ok: false };
     const userId = Number(sessionStorage.getItem("autokita_user_id"));
     const acceptedServiceIds = Object.entries(checked).filter(([, v]) => v).map(([k]) => Number(k));
-    const res = await confirmQuotationVia2FA(userId, jobOrder.job_order_id, acceptedServiceIds, token, code);
+    const declinedServiceIds = Object.entries(checked).filter(([, v]) => !v).map(([k]) => Number(k));
+    const res = await confirmQuotationVia2FA(userId, jobOrder.job_order_id, acceptedServiceIds, token, code, declinedServiceIds);
     if (!res.success) return { ok: false, message: res.message };
     return { ok: true };
   };

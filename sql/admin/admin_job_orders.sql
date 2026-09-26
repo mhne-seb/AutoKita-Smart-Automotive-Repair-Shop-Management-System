@@ -1,14 +1,16 @@
 -- get_job_orders_list()
 CREATE OR REPLACE FUNCTION get_job_orders_list()
 RETURNS TABLE (
-    id             INT,
-    jo_date        DATE,
-    status         job_orders_status,
-    actual_grand_total    DECIMAL(10,2),	
-    first_name     VARCHAR(40),
-    last_name      VARCHAR(40),
-    vehicle_model  VARCHAR(40),
-    plate_number   VARCHAR(10)
+    id                   INT,
+    jo_date              DATE,
+    status               job_orders_status,
+    actual_grand_total   DECIMAL(10,2),	
+    first_name           VARCHAR(40),
+    last_name            VARCHAR(40),
+    vehicle_model        VARCHAR(40),
+    plate_number         VARCHAR(10),
+    assigned_mechanic_id INT,
+    mechanic_name        VARCHAR(70)
 )
 LANGUAGE SQL STABLE
 AS $$
@@ -20,10 +22,13 @@ AS $$
         u.first_name,
         u.last_name,
         v.vehicle_model,
-        v.plate_number
+        v.plate_number,
+        jo.assigned_mechanic_id,
+        e.full_name AS mechanic_name
     FROM job_orders jo
-    JOIN users u    ON u.id = jo.user_id
-    JOIN vehicles v ON v.id = jo.vehicle_id
+    JOIN users u       ON u.id = jo.user_id
+    JOIN vehicles v    ON v.id = jo.vehicle_id
+    LEFT JOIN employees e ON e.id = jo.assigned_mechanic_id
     ORDER BY jo.jo_date DESC;
 $$;
 
@@ -55,7 +60,9 @@ RETURNS TABLE (
     plate_number       VARCHAR(10),
     vin                CHAR(17),
     vehicle_year       INT,
-    mileage            DECIMAL(10,2)
+    mileage            DECIMAL(10,2),
+    assigned_mechanic_id INT,
+    mechanic_name      VARCHAR(70)
 )
 LANGUAGE SQL STABLE
 AS $$
@@ -84,10 +91,13 @@ AS $$
         v.plate_number,
         v.vin,
         v.vehicle_year,
-        v.mileage
+        v.mileage,
+        jo.assigned_mechanic_id,
+        e.full_name AS mechanic_name
     FROM job_orders jo
-    JOIN users u    ON u.id = jo.user_id
-    JOIN vehicles v ON v.id = jo.vehicle_id
+    JOIN users u          ON u.id = jo.user_id
+    JOIN vehicles v       ON v.id = jo.vehicle_id
+    LEFT JOIN employees e ON e.id = jo.assigned_mechanic_id
     WHERE jo.id = p_job_order_id;
 $$;
 
@@ -282,6 +292,22 @@ RETURNS VOID
 LANGUAGE plpgsql VOLATILE
 AS $$
 BEGIN
+    -- Update job order
+    UPDATE job_orders
+    SET assigned_mechanic_id = p_employee_id
+    WHERE id = p_job_order_id;
+
+    -- Update services under this job order
+    UPDATE job_order_services
+    SET assigned_mechanic_id = p_employee_id
+    WHERE job_order_id = p_job_order_id;
+
+    -- Sync back to ticket if applicable
+    UPDATE service_tickets
+    SET assigned_mechanic_id = p_employee_id
+    WHERE id = (SELECT ticket_id FROM job_orders WHERE id = p_job_order_id);
+
+    -- Log to audit logs
     INSERT INTO system_audit_logs (
         user_id, employees_id, action_performed,
         entity_type, entity_id, old_values, new_values, action_date

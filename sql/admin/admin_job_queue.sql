@@ -93,17 +93,18 @@ BEGIN
     FROM service_tickets st
     WHERE st.id = p_ticket_id;
 
-    -- Mark the ticket as approved
+    -- Mark the ticket as approved and update assigned_mechanic_id
     UPDATE service_tickets
-    SET ticket_status = 'approved'
+    SET ticket_status = 'approved',
+        assigned_mechanic_id = COALESCE(p_mechanic_id, assigned_mechanic_id)
     WHERE service_tickets.id = p_ticket_id;
 
-    -- Create the job order
+    -- Create the job order with assigned_mechanic_id
     INSERT INTO job_orders (
-        ticket_id, user_id, vehicle_id, jo_date,
+        ticket_id, user_id, vehicle_id, assigned_mechanic_id, jo_date,
         date_arrived, actual_grand_total, partial_payment, balance, status
     ) VALUES (
-        p_ticket_id, v_user_id, v_vehicle_id, CURRENT_DATE,
+        p_ticket_id, v_user_id, v_vehicle_id, p_mechanic_id, CURRENT_DATE,
         NOW(), 0, 0, 0, 'inspecting'
     )
     RETURNING job_orders.id INTO v_jo_id;

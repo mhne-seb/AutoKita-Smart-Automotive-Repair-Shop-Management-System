@@ -24,3 +24,33 @@ AutoKita is a capstone project focused on developing a smart automotive repair s
 ### Booking Page
 
 ![Booking Page](bookpage(1).png)
+
+## Getting Started & New Device Setup
+
+### 1. Frontend Setup
+```bash
+npm install
+npm run dev
+```
+
+### 2. Python Backend Setup (ML Prediction Server)
+On a new device, Python packages must be installed before running `predict_server.py`.
+
+**Option A (Automated Batch Runner - Recommended):**
+```cmd
+.\run_backend.bat
+```
+*(This automatically creates a Python `venv`, installs required packages from `models/requirements.txt`, and launches the server).*
+
+**Option B (Global / User Environment via PowerShell):**
+```powershell
+.\setup_ml.ps1
+py -3 models/predict_server.py
+```
+
+**Option C (Manual pip install):**
+```powershell
+py -3 -m pip install -r models/requirements.txt
+py -3 models/predict_server.py
+```
+

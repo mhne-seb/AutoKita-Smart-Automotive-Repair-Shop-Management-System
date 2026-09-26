@@ -28,6 +28,8 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 EXPORTED = os.path.join(BASE, 'exported')
 SYNC_META_PATH = os.path.join(EXPORTED, 'last_sync_meta.json')
 
+MIN_SAMPLE_THRESHOLD = 10
+
 time_model = None
 cost_model = None
 churn_model = None
@@ -35,10 +37,11 @@ veh_encoder = None
 KNOWN_TYPES = set()
 service_base_prices = {}
 service_base_durations = {}
+service_sample_counts = {}
 
 def load_models():
     """Loads or reloads all models and lookup tables from models/exported/."""
-    global time_model, cost_model, churn_model, veh_encoder, KNOWN_TYPES, service_base_prices, service_base_durations
+    global time_model, cost_model, churn_model, veh_encoder, KNOWN_TYPES, service_base_prices, service_base_durations, service_sample_counts
     time_model = joblib.load(os.path.join(EXPORTED, 'time_model.pkl'))
     cost_model = joblib.load(os.path.join(EXPORTED, 'cost_model.pkl'))
     churn_model = joblib.load(os.path.join(EXPORTED, 'churn_model.pkl'))
@@ -50,7 +53,10 @@ def load_models():
 
     _svc_bd_path = os.path.join(EXPORTED, 'service_base_durations.pkl')
     service_base_durations = joblib.load(_svc_bd_path) if os.path.exists(_svc_bd_path) else {}
-    print(f" Loaded {len(service_base_prices)} baseline prices and {len(service_base_durations)} baseline durations.")
+
+    _svc_sc_path = os.path.join(EXPORTED, 'service_sample_counts.pkl')
+    service_sample_counts = joblib.load(_svc_sc_path) if os.path.exists(_svc_sc_path) else {}
+    print(f" Loaded {len(service_base_prices)} baseline prices, {len(service_base_durations)} baseline durations, and {len(service_sample_counts)} sample counts.")
 
 # Initial load
 load_models()
@@ -73,8 +79,23 @@ def predict_time(data: Union[Dict[str, Any], List[Dict[str, Any]]] = Body(...)):
     metadata = []
     
     for item in data:
-        vtype_enc = encode_vehicle_type(item.get('vehicle_type'))
         svc_id = int(item.get('service_id', 0))
+        sample_count = service_sample_counts.get(svc_id, 0)
+
+        # Cold start check: low or new data
+        if sample_count < MIN_SAMPLE_THRESHOLD:
+            results.append({
+                'can_estimate': False,
+                'is_low_data': True,
+                'sample_count': sample_count,
+                'min_samples_required': MIN_SAMPLE_THRESHOLD,
+                'predicted_duration_mins': None,
+                'time_ratio': 1.0,
+                'message': f"Insufficient historical data ({sample_count}/{MIN_SAMPLE_THRESHOLD} completed jobs)"
+            })
+            continue
+
+        vtype_enc = encode_vehicle_type(item.get('vehicle_type'))
         base_dur_hrs = float(item.get('base_duration_hours', 0))
         if base_dur_hrs <= 0:
             base_dur_hrs = float(service_base_durations.get(svc_id, 1.0))
@@ -95,7 +116,7 @@ def predict_time(data: Union[Dict[str, Any], List[Dict[str, Any]]] = Body(...)):
             vtype_enc,
             float(item.get('mileage', item.get('vehicle_age', 5) * 15000)),
         ])
-        metadata.append({'base_dur_hrs': base_dur_hrs})
+        metadata.append({'base_dur_hrs': base_dur_hrs, 'sample_count': sample_count})
         
     if features_list:
         features_arr = np.array(features_list)
@@ -105,7 +126,13 @@ def predict_time(data: Union[Dict[str, Any], List[Dict[str, Any]]] = Body(...)):
             predicted_mins = float(pred)
             base_dur_hrs = metadata[i]['base_dur_hrs']
             time_ratio = predicted_mins / (base_dur_hrs * 60) if base_dur_hrs > 0 else 1.0
-            results.append({'predicted_duration_mins': round(predicted_mins, 2), 'time_ratio': round(time_ratio, 4)})
+            results.append({
+                'can_estimate': True,
+                'is_low_data': False,
+                'sample_count': metadata[i]['sample_count'],
+                'predicted_duration_mins': round(predicted_mins, 2),
+                'time_ratio': round(time_ratio, 4)
+            })
 
     if len(results) == 1:
         return results[0]
@@ -125,8 +152,25 @@ def predict_cost(data: Union[Dict[str, Any], List[Dict[str, Any]]] = Body(...)):
     metadata = []
     
     for item in data:
-        vtype_enc = encode_vehicle_type(item.get('vehicle_type'))
         svc_id = int(item.get('service_id', 0))
+        sample_count = service_sample_counts.get(svc_id, 0)
+
+        # Cold start check: low or new data
+        if sample_count < MIN_SAMPLE_THRESHOLD:
+            results.append({
+                'can_estimate': False,
+                'is_low_data': True,
+                'sample_count': sample_count,
+                'min_samples_required': MIN_SAMPLE_THRESHOLD,
+                'predicted_duration_mins': None,
+                'predicted_amount': None,
+                'time_ratio': 1.0,
+                'price_ratio': 1.0,
+                'message': f"Insufficient historical data ({sample_count}/{MIN_SAMPLE_THRESHOLD} completed jobs)"
+            })
+            continue
+
+        vtype_enc = encode_vehicle_type(item.get('vehicle_type'))
         base_dur_hrs = float(item.get('base_duration_hours', 0))
         if base_dur_hrs <= 0:
             base_dur_hrs = float(service_base_durations.get(svc_id, 1.0))
@@ -147,7 +191,7 @@ def predict_cost(data: Union[Dict[str, Any], List[Dict[str, Any]]] = Body(...)):
             vtype_enc,
             float(item.get('mileage', item.get('vehicle_age', 5) * 15000)),
         ])
-        metadata.append({'item': item, 'vtype_enc': vtype_enc, 'svc_id': svc_id, 'base_dur_hrs': base_dur_hrs, 'base_price': base_price})
+        metadata.append({'item': item, 'vtype_enc': vtype_enc, 'svc_id': svc_id, 'base_dur_hrs': base_dur_hrs, 'base_price': base_price, 'sample_count': sample_count})
         
     if features_t_list:
         features_t_arr = np.array(features_t_list)
@@ -179,6 +223,9 @@ def predict_cost(data: Union[Dict[str, Any], List[Dict[str, Any]]] = Body(...)):
             price_ratio = pred_cost / md['base_price'] if md['base_price'] > 0 else 1.0
             
             results.append({
+                'can_estimate': True,
+                'is_low_data': False,
+                'sample_count': md['sample_count'],
                 'predicted_duration_mins': round(pred_time, 2),
                 'predicted_amount': round(pred_cost, 2),
                 'time_ratio': round(time_ratio, 4),
@@ -258,10 +305,12 @@ def get_model_status():
 
 @app.get('/api/baselines')
 def get_baselines():
-    """Returns active service baseline prices and durations."""
+    """Returns active service baseline prices, durations, and sample counts."""
     return {
         'service_base_prices': service_base_prices,
         'service_base_durations': service_base_durations,
+        'service_sample_counts': service_sample_counts,
+        'min_sample_threshold': MIN_SAMPLE_THRESHOLD,
     }
 
 

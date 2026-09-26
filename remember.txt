@@ -116,6 +116,16 @@ C:\Users\Snow\AppData\Local\Programs\Python\Python313\python.exe extract_manuals
 # or all vehicles:
 C:\Users\Snow\AppData\Local\Programs\Python\Python313\python.exe extract_manuals.py
 
+# Setup Python dependencies (run once per new device):
+.\setup_ml.ps1  (OR run .\run_backend.bat which creates venv & installs dependencies automatically)
+
+# Run server:
 py -3 models/predict_server.py
 
 py Email_parser/gmail_fetcher.py
+
+npm run verify:off
+
+npm run verify:on
+
+npm run verify:status

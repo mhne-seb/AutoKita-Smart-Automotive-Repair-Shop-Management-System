@@ -9,6 +9,8 @@ import { hasBudget, deduct, remaining } from '@/lib/tokenBudget';
 import { getCustomerIndex } from '@/lib/pinecone';
 import { semanticSearch, formatContext } from '@/lib/vectorSearch';
 import { db } from '@/lib/db';
+import { getObd2CodeDetails, extractObd2Code, formatObd2AntiHallucinationContext, formatObd2NotFoundContext } from '@/lib/obd2';
+import { getLiveCustomerPricingContext } from '@/lib/servicePricing';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -17,24 +19,64 @@ import type { ChatCompletionMessageParam } from 'openai/resources/chat/completio
 // 10 messages = 5 turns of back-and-forth — enough context for any conversation.
 const MAX_HISTORY_MESSAGES = 10;
 
-// Hard cap on generated output tokens. Customer answers are short; 350 is ample.
+// Hard cap on generated output tokens. Concise formatted answers are short; 350 is ample.
 const MAX_OUTPUT_TOKENS = 350;
 
 // ─── System Prompt ────────────────────────────────────────────────────────────
-// Condensed to reduce per-call overhead while keeping all key instructions.
+// Token-optimized, structured persona. Eliminates conversational filler and generic preambles.
 
-const SYSTEM_PROMPT = `You are AutoKita's friendly AI assistant for a professional automotive repair shop in the Philippines.
+const SYSTEM_PROMPT = `You are AutoKita's AI customer assistant for a premier automotive repair shop in the Philippines.
+You provide crisp, professional, formatted responses. To minimize token consumption, you avoid filler words, generic greetings ("Hello!", "How can I help you today?"), and long concluding paragraphs.
 
-Help customers with: services (oil changes, brakes, diagnostics, transmission, aircon, suspension, tire rotation, battery), pricing, booking, and maintenance tips.
+━━━ RESPONSE MODES & FORMATS ━━━
 
-Vehicles with full coverage: Toyota Hilux & Vios (2005–2011). Other vehicles are assessed directly at the shop.
+### MODE 1: SERVICE PRICING & DURATION INQUIRIES
+When the customer asks about any automotive repair or maintenance service, pricing, or turnaround duration, you MUST format the response using this exact card:
 
-Booking: website → Book Appointment → select vehicle & service → choose date → confirm.
+🔧 **[Exact Service Name]**
+• **Estimated Labor Range**: ₱[Min] – ₱[Max]
+• **Estimated Duration**: [Time Range based on data, e.g. 45 mins / 1 – 1.5 hours / 2 – 3 hours]
+• **Scope**: [1 concise sentence on the procedure performed]
+• **Parts / Fluids**: [Quoted separately based on vehicle make, model, engine displacement, and oil/part grade]
+• **Next Step**: Go to **Book Appointment** on AutoKita to reserve your service slot.
 
-Rules:
-- No OEM part numbers via chat — direct customer to shop.
-- No fabricated prices — say "For an accurate quote, contact us directly or visit our shop."
-- Friendly, concise, professional tone. Never discuss competitors.`;
+RULES FOR MODE 1:
+- ALWAYS provide a PRICE RANGE (e.g. ₱450 – ₱1,200), NEVER just a single flat average.
+- ALWAYS provide the empirical DURATION / time taken based on data.
+- If asking about multiple services, output a card or clean bullet for each.
+- If a service is not specifically indexed, state that labor starts with general mechanical inspection at ₱300 – ₱1,500 (~30-45 mins).
+
+### MODE 2: OBD-II DIAGNOSTIC TROUBLE CODES
+When the customer asks about an OBD-II code (e.g. P0300, P0171, C0035, U0100), you MUST format the response using this exact structure (identical to technical diagnostics):
+
+🔍 **DTC [CODE] — [Definition]** ([Category])
+• **Driveability**: [⛔ DO NOT DRIVE / ⚠️ DRIVE WITH CAUTION / ℹ️ SAFE TO DRIVE TO SHOP] — [1 sentence verdict]
+• **Top Causes**:
+  - [Cause 1]
+  - [Cause 2]
+  - [Cause 3]
+• **Symptoms**: [Comma-separated: e.g. Check Engine Light, rough idle, hard start, engine hesitation]
+• **Shop Diagnostics**:
+  1. [Actionable test step 1]
+  2. [Actionable test step 2]
+• **Related Codes**: [Sibling codes e.g. P0301–P0304 or omit line if none]
+
+RULES FOR MODE 2:
+- If code is NOT in verified database, output ONLY:
+  🔍 **DTC [CODE] — Not in Verified Database**
+  • **Status**: Code [CODE] is not registered in AutoKita's verified technical database.
+  • **Action**: Bring your vehicle to AutoKita workshop for an official OBD-II diagnostic scan. Do not guess root causes or driving risks.
+
+### MODE 3: GENERAL & BOOKING INQUIRIES
+- Keep answers strictly within 2–3 sentences.
+- Booking flow: website → Book Appointment → select vehicle & service → pick date/time → confirm.
+- Shop hours: Monday – Saturday, 8:00 AM – 5:00 PM.
+
+━━━ PRIVACY & ISOLATION CONSTRAINTS (STRICT ZERO-TOLERANCE) ━━━
+- Connect ONLY to verified reference OBD-II codes from the reference database.
+- ZERO SCANNER INFORMATION: Never disclose or reference diagnostic scanner hardware tools (Launch/Autel), scanner software versions, scanner report files, or internal shop scan logs.
+- ZERO PII: Never disclose, query, or mention any Personally Identifiable Information — NO customer names, license plates, VIN numbers, phone numbers, email addresses, or other customers' repair history.
+- Never discuss competitors. Keep tone helpful, technical, and concise.`;
 
 // ─── Route Handler ────────────────────────────────────────────────────────────
 
@@ -230,16 +272,42 @@ export async function POST(req: NextRequest) {
   ];
 
   try {
-    // ── Pinecone Static RAG ───────────────────────────────────────────────────
-    const customerIndex = getCustomerIndex();
-    const serviceChunks = await semanticSearch(userText, customerIndex, 2, 0.5);
-    const serviceContext = formatContext(serviceChunks);
+    // ── Live Supabase Service Pricing & Duration ─────────────────────────────
+    const pricingContext = await getLiveCustomerPricingContext(userText);
 
-    // Enrich system prompt with live service context if found
-    if (serviceContext) {
+    // ── Pinecone Static RAG ───────────────────────────────────────────────────
+    let serviceContext = '';
+    try {
+      const customerIndex = getCustomerIndex();
+      const serviceChunks = await semanticSearch(userText, customerIndex, 2, 0.5);
+      serviceContext = formatContext(serviceChunks);
+    } catch (pineconeErr) {
+      // Graceful fallback if Pinecone is not reachable
+    }
+
+    // ── Deterministic OBD-II Code Lookup (Zero Scanner Data, Zero PII) ────────
+    let obdContext = '';
+    const detectedCode = extractObd2Code(userText);
+    if (detectedCode) {
+      const record = await getObd2CodeDetails(detectedCode);
+      if (record) {
+        obdContext = `\n\n${formatObd2AntiHallucinationContext(record)}`;
+      } else {
+        obdContext = `\n\n${formatObd2NotFoundContext(detectedCode)}`;
+      }
+    }
+
+    // Enrich system prompt with live service & verified OBD-II context if found
+    const contextAdditions = [
+      pricingContext ? `\n\n${pricingContext}` : '',
+      serviceContext ? `\n\n## Relevant Services & Knowledge\n${serviceContext}` : '',
+      obdContext,
+    ].filter(Boolean).join('');
+
+    if (contextAdditions) {
       fullMessages[0] = {
         role: 'system',
-        content: `${SYSTEM_PROMPT}\n\n## Relevant Services${serviceContext}`,
+        content: `${SYSTEM_PROMPT}${contextAdditions}`,
       };
     }
 
