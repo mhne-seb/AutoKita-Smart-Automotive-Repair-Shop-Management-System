@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { FileText, ChevronRight, Loader2, Camera, AlertCircle, Check } from "lucide-react";
+import { FileText, ChevronRight, Loader2, Camera, AlertCircle, Check, ScanLine } from "lucide-react";
 import { toast } from "sonner";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { Lightbox } from "@/components/Lightbox";
@@ -44,6 +44,7 @@ function Inspecting() {
   const findings = data?.findings ?? [];
   const reviewHistory = data?.reviewHistory ?? [];
   const walkaround = data?.walkaround ?? [];
+  const scannerFindings = data?.scannerFindings ?? [];
   const scanAuthorization = data?.scanAuthorization ?? null;
 
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
@@ -379,6 +380,26 @@ function Inspecting() {
                   <p className="py-4 text-sm text-muted-foreground">No findings recorded yet.</p>
                 )}
               </div>
+            </div>
+          )}
+
+          {!awaitingReport && scannerFindings.length > 0 && (
+            <div className="rounded-xl border bg-card p-6">
+              <div className="flex items-center gap-2 text-[color:oklch(0.5_0.2_300)]">
+                <ScanLine className="h-4 w-4" />
+                <span className="text-xs font-bold uppercase tracking-wider">Diagnostic Scan Results</span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Issues our scanner picked up on your vehicle.
+              </p>
+              <ul className="mt-4 space-y-2 text-sm">
+                {scannerFindings.map((desc, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
+                    {desc}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
