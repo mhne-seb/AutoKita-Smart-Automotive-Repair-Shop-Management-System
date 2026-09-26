@@ -53,9 +53,7 @@ import type {
   DashboardShop,
 } from "@/controllers/dashboardController";
 import { getCompletedData } from "@/controllers/serviceProgressController";
-import { getShopInfo } from "@/controllers/billingController";
-// npm install jspdf
-import jsPDF from "jspdf";
+import { fetchJobOrderPdfData, generateJobOrderPdf } from "@/lib/jobOrderPdf";
 import { formatStamp } from "@/lib/utils";
 
 // Status
@@ -1183,7 +1181,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                           Scan fee: {formatPeso(DIAGNOSTIC_SCAN_FEE)}
                         </p>
                         <p className="mt-1 text-sm text-amber-900">
-                          To find the problem, we plug a scanner into your car. You pay this fee{" "}
+                          To find the problem, we will plug a scanner into your car. You will pay this fee{" "}
                           <b>even if you decide not to push through with the repair</b>. Repairs are priced
                           separately, and we&apos;ll ask you first.
                         </p>
@@ -1505,9 +1503,14 @@ function ServiceReportModal({ jobId, onClose }: { jobId: number; onClose: () => 
       .finally(() => setLoading(false));
   }, [jobId]);
 
-  const handleDownload = () => {
+  const [downloading, setDownloading] = useState(false);
+  const handleDownload = async () => {
     if (!data?.jobOrder) return;
-    void generateDashboardServiceReportPDF(data);
+    setDownloading(true);
+    const pdfData = await fetchJobOrderPdfData(data.jobOrder.job_order_id);
+    setDownloading(false);
+    if (!pdfData) return;
+    void generateJobOrderPdf(pdfData);
   };
 
   return (
@@ -1671,9 +1674,10 @@ function ServiceReportModal({ jobId, onClose }: { jobId: number; onClose: () => 
 
               <button
                 onClick={handleDownload}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90"
+                disabled={downloading}
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-50"
               >
-                <Download className="h-4 w-4" /> Download Report
+                {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Download Job Order
               </button>
             </>
           )}
@@ -1683,167 +1687,6 @@ function ServiceReportModal({ jobId, onClose }: { jobId: number; onClose: () => 
   );
 }
 
-function loadDashboardLogoAsDataURL(src: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("Canvas context unavailable"));
-      ctx.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/png"));
-    };
-    img.onerror = reject;
-    img.src = src;
-  });
-}
-
-// Same visual format as the Completed stage / History invoice PDFs — logo
-// header, SERVICE INVOICE title, details block, itemized DESCRIPTION/AMOUNT
-// table covering both labor and parts, total, footer note.
-async function generateDashboardServiceReportPDF(data: Awaited<ReturnType<typeof getCompletedData>>) {
-  const { jobOrder, services, parts, warranties } = data;
-  if (!jobOrder) return;
-
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = 48;
-  let y = 56;
-
-  const SHOP_INFO = await getShopInfo();
-
-  const logoX = margin;
-  const logoY = y;
-  try {
-    const logoDataUrl = await loadDashboardLogoAsDataURL("/autokita-logo.png");
-    doc.addImage(logoDataUrl, "PNG", logoX, logoY - 14, 28, 28);
-  } catch {
-    doc.setDrawColor(15, 76, 92);
-    doc.setLineWidth(1.5);
-    doc.circle(logoX + 14, logoY + 10, 14, "S");
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(15, 76, 92);
-    doc.text("A", logoX + 14, logoY + 15, { align: "center" });
-  }
-
-  doc.setFontSize(16);
-  doc.setTextColor(20, 20, 20);
-  doc.text(SHOP_INFO.name, logoX + 36, logoY + 8);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(110, 110, 110);
-  doc.text(SHOP_INFO.tagline, logoX + 36, logoY + 21);
-
-  doc.setFontSize(9);
-  doc.setTextColor(90, 90, 90);
-  const addressLines = doc.splitTextToSize(SHOP_INFO.address, 220);
-  doc.text(addressLines, pageWidth - margin, y - 4, { align: "right" });
-  doc.text(`Tel: ${SHOP_INFO.phone}`, pageWidth - margin, y + 22, { align: "right" });
-  doc.text(SHOP_INFO.email, pageWidth - margin, y + 34, { align: "right" });
-  doc.text(`TIN: ${SHOP_INFO.tin}`, pageWidth - margin, y + 46, { align: "right" });
-
-  y += 66;
-  doc.setDrawColor(220, 220, 220);
-  doc.line(margin, y, pageWidth - margin, y);
-  y += 28;
-
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(20, 20, 20);
-  doc.text("SERVICE INVOICE", margin, y);
-
-  const statusLabel = jobOrder.status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(90, 90, 90);
-  doc.text(`Job Order: JO-${jobOrder.job_order_id}`, pageWidth - margin, y - 12, { align: "right" });
-  doc.text(`Date: ${new Date().toLocaleDateString("en-PH")}`, pageWidth - margin, y, { align: "right" });
-  doc.text(`Status: ${statusLabel}`, pageWidth - margin, y + 12, { align: "right" });
-
-  y += 34;
-
-  const primaryService = services[0]?.service_name ?? "General Service";
-  const serviceLabel = services.length > 1 ? `${primaryService} +${services.length - 1} more` : primaryService;
-  const activeWarranty = warranties[0];
-  const warrantyLabel = activeWarranty ? activeWarranty.coverage_description : "—";
-
-  const details: [string, string][] = [
-    ["Vehicle", `${jobOrder.vehicle_year} ${jobOrder.vehicle_model} (${jobOrder.plate_number})`],
-    ["Mechanic", "AutoKita Service Team"],
-    ["Location", SHOP_INFO.name],
-    ["Warranty", warrantyLabel],
-    ["Service", serviceLabel],
-  ];
-  doc.setFontSize(9);
-  details.forEach(([label, value]) => {
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(60, 60, 60);
-    doc.text(`${label}:`, margin, y);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(20, 20, 20);
-    doc.text(value, margin + 90, y);
-    y += 16;
-  });
-
-  y += 12;
-
-  const col1 = margin;
-  const col2 = pageWidth - margin;
-  const items: [string, number][] = [
-    ...services.map((s): [string, number] => [s.service_name, Number(s.actual_amount ?? 0)]),
-    ...parts.map((p): [string, number] => [`${p.description} x${p.quantity}`, Number(p.total_retail_amount ?? 0)]),
-  ];
-
-  doc.setFillColor(15, 76, 92);
-  doc.rect(margin, y, pageWidth - margin * 2, 22, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text("DESCRIPTION", col1 + 8, y + 15);
-  doc.text("AMOUNT (PHP)", col2 - 8, y + 15, { align: "right" });
-  y += 22;
-
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(30, 30, 30);
-  items.forEach(([desc, amt], idx) => {
-    const rowHeight = 22;
-    if (idx % 2 === 1) {
-      doc.setFillColor(246, 247, 248);
-      doc.rect(margin, y, pageWidth - margin * 2, rowHeight, "F");
-    }
-    doc.text(desc, col1 + 8, y + 15);
-    doc.text(formatMoney(amt), col2 - 8, y + 15, { align: "right" });
-    y += rowHeight;
-  });
-
-  doc.setDrawColor(15, 76, 92);
-  doc.setLineWidth(1);
-  doc.line(margin, y, pageWidth - margin, y);
-  y += 20;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.setTextColor(15, 76, 92);
-  doc.text("TOTAL", col1 + 8, y);
-  doc.text(`₱ ${formatMoney(jobOrder.actual_grand_total)}`, col2 - 8, y, { align: "right" });
-
-  y += 40;
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(8.5);
-  doc.setTextColor(140, 140, 140);
-  doc.text(
-    "Thank you for choosing AutoKita. This invoice was generated electronically and is valid without a signature.",
-    margin,
-    y,
-    { maxWidth: pageWidth - margin * 2 }
-  );
-
-  doc.save(`AutoKita_ServiceReport_JO-${jobOrder.job_order_id}.pdf`);
-}
 
 // Generic confirm modal
 
