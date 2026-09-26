@@ -27,14 +27,16 @@ export async function GET(req: NextRequest) {
                 AND c.action_performed = 'approved'
           ) AS diagnostic_scan_authorized,
           (
-              SELECT sal.employees_id 
-              FROM job_orders jo 
+              SELECT sal.employees_id
+              FROM job_orders jo
               JOIN system_audit_logs sal ON sal.entity_id = jo.id AND sal.entity_type = 'job_orders'
               WHERE jo.ticket_id = st.id AND sal.employees_id IS NOT NULL
               ORDER BY sal.action_date DESC
               LIMIT 1
-          ) as mechanic_id
+          ) as mechanic_id,
+          wc.id IS NOT NULL AS is_warranty_claim
       FROM service_tickets st
+      LEFT JOIN warranty_claims wc ON wc.ticket_id = st.id
       JOIN users u ON u.id = st.user_id
       JOIN vehicles v ON v.id = st.vehicle_id
       ORDER BY st.request_date DESC
