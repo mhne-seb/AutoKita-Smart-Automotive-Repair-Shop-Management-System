@@ -29,12 +29,12 @@ export async function GET(request: NextRequest) {
 
     if (!jobOrder) {
       return NextResponse.json({
-        jobOrder: null, preDiagnostic: null, walkaround: [], findings: [], reviewHistory: [], shop: null,
+        jobOrder: null, preDiagnostic: null, walkaround: [], findings: [], scannerFindings: [], reviewHistory: [], shop: null,
         canCancel: false, scanAuthorization: null,
       })
     }
 
-    const [preDiagRes, findingsRes, walkaroundRes, historyRes, shopRes, cancelRes] = await Promise.all([
+    const [preDiagRes, findingsRes, walkaroundRes, historyRes, shopRes, cancelRes, scannerRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_quotation($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_inspections($1)`, [jobOrder.job_order_id]),
        // Walkaround photos from inspection_photos (child of vehicle_inspections)
@@ -83,6 +83,17 @@ export async function GET(request: NextRequest) {
          FROM job_orders jo WHERE jo.id = $1`,
         [jobOrder.job_order_id],
       ),
+      // Scanner findings, plain-language only — no raw codes or "System"
+      // jargon for the customer. Only current (still-active) codes; a
+      // cleared/history code isn't something they need to act on.
+      db.query(
+        `SELECT d.description
+         FROM obd2_diagnostic_reports r
+         JOIN obd2_dtc_codes d ON d.report_id = r.id
+         WHERE r.job_order_id = $1 AND LOWER(d.state) = 'current'
+         ORDER BY d.datetime_logged ASC`,
+        [jobOrder.job_order_id],
+      ),
     ])
 
     const preDiagnostic = preDiagRes.rows[0] ?? null
@@ -112,6 +123,7 @@ export async function GET(request: NextRequest) {
       findings: reportSent
         ? findingsRes.rows.filter((r) => !(r.status === null && r.photo))
         : [],
+      scannerFindings: reportSent ? scannerRes.rows.map((r) => r.description as string) : [],
       shop: shopRes.rows[0] ?? null,
     })
   } catch (err) {

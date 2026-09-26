@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Download, Loader2, X } from 'lucide-react'
 import { SHOP_PROFILE } from '@/data/shopProfile'
-import { generateJobOrderPdf, type JobOrderPdfData } from '@/lib/jobOrderPdf'
+import { fetchJobOrderPdfData, generateJobOrderPdf, type JobOrderPdfData } from '@/lib/jobOrderPdf'
 
 interface Props {
   jobOrderId: string
@@ -28,21 +28,11 @@ export function GenerateJobOrderModal({ jobOrderId, onClose }: Props) {
 
   useEffect(() => {
     let active = true
-    fetch(`/api/job-orders/${jobOrderId}/document`, { cache: 'no-store' })
-      .then((r) => r.json())
+    fetchJobOrderPdfData(jobOrderId)
       .then((d) => {
         if (!active) return
-        if (!d.success) { setError(d.message ?? 'Could not load the job order.'); return }
-        setData({
-          jobOrderId: d.jobOrderId,
-          date: d.date,
-          datePromised: d.datePromised,
-          customer: d.customer,
-          vehicle: d.vehicle,
-          parts: d.parts,
-          services: d.services,
-          payments: d.payments.map((p: { amount: number; label: string }) => ({ label: `PARTIAL PAYMENT ${p.label}`.trim(), amount: p.amount })),
-        })
+        if (!d) { setError('Could not load the job order.'); return }
+        setData(d)
       })
       .catch(() => active && setError('Could not load the job order.'))
     return () => { active = false }
@@ -159,6 +149,28 @@ export function GenerateJobOrderModal({ jobOrderId, onClose }: Props) {
                   </tr>
                 </tbody>
               </table>
+
+              {/* Warranty coverage — one row per part, from the warranties table */}
+              {data.warranties.length > 0 ? (
+                <table className="mt-4 w-full border-collapse text-[13px]">
+                  <thead>
+                    <tr>
+                      <th className={head}>Warranty Coverage</th>
+                      <th className={`${head} w-32 text-right`}>Covered Until</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.warranties.map((w, i) => (
+                      <tr key={i}>
+                        <td className={cell}>{w.description}</td>
+                        <td className={`${cell} text-right`}>{fmtDate(w.expiresAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : !data.releasedAt ? (
+                <p className="mt-4 text-[12px] italic text-slate-400">Warranty coverage will be added once the vehicle is released.</p>
+              ) : null}
 
               {/* Totals + signatures */}
               <div className="mt-4 flex flex-col items-start justify-between gap-6 sm:flex-row">

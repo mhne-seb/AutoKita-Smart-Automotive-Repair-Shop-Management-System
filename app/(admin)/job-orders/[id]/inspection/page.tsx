@@ -14,6 +14,8 @@ import { getJobOrderById } from '@/controllers/jobOrderController'
 import { getInspectionById, addInspectionFinding, updateInspectionFinding, deleteInspectionFinding, uploadInspectionPhoto, saveWalkaroundNote, saveWalkaroundTitle, deleteInspectionPhoto } from '@/controllers/inspectionController'
 import { getLatestPreDiagnostic, sendForApproval, type PreDiagnosticRound } from '@/controllers/preDiagnosticController'
 import { requestScanAuthorization } from '@/controllers/preDiagnosticController'
+import { getWarrantyClaim, type WarrantyClaim } from '@/controllers/warrantyClaimController'
+import { WarrantyClaimCard } from '@/components/dashboard/WarrantyClaimCard'
 import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData, InspectionPhotoSlot } from '@/data/types'
 
 export default function page() {
@@ -55,6 +57,10 @@ export default function page() {
     }
   }, [jobOrderId])
 
+  const [warrantyClaim, setWarrantyClaim] = useState<WarrantyClaim | null>(null)
+  const loadWarrantyClaim = () => getWarrantyClaim(jobOrderId).then(setWarrantyClaim)
+  useEffect(() => { loadWarrantyClaim() }, [jobOrderId]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const [photoSlots, setPhotoSlots] = useState<InspectionData['photoSlots']>([])
   // Set true after a blocked send attempt, so empty slots highlight red
   // until the admin fixes them (paper's Exception 1 on this use case).
@@ -67,6 +73,7 @@ export default function page() {
   const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [editingFindingId, setEditingFindingId] = useState<string | null>(null)
+  const [addingFinding, setAddingFinding] = useState(false)
   const [editFindingName, setEditFindingName] = useState('')
   const [editFindingNote, setEditFindingNote] = useState('')
   // Severity is staged here while editing and only written on Save, so picking
@@ -475,6 +482,10 @@ export default function page() {
     if (isLocked) return
     // Optimistic update
     setFindings((prev) => prev.filter((f) => f.id !== fId))
+    // The deleted row might be the one currently open for editing — if so,
+    // that lock has nothing left to point at, so release it too, or "Add
+    // Finding" stays disabled forever with no row left to finish editing.
+    setEditingFindingId((prev) => (prev === fId ? null : prev))
 
     // API Call
     setSaveState('saving')
@@ -483,16 +494,20 @@ export default function page() {
   }
 
   async function addFinding() {
-    if (isLocked || editingFindingId !== null) return
+    if (isLocked || editingFindingId !== null || addingFinding) return
     const newFindingData = {
       name: '',
       note: '',
       status: 'ok' as FindingStatus,
     }
 
-    // API Call to get real ID
+    // addingFinding blocks a second click while the request is in flight —
+    // editingFindingId alone doesn't catch it, since it's only set once this
+    // call resolves.
+    setAddingFinding(true)
     setSaveState('saving')
     const added = await addInspectionFinding(jobOrderId, newFindingData)
+    setAddingFinding(false)
     setSaveState(added ? 'saved' : 'error')
     if (added) {
       setFindings((prev) => [...prev, added])
@@ -565,6 +580,10 @@ export default function page() {
     <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-8">
       <TopBar title="Vehicle Inspection" subtitle="Inspection workflow & time tracking." showSearch={false} />
       <JobOrderBreadcrumb jobOrderId={jobOrderId} current="inspection" stage={jobOrder.stage} />
+
+      {warrantyClaim && (
+        <WarrantyClaimCard claim={warrantyClaim} jobOrderId={jobOrderId} onDecided={loadWarrantyClaim} />
+      )}
 
       <div className={hasSidebar ? "grid grid-cols-1 gap-6 xl:grid-cols-[1fr_340px]" : "block"}>
         <div className="space-y-6">
@@ -893,11 +912,11 @@ export default function page() {
               <p className="text-sm font-bold text-slate-900">Mechanical Findings</p>
               <button
                 onClick={addFinding}
-                disabled={isLocked || editingFindingId !== null}
+                disabled={isLocked || editingFindingId !== null || addingFinding}
                 title={editingFindingId !== null ? 'Finish editing the current finding first' : undefined}
                 className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-150 hover:border-slate-300 hover:bg-slate-100 hover:shadow-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 disabled:hover:shadow-none"
               >
-                <Plus size={13} /> Add Finding
+                {addingFinding ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />} Add Finding
               </button>
             </div>
 

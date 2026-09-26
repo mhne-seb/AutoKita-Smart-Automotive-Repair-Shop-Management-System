@@ -10,9 +10,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const { id } = await params
   const jobOrderId = Number(id)
   try {
-    const [head, parts, services, payments, promised] = await Promise.all([
+    const [head, parts, services, payments, promised, warranties] = await Promise.all([
       db.query(
-        `SELECT jo.id, jo.jo_date::text, jo.date_promised::text, jo.status::text,
+        `SELECT jo.id, jo.jo_date::text, jo.date_promised::text, jo.status::text, jo.released_at::text,
                 u.first_name, u.last_name, u.contact_number, u.address,
                 v.vehicle_make, v.vehicle_model, v.vehicle_year, v.plate_number, v.vin
          FROM job_orders jo
@@ -47,6 +47,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
          WHERE spt.job_order_id = $1 AND spt.scheduled_date IS NOT NULL`,
         [jobOrderId],
       ),
+      db.query(
+        `SELECT coverage_description, expiration_date::text FROM warranties WHERE job_order_id = $1 ORDER BY id`,
+        [jobOrderId],
+      ),
     ])
     const h = head.rows[0]
     if (!h) return NextResponse.json({ success: false, message: 'Job order not found' }, { status: 404 })
@@ -57,6 +61,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       date: h.jo_date,
       datePromised: h.date_promised ?? promised.rows[0]?.promised ?? null,
       status: h.status,
+      releasedAt: h.released_at,
       customer: { name: [h.first_name, h.last_name].filter(Boolean).join(' '), phone: h.contact_number ?? '', address: h.address ?? '' },
       vehicle: { yearModel: [h.vehicle_year, h.vehicle_make, h.vehicle_model].filter(Boolean).join(' '), plate: h.plate_number ?? '', vin: h.vin ?? '' },
       parts: parts.rows.map((p) => ({
@@ -64,6 +69,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         description: [p.part_number, p.description].filter(Boolean).join(' — ') + (p.is_warranty_replacement ? ' (warranty)' : ''),
         unitPrice: Number(p.retail_unit_price ?? 0),
       })),
+      warranties: warranties.rows.map((w) => ({ description: w.coverage_description, expiresAt: w.expiration_date })),
       services: services.rows.map((s) => ({ description: s.service_name, amount: Number(s.actual_amount ?? 0) })),
       payments: payments.rows.map((p) => ({
         amount: Number(p.amount_paid ?? 0),

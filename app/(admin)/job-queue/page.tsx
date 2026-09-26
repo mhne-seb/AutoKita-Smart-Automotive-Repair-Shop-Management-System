@@ -28,6 +28,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ScanLine,
+  ShieldCheck,
   Search,
 } from 'lucide-react'
 import { DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
@@ -57,9 +58,12 @@ export interface Job {
   // Customer agreed to the OBD-II scan fee at booking — the mechanic may scan,
   // and the fee attaches to the job order on approval.
   diagnosticScanAuthorized: boolean
+  // This ticket started from a customer's "Claim" on an existing warranty,
+  // not a fresh booking — see warranty_claims.
+  isWarrantyClaim: boolean
 }
 
-type Tab = 'All Jobs' | 'Pending' | 'Approved' | 'Cancelled'
+type Tab = 'Tickets' | 'Pending' | 'Approved' | 'Cancelled'
 
 const validEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 const validPhone = (v: string) => /^(09\d{9}|\+639\d{9})$/.test(v.replace(/\s|-/g, ''))
@@ -105,6 +109,7 @@ export default function page() {
               serviceMode: t.service_mode === 'walk_in' ? 'Shop Visit' : 'Home Service',
               servicesNeeded: [t.customer_concern || 'N/A'],
               diagnosticScanAuthorized: Boolean(t.diagnostic_scan_authorized),
+              isWarrantyClaim: Boolean(t.is_warranty_claim),
               assignedMechanic: t.mechanic_id ? t.mechanic_id.toString() : undefined,
               status,
               date: new Date(t.request_date).toLocaleDateString(),
@@ -122,7 +127,11 @@ export default function page() {
     fetchJobs()
   }, [])
 
-  const [tab, setTab] = useState<Tab>('All Jobs')
+  const [tab, setTab] = useState<Tab>('Tickets')
+  // Independent of tab (status) — a warranty claim can be pending, approved,
+  // or cancelled just like any ticket, so this is a separate toggle, not a
+  // fifth status tab.
+  const [warrantyOnly, setWarrantyOnly] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState('')
   const itemsPerPage = 9
@@ -151,7 +160,7 @@ export default function page() {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, tab, selectedVehicle, selectedMode, selectedMechanic])
+  }, [searchQuery, tab, warrantyOnly, selectedVehicle, selectedMode, selectedMechanic])
 
   const vehicleOptions = useMemo(() => {
     const set = new Set<string>()
@@ -214,11 +223,13 @@ export default function page() {
       )
 
     const matchesTab =
-      tab === 'All Jobs' ||
+      tab === 'Tickets' ||
       (tab === 'Pending' && c.status === 'Pending') ||
       (tab === 'Approved' &&
         (c.status === 'Approved' || c.status === 'In Progress')) ||
       (tab === 'Cancelled' && c.status === 'Cancelled')
+
+    const matchesWarranty = !warrantyOnly || c.isWarrantyClaim
 
     const matchesVehicle =
       selectedVehicle === 'all' || c.vehicle.toLowerCase() === selectedVehicle.toLowerCase()
@@ -231,18 +242,19 @@ export default function page() {
       (selectedMechanic === 'unassigned' && (!c.assignedMechanic || c.assignedMechanic === 'Unassigned')) ||
       c.assignedMechanic === selectedMechanic
 
-    return matchesSearch && matchesTab && matchesVehicle && matchesMode && matchesMechanic
+    return matchesSearch && matchesTab && matchesWarranty && matchesVehicle && matchesMode && matchesMechanic
   })
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage))
   const paginatedJobs = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   const tabs: { label: Tab; count: number; icon: typeof Wrench }[] = [
-    { label: 'All Jobs', count: counts.all, icon: Wrench },
+    { label: 'Tickets', count: counts.all, icon: Wrench },
     { label: 'Pending', count: counts.pending, icon: ShieldAlert },
     { label: 'Approved', count: counts.approved, icon: Package },
     { label: 'Cancelled', count: counts.cancelled, icon: XCircle },
   ]
+  const warrantyClaimCount = jobs.filter((j) => j.isWarrantyClaim).length
 
   const updateMechanic = (ticketId: number, mechanic: string) => {
     setJobs((prev) =>
@@ -381,6 +393,18 @@ export default function page() {
           </button>
         ))}
       </div>
+
+      <button
+        onClick={() => { setWarrantyOnly((v) => !v); setCurrentPage(1); }}
+        className={`mt-3 flex w-fit items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors ${warrantyOnly ? 'border-brand bg-brand-soft text-brand' : 'border-border text-muted-foreground hover:text-foreground'
+          }`}
+      >
+        <ShieldCheck size={14} />
+        Warranty Claims
+        <span className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs ${warrantyOnly ? 'bg-brand/15 text-brand' : 'bg-accent text-muted-foreground'}`}>
+          {warrantyClaimCount}
+        </span>
+      </button>
 
       {/* Unified Toolbar: Page count on left, Search Bar next to Filter next to Prev/Next buttons on right */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -618,6 +642,14 @@ export default function page() {
                         className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800"
                       >
                         <ScanLine size={11} /> OBD-II scan authorized
+                      </span>
+                    )}
+                    {c.isWarrantyClaim && (
+                      <span
+                        title="Started from a customer's warranty claim, not a fresh booking"
+                        className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-0.5 text-[10px] font-semibold text-brand"
+                      >
+                        <ShieldCheck size={11} /> Warranty claim
                       </span>
                     )}
                   </td>

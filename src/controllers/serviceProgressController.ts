@@ -352,6 +352,9 @@ export async function getInspectingData(userId: number, jobOrderId?: number) {
       findings_description: string
       logged_date: string
     }[]
+    // Plain-language descriptions from a linked OBD-II scan (current/active
+    // codes only) — no raw codes or system jargon, see /api/tracking/inspecting.
+    scannerFindings: string[]
     shop: { name: string; address: string } | null
   }>
 }

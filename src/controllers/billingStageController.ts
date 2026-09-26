@@ -21,7 +21,7 @@ export interface BillingData {
   bill: { total: number; paid: number; balance: number }
   payments: BillingPayment[]
   services: { name: string; amount: number; addedMidService: boolean }[]
-  parts: { name: string; partNo: string | null; qty: number; unitPrice: number; amount: number; warranty: boolean }[]
+  parts: { id: number; name: string; partNo: string | null; qty: number; unitPrice: number; amount: number; warranty: boolean }[]
 }
 
 type Result = { ok: boolean; message?: string }
@@ -49,7 +49,9 @@ export function recordCashPayment(jobOrderId: string, amount: number): Promise<R
   return post(jobOrderId, { action: 'record_cash', amount })
 }
 
-/** Hand the vehicle back. Server refuses unless the balance is ₱0. */
-export function releaseVehicle(jobOrderId: string): Promise<Result> {
-  return post(jobOrderId, { action: 'release' })
+/** Hand the vehicle back. Server refuses unless the balance is ₱0.
+ *  warrantyByPart maps job_order_parts.id -> warranty months, set once and
+ *  never editable afterward. */
+export function releaseVehicle(jobOrderId: string, warrantyByPart: Record<number, number> = {}): Promise<Result> {
+  return post(jobOrderId, { action: 'release', warrantyByPart })
 }

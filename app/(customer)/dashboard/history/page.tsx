@@ -21,14 +21,14 @@ import {
   Loader2,
   History as HistoryIcon,
 } from "lucide-react";
-import { getServiceHistory, getShopInfo } from "@/controllers/billingController";
+import { toast } from "sonner";
+import { getServiceHistory } from "@/controllers/billingController";
 import type { ServiceRecord } from "@/data/history";
 import { ShopLoading } from "@/components/ShopLoading";
+import { fetchJobOrderPdfData, generateJobOrderPdf } from "@/lib/jobOrderPdf";
+import { getCustomerWarranties, submitWarrantyClaim, type CustomerWarranty } from "@/controllers/warrantyController";
 
 const CURRENT_USER_ID = 280;
-
-// npm install jspdf
-import jsPDF from "jspdf";
 
 const PAGE_SIZE = 5;
 const BRAND_GRADIENT = "linear-gradient(90deg, #0b1730 0%, #1d3a68 55%, #3b6cb4 100%)";
@@ -39,6 +39,8 @@ type SortDir = "desc" | "asc";
 function History() {
   useEffect(() => { document.title = "Service History — AutoKita"; }, []);
 
+  const [tab, setTab] = useState<"services" | "warranties">("services");
+  const [userId, setUserId] = useState<number>(CURRENT_USER_ID);
   const [open, setOpen] = useState<ServiceRecord | null>(null);
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -60,6 +62,7 @@ function History() {
     let active = true;
     const storedUserId = sessionStorage.getItem("autokita_user_id");
     const userId = storedUserId ? parseInt(storedUserId, 10) : CURRENT_USER_ID;
+    setUserId(userId);
     getServiceHistory(userId).then((data) => {
       if (!active) return;
       setServiceHistory(data);
@@ -199,6 +202,23 @@ function History() {
         </div>
       </div>
 
+      <div className="mt-5 flex gap-1 rounded-lg border bg-muted/30 p-1 text-sm font-semibold">
+        <button
+          onClick={() => setTab("services")}
+          className={`flex-1 rounded-md py-1.5 transition-colors ${tab === "services" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          Services
+        </button>
+        <button
+          onClick={() => setTab("warranties")}
+          className={`flex-1 rounded-md py-1.5 transition-colors ${tab === "warranties" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          Warranties
+        </button>
+      </div>
+
+      {tab === "services" && (
+      <>
       {/* --- Overview stats: instant context before the table --- */}
       <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <StatCard
@@ -496,6 +516,10 @@ function History() {
           </>
         )}
       </div>
+      </>
+      )}
+
+      {tab === "warranties" && <WarrantiesPanel userId={userId} />}
 
       {open && <DetailsModal row={open} onClose={() => setOpen(null)} />}
     </div>
@@ -623,8 +647,13 @@ function Pagination({
 }
 
 function DetailsModal({ row, onClose }: { row: ServiceRecord; onClose: () => void }) {
-  function downloadInvoice() {
-    void generateInvoicePDF(row);
+  const [downloading, setDownloading] = useState(false);
+  async function downloadJobOrder() {
+    setDownloading(true);
+    const data = await fetchJobOrderPdfData(row.jobOrderId);
+    setDownloading(false);
+    if (!data) return;
+    void generateJobOrderPdf(data);
   }
 
   return (
@@ -655,10 +684,12 @@ function DetailsModal({ row, onClose }: { row: ServiceRecord; onClose: () => voi
             <Detail icon={Car} label="Vehicle" value={row.vehicle} />
             <Detail icon={User} label="Mechanic" value={row.mechanic} />
             <Detail icon={MapPin} label="Location" value={row.location} />
-            <Detail icon={ShieldCheck} label="Warranty" value={row.warranty} />
             <Detail icon={Clock} label="Completed" value={row.date} />
             <Detail icon={Search} label="Service" value={row.desc} />
           </div>
+          <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5" /> Warranty coverage is on the downloaded Job Order.
+          </p>
 
           {row.items.length > 0 && (
             <>
@@ -693,12 +724,12 @@ function DetailsModal({ row, onClose }: { row: ServiceRecord; onClose: () => voi
 
         <div className="flex items-center justify-end gap-2 border-t bg-muted/30 px-6 py-3">
           <button
-            onClick={downloadInvoice}
-            disabled={row.items.length === 0}
+            onClick={downloadJobOrder}
+            disabled={row.items.length === 0 || downloading}
             className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
-            title={row.items.length === 0 ? "No invoice available for cancelled bookings" : "Download PDF invoice"}
+            title={row.items.length === 0 ? "No job order available for cancelled bookings" : "Download the Job Order PDF"}
           >
-            <Download className="h-4 w-4" /> Download Invoice
+            {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Download Job Order
           </button>
           <button
             onClick={onClose}
@@ -728,161 +759,130 @@ function Detail({ icon: Icon, label, value }: { icon: any; label: string; value:
 }
 
 
-function loadImageAsDataURL(src: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("Canvas context unavailable"));
-      ctx.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/png"));
-    };
-    img.onerror = reject;
-    img.src = src;
-  });
-}
+function WarrantiesPanel({ userId }: { userId: number }) {
+  const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState<CustomerWarranty[]>([]);
+  const [history, setHistory] = useState<CustomerWarranty[]>([]);
+  const [claimingId, setClaimingId] = useState<number | null>(null);
+  const [claimText, setClaimText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-/**
- * Builds and downloads a PDF invoice for a single booking
- */
-async function generateInvoicePDF(row: ServiceRecord) {
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = 48;
-  let y = 56;
+  async function load() {
+    const data = await getCustomerWarranties(userId);
+    setActive(data.active);
+    setHistory(data.history);
+    setLoading(false);
+  }
+  useEffect(() => { load(); }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Shop details also come through the controller (mock API), same as the
-  // rest of this page's data — see billingController.ts.
-  const SHOP_INFO = await getShopInfo();
-
-  // --- Logo  ---
-  const logoX = margin;
-  const logoY = y;
-  try {
-    const logoDataUrl = await loadImageAsDataURL("/autokita-logo.png");
-    doc.addImage(logoDataUrl, "PNG", logoX, logoY - 14, 28, 28);
-  } catch {
-    doc.setDrawColor(15, 76, 92);
-    doc.setLineWidth(1.5);
-    doc.circle(logoX + 14, logoY + 10, 14, "S");
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(15, 76, 92);
-    doc.text("A", logoX + 14, logoY + 15, { align: "center" });
+  async function sendClaim(warrantyId: number) {
+    if (!claimText.trim()) return toast.error("Describe what's wrong first.");
+    setSubmitting(true);
+    const r = await submitWarrantyClaim(userId, warrantyId, claimText.trim());
+    setSubmitting(false);
+    if (!r.ok) return toast.error(r.message ?? "Could not submit the claim.");
+    toast.success("Claim sent — bring your vehicle in for inspection.");
+    setClaimingId(null);
+    setClaimText("");
+    await load();
   }
 
-  // --- Shop name / tagline ---
-  doc.setFontSize(16);
-  doc.setTextColor(20, 20, 20);
-  doc.text(SHOP_INFO.name, logoX + 36, logoY + 8);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(110, 110, 110);
-  doc.text(SHOP_INFO.tagline, logoX + 36, logoY + 21);
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
 
-  // --- Shop address block (right-aligned) ---
-  doc.setFontSize(9);
-  doc.setTextColor(90, 90, 90);
-  const addressLines = doc.splitTextToSize(SHOP_INFO.address, 220);
-  doc.text(addressLines, pageWidth - margin, y - 4, { align: "right" });
-  doc.text(`Tel: ${SHOP_INFO.phone}`, pageWidth - margin, y + 22, { align: "right" });
-  doc.text(SHOP_INFO.email, pageWidth - margin, y + 34, { align: "right" });
-  doc.text(`TIN: ${SHOP_INFO.tin}`, pageWidth - margin, y + 46, { align: "right" });
+  if (loading) {
+    return <div className="mt-8 py-16 text-center text-sm text-muted-foreground">Loading warranties…</div>;
+  }
 
-  y += 66;
-  doc.setDrawColor(220, 220, 220);
-  doc.line(margin, y, pageWidth - margin, y);
-  y += 28;
+  return (
+    <div className="mt-6 space-y-6">
+      <div className="rounded-xl border bg-card p-5">
+        <h3 className="text-sm font-bold">Active</h3>
+        {active.length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">No active warranties yet.</p>
+        ) : (
+          <div className="mt-3 divide-y">
+            {active.map((w) => (
+              <div key={w.warrantyId} className="py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-medium">{w.description}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {w.vehicle} · Covered until {fmtDate(w.expirationDate)}
+                    </div>
+                  </div>
+                  {w.hasPendingClaim ? (
+                    <span className="shrink-0 rounded-full bg-warning/15 px-2.5 py-1 text-[11px] font-semibold text-warning">
+                      Claim pending
+                    </span>
+                  ) : claimingId !== w.warrantyId ? (
+                    <button
+                      onClick={() => { setClaimingId(w.warrantyId); setClaimText(""); }}
+                      className="shrink-0 rounded-md border px-3 py-1.5 text-xs font-semibold hover:bg-accent"
+                    >
+                      Claim
+                    </button>
+                  ) : null}
+                </div>
+                {claimingId === w.warrantyId && (
+                  <div className="mt-3 rounded-lg border bg-muted/20 p-3">
+                    <label className="text-xs font-medium">What's wrong with it?</label>
+                    <textarea
+                      value={claimText}
+                      onChange={(e) => setClaimText(e.target.value)}
+                      rows={3}
+                      placeholder="e.g. Battery light turns on while driving"
+                      className="mt-1.5 w-full rounded-md border bg-background px-2.5 py-1.5 text-sm focus:border-brand focus:outline-none"
+                    />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Bring your vehicle in. Our mechanic will check the part first. If it's covered, the replacement is free.
+                    </p>
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        onClick={() => sendClaim(w.warrantyId)}
+                        disabled={submitting}
+                        className="rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-50"
+                      >
+                        {submitting ? "Sending…" : "Send claim"}
+                      </button>
+                      <button
+                        onClick={() => setClaimingId(null)}
+                        disabled={submitting}
+                        className="rounded-md border px-3 py-1.5 text-xs font-semibold hover:bg-accent"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-  // --- Invoice title + booking meta ---
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(20, 20, 20);
-  doc.text("SERVICE INVOICE", margin, y);
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(90, 90, 90);
-  doc.text(`Booking ID: ${row.id}`, pageWidth - margin, y - 12, { align: "right" });
-  doc.text(`Date: ${row.date}`, pageWidth - margin, y, { align: "right" });
-  doc.text(`Status: ${row.status}`, pageWidth - margin, y + 12, { align: "right" });
-
-  y += 34;
-
-  // --- Booking details grid ---
-  const details: [string, string][] = [
-    ["Vehicle", row.vehicle],
-    ["Mechanic", row.mechanic],
-    ["Location", row.location],
-    ["Warranty", row.warranty],
-    ["Service", row.desc],
-  ];
-  doc.setFontSize(9);
-  details.forEach(([label, value]) => {
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(60, 60, 60);
-    doc.text(`${label}:`, margin, y);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(20, 20, 20);
-    doc.text(value, margin + 80, y);
-    y += 16;
-  });
-
-  y += 12;
-
-  // --- Line items table ---
-  const col1 = margin;
-  const col2 = pageWidth - margin;
-
-  doc.setFillColor(15, 76, 92);
-  doc.rect(margin, y, pageWidth - margin * 2, 22, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text("DESCRIPTION", col1 + 8, y + 15);
-  doc.text("AMOUNT (PHP)", col2 - 8, y + 15, { align: "right" });
-  y += 22;
-
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(30, 30, 30);
-  row.items.forEach(([desc, amt], idx) => {
-    const rowHeight = 22;
-    if (idx % 2 === 1) {
-      doc.setFillColor(246, 247, 248);
-      doc.rect(margin, y, pageWidth - margin * 2, rowHeight, "F");
-    }
-    doc.text(desc, col1 + 8, y + 15);
-    doc.text(amt, col2 - 8, y + 15, { align: "right" });
-    y += rowHeight;
-  });
-
-  // Total row
-  doc.setDrawColor(15, 76, 92);
-  doc.setLineWidth(1);
-  doc.line(margin, y, pageWidth - margin, y);
-  y += 20;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.setTextColor(15, 76, 92);
-  doc.text("TOTAL", col1 + 8, y);
-  doc.text(`₱ ${row.amt}`, col2 - 8, y, { align: "right" });
-
-  y += 40;
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(8.5);
-  doc.setTextColor(140, 140, 140);
-  doc.text(
-    "Thank you for choosing AutoKita. This invoice was generated electronically and is valid without a signature.",
-    margin,
-    y,
-    { maxWidth: pageWidth - margin * 2 }
+      <div className="rounded-xl border bg-card p-5">
+        <h3 className="text-sm font-bold">Past</h3>
+        {history.length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">No expired, voided, or claimed warranties.</p>
+        ) : (
+          <div className="mt-3 divide-y">
+            {history.map((w) => (
+              <div key={w.warrantyId} className="flex items-center justify-between gap-3 py-3">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">{w.description}</div>
+                  <div className="text-xs text-muted-foreground">{w.vehicle}</div>
+                </div>
+                <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold capitalize text-muted-foreground">
+                  {w.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
-
-  doc.save(`${row.id}-invoice.pdf`);
 }
 
 export default History;
