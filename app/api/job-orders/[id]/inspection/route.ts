@@ -12,9 +12,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     // used to populate the Time Tracking panel with real numbers.
     const headerResult = await db.query(
       `
-      SELECT gid.*, jo.started_at, jo.date_promised, jo.estimated_duration, jo.actual_grand_total
+      SELECT gid.*, jo.started_at, jo.date_promised, jo.estimated_duration, jo.actual_grand_total,
+             u.contact_number
       FROM get_inspection_data($1) gid
       JOIN job_orders jo ON jo.id = gid.id
+      JOIN users u ON u.id = jo.user_id
       `,
       [id]
     )

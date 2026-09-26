@@ -27,10 +27,9 @@ AS $$
         ep.jobs_capacity,
         ep.color,
         (SELECT COUNT(*)
-         FROM system_audit_logs sal
-         WHERE sal.employees_id = e.id
-           AND sal.entity_type = 'job_orders'
-           AND sal.action_performed = 'created'
+         FROM job_orders jo
+         WHERE jo.assigned_mechanic_id = e.id
+           AND jo.status NOT IN ('completed', 'released', 'cancelled')
         ) AS active_jobs
     FROM employees e
     LEFT JOIN employee_profiles ep ON ep.employee_id = e.id
@@ -103,14 +102,12 @@ AS $$
         v.vehicle_model,
         v.plate_number,
         STRING_AGG(DISTINCT s.service_name, ', ') AS service_names
-    FROM system_audit_logs sal
-    JOIN job_orders jo ON jo.id = sal.entity_id
+    FROM job_orders jo
     JOIN users u       ON u.id = jo.user_id
     JOIN vehicles v    ON v.id = jo.vehicle_id
     LEFT JOIN job_order_services jos ON jos.job_order_id = jo.id
     LEFT JOIN services s             ON s.id = jos.service_id
-    WHERE sal.employees_id = p_employee_id
-      AND sal.entity_type = 'job_orders'
+    WHERE jo.assigned_mechanic_id = p_employee_id
     GROUP BY jo.id, jo.jo_date, jo.status, jo.actual_grand_total,
              u.first_name, u.last_name, v.vehicle_model, v.plate_number
     ORDER BY jo.jo_date DESC;

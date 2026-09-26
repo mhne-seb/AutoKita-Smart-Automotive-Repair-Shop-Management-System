@@ -17,9 +17,11 @@ import {
   Gauge,
   Hash,
 } from "lucide-react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceModal";
 import { ShopLoading } from "@/components/ShopLoading";
-import { isValidPhPlate, PLATE_FORMAT_ERROR } from "@/lib/plateNumber";
+import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from "@/lib/plate";
 
 function RegisterVehicle() {
   useEffect(() => { document.title = "Register New Vehicle — AutoKita"; }, []);
@@ -47,6 +49,7 @@ function RegisterVehicle() {
   const [plateError, setPlateError] = useState<string | undefined>(undefined);
   const [serviceCategory, setServiceCategory] = useState("");
   const [notes, setNotes] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const userId = sessionStorage.getItem("autokita_user_id");
@@ -73,18 +76,49 @@ function RegisterVehicle() {
     if (isSubmitting) return;
     const userId = sessionStorage.getItem("autokita_user_id");
     if (!userId) {
-      alert("You must be logged in to book a service.");
+      toast.error("You must be logged in to book a service.");
       return;
     }
 
+    const errs: Record<string, string> = {};
+
     if (!selectedVehicleId) {
-      alert("Please select a vehicle, or choose \"+ Register New Vehicle\".");
-      return;
+      errs.selectedVehicleId = "Please select a vehicle or choose '+ Register New Vehicle'.";
     }
 
     const isVehicleActive = (plate: string) => {
       return activeJobOrders.some(jo => jo.plate_number === plate);
     };
+
+    if (selectedVehicleId === "new") {
+      if (!vehicleModel.trim()) {
+        errs.vehicleModel = "Vehicle model is required (e.g., Civic, Vios).";
+      }
+      if (!vehiclePlate.trim()) {
+        errs.vehiclePlate = "License plate is required.";
+      } else {
+        const cleanPlate = normalizePlateNumber(vehiclePlate);
+        if (!isValidPlateNumber(cleanPlate)) {
+          errs.vehiclePlate = PLATE_FORMAT_ERROR_MESSAGE;
+        } else if (isVehicleActive(cleanPlate) || isVehicleActive(vehiclePlate)) {
+          setInServicePlate(vehiclePlate);
+          return;
+        }
+      }
+      if (vehicleMileage && parseFloat(vehicleMileage) < 0) {
+        errs.vehicleMileage = "Mileage cannot be negative.";
+      }
+    }
+
+    if (!serviceCategory) {
+      errs.serviceCategory = "Please select a service category.";
+    }
+
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      toast.error("Please fill in the required fields highlighted in red.");
+      return;
+    }
 
     const reqBody: any = {
       userId: parseInt(userId, 10),
@@ -94,25 +128,14 @@ function RegisterVehicle() {
     };
 
     if (selectedVehicleId === "new") {
-      if (!vehicleModel || !vehiclePlate) {
-        alert("Please provide the new vehicle's model and license plate.");
-        return;
-      }
-      if (!isValidPhPlate(vehiclePlate)) {
-        setPlateError(PLATE_FORMAT_ERROR);
-        return;
-      }
-      if (isVehicleActive(vehiclePlate)) {
-        setInServicePlate(vehiclePlate);
-        return;
-      }
+      const cleanPlate = normalizePlateNumber(vehiclePlate);
       reqBody.newVehicleDetails = {
         make: vehicleMake || null,
-        model: vehicleModel,
+        model: vehicleModel.trim(),
         year: vehicleYear || new Date().getFullYear().toString(),
         type: vehicleTransmission || "Sedan",
         mileage: vehicleMileage || "0",
-        plate: vehiclePlate
+        plate: cleanPlate
       };
     } else {
       reqBody.vehicleId = parseInt(selectedVehicleId, 10);
@@ -128,12 +151,24 @@ function RegisterVehicle() {
       const data = await res.json();
       if (data.success) {
         setShowConfirmModal(true);
+      } else if (data.code === 'INVALID_PLATE_FORMAT') {
+        setFieldErrors((prev) => ({
+          ...prev,
+          vehiclePlate: data.message || "Invalid license plate format (e.g., ABC-1234 or 123-ABC)."
+        }));
+        toast.error("Invalid license plate format.");
+      } else if (data.code === 'PLATE_REGISTERED') {
+        setFieldErrors((prev) => ({
+          ...prev,
+          vehiclePlate: "This vehicle is already registered. Please select it from your saved vehicles."
+        }));
+        toast.error("Vehicle already registered.");
       } else {
-        alert("Booking failed: " + data.message);
+        toast.error("Booking failed: " + (data.message || "Please check details and try again."));
       }
     } catch (err) {
       console.error(err);
-      alert("An error occurred while confirming your booking.");
+      toast.error("An error occurred while confirming your booking. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -202,8 +237,16 @@ function RegisterVehicle() {
               <label className="text-[10px] font-semibold uppercase text-muted-foreground">Select Vehicle</label>
               <select
                 value={selectedVehicleId}
-                onChange={(e) => setSelectedVehicleId(e.target.value)}
-                className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15"
+                onChange={(e) => {
+                  setSelectedVehicleId(e.target.value);
+                  if (fieldErrors.selectedVehicleId) setFieldErrors(p => ({ ...p, selectedVehicleId: "" }));
+                }}
+                className={cn(
+                  "mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground transition-colors focus:outline-none",
+                  fieldErrors.selectedVehicleId
+                    ? "border-rose-500 focus:border-rose-500 ring-1 ring-rose-500"
+                    : "border-input focus:border-brand focus:ring-2 focus:ring-brand/15"
+                )}
               >
                 <option value="" disabled> Select a vehicle...</option>
                 {vehicles.map(v => {
@@ -216,9 +259,11 @@ function RegisterVehicle() {
                 })}
                 <option value="new">+ Register New Vehicle</option>
               </select>
-              {selectedVehicleId === "" && (
-                <p className="mt-2 text-xs text-muted-forground"> Choose one of your saved vehicles, or register a new one.</p>
-              )}
+              {fieldErrors.selectedVehicleId ? (
+                <p className="mt-1 text-xs text-rose-500 font-medium">{fieldErrors.selectedVehicleId}</p>
+              ) : selectedVehicleId === "" ? (
+                <p className="mt-2 text-xs text-muted-foreground"> Choose one of your saved vehicles, or register a new one.</p>
+              ) : null}
             </div>
 
             {selectedVehicleId === "new" && (
@@ -226,18 +271,41 @@ function RegisterVehicle() {
                 <div className="mb-4 h-px bg-border" />
                 <div className="grid gap-3 md:grid-cols-2">
                   <S label="Vehicle Make (Brand)" placeholder="Select Brand" value={vehicleMake} onChange={(e) => setVehicleMake(e.target.value)} options={["Toyota", "Honda", "Mitsubishi", "Ford", "Nissan", "Hyundai", "Kia", "Suzuki", "Isuzu", "Mazda", "Chevrolet", "Subaru", "Volkswagen", "BMW", "Mercedes-Benz", "Peugeot", "Geely", "Chery", "MG"]} />
-                  <F label="Vehicle Model" placeholder="e.g., Vios, Civic, Montero" value={vehicleModel} onChange={(e) => setVehicleModel(e.target.value)} />
+                  <F
+                    label="Vehicle Model"
+                    placeholder="e.g., Vios, Civic, Montero"
+                    value={vehicleModel}
+                    onChange={(e) => {
+                      setVehicleModel(e.target.value);
+                      if (fieldErrors.vehicleModel) setFieldErrors(p => ({ ...p, vehicleModel: "" }));
+                    }}
+                    error={fieldErrors.vehicleModel}
+                  />
                   <S label="Year" placeholder="Select Year" value={vehicleYear} onChange={(e) => setVehicleYear(e.target.value)} options={["2025", "2024", "2023", "2022", "2021", "2020", "2019"]} />
                   <S label="Transmission" placeholder="Select Transmission" value={vehicleTransmission} onChange={(e) => setVehicleTransmission(e.target.value)} options={["Automatic", "Manual"]} />
-                  <F label="Mileage" placeholder="e.g., 50000" type="number" value={vehicleMileage} onChange={(e) => setVehicleMileage(e.target.value)} icon={Gauge} />
+                  <F
+                    label="Mileage"
+                    placeholder="e.g., 50000"
+                    type="number"
+                    value={vehicleMileage}
+                    onChange={(e) => {
+                      setVehicleMileage(e.target.value);
+                      if (fieldErrors.vehicleMileage) setFieldErrors(p => ({ ...p, vehicleMileage: "" }));
+                    }}
+                    icon={Gauge}
+                    error={fieldErrors.vehicleMileage}
+                  />
                   <F
                     label="License Plate"
                     placeholder="e.g., ABC-1234"
                     wide
                     value={vehiclePlate}
-                    onChange={(e) => { setVehiclePlate(e.target.value); setPlateError(undefined); }}
+                    onChange={(e) => {
+                      setVehiclePlate(e.target.value);
+                      if (fieldErrors.vehiclePlate) setFieldErrors(p => ({ ...p, vehiclePlate: "" }));
+                    }}
                     icon={Hash}
-                    error={plateError}
+                    error={fieldErrors.vehiclePlate}
                   />
                 </div>
                 <label className="mt-4 flex items-center gap-2 text-sm">
@@ -258,8 +326,16 @@ function RegisterVehicle() {
               <label className="text-sm font-medium">Service Category</label>
               <select
                 value={serviceCategory}
-                onChange={(e) => setServiceCategory(e.target.value)}
-                className="mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15"
+                onChange={(e) => {
+                  setServiceCategory(e.target.value);
+                  if (fieldErrors.serviceCategory) setFieldErrors(p => ({ ...p, serviceCategory: "" }));
+                }}
+                className={cn(
+                  "mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground transition-colors focus:outline-none",
+                  fieldErrors.serviceCategory
+                    ? "border-rose-500 focus:border-rose-500 ring-1 ring-rose-500"
+                    : "border-input focus:border-brand focus:ring-2 focus:ring-brand/15"
+                )}
               >
                 <option value="">Select a Service</option>
                 <option value="Periodic Maintenance">Periodic Maintenance</option>
@@ -267,6 +343,9 @@ function RegisterVehicle() {
                 <option value="Checkup & Diagnostics">Checkup & Diagnostics</option>
                 <option value="Body & Paint">Body & Paint</option>
               </select>
+              {fieldErrors.serviceCategory && (
+                <p className="mt-1 text-xs text-rose-500 font-medium">{fieldErrors.serviceCategory}</p>
+              )}
             </div>
             <div className="mt-4">
               <label className="text-sm font-medium">Additional Notes or Concerns</label>
@@ -411,26 +490,39 @@ function F({ label, wide, icon: Icon, error, ...p }: { label: string; wide?: boo
         {Icon && <Icon className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />}
         <input
           {...p}
-          className={`w-full rounded-md border bg-background py-2 text-sm transition-colors focus:outline-none focus:ring-2 ${
-            error ? "border-rose-400 focus:border-rose-400 focus:ring-rose-400/15" : "focus:border-brand focus:ring-brand/15"
-          } ${Icon ? "pl-8 pr-3" : "px-3"}`}
+          className={cn(
+            "w-full rounded-md border bg-background py-2 text-sm transition-colors focus:outline-none",
+            error
+              ? "border-rose-500 text-rose-950 dark:text-rose-100 focus:border-rose-500 ring-1 ring-rose-500"
+              : "border-input focus:border-brand focus:ring-2 focus:ring-brand/15",
+            Icon ? "pl-8 pr-3" : "px-3"
+          )}
         />
       </div>
-      {error && <p className="mt-1 text-[11px] text-rose-500">{error}</p>}
+      {error && <p className="mt-1 text-xs text-rose-500 font-medium">{error}</p>}
     </div>
   );
 }
 
-function S({ label, placeholder, options, ...p }: { label: string; placeholder: string, options?: string[] } & React.SelectHTMLAttributes<HTMLSelectElement>) {
+function S({ label, placeholder, options, error, ...p }: { label: string; placeholder: string; options?: string[]; error?: string } & React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <div>
       <label className="text-[10px] font-semibold uppercase text-muted-foreground">{label}</label>
-      <select {...p} className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15">
+      <select
+        {...p}
+        className={cn(
+          "mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground transition-colors focus:outline-none",
+          error
+            ? "border-rose-500 focus:border-rose-500 ring-1 ring-rose-500"
+            : "border-input focus:border-brand focus:ring-2 focus:ring-brand/15"
+        )}
+      >
         <option value="">{placeholder}</option>
         {options?.map(opt => (
           <option key={opt} value={opt}>{opt}</option>
         ))}
       </select>
+      {error && <p className="mt-1 text-xs text-rose-500 font-medium">{error}</p>}
     </div>
   );
 }

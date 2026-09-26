@@ -161,6 +161,7 @@ function toInspectionData(row: any): InspectionData {
     vehicleTitle: `${row.vin ? '' : ''}${row.vehicle_model ?? 'Unknown Vehicle'}`.trim(),
     plate: row.plate_number || '—',
     customer: `${row.first_name ?? ''} ${row.last_name ?? ''}`.trim() || 'Unknown Customer',
+    contactNumber: row.contact_number || '',
     photoSlots,
     findings,
     timer: {

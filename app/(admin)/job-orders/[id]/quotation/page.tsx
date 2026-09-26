@@ -139,7 +139,7 @@ export default function page() {
   // then end up with two copies of every service.
   const saveInFlight = useRef(false)
   // AI predictions for each service
-  const [aiPredictions, setAiPredictions] = useState<Record<string, { predicted_amount: number; predicted_duration_mins?: number; is_mock?: boolean }>>({})
+  const [aiPredictions, setAiPredictions] = useState<Record<string, { predicted_amount: number; predicted_duration_mins?: number; is_mock?: boolean; is_low_data?: boolean; sample_count?: number; min_samples_required?: number }>>({})
 
   useEffect(() => {
     // Don't auto-save until initial data has loaded and seeded
@@ -209,14 +209,24 @@ export default function page() {
             // Shared
             base_price: basePrice,
             base_duration_hours: baseDurationHours,
-            is_price_fixed: 0,
+            is_price_fixed: dbService?.is_price_fixed ? 1 : 0,
             vehicle_age: vehicleAge,
             vehicle_type: vehicleType,
             mileage: actualMileage,
           }),
         })
         const data = await res.json()
-        if (data.predicted_amount) {
+        if (data.is_low_data || data.can_estimate === false) {
+          setAiPredictions(prev => ({
+            ...prev,
+            [s.id]: {
+              is_low_data: true,
+              sample_count: data.sample_count ?? 0,
+              min_samples_required: data.min_samples_required ?? 10,
+              predicted_amount: 0,
+            }
+          }))
+        } else if (data.predicted_amount) {
           setAiPredictions(prev => ({ ...prev, [s.id]: data }))
         } else if (s.estimated_amount && s.estimated_amount > 0) {
           // Fall back to stored value if prediction fails
@@ -413,9 +423,10 @@ export default function page() {
     try {
       const servicesWithEstimates = services.map(s => {
         const prediction = aiPredictions[s.id]
+        const validAiAmount = prediction && !prediction.is_low_data && prediction.predicted_amount > 0 ? prediction.predicted_amount : null
         return {
           ...s,
-          estimated_amount: prediction?.predicted_amount || s.estimated_amount || s.laborCost,
+          estimated_amount: validAiAmount || s.estimated_amount || s.laborCost,
           actual_amount: s.laborCost
         }
       })
@@ -520,15 +531,15 @@ export default function page() {
 
   async function confirmAddService() {
     const picked: QuotationService[] = []
-    let next = services.length
+    let nextNum = services.length
 
     for (const id of selectedServiceIds) {
       const srv = availableServices.find((s) => String(s.id) === id)
       if (!srv) continue
-      next += 1
+      nextNum += 1
       picked.push({
-        id: `SVC-${next}`,
-        code: `SVC-${String(next).padStart(3, '0')}`,
+        id: `SVC-new-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        code: `SVC-${String(nextNum).padStart(3, '0')}`,
         name: srv.service_name,
         description: srv.service_name,
         laborHours: Number(srv.base_duration_hours) || 1,
@@ -539,10 +550,10 @@ export default function page() {
     }
 
     if (addCustomService && customServiceName.trim()) {
-      next += 1
+      nextNum += 1
       picked.push({
-        id: `SVC-${next}`,
-        code: `SVC-${String(next).padStart(3, '0')}`,
+        id: `SVC-new-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        code: `SVC-${String(nextNum).padStart(3, '0')}`,
         name: customServiceName.trim(),
         description: customServiceName.trim(),
         laborHours: 1,
@@ -665,12 +676,12 @@ export default function page() {
             </div>
           )}
 
-          {services.map((s) => {
+          {services.map((s, sIdx) => {
             const partsSubtotal = s.parts.reduce((sum, p) => sum + p.qty * p.unitPrice, 0)
             const inStock = s.parts.filter((p) => p.status === 'in-stock').length
             const editing = editingServiceId === s.id
             return (
-              <div key={s.id} className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div key={`${s.id}-${sIdx}`} className="rounded-2xl border border-slate-200 bg-white p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100">🔧</div>
@@ -696,8 +707,13 @@ export default function page() {
                     <div>
                       <p className="flex items-center gap-1.5 text-slate-400">
                         Labor Time
-                        {!s.dbServiceId ? (
-                          <span className="inline-flex cursor-help items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 hover:bg-slate-200" title="Need more historical data for AI estimation">
+                        {!s.dbServiceId || aiPredictions[s.id]?.is_low_data ? (
+                          <span
+                            className="inline-flex cursor-help items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 hover:bg-slate-200"
+                            title={aiPredictions[s.id]?.sample_count !== undefined
+                              ? `Need at least 10 completed jobs for AI estimation (${aiPredictions[s.id].sample_count}/10 completed)`
+                              : "Need more historical data for AI estimation"}
+                          >
                             🤖 Low Data
                           </span>
                         ) : aiPredictions[s.id] && aiPredictions[s.id].predicted_duration_mins && (
@@ -726,18 +742,23 @@ export default function page() {
                     <div>
                       <p className="flex items-center gap-1.5 text-slate-400">
                         Labor Cost
-                        {!s.dbServiceId ? (
-                          <span className="inline-flex cursor-help items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 hover:bg-slate-200" title="Need more historical data for AI estimation">
+                        {!s.dbServiceId || aiPredictions[s.id]?.is_low_data ? (
+                          <span
+                            className="inline-flex cursor-help items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 hover:bg-slate-200"
+                            title={aiPredictions[s.id]?.sample_count !== undefined
+                              ? `Need at least 10 completed jobs for AI estimation (${aiPredictions[s.id].sample_count}/10 completed)`
+                              : "Need more historical data for AI estimation"}
+                          >
                             🤖 Low Data
                           </span>
-                        ) : aiPredictions[s.id] && (
+                        ) : aiPredictions[s.id] && aiPredictions[s.id].predicted_amount ? (
                           <span
                             className="inline-flex cursor-help items-center gap-1 rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-700 hover:bg-purple-200"
                             title={`${aiPredictions[s.id].is_mock ? 'ai' : 'AI'} suggests ${currency(aiPredictions[s.id].predicted_amount)}`}
                           >
                             🤖 {currency(aiPredictions[s.id].predicted_amount)}
                           </span>
-                        )}
+                        ) : null}
                       </p>
                       {editing ? (
                         <input
@@ -860,8 +881,8 @@ export default function page() {
           <div className="rounded-2xl bg-slate-900 p-5 text-white">
             <p className="mb-3 font-bold">📄 Quotation Summary</p>
             <div className="space-y-2 text-sm text-slate-300">
-              {services.map((s) => (
-                <div key={s.id} className="flex justify-between">
+              {services.map((s, sIdx) => (
+                <div key={`${s.id}-${sIdx}`} className="flex justify-between">
                   <span>{s.name}</span>
                   <span>{currency(s.laborCost + s.parts.reduce((sum, p) => sum + p.qty * p.unitPrice, 0))}</span>
                 </div>
@@ -1058,8 +1079,8 @@ export default function page() {
             )}
 
             <div className="mt-4 rounded-xl border border-slate-200">
-              {services.map((s) => (
-                <div key={s.id} className="border-b border-slate-100 px-3 py-2.5 text-sm last:border-b-0">
+              {services.map((s, sIdx) => (
+                <div key={`${s.id}-${sIdx}`} className="border-b border-slate-100 px-3 py-2.5 text-sm last:border-b-0">
                   <div className="flex items-start justify-between gap-3">
                     <p className="font-semibold text-slate-800">{s.name}</p>
                     <span className="shrink-0 font-semibold text-slate-700">

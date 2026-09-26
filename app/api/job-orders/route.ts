@@ -32,7 +32,9 @@ export async function GET(request: Request) {
         gol.vehicle_model,
         v.vehicle_year,
         gol.plate_number,
-        STRING_AGG(DISTINCT s.service_name, ', ') AS service_names
+        STRING_AGG(DISTINCT s.service_name, ', ') AS service_names,
+        gol.mechanic_name,
+        gol.assigned_mechanic_id
       FROM get_job_orders_list() gol
       JOIN job_orders jo ON jo.id = gol.id
       LEFT JOIN vehicles v ON v.id = jo.vehicle_id
@@ -40,7 +42,7 @@ export async function GET(request: Request) {
       LEFT JOIN services s ON s.id = jos.service_id
       GROUP BY gol.id, jo.date_arrived, gol.status, gol.actual_grand_total, jo.balance,
                jo.user_id, gol.first_name, gol.last_name, gol.vehicle_model,
-               v.vehicle_year, gol.plate_number
+               v.vehicle_year, gol.plate_number, gol.mechanic_name, gol.assigned_mechanic_id
       ORDER BY gol.id
       LIMIT $1 OFFSET $2
       `,

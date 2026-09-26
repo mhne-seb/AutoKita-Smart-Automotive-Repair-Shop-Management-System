@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { issueOtp, OTP_TTL_MINUTES, FINDING_OTP_PURPOSE } from '@/lib/otp'
 import { sendOtpEmail } from '@/lib/mail'
+import { isVerificationBypassed } from '@/lib/testMode'
 
 // Step 1 of approving a mid-service finding — same shape as the quotation
 // OTP: email a 6-digit code, hand back a signed token bound to this customer
@@ -49,6 +50,19 @@ export async function POST(request: NextRequest) {
       : `${names[0]} and ${names.length - 1} more`
     const cost = Number(finding.extra_cost ?? 0)
     const costLabel = cost > 0 ? ` (₱${cost.toLocaleString('en-PH')})` : ''
+
+    if (isVerificationBypassed()) {
+      return NextResponse.json({
+        success: true,
+        token: 'test-bypass-token',
+        forWork: `${workLabel}${costLabel}`,
+        sentTo: 'Bypassed (Test Mode)',
+        expiresAt: Date.now() + 600000,
+        expiresMinutes: 10,
+        devCode: '123456',
+        bypassed: true,
+      })
+    }
 
     const { code, token, expiresAt } = issueOtp(FINDING_OTP_PURPOSE, `${userId}:${findingId}`)
 

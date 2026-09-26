@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { issueOtp, OTP_TTL_MINUTES, QUOTATION_OTP_PURPOSE } from '@/lib/otp'
 import { sendOtpEmail } from '@/lib/mail'
+import { isVerificationBypassed } from '@/lib/testMode'
 
 // Step 1 of confirming a quotation: email the customer a 6-digit code and
 // hand the browser a signed token to present alongside it. The confirm
@@ -34,6 +35,18 @@ export async function POST(request: NextRequest) {
     const userRes = await db.query(`SELECT email, first_name, nickname FROM users WHERE id = $1`, [userId])
     const user = userRes.rows[0]
     if (!user?.email) return NextResponse.json({ success: false, message: 'No email on file' }, { status: 400 })
+
+    if (isVerificationBypassed()) {
+      return NextResponse.json({
+        success: true,
+        token: 'test-bypass-token',
+        sentTo: 'Bypassed (Test Mode)',
+        expiresAt: Date.now() + 600000,
+        expiresMinutes: 10,
+        devCode: '123456',
+        bypassed: true,
+      })
+    }
 
     const { code, token, expiresAt } = issueOtp(QUOTATION_OTP_PURPOSE, `${userId}:${jobOrderId}`)
 

@@ -18,10 +18,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ success: false, message: 'partId and a status of received|to_order|ordered are required' }, { status: 400 })
     }
 
-    // A part can only arrive after it was bought: "received" is allowed from
-    // ordered / in_transit (i.e. it's on a recorded purchase), never straight
-    // from to_order. The button is disabled for that case too; this is the
-    // guarantee.
+    // Parts can be marked received from ordered, in_transit, or directly from to_order.
     if (status === 'received') {
       const cur = await db.query(
         `SELECT status::text FROM job_order_parts WHERE id = $1::int AND job_order_id = $2::int`,
@@ -29,12 +26,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       )
       const from = cur.rows[0]?.status
       if (!from) return NextResponse.json({ success: false, message: 'Part not found' }, { status: 404 })
-      if (from !== 'ordered' && from !== 'in_transit') {
-        return NextResponse.json(
-          { success: false, message: 'Record the purchase first — a part is marked received only after it has been ordered.' },
-          { status: 409 },
-        )
-      }
     }
 
     const result = await db.query(

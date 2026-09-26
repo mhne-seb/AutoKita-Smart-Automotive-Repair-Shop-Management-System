@@ -17,7 +17,7 @@ export const jobOrders: JobOrderCard[] = [
     paid: true,
     mechanic: 'Jose Santos',
     stepsDone: 3,
-    stepsTotal: 4,
+    stepsTotal: 6,
   },
   {
     id: 'i2',
@@ -32,7 +32,7 @@ export const jobOrders: JobOrderCard[] = [
     paid: true,
     mechanic: 'Jose Santos',
     stepsDone: 0,
-    stepsTotal: 4,
+    stepsTotal: 6,
   },
   {
     id: 'i3',
@@ -47,7 +47,7 @@ export const jobOrders: JobOrderCard[] = [
     paid: false,
     mechanic: 'Jose Santos',
     stepsDone: 0,
-    stepsTotal: 4,
+    stepsTotal: 6,
   },
   {
     id: 'i4',
@@ -62,7 +62,7 @@ export const jobOrders: JobOrderCard[] = [
     paid: true,
     mechanic: 'Jose Santos',
     stepsDone: 4,
-    stepsTotal: 4,
+    stepsTotal: 6,
   },
   {
     // Second vehicle for the demo Customer login (CUST-2026-1234 / Juan Dela
@@ -80,7 +80,7 @@ export const jobOrders: JobOrderCard[] = [
     paid: false,
     mechanic: 'Jose Santos',
     stepsDone: 2,
-    stepsTotal: 4,
+    stepsTotal: 6,
   },
 ]
 

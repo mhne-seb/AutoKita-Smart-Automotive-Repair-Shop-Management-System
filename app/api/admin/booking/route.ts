@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { isValidPhPlate, normalizePlate, PLATE_FORMAT_ERROR } from '@/lib/plateNumber'
+import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,8 +10,8 @@ export async function POST(req: NextRequest) {
     if (!ticketData) {
       return NextResponse.json({ success: false, message: 'Missing ticket data' }, { status: 400 })
     }
-    if (!ticketData.licensePlate || !isValidPhPlate(ticketData.licensePlate)) {
-      return NextResponse.json({ success: false, message: PLATE_FORMAT_ERROR }, { status: 400 })
+    if (!ticketData.licensePlate || !isValidPlateNumber(normalizePlateNumber(ticketData.licensePlate))) {
+      return NextResponse.json({ success: false, message: PLATE_FORMAT_ERROR_MESSAGE }, { status: 400 })
     }
 
     // 1. Handle User creation / lookup
@@ -49,10 +49,14 @@ export async function POST(req: NextRequest) {
     // vehicles.plate_number is UNIQUE, so reuse the car if it is already
     // registered — same lookup-then-insert we do for the user above.
     let vehicleId
-    const normalizedPlate = normalizePlate(ticketData.licensePlate)
+    const cleanPlate = normalizePlateNumber(ticketData.licensePlate)
+    if (ticketData.licensePlate && !isValidPlateNumber(cleanPlate)) {
+      return NextResponse.json({ success: false, message: PLATE_FORMAT_ERROR_MESSAGE }, { status: 400 })
+    }
+
     const checkVeh = await db.query(
-      `SELECT id FROM vehicles WHERE plate_number = $1`,
-      [normalizedPlate]
+      `SELECT id FROM vehicles WHERE UPPER(plate_number) = UPPER($1) OR UPPER(plate_number) = UPPER($2)`,
+      [cleanPlate, ticketData.licensePlate || '']
     )
 
     if (checkVeh.rows.length > 0) {
@@ -65,7 +69,7 @@ export async function POST(req: NextRequest) {
           userId,
           ticketData.vehicleModel || 'Unknown',
           parseInt(ticketData.year) || 2026,
-          normalizedPlate,
+          cleanPlate,
           ticketData.transmission || 'Automatic',
           parseFloat(ticketData.mileage) || 0
         ]
@@ -131,6 +135,12 @@ export async function POST(req: NextRequest) {
 
   } catch (err: any) {
     console.error('Admin booking error:', err)
+    if (err?.code === '23514' && err?.constraint === 'vehicles_plate_number_format') {
+      return NextResponse.json(
+        { success: false, message: PLATE_FORMAT_ERROR_MESSAGE },
+        { status: 400 }
+      )
+    }
     return NextResponse.json(
       { success: false, message: 'Internal server error', debug: err.message },
       { status: 500 }
