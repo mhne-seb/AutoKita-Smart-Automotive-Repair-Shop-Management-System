@@ -296,6 +296,7 @@ export default function page() {
   const [uploadingSlot, setUploadingSlot] = useState<string | null>(null)
   const [lightbox, setLightbox] = useState<{ url: string; label: string } | null>(null)
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
+  const galleryInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
 
   // While the customer is reviewing the report we sent them, it must not change
   // underneath them — the record they approve has to be the record we sent.
@@ -312,6 +313,12 @@ export default function page() {
     jobOrder?.stage === 'inspecting' ? preDiagnostic?.status : 'approved'
   const isApproved = inspectionStatus === 'approved'
   const isLocked = inspectionStatus === 'pending' || isApproved
+  // While a warranty claim on this job order is undecided, the report can't
+  // be built yet — free or paid decides what goes in it. Photos stay on plain
+  // isLocked on purpose: they're the evidence a denial ("misuse or
+  // accident") has to rest on, so they must be takeable BEFORE deciding.
+  const claimPending = warrantyClaim?.decision === 'pending'
+  const reportLocked = isLocked || claimPending
 
   // Auto-refresh while waiting on the customer's decision, so the admin sees
   // "Approved" / "Customer has concerns" without having to reload the page.
@@ -461,7 +468,7 @@ export default function page() {
   // Opens the editor with every field seeded from the finding, so the form
   // never shows leftovers from whichever finding was edited before it.
   function startEditingFinding(f: MechanicalFinding) {
-    if (isLocked) return
+    if (reportLocked) return
     setEditingFindingId(f.id)
     setEditFindingName(f.name)
     setEditFindingNote(f.note)
@@ -469,7 +476,7 @@ export default function page() {
   }
 
   async function updateFindingContent(fId: string, name: string, note: string, status: FindingStatus) {
-    if (isLocked || !name.trim() || !note.trim()) return
+    if (reportLocked || !name.trim() || !note.trim()) return
     setFindings((prev) => prev.map((f) => (f.id === fId ? { ...f, name, note, status } : f)))
     setEditingFindingId(null)
 
@@ -479,7 +486,7 @@ export default function page() {
   }
 
   async function deleteFinding(fId: string) {
-    if (isLocked) return
+    if (reportLocked) return
     // Optimistic update
     setFindings((prev) => prev.filter((f) => f.id !== fId))
     // The deleted row might be the one currently open for editing — if so,
@@ -494,7 +501,7 @@ export default function page() {
   }
 
   async function addFinding() {
-    if (isLocked || editingFindingId !== null || addingFinding) return
+    if (reportLocked || editingFindingId !== null || addingFinding) return
     const newFindingData = {
       name: '',
       note: '',
@@ -531,7 +538,7 @@ export default function page() {
   // Sends the current findings for approval — a real, persisted database
   // write (creates a pre_diagnostics round) instead of the old fake local flag.
   async function askToUseScanner() {
-    if (!jobOrder) return
+    if (!jobOrder || reportLocked) return
     setRequestingScan(true)
     const result = await requestScanAuthorization(jobOrderId, '')
     setRequestingScan(false)
@@ -546,6 +553,7 @@ export default function page() {
   }
 
     async function sendInspectionForApproval() {
+    if (reportLocked) return
     // Exception 1 (paper, Manage Real-Time Progress): the report can't go
     // out without photo evidence of the vehicle's condition — that's what
     // protects the shop and the customer if the car's state is disputed
@@ -584,6 +592,12 @@ export default function page() {
       {warrantyClaim && (
         <WarrantyClaimCard claim={warrantyClaim} jobOrderId={jobOrderId} onDecided={loadWarrantyClaim} />
       )}
+      {claimPending && (
+        <p className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <AlertCircle size={16} className="mt-0.5 shrink-0" />
+          Findings and the inspection report unlock once the warranty claim is decided. You can still take photos now — use them to show the part&apos;s condition, especially before denying a claim.
+        </p>
+      )}
 
       <div className={hasSidebar ? "grid grid-cols-1 gap-6 xl:grid-cols-[1fr_340px]" : "block"}>
         <div className="space-y-6">
@@ -621,8 +635,12 @@ export default function page() {
               )}
               <button
                 onClick={sendInspectionForApproval}
-                disabled={sending || isLocked}
-                className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-default disabled:bg-emerald-600"
+                disabled={sending || reportLocked}
+                // Disabled normally means "already sent" (green). Held back by
+                // an undecided claim is not sent — grey it out instead.
+                className={`flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 ${
+                  claimPending && !isLocked ? 'disabled:cursor-not-allowed disabled:opacity-40' : 'disabled:cursor-default disabled:bg-emerald-600'
+                }`}
               >
                 {inspectionStatus === 'disputed' ? (
                     <AlertCircle size={15} />
@@ -633,12 +651,14 @@ export default function page() {
                   )}
                 {sending
                   ? 'Sending…'
+                  : claimPending && !isLocked
+                  ? 'Decide the warranty claim first'
                   : inspectionStatus === 'pending'
                   ? 'Awaiting customer approval'
                   : inspectionStatus === 'approved'
                   ? 'Approved by customer'
                   : inspectionStatus === 'disputed'
-                  ? 'Customer has concerns - revise and send again'
+                  ? 'Send Revised Report'
                   : 'Upload to customer portal'}
               </button>
             </div>
@@ -709,7 +729,7 @@ export default function page() {
                 <button
                   type="button"
                   onClick={askToUseScanner}
-                  disabled={requestingScan || isLocked}
+                  disabled={requestingScan || reportLocked}
                   className="flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {requestingScan ? <Loader2 size={13} className="animate-spin" /> : <ScanLine size={13} />}
@@ -812,13 +832,30 @@ export default function page() {
                         </button>
                         {!isLocked && (
                           <div className="absolute bottom-2 right-2 z-10 flex items-center gap-1 opacity-0 shadow group-hover:opacity-100">
+                            {/* capture="environment" only means anything on a
+                                touch device with a camera (phone OR tablet) —
+                                a mouse-driven desktop opens the same file
+                                dialog either way. Gate on pointer type, not
+                                screen width, since a tablet is wide but still
+                                has a working camera. */}
                             <button
                               type="button"
                               onClick={() => fileInputRefs.current[slot.id]?.click()}
                               disabled={uploadingSlot === slot.id}
+                              title="Retake with camera"
+                              className="rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700 hover:bg-white [@media(pointer:fine)]:hidden"
+                            >
+                              Retake
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => galleryInputRefs.current[slot.id]?.click()}
+                              disabled={uploadingSlot === slot.id}
+                              title="Replace photo"
                               className="rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700 hover:bg-white"
                             >
-                              Replace
+                              <span className="[@media(pointer:fine)]:hidden">Gallery</span>
+                              <span className="hidden [@media(pointer:fine)]:inline">Replace</span>
                             </button>
                             <button
                               type="button"
@@ -832,14 +869,29 @@ export default function page() {
                         )}
                       </>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => fileInputRefs.current[slot.id]?.click()}
-                        disabled={uploadingSlot === slot.id || isLocked}
-                        className="flex h-full w-full flex-col items-center justify-center gap-2 disabled:cursor-not-allowed"
-                      >
-                        <Camera size={20} />
-                      </button>
+                      <div className="flex h-full w-full divide-x divide-slate-200 [@media(pointer:fine)]:divide-x-0">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRefs.current[slot.id]?.click()}
+                          disabled={uploadingSlot === slot.id || isLocked}
+                          title="Take photo"
+                          className="flex flex-1 flex-col items-center justify-center gap-1 hover:bg-slate-100 disabled:cursor-not-allowed [@media(pointer:fine)]:hidden"
+                        >
+                          <Camera size={18} />
+                          <span className="text-[9px] normal-case tracking-normal">Camera</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => galleryInputRefs.current[slot.id]?.click()}
+                          disabled={uploadingSlot === slot.id || isLocked}
+                          title="Add photo"
+                          className="flex flex-1 flex-col items-center justify-center gap-1 hover:bg-slate-100 disabled:cursor-not-allowed"
+                        >
+                          <Camera size={20} className="hidden [@media(pointer:fine)]:block" />
+                          <Upload size={18} className="[@media(pointer:fine)]:hidden" />
+                          <span className="text-[9px] normal-case tracking-normal [@media(pointer:fine)]:hidden">Gallery</span>
+                        </button>
+                      </div>
                     )}
                     {uploadingSlot === slot.id && (
                       <span className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 text-white">
@@ -860,10 +912,21 @@ export default function page() {
                       ref={(el) => { fileInputRefs.current[slot.id] = el }}
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
+                      capture="environment"
                       className="hidden"
                       onChange={(e) => {
                         handlePhotoPick(slot.id, slot.title || slot.label, e.target.files?.[0])
                         e.target.value = '' // re-picking the same file still fires onChange
+                      }}
+                    />
+                    <input
+                      ref={(el) => { galleryInputRefs.current[slot.id] = el }}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={(e) => {
+                        handlePhotoPick(slot.id, slot.title || slot.label, e.target.files?.[0])
+                        e.target.value = ''
                       }}
                     />
                   </div>
@@ -912,7 +975,7 @@ export default function page() {
               <p className="text-sm font-bold text-slate-900">Mechanical Findings</p>
               <button
                 onClick={addFinding}
-                disabled={isLocked || editingFindingId !== null || addingFinding}
+                disabled={reportLocked || editingFindingId !== null || addingFinding}
                 title={editingFindingId !== null ? 'Finish editing the current finding first' : undefined}
                 className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-150 hover:border-slate-300 hover:bg-slate-100 hover:shadow-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 disabled:hover:shadow-none"
               >
@@ -1001,7 +1064,7 @@ export default function page() {
                         ) : (
                           <button
                             onClick={() => startEditingFinding(f)}
-                            disabled={isLocked}
+                            disabled={reportLocked}
                             className={`rounded-full border px-3 py-1 text-xs font-semibold disabled:cursor-not-allowed ${meta.classes}`}
                           >
                             {meta.label}
@@ -1009,14 +1072,14 @@ export default function page() {
                         )}
                         <button
                           onClick={() => startEditingFinding(f)}
-                          disabled={isLocked}
+                          disabled={reportLocked}
                           className="rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           <Pencil size={14} />
                         </button>
                         <button
                           onClick={() => deleteFinding(f.id)}
-                          disabled={isLocked}
+                          disabled={reportLocked}
                           className="rounded-lg border border-slate-200 p-1.5 text-rose-500 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           <Trash2 size={14} />
@@ -1043,7 +1106,7 @@ export default function page() {
               </div>
               {obd2Report ? (
                 <div className="flex items-center gap-2">
-                  {!isLocked && (
+                  {!reportLocked && (
                     <button
                       type="button"
                       onClick={() => setShowRemoveDialog(true)}

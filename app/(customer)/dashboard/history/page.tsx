@@ -765,6 +765,8 @@ function WarrantiesPanel({ userId }: { userId: number }) {
   const [history, setHistory] = useState<CustomerWarranty[]>([]);
   const [claimingId, setClaimingId] = useState<number | null>(null);
   const [claimText, setClaimText] = useState("");
+  const [visitAt, setVisitAt] = useState("");
+  const [visitMode, setVisitMode] = useState<"shop" | "home">("shop");
   const [submitting, setSubmitting] = useState(false);
 
   async function load() {
@@ -775,17 +777,42 @@ function WarrantiesPanel({ userId }: { userId: number }) {
   }
   useEffect(() => { load(); }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  function openReport(warrantyId: number) {
+    setClaimingId(warrantyId);
+    setClaimText("");
+    setVisitAt("");
+    setVisitMode("shop");
+  }
+
   async function sendClaim(warrantyId: number) {
     if (!claimText.trim()) return toast.error("Describe what's wrong first.");
     setSubmitting(true);
-    const r = await submitWarrantyClaim(userId, warrantyId, claimText.trim());
+    const r = await submitWarrantyClaim(
+      userId,
+      warrantyId,
+      claimText.trim(),
+      visitAt ? new Date(visitAt).toISOString() : null,
+      visitMode === "home" ? "Home Service" : "Shop Visit",
+    );
     setSubmitting(false);
-    if (!r.ok) return toast.error(r.message ?? "Could not submit the claim.");
-    toast.success("Claim sent — bring your vehicle in for inspection.");
+    if (!r.ok) return toast.error(r.message ?? "Could not send your report.");
+    toast.success(visitMode === "home"
+      ? "Report sent — the shop will contact you to confirm the home visit."
+      : "Report sent — bring your car in so we can check it.");
     setClaimingId(null);
     setClaimText("");
+    setVisitAt("");
+    setVisitMode("shop");
     await load();
   }
+
+  // datetime-local wants local time, so shift out of UTC before slicing —
+  // toISOString() alone would let a PH customer pick a time 8 hours ago.
+  const nowLocal = () => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+  };
 
   const fmtDate = (iso: string) =>
     new Date(iso).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
@@ -813,14 +840,14 @@ function WarrantiesPanel({ userId }: { userId: number }) {
                   </div>
                   {w.hasPendingClaim ? (
                     <span className="shrink-0 rounded-full bg-warning/15 px-2.5 py-1 text-[11px] font-semibold text-warning">
-                      Claim pending
+                      Report sent — waiting for the shop
                     </span>
                   ) : claimingId !== w.warrantyId ? (
                     <button
-                      onClick={() => { setClaimingId(w.warrantyId); setClaimText(""); }}
+                      onClick={() => openReport(w.warrantyId)}
                       className="shrink-0 rounded-md border px-3 py-1.5 text-xs font-semibold hover:bg-accent"
                     >
-                      Claim
+                      Report a Problem
                     </button>
                   ) : null}
                 </div>
@@ -834,8 +861,33 @@ function WarrantiesPanel({ userId }: { userId: number }) {
                       placeholder="e.g. Battery light turns on while driving"
                       className="mt-1.5 w-full rounded-md border bg-background px-2.5 py-1.5 text-sm focus:border-brand focus:outline-none"
                     />
+                    <label className="mt-3 block text-xs font-medium">Where should we check it?</label>
+                    <div className="mt-1.5 grid grid-cols-2 gap-2">
+                      {(["shop", "home"] as const).map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => setVisitMode(m)}
+                          className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${visitMode === m ? "border-brand bg-brand-soft/40 text-foreground" : "bg-background text-muted-foreground hover:bg-accent"}`}
+                        >
+                          {m === "shop" ? "Shop Visit" : "Home Service"}
+                        </button>
+                      ))}
+                    </div>
+                    <label className="mt-3 block text-xs font-medium">
+                      {visitMode === "home" ? "When should our mechanic come? (optional)" : "When can you bring your car in? (optional)"}
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={visitAt}
+                      min={nowLocal()}
+                      onChange={(e) => setVisitAt(e.target.value)}
+                      className="mt-1.5 w-full rounded-md border bg-background px-2.5 py-1.5 text-sm focus:border-brand focus:outline-none"
+                    />
                     <p className="mt-2 text-xs text-muted-foreground">
-                      Bring your vehicle in. Our mechanic will check the part first. If it's covered, the replacement is free.
+                      {visitMode === "home"
+                        ? "Our mechanic will go to the address on your profile and check the part first. If it's covered, the replacement is free."
+                        : "Bring your vehicle in. Our mechanic will check the part first. If it's covered, the replacement is free."}
                     </p>
                     <div className="mt-2 flex gap-2">
                       <button
@@ -843,7 +895,7 @@ function WarrantiesPanel({ userId }: { userId: number }) {
                         disabled={submitting}
                         className="rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-50"
                       >
-                        {submitting ? "Sending…" : "Send claim"}
+                        {submitting ? "Sending…" : "Send Report"}
                       </button>
                       <button
                         onClick={() => setClaimingId(null)}
