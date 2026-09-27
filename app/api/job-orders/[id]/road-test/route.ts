@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getRoadTestHistory, currentAttempt } from '@/lib/roadTest'
-import { uploadRoadTestPhoto } from '@/lib/storage'
+import { uploadRoadTestPhoto, signFileUrls } from '@/lib/storage'
 import { notifyCustomer } from '@/lib/customerNotify'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 
@@ -42,6 +42,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     if (jo.rows.length === 0) return NextResponse.json({ success: false, message: 'Job order not found' }, { status: 404 })
 
     const serviceTasks = tasks.rows
+    const taskPhotos = await signFileUrls(serviceTasks.map((t) => t.completion_photo_url))
+    serviceTasks.forEach((t, i) => { t.completion_photo_url = taskPhotos[i] })
     const allServicesDone = serviceTasks.length > 0 && serviceTasks.every((t) => t.task_status === 'completed')
 
     return NextResponse.json({
@@ -98,7 +100,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const photo = form.get('photo')
     let photoUrl: string | null = null
     if (photo instanceof File && photo.size > 0) {
-      if (!photo.type.startsWith('image/')) return NextResponse.json({ success: false, message: 'Only image files are allowed' }, { status: 415 })
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(photo.type)) return NextResponse.json({ success: false, message: 'Photo must be a JPEG, PNG or WebP image' }, { status: 415 })
       if (photo.size > 5 * 1024 * 1024) return NextResponse.json({ success: false, message: 'Photo must be under 5MB' }, { status: 413 })
       photoUrl = await uploadRoadTestPhoto(String(jobOrderId), open.id, photo)
     }

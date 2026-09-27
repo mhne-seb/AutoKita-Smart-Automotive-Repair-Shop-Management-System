@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getFindingsForJobOrder } from '@/lib/findings'
 import { getLatestPullOut } from '@/lib/pullOut'
+import { signFileUrls } from '@/lib/storage'
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -77,6 +78,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     // banner and the page's polling; decided ones are history.
     const findings = await getFindingsForJobOrder(Number(id))
     const pullOut = await getLatestPullOut(Number(id))
+
+    const taskPhotos = await signFileUrls(result.rows.map((t) => t.completion_photo_url))
+    result.rows.forEach((t, i) => { t.completion_photo_url = taskPhotos[i] })
 
     return NextResponse.json({
       success: true,

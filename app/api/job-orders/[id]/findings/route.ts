@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { toStoredRef, signFileUrl } from '@/lib/storage'
 
 // Mechanical Findings on the INSPECTION report (admin inspection page).
 // Findings raised later, while the job is on the floor, are a separate
@@ -46,18 +47,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       `INSERT INTO inspection_photos (inspection_id, title, note, status, photo_url, logged_at)
        VALUES ($1, $2, $3, $4::finding_status, $5, NOW())
        RETURNING *`,
-      [inspectionId, name ?? '', note ?? '', toDbStatus(status || 'ok'), photo || null],
+      [inspectionId, name ?? '', note ?? '', toDbStatus(status || 'ok'), toStoredRef(photo)],
     )
 
     const row = result.rows[0]
+    const signed = await signFileUrl(row.photo_url)
     return NextResponse.json({
       success: true,
       data: {
         ...row,
+        photo_url: signed,
         name: row.title,
         description: row.note,
         findings_description: row.note,
-        photo: row.photo_url,
+        photo: signed,
         status: toUiStatus(row.status),
       },
     })
@@ -95,7 +98,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         name ?? null,
         note ?? null,
         status ? toDbStatus(status) : null,
-        photo ?? null,
+        toStoredRef(photo),
         jobOrderId,
         findingId,
       ],
@@ -106,14 +109,16 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     const row = result.rows[0]
+    const signed = await signFileUrl(row.photo_url)
     return NextResponse.json({
       success: true,
       data: {
         ...row,
+        photo_url: signed,
         name: row.title,
         description: row.note,
         findings_description: row.note,
-        photo: row.photo_url,
+        photo: signed,
         status: toUiStatus(row.status),
       },
     })
