@@ -48,6 +48,7 @@ function RegisterVehicle() {
   const [vehiclePlate, setVehiclePlate] = useState("");
   const [plateError, setPlateError] = useState<string | undefined>(undefined);
   const [serviceCategory, setServiceCategory] = useState("");
+  const [preferredDatetime, setPreferredDatetime] = useState("");
   const [notes, setNotes] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -124,7 +125,8 @@ function RegisterVehicle() {
       userId: parseInt(userId, 10),
       serviceMode: pickup === "shop" ? "Shop Visit" : "Home Service",
       customerConcern: `Category: ${serviceCategory || 'Not specified'}. Notes: ${notes || 'None'}`,
-      homeAddress: user?.address || "None"
+      homeAddress: user?.address || "None",
+      preferredDatetime: preferredDatetime ? new Date(preferredDatetime).toISOString() : null,
     };
 
     if (selectedVehicleId === "new") {
@@ -323,6 +325,16 @@ function RegisterVehicle() {
               <Radio icon={MapPin} label="Home Service" active={pickup === "home"} onClick={() => setPickup("home")} />
             </div>
             <div className="mt-4">
+              <label className="text-sm font-medium">Preferred Date &amp; Time (optional)</label>
+              <input
+                type="datetime-local"
+                value={preferredDatetime}
+                min={new Date().toISOString().slice(0, 16)}
+                onChange={(e) => setPreferredDatetime(e.target.value)}
+                className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
+              />
+            </div>
+            <div className="mt-4">
               <label className="text-sm font-medium">Service Category</label>
               <select
                 value={serviceCategory}
@@ -375,6 +387,12 @@ function RegisterVehicle() {
                 <SumRow label="Vehicle" value={displayVehicle} />
                 <SumRow label="Service Option" value={pickup === "shop" ? "Shop Visit" : "Home Service"} />
                 <SumRow label="Service Needed" value={serviceCategory || "—"} />
+                {preferredDatetime && (
+                  <SumRow
+                    label="Preferred Date"
+                    value={new Date(preferredDatetime).toLocaleString("en-PH", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
+                  />
+                )}
               </div>
             </div>
           </div>
