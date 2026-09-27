@@ -902,6 +902,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [pickup, setPickup] = useState<"shop" | "home">("shop");
+  const [preferredDatetime, setPreferredDatetime] = useState("");
   const [serviceCategory, setServiceCategory] = useState("");
   const [serviceCategoryOther, setServiceCategoryOther] = useState("");
   const [notes, setNotes] = useState("");
@@ -990,6 +991,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
       customerConcern: `Category: ${category || "Not specified"}. Notes: ${notes || "None"}`,
       homeAddress: user?.address || "None",
       diagnosticScanAuthorized: needsScan && scanAcknowledged,
+      preferredDatetime: preferredDatetime ? new Date(preferredDatetime).toISOString() : null,
     };
 
     if (selectedVehicleId === "new") {
@@ -1202,6 +1204,16 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                   <BookRadioTile icon={Car} label="Home Service" active={pickup === "home"} onClick={() => setPickup("home")} />
                 </div>
                 <div className="mt-4">
+                  <label className="text-sm font-medium">Preferred Date &amp; Time (optional)</label>
+                  <input
+                    type="datetime-local"
+                    value={preferredDatetime}
+                    min={new Date().toISOString().slice(0, 16)}
+                    onChange={(e) => setPreferredDatetime(e.target.value)}
+                    className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
+                  />
+                </div>
+                <div className="mt-4">
                   <label className="text-sm font-medium">Service Category</label>
                   <select
                     value={serviceCategory}
@@ -1304,6 +1316,12 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                   <BookSumRow label="Vehicle" value={displayVehicle} />
                   <BookSumRow label="Service Option" value={pickup === "shop" ? "Shop Visit" : "Home Service"} />
                   <BookSumRow label="Service Needed" value={serviceCategory || "—"} />
+                  {preferredDatetime && (
+                    <BookSumRow
+                      label="Preferred Date"
+                      value={new Date(preferredDatetime).toLocaleString("en-PH", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
+                    />
+                  )}
                 </div>
               </div>
 

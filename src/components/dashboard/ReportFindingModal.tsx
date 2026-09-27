@@ -10,7 +10,7 @@
 // shop, not part of any one service).
 
 import { useEffect, useRef, useState } from 'react'
-import { AlertTriangle, Camera, Loader2, Plus, Search, Send, Trash2, X } from 'lucide-react'
+import { AlertTriangle, Camera, Loader2, Plus, Search, Send, Trash2, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ProposedPart, ProposedService } from '@/data/types'
 import { reportFinding, uploadFindingPhoto } from '@/controllers/findingsController'
@@ -37,6 +37,7 @@ export function ReportFindingModal({
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const galleryRef = useRef<HTMLInputElement>(null)
 
   // Service catalog + the same searchable picker the quotation page uses.
   const [catalog, setCatalog] = useState<CatalogService[]>([])
@@ -172,9 +173,18 @@ export function ReportFindingModal({
         </div>
 
         <div className="mt-3 flex items-center gap-3">
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={pickPhoto} />
-          <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">
-            {uploading ? <Loader2 size={13} className="animate-spin" /> : <Camera size={13} />} {photoUrl ? 'Replace photo' : 'Add photo'}
+          <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={pickPhoto} />
+          <input ref={galleryRef} type="file" accept="image/*" className="hidden" onChange={pickPhoto} />
+          {/* capture="environment" only means anything on a touch device with
+              a camera (phone OR tablet) — gate on pointer type, not screen
+              width, since a tablet is wide but still has a working camera. */}
+          <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 [@media(pointer:fine)]:hidden">
+            {uploading ? <Loader2 size={13} className="animate-spin" /> : <Camera size={13} />} {photoUrl ? 'Retake' : 'Take Photo'}
+          </button>
+          <button type="button" onClick={() => galleryRef.current?.click()} disabled={uploading} className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">
+            <Upload size={13} />
+            <span className="[@media(pointer:fine)]:hidden">Gallery</span>
+            <span className="hidden [@media(pointer:fine)]:inline">{photoUrl ? 'Replace photo' : 'Add photo'}</span>
           </button>
           {photoUrl && (
             <div className="flex items-center gap-2">
