@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { getRoadTestHistory, currentAttempt } from '@/lib/roadTest'
 import { uploadRoadTestPhoto } from '@/lib/storage'
 import { notifyCustomer } from '@/lib/customerNotify'
+import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 
 // The Testing stage. Reads through get_road_test_history(); writes through
 // Jubert's start_road_test / pass_road_test / fail_road_test, which own the
@@ -114,9 +115,38 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     if (action === 'fail') {
       if (!notes) return NextResponse.json({ success: false, message: 'Describe what failed' }, { status: 400 })
-      const reworkTaskIds = JSON.parse(String(form.get('reworkTaskIds') ?? '[]')).map(Number).filter(Boolean)
+      const submittedReworkTaskIds = JSON.parse(String(form.get('reworkTaskIds') ?? '[]')).map(Number).filter(Boolean)
       const failedPartIds = JSON.parse(String(form.get('failedPartIds') ?? '[]')).map(Number).filter(Boolean)
+
+      // A failed part can't be swapped in without touching its service again
+      // — the labor isn't done until the (working) part is installed. The UI
+      // already locks this, but enforce it here too so it holds regardless
+      // of what the client actually sent.
+      let reworkTaskIds = submittedReworkTaskIds
+      if (failedPartIds.length > 0) {
+        const required = await db.query(
+          `SELECT DISTINCT spt.id
+           FROM job_order_parts p
+           JOIN job_order_services jos ON jos.id = p.job_order_service_id
+           JOIN services s ON s.id = jos.service_id
+           JOIN service_progress_tasks spt ON spt.job_order_id = p.job_order_id AND spt.task_title = s.service_name AND spt.section_id = 'in_progress'
+           WHERE p.id = ANY($1::int[])`,
+          [failedPartIds],
+        )
+        reworkTaskIds = [...new Set([...submittedReworkTaskIds, ...required.rows.map((r) => r.id)])]
+      }
       if (reworkTaskIds.length === 0) return NextResponse.json({ success: false, message: 'Tick at least one service to redo' }, { status: 400 })
+
+      // The scan happened during inspection, before this road test ever
+      // started — a test drive can't confirm or disprove a diagnostic
+      // reading, so it can never be one of the things that "failed" it.
+      const scanTask = await db.query(
+        `SELECT 1 FROM service_progress_tasks WHERE job_order_id = $1 AND id = ANY($2::int[]) AND task_title = $3`,
+        [jobOrderId, reworkTaskIds, DIAGNOSTIC_SCAN_SERVICE_NAME],
+      )
+      if (scanTask.rows.length > 0) {
+        return NextResponse.json({ success: false, message: 'The OBD-II scan already happened during inspection — it can\'t be marked as a road test failure.' }, { status: 400 })
+      }
 
       await db.query(`SELECT fail_road_test($1, $2, $3::int[], $4::int[], $5)`, [open.id, notes, reworkTaskIds, failedPartIds, photoUrl])
       await notifyCustomer({
