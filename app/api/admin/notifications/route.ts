@@ -237,11 +237,19 @@ export async function GET() {
       })
     }
 
-    notifs.sort((a, b) => {
-      const ta = a.notif_time ? new Date(a.notif_time).getTime() : 0
-      const tb = b.notif_time ? new Date(b.notif_time).getTime() : 0
-      return tb - ta
-    })
+    // Seed data has job orders dated months into the future — sorted naively,
+    // those permanently outrank anything happening today, so the top-20 cutoff
+    // below gets entirely consumed by fake backlog and a real, brand-new
+    // notification never makes it into the list at all. A timestamp can't
+    // really be in the future, so rank it as far in the past instead of far
+    // ahead — real, current activity then always surfaces first.
+    const now = Date.now()
+    const rank = (t: string | null) => {
+      if (!t) return -Infinity
+      const ms = new Date(t).getTime()
+      return ms > now ? -ms : ms
+    }
+    notifs.sort((a, b) => rank(b.notif_time) - rank(a.notif_time))
 
     return NextResponse.json({ success: true, notifications: notifs.slice(0, 20) })
   } catch (err: unknown) {
