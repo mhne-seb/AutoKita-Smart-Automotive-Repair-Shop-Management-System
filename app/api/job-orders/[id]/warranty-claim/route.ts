@@ -62,7 +62,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
        JOIN job_orders jo ON jo.ticket_id = wc.ticket_id
        LEFT JOIN job_order_parts jop ON jop.id = w.job_order_part_id
        LEFT JOIN job_order_services jos ON jos.id = jop.job_order_service_id
-       WHERE jo.id = $1 FOR UPDATE`,
+       WHERE jo.id = $1
+       -- Lock just the claim row (stops two admins deciding it at once).
+       -- A bare FOR UPDATE also tries to lock the LEFT JOINed tables, which
+       -- Postgres rejects on the nullable side of an outer join.
+       FOR UPDATE OF wc`,
       [jobOrderId],
     )
     const claim = claimRes.rows[0]
