@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { DEFAULT_MECHANIC_CAPACITY } from '@/data/mechanicPolicy'
 import { notifyCustomer } from '@/lib/customerNotify'
 import { ROAD_TEST_TITLE } from '@/data/roadTest'
+import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -75,9 +76,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     )
     const prev = before.rows[0]
     const isRoadTest = prev?.task_title === ROAD_TEST_TITLE
+    // The scan already happened during inspection, so like the road test,
+    // it has nothing to schedule — it can start without a date/mechanic.
+    const isDiagnosticScan = prev?.task_title === DIAGNOSTIC_SCAN_SERVICE_NAME
     // (The road test is the final quality gate, not a scheduled service —
     // it can start as soon as every service is done.)
-    if (status === 'in_progress' && !isRoadTest && (!mechanicId || !scheduledDate)) {
+    if (status === 'in_progress' && !isRoadTest && !isDiagnosticScan && (!mechanicId || !scheduledDate)) {
       return NextResponse.json(
         { success: false, code: 'TASK_UNSCHEDULED', message: 'Schedule this task and assign a mechanic before starting it.' },
         { status: 409 },

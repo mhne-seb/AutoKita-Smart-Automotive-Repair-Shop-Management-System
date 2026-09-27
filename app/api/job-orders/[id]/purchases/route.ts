@@ -3,8 +3,9 @@ import { db } from '@/lib/db'
 
 // "Record purchase" on Service Progress. This is the shop's purchase ledger,
 // not a procurement workflow — nothing is sent to the supplier. One save =
-// one purchase_orders row (already fulfilled, since the parts are in hand)
-// plus every ticked part pointed at it and marked received.
+// one purchase_orders row (status 'sent') plus every ticked part pointed at
+// it and moved to 'ordered'. The parts aren't in hand yet — they're marked
+// received one by one on the task cards as they actually arrive.
 
 type PurchasedPart = { partId: number; unitCost: number }
 

@@ -49,9 +49,10 @@ export function TopBar({ title, subtitle, rightSlot, showFilters, showSearch = t
         </button>
       )}
 
-      <AdminNotificationBell />
-
-      {rightSlot}
+      <div className="flex items-center gap-3">
+        <AdminNotificationBell />
+        {rightSlot}
+      </div>
     </div>
   )
 }

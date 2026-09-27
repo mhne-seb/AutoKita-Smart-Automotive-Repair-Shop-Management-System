@@ -120,7 +120,8 @@ export async function POST(req: NextRequest) {
     // Documented consent to the OBD-II scan fee. service_tickets has no column
     // for it and create_service_ticket() takes no flag, so it's an audit event
     // against the ticket — who agreed, to what, and when. The admin queue and
-    // the job-order creation step both read this back.
+    // the job-order creation step both read this back, keyed on user_id being
+    // set: accepting the ticket writes an 'approved' row too, but by an employee.
     if (diagnosticScanAuthorized === true) {
       await db.query(
         `INSERT INTO system_audit_logs (user_id, action_performed, entity_type, entity_id, new_values, action_date)

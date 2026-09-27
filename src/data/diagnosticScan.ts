@@ -24,5 +24,13 @@ export function requiresDiagnosticScan(category: string | null | undefined): boo
   return Boolean(category) && DIAGNOSTIC_SCAN_CATEGORIES.has(category as string)
 }
 
+// The scan itself happens during inspection, before the repair stage even
+// starts — so unlike a real repair task, it has nothing to "schedule" a
+// mechanic and date for. Same idea as roadTest.ts's isRoadTest().
+export function isDiagnosticScanTask(task: { title: string } | { task_title: string }): boolean {
+  const title = 'title' in task ? task.title : task.task_title
+  return title === DIAGNOSTIC_SCAN_SERVICE_NAME
+}
+
 export const formatPeso = (n: number) =>
   `₱${n.toLocaleString('en-PH', { minimumFractionDigits: 0 })}`

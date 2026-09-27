@@ -23,13 +23,15 @@ export async function submitWarrantyClaim(
   userId: number,
   warrantyId: number,
   description: string,
+  preferredDatetime: string | null,
+  serviceMode: 'Shop Visit' | 'Home Service',
 ): Promise<{ ok: boolean; message?: string }> {
   const res = await fetch('/api/customer/warranties/claim', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, warrantyId, description }),
+    body: JSON.stringify({ userId, warrantyId, description, preferredDatetime, serviceMode }),
   })
   const json = await res.json().catch(() => null)
-  if (!res.ok || !json?.success) return { ok: false, message: json?.message ?? 'Could not submit the claim.' }
+  if (!res.ok || !json?.success) return { ok: false, message: json?.message ?? 'Could not send your report.' }
   return { ok: true }
 }

@@ -202,18 +202,39 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
     `SELECT
         r.id,
         'report_ready'::text AS type,
-        CASE WHEN r.round_no = 1 THEN 'Inspection Report Ready' ELSE 'Revised Report Ready' END::text AS title,
-        CASE WHEN r.round_no = 1
-             THEN 'Your inspection report for Job Order #JO-' || r.job_order_id
-                  || ' is ready. Please review it and let us know if we can proceed.'
-             ELSE 'We''ve revised the inspection report for Job Order #JO-' || r.job_order_id
-                  || ' based on your concern. Please take another look.'
+        CASE
+          WHEN r.is_quotation AND r.stage_round_no = 1 THEN 'Quotation Ready for Review'
+          WHEN r.is_quotation THEN 'Revised Quotation Ready'
+          WHEN r.stage_round_no = 1 THEN 'Inspection Report Ready'
+          ELSE 'Revised Report Ready'
+        END::text AS title,
+        CASE
+          WHEN r.is_quotation AND r.stage_round_no = 1
+               THEN 'Your quotation for Job Order #JO-' || r.job_order_id
+                    || ' is ready. Please review and approve to proceed.'
+          WHEN r.is_quotation
+               THEN 'We''ve revised the quotation for Job Order #JO-' || r.job_order_id
+                    || ' based on your concern. Please take another look.'
+          WHEN r.stage_round_no = 1
+               THEN 'Your inspection report for Job Order #JO-' || r.job_order_id
+                    || ' is ready. Please review it and let us know if we can proceed.'
+          ELSE 'We''ve revised the inspection report for Job Order #JO-' || r.job_order_id
+               || ' based on your concern. Please take another look.'
         END::text AS description,
         r.datetime_created AS job_time,
         r.job_order_id
      FROM (
+        -- A job order's pre_diagnostics rounds cover two different stages
+        -- (inspection, then quotation) in the same table. Numbering rounds
+        -- per stage — not globally per job order — is what lets round 1 of
+        -- the quotation say "Quotation Ready" instead of colliding with
+        -- inspection's own round numbering and being mislabeled a "revision".
         SELECT pd.id, vi.job_order_id, pd.datetime_created,
-               ROW_NUMBER() OVER (PARTITION BY vi.job_order_id ORDER BY pd.datetime_created) AS round_no
+               (pd.mechanic_notes LIKE 'Quotation total:%') AS is_quotation,
+               ROW_NUMBER() OVER (
+                 PARTITION BY vi.job_order_id, (pd.mechanic_notes LIKE 'Quotation total:%')
+                 ORDER BY pd.datetime_created
+               ) AS stage_round_no
         FROM pre_diagnostics pd
         JOIN vehicle_inspections vi ON vi.id = pd.inspection_id
         WHERE vi.job_order_id IN (SELECT jo.id FROM job_orders jo WHERE jo.user_id = $1)

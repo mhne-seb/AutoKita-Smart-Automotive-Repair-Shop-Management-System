@@ -18,7 +18,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ success: false, message: 'partId and a status of received|to_order|ordered are required' }, { status: 400 })
     }
 
-    // Parts can be marked received from ordered, in_transit, or directly from to_order.
+    // A to-order part has no supplier or cost on file yet, so it can only
+    // become received through /purchases (which records that first). Once a
+    // purchase exists — status 'ordered', from an earlier Undo — this route
+    // can flip it back to received without losing that paper trail.
     if (status === 'received') {
       const cur = await db.query(
         `SELECT status::text FROM job_order_parts WHERE id = $1::int AND job_order_id = $2::int`,
@@ -26,6 +29,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       )
       const from = cur.rows[0]?.status
       if (!from) return NextResponse.json({ success: false, message: 'Part not found' }, { status: 404 })
+      if (from === 'to_order') {
+        return NextResponse.json(
+          { success: false, message: 'Record the purchase first — that logs the supplier and cost, then marks it received.' },
+          { status: 409 },
+        )
+      }
     }
 
     const result = await db.query(

@@ -17,6 +17,7 @@ import { ReportFindingModal } from '@/components/dashboard/ReportFindingModal'
 import { decidePullOut } from '@/controllers/pullOutController'
 import { FINDING_TIMEOUT_HOURS, findingAgeHours, findingIsOverdue } from '@/data/findingPolicy'
 import { isRoadTest } from '@/data/roadTest'
+import { isDiagnosticScanTask } from '@/data/diagnosticScan'
 import { mechanicIsFull } from '@/data/mechanicPolicy'
 import { currency } from '@/data/mockData'
 import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, PartsPurchase, Supplier, ServiceFinding, PullOutRequest, partIsReady } from '@/data/types'
@@ -331,16 +332,22 @@ export default function page() {
     setNewSupplierName('')
     setAddingSupplier(false)
     setPurchaseDate(new Date().toISOString().slice(0, 10))
-    // Every to-order part starts ticked (or only targetPartId if specified)
+    // Every to-order part starts ticked (or only targetPartId if specified).
+    // The 70%-of-quoted-retail guess is only a useful starting point for a
+    // row that's actually in this purchase — an unticked row has no business
+    // showing a number at all, even disabled, since it looks like a real cost.
     setPurchaseLines(
       Object.fromEntries(
-        partsToBuy.map((p) => [
-          p.id,
-          {
-            checked: targetPartId ? p.id === targetPartId : true,
-            unitCost: p.retailPrice ? String(Math.round(p.retailPrice * 0.7)) : '',
-          },
-        ]),
+        partsToBuy.map((p) => {
+          const checked = targetPartId ? p.id === targetPartId : true
+          return [
+            p.id,
+            {
+              checked,
+              unitCost: checked && p.retailPrice ? String(Math.round(p.retailPrice * 0.7)) : '',
+            },
+          ]
+        }),
       ),
     )
     setShowPurchaseModal(true)
@@ -379,12 +386,11 @@ export default function page() {
       setSavingPurchase(false)
       return toast.error(result.message ?? 'Could not save the purchase.')
     }
-    // Auto-mark the purchased parts as received
-    for (const l of lines) {
-      await setPartStatus(jobOrderId, l.partId, 'received')
-    }
+    // Recording the purchase puts the part on order (see purchases/route.ts) —
+    // it isn't physically at the shop yet, so it stays there until someone
+    // clicks Received on the task card once it actually arrives.
     setSavingPurchase(false)
-    toast.success(`Purchase recorded — ${lines.length} part${lines.length === 1 ? '' : 's'} marked received and ready.`)
+    toast.success(`Purchase recorded — ${lines.length} part${lines.length === 1 ? '' : 's'} on order.`)
     setShowPurchaseModal(false)
     await refreshTasks()
   }
@@ -401,9 +407,9 @@ export default function page() {
           <div
             className={`rounded-xl border p-4 ${
                task.status === 'active' ? 'border-indigo-300 bg-indigo-50/50' : task.status === 'completed' ? 'border-emerald-200 bg-emerald-50/40' : task.status === 'cancelled' ? 'border-dashed border-slate-300 bg-slate-50 opacity-70' : 'border-slate-200 bg-white'
-            } ${task.status !== 'completed' && task.status !== 'cancelled' && !isRoadTest(task) ? 'cursor-pointer hover:bg-slate-50' : ''
+            } ${task.status !== 'completed' && task.status !== 'cancelled' && !isRoadTest(task) && !isDiagnosticScanTask(task) ? 'cursor-pointer hover:bg-slate-50' : ''
             }`}
-            onClick={() => task.status !== 'completed' && task.status !== 'cancelled' && !isRoadTest(task) && setSchedulingTask(task)}
+            onClick={() => task.status !== 'completed' && task.status !== 'cancelled' && !isRoadTest(task) && !isDiagnosticScanTask(task) && setSchedulingTask(task)}
           >
           {/* Stacks on small screens (pills wrap, status/action drop below);
               side by side from sm up. */}
@@ -485,7 +491,7 @@ export default function page() {
               // Nobody can start work that nobody's been assigned to.
               // Date + mechanic are both set in the schedule modal, so
               // "schedule it first" is the whole instruction.
-              const unscheduled = !isRoadTest(task) && (!task.scheduledDate || !task.mechanicId)
+              const unscheduled = !isRoadTest(task) && !isDiagnosticScanTask(task) && (!task.scheduledDate || !task.mechanicId)
               return (
                 <div className="flex flex-wrap items-center gap-2 sm:ml-4 sm:shrink-0 sm:flex-col sm:items-end" onClick={(e) => e.stopPropagation()}>
                   {/* A task that simply hasn't started gets no badge — the Start
@@ -565,7 +571,11 @@ export default function page() {
 
           {/* Parts this service needs, as a table inside the card. One
               row per part; "Received" marks it arrived (Undo for a
-              mis-tap). Read-only once the task is finished. */}
+              mis-tap). Read-only once a part is already received — but a
+              still-outstanding part (e.g. a road-test warranty replacement,
+              which can land as "ordered" on an already-finished task) stays
+              actionable regardless of the task's own status, otherwise it'd
+              be stuck with no way to ever mark it received. */}
           {(task.parts?.length ?? 0) > 0 && (() => {
             const parts = task.parts!
             const received = parts.filter(partIsReady).length
@@ -574,14 +584,15 @@ export default function page() {
               <div className="mt-3 border-t border-slate-200 pt-3" onClick={(e) => e.stopPropagation()}>
                 <div className="mb-1.5 flex items-center justify-between text-xs text-slate-400">
                   <span className="flex items-center gap-1.5 font-semibold uppercase tracking-wide"><Package size={12} /> Parts · {received} of {parts.length} received</span>
-                  {editable && received < parts.length && (
-                    <span>{parts.some((p) => p.status === 'to_order') ? 'Record purchase to log supplier cost, or click Received directly' : 'Mark each part when it arrives'}</span>
+                  {received < parts.length && (
+                    <span>{parts.some((p) => p.status === 'to_order') ? 'Record the purchase to mark a to-order part received' : 'Mark each part when it arrives'}</span>
                   )}
                 </div>
                 <table className="w-full text-sm">
                   <tbody>
                     {parts.map((p) => {
                       const ready = partIsReady(p)
+                      const rowEditable = editable || !ready
                       const busyP = busyPartId === p.id
                       return (
                         <tr key={p.id} className="border-t border-slate-100">
@@ -598,8 +609,11 @@ export default function page() {
                               {ready ? (p.status === 'in_stock' ? 'In stock' : 'Received') : p.status === 'ordered' ? 'Ordered' : 'To order'}
                             </span>
                           </td>
-                          {editable && (
+                          {/* Always render the cell (not just when rowEditable) so
+                              rows don't go ragged when a completed task mixes an
+                              already-received part with one that's still outstanding. */}
                           <td className="py-2 text-right whitespace-nowrap">
+                            {rowEditable && (
                             <div className="inline-flex items-center gap-1.5 justify-end">
                               {p.status === 'to_order' && (
                                 <button
@@ -612,6 +626,12 @@ export default function page() {
                                   <Receipt size={12} /> Record Purchase
                                 </button>
                               )}
+                              {/* A to-order part has no purchase on file yet, so there's
+                                  nothing to confirm arrival of — Record Purchase is the
+                                  only way forward, and it marks the part received itself.
+                                  Once a purchase exists (status 'ordered' after an Undo,
+                                  or already received/in stock), this toggles it normally. */}
+                              {p.status !== 'to_order' && (
                               <button
                                 type="button"
                                 onClick={() => togglePartReceived(p)}
@@ -626,9 +646,10 @@ export default function page() {
                                 {busyP ? <Loader2 size={12} className="animate-spin" /> : ready ? null : <PackageCheck size={12} />}
                                 {ready ? 'Undo' : 'Received'}
                               </button>
+                              )}
                             </div>
+                            )}
                           </td>
-                          )}
                         </tr>
                       )
                     })}
@@ -1191,7 +1212,14 @@ export default function page() {
                     <input
                       type="checkbox"
                       checked={line.checked}
-                      onChange={(e) => setPurchaseLines((prev) => ({ ...prev, [p.id]: { ...line, checked: e.target.checked } }))}
+                      // Ticking a part always starts its cost blank — the disabled
+                      // row's pre-filled guess (70% of quoted retail) is a hint for
+                      // the pre-selected part, not a real supplier price, so it must
+                      // never get saved just because someone re-ticked the box.
+                      onChange={(e) => {
+                        const checked = e.target.checked
+                        setPurchaseLines((prev) => ({ ...prev, [p.id]: { checked, unitCost: checked ? '' : line.unitCost } }))
+                      }}
                       className="h-4 w-4 accent-emerald-500"
                     />
                     <div className="min-w-0 flex-1">
@@ -1314,21 +1342,42 @@ function FinishTaskModal({ task, onClose, onSubmit }: { task: ServiceTask; onClo
           {preview ? (
             <div className="overflow-hidden rounded-xl border border-slate-200">
               <img src={preview} alt="Finished work" className="aspect-video w-full object-cover" />
-              <div className="flex items-center justify-between px-3 py-2 text-xs">
+              <div className="flex items-center justify-between gap-3 px-3 py-2 text-xs">
                 <span className="truncate text-slate-500">{file?.name} · {((file?.size ?? 0) / 1024).toFixed(0)} KB</span>
-                <label className="shrink-0 cursor-pointer font-semibold text-indigo-600 hover:underline">
-                  Replace
-                  <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={pick} />
-                </label>
+                <div className="flex shrink-0 items-center gap-3">
+                  {/* capture="environment" only means anything on a touch
+                      device with a camera (phone OR tablet) — a mouse-driven
+                      desktop just opens the same file dialog either way, so
+                      the camera button only earns its place under a coarse
+                      (touch) pointer, not by screen width (tablets are wide
+                      too, but still have a working camera). */}
+                  <label className="cursor-pointer font-semibold text-indigo-600 hover:underline [@media(pointer:fine)]:hidden">
+                    Retake
+                    <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={pick} />
+                  </label>
+                  <label className="cursor-pointer font-semibold text-indigo-600 hover:underline">
+                    <span className="[@media(pointer:fine)]:hidden">Gallery</span>
+                    <span className="hidden [@media(pointer:fine)]:inline">Replace</span>
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={pick} />
+                  </label>
+                </div>
               </div>
             </div>
           ) : (
-            <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-8 text-center transition-colors hover:border-indigo-400 hover:bg-indigo-50/40">
-              <Upload size={22} className="text-slate-400" />
-              <span className="text-sm font-semibold text-slate-700">Click to choose a photo</span>
-              <span className="text-xs text-slate-400">JPEG, PNG or WebP · up to 5MB</span>
-              <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={pick} />
-            </label>
+            <div className="grid grid-cols-2 gap-3 [@media(pointer:fine)]:grid-cols-1">
+              <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-6 text-center transition-colors hover:border-indigo-400 hover:bg-indigo-50/40 [@media(pointer:fine)]:hidden">
+                <Camera size={22} className="text-slate-400" />
+                <span className="text-sm font-semibold text-slate-700">Take Photo</span>
+                <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={pick} />
+              </label>
+              <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-6 text-center transition-colors hover:border-indigo-400 hover:bg-indigo-50/40">
+                <Upload size={22} className="text-slate-400" />
+                <span className="text-sm font-semibold text-slate-700 [@media(pointer:fine)]:hidden">From Gallery</span>
+                <span className="hidden text-sm font-semibold text-slate-700 [@media(pointer:fine)]:inline">Click to choose a photo</span>
+                <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={pick} />
+              </label>
+              <p className="col-span-2 text-xs text-slate-400 [@media(pointer:fine)]:col-span-1">JPEG, PNG or WebP · up to 5MB</p>
+            </div>
           )}
           {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
         </div>
