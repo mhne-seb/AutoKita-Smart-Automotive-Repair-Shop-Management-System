@@ -52,6 +52,10 @@ export interface Job {
   serviceMode: string
   status: JobStatus
   date: string
+  // The date/time the customer actually asked to be served, if they gave one
+  // (service_tickets.preferred_datetime) — separate from `date`, which is when
+  // the booking itself was submitted.
+  preferredDate: string | null
   servicesNeeded: string[]
   assignedMechanic?: string
   total?: number
@@ -113,6 +117,9 @@ export default function page() {
               assignedMechanic: t.mechanic_id ? t.mechanic_id.toString() : undefined,
               status,
               date: new Date(t.request_date).toLocaleDateString(),
+              preferredDate: t.preferred_datetime
+                ? new Date(t.preferred_datetime).toLocaleString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
+                : null,
             }
           })
           setJobs(mappedJobs)
@@ -590,6 +597,7 @@ export default function page() {
               <th className="px-4 py-3 font-semibold">Vehicle</th>
               <th className="px-4 py-3 font-semibold">Mode</th>
               <th className="px-4 py-3 font-semibold">Service Needed</th>
+              <th className="px-4 py-3 font-semibold">Preferred Date</th>
               <th className="px-4 py-3 font-semibold">Mechanic</th>
               <th className="px-4 py-3 font-semibold">Status</th>
               <th className="px-4 py-3 text-right font-semibold">Actions</th>
@@ -651,6 +659,15 @@ export default function page() {
                       >
                         <ShieldCheck size={11} /> Warranty claim
                       </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-4">
+                    {c.preferredDate ? (
+                      <span className="flex items-center gap-1.5 text-foreground/80">
+                        <Calendar size={12} className="shrink-0 text-muted-foreground" /> {c.preferredDate}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
                     )}
                   </td>
                   <td className="px-4 py-4">
@@ -729,7 +746,7 @@ export default function page() {
       {showNewTicket && <NewTicketModal onClose={() => setShowNewTicket(false)} onSubmit={addTicket} />}
 
       {approveTarget && (
-        <ApproveModal job={approveTarget} busy={approving} onClose={() => setApproveTarget(null)} onConfirm={() => confirmApprove(approveTarget)} />
+        <ApproveModal job={approveTarget} mechanics={mechanics} busy={approving} onClose={() => setApproveTarget(null)} onConfirm={() => confirmApprove(approveTarget)} />
       )}
 
       {rejectTarget && (
@@ -744,7 +761,7 @@ export default function page() {
       )}
 
       {viewTarget && (
-        <ViewModal job={viewTarget} onClose={() => setViewTarget(null)} />
+        <ViewModal job={viewTarget} mechanics={mechanics} onClose={() => setViewTarget(null)} />
       )}
 
       {deleteTarget && (
@@ -766,8 +783,9 @@ export default function page() {
 // mechanic is assigned.
 // ---------------------------------------------------------------------------
 
-function ApproveModal({ job, busy, onClose, onConfirm }: { job: Job; busy: boolean; onClose: () => void; onConfirm: () => void }) {
+function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; mechanics: any[]; busy: boolean; onClose: () => void; onConfirm: () => void }) {
   const unassigned = !job.assignedMechanic || job.assignedMechanic === 'Unassigned'
+  const mechanicName = unassigned ? 'Unassigned' : mechanics.find((m) => m.id.toString() === job.assignedMechanic)?.full_name ?? job.assignedMechanic
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
@@ -799,6 +817,12 @@ function ApproveModal({ job, busy, onClose, onConfirm }: { job: Job; busy: boole
             <dt className="text-muted-foreground">Services</dt>
             <dd className="text-right font-medium text-foreground">{job.servicesNeeded.join(', ')}</dd>
           </div>
+          {job.preferredDate && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">Preferred Date</dt>
+              <dd className="text-right font-medium text-foreground">{job.preferredDate}</dd>
+            </div>
+          )}
           {job.diagnosticScanAuthorized && (
             <div className="flex justify-between gap-4">
               <dt className="text-muted-foreground">Diagnostic scan</dt>
@@ -810,7 +834,7 @@ function ApproveModal({ job, busy, onClose, onConfirm }: { job: Job; busy: boole
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">Assigned Mechanic</dt>
             <dd className={`font-medium ${unassigned ? 'text-amber-600' : 'text-foreground'}`}>
-              {job.assignedMechanic ?? 'Unassigned'}
+              {mechanicName}
             </dd>
           </div>
         </dl>
@@ -844,7 +868,10 @@ function ApproveModal({ job, busy, onClose, onConfirm }: { job: Job; busy: boole
 // Hold modal — requires a reason before putting a job on hold.
 // ---------------------------------------------------------------------------
 
-function ViewModal({ job, onClose }: { job: Job; onClose: () => void }) {
+function ViewModal({ job, mechanics, onClose }: { job: Job; mechanics: any[]; onClose: () => void }) {
+  const mechanicName = !job.assignedMechanic
+    ? 'Not yet assigned'
+    : mechanics.find((m) => m.id.toString() === job.assignedMechanic)?.full_name ?? job.assignedMechanic
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg rounded-xl bg-background p-6 shadow-2xl">
@@ -939,11 +966,19 @@ function ViewModal({ job, onClose }: { job: Job; onClose: () => void }) {
                 </dt>
                 <dd className="font-medium text-foreground">{job.date}</dd>
               </div>
+              {job.preferredDate && (
+                <div className="flex justify-between gap-4">
+                  <dt className="flex items-center gap-1.5 text-muted-foreground">
+                    <Calendar size={12} /> Customer's Preferred Date
+                  </dt>
+                  <dd className="font-medium text-foreground">{job.preferredDate}</dd>
+                </div>
+              )}
               <div className="flex justify-between gap-4">
                 <dt className="flex items-center gap-1.5 text-muted-foreground">
                   <UserCog size={12} /> Assigned Mechanic
                 </dt>
-                <dd className="font-medium text-foreground">{job.assignedMechanic ?? 'Not yet assigned'}</dd>
+                <dd className="font-medium text-foreground">{mechanicName}</dd>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-muted-foreground">Current Status</dt>
