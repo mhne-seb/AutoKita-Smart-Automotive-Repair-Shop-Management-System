@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { getFindingsForJobOrder } from '@/lib/findings'
 import { getJobOrderBill } from '@/lib/jobOrderBill'
 import { getLatestPullOut } from '@/lib/pullOut'
+import { signFileUrls } from '@/lib/storage'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -43,7 +44,8 @@ export async function GET(request: NextRequest) {
             `SELECT id, completion_photo_url FROM service_progress_tasks WHERE job_order_id = $1 AND completion_photo_url IS NOT NULL`,
             [jobOrder.job_order_id],
           )
-          const byId = new Map(photos.rows.map((p) => [p.id, p.completion_photo_url as string]))
+          const signed = await signFileUrls(photos.rows.map((p) => p.completion_photo_url))
+          const byId = new Map(photos.rows.map((p, i) => [p.id, signed[i]]))
           return rows.map((t) => ({ ...t, completion_photo_url: byId.get(t.id) ?? null }))
         })()
       : []

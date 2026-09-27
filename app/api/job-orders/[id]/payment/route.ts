@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { notifyCustomer } from '@/lib/customerNotify'
+import { signFileUrl } from '@/lib/storage'
 
 // Admin-side view of the latest payment submitted for a job order, plus the
 // action to verify/reject it. Raw queries straight against `payments` —
@@ -20,7 +21,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
        LIMIT 1`,
       [id],
     )
-    return NextResponse.json({ success: true, payment: result.rows[0] ?? null })
+    const payment = result.rows[0] ?? null
+    if (payment) payment.proof_of_payment_image = await signFileUrl(payment.proof_of_payment_image)
+    return NextResponse.json({ success: true, payment })
   } catch (error) {
     console.error('Payment fetch error:', error)
     return NextResponse.json(
