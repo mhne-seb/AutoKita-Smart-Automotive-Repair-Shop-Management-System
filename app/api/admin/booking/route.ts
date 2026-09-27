@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { hashPassword } from '@/lib/password'
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
 
 export async function POST(req: NextRequest) {
@@ -25,8 +26,6 @@ export async function POST(req: NextRequest) {
     if (checkUser.rows.length > 0) {
       userId = checkUser.rows[0].id
     } else {
-        // users.password is UNIQUE in the schema, so one shared default only works
-      // for the first walk-in. Give each new customer their own temporary password.
       const tempPassword = `temp-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString().slice(-6)}`
 
       // 7 target columns and 7 expressions (including NOW())
@@ -38,8 +37,8 @@ export async function POST(req: NextRequest) {
           lastName, 
           firstName, // Fallback for nickname
           ticketData.contactNumber, 
-          ticketData.email, 
-          tempPassword
+          ticketData.email,
+          await hashPassword(tempPassword)
         ]
       )
       userId = insUser.rows[0].id

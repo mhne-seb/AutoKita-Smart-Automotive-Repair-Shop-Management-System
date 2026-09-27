@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { hashPassword, verifyPassword } from '@/lib/password'
 
 const SELECT_USER = `
   SELECT id, first_name, last_name, nickname, email, contact_number, address
@@ -35,10 +36,10 @@ export async function PATCH(req: NextRequest) {
       if (check.rows.length === 0) {
         return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
       }
-      if (check.rows[0].password !== currentPassword) {
+      if (!(await verifyPassword(String(currentPassword ?? ''), check.rows[0].password))) {
         return NextResponse.json({ success: false, code: 'BAD_PASSWORD', message: 'Current password is incorrect.' }, { status: 400 })
       }
-      await db.query(`UPDATE users SET password = $1 WHERE id = $2`, [newPassword, userId])
+      await db.query(`UPDATE users SET password = $1 WHERE id = $2`, [await hashPassword(newPassword), userId])
     }
 
     // Profile fields.
