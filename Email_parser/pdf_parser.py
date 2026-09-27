@@ -281,11 +281,25 @@ def _extract_dtc_table(doc) -> list[dict]:
             # Calculate vertical boundaries for each code row
             for i, cw in enumerate(code_words):
                 if i == 0:
-                    prev_top = 0
+                    # Find the real header row: the single physical line where
+                    # all four column labels appear together. Matching any one
+                    # of these words alone is unsafe — "System" commonly also
+                    # appears as plain text inside a DTC's own module name
+                    # (e.g. "Anti-lock Braking System"), and a stray match like
+                    # that can push row_top into the middle of the first row's
+                    # own wrapped text, truncating its Description/State to a
+                    # single leftover word (seen with a real Toyota report).
+                    line_labels: dict[float, set] = {}
+                    line_bottom: dict[float, float] = {}
                     for w in words:
-                        if w['text'] in ['DTC', 'Description', 'State', 'System'] and w['top'] < cw['top']:
-                            prev_top = max(prev_top, w['bottom'])
-                    row_top = prev_top if prev_top > 0 else (cw['top'] - 12)
+                        if w['top'] >= cw['top']:
+                            continue
+                        if w['text'] in ('DTC', 'Description', 'State', 'System'):
+                            line_labels.setdefault(w['top'], set()).add(w['text'])
+                            line_bottom[w['top']] = max(line_bottom.get(w['top'], 0), w['bottom'])
+                    required = {'DTC', 'Description', 'State', 'System'}
+                    header_lines = [top for top, labels in line_labels.items() if required <= labels]
+                    row_top = max(line_bottom[top] for top in header_lines) if header_lines else (cw['top'] - 12)
                 else:
                     row_top = (code_words[i-1]['top'] + cw['top']) / 2
 
