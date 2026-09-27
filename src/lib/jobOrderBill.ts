@@ -8,6 +8,7 @@
 // should go.)
 
 import { db } from '@/lib/db'
+import { signFileUrl } from '@/lib/storage'
 
 export interface BillPayment {
   id: number
@@ -58,6 +59,8 @@ export async function getJobOrderBill(jobOrderId: number): Promise<JobOrderBill>
     total,
     paid,
     balance: Math.max(0, Math.round((total - paid) * 100) / 100),
-    latestPayment: row ? { ...row, amount_paid: Number(row.amount_paid) } : null,
+    latestPayment: row
+      ? { ...row, amount_paid: Number(row.amount_paid), proof_of_payment_image: await signFileUrl(row.proof_of_payment_image) }
+      : null,
   }
 }

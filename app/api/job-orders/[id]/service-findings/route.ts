@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { findingTotal } from '@/lib/findings'
 import { sendReviewReadyEmail } from '@/lib/mail'
 import { notifyCustomer } from '@/lib/customerNotify'
+import { toStoredRef } from '@/lib/storage'
 import type { ProposedService, ProposedPart } from '@/data/types'
 
 // NOTE: this is the MID-SERVICE finding (job already in progress).
@@ -21,7 +22,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const taskId = body.taskId ? Number(body.taskId) : null
   const findings = String(body.findings ?? '').trim()
-  const photoUrl = body.photoUrl ? String(body.photoUrl) : null
+  // The modal sends back the temporary link it previewed — save the permanent one.
+  const photoUrl = toStoredRef(body.photoUrl ? String(body.photoUrl) : null)
   const services: ProposedService[] = Array.isArray(body.services) ? body.services : []
   const parts: ProposedPart[] = Array.isArray(body.parts) ? body.parts : []
 

@@ -215,8 +215,8 @@ export default function TestingPage() {
                   )}
 
                   <div className="flex items-center gap-3">
-                    <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={pickPhoto} />
-                    <input ref={galleryRef} type="file" accept="image/*" className="hidden" onChange={pickPhoto} />
+                    <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={pickPhoto} />
+                    <input ref={galleryRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={pickPhoto} />
                     {/* capture="environment" only means anything on a touch
                         device with a camera (phone OR tablet) — gate on
                         pointer type, not screen width, since a tablet is wide

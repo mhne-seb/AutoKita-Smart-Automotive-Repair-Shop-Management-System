@@ -3,6 +3,7 @@
 // customer tracking route so they read the rows the same way.
 
 import { db } from '@/lib/db'
+import { signFileUrls } from '@/lib/storage'
 import type { ServiceFinding, ProposedService, ProposedPart } from '@/data/types'
 
 export async function getFindingsForJobOrder(jobOrderId: number): Promise<ServiceFinding[]> {
@@ -17,13 +18,14 @@ export async function getFindingsForJobOrder(jobOrderId: number): Promise<Servic
      ORDER BY f.created_at DESC, f.id DESC`,
     [jobOrderId],
   )
-  return rows.map((r) => ({
+  const photos = await signFileUrls(rows.map((r) => r.photo_url))
+  return rows.map((r, i) => ({
     id: r.id,
     taskId: r.task_id ?? null,
     taskTitle: r.task_title ?? null,
     reportedByName: r.reported_by_name ?? null,
     findings: r.findings,
-    photoUrl: r.photo_url ?? null,
+    photoUrl: photos[i],
     services: (r.proposed_services ?? []) as ProposedService[],
     parts: (r.proposed_parts ?? []) as ProposedPart[],
     extraCost: Number(r.extra_cost ?? 0),
