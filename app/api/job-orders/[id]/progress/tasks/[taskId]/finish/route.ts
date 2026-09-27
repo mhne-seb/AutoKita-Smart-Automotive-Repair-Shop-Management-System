@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { uploadTaskPhoto } from '@/lib/storage'
+import { uploadTaskPhoto, signFileUrl } from '@/lib/storage'
 import { afterTaskFinished } from '@/lib/taskCompletion'
 import { notifyCustomer } from '@/lib/customerNotify'
 
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       employeeId: row.mechanic_id ?? null,
     })
 
-    return NextResponse.json({ success: true, photoUrl, ...outcome })
+    return NextResponse.json({ success: true, photoUrl: await signFileUrl(photoUrl), ...outcome })
   } catch (error) {
     console.error('Task finish error:', error)
     return NextResponse.json(

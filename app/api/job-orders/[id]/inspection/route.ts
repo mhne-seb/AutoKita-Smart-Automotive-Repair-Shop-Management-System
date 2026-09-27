@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 import { getLatestScanAuthorization } from '@/lib/scanAuthorization'
+import { signFileUrls } from '@/lib/storage'
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -74,12 +75,19 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     // customer wasn't already asked at booking — see scan-authorization/route.ts.
     const scanAuthorization = await getLatestScanAuthorization(Number(id))
 
+    // One batch of temporary links for every photo on the page.
+    const findings = findingsResult.rows
+    const photos = photoResult.rows
+    const signed = await signFileUrls([...findings.map((f) => f.photo), ...photos.map((p) => p.photo_url)])
+    findings.forEach((f, i) => { f.photo = signed[i] })
+    photos.forEach((p, i) => { p.photo_url = signed[findings.length + i] })
+
     return NextResponse.json({
       success: true,
       data: {
         ...headerResult.rows[0],
-        findings: findingsResult.rows,
-        referencePhotos: photoResult.rows,
+        findings,
+        referencePhotos: photos,
         diagnosticScanAuthorized: Boolean(scanResult.rows[0]?.authorized),
         scanAuthorization,
         ticket: ticketResult.rows[0] ?? null,

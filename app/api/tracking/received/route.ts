@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { signFileUrls } from '@/lib/storage'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -56,12 +57,16 @@ export async function GET(request: NextRequest) {
       ? (await db.query(`SELECT * FROM get_vehicle_service_history($1, $2)`, [vehicleId, jobOrder.job_order_id])).rows
       : []
 
+    const walkaround = walkaroundRes.rows
+    const signed = await signFileUrls(walkaround.map((w) => w.photo))
+    walkaround.forEach((w, i) => { w.photo = signed[i] })
+
     return NextResponse.json({
       jobOrder,
       services: servicesRes.rows,
       history,
       customerConcern: ticketRes.rows[0]?.customer_concern ?? null,
-      walkaround: walkaroundRes.rows,
+      walkaround,
     })
   } catch (err) {
     console.error('[/api/tracking/received] error:', err)

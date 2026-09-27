@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getLatestScanAuthorization } from '@/lib/scanAuthorization'
+import { signFileUrls } from '@/lib/storage'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -109,20 +110,24 @@ export async function GET(request: NextRequest) {
     // approves/declines from this page (see scan-authorization/*).
     const scanAuthorization = await getLatestScanAuthorization(jobOrder.job_order_id)
 
+    const walkaround = reportSent ? walkaroundRes.rows : []
+    // get_job_order_inspections() mixes inspection_photos rows into its
+    // result (they come back with status: null and a real photo URL) —
+    // keep those out of the findings list, they're intake documentation
+    // shown separately above, not something the mechanic diagnosed.
+    const findings = reportSent ? findingsRes.rows.filter((r) => !(r.status === null && r.photo)) : []
+    const signed = await signFileUrls([...walkaround.map((w) => w.photo), ...findings.map((f) => f.photo)])
+    walkaround.forEach((w, i) => { w.photo = signed[i] })
+    findings.forEach((f, i) => { f.photo = signed[walkaround.length + i] })
+
     return NextResponse.json({
       jobOrder,
       preDiagnostic,
-      walkaround: reportSent ? walkaroundRes.rows : [],
+      walkaround,
       reviewHistory: historyRes.rows,
       canCancel: Boolean(cancelRes.rows[0]?.can_cancel),
       scanAuthorization,
-      // get_job_order_inspections() mixes inspection_photos rows into its
-      // result (they come back with status: null and a real photo URL) —
-      // keep those out of the findings list, they're intake documentation
-      // shown separately above, not something the mechanic diagnosed.
-      findings: reportSent
-        ? findingsRes.rows.filter((r) => !(r.status === null && r.photo))
-        : [],
+      findings,
       scannerFindings: reportSent ? scannerRes.rows.map((r) => r.description as string) : [],
       shop: shopRes.rows[0] ?? null,
     })

@@ -3,11 +3,13 @@
 // same way. Writes go straight to start/pass/fail_road_test in the route.
 
 import { db } from '@/lib/db'
+import { signFileUrls } from '@/lib/storage'
 import type { RoadTestAttempt } from '@/data/roadTest'
 
 export async function getRoadTestHistory(jobOrderId: number): Promise<RoadTestAttempt[]> {
   const { rows } = await db.query(`SELECT * FROM get_road_test_history($1)`, [jobOrderId])
-  return rows.map((r) => ({
+  const photos = await signFileUrls(rows.map((r) => r.photo_url))
+  return rows.map((r, i) => ({
     id: r.id,
     attemptNo: r.attempt_no,
     testerName: r.tester_name ?? 'Assigned Mechanic',
@@ -15,7 +17,7 @@ export async function getRoadTestHistory(jobOrderId: number): Promise<RoadTestAt
     endedAt: r.ended_at ? new Date(r.ended_at).toISOString() : null,
     result: r.result ?? null,
     notes: r.notes ?? null,
-    photoUrl: r.photo_url ?? null,
+    photoUrl: photos[i],
     reworkTaskIds: r.rework_task_ids ?? [],
     reworkTaskTitles: r.rework_task_titles ?? [],
     failedPartIds: r.failed_part_ids ?? [],

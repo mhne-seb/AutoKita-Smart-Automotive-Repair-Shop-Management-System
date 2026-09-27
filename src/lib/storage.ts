@@ -8,6 +8,51 @@ const supabase = createClient(
     { auth: { persistSession: false } },
 )
 
+// The bucket is private: a stored link is only an address. Anything shown to
+// a browser goes through signFileUrl(s), which hands out a pass that expires.
+const PASS_SECONDS = 60 * 60
+const LINK_MARKERS = [`/object/public/${BUCKET}/`, `/object/sign/${BUCKET}/`]
+
+// A photo reference can be the permanent link saved in the database, a
+// temporary link the browser sent back, or a bare path — reduce any of them
+// to the file's path inside the bucket. Links to anywhere else give null.
+function pathOf(ref: string): string | null {
+    for (const marker of LINK_MARKERS) {
+        const i = ref.indexOf(marker)
+        if (i !== -1) return decodeURIComponent(ref.slice(i + marker.length).split('?')[0])
+    }
+    return /^https?:\/\//.test(ref) ? null : ref
+}
+
+// What gets saved: always the permanent form, never a temporary link (that
+// would stop working an hour after it was saved).
+export function toStoredRef(ref: string | null | undefined): string | null {
+    if (!ref) return null
+    const path = pathOf(ref)
+    return path ? supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl : ref
+}
+
+// What gets shown: a link that works for PASS_SECONDS. Links that aren't in
+// this bucket (e.g. placeholder images in seed data) pass through unchanged.
+export async function signFileUrl(ref: string | null | undefined): Promise<string | null> {
+    return (await signFileUrls([ref]))[0]
+}
+
+// Same, for a list — one request to Supabase instead of one per photo.
+export async function signFileUrls(refs: (string | null | undefined)[]): Promise<(string | null)[]> {
+    const paths = refs.map((ref) => (ref ? pathOf(ref) : null))
+    const wanted = [...new Set(paths.filter((p): p is string => p !== null))]
+    if (wanted.length === 0) return refs.map((ref) => ref ?? null)
+
+    const { data, error } = await supabase.storage.from(BUCKET).createSignedUrls(wanted, PASS_SECONDS)
+    if (error) console.error('Signing photo links failed:', error.message)
+    const byPath = new Map((data ?? []).filter((d) => d.path && !d.error).map((d) => [d.path as string, d.signedUrl]))
+    return refs.map((ref, i) => {
+        const path = paths[i]
+        return path ? byPath.get(path) ?? null : ref ?? null
+    })
+}
+
 function extensionFor(file: File): string {
     return file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
 }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getJobOrderBill } from '@/lib/jobOrderBill'
 import { notifyCustomer } from '@/lib/customerNotify'
+import { signFileUrls } from '@/lib/storage'
 
 // The Billing stage (after Testing): what the job costs, what's been paid,
 // the admin's verification of each payment, and the hand-over. Reads go
@@ -39,6 +40,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     ])
     const h = jo.rows[0]
     if (!h) return NextResponse.json({ success: false, message: 'Job order not found' }, { status: 404 })
+
+    const proofs = await signFileUrls(payments.rows.map((p) => p.proof_of_payment_image))
+    payments.rows.forEach((p, i) => { p.proof_of_payment_image = proofs[i] })
 
     return NextResponse.json({
       success: true,

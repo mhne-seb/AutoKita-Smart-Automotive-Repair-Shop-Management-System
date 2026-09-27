@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { uploadToBucket } from '@/lib/storage'
+import { uploadToBucket, signFileUrl } from '@/lib/storage'
 
 // Stores a walkaround reference photo into inspection_photos (child of
 // vehicle_inspections). The inspection header row is created on first upload
@@ -83,7 +83,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       }
     }
 
-    return NextResponse.json({ success: true, url: publicUrl, id: rowId, title })
+    return NextResponse.json({ success: true, url: await signFileUrl(publicUrl), id: rowId, title })
   } catch (error) {
     console.error('Photo upload error:', error)
     return NextResponse.json(
