@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Check, FileText, Wrench, ShieldCheck, Download, Clock, Car, User, PackageCheck, CreditCard, HourglassIcon, AlertCircle, BadgeCheck } from "lucide-react";
+import { Check, FileText, ShieldCheck, Download, Clock, Car, User, PackageCheck, CreditCard, HourglassIcon, AlertCircle, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 import { PaymentModal, type PaymentMethod } from "@/components/dashboard/PaymentModal";
 import type { PaymentProof } from "@/controllers/quotationController";
@@ -95,7 +95,7 @@ function Completed() {
     return <div className="mx-auto max-w-6xl px-6 py-8 text-sm text-muted-foreground">{error ?? "No completed job order found."}</div>;
   }
 
-  const { jobOrder, logs, warranties, services, parts } = data;
+  const { jobOrder, warranties, services, parts } = data;
 
   // NOTE: release-related fields (released_at / released_to / odometer /
   // release_photo_url) aren't in the current CompletedData shape yet — add
@@ -127,7 +127,8 @@ function Completed() {
       <StageStepper active={stageForStatus(jobOrder.status)} viewing={jobOrder.status === "completed" ? "billing" : "completed"} jobOrderId={jobOrder.job_order_id} />
 
       <div className="relative overflow-hidden rounded-2xl bg-brand-soft/60 p-8">
-        <Check className="absolute right-8 top-8 h-32 w-32 text-brand/10" />
+        {/* Decoration only — it sits over the Download button, so it must not take the click. */}
+        <Check className="pointer-events-none absolute right-8 top-8 h-32 w-32 text-brand/10" />
         <div className="flex items-start gap-5">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-brand-foreground"><Check className="h-7 w-7" /></div>
           <div>
@@ -150,32 +151,24 @@ function Completed() {
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-5">
-          <div className="rounded-xl border bg-card p-6">
-            <h3 className="flex items-center gap-2 font-bold"><Wrench className="h-4 w-4" /> Services Performed</h3>
-            <p className="text-xs text-muted-foreground">Full log of all work completed on your vehicle.</p>
-            <div className="mt-4 divide-y">
-              {logs.length === 0 && <p className="py-4 text-xs text-muted-foreground">No log entries yet.</p>}
-              {logs.map((log) => (
-                <div key={log.id} className="py-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <Wrench className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground max-w-lg">{log.activity_description}</p>
-                    </div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 shrink-0"><Clock className="h-3 w-3" /> {formatTime(log.log_time)}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <div>
             <div className="flex items-center justify-between">
               <h3 className="flex items-center gap-2 font-bold"><ShieldCheck className="h-4 w-4 text-teal" /> Warranty Certificates</h3>
-              <span className="rounded-full border px-3 py-0.5 text-xs">{warranties.length} Warrant{warranties.length === 1 ? "y" : "ies"}</span>
+              {warranties.length > 0 && (
+                <span className="rounded-full border px-3 py-0.5 text-xs">{warranties.length} Warrant{warranties.length === 1 ? "y" : "ies"}</span>
+              )}
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
-              {warranties.length === 0 && <p className="text-xs text-muted-foreground">No warranties issued for this job order.</p>}
+              {/* Warranties are only written at release (billing route), so
+                  before pickup an empty list means "not started yet", not
+                  "no warranty" — say that, or the customer thinks they got none. */}
+              {warranties.length === 0 && (
+                <p className="text-xs text-muted-foreground md:col-span-3">
+                  {releasedAt
+                    ? "No warranties issued for this job order."
+                    : "Your warranty starts the day you pick up your car. It will show here once your car is released."}
+                </p>
+              )}
               {warranties.map((w) => (
                 <div key={w.id} className="rounded-xl border bg-card p-4">
                   <div className="flex items-center justify-between">
@@ -190,7 +183,7 @@ function Completed() {
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">Warranty coverage applies to both parts and labor. Please keep your digital receipt for any potential claims.</p>
+            <p className="mt-3 text-xs text-muted-foreground">Warranty coverage applies to both parts and labor. To make a claim, open Service History and go to the Warranties tab.</p>
           </div>
 
           {/* --- Vehicle Release Information --- */}

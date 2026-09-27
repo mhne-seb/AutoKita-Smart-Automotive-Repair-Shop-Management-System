@@ -22,7 +22,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         [jobOrderId],
       ),
       db.query(
-        `SELECT p.quantity, p.part_number, p.description, p.retail_unit_price, p.is_warranty_replacement
+        `SELECT p.quantity, p.part_number, p.description, p.retail_unit_price
          FROM job_order_parts p WHERE p.job_order_id = $1 ORDER BY p.job_order_service_id, p.id`,
         [jobOrderId],
       ),
@@ -66,7 +66,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       vehicle: { yearModel: [h.vehicle_year, h.vehicle_make, h.vehicle_model].filter(Boolean).join(' '), plate: h.plate_number ?? '', vin: h.vin ?? '' },
       parts: parts.rows.map((p) => ({
         qty: Number(p.quantity ?? 1),
-        description: [p.part_number, p.description].filter(Boolean).join(' — ') + (p.is_warranty_replacement ? ' (warranty)' : ''),
+        description: [p.part_number, p.description].filter(Boolean).join(' — '),
         unitPrice: Number(p.retail_unit_price ?? 0),
       })),
       warranties: warranties.rows.map((w) => ({ description: w.coverage_description, expiresAt: w.expiration_date })),
