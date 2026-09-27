@@ -12,13 +12,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { Gauge, Play, CheckCircle2, XCircle, Camera, Loader2, ArrowLeft, ArrowRight, Wrench, Package, History, AlertTriangle, RotateCcw } from 'lucide-react'
+import { Gauge, Play, CheckCircle2, XCircle, Camera, Loader2, ArrowLeft, ArrowRight, Wrench, Package, History, AlertTriangle, RotateCcw, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { Lightbox } from '@/components/Lightbox'
 import { getJobOrderById } from '@/controllers/jobOrderController'
 import { getRoadTestData, startRoadTest, passRoadTest, failRoadTest, type RoadTestData } from '@/controllers/roadTestController'
+import { isDiagnosticScanTask } from '@/data/diagnosticScan'
 import type { JobOrderCard } from '@/data/types'
 
 const fmt = (iso: string | null) =>
@@ -44,6 +45,7 @@ export default function TestingPage() {
   const [preview, setPreview] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const galleryRef = useRef<HTMLInputElement>(null)
 
   async function load() {
     const [jo, rt] = await Promise.all([getJobOrderById(jobOrderId), getRoadTestData(jobOrderId)])
@@ -75,12 +77,22 @@ export default function TestingPage() {
     await load()
   }
 
+  // A failed part can't be swapped in without touching its service again —
+  // the labor isn't done until the (working) part is actually installed. So
+  // any task whose service a ticked part belongs to is required, not
+  // optional, regardless of whether it was separately ticked by hand.
+  function tasksRequiredByFailedParts(data: RoadTestData, failed: Set<number>): Set<number> {
+    const requiredTitles = new Set(data.parts.filter((p) => failed.has(p.id)).map((p) => p.service_name))
+    return new Set(data.tasks.filter((t) => requiredTitles.has(t.task_title)).map((t) => t.id))
+  }
+
   async function onSubmitResult() {
     if (!verdict) return
     setSaving(true)
+    const effectiveRework = data ? new Set([...rework, ...tasksRequiredByFailedParts(data, failedParts)]) : rework
     const r = verdict === 'pass'
       ? await passRoadTest(jobOrderId, notes.trim(), photo)
-      : await failRoadTest(jobOrderId, notes.trim(), [...rework], [...failedParts], photo)
+      : await failRoadTest(jobOrderId, notes.trim(), [...effectiveRework], [...failedParts], photo)
     setSaving(false)
     if (!r.ok) return toast.error(r.message)
     toast.success(verdict === 'pass' ? 'Passed — job order is now Completed.' : 'Recorded — the ticked services are back on the floor.')
@@ -154,14 +166,31 @@ export default function TestingPage() {
                       <div>
                         <p className="mb-1 text-sm font-semibold text-slate-700">Services to redo <span className="font-normal text-slate-400">— these go back to the floor</span></p>
                         <div className="divide-y divide-slate-100 rounded-lg border border-slate-200">
-                          {data.tasks.map((t) => (
-                            <label key={t.id} className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm hover:bg-slate-50">
-                              <input type="checkbox" checked={rework.has(t.id)} onChange={() => toggle(rework, t.id, setRework)} className="h-4 w-4 accent-rose-500" />
+                          {/* The scan already happened during inspection, before the
+                              car ever went out on this road test — a test drive can't
+                              prove a diagnostic reading right or wrong, so it can't be
+                              one of the things that "failed" it. */}
+                          {data.tasks.filter((t) => !isDiagnosticScanTask(t)).map((t) => {
+                            // A part can't be swapped in without touching its
+                            // service again, so ticking a failed part below
+                            // locks its service here on — it isn't optional.
+                            const requiredByPart = data.parts.some((p) => failedParts.has(p.id) && p.service_name === t.task_title)
+                            return (
+                            <label key={t.id} className={`flex items-center gap-3 px-3 py-2 text-sm ${requiredByPart ? 'cursor-not-allowed bg-slate-50' : 'cursor-pointer hover:bg-slate-50'}`}>
+                              <input
+                                type="checkbox"
+                                checked={rework.has(t.id) || requiredByPart}
+                                disabled={requiredByPart}
+                                onChange={() => toggle(rework, t.id, setRework)}
+                                className="h-4 w-4 accent-rose-500"
+                              />
                               <Wrench size={14} className="text-slate-400" />
                               <span className="flex-1">{t.task_title}</span>
+                              {requiredByPart && <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-700">Required — a part below failed</span>}
                               {t.rework_count > 0 && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">Redone ×{t.rework_count}</span>}
                             </label>
-                          ))}
+                            )
+                          })}
                         </div>
                       </div>
                       {data.parts.length > 0 && (
@@ -186,9 +215,19 @@ export default function TestingPage() {
                   )}
 
                   <div className="flex items-center gap-3">
-                    <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={pickPhoto} />
-                    <button type="button" onClick={() => fileRef.current?.click()} className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">
-                      <Camera size={13} /> {photo ? 'Replace photo' : 'Add photo'}
+                    <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={pickPhoto} />
+                    <input ref={galleryRef} type="file" accept="image/*" className="hidden" onChange={pickPhoto} />
+                    {/* capture="environment" only means anything on a touch
+                        device with a camera (phone OR tablet) — gate on
+                        pointer type, not screen width, since a tablet is wide
+                        but still has a working camera. */}
+                    <button type="button" onClick={() => fileRef.current?.click()} className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 [@media(pointer:fine)]:hidden">
+                      <Camera size={13} /> {photo ? 'Retake' : 'Take Photo'}
+                    </button>
+                    <button type="button" onClick={() => galleryRef.current?.click()} className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+                      <Upload size={13} />
+                      <span className="[@media(pointer:fine)]:hidden">Gallery</span>
+                      <span className="hidden [@media(pointer:fine)]:inline">{photo ? 'Replace photo' : 'Add photo'}</span>
                     </button>
                     {preview && <img src={preview} alt="" className="h-12 w-16 rounded-md border object-cover" />}
                     <span className="text-xs text-slate-400">Optional — dashboard, odometer, or the fault</span>
