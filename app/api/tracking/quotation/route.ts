@@ -54,6 +54,8 @@ export async function GET(request: NextRequest) {
            WHERE jo.id = $1
              AND sal.entity_type = 'service_tickets'
              AND sal.action_performed = 'approved'
+             -- The customer's own consent row, not the admin's acceptance row.
+             AND sal.user_id IS NOT NULL
          ) AS authorized`,
         [jobOrder.job_order_id],
       ),

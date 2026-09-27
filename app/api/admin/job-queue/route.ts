@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
           st.customer_concern,
           st.ticket_status,
           st.request_date,
+          st.preferred_datetime,
           u.id as user_id,
           u.first_name,
           u.last_name,
@@ -25,6 +26,9 @@ export async function GET(req: NextRequest) {
               WHERE c.entity_type = 'service_tickets'
                 AND c.entity_id = st.id
                 AND c.action_performed = 'approved'
+                -- The customer's own row. Accepting the ticket also writes an
+                -- 'approved' row on it, but by an employee — that isn't consent.
+                AND c.user_id IS NOT NULL
           ) AS diagnostic_scan_authorized,
           COALESCE(st.assigned_mechanic_id, jo.assigned_mechanic_id) as mechanic_id,
           wc.id IS NOT NULL AS is_warranty_claim
@@ -158,6 +162,9 @@ export async function POST(req: NextRequest) {
         const consent = await db.query(
           `SELECT 1 FROM system_audit_logs
            WHERE entity_type = 'service_tickets' AND entity_id = $1 AND action_performed = 'approved'
+             -- Only the customer's consent row — the acceptance row written a
+             -- few lines above is also 'approved' on this ticket, by the admin.
+             AND user_id IS NOT NULL
            LIMIT 1`,
           [ticketId],
         )
@@ -170,6 +177,17 @@ export async function POST(req: NextRequest) {
              WHERE s.service_name = $4 AND s.is_active
              LIMIT 1`,
             [newJo.id, mechanicId || null, 'OBD-II diagnostic scan — authorized by customer at booking. Payable even if repairs are declined.', DIAGNOSTIC_SCAN_SERVICE_NAME],
+          )
+
+          // The scan itself is done during inspection, not the repair stage —
+          // pre-insert its repair-stage task as already completed so it never
+          // shows up asking to be scheduled/started later. set_quotation_approval's
+          // "INSERT new tasks ... WHERE NOT EXISTS" skips a task_title that's
+          // already there, so this row is what it finds and leaves alone.
+          await db.query(
+            `INSERT INTO service_progress_tasks (job_order_id, section_id, task_title, note, task_status, price, billable)
+             VALUES ($1, 'in_progress', $2, $3, 'completed', 0, true)`,
+            [newJo.id, DIAGNOSTIC_SCAN_SERVICE_NAME, 'Performed during inspection.'],
           )
         }
       }
