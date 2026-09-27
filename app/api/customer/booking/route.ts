@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { sendTempPasswordEmail } from '@/lib/mail'
+import { hashPassword } from '@/lib/password'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
 
@@ -53,13 +54,14 @@ export async function POST(req: NextRequest) {
         newCustomerName = firstName
 
 
-        // users.password is UNIQUE, so every new account needs its own value.
+        // Readable copy stays in tempPassword for the welcome email below;
+        // only the hash goes into the database.
         tempPassword = `temp-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString().slice(-6)}`
 
         const created = await db.query(
          `INSERT INTO users (first_name, last_name, nickname, contact_number, email, address, password, registration_date)
            VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING id`,
-          [firstName, lastName, nickname, customer.phone || '', customer.email, customer.address || null, tempPassword]
+          [firstName, lastName, nickname, customer.phone || '', customer.email, customer.address || null, await hashPassword(tempPassword)]
         )
         finalUserId = created.rows[0].id
       }
