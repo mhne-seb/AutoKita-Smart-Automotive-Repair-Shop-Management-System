@@ -38,18 +38,33 @@ export async function signFileUrl(ref: string | null | undefined): Promise<strin
     return (await signFileUrls([ref]))[0]
 }
 
+// Every signing makes a different link, and pages that refresh every few
+// seconds would then make the browser re-download each photo every time.
+// Reusing a pass until it's close to expiring keeps the link the same, so the
+// browser's cached copy is used instead.
+const REUSE_UNTIL_MS_LEFT = 15 * 60 * 1000
+const passCache = new Map<string, { url: string; expiresAt: number }>()
+
 // Same, for a list — one request to Supabase instead of one per photo.
 export async function signFileUrls(refs: (string | null | undefined)[]): Promise<(string | null)[]> {
     const paths = refs.map((ref) => (ref ? pathOf(ref) : null))
-    const wanted = [...new Set(paths.filter((p): p is string => p !== null))]
-    if (wanted.length === 0) return refs.map((ref) => ref ?? null)
+    const now = Date.now()
+    const unique = [...new Set(paths.filter((p): p is string => p !== null))]
+    const wanted = unique.filter((p) => (passCache.get(p)?.expiresAt ?? 0) - now < REUSE_UNTIL_MS_LEFT)
 
-    const { data, error } = await supabase.storage.from(BUCKET).createSignedUrls(wanted, PASS_SECONDS)
-    if (error) console.error('Signing photo links failed:', error.message)
-    const byPath = new Map((data ?? []).filter((d) => d.path && !d.error).map((d) => [d.path as string, d.signedUrl]))
+    if (wanted.length > 0) {
+        const { data, error } = await supabase.storage.from(BUCKET).createSignedUrls(wanted, PASS_SECONDS)
+        if (error) console.error('Signing photo links failed:', error.message)
+        for (const d of data ?? []) {
+            if (d.path && d.signedUrl && !d.error) passCache.set(d.path, { url: d.signedUrl, expiresAt: now + PASS_SECONDS * 1000 })
+        }
+    }
+
     return refs.map((ref, i) => {
         const path = paths[i]
-        return path ? byPath.get(path) ?? null : ref ?? null
+        if (!path) return ref ?? null
+        const pass = passCache.get(path)
+        return pass && pass.expiresAt > now ? pass.url : null
     })
 }
 
