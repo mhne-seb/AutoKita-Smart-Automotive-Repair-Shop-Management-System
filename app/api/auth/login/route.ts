@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { verifyPassword } from '@/lib/password'
+import { SESSION_COOKIE, createSessionToken, sessionCookieOptions, sessionSecretConfigured } from '@/lib/session'
 
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json()
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
     // Live database users.role is 'c' (or 'customer'). Employees have roles: owner, mechanic, etc.
     const resolvedRole = isCustomer || rawRole === 'c' || rawRole === 'customer' ? 'customer' : 'admin'
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       user: {
         ...user,
@@ -45,6 +46,16 @@ export async function POST(req: NextRequest) {
       },
       role: resolvedRole,
     })
+
+    // The wristband. Which table the account came from decides the role —
+    // customer #5 and employee #5 are different people.
+    if (sessionSecretConfigured()) {
+      const token = await createSessionToken({ userId: found.id, role: isCustomer ? 'customer' : 'staff' })
+      res.cookies.set(SESSION_COOKIE, token, sessionCookieOptions)
+    } else {
+      console.warn('SESSION_SECRET is not set — logged in without a session cookie (see .env.example).')
+    }
+    return res
   } catch (err) {
     console.error('Login query failed:', err)
     return NextResponse.json({ success: false, message: 'Something went wrong.' }, { status: 500 })

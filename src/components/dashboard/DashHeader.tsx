@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { logout } from "@/controllers/authController";
 import { useEffect, useRef, useState } from "react";
 import { LayoutDashboard, History, User, LogOut, Settings, X, ChevronDown } from "lucide-react";
 import { Logo } from "@/components/site/Logo";
@@ -98,10 +99,9 @@ export function DashHeader() {
       });
   }, []);
 
-  function confirmLogout() {
+  async function confirmLogout() {
     setLogoutConfirmOpen(false);
-    // Clear the mock session so the (customer) layout's auth guard kicks in again.
-    if (typeof window !== "undefined") sessionStorage.removeItem("autokita_customer");
+    await logout();
     router.push("/login");
   }
 
