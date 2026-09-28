@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Mail, Lock, Eye, EyeOff, ArrowRight, X, KeyRound,
-  CheckCircle2, Loader2, AlertCircle,
+  Loader2, AlertCircle,
 } from 'lucide-react'
 import { Logo } from '@/components/site/Logo'
 import { Header } from '@/components/site/Header'
@@ -13,10 +12,17 @@ import { login, startSession } from '@/controllers/authController'
 
 const loginBg = '/assets/login-workshop.jpg' // static asset path
 
-const demoAccounts = [
-  { label: 'Customer', email: 'customer200@example.com', password: 'password123_u200' },
-  { label: 'Admin', email: 'owner@autokita.com', password: 'password123_e1' },
-]
+// These buttons hold real account passwords (one is the shop owner's), so the
+// live site leaves them out unless NEXT_PUBLIC_SHOW_DEMO_LOGIN=true, e.g. for
+// the defense. Both values are fixed at build time, so when the flag is off the
+// passwords aren't even in the page's JavaScript.
+const showDemo = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_SHOW_DEMO_LOGIN === 'true'
+const demoAccounts = showDemo
+  ? [
+      { label: 'Customer', email: 'customer200@example.com', password: 'password123_u200' },
+      { label: 'Admin', email: 'owner@autokita.com', password: 'password123_e1' },
+    ]
+  : []
 
 function LoginPage() {
   useEffect(() => {
@@ -24,10 +30,11 @@ function LoginPage() {
   }, [])
 
   const router = useRouter()
-  const [email, setEmail] = useState('customer200@example.com')
-  const [password, setPassword] = useState('password123_u200')
+  const [email, setEmail] = useState(demoAccounts[0]?.email ?? '')
+  const [password, setPassword] = useState(demoAccounts[0]?.password ?? '')
   const [showPassword, setShowPassword] = useState(false)
-  const [remember, setRemember] = useState(true)
+  // Off by default: the shop PC is shared, and the next person shouldn't land in your account.
+  const [remember, setRemember] = useState(false)
   const [forgot, setForgot] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -37,7 +44,7 @@ function LoginPage() {
     setSubmitting(true)
     setError('')
 
-    const result = await login(email, password)
+    const result = await login(email, password, remember)
 
     setSubmitting(false)
 
@@ -46,7 +53,7 @@ function LoginPage() {
       return
     }
 
-    startSession(result.role, result.user!.id)
+    startSession(result.role, result.user!.id, remember)
     const isCustomer = result.role === 'customer' || result.role === 'c'
     router.push(isCustomer ? '/dashboard' : '/overview')
   }
@@ -96,11 +103,13 @@ function LoginPage() {
             </p>
             <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
               <div>
-                <label className="text-xs font-medium">Email or Phone Number</label>
+                <label className="text-xs font-medium">Email</label>
                 <div className="mt-1.5 relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input
-                    type="text"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="you@example.com"
                     value={email}
                     onChange={(e) => { setEmail(e.target.value); if (error) setError('') }}
                     className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
@@ -135,7 +144,7 @@ function LoginPage() {
                     onChange={(e) => setRemember(e.target.checked)}
                     className="h-4 w-4 accent-[color:var(--brand)]"
                   />
-                  Remember me
+                  Keep me signed in
                 </label>
                 <button type="button" onClick={() => setForgot(true)} className="text-brand transition-colors hover:underline">
                   Forgot password?
@@ -165,6 +174,8 @@ function LoginPage() {
               </button>
             </form>
 
+            {demoAccounts.length > 0 && (
+            <>
             <div className="my-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
               <span className="h-px flex-1 bg-border" /> Quick Demo Access <span className="h-px flex-1 bg-border" />
             </div>
@@ -184,6 +195,8 @@ function LoginPage() {
                 </button>
               ))}
             </div>
+            </>
+            )}
           </div>
         </div>
 
@@ -197,38 +210,33 @@ function LoginPage() {
   )
 }
 
-const forgotSteps = ['Email', 'Verify', 'Reset', 'Done']
-
+// Step 1 asks for the email; step 2 says "check your inbox". The rest happens
+// on /reset-password, which the emailed link opens.
 function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
-  const [step, setStep] = useState<0 | 1 | 2 | 3>(0)
+  const [sent, setSent] = useState(false)
   const [email, setEmail] = useState('')
-  const [code, setCode] = useState(['', '', '', '', '', ''])
-  const [pw, setPw] = useState('')
-  const [pw2, setPw2] = useState('')
   const [err, setErr] = useState('')
-  const firstCodeRef = useRef<HTMLInputElement | null>(null)
+  const [sending, setSending] = useState(false)
 
-  const [mockCode] = useState(() => String(Math.floor(100000 + Math.random() * 900000)))
-
-  useEffect(() => {
-    if (step === 1) firstCodeRef.current?.focus()
-  }, [step])
-
-  const submitEmail = (e: React.FormEvent) => {
+  const submitEmail = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.includes('@')) { setErr('Please enter a valid email.'); return }
-    setErr(''); setStep(1)
-  }
-  const submitCode = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (code.join('') !== mockCode) { setErr('Incorrect code. Try again.'); return }
-    setErr(''); setStep(2)
-  }
-  const submitPw = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (pw.length < 8) { setErr('Password must be at least 8 characters.'); return }
-    if (pw !== pw2) { setErr("Passwords don't match."); return }
-    setErr(''); setStep(3)
+    if (!email.includes('@')) { setErr('Enter a valid email address.'); return }
+    setErr('')
+    setSending(true)
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      })
+      const data = await res.json()
+      if (!data.success) { setErr(data.message ?? "We couldn't send the email. Try again."); return }
+      setSent(true)
+    } catch {
+      setErr("We couldn't reach the server. Check your connection and try again.")
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -252,36 +260,22 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
         <div className="flex items-center justify-between border-b bg-brand px-5 py-3.5 text-white">
           <div className="flex items-center gap-2">
             <KeyRound className="h-4 w-4" />
-            <h3 className="text-sm font-semibold">
-              {step === 0 && 'Forgot Password'}
-              {step === 1 && 'Verify Your Email'}
-              {step === 2 && 'Set New Password'}
-              {step === 3 && 'Password Updated'}
-            </h3>
+            <h3 className="text-sm font-semibold">{sent ? 'Check your email' : 'Forgot password'}</h3>
           </div>
-          <button onClick={onClose} className="rounded p-1 transition-colors hover:bg-white/10"><X className="h-4 w-4" /></button>
-        </div>
-
-        <div className="flex gap-1.5 px-5 pt-4">
-          {forgotSteps.map((label, i) => (
-            <div key={label} className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-brand transition-all duration-500 ease-out"
-                style={{ width: i <= step ? '100%' : '0%' }}
-              />
-            </div>
-          ))}
+          <button onClick={onClose} aria-label="Close" className="rounded p-1 transition-colors hover:bg-white/10"><X className="h-4 w-4" /></button>
         </div>
 
         <div className="p-6">
-          {step === 0 && (
+          {!sent && (
             <form onSubmit={submitEmail} className="space-y-4 animate-fade-up">
-              <p className="text-sm text-muted-foreground">Enter your registered email. We'll send a 6-digit verification code.</p>
+              <p className="text-sm text-muted-foreground">
+                Enter the email you use for AutoKita. We'll send you a link to set a new password.
+              </p>
               <div>
-                <label className="text-xs font-medium">Email address</label>
+                <label className="text-xs font-medium">Email</label>
                 <div className="mt-1.5 relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input value={email} onChange={(e) => { setEmail(e.target.value); if (err) setErr('') }} placeholder="you@example.com"
+                  <input type="email" autoComplete="email" value={email} onChange={(e) => { setEmail(e.target.value); if (err) setErr('') }} placeholder="you@example.com"
                     className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
                 </div>
               </div>
@@ -290,96 +284,25 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
                   <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" /> {err}
                 </p>
               )}
-              <button className="w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01]">
-                Send Verification Code
+              <button disabled={sending} className="flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60">
+                {sending ? <>Sending… <Loader2 className="h-4 w-4 animate-spin" /></> : 'Send reset link'}
               </button>
             </form>
           )}
 
-          {step === 1 && (
-            <form onSubmit={submitCode} className="space-y-4 animate-fade-up">
-              <p className="text-sm text-muted-foreground">
-                We sent a 6-digit code to <b>{email}</b>. Enter it below to continue.
-              </p>
-              <div className="rounded-md border border-dashed bg-muted/40 p-3 text-center text-xs text-muted-foreground">
-                Demo code: <span className="font-mono font-bold text-foreground tracking-widest">{mockCode}</span>
-              </div>
-              <div className="flex justify-center gap-2">
-                {code.map((c, i) => (
-                  <input
-                    key={i}
-                    ref={i === 0 ? firstCodeRef : undefined}
-                    id={`code-${i}`}
-                    value={c}
-                    inputMode="numeric"
-                    maxLength={1}
-                    onChange={(e) => {
-                      const v = e.target.value.replace(/\D/g, '').slice(0, 1)
-                      setCode((prev) => prev.map((x, ix) => (ix === i ? v : x)))
-                      if (v && i < 5) document.getElementById(`code-${i + 1}`)?.focus()
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Backspace' && !code[i] && i > 0) {
-                        document.getElementById(`code-${i - 1}`)?.focus()
-                      }
-                    }}
-                    className="h-11 w-10 rounded-md border bg-background text-center text-lg font-bold transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
-                  />
-                ))}
-              </div>
-              {err && (
-                <p className="flex items-center justify-center gap-2 text-center text-xs text-destructive" style={{ animation: 'shakeX 0.4s ease-in-out' }}>
-                  <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" /> {err}
-                </p>
-              )}
-              <button className="w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01]">
-                Verify Code
-              </button>
-              <button type="button" onClick={() => setStep(0)} className="w-full text-xs text-muted-foreground transition-colors hover:text-foreground">
-                ← Change email
-              </button>
-            </form>
-          )}
-
-          {step === 2 && (
-            <form onSubmit={submitPw} className="space-y-4 animate-fade-up">
-              <p className="text-sm text-muted-foreground">Choose a strong new password (min. 8 characters).</p>
-              <div>
-                <label className="text-xs font-medium">New password</label>
-                <div className="mt-1.5 relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input type="password" value={pw} onChange={(e) => { setPw(e.target.value); if (err) setErr('') }}
-                    className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs font-medium">Confirm new password</label>
-                <div className="mt-1.5 relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input type="password" value={pw2} onChange={(e) => { setPw2(e.target.value); if (err) setErr('') }}
-                    className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
-                </div>
-              </div>
-              {err && (
-                <p className="flex items-center gap-2 text-xs text-destructive" style={{ animation: 'shakeX 0.4s ease-in-out' }}>
-                  <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" /> {err}
-                </p>
-              )}
-              <button className="w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01]">
-                Update Password
-              </button>
-            </form>
-          )}
-
-          {step === 3 && (
+          {sent && (
             <div className="space-y-4 text-center animate-fade-up">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-success/15 text-success">
-                <CheckCircle2 className="h-8 w-8" />
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand/10 text-brand">
+                <Mail className="h-7 w-7" />
               </div>
-              <h4 className="text-lg font-bold">Password successfully updated</h4>
-              <p className="text-sm text-muted-foreground">You can now sign in with your new password.</p>
+              <p className="text-sm">
+                If <b>{email.trim()}</b> has an AutoKita account, we sent a reset link to it. The link works for 30 minutes.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Didn't get it? Check your spam folder, or ask the shop to reset it for you.
+              </p>
               <button onClick={onClose} className="w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01]">
-                Back to Log In
+                Back to sign in
               </button>
             </div>
           )}

@@ -11,6 +11,8 @@ import { cookies } from 'next/headers'
 
 export const SESSION_COOKIE = 'autokita_session'
 const MAX_AGE_SECONDS = 12 * 60 * 60
+// "Keep me signed in" ticked.
+export const REMEMBER_MAX_AGE_SECONDS = 30 * 24 * 60 * 60
 
 export type Session = { userId: number; role: 'customer' | 'staff' }
 
@@ -24,12 +26,12 @@ export function sessionSecretConfigured(): boolean {
   return (process.env.SESSION_SECRET?.length ?? 0) >= 32
 }
 
-export async function createSessionToken(session: Session): Promise<string> {
+export async function createSessionToken(session: Session, maxAgeSeconds = MAX_AGE_SECONDS): Promise<string> {
   return new SignJWT({ role: session.role })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(String(session.userId))
     .setIssuedAt()
-    .setExpirationTime(`${MAX_AGE_SECONDS}s`)
+    .setExpirationTime(`${maxAgeSeconds}s`)
     .sign(secretKey())
 }
 
