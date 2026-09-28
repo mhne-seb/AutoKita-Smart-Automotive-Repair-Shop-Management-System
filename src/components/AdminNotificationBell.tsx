@@ -52,10 +52,16 @@ export function AdminNotificationBell({ buttonClassName }: { buttonClassName?: s
       }
     }
     load()
-    const t = setInterval(load, 10000) // fast enough to feel live; the server throttles its own work
+    // Every 30 s, and only while this tab is on screen — an admin page left
+    // open in a background tab all day was most of the project's Supabase
+    // data usage. Coming back to the tab refreshes right away.
+    const t = setInterval(() => { if (!document.hidden) load() }, 30000)
+    const onVisible = () => { if (!document.hidden) load() }
+    document.addEventListener('visibilitychange', onVisible)
     return () => {
       alive = false
       clearInterval(t)
+      document.removeEventListener('visibilitychange', onVisible)
     }
   }, [])
 
