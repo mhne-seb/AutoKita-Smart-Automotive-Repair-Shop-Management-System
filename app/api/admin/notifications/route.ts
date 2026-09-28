@@ -8,14 +8,18 @@ import { FINDING_TIMEOUT_HOURS } from '@/data/findingPolicy'
 // admin acts (advance stage / release / verify payment).
 export async function GET() {
   try {
-    // The bell polls every 45 s while the shop has the app open — that's
+    // The bell polls every 30 s while an admin tab is on screen — that's
     // the app's clock for finding reminders (see lib/findingsSweep).
     sweepPendingFindings().catch((e) => console.error('[notifications] sweep failed:', e))
 
+    // Only fetch rows that can become a notification. Pulling every job order
+    // and every payment on each poll (then keeping 20) was most of the
+    // project's Supabase data usage. pending_customer_approval job orders are
+    // kept only so a pending payment can link to the right page below.
     const [tickets, jobOrders, payments, responses, jobOrderCreatedAt, pullOuts, overdueFindings, warrantyClaims] = await Promise.all([
       db.query('SELECT * FROM get_service_tickets_queue()'),
-      db.query('SELECT * FROM get_job_orders_list()'),
-      db.query('SELECT * FROM get_payment_records()'),
+      db.query(`SELECT * FROM get_job_orders_list() WHERE status IN ('inspecting', 'completed', 'pending_customer_approval')`),
+      db.query(`SELECT * FROM get_payment_records() WHERE verification_status = 'pending'`),
       // Every yes/no the customer has given, newest first — inspection report
       // (pre_diagnostics round), quotation (2FA confirm on job_orders), and
       // mid-service findings. These are history, not to-dos: they stay in
