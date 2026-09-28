@@ -43,12 +43,13 @@ export async function login(email: string, password: string): Promise<LoginResul
   }
 }
 
-/** Clears whichever session flags are currently set. */
-export function logout() {
+/** Clears the browser's session flags and has the server take back the login cookie. */
+export async function logout() {
   if (typeof window === 'undefined') return
   sessionStorage.removeItem('autokita_admin')
   sessionStorage.removeItem('autokita_customer')
   sessionStorage.removeItem('autokita_user_id')
+  await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
 }
 
 /** Persists the session flags for the given role + user id after a successful login. */

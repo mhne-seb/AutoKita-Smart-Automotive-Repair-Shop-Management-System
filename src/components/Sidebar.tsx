@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { logout } from '@/controllers/authController'
 import {
   LayoutGrid,
   ListChecks,
@@ -61,8 +62,8 @@ export function Sidebar() {
     setMobileOpen(false)
   }, [pathname])
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('autokita_admin')
+  const handleLogout = async () => {
+    await logout()
     router.push('/login')
   }
 
