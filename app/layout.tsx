@@ -13,10 +13,25 @@ export const metadata: Metadata = {
   },
 };
 
+// "Keep me signed in" (see startSession in authController.ts). Runs before the
+// page's own code, so every page that reads sessionStorage sees the login.
+const restoreRememberedLogin = `try {
+  var r = JSON.parse(localStorage.getItem('autokita_remember') || 'null');
+  if (r && r.exp > Date.now() && (r.flag === 'autokita_customer' || r.flag === 'autokita_admin')) {
+    if (!sessionStorage.getItem('autokita_user_id')) {
+      sessionStorage.setItem(r.flag, 'true');
+      sessionStorage.setItem('autokita_user_id', String(r.userId));
+    }
+  } else if (r) {
+    localStorage.removeItem('autokita_remember');
+  }
+} catch (e) {}`
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: restoreRememberedLogin }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
