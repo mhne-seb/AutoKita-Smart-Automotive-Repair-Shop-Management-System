@@ -247,7 +247,6 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
       style={{ animation: 'fadeIn 0.25s ease-out' }}
-      onClick={onClose}
     >
       <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -259,7 +258,6 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
       <div
         className="w-full max-w-md overflow-hidden rounded-xl bg-background shadow-2xl"
         style={{ animation: 'modalPop 0.3s cubic-bezier(0.22,1,0.36,1)' }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b bg-brand px-5 py-3.5 text-white">
           <div className="flex items-center gap-2">

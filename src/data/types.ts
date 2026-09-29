@@ -91,6 +91,20 @@ export interface InspectionData {
   plate: string
   customer: string
   contactNumber?: string
+  customerDetails?: {
+    firstName: string
+    lastName: string
+    contactNumber: string
+    email: string
+    address: string
+  }
+  vehicleDetails?: {
+    plateNumber: string
+    make: string
+    model: string
+    year: number | null
+    mileage: number | null
+  }
   photoSlots: InspectionPhotoSlot[]
   findings: MechanicalFinding[]
   timer: {
