@@ -162,6 +162,20 @@ function toInspectionData(row: any): InspectionData {
     plate: row.plate_number || '—',
     customer: `${row.first_name ?? ''} ${row.last_name ?? ''}`.trim() || 'Unknown Customer',
     contactNumber: row.contact_number || '',
+    customerDetails: {
+      firstName: row.first_name || '',
+      lastName: row.last_name || '',
+      contactNumber: row.contact_number || '',
+      email: row.email || '',
+      address: row.address || '',
+    },
+    vehicleDetails: {
+      plateNumber: row.plate_number || '',
+      make: row.vehicle_make || '',
+      model: row.vehicle_model || '',
+      year: row.vehicle_year || null,
+      mileage: row.mileage ?? null,
+    },
     photoSlots,
     findings,
     timer: {

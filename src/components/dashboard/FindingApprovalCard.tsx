@@ -117,8 +117,8 @@ export function FindingApprovalCard({
       </div>
 
       {showDecline && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => !declining && setShowDecline(false)}>
-          <div className="w-full max-w-sm rounded-xl bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-xl bg-card p-6 shadow-2xl">
             <div className="flex items-start justify-between">
               <h3 className="text-lg font-semibold">Decline this additional work?</h3>
               <button onClick={() => setShowDecline(false)} disabled={declining} className="rounded-md p-1 transition-colors hover:bg-accent" aria-label="Close">

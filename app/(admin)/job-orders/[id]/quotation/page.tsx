@@ -1048,8 +1048,8 @@ export default function page() {
       </div>
 
       {showSendReview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setShowSendReview(false)}>
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900">Review before sending</h3>
               <button onClick={() => setShowSendReview(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
@@ -1133,8 +1133,8 @@ export default function page() {
       )}
 
       {showServiceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setShowServiceModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-slate-900">Add Services</h3>
               <button onClick={() => setShowServiceModal(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
@@ -1226,8 +1226,8 @@ export default function page() {
       )}
 
       {showPartModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setShowPartModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900"><PackagePlus size={18} className="text-emerald-600" /> {editingPartId ? 'Edit Part' : 'Add Part'}</h3>
               <button onClick={() => setShowPartModal(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>

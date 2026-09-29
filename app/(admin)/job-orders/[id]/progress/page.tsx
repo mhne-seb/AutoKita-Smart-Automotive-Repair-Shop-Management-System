@@ -1148,8 +1148,8 @@ export default function page() {
       )}
 
       {showPurchaseModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => !savingPurchase && setShowPurchaseModal(false)}>
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-1 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900">Record Parts Purchase</h3>
               <button onClick={() => setShowPurchaseModal(false)} disabled={savingPurchase} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
@@ -1324,8 +1324,8 @@ function FinishTaskModal({ task, onClose, onSubmit }: { task: ServiceTask; onClo
 
   const roadTest = isRoadTest(task)
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-lg font-bold text-slate-900">Finish {task.title}</h2>
@@ -1477,7 +1477,7 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-slate-900">Schedule Task</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 rounded-full p-1 hover:bg-slate-100"><X size={20}/></button>
