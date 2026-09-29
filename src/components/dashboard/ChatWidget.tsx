@@ -2,46 +2,99 @@
 
 import { uid } from '@/lib/utils'
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { X, Maximize2, MoreVertical, Paperclip, Send, ShieldCheck, Clock, Calendar, HelpCircle, Wrench, Bot } from "lucide-react";
 import { Logo } from "@/components/site/Logo";
+import { formatChatMarkdown } from "@/lib/chatMarkdown";
 
-type Msg = { id: string; role: "user" | "bot"; text?: string; time: string; card?: boolean };
+export interface LiveJobCardData {
+  id: number;
+  jobOrderNumber: string;
+  vehicle: string;
+  plateNumber?: string;
+  serviceName: string;
+  rawStatus: string;
+  statusLabel: string;
+  progressPercent: number;
+  trackingSlug?: string;
+}
 
-const INITIAL: Msg[] = [
-  {
-    id: "1",
-    role: "bot",
-    text: "Hello Juan! I'm your AutoKita AI assistant. How can I help you manage your vehicle services today?",
-    time: "10:45 AM",
-  },
-  {
-    id: "2",
-    role: "user",
-    text: "I'd like to check the status of my current service for the Toyota Camry.",
-    time: "10:46 AM",
-  },
-  {
-    id: "3",
-    role: "bot",
-    text: "Sure thing! I've located your active service record. Here's your real-time update:",
-    time: "10:46 AM",
-    card: true,
-  },
-];
+type Msg = {
+  id: string;
+  role: "user" | "bot";
+  text?: string;
+  time: string;
+  card?: boolean;
+  jobCardData?: LiveJobCardData | null;
+};
 
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>(INITIAL);
+  const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [waiting, setWaiting] = useState(false);
+  const [activeJob, setActiveJob] = useState<LiveJobCardData | null>(null);
+
   // Multi-turn conversation history sent to the API
   const conversationHistory = useRef<{ role: 'user' | 'assistant'; content: string }[]>([]);
   const sessionIdRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Initial load: Fetch real customer profile, active job order, and chat history from Supabase
+  useEffect(() => {
+    const storedIdRaw = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null;
+    const userId = storedIdRaw ? parseInt(storedIdRaw, 10) : null;
+
+    fetch(`/api/chat/customer${userId ? `?userId=${userId}` : ''}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.sessionId) {
+          sessionIdRef.current = data.sessionId;
+        }
+        if (data.activeJob) {
+          setActiveJob(data.activeJob);
+        }
+
+        // If customer has previous message history in Supabase, load it
+        if (data.recentMessages && data.recentMessages.length > 0) {
+          setMessages(data.recentMessages);
+          conversationHistory.current = data.recentMessages.map((m: any) => ({
+            role: m.role === 'user' ? 'user' : 'assistant',
+            content: m.text || '',
+          }));
+        } else {
+          // Clean personalized welcome message connected to Supabase user
+          const firstName = data.user?.firstName || '';
+          const welcomeGreeting = firstName
+            ? `Hello ${firstName}! I'm your AutoKita AI assistant. How can I help you manage your vehicle services today?`
+            : "Hello! I'm your AutoKita AI assistant. How can I help you manage your vehicle services today?";
+
+          setMessages([
+            {
+              id: 'welcome',
+              role: 'bot',
+              text: welcomeGreeting,
+              time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+            },
+          ]);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to initialize customer chat from Supabase:', err);
+        setMessages([
+          {
+            id: 'welcome',
+            role: 'bot',
+            text: "Hello! I'm your AutoKita AI assistant. How can I help you manage your vehicle services today?",
+            time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+          },
+        ]);
+      });
+  }, []);
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
@@ -51,12 +104,12 @@ export function ChatWidget() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  function send() {
-    const t = input.trim();
+  function send(customText?: string) {
+    const t = (customText ?? input).trim();
     if (!t || waiting) return;
     const now = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     setMessages((m) => [...m, { id: uid(), role: "user", text: t, time: now }]);
-    setInput("");
+    if (!customText) setInput("");
     setWaiting(true);
 
     conversationHistory.current = [
@@ -86,15 +139,26 @@ export function ChatWidget() {
         if (data.sessionId) {
           sessionIdRef.current = data.sessionId;
         }
+        if (data.activeJob) {
+          setActiveJob(data.activeJob);
+        }
+
         const reply: string = res.ok
           ? (data.reply ?? '')
           : (data.error ?? 'Something went wrong. Please try again.');
+
         if (res.ok) {
           conversationHistory.current = [
             ...conversationHistory.current,
             { role: 'assistant', content: reply },
           ];
         }
+
+        // Show live status card if inquiry is about vehicle tracking and an active job exists in Supabase
+        const isStatusInquiry = /\b(status|track|tracking|progress|update|my car|my vehicle|my service|ongoing|current service)\b/i.test(t);
+        const resolvedJob = data.activeJob ?? activeJob;
+        const shouldShowCard = Boolean((data.showJobCard || isStatusInquiry) && resolvedJob);
+
         setMessages((m) => [
           ...m,
           {
@@ -102,6 +166,8 @@ export function ChatWidget() {
             role: 'bot',
             text: reply,
             time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+            card: shouldShowCard,
+            jobCardData: shouldShowCard ? resolvedJob : null,
           },
         ]);
       })
@@ -176,11 +242,23 @@ export function ChatWidget() {
               )}
             </div>
 
-            {/* Quick actions */}
+            {/* Quick actions wired to live Supabase flows */}
             <div className="flex flex-wrap gap-2 border-t bg-background px-5 py-3">
-              <QuickChip icon={Clock} label="Track Service" />
-              <QuickChip icon={Calendar} label="Book Appointment" />
-              <QuickChip icon={HelpCircle} label="General FAQs" />
+              <QuickChip
+                icon={Clock}
+                label="Track Service"
+                onClick={() => send("I'd like to check the status of my current service.")}
+              />
+              <QuickChip
+                icon={Calendar}
+                label="Book Appointment"
+                onClick={() => send("I would like to book an appointment for my vehicle.")}
+              />
+              <QuickChip
+                icon={HelpCircle}
+                label="General FAQs"
+                onClick={() => send("What are your shop hours, location, and services offered?")}
+              />
             </div>
 
             {/* Composer */}
@@ -195,7 +273,7 @@ export function ChatWidget() {
                   placeholder="Type your message..."
                   className="flex-1 bg-transparent py-2.5 text-sm outline-none placeholder:text-muted-foreground"
                 />
-                <button onClick={send} className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-brand-foreground hover:opacity-90">
+                <button onClick={() => send()} className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-brand-foreground hover:opacity-90">
                   <Send className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -223,47 +301,75 @@ function MessageBubble({ msg }: { msg: Msg }) {
   return (
     <div className="flex gap-2">
       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand"><Bot className="h-4 w-4" /></div>
-      <div className="flex max-w-[80%] flex-col">
-        <div className="rounded-2xl rounded-tl-sm bg-card border px-4 py-2.5 text-sm prose prose-sm max-w-none
-          [&_strong]:font-semibold [&_ul]:my-1 [&_ul]:pl-4 [&_li]:my-0
-          [&_p]:my-1 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0
+      <div className="flex max-w-[85%] flex-col">
+        <div className="rounded-2xl rounded-tl-sm bg-card border px-4 py-2.5 text-sm prose prose-sm max-w-none leading-relaxed
+          [&_strong]:font-semibold
+          [&_ul]:my-1.5 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-0.5
+          [&_ol]:my-1.5 [&_ol]:list-decimal [&_ol]:pl-5
+          [&_p]:my-1.5 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0
           [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text ?? ''}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{formatChatMarkdown(msg.text ?? '')}</ReactMarkdown>
         </div>
-        {msg.card && <StatusCard />}
+        {msg.card && msg.jobCardData && <StatusCard job={msg.jobCardData} />}
         <span className="mt-1 text-[10px] text-muted-foreground">{msg.time}</span>
       </div>
     </div>
   );
 }
 
-function StatusCard() {
+function StatusCard({ job }: { job: LiveJobCardData }) {
+  const trackingSlug = job.trackingSlug || 'in-progress';
+  const trackingUrl = `/dashboard/tracking/${trackingSlug}?jobOrderId=${job.id}`;
+
   return (
-    <div className="mt-3 rounded-xl border bg-card p-4">
+    <div className="mt-3 rounded-xl border bg-card p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-bold uppercase tracking-wider text-brand">Live Status</span>
-        <span className="rounded-md border px-2 py-0.5 text-[10px] font-medium">ID: #AC-88294</span>
+        <span className="rounded-md border px-2 py-0.5 text-[10px] font-medium text-foreground">
+          {job.jobOrderNumber || `ID: #JO-${job.id}`}
+        </span>
       </div>
       <div className="mt-3 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-soft text-brand"><Wrench className="h-5 w-5" /></div>
-        <div>
-          <div className="text-sm font-bold">2022 Tesla Model 3</div>
-          <div className="text-xs text-muted-foreground">Full Engine Diagnostics</div>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
+          <Wrench className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-bold text-foreground">{job.vehicle}</div>
+          <div className="truncate text-xs text-muted-foreground">
+            {job.serviceName || 'Automotive Service'}
+            {job.plateNumber ? ` • ${job.plateNumber}` : ''}
+          </div>
         </div>
       </div>
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-        <div className="h-full w-[65%] bg-brand" />
+        <div
+          className="h-full bg-brand transition-all duration-500"
+          style={{ width: `${Math.min(100, Math.max(5, job.progressPercent))}%` }}
+        />
       </div>
-      <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
-        <span>In Progress</span><span className="font-semibold text-foreground">65%</span>
+      <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+        <span className="font-medium text-foreground">{job.statusLabel}</span>
+        <span className="font-semibold text-brand">{job.progressPercent}%</span>
+      </div>
+      <div className="mt-3 border-t pt-2.5">
+        <Link
+          href={trackingUrl}
+          className="inline-flex w-full items-center justify-center rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand transition hover:bg-brand hover:text-brand-foreground"
+        >
+          View Full Tracking
+        </Link>
       </div>
     </div>
   );
 }
 
-function QuickChip({ icon: Icon, label }: { icon: any; label: string }) {
+function QuickChip({ icon: Icon, label, onClick }: { icon: any; label: string; onClick?: () => void }) {
   return (
-    <button className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium hover:bg-accent">
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition hover:bg-accent active:scale-95"
+    >
       <Icon className="h-3.5 w-3.5 text-brand" /> {label}
     </button>
   );
