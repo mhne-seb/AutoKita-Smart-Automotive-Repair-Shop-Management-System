@@ -2,19 +2,44 @@
 Run this script in terminal before using the website for ML stuff
 """
 import os
+import re
+import sys
 import json
+import hmac
+import subprocess
+import tempfile
 import warnings
 import joblib
 import numpy as np
 
 # Suppress sklearn's valid feature names warnings when predicting with numpy arrays
 warnings.filterwarnings("ignore", message="X does not have valid feature names")
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, Depends, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Union, List, Dict, Any
 import uvicorn
 
-app = FastAPI(title="AutoKita ML Predict API")
+# Every route except /health needs the header  X-API-Key: <ML_API_KEY>.
+# The website (server side, never the browser) is the only caller, and it holds
+# the key. On a laptop with no key set the server stays open, as it always was.
+# Render sets RENDER=true, and there a missing key means "refuse", never "open".
+ML_API_KEY = os.environ.get('ML_API_KEY', '')
+ON_RENDER = bool(os.environ.get('RENDER'))
+
+
+def require_api_key(request: Request):
+    if request.url.path == '/health':  # Render's health check and pre-warming use this
+        return
+    if not ML_API_KEY:
+        if ON_RENDER:
+            raise HTTPException(status_code=503, detail='Server has no ML_API_KEY configured')
+        return
+    sent = request.headers.get('x-api-key', '')
+    if not hmac.compare_digest(sent.encode('utf-8'), ML_API_KEY.encode('utf-8')):
+        raise HTTPException(status_code=401, detail='Invalid API key')
+
+
+app = FastAPI(title="AutoKita ML Predict API", dependencies=[Depends(require_api_key)])
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,6 +51,7 @@ app.add_middleware(
 # Loading
 BASE = os.path.dirname(os.path.abspath(__file__))
 EXPORTED = os.path.join(BASE, 'exported')
+PARSER_DIR = os.path.join(os.path.dirname(BASE), 'Email_parser')  # sits next to models/ in the repo
 SYNC_META_PATH = os.path.join(EXPORTED, 'last_sync_meta.json')
 
 MIN_SAMPLE_THRESHOLD = 10
@@ -346,6 +372,67 @@ def trigger_batch_sync(
         }
     except Exception as e:
         return {'status': 'error', 'message': str(e)}
+
+
+# --- Email parser -----------------------------------------------------------
+# These two used to be started by the website itself with `py -3`, which only
+# works on a Windows machine that has Python. Now the website asks this server.
+
+MAX_PDF_BYTES = 15 * 1024 * 1024
+UTF8_ENV = {**os.environ, 'PYTHONIOENCODING': 'utf-8'}  # so a non-English email subject can't crash the script
+
+
+@app.post('/parse-pdf')
+def parse_pdf(file: UploadFile = File(...)):
+    """Reads one OBD-II scanner PDF and returns what's in it (vehicle, error codes)."""
+    data = file.file.read(MAX_PDF_BYTES + 1)
+    if len(data) > MAX_PDF_BYTES:
+        raise HTTPException(status_code=413, detail='PDF is over 15 MB')
+
+    with tempfile.TemporaryDirectory() as tmp:
+        pdf_path = os.path.join(tmp, 'report.pdf')  # not the uploaded name: it's the client's to choose
+        with open(pdf_path, 'wb') as f:
+            f.write(data)
+        try:
+            result = subprocess.run(
+                [sys.executable, os.path.join(PARSER_DIR, 'pdf_parser.py'), pdf_path],
+                capture_output=True, text=True, encoding='utf-8', errors='replace',
+                timeout=60, env=UTF8_ENV,
+            )
+        except subprocess.TimeoutExpired:
+            raise HTTPException(status_code=422, detail='Reading the PDF took too long')
+
+    if result.returncode != 0:
+        print(f'[parse-pdf] parser exited {result.returncode}: {result.stderr[-500:]}')
+        raise HTTPException(status_code=422, detail='Failed to parse PDF')
+    try:
+        parsed = json.loads(result.stdout.strip())
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=422, detail='Failed to parse PDF')
+    if isinstance(parsed, dict) and 'error' in parsed:
+        raise HTTPException(status_code=422, detail=str(parsed['error']))
+    return parsed
+
+
+@app.post('/gmail/sync')
+def gmail_sync():
+    """Checks the shop inbox for new scanner reports and stores them through the website."""
+    try:
+        result = subprocess.run(
+            [sys.executable, os.path.join(PARSER_DIR, 'gmail_fetcher.py')],
+            capture_output=True, text=True, encoding='utf-8', errors='replace',
+            timeout=240, env=UTF8_ENV,
+        )
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=504, detail='Checking Gmail took too long')
+
+    out = result.stdout.strip()
+    match = re.search(r'fetched=(\d+)\s+validated=(\d+)\s+stored=(\d+)\s+skipped=(\d+)', out)
+    if result.returncode != 0 or not match:
+        print(f'[gmail/sync] exited {result.returncode}: {result.stderr[-500:]} | {out[-500:]}')
+        raise HTTPException(status_code=500, detail='Gmail sync failed. Check the Gmail login in the server settings.')
+    fetched, validated, stored, skipped = (int(g) for g in match.groups())
+    return {'fetched': fetched, 'validated': validated, 'stored': stored, 'skipped': skipped, 'output': out}
 
 
 if __name__ == '__main__':

@@ -12,3 +12,4 @@ numpy==2.5.3
 scipy==1.18.1
 scikit-learn==1.7.2
 pdfplumber==0.11.10
+python-multipart==0.0.32
