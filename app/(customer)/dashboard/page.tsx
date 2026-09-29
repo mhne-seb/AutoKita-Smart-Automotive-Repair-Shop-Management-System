@@ -1375,12 +1375,15 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
       {showConfirmModal && (
         <div
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4"
-          onClick={() => {
-            setShowConfirmModal(false);
-            onClose();
-          }}
         >
-          <div className="w-full max-w-sm rounded-xl bg-card p-6 text-center shadow-lg" onClick={(e) => e.stopPropagation()}>
+          <div className="relative w-full max-w-sm rounded-xl bg-card p-6 text-center shadow-lg">
+            <button 
+              onClick={() => { setShowConfirmModal(false); onClose(); }}
+              className="absolute right-4 top-4 rounded-md p-1 text-muted-foreground hover:bg-accent"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-soft text-brand">
               <CheckCircle2 className="h-6 w-6" />
             </div>
