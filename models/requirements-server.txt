@@ -1,0 +1,14 @@
+# Only what the online ML/email-parser server needs (used by Render).
+#
+# scikit-learn is pinned to 1.7.2 on purpose: the saved models in exported/
+# were trained with it. A newer version still loads them, but with warnings
+# that the results "might be invalid". If you retrain the models, retrain
+# with this same version, or bump it here and retrain together.
+fastapi==0.141.1
+uvicorn==0.54.0
+pydantic==2.13.5
+joblib==1.6.0
+numpy==2.5.3
+scipy==1.18.1
+scikit-learn==1.7.2
+pdfplumber==0.11.10
