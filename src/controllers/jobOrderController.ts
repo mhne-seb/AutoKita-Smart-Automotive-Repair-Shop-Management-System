@@ -87,6 +87,8 @@ function toJobOrderCard(row: any): JobOrderCard {
     customer: `${row.first_name ?? ''} ${row.last_name ?? ''}`.trim() || row.nickname || 'Unknown Customer',
     vehicle: row.vehicle_model ? `${row.vehicle_year ?? ''} ${row.vehicle_model}`.trim() : 'Unknown Vehicle',
     customerId: `CUST-${row.user_id ?? '0000'}`,
+    avatarUrl: row.avatar_url || null,
+    rawUserId: row.user_id ? Number(row.user_id) : 0,
     stage,
     cancelled: row.status === 'cancelled',
     service: row.service_names || 'No services listed',
