@@ -35,6 +35,8 @@ export interface JobOrderCard {
   // A cancelled job order maps to the 'completed' stage (it's terminal) but
   // must never be labelled as if the work was done.
   cancelled?: boolean
+  dateArrived?: string | null
+  arrived?: boolean
 }
 
 export type FindingStatus = 'ok' | 'needs-attention' | 'urgent'
@@ -223,6 +225,7 @@ export interface ServiceTask {
   mechanicId?: number
   mechanicName?: string
   estimatedFinish?: string
+  estimatedHours?: number
   parts?: TaskPart[]
   // Photo of the finished work — set when the task is completed (required).
   photoUrl?: string

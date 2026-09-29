@@ -294,11 +294,13 @@ export interface PaymentRecord {
   services: string
   modeOfPayment: string
   paymentType: 'Full Payment' | 'Downpayment'
-  // For 'Full Payment' records, this is the total amount paid.
-  // For 'Downpayment' records, this is the remaining BALANCE DUE
-  // (i.e. subtotal from `items` minus `downpaymentAmount`).
   amount: number
+  balance?: number
+  totalAmount?: number
   status: 'Paid' | 'To Be Paid'
+  paymentId?: string
+  jobOrderId?: number
+  paymentDate?: string
   // Itemized parts/labor breakdown shown in the payment modal and invoice.
   // Falls back to the plain `services` string if omitted.
   items?: PaymentItem[]

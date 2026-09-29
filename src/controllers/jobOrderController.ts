@@ -102,7 +102,19 @@ function toJobOrderCard(row: any): JobOrderCard {
     stepsTotal: 6,
     mileage: row.mileage ? Number(row.mileage) : undefined,
     vehicleYear: row.vehicle_year ? Number(row.vehicle_year) : undefined,
+    dateArrived: row.date_arrived ? new Date(row.date_arrived).toISOString() : null,
+    arrived: Boolean(row.date_arrived),
   }
+}
+
+/** Marks a vehicle as arrived and stored in the shop (Check In). */
+export async function checkInJobOrder(id: string | number, employeeId?: number): Promise<{ success: boolean; message?: string; jobOrder?: any }> {
+  const res = await fetch(`/api/job-orders/${id}/check-in`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ employeeId }),
+  })
+  return res.json()
 }
 
 export interface PaginatedJobOrders {

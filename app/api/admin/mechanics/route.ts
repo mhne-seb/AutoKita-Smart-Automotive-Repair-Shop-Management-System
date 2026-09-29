@@ -38,7 +38,48 @@ const AUDIT_SQL = `
 export async function GET() {
   try {
     const [roster, payroll, auditLogsRes] = await Promise.all([
-      db.query(`SELECT * FROM get_mechanics($1)`, [DEFAULT_MECHANIC_CAPACITY]),
+      db.query(`
+        SELECT 
+          e.id,
+          e.full_name,
+          e.email,
+          e.contact_number,
+          e.status,
+          e.hire_date,
+          COALESCE(ep.branch, 'AutoKita Main Branch') AS branch,
+          COALESCE(ep.location, 'Bay ' || e.id) AS location,
+          COALESCE(ep.rank, 'Mechanic') AS rank,
+          COALESCE(ep.base_salary, 15000)::text AS base_salary,
+          COALESCE(ep.commission_percent, 25)::text AS commission_percent,
+          COALESCE(ep.jobs_capacity, $1)::int AS jobs_capacity,
+          COALESCE((
+            SELECT COUNT(DISTINCT jo.id)::int
+            FROM job_orders jo
+            LEFT JOIN service_progress_tasks spt ON spt.job_order_id = jo.id
+            WHERE (jo.assigned_mechanic_id = e.id OR spt.mechanic_id = e.id)
+              AND jo.status IN ('in_progress', 'waiting_on_parts', 'testing')
+              AND (spt.task_status IS NULL OR spt.task_status <> 'completed')
+          ), 0) AS open_tasks,
+          COALESCE((
+            SELECT COUNT(DISTINCT jo.id)::int
+            FROM job_orders jo
+            LEFT JOIN service_progress_tasks spt ON spt.job_order_id = jo.id
+            WHERE (jo.assigned_mechanic_id = e.id OR spt.mechanic_id = e.id)
+              AND jo.status IN ('completed', 'released')
+              AND jo.completed_at >= DATE_TRUNC('month', NOW())
+          ), 0) AS completed_this_month,
+          COALESCE((
+            SELECT ROUND(SUM(jo.actual_grand_total))::float
+            FROM job_orders jo
+            WHERE jo.assigned_mechanic_id = e.id
+              AND jo.status IN ('completed', 'released')
+              AND jo.completed_at >= DATE_TRUNC('month', NOW())
+          ), 0) AS billed_this_month
+        FROM employees e
+        LEFT JOIN employee_profiles ep ON ep.employee_id = e.id
+        WHERE e.role = 'mechanic'
+        ORDER BY e.full_name ASC
+      `, [DEFAULT_MECHANIC_CAPACITY]),
       db.query(PAYROLL_SQL),
       db.query(AUDIT_SQL),
     ])

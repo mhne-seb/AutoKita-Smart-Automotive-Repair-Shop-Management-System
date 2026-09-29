@@ -3,9 +3,10 @@
 // Admin "Job Orders" board — lists every job order across all stages (inspecting/quotation/in-progress/completed), searchable and filterable by stage tab.
 import { useEffect, useMemo, useState, useRef } from 'react'
 import Link from "next/link";
-import { ClipboardList, Search, FileText, Wrench, CheckCircle2, Eye, ChevronLeft, ChevronRight, Car, Hash, Calendar, UserCog, Gauge, Receipt, SlidersHorizontal, X } from 'lucide-react'
+import { ClipboardList, Search, FileText, Wrench, CheckCircle2, Eye, ChevronLeft, ChevronRight, Car, Hash, Calendar, UserCog, Gauge, Receipt, SlidersHorizontal, X, Store } from 'lucide-react'
+import { toast } from 'sonner'
 import { TopBar } from '@/components/TopBar'
-import { getJobOrders } from '@/controllers/jobOrderController'
+import { getJobOrders, checkInJobOrder } from '@/controllers/jobOrderController'
 import { JobOrderCard, Stage, stageOrder, stageLabels } from '@/data/types'
 
 type TabKey = 'all' | Stage
@@ -118,6 +119,38 @@ export default function page() {
     setPage(1)
   }
 
+  const [checkingInId, setCheckingInId] = useState<string | null>(null)
+
+  const handleCheckIn = async (card: JobOrderCard) => {
+    if (checkingInId) return
+    setCheckingInId(card.id)
+    try {
+      const activeEmpId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
+      const res = await checkInJobOrder(card.id, activeEmpId ? Number(activeEmpId) : undefined)
+      if (res.success) {
+        toast.success(`Vehicle for ${card.customer} marked as stored in shop! Moved to Inspecting.`)
+        setJobOrders((prev) =>
+          prev.map((j) =>
+            j.id === card.id
+              ? {
+                  ...j,
+                  arrived: true,
+                  stepsDone: 1,
+                  time: new Date().toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
+                }
+              : j
+          )
+        )
+      } else {
+        toast.error(res.message || 'Failed to check in vehicle')
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Check-in failed')
+    } finally {
+      setCheckingInId(null)
+    }
+  }
+
   const tabs: { key: TabKey; label: string; icon: typeof ClipboardList; count: number }[] = [
     { key: 'all', label: 'All Orders', icon: ClipboardList, count: jobOrders.length },
     ...stageOrder.map((s: Stage) => ({
@@ -131,7 +164,7 @@ export default function page() {
   const visibleCards = useMemo(() => {
     const q = query.trim().toLowerCase()
     return jobOrders.filter((c: JobOrderCard) => {
-      const matchesTab = activeTab === 'all' || c.stage === activeTab
+      const matchesTab = activeTab === 'all' ? true : c.stage === activeTab
       const matchesQuery =
         !q ||
         c.customer.toLowerCase().includes(q) ||
@@ -460,7 +493,12 @@ export default function page() {
                       </td>
                       <td className="px-4 py-4 text-foreground/80">
                         <span className="flex items-center gap-1.5">
-                          <Calendar size={12} className="shrink-0 text-muted-foreground" /> {c.time}
+                          <Calendar size={12} className="shrink-0 text-muted-foreground" />
+                          {c.stage === 'inspecting' && !c.arrived ? (
+                            <span className="italic text-muted-foreground">Not checked in</span>
+                          ) : (
+                            c.time
+                          )}
                         </span>
                       </td>
                       <td className="px-4 py-4">
@@ -484,7 +522,7 @@ export default function page() {
                       </td>
                       <td className="px-4 py-4">
                         <p className="text-xs text-muted-foreground">
-                          {c.stepsDone}/{c.stepsTotal} steps
+                          {`${c.stepsDone}/${c.stepsTotal} steps`}
                         </p>
                         <div className="mt-1.5 h-1.5 w-24 overflow-hidden rounded-full bg-accent">
                           <div
@@ -494,13 +532,26 @@ export default function page() {
                         </div>
                       </td>
                       <td className="px-4 py-4 text-right">
-                        <Link
-                          href={`/job-orders/${c.id}/${stageToRoute[c.stage]}`}
-                          title="View Full Job Order"
-                          className="inline-flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent"
-                        >
-                          <Eye size={15} />
-                        </Link>
+                        <div className="flex items-center justify-end gap-1.5">
+                          {c.stage === 'inspecting' && !c.arrived && (
+                            <button
+                              onClick={() => handleCheckIn(c)}
+                              disabled={checkingInId === c.id}
+                              title="Check In Vehicle (Mark Stored in Shop)"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 shadow-2xs hover:bg-amber-100 disabled:opacity-50 transition-all"
+                            >
+                              <Store size={13} />
+                              {checkingInId === c.id ? 'Checking In…' : 'Check In'}
+                            </button>
+                          )}
+                          <Link
+                            href={`/job-orders/${c.id}/${stageToRoute[c.stage]}`}
+                            title="View Full Job Order"
+                            className="inline-flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent"
+                          >
+                            <Eye size={15} />
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   )
