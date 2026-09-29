@@ -3,15 +3,14 @@
 // Route: /dashboard/profile — Customer account/profile settings page.
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import {
   User,
-  Upload,
   Mail,
   Info,
   Eye,
   EyeOff,
-  Camera,
   Check,
   Lock,
   ShieldCheck,
@@ -79,8 +78,6 @@ function Profile() {
           firstName: form.first_name,
           lastName: form.last_name,
           nickname: form.nickname,
-          email: form.email,
-          contactNumber: form.contact_number,
         }),
       });
       const j = await res.json();
@@ -153,31 +150,24 @@ function Profile() {
       {/* Profile + Password side by side on larger screens */}
       <div className="grid gap-6 lg:grid-cols-2">
         <Section icon={User} title="Profile" desc="Your public profile information visible to teammates." stacked>
-          <div className="mb-6 flex items-center gap-4">
-            <div className="group relative h-16 w-16 shrink-0">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-teal text-white">
-                <User className="h-7 w-7" />
-              </div>
-              <button
-                aria-label="Upload photo"
-                className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
-              >
-                <Camera className="h-5 w-5 text-white" />
-              </button>
-            </div>
-            <div>
-              <button className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-accent">
-                <Upload className="h-3.5 w-3.5" /> Upload photo
-              </button>
-              <p className="mt-1.5 text-xs text-muted-foreground">JPG or PNG. Max 5MB.</p>
-            </div>
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-teal text-white">
+            <User className="h-7 w-7" />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="First name" value={form.first_name} onChange={(e) => set("first_name", e.target.value)} />
             <Field label="Last name" value={form.last_name} onChange={(e) => set("last_name", e.target.value)} />
             <Field label="Nickname" value={form.nickname} onChange={(e) => set("nickname", e.target.value)} wide />
-            <Field label="Contact number" value={form.contact_number} onChange={(e) => set("contact_number", e.target.value)} wide />
-            <Field label="Email address" value={form.email} onChange={(e) => set("email", e.target.value)} wide />
+            <Field label="Contact number" value={form.contact_number} readOnly wide />
+            <Field label="Email address" value={form.email} readOnly wide />
+          </div>
+          <div className="mt-4 flex items-start gap-2 rounded-md bg-brand-soft/60 p-3 text-xs text-brand">
+            <Lock className="mt-0.5 h-4 w-4 flex-shrink-0" />
+            <p>
+              Your email and contact number are where we send your approval codes and updates. To change
+              either one, visit the shop or call us (see our{" "}
+              <Link href="/contact" className="font-semibold underline">Contact page</Link>). We&apos;ll check
+              it&apos;s really you first.
+            </p>
           </div>
           <div className="mt-6 flex justify-end">
             <button
@@ -293,10 +283,17 @@ function Section({
 function Field({ label, wide, ...props }: { label: string; wide?: boolean } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div className={wide ? "sm:col-span-2" : ""}>
-      <label className="text-sm font-medium">{label}</label>
+      <label className="flex items-center gap-1.5 text-sm font-medium">
+        {label}
+        {props.readOnly && <Lock className="h-3 w-3 text-muted-foreground" aria-label="Locked" />}
+      </label>
       <input
         {...props}
-        className="mt-1.5 w-full rounded-md border bg-background px-3 py-2 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+        className={`mt-1.5 w-full rounded-md border px-3 py-2 text-sm transition-colors ${
+          props.readOnly
+            ? "cursor-not-allowed bg-muted text-muted-foreground"
+            : "bg-background focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+        }`}
       />
     </div>
   );

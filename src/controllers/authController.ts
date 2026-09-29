@@ -27,12 +27,12 @@ export interface LoginResult {
  * role they belong to, so the caller (the unified /login page) knows
  * whether to redirect to the Customer dashboard or the Admin dashboard.
  */
-export async function login(email: string, password: string): Promise<LoginResult> {
+export async function login(email: string, password: string, remember = false): Promise<LoginResult> {
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, remember }),
     })
 
     const data = await res.json()
@@ -49,14 +49,28 @@ export async function logout() {
   sessionStorage.removeItem('autokita_admin')
   sessionStorage.removeItem('autokita_customer')
   sessionStorage.removeItem('autokita_user_id')
+  localStorage.removeItem(REMEMBER_KEY)
   await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
 }
 
+// "Keep me signed in": sessionStorage dies with the tab, so a copy goes in
+// localStorage. A small script in app/layout.tsx copies it back into
+// sessionStorage when a page opens, before any page reads it.
+const REMEMBER_KEY = 'autokita_remember'
+const REMEMBER_DAYS = 30
+
 /** Persists the session flags for the given role + user id after a successful login. */
-export function startSession(role: string, userId: number) {
+export function startSession(role: string, userId: number, remember = false) {
   if (typeof window === 'undefined') return
   const isCustomer = role === 'customer' || role === 'c'
-  if (!isCustomer) sessionStorage.setItem('autokita_admin', 'true')
-  else sessionStorage.setItem('autokita_customer', 'true')
+  const flag = isCustomer ? 'autokita_customer' : 'autokita_admin'
+  sessionStorage.setItem(flag, 'true')
   sessionStorage.setItem('autokita_user_id', String(userId))
+
+  if (remember) {
+    const exp = Date.now() + REMEMBER_DAYS * 24 * 60 * 60 * 1000
+    localStorage.setItem(REMEMBER_KEY, JSON.stringify({ flag, userId, exp }))
+  } else {
+    localStorage.removeItem(REMEMBER_KEY)
+  }
 }
