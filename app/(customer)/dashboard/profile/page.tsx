@@ -108,6 +108,7 @@ function Profile() {
 
   const [userId, setUserId] = useState<number>(FALLBACK_USER_ID);
   const [form, setForm] = useState<ProfileForm | null>(null);
+  const [savedForm, setSavedForm] = useState<ProfileForm | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [pwd, setPwd] = useState({ current: "", next: "", confirm: "" });
   const [savingPwd, setSavingPwd] = useState(false);
@@ -120,6 +121,22 @@ function Profile() {
   const [profileSaved, setProfileSaved] = useState(false);
   const [pwdSaved, setPwdSaved] = useState(false); 
 
+  const hasChanges = Boolean(
+    form &&
+      savedForm &&
+      (form.first_name.trim() !== savedForm.first_name.trim() ||
+        form.last_name.trim() !== savedForm.last_name.trim() ||
+        form.nickname.trim() !== savedForm.nickname.trim() ||
+        form.street.trim() !== savedForm.street.trim() ||
+        form.province.trim() !== savedForm.province.trim() ||
+        form.provinceOther.trim() !== savedForm.provinceOther.trim() ||
+        form.city.trim() !== savedForm.city.trim() ||
+        form.cityOther.trim() !== savedForm.cityOther.trim() ||
+        form.barangay.trim() !== savedForm.barangay.trim())
+  );
+
+  const hasPwdChanges = pwd.current.length > 0 && pwd.next.length > 0 && pwd.confirm.length > 0;
+
   useEffect(() => {
     const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
     const id = stored ? parseInt(stored, 10) : FALLBACK_USER_ID;
@@ -128,14 +145,16 @@ function Profile() {
       .then((r) => r.json())
       .then((j) => {
         if (j.success) {
-          setForm({
+          const loadedForm = {
             first_name: j.user.first_name ?? "",
             last_name: j.user.last_name ?? "",
             nickname: j.user.nickname ?? "",
             email: j.user.email ?? "",
             contact_number: j.user.contact_number ?? "",
             ...splitAddress(j.user.address),
-          });
+          };
+          setForm(loadedForm);
+          setSavedForm(loadedForm);
           setPhotoUrl(j.user.avatar_url ?? null);
         } else {
           toast.error(j.message ?? "Could not load your profile.");
@@ -195,7 +214,7 @@ function Profile() {
   };
 
   const saveProfile = async () => {
-    if (!form) return;
+    if (!form || !hasChanges) return;
     if (Object.values(addressErrors(form)).some(Boolean)) {
       setShowAddressErrors(true);
       return;
@@ -217,6 +236,7 @@ function Profile() {
       const j = await res.json();
       if(j.success) {
         toast.success("Profile updated.");
+        setSavedForm({ ...form });
         announceChange();
         setProfileSaved(true);
         setTimeout(() => setProfileSaved(false), 2000);
@@ -404,10 +424,12 @@ function Profile() {
           <div className="mt-6 flex justify-end">
             <button
               onClick={saveProfile}
-              disabled={savingProfile}
+              disabled={savingProfile || !hasChanges}
               className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors ${
                 profileSaved
                   ? "bg-emerald-600 text-white"
+                  : !hasChanges
+                  ? "bg-muted text-muted-foreground cursor-not-allowed"
                   : "bg-brand text-brand-foreground hover:opacity-90 disabled:opacity-60"
               }`}
             >
@@ -436,10 +458,12 @@ function Profile() {
           <div className="mt-6 flex justify-end">
             <button
               onClick={savePassword}
-              disabled={savingPwd}
+              disabled={savingPwd || !hasPwdChanges}
               className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors ${
                 pwdSaved
                   ? "bg-emerald-600 text-white"
+                  : !hasPwdChanges
+                  ? "bg-muted text-muted-foreground cursor-not-allowed"
                   : "bg-brand text-brand-foreground hover:opacity-90 disabled:opacity-60"
               }`}
             >
