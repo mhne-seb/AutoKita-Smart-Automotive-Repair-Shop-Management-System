@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { spawn } from 'child_process'
-import path from 'path'
-import os from 'os'
-import fs from 'fs'
+import { mlFetch } from '@/lib/mlServer'
+
+// A sleeping online ML server can take about a minute to answer the first time.
+export const maxDuration = 60
 
 interface VehicleInfo {
   vin?: string | null
@@ -49,7 +49,6 @@ export async function POST(req: NextRequest) {
   let source: string = 'gmail'
   let filename: string = 'report.pdf'
   let parsed: ParsedReport | null = null
-  let pdfBuffer: Buffer | null = null
 
   try {
     if (contentType.includes('multipart/form-data')) {
@@ -63,19 +62,24 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'No file provided' }, { status: 400 })
       }
       filename = file.name
-      const arrayBuffer = await file.arrayBuffer()
-      pdfBuffer = Buffer.from(arrayBuffer)
 
-      // Write to temp file and run Python parser
-      const tmpPath = path.join(os.tmpdir(), `obd2_${Date.now()}_${filename}`)
-      fs.writeFileSync(tmpPath, pdfBuffer)
-
-      parsed = await runParser(tmpPath)
-      fs.unlinkSync(tmpPath)
-
-      if (!parsed) {
+      // The Python server reads the PDF (Email_parser/pdf_parser.py)
+      const upload = new FormData()
+      upload.append('file', file, 'report.pdf')
+      let parseRes: Response
+      try {
+        parseRes = await mlFetch('/parse-pdf', { method: 'POST', body: upload })
+      } catch (err) {
+        console.error('[/api/diagnostics/store] PDF reader unreachable:', err)
+        return NextResponse.json(
+          { error: 'Could not reach the report reader. If it was idle, wait a minute and try again.' },
+          { status: 503 },
+        )
+      }
+      if (!parseRes.ok) {
         return NextResponse.json({ error: 'Failed to parse PDF' }, { status: 422 })
       }
+      parsed = (await parseRes.json()) as ParsedReport
     } else {
       // -----------------------------------------------------------------------
       // JSON payload from gmail_fetcher.py
@@ -180,33 +184,4 @@ export async function POST(req: NextRequest) {
     console.error('[/api/diagnostics/store] Error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-}
-
-// ---------------------------------------------------------------------------
-// Helper: run pdf_parser.py on a local file path
-// ---------------------------------------------------------------------------
-function runParser(pdfPath: string): Promise<ParsedReport | null> {
-  return new Promise((resolve) => {
-    const parserScript = path.join(process.cwd(), 'Email_parser', 'pdf_parser.py')
-    const proc = spawn('py', ['-3', parserScript, pdfPath], { stdio: 'pipe' })
-
-    let stdout = ''
-    let stderr = ''
-    proc.stdout.on('data', (chunk) => (stdout += chunk))
-    proc.stderr.on('data', (chunk) => (stderr += chunk))
-
-    proc.on('close', (code) => {
-      if (code !== 0) {
-        console.error('[runParser] Python exited with code', code, stderr)
-        resolve(null)
-        return
-      }
-      try {
-        resolve(JSON.parse(stdout.trim()))
-      } catch {
-        console.error('[runParser] JSON parse error:', stdout)
-        resolve(null)
-      }
-    })
-  })
 }

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { mlFetch } from '@/lib/mlServer'
 
-const ML_SERVER = process.env.ML_SERVER_URL || 'http://127.0.0.1:5001'
+// A sleeping online ML server can take about a minute to answer the first time.
+export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
   let body: any = {}
@@ -8,7 +10,7 @@ export async function POST(req: NextRequest) {
     body = await req.json()
 
     // 1. Fetch Time prediction first
-    const timeRes = await fetch(`${ML_SERVER}/predict/time`, {
+    const timeRes = await mlFetch('/predict/time', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -21,7 +23,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Fetch Cost prediction using the predicted time
-    const costRes = await fetch(`${ML_SERVER}/predict/cost`, {
+    const costRes = await mlFetch('/predict/cost', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
