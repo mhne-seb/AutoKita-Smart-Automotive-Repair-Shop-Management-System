@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { logout } from '@/controllers/authController'
+import { logout, getDisplayProfile, type DisplayProfile } from '@/controllers/authController'
 import {
   LayoutGrid,
   ListChecks,
@@ -66,6 +66,13 @@ export function Sidebar() {
     await logout()
     router.push('/login')
   }
+
+  // Who's logged in — read after mount, since the server render can't see sessionStorage.
+  const [profile, setProfile] = useState<DisplayProfile | null>(null)
+  useEffect(() => {
+    setProfile(getDisplayProfile())
+  }, [])
+  const displayName = profile?.name ?? 'Staff'
 
   return (
     <>
@@ -189,11 +196,11 @@ export function Sidebar() {
             className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white shadow-sm"
             style={{ backgroundImage: BRAND_GRADIENT }}
           >
-            B
+            {displayName.charAt(0).toUpperCase()}
           </div>
-          <div className="flex-1 leading-tight">
-            <p className="text-sm font-semibold text-foreground">Boss Boyet</p>
-            <p className="text-xs text-muted-foreground">Admin - AutoKita</p>
+          <div className="min-w-0 flex-1 leading-tight">
+            <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
+            <p className="truncate text-xs text-muted-foreground">{profile?.title ?? 'Staff'} - AutoKita</p>
           </div>
           <button
             type="button"

@@ -1,10 +1,10 @@
-fastapi
-uvicorn
-pydantic
-joblib
-numpy
-scikit-learn
+# For laptops (run_backend.bat / setup_ml.ps1): everything the server needs,
+# at the same pinned versions the online server uses, plus the tools for
+# retraining in the notebooks and syncing from the database.
+-r requirements-server.txt
+
 psycopg2-binary
+python-dotenv
 pandas
 jupyter
 matplotlib
@@ -12,4 +12,3 @@ seaborn
 requests
 beautifulsoup4
 playwright
-pdfplumber

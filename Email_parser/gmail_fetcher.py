@@ -98,7 +98,7 @@ def _run_fact_check(pdf_path: str) -> dict:
     """Run fact_check.py and return parsed JSON result."""
     fact_check_script = str(SCRIPT_DIR / "fact_check.py")
     result = subprocess.run(
-        ["py", "-3", fact_check_script, pdf_path],
+        [sys.executable, fact_check_script, pdf_path],
         capture_output=True, text=True
     )
     try:
@@ -111,7 +111,7 @@ def _run_parser(pdf_path: str) -> dict | None:
     """Run pdf_parser.py and return parsed JSON result."""
     parser_script = str(SCRIPT_DIR / "pdf_parser.py")
     result = subprocess.run(
-        ["py", "-3", parser_script, pdf_path],
+        [sys.executable, parser_script, pdf_path],
         capture_output=True, text=True
     )
     try:
