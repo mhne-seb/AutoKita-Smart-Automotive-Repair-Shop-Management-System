@@ -28,6 +28,7 @@ import { TopBar } from '@/components/TopBar'
 import { StatCard } from '@/components/StatCard'
 import { StatusBadge } from '@/components/StatusBadge'
 import { getJobOrders } from '@/controllers/jobOrderController'
+import { getDisplayProfile } from '@/controllers/authController'
 import { JobOrderCard } from '@/data/types'
 import { getRevenueTrend, getServiceMix } from '@/controllers/reportController'
 import { currency, type RevenuePoint, type ServiceMixSlice } from '@/data/mockData'
@@ -54,6 +55,11 @@ export default function page() {
   // Show "loading" instead of zeros until every fetch below has settled —
   // otherwise a reload flashes "0 pending / ₱0" before the real numbers land.
   const [loading, setLoading] = useState(true)
+  // Greets whoever is logged in — read after mount, since the server can't see sessionStorage.
+  const [firstName, setFirstName] = useState<string | null>(null)
+  useEffect(() => {
+    setFirstName(getDisplayProfile()?.name.split(' ')[0] ?? null)
+  }, [])
   const totalRevenue = revenueTrend.reduce((sum, item) => sum + item.revenue, 0)
 
   useEffect(() => {
@@ -144,7 +150,7 @@ export default function page() {
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-foreground/70">
               Welcome back
             </p>
-            <h2 className="mt-1 text-2xl font-bold">Boss Boyet, here's today's shop floor.</h2>
+            <h2 className="mt-1 text-2xl font-bold">{firstName ? `${firstName}, here's` : "Here's"} today's shop floor.</h2>
             <p className="mt-1 max-w-md text-sm text-brand-foreground/80">
               {inProgressOrders} in progress and {pendingTicketsCount} {pendingTicketsCount === 1 ? 'ticket' : 'tickets'} waiting for triage.
             </p>

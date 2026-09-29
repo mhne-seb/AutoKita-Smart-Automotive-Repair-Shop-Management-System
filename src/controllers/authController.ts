@@ -1,8 +1,7 @@
 // authController
 //
 // Controllers in this project are the single seam between UI components and
-// data. This file now talks to the real database via /api/auth/login,
-// instead of the old mock data in src/data/users.ts.
+// data. This file talks to the real database via /api/auth/login.
 
 export type UserRole = 'admin' | 'customer' | 'c'
 
@@ -19,7 +18,20 @@ export interface LoginResult {
   success: boolean
   user?: AuthUser
   role?: UserRole
+  title?: string | null // staff job title, e.g. "Finance Adviser"; null for customers
   message?: string
+}
+
+// Who's logged in, for display only (sidebar, greeting) — never for access decisions.
+export interface DisplayProfile {
+  name: string
+  title: string | null
+}
+
+export function getDisplayProfile(): DisplayProfile | null {
+  if (typeof window === 'undefined') return null
+  const name = sessionStorage.getItem('autokita_user_name')
+  return name ? { name, title: sessionStorage.getItem('autokita_user_title') } : null
 }
 
 /**
@@ -49,6 +61,8 @@ export async function logout() {
   sessionStorage.removeItem('autokita_admin')
   sessionStorage.removeItem('autokita_customer')
   sessionStorage.removeItem('autokita_user_id')
+  sessionStorage.removeItem('autokita_user_name')
+  sessionStorage.removeItem('autokita_user_title')
   localStorage.removeItem(REMEMBER_KEY)
   await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
 }
@@ -60,16 +74,21 @@ const REMEMBER_KEY = 'autokita_remember'
 const REMEMBER_DAYS = 30
 
 /** Persists the session flags for the given role + user id after a successful login. */
-export function startSession(role: string, userId: number, remember = false) {
+export function startSession(role: string, userId: number, remember = false, profile: DisplayProfile | null = null) {
   if (typeof window === 'undefined') return
   const isCustomer = role === 'customer' || role === 'c'
   const flag = isCustomer ? 'autokita_customer' : 'autokita_admin'
   sessionStorage.setItem(flag, 'true')
   sessionStorage.setItem('autokita_user_id', String(userId))
+  if (profile) {
+    sessionStorage.setItem('autokita_user_name', profile.name)
+    if (profile.title) sessionStorage.setItem('autokita_user_title', profile.title)
+    else sessionStorage.removeItem('autokita_user_title')
+  }
 
   if (remember) {
     const exp = Date.now() + REMEMBER_DAYS * 24 * 60 * 60 * 1000
-    localStorage.setItem(REMEMBER_KEY, JSON.stringify({ flag, userId, exp }))
+    localStorage.setItem(REMEMBER_KEY, JSON.stringify({ flag, userId, exp, name: profile?.name ?? null, title: profile?.title ?? null }))
   } else {
     localStorage.removeItem(REMEMBER_KEY)
   }
