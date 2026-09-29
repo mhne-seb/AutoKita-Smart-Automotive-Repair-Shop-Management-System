@@ -28,7 +28,6 @@ import {
   Loader2,
   Sparkles,
   Car,
-  Bell,
   Inbox,
   ShieldCheck,
   Download,
@@ -550,53 +549,6 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* CONTEXTUAL ALERTS — from recent activity */}
-          <div className="rounded-xl border bg-card p-5">
-            <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <Bell className="h-3.5 w-3.5" /> Contextual Alerts
-            </div>
-            <div className="mt-4 space-y-3">
-              {recentActivity.length === 0 ? (
-                <div className="flex flex-col items-center gap-2 py-3 text-center">
-                  <ShieldCheck className="h-6 w-6 text-success/50" />
-                  <p className="text-sm text-muted-foreground">No alerts at this time.</p>
-                </div>
-              ) : (
-                recentActivity.slice(0, 3).map((act) => {
-                  // A job moving to its next stage is news, not a problem — keep
-                  // red for things that actually went wrong.
-                  const tone: "destructive" | "neutral" | "success" =
-                    act.type === "payment" || act.type === "booking_accepted"
-                      ? "success"
-                      : "neutral";
-                  return (
-                    <Alert
-                      key={`alert-${act.type}-${act.id}`}
-                      tone={tone}
-                      title={act.title}
-                      badge={formatBadgeTime(act.time)}
-                      body={act.description}
-                    />
-                  );
-                })
-              )}
-              <button
-                onClick={() =>
-                  setConfirmModal({
-                    tone: "destructive",
-                    title: "Clear All Notifications",
-                    body: "This will clear all current notifications from your dashboard. You can still find them later in your full activity history.",
-                    confirmLabel: "Clear All",
-                    onConfirm: () => setConfirmModal(null),
-                  })
-                }
-                className="w-full pt-2 text-center text-xs text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Clear All Notifications
-              </button>
-            </div>
-          </div>
-
           {/* RECENT ACTIVITY */}
           <div className="rounded-xl border bg-card p-5">
             <div className="flex items-center justify-between">
@@ -617,7 +569,7 @@ function Dashboard() {
                   <p className="text-sm text-muted-foreground">No recent activity.</p>
                 </div>
               ) : (
-                recentActivity.slice(0, 4).map((act) => {
+                recentActivity.slice(0, 5).map((act) => {
                   const meta = activityMeta(act.type);
                   return (
                     <Activity
@@ -2104,41 +2056,5 @@ function VehicleRow({
   );
 }
 
-function Alert({
-  tone,
-  title,
-  badge,
-  body,
-  actions,
-}: {
-  tone: "destructive" | "neutral" | "success";
-  title: string;
-  badge: string;
-  body: string;
-  actions?: React.ReactNode;
-}) {
-  const toneMap = {
-    destructive: "border-destructive/30 bg-destructive/5",
-    neutral: "border-border bg-muted/30",
-    success: "border-success/30 bg-success/5",
-  };
-  const iconMap = {
-    destructive: <AlertCircle className="h-3.5 w-3.5 text-destructive" />,
-    neutral: <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" />,
-    success: <CheckCircle2 className="h-3.5 w-3.5 text-success" />,
-  };
-  return (
-    <div className={`rounded-md border p-3 transition-shadow duration-200 hover:shadow-sm ${toneMap[tone]}`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-xs font-semibold">
-          {iconMap[tone]} {title}
-        </div>
-        <span className="text-[10px] font-semibold text-muted-foreground">{badge}</span>
-      </div>
-      <p className="mt-1.5 text-xs text-muted-foreground">{body}</p>
-      {actions && <div className="mt-3 flex items-center gap-3">{actions}</div>}
-    </div>
-  );
-}
 
 export default Dashboard;
