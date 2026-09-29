@@ -24,58 +24,117 @@ export async function GET(request: NextRequest) {
       kpiRes,
       auditRes
     ] = await Promise.all([
-      // 1. Payment records with itemized parts & services
+      // 1. Payment records with itemized parts & services (both actual payments and unpaid job orders)
       db.query(`
-        SELECT 
-          p.id AS "paymentId",
-          'CUS-' || u.id AS "customerId",
-          COALESCE(u.first_name || ' ' || u.last_name, u.nickname, 'Customer #' || u.id) AS name,
-          COALESCE(u.contact_number, 'N/A') AS contact,
-          COALESCE((
-            SELECT STRING_AGG(s.service_name, ', ')
-            FROM job_order_services jos
-            JOIN services s ON s.id = jos.service_id
-            WHERE jos.job_order_id = jo.id
-          ), 'General Service') AS services,
-          CASE 
-            WHEN p.payment_method = 'cash' THEN 'Cash'
-            WHEN p.payment_method = 'e_wallet' THEN 'GCash'
-            WHEN p.payment_method = 'bank_transfer' THEN 'Bank Transfer'
-            WHEN p.payment_method = 'credit_card' THEN 'Credit Card'
-            WHEN p.payment_method = 'debit_card' THEN 'Debit Card'
-            WHEN p.payment_method = 'cheque' THEN 'Cheque'
-            ELSE INITCAP(REPLACE(p.payment_method::TEXT, '_', ' '))
-          END AS "modeOfPayment",
-          CASE 
-            WHEN jo.partial_payment > 0 AND COALESCE(jo.balance, 0) > 0 THEN 'Downpayment'
-            ELSE 'Full Payment'
-          END AS "paymentType",
-          p.amount_paid::float AS amount,
-          CASE 
-            WHEN p.verification_status = 'verified' AND (COALESCE(jo.balance, 0) <= 0 OR jo.status IN ('completed', 'released')) THEN 'Paid'
-            ELSE 'To Be Paid'
-          END AS status,
-          COALESCE(jo.partial_payment, 0)::float AS "downpaymentAmount",
-          jo.id AS "jobOrderId",
-          p.payment_date AS "paymentDate",
-          (
-            SELECT COALESCE(json_agg(item), '[]'::json)
-            FROM (
-              SELECT 'Labor' AS category, s2.service_name AS name, 1 AS qty, jos2.actual_amount::float AS price
-              FROM job_order_services jos2
-              JOIN services s2 ON s2.id = jos2.service_id
-              WHERE jos2.job_order_id = jo.id
-              UNION ALL
-              SELECT 'Parts' AS category, jop2.description AS name, jop2.quantity AS qty, jop2.retail_unit_price::float AS price
-              FROM job_order_parts jop2
-              WHERE jop2.job_order_id = jo.id
-            ) item
-          ) AS items
-        FROM payments p
-        JOIN job_orders jo ON jo.id = p.job_order_id
-        JOIN users u ON u.id = jo.user_id
-        ORDER BY p.payment_date DESC
-        LIMIT 100
+        WITH recorded_payments AS (
+          SELECT 
+            p.id::text AS "paymentId",
+            'CUS-' || u.id AS "customerId",
+            COALESCE(u.first_name || ' ' || u.last_name, u.nickname, 'Customer #' || u.id) AS name,
+            COALESCE(u.contact_number, 'N/A') AS contact,
+            COALESCE((
+              SELECT STRING_AGG(s.service_name, ', ')
+              FROM job_order_services jos
+              JOIN services s ON s.id = jos.service_id
+              WHERE jos.job_order_id = jo.id
+            ), 'General Service') AS services,
+            CASE 
+              WHEN p.payment_method = 'cash' THEN 'Cash'
+              WHEN p.payment_method = 'e_wallet' THEN 'GCash'
+              WHEN p.payment_method = 'bank_transfer' THEN 'Bank Transfer'
+              WHEN p.payment_method = 'credit_card' THEN 'Credit Card'
+              WHEN p.payment_method = 'debit_card' THEN 'Debit Card'
+              WHEN p.payment_method = 'cheque' THEN 'Cheque'
+              ELSE INITCAP(REPLACE(p.payment_method::TEXT, '_', ' '))
+            END AS "modeOfPayment",
+            CASE 
+              WHEN jo.partial_payment > 0 AND COALESCE(jo.balance, 0) > 0 THEN 'Downpayment'
+              ELSE 'Full Payment'
+            END AS "paymentType",
+            p.amount_paid::float AS amount,
+            CASE 
+              WHEN p.verification_status = 'verified' AND COALESCE(jo.balance, 0) <= 0 THEN 'Paid'
+              ELSE 'To Be Paid'
+            END AS status,
+            COALESCE(jo.partial_payment, 0)::float AS "downpaymentAmount",
+            COALESCE(jo.balance, 0)::float AS balance,
+            COALESCE(jo.actual_grand_total, jo.estimated_grand_total, p.amount_paid, 0)::float AS "totalAmount",
+            jo.id AS "jobOrderId",
+            p.payment_date AS "paymentDate",
+            (
+              SELECT COALESCE(json_agg(item), '[]'::json)
+              FROM (
+                SELECT 'Labor' AS category, s2.service_name AS name, 1 AS qty, jos2.actual_amount::float AS price
+                FROM job_order_services jos2
+                JOIN services s2 ON s2.id = jos2.service_id
+                WHERE jos2.job_order_id = jo.id
+                UNION ALL
+                SELECT 'Parts' AS category, jop2.description AS name, jop2.quantity AS qty, jop2.retail_unit_price::float AS price
+                FROM job_order_parts jop2
+                WHERE jop2.job_order_id = jo.id
+              ) item
+            ) AS items
+          FROM payments p
+          JOIN job_orders jo ON jo.id = p.job_order_id
+          JOIN users u ON u.id = jo.user_id
+          ORDER BY p.payment_date DESC
+        ),
+        unpaid_job_orders AS (
+          SELECT
+            ('JO-' || jo.id) AS "paymentId",
+            'CUS-' || u.id AS "customerId",
+            COALESCE(u.first_name || ' ' || u.last_name, u.nickname, 'Customer #' || u.id) AS name,
+            COALESCE(u.contact_number, 'N/A') AS contact,
+            COALESCE((
+              SELECT STRING_AGG(s.service_name, ', ')
+              FROM job_order_services jos
+              JOIN services s ON s.id = jos.service_id
+              WHERE jos.job_order_id = jo.id
+            ), 'General Service') AS services,
+            'Pending' AS "modeOfPayment",
+            CASE 
+              WHEN jo.partial_payment > 0 AND COALESCE(jo.balance, 0) > 0 THEN 'Downpayment'
+              ELSE 'Full Payment'
+            END AS "paymentType",
+            COALESCE(NULLIF(jo.balance::float, 0), jo.actual_grand_total::float, jo.estimated_grand_total::float, 0) AS amount,
+            'To Be Paid' AS status,
+            COALESCE(jo.partial_payment, 0)::float AS "downpaymentAmount",
+            COALESCE(NULLIF(jo.balance::float, 0), jo.actual_grand_total::float, jo.estimated_grand_total::float, 0) AS balance,
+            COALESCE(jo.actual_grand_total, jo.estimated_grand_total, 0)::float AS "totalAmount",
+            jo.id AS "jobOrderId",
+            COALESCE(jo.jo_date, NOW()) AS "paymentDate",
+            (
+              SELECT COALESCE(json_agg(item), '[]'::json)
+              FROM (
+                SELECT 'Labor' AS category, s2.service_name AS name, 1 AS qty, jos2.actual_amount::float AS price
+                FROM job_order_services jos2
+                JOIN services s2 ON s2.id = jos2.service_id
+                WHERE jos2.job_order_id = jo.id
+                UNION ALL
+                SELECT 'Parts' AS category, jop2.description AS name, jop2.quantity AS qty, jop2.retail_unit_price::float AS price
+                FROM job_order_parts jop2
+                WHERE jop2.job_order_id = jo.id
+              ) item
+            ) AS items
+          FROM job_orders jo
+          JOIN users u ON u.id = jo.user_id
+          WHERE jo.status NOT IN ('cancelled', 'inspecting')
+            AND (COALESCE(jo.balance, jo.actual_grand_total, jo.estimated_grand_total, 0) > 0)
+            AND NOT EXISTS (
+              SELECT 1 FROM payments p WHERE p.job_order_id = jo.id
+            )
+          ORDER BY 
+            CASE 
+              WHEN jo.status IN ('in_progress', 'waiting_on_parts', 'testing', 'completed') THEN 0 
+              ELSE 1 
+            END,
+            COALESCE(jo.date_arrived, jo.jo_date) DESC,
+            jo.id DESC
+        )
+        SELECT * FROM recorded_payments
+        UNION ALL
+        SELECT * FROM unpaid_job_orders
+        ORDER BY "paymentDate" DESC
       `),
 
       // 2. Active mechanics roster from employees + employee_profiles
@@ -89,20 +148,22 @@ export async function GET(request: NextRequest) {
           COALESCE(ep.location, 'Bay ' || e.id) AS location,
           CASE WHEN e.status = 'active' THEN 'Available' ELSE 'Busy' END AS status,
           COALESCE((
-            SELECT COUNT(*)::int
-            FROM service_progress_tasks spt
-            WHERE spt.mechanic_id = e.id 
-              AND spt.task_status IN ('pending', 'in_progress')
+            SELECT COUNT(DISTINCT jo.id)::int
+            FROM job_orders jo
+            LEFT JOIN service_progress_tasks spt ON spt.job_order_id = jo.id
+            WHERE (jo.assigned_mechanic_id = e.id OR spt.mechanic_id = e.id)
+              AND jo.status NOT IN ('completed', 'released', 'cancelled')
           ), 0) AS "jobsAssigned",
           COALESCE(ep.jobs_capacity, 5) AS "jobsCapacity",
           COALESCE(ep.rank, 'Mechanic') AS rank,
           COALESCE(ep.base_salary, 15000)::float AS "baseSalary",
           COALESCE(ep.commission_percent, 25)::float AS "commissionPercent",
           COALESCE((
-            SELECT COUNT(*)::int 
-            FROM service_progress_tasks spt
-            WHERE spt.mechanic_id = e.id 
-              AND spt.task_status = 'completed'
+            SELECT COUNT(DISTINCT jo.id)::int 
+            FROM job_orders jo
+            LEFT JOIN service_progress_tasks spt ON spt.job_order_id = jo.id
+            WHERE (jo.assigned_mechanic_id = e.id OR spt.mechanic_id = e.id)
+              AND jo.status IN ('completed', 'released')
           ), 0) AS "servicesDoneWeekly",
           COALESCE(ep.color, '#3b82f6') AS color
         FROM employees e

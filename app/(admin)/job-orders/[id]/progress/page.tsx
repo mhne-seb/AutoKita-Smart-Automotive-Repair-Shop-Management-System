@@ -4,7 +4,7 @@
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, XCircle, Camera, Upload, Car, Receipt, Plus, ChevronDown, AlertTriangle, Hourglass, ClipboardList, Gauge, ArrowRight } from 'lucide-react'
+import { Check, ListChecks, CalendarDays, Clock, X, Timer, Play, Package, PackageCheck, Loader2, XCircle, Camera, Upload, Car, Receipt, Plus, ChevronDown, AlertTriangle, Hourglass, ClipboardList, Gauge, ArrowRight, RotateCcw } from 'lucide-react'
 import type { ChangeEvent } from 'react'
 import { toast } from 'sonner'
 import { Lightbox } from '@/components/Lightbox'
@@ -114,6 +114,7 @@ export default function page() {
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null)
   const [busyPartId, setBusyPartId] = useState<number | null>(null)
   const [finishingTask, setFinishingTask] = useState<ServiceTask | null>(null)
+  const [stoppingTask, setStoppingTask] = useState<ServiceTask | null>(null)
 
   // "Record purchase" — the shop's ledger of where to-order parts were bought.
   // One save creates one purchase record and marks the ticked parts received.
@@ -292,7 +293,11 @@ export default function page() {
   async function setTaskStatus(task: ServiceTask, next: TaskStatus) {
     setBusyTaskId(task.id)
     const result = await scheduleTask(jobOrderId, task.id, task.scheduledDate ?? null, next, task.mechanicId, task.note)
-    if (!result.ok) toast.error(result.message ?? 'Could not update the task.')
+    if (!result.ok) {
+      toast.error(result.message ?? 'Could not update the task.')
+    } else if (next === 'pending') {
+      toast.success(`"${task.title}" stopped and reverted to pending.`)
+    }
     await refreshTasks()
     setBusyTaskId(null)
   }
@@ -545,14 +550,24 @@ export default function page() {
                     </button>
                   )}
                   {task.status === 'active' && (
-                    <button
-                      onClick={() => setFinishingTask(task)}
-                      disabled={busy}
-                      title="Upload a photo of the finished work to mark this done"
-                      className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-700 active:scale-95 disabled:opacity-40"
-                    >
-                      <Camera size={13} /> Finish
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setFinishingTask(task)}
+                        disabled={busy}
+                        title="Upload a photo of the finished work to mark this done"
+                        className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-700 active:scale-95 disabled:opacity-40"
+                      >
+                        <Camera size={13} /> Finish
+                      </button>
+                      <button
+                        onClick={() => setStoppingTask(task)}
+                        disabled={busy}
+                        title="Revert back to pending if started accidentally"
+                        className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-700 transition-all duration-150 hover:bg-rose-100 hover:border-rose-300 active:scale-95 disabled:opacity-40"
+                      >
+                        <RotateCcw size={13} /> Revert / Stop
+                      </button>
+                    </div>
                   )}
                   {/* Mid-service finding tied to this task — only while the
                       mechanic is actually working on it (Started, not Finished). */}
@@ -1138,6 +1153,54 @@ export default function page() {
           }}
         />
       )}
+      {stoppingTask && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setStoppingTask(null)}>
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600">
+                <AlertTriangle size={22} />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-bold text-slate-900">Stop Service Task</h3>
+                <p className="mt-1 text-sm text-slate-600">
+                  Are you sure you want to stop <span className="font-semibold text-slate-800">{stoppingTask.title}</span>?
+                </p>
+                <div className="mt-3 rounded-xl bg-amber-50 p-3.5 text-xs text-amber-800 border border-amber-200 space-y-1.5">
+                  <p className="font-bold flex items-center gap-1">
+                    <span>⚠️ Warning before stopping:</span>
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-amber-700">
+                    <li>This will revert the task from <strong>Started</strong> back to <strong>Pending</strong>.</li>
+                    <li>The start timer will be reset.</li>
+                    <li>If started again later, a new start time will replace the previous one.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setStoppingTask(null)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const target = stoppingTask
+                  setStoppingTask(null)
+                  await setTaskStatus(target, 'pending')
+                }}
+                className="flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 active:scale-95 transition-all shadow-sm"
+              >
+                <RotateCcw size={14} /> Yes, Stop & Revert
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {findingModal && (
         <ReportFindingModal
           jobOrderId={jobOrderId}
@@ -1148,8 +1211,8 @@ export default function page() {
       )}
 
       {showPurchaseModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => !savingPurchase && setShowPurchaseModal(false)}>
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-1 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900">Record Parts Purchase</h3>
               <button onClick={() => setShowPurchaseModal(false)} disabled={savingPurchase} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
@@ -1277,6 +1340,8 @@ export default function page() {
           task={schedulingTask} 
           jobOrderId={jobOrderId}
           scheduleData={scheduleData}
+          allTasks={sections.flatMap((s) => s.tasks)}
+          assignedMechanicName={jobOrder?.mechanic}
           onClose={() => setSchedulingTask(null)}
           onSaved={() => {
             setSchedulingTask(null)
@@ -1324,8 +1389,8 @@ function FinishTaskModal({ task, onClose, onSubmit }: { task: ServiceTask; onClo
 
   const roadTest = isRoadTest(task)
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-lg font-bold text-slate-900">Finish {task.title}</h2>
@@ -1419,8 +1484,33 @@ function defaultTimeFor(date: string): string {
   return `${String(next.getHours()).padStart(2, '0')}:00`
 }
 
-function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { task: ServiceTask, jobOrderId: string, scheduleData: { tasks: any[], mechanics: any[] }, onClose: () => void, onSaved: () => void }) {
+function ScheduleModal({ 
+  task, 
+  jobOrderId, 
+  scheduleData, 
+  allTasks = [],
+  assignedMechanicName,
+  onClose, 
+  onSaved 
+}: { 
+  task: ServiceTask, 
+  jobOrderId: string, 
+  scheduleData: { tasks: any[], mechanics: any[] }, 
+  allTasks?: ServiceTask[],
+  assignedMechanicName?: string,
+  onClose: () => void, 
+  onSaved: () => void 
+}) {
   const today = toLocalDateValue(new Date())
+
+  // A mechanic is already on this job order if they hold another task on this job order,
+  // currently hold this task, or are the designated mechanic on the job order card.
+  const isMechanicAlreadyOnOrder = (mId: number, mName?: string) => {
+    if (!mId) return false
+    if (task.mechanicId === mId) return true
+    if (assignedMechanicName && mName && assignedMechanicName.toLowerCase() === mName.toLowerCase()) return true
+    return allTasks.some(t => t.mechanicId === mId)
+  }
 
   // A saved time that has already passed is stale, not a choice — fall back
   // to today so the modal doesn't open showing an error.
@@ -1452,9 +1542,95 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
   // Read-only here: the text belongs to the quotation (description_of_work).
   const note = task.note || ''
 
+  // Estimated duration of the task being scheduled (in hours and ms)
+  const taskDurationHours = useMemo(() => {
+    if (task.estimatedHours && task.estimatedHours > 0) return task.estimatedHours
+    if (task.estimatedFinish && task.scheduledDate) {
+      const diffHrs = (new Date(task.estimatedFinish).getTime() - new Date(task.scheduledDate).getTime()) / 3600000
+      if (diffHrs > 0) return Math.round(diffHrs * 10) / 10
+    }
+    return 1.5
+  }, [task.estimatedHours, task.estimatedFinish, task.scheduledDate])
+
+  const taskDurationMs = taskDurationHours * 3600000
+
+  const proposedStart = useMemo(() => {
+    if (!date || !time) return null
+    const ts = new Date(`${date}T${time}:00`).getTime()
+    return isNaN(ts) ? null : ts
+  }, [date, time])
+
+  const proposedFinish = useMemo(() => {
+    if (!proposedStart) return null
+    return proposedStart + taskDurationMs
+  }, [proposedStart, taskDurationMs])
+
+  const BUFFER_MS = 15 * 60 * 1000 // 15-minute buffer between tasks
+
+  const conflictingSchedule = useMemo(() => {
+    if (!proposedStart || !proposedFinish) return null
+    // If not pending and not changing date/mechanic, don't block
+    if (task.status !== 'pending' && mechanicId === (task.mechanicId || '')) return null
+
+    for (const t of scheduleData.tasks) {
+      if (String(t.id) === String(task.id)) continue
+      if (t.status === 'completed' || t.status === 'cancelled') continue
+      if (!t.scheduled_date) continue
+
+      const isSameMechanic = mechanicId !== '' && Number(t.mechanic_id) === Number(mechanicId)
+      const isSameJobOrder = Number(t.job_order_id) === Number(jobOrderId)
+
+      if (!isSameMechanic && !isSameJobOrder) continue
+
+      const tStart = new Date(t.scheduled_date).getTime()
+      const tEstHours = Number(t.estimated_hours ?? 1.5)
+      const tFinish = t.estimated_finish ? new Date(t.estimated_finish).getTime() : tStart + (tEstHours * 3600000)
+
+      const overlaps = (proposedStart < tFinish) && (proposedFinish > tStart)
+      const tooClose = (proposedStart < tFinish + BUFFER_MS) && (proposedFinish + BUFFER_MS > tStart)
+
+      if (tooClose) {
+        const startStr = new Date(tStart).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+        const finishStr = new Date(tFinish).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+        const earliestAfterDate = new Date(tFinish + BUFFER_MS)
+        const earliestAfter = earliestAfterDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+
+        let reason = ''
+        if (isSameMechanic) {
+          const mName = t.mechanic_name || scheduleData.mechanics.find((m) => m.id === mechanicId)?.full_name || 'The mechanic'
+          reason = overlaps
+            ? `${mName} is already scheduled for "${t.title}" (${startStr} – ${finishStr}). Services cannot overlap.`
+            : `${mName} has "${t.title}" scheduled (${startStr} – ${finishStr}). Allow at least 15 minutes buffer.`
+        } else {
+          reason = overlaps
+            ? `Another service ("${t.title}") on this vehicle is scheduled from ${startStr} to ${finishStr}. Services cannot overlap.`
+            : `Another service ("${t.title}") on this vehicle is scheduled until ${finishStr}. Allow at least 15 minutes buffer.`
+        }
+
+        return {
+          task: t,
+          isDirectOverlap: overlaps,
+          tStart,
+          tFinish,
+          earliestAfterDate,
+          startStr,
+          finishStr,
+          earliestAfter,
+          reason,
+          isSameMechanic,
+        }
+      }
+    }
+    return null
+  }, [proposedStart, proposedFinish, task.id, task.status, task.mechanicId, mechanicId, jobOrderId, scheduleData.tasks, scheduleData.mechanics, BUFFER_MS])
+
   const [saving, setSaving] = useState(false)
 
   const handleSave = async () => {
+    if (conflictingSchedule) {
+      toast.error(conflictingSchedule.reason)
+      return
+    }
     setSaving(true)
     const datetime = `${date}T${time}:00`
     // Status isn't set here — Start/Finish live on the task card.
@@ -1484,7 +1660,12 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
         </div>
         
         <div className="mb-6 rounded-lg bg-slate-50 p-4 border border-slate-100">
-          <p className="font-semibold text-slate-900">{task.title}</p>
+          <div className="flex items-center justify-between">
+            <p className="font-semibold text-slate-900">{task.title}</p>
+            <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full">
+              Est: {taskDurationHours} {taskDurationHours === 1 ? 'hr' : 'hrs'}
+            </span>
+          </div>
           {note.trim() && note.trim() !== 'Describe the service...' && (
             <p className="mt-1 text-sm text-slate-500">{note}</p>
           )}
@@ -1535,6 +1716,31 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
               <XCircle size={13} /> That time has already passed — pick a later one.
             </p>
           )}
+
+          {conflictingSchedule && (
+            <div className="rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs text-rose-800 space-y-2 shadow-sm animate-fadeIn">
+              <div className="flex items-center gap-1.5 font-bold text-rose-900">
+                <AlertTriangle size={15} className="text-rose-600 shrink-0" />
+                <span>Scheduling Conflict</span>
+              </div>
+              <p className="leading-relaxed">{conflictingSchedule.reason}</p>
+              <div className="flex items-center justify-between pt-1 border-t border-rose-200 font-medium">
+                <span className="text-rose-700">Earliest slot after this service:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = conflictingSchedule.earliestAfterDate
+                    setDate(toLocalDateValue(next))
+                    setTime(`${String(next.getHours()).padStart(2, '0')}:${String(next.getMinutes()).padStart(2, '0')}`)
+                  }}
+                  className="rounded-lg bg-rose-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-rose-700 transition-colors shadow-sm"
+                >
+                  Set to {conflictingSchedule.earliestAfter}
+                </button>
+              </div>
+            </div>
+          )}
+
           {task.status === 'active' && (
             <p className="text-xs text-slate-500">
               Already started — the schedule is locked. You can still reassign the mechanic or update the note.
@@ -1552,12 +1758,13 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
               {scheduleData.mechanics.map((m) => {
                 const open = Number(m.open_tasks ?? 0)
                 const cap = Number(m.capacity)
-                // A full mechanic can't take a NEW task, but stays selectable
-                // for a task that's already theirs (re-saving the schedule).
-                const full = mechanicIsFull(open, cap) && task.mechanicId !== m.id
+                const alreadyOnOrder = isMechanicAlreadyOnOrder(m.id, m.full_name)
+                // A full mechanic can't take a NEW job order, but stays selectable
+                // if they are ALREADY handling this job order (adding another service).
+                const full = mechanicIsFull(open, cap) && !alreadyOnOrder
                 return (
                   <option key={m.id} value={m.id} disabled={full}>
-                    {m.full_name} ({open}/{cap}{full ? ' — full' : ''})
+                    {m.full_name}{alreadyOnOrder ? ' — on this job order' : full ? ' — full' : ''}
                   </option>
                 )
               })}
@@ -1567,13 +1774,20 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
               if (!m) return null
               const open = Number(m.open_tasks ?? 0)
               const cap = Number(m.capacity)
-              const wouldAdd = task.mechanicId !== m.id
-              return (
-                <p className={`mt-1.5 text-xs ${mechanicIsFull(open, cap) && wouldAdd ? 'text-rose-600' : 'text-slate-500'}`}>
-                  {open} of {cap} open tasks{wouldAdd ? ` — this would make ${open + 1}` : ' (including this one)'}.
-                  {mechanicIsFull(open, cap) && wouldAdd && ' At the limit — finish one of theirs first or pick someone else.'}
-                </p>
-              )
+              const alreadyOnOrder = isMechanicAlreadyOnOrder(m.id, m.full_name)
+              const isFull = mechanicIsFull(open, cap)
+
+              if (alreadyOnOrder) return null
+
+              if (isFull) {
+                return (
+                  <p className="mt-1.5 text-xs text-rose-600">
+                    At capacity — finish an ongoing job order first or choose another mechanic.
+                  </p>
+                )
+              }
+
+              return null
             })()}
           </div>
 
@@ -1581,43 +1795,50 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
           {mechanicId !== '' && (
             <div className="mt-4 rounded-lg bg-indigo-50/50 p-4 border border-indigo-100">
               <p className="text-xs font-bold uppercase tracking-wider text-indigo-800 mb-2">
-                Mechanic's Schedule for {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                Mechanic&apos;s Schedule for {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </p>
               {(() => {
-                const dayTasks = scheduleData.tasks.filter(t => 
+                const dayTasks = scheduleData.tasks.filter((t) => 
                   t.mechanic_id === mechanicId && 
                   t.scheduled_date && 
                   new Date(t.scheduled_date).toISOString().split('T')[0] === date &&
                   String(t.id) !== task.id
-                );
+                )
                 
                 if (dayTasks.length === 0) {
-                  return <p className="text-sm text-indigo-600">No other tasks scheduled for this day.</p>;
+                  return <p className="text-sm text-indigo-600">No other tasks scheduled for this day.</p>
                 }
 
-                // Check for direct overlap (assuming 1 hour duration for simple check)
-                const proposedTime = new Date(`${date}T${time}:00`).getTime();
-                const overlaps = dayTasks.filter(t => {
-                  const tTime = new Date(t.scheduled_date).getTime();
-                  return Math.abs(tTime - proposedTime) < 60 * 60 * 1000; // within 1 hour
-                });
-
                 return (
-                  <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
-                    {overlaps.length > 0 && (
-                      <div className="mb-2 rounded bg-red-100 px-3 py-2 text-xs font-medium text-red-800 border border-red-200 flex items-start gap-2">
-                        <span className="mt-0.5">⚠️</span>
-                        <span>Warning: Potential overlap. The mechanic has tasks scheduled around this time.</span>
-                      </div>
-                    )}
-                    {dayTasks.map(t => (
-                      <div key={t.id} className="flex justify-between items-center text-xs bg-white p-2 rounded border border-indigo-100 shadow-sm">
-                        <span className="font-semibold text-slate-700 truncate mr-2 flex-1">{t.title}</span>
-                        <span className="text-indigo-600 font-medium shrink-0">
-                          {new Date(t.scheduled_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                    {dayTasks.map((t) => {
+                      const tStart = new Date(t.scheduled_date)
+                      const tEst = t.estimated_finish ? new Date(t.estimated_finish) : new Date(tStart.getTime() + Number(t.estimated_hours ?? 1.5) * 3600000)
+                      const isConflicting = conflictingSchedule?.task.id === t.id
+
+                      return (
+                        <div
+                          key={t.id}
+                          className={`flex justify-between items-center text-xs p-2 rounded border shadow-sm transition-colors ${
+                            isConflicting
+                              ? 'bg-rose-50 border-rose-300 text-rose-900'
+                              : 'bg-white border-indigo-100 text-slate-700'
+                          }`}
+                        >
+                          <div className="truncate mr-2 flex-1">
+                            <span className="font-semibold">{t.title}</span>
+                            {isConflicting && (
+                              <span className="ml-2 rounded bg-rose-200 px-1.5 py-0.5 text-[10px] font-bold text-rose-800">
+                                Conflict
+                              </span>
+                            )}
+                          </div>
+                          <span className={`font-medium shrink-0 ${isConflicting ? 'text-rose-700' : 'text-indigo-600'}`}>
+                            {tStart.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} – {tEst.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      )
+                    })}
                   </div>
                 )
               })()}
@@ -1626,14 +1847,17 @@ function ScheduleModal({ task, jobOrderId, scheduleData, onClose, onSaved }: { t
         </div>
         
         <div className="mt-6 flex gap-3">
-          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">Cancel</button>
           <button
             onClick={handleSave}
-            disabled={saving || pickedPast || (() => {
+            disabled={saving || pickedPast || !!conflictingSchedule || (() => {
               const m = scheduleData.mechanics.find((x) => x.id === mechanicId)
-              return Boolean(m && task.mechanicId !== m.id && mechanicIsFull(Number(m.open_tasks ?? 0), Number(m.capacity)))
+              if (!m) return false
+              const alreadyOnOrder = isMechanicAlreadyOnOrder(m.id, m.full_name)
+              return !alreadyOnOrder && mechanicIsFull(Number(m.open_tasks ?? 0), Number(m.capacity))
             })()}
-            className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-2"
+            title={conflictingSchedule ? conflictingSchedule.reason : undefined}
+            className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2 transition-all shadow-sm"
           >
             {saving ? 'Saving...' : <><Check size={16}/> Save</>}
           </button>

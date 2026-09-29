@@ -65,6 +65,8 @@ export interface Job {
   // This ticket started from a customer's "Claim" on an existing warranty,
   // not a fresh booking — see warranty_claims.
   isWarrantyClaim: boolean
+  jobOrderId?: number
+  dateArrived?: string | null
 }
 
 type Tab = 'Tickets' | 'Pending' | 'Approved' | 'Cancelled'
@@ -114,6 +116,8 @@ export default function page() {
               servicesNeeded: [t.customer_concern || 'N/A'],
               diagnosticScanAuthorized: Boolean(t.diagnostic_scan_authorized),
               isWarrantyClaim: Boolean(t.is_warranty_claim),
+              jobOrderId: t.job_order_id ? Number(t.job_order_id) : undefined,
+              dateArrived: t.date_arrived ? new Date(t.date_arrived).toISOString() : null,
               assignedMechanic: t.mechanic_id ? t.mechanic_id.toString() : undefined,
               status,
               date: new Date(t.request_date).toLocaleDateString(),
@@ -269,7 +273,7 @@ export default function page() {
     )
   }
 
-  const confirmApprove = async (job: Job) => {
+  const confirmApprove = async (job: Job, checkInNow = false) => {
     if (approving) return;
     if (!job.assignedMechanic || job.assignedMechanic === 'Unassigned') {
       alert("Please assign a mechanic first");
@@ -278,7 +282,7 @@ export default function page() {
     setApproving(true);
     try {
       const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
-      await fetch('/api/admin/job-queue', {
+      const res = await fetch('/api/admin/job-queue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -286,14 +290,58 @@ export default function page() {
           ticketId: job.ticketId,
           mechanicId: job.assignedMechanic,
           employeeId: activeEmployeeId ? Number(activeEmployeeId) : null,
+          checkInNow: Boolean(checkInNow),
         })
       });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(
+          checkInNow
+            ? `Ticket approved & vehicle marked as stored in shop! Inspection is ready.`
+            : `Ticket approved! Awaiting vehicle arrival at the shop.`
+        );
+      }
       setApproveTarget(null);
       fetchJobs();
+    } catch (err: any) {
+      toast.error(err.message || 'Approval failed');
     } finally {
       setApproving(false);
     }
   }
+
+  const [checkInTarget, setCheckInTarget] = useState<Job | null>(null);
+  const [checkingIn, setCheckingIn] = useState(false);
+
+  const confirmCheckIn = async (job: Job) => {
+    if (checkingIn) return;
+    setCheckingIn(true);
+    try {
+      const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null;
+      const res = await fetch('/api/admin/job-queue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'check_in',
+          ticketId: job.ticketId,
+          jobOrderId: job.jobOrderId,
+          employeeId: activeEmployeeId ? Number(activeEmployeeId) : null,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Vehicle for ${job.name} marked as stored in shop! Inspection unlocked.`);
+        setCheckInTarget(null);
+        fetchJobs();
+      } else {
+        toast.error(data.message || 'Check-in failed');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Check-in failed');
+    } finally {
+      setCheckingIn(false);
+    }
+  };
 
   const confirmReject = async (job: Job) => {
     const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
@@ -687,10 +735,22 @@ export default function page() {
                     </div>
                   </td>
                   <td className="px-4 py-4">
-                    <StatusBadge status={c.status === 'In Progress' ? 'Approved' : c.status} />
+                    {c.status === 'Approved' ? (
+                      !c.dateArrived ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                          <Store size={12} /> Awaiting Arrival
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+                          <CheckCircle2 size={12} /> Stored in Shop
+                        </span>
+                      )
+                    ) : (
+                      <StatusBadge status={c.status === 'In Progress' ? 'Approved' : c.status} />
+                    )}
                   </td>
                   <td className="px-4 py-4 text-right">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-end gap-2 items-center">
                       <button
                         onClick={() => setViewTarget(c)}
                         title="View"
@@ -699,13 +759,34 @@ export default function page() {
                         <Eye size={14} />
                       </button>
                       {approvedLike ? (
-                        <button
-                          onClick={() => setDeleteTarget(c)}
-                          title="Delete"
-                          className="flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        <>
+                          {!c.dateArrived ? (
+                            <button
+                              onClick={() => setCheckInTarget(c)}
+                              title="Vehicle Arrived — Store in Shop & Check In"
+                              className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 transition-all"
+                            >
+                              <Store size={13} /> Check In
+                            </button>
+                          ) : (
+                            c.jobOrderId && (
+                              <a
+                                href={`/job-orders/${c.jobOrderId}/inspection`}
+                                title="Go to Inspection"
+                                className="flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent"
+                              >
+                                <Search size={14} />
+                              </a>
+                            )
+                          )}
+                          <button
+                            onClick={() => setDeleteTarget(c)}
+                            title="Delete"
+                            className="flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </>
                       ) : (
                         <>
                           <button
@@ -746,7 +827,24 @@ export default function page() {
       {showNewTicket && <NewTicketModal onClose={() => setShowNewTicket(false)} onSubmit={addTicket} />}
 
       {approveTarget && (
-        <ApproveModal job={approveTarget} mechanics={mechanics} busy={approving} onClose={() => setApproveTarget(null)} onConfirm={() => confirmApprove(approveTarget)} />
+        <ApproveModal
+          job={approveTarget}
+          mechanics={mechanics}
+          busy={approving}
+          onClose={() => setApproveTarget(null)}
+          onConfirm={(checkInNow) => confirmApprove(approveTarget, checkInNow)}
+        />
+      )}
+
+      {checkInTarget && (
+        <ConfirmModal
+          tone="brand"
+          title="Confirm Vehicle Arrival & Store in Shop"
+          description={`Confirm that ${checkInTarget.name}'s ${checkInTarget.vehicle} (${checkInTarget.plate}) has arrived and is safely stored in the shop. This will mark the vehicle as checked in and unlock the inspection workflow.`}
+          confirmLabel={checkingIn ? "Checking In..." : "Store in Shop & Check In"}
+          onClose={() => setCheckInTarget(null)}
+          onConfirm={() => confirmCheckIn(checkInTarget)}
+        />
       )}
 
       {rejectTarget && (
@@ -783,9 +881,10 @@ export default function page() {
 // mechanic is assigned.
 // ---------------------------------------------------------------------------
 
-function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; mechanics: any[]; busy: boolean; onClose: () => void; onConfirm: () => void }) {
+function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; mechanics: any[]; busy: boolean; onClose: () => void; onConfirm: (checkInNow: boolean) => void }) {
   const unassigned = !job.assignedMechanic || job.assignedMechanic === 'Unassigned'
   const mechanicName = unassigned ? 'Unassigned' : mechanics.find((m) => m.id.toString() === job.assignedMechanic)?.full_name ?? job.assignedMechanic
+  const [checkInNow, setCheckInNow] = useState(false)
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
@@ -839,6 +938,22 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
           </div>
         </dl>
 
+        <div className="mt-4 rounded-lg border border-border bg-accent/30 p-3.5 flex items-start gap-3">
+          <input
+            id="modalCheckInNow"
+            type="checkbox"
+            checked={checkInNow}
+            onChange={(e) => setCheckInNow(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-border text-brand focus:ring-brand cursor-pointer"
+          />
+          <label htmlFor="modalCheckInNow" className="text-xs text-foreground cursor-pointer select-none">
+            <span className="font-semibold block text-sm">Vehicle has already arrived & is stored in shop now</span>
+            <span className="text-muted-foreground mt-0.5 block leading-normal">
+              Check in immediately. If unchecked, the ticket will be approved as &ldquo;Awaiting Arrival&rdquo; until the vehicle is physically dropped off.
+            </span>
+          </label>
+        </div>
+
         {unassigned && (
           <div className="mt-3 flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2.5 text-xs text-amber-700">
             <AlertCircle size={14} className="mt-0.5 shrink-0" />
@@ -852,7 +967,7 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
             Cancel
           </button>
           <button
-            onClick={onConfirm}
+            onClick={() => onConfirm(checkInNow)}
             disabled={unassigned || busy}
             className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
@@ -1012,19 +1127,30 @@ function ConfirmModal({
   onClose,
   onConfirm,
 }: {
-  tone: 'danger' | 'default'
+  tone: 'danger' | 'default' | 'brand'
   title: string
   description: string
   confirmLabel: string
   onClose: () => void
   onConfirm: () => void
 }) {
+  const isDanger = tone === 'danger'
+  const isBrand = tone === 'brand'
+
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-sm rounded-xl bg-background p-6 shadow-2xl">
         <div className="flex items-start justify-between">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-            <Trash2 size={20} />
+          <div
+            className={`flex h-11 w-11 items-center justify-center rounded-full ${
+              isDanger
+                ? 'bg-destructive/10 text-destructive'
+                : isBrand
+                ? 'bg-brand/10 text-brand'
+                : 'bg-accent text-foreground'
+            }`}
+          >
+            {isDanger ? <Trash2 size={20} /> : isBrand ? <Store size={20} /> : <AlertCircle size={20} />}
           </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
             <X size={18} />
@@ -1038,7 +1164,16 @@ function ConfirmModal({
           <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent">
             Cancel
           </button>
-          <button onClick={onConfirm} className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+          <button
+            onClick={onConfirm}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+              isDanger
+                ? 'bg-destructive text-destructive-foreground hover:opacity-90'
+                : isBrand
+                ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white hover:opacity-90'
+                : 'bg-primary text-primary-foreground hover:opacity-90'
+            }`}
+          >
             {confirmLabel}
           </button>
         </div>

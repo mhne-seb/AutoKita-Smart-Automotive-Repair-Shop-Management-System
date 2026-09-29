@@ -810,13 +810,13 @@ BEGIN
     SET ticket_status = 'approved'
     WHERE service_tickets.id = p_ticket_id;
 
-    -- Create the job order
+    -- Create the job order (date_arrived is NULL until vehicle is physically checked in)
     INSERT INTO job_orders (
         ticket_id, user_id, vehicle_id, jo_date,
         date_arrived, actual_grand_total, partial_payment, balance, status
     ) VALUES (
         p_ticket_id, v_user_id, v_vehicle_id, CURRENT_DATE,
-        NOW(), 0, 0, 0, 'inspecting'
+        NULL, 0, 0, 0, 'inspecting'
     )
     RETURNING job_orders.id INTO v_jo_id;
 

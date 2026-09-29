@@ -1,8 +1,27 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import ExcelJS from 'exceljs'
-import { Download, Info, Gift, Search, Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  Download,
+  Info,
+  Gift,
+  Search,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  FileSpreadsheet,
+  FileText,
+  TrendingUp,
+  Users,
+  Wrench,
+  ShieldCheck,
+  AlertTriangle,
+  Sparkles,
+  PieChart as PieIcon,
+  CheckCircle2,
+} from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -74,65 +93,298 @@ const STATUS_FONT: Record<string, string> = {
   'New Customer': 'FF0369A1',
 }
 
-async function buildChurnReportWorkbook(rows: any[]) {
+// ---------------------------------------------------------------------------
+// Comprehensive Export Builders (KPIs + Monthly Trends + Service Mix + Churn)
+// ---------------------------------------------------------------------------
+
+function buildAnalyticsReportCsv(params: {
+  analyticsData: any
+  counts: Record<string, number>
+  timeRangeLabel: string
+  rows: any[]
+}): string {
+  const escapeCell = (cell: string | number | null | undefined) => {
+    if (cell === null || cell === undefined) return '""'
+    const str = String(cell)
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`
+    }
+    return `"${str}"`
+  }
+
+  const { analyticsData, counts, timeRangeLabel, rows } = params
+  const summary = analyticsData?.summary || {}
+  const totalCustomers = counts.all || rows.length || 0
+  const loyalCount = counts['Loyal Customer'] || 0
+  const newCount = counts['New Customer'] || 0
+  const highRiskCount = counts['High Churn Risk'] || 0
+  const medRiskCount = counts['Medium Churn Risk'] || 0
+  const retentionRate = totalCustomers > 0 ? (((loyalCount + newCount) / totalCustomers) * 100).toFixed(1) : '100.0'
+  const highRiskPct = totalCustomers > 0 ? ((highRiskCount / totalCustomers) * 100).toFixed(1) : '0.0'
+  const medRiskPct = totalCustomers > 0 ? ((medRiskCount / totalCustomers) * 100).toFixed(1) : '0.0'
+  const loyalPct = totalCustomers > 0 ? ((loyalCount / totalCustomers) * 100).toFixed(1) : '0.0'
+  const newPct = totalCustomers > 0 ? ((newCount / totalCustomers) * 100).toFixed(1) : '0.0'
+  const avgTicket = summary.jobsDone > 0 ? Math.round((summary.revenue || 0) / summary.jobsDone) : 0
+
+  const lines: string[] = []
+
+  // Document Title
+  lines.push(`"AUTOKITA AUTOMOTIVE SERVICE CENTER - COMPREHENSIVE BUSINESS ANALYTICS & CHURN REPORT"`)
+  lines.push(`"Generated At",${escapeCell(new Date().toLocaleString('en-PH'))}`)
+  lines.push(`"Time-Range Scope",${escapeCell(timeRangeLabel)}`)
+  lines.push(`""`)
+
+  // Section 1: Executive Performance & Operational KPIs
+  lines.push(`"=== 1. EXECUTIVE PERFORMANCE & OPERATIONAL METRICS ==="`)
+  lines.push(`"Category","Metric Name","Value","Operational Notes / Context"`)
+  lines.push(`"Financial","Total Revenue Intake",${escapeCell(`₱${Number(summary.revenue || 0).toLocaleString('en-PH')}`)},${escapeCell(`${summary.revenueTrend > 0 ? '+' : ''}${(summary.revenueTrend || 0).toFixed(1)}% vs prior period`)}`)
+  lines.push(`"Financial","Average Ticket / Revenue per Job",${escapeCell(`₱${avgTicket.toLocaleString('en-PH')}`)},"Average ticket value across completed work orders"`)
+  lines.push(`"Operations","Total Completed Work Orders",${escapeCell(summary.jobsDone || 0)},${escapeCell(`${summary.jobsTrend > 0 ? '+' : ''}${(summary.jobsTrend || 0).toFixed(1)}% vs prior period`)}`)
+  lines.push(`"Operations","Average Daily Services",${escapeCell((summary.averageDailyJobs || 0).toFixed(1))},"Completed jobs per day in selected cycle"`)
+  lines.push(`"Operations","Operational Safety / On-Time Rate",${escapeCell(`${(summary.safetyRate || 0).toFixed(1)}%`)},"Completed on or before promised delivery date"`)
+  lines.push(`"Customer Retention","Total Tracked Customers",${escapeCell(totalCustomers)},"Active customer database records analyzed"`)
+  lines.push(`"Customer Retention","Overall Retention Rate",${escapeCell(`${retentionRate}%`)},"Active & loyal customer share"`)
+  lines.push(`"Customer Retention","High Churn Risk Customers",${escapeCell(highRiskCount)},${escapeCell(`${highRiskPct}% of customer base - Immediate retention outreach needed`)}`)
+  lines.push(`"Customer Retention","Medium Churn Risk Customers",${escapeCell(medRiskCount)},${escapeCell(`${medRiskPct}% of customer base - Monitor / Maintenance follow-up`)}`)
+  lines.push(`"Customer Retention","Loyal Active Customers",${escapeCell(loyalCount)},${escapeCell(`${loyalPct}% of customer base`)}`)
+  lines.push(`"Customer Retention","New Customers",${escapeCell(newCount)},${escapeCell(`${newPct}% of customer base`)}`)
+  lines.push(`""`)
+
+  // Section 2: Monthly Trends
+  lines.push(`"=== 2. MONTHLY REVENUE & JOB VOLUME TRENDS ==="`)
+  lines.push(`"Month","Revenue (PHP)","Completed Job Orders"`)
+  if (Array.isArray(analyticsData?.chartData) && analyticsData.chartData.length > 0) {
+    analyticsData.chartData.forEach((row: any) => {
+      lines.push(`${escapeCell(row.month)},${escapeCell(row.revenue || 0)},${escapeCell(row.jobsCompleted || 0)}`)
+    })
+  } else {
+    lines.push(`"No trend data available for current selection",0,0`)
+  }
+  lines.push(`""`)
+
+  // Section 3: Service Mix
+  lines.push(`"=== 3. TOP SERVICE CATEGORIES & DEMAND DISTRIBUTION ==="`)
+  lines.push(`"Service Category","Distribution Share (%)"`)
+  if (Array.isArray(analyticsData?.serviceMix) && analyticsData.serviceMix.length > 0) {
+    analyticsData.serviceMix.forEach((sm: any) => {
+      lines.push(`${escapeCell(sm.label)},${escapeCell(`${sm.percent}%`)}`)
+    })
+  } else {
+    lines.push(`"All Services",100%`)
+  }
+  lines.push(`""`)
+
+  // Section 4: Customer Churn Register
+  lines.push(`"=== 4. CUSTOMER CHURN & RETENTION REGISTER ==="`)
+  lines.push(`"Customer ID","Customer Name","Contact No.","Status (Churn Risk)","Vehicle (Year & Model)","Mileage","Last Checkup Date","Recommended Retention Offer"`)
+  rows.forEach((c: any) => {
+    lines.push([
+      escapeCell(c.customerId),
+      escapeCell(c.name),
+      escapeCell(c.contact),
+      escapeCell(c.churnStatus),
+      escapeCell(c.vehicle),
+      escapeCell(c.mileage),
+      escapeCell(c.lastCheckup ?? '—'),
+      escapeCell(c.offer ?? (c.churnStatus === 'New Customer' ? 'Welcome Discount' : '—'))
+    ].join(','))
+  })
+
+  return lines.join('\n')
+}
+
+async function buildAnalyticsReportWorkbook(params: {
+  analyticsData: any
+  counts: Record<string, number>
+  timeRangeLabel: string
+  rows: any[]
+}) {
+  const { analyticsData, counts, timeRangeLabel, rows } = params
   const workbook = new ExcelJS.Workbook()
   workbook.creator = 'AutoKita Admin'
   workbook.created = new Date()
 
-  const sheet = workbook.addWorksheet('Churn Report', {
+  const summary = analyticsData?.summary || {}
+  const totalCustomers = counts.all || rows.length || 0
+  const loyalCount = counts['Loyal Customer'] || 0
+  const newCount = counts['New Customer'] || 0
+  const highRiskCount = counts['High Churn Risk'] || 0
+  const medRiskCount = counts['Medium Churn Risk'] || 0
+  const retentionRate = totalCustomers > 0 ? (((loyalCount + newCount) / totalCustomers) * 100).toFixed(1) : '100.0'
+  const highRiskPct = totalCustomers > 0 ? ((highRiskCount / totalCustomers) * 100).toFixed(1) : '0.0'
+  const medRiskPct = totalCustomers > 0 ? ((medRiskCount / totalCustomers) * 100).toFixed(1) : '0.0'
+  const loyalPct = totalCustomers > 0 ? ((loyalCount / totalCustomers) * 100).toFixed(1) : '0.0'
+  const newPct = totalCustomers > 0 ? ((newCount / totalCustomers) * 100).toFixed(1) : '0.0'
+  const avgTicket = summary.jobsDone > 0 ? Math.round((summary.revenue || 0) / summary.jobsDone) : 0
+
+  // ----------------------------------------------------
+  // SHEET 1: Executive Analytics & KPIs
+  // ----------------------------------------------------
+  const sheet1 = workbook.addWorksheet('Analytics & KPIs')
+
+  sheet1.mergeCells('A1:D1')
+  const title1 = sheet1.getCell('A1')
+  title1.value = `AutoKita — Executive Analytics & Operational Summary`
+  title1.font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } }
+  title1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } }
+  title1.alignment = { vertical: 'middle', horizontal: 'left' }
+  sheet1.getRow(1).height = 36
+
+  sheet1.mergeCells('A2:D2')
+  const sub1 = sheet1.getCell('A2')
+  sub1.value = `Report Generated: ${new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} | Filter Range: ${timeRangeLabel}`
+  sub1.font = { italic: true, size: 10, color: { argb: 'FF64748B' } }
+  sub1.alignment = { vertical: 'middle', horizontal: 'left' }
+  sheet1.getRow(2).height = 20
+
+  sheet1.getCell('A4').value = '1. EXECUTIVE PERFORMANCE & OPERATIONAL METRICS'
+  sheet1.getCell('A4').font = { bold: true, size: 11, color: { argb: 'FF0F172A' } }
+
+  const kpiHeaders = ['Category', 'Metric Name', 'Value', 'Operational Notes / Context']
+  sheet1.getRow(5).values = kpiHeaders
+  sheet1.getRow(5).font = { bold: true, color: { argb: 'FFFFFFFF' } }
+  sheet1.getRow(5).eachCell((c) => {
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } }
+    c.alignment = { vertical: 'middle' }
+  })
+  sheet1.getRow(5).height = 22
+
+  const kpiData = [
+    ['Financial', 'Total Monthly Revenue Intake', `₱${Number(summary.revenue || 0).toLocaleString('en-PH')}`, `${summary.revenueTrend > 0 ? '+' : ''}${(summary.revenueTrend || 0).toFixed(1)}% vs prior period`],
+    ['Financial', 'Average Ticket / Revenue per Job', `₱${avgTicket.toLocaleString('en-PH')}`, 'Average ticket size across completed work orders'],
+    ['Operations', 'Total Completed Work Orders', summary.jobsDone || 0, `${summary.jobsTrend > 0 ? '+' : ''}${(summary.jobsTrend || 0).toFixed(1)}% vs prior period`],
+    ['Operations', 'Average Daily Services', (summary.averageDailyJobs || 0).toFixed(1), 'Completed jobs per day in selected cycle'],
+    ['Operations', 'Operational Safety / On-Time Rate', `${(summary.safetyRate || 0).toFixed(1)}%`, 'Jobs completed on or before promised delivery date'],
+    ['Customer Retention', 'Total Tracked Customers', totalCustomers, 'Active customer accounts analyzed by ML'],
+    ['Customer Retention', 'Overall Customer Retention Rate', `${retentionRate}%`, 'Loyal & new active customers vs total database'],
+    ['Customer Retention', 'High Churn Risk Customers', highRiskCount, `${highRiskPct}% of customer base — Immediate outreach advised`],
+    ['Customer Retention', 'Medium Churn Risk Customers', medRiskCount, `${medRiskPct}% of customer base — Maintenance reminder recommended`],
+    ['Customer Retention', 'Loyal Customers', loyalCount, `${loyalPct}% of customer base — High engagement`],
+    ['Customer Retention', 'New Customers', newCount, `${newPct}% of customer base — First-visit cohort`],
+  ]
+
+  kpiData.forEach((row, i) => {
+    const r = sheet1.addRow(row)
+    r.height = 20
+    r.eachCell((cell) => {
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+      }
+      cell.alignment = { vertical: 'middle' }
+      if (i % 2 === 1) {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } }
+      }
+    })
+  })
+
+  let nextRow = sheet1.rowCount + 2
+  sheet1.getCell(`A${nextRow}`).value = '2. MONTHLY REVENUE & JOB VOLUME TRENDS'
+  sheet1.getCell(`A${nextRow}`).font = { bold: true, size: 11, color: { argb: 'FF0F172A' } }
+  nextRow++
+
+  sheet1.getRow(nextRow).values = ['Month', 'Revenue (PHP)', 'Completed Jobs']
+  sheet1.getRow(nextRow).font = { bold: true, color: { argb: 'FFFFFFFF' } }
+  sheet1.getRow(nextRow).eachCell((c) => {
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } }
+    c.alignment = { vertical: 'middle' }
+  })
+  sheet1.getRow(nextRow).height = 22
+  nextRow++
+
+  if (Array.isArray(analyticsData?.chartData) && analyticsData.chartData.length > 0) {
+    analyticsData.chartData.forEach((row: any, i: number) => {
+      const r = sheet1.addRow([row.month, `₱${Number(row.revenue || 0).toLocaleString('en-PH')}`, row.jobsCompleted || 0])
+      r.height = 20
+      r.eachCell((cell) => {
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        }
+        if (i % 2 === 1) {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } }
+        }
+      })
+    })
+  }
+
+  nextRow = sheet1.rowCount + 2
+  sheet1.getCell(`A${nextRow}`).value = '3. TOP SERVICE CATEGORIES (SERVICE MIX)'
+  sheet1.getCell(`A${nextRow}`).font = { bold: true, size: 11, color: { argb: 'FF0F172A' } }
+  nextRow++
+
+  sheet1.getRow(nextRow).values = ['Service Category', 'Demand Share (%)']
+  sheet1.getRow(nextRow).font = { bold: true, color: { argb: 'FFFFFFFF' } }
+  sheet1.getRow(nextRow).eachCell((c) => {
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } }
+    c.alignment = { vertical: 'middle' }
+  })
+  sheet1.getRow(nextRow).height = 22
+
+  if (Array.isArray(analyticsData?.serviceMix) && analyticsData.serviceMix.length > 0) {
+    analyticsData.serviceMix.forEach((sm: any, i: number) => {
+      const r = sheet1.addRow([sm.label, `${sm.percent}%`])
+      r.height = 20
+      r.eachCell((cell) => {
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        }
+        if (i % 2 === 1) {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } }
+        }
+      })
+    })
+  }
+
+  sheet1.columns = [
+    { key: 'col1', width: 24 },
+    { key: 'col2', width: 38 },
+    { key: 'col3', width: 25 },
+    { key: 'col4', width: 50 },
+  ]
+
+  // ----------------------------------------------------
+  // SHEET 2: Customer Churn Register
+  // ----------------------------------------------------
+  const sheet2 = workbook.addWorksheet('Customer Churn Register', {
     views: [{ state: 'frozen', ySplit: 2 }],
   })
 
-  // --- Company logo, embedded top-left of the title band -----------------
-  try {
-    const logoBuffer = await fetch('/autokita-logo.png').then((r) => r.arrayBuffer())
-    const imageId = workbook.addImage({ buffer: logoBuffer as any, extension: 'png' })
-    sheet.addImage(imageId, {
-      tl: { col: 0.15, row: 0.1 },
-      ext: { width: 28, height: 28 },
-    })
-  } catch {
-    // Non-fatal — report still generates without the logo if the fetch fails.
-  }
+  sheet2.mergeCells('B1:H1')
+  const title2 = sheet2.getCell('B1')
+  title2.value = `AutoKita — Detailed Customer Churn & Retention Register`
+  title2.font = { bold: true, size: 13, color: { argb: 'FFFFFFFF' } }
+  title2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } }
+  title2.alignment = { vertical: 'middle', horizontal: 'left' }
+  sheet2.getRow(1).height = 34
 
-  sheet.mergeCells('B1:H1')
-  const titleCell = sheet.getCell('B1')
-  titleCell.value = `AutoKita — Churn Report (Generated ${new Date().toLocaleDateString('en-PH', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })})`
-  titleCell.font = { bold: true, size: 13, color: { argb: 'FFFFFFFF' } }
-  titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } }
-  titleCell.alignment = { vertical: 'middle', horizontal: 'left' }
-  sheet.getRow(1).height = 34
-
-  const columns = [
+  const columns2 = [
     { header: 'Customer ID', key: 'customerId', width: 18 },
-    { header: 'Name', key: 'name', width: 22 },
+    { header: 'Name', key: 'name', width: 24 },
     { header: 'Contact', key: 'contact', width: 18 },
-    { header: 'Status', key: 'churnStatus', width: 20 },
-    { header: 'Vehicle (Year & Model)', key: 'vehicle', width: 24 },
-    { header: 'Mileage', key: 'mileage', width: 12 },
-    { header: 'Last Checkup', key: 'lastCheckup', width: 14 },
-    { header: 'Promotional Offer', key: 'offer', width: 32 },
+    { header: 'Status (Churn)', key: 'churnStatus', width: 22 },
+    { header: 'Vehicle (Year & Model)', key: 'vehicle', width: 26 },
+    { header: 'Mileage', key: 'mileage', width: 14 },
+    { header: 'Last Checkup', key: 'lastCheckup', width: 16 },
+    { header: 'Promotional Offer', key: 'offer', width: 34 },
   ]
-  sheet.columns = columns
+  sheet2.columns = columns2
 
-  const headerRow = sheet.getRow(2)
-  columns.forEach((col, i) => {
-    const cell = headerRow.getCell(i + 1)
+  const headerRow2 = sheet2.getRow(2)
+  columns2.forEach((col, i) => {
+    const cell = headerRow2.getCell(i + 1)
     cell.value = col.header
     cell.font = { bold: true, color: { argb: 'FFFFFFFF' } }
     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } }
     cell.alignment = { vertical: 'middle', horizontal: 'left' }
     cell.border = { bottom: { style: 'thin', color: { argb: 'FF0F172A' } } }
   })
-  headerRow.height = 22
-  sheet.autoFilter = { from: 'A2', to: 'H2' }
+  headerRow2.height = 24
+  sheet2.autoFilter = { from: 'A2', to: 'H2' }
 
   rows.forEach((c) => {
-    const row = sheet.addRow({
+    const row = sheet2.addRow({
       customerId: c.customerId,
       name: c.name,
       contact: c.contact,
@@ -140,7 +392,7 @@ async function buildChurnReportWorkbook(rows: any[]) {
       vehicle: c.vehicle,
       mileage: c.mileage,
       lastCheckup: c.lastCheckup ?? '—',
-      offer: c.offer ?? '—',
+      offer: c.offer ?? (c.churnStatus === 'New Customer' ? 'Welcome Discount' : '—'),
     })
 
     row.eachCell((cell) => {
@@ -161,7 +413,7 @@ async function buildChurnReportWorkbook(rows: any[]) {
     }
   })
 
-  sheet.eachRow((row, rowNumber) => {
+  sheet2.eachRow((row, rowNumber) => {
     if (rowNumber <= 2) return
     if (rowNumber % 2 === 0) {
       row.eachCell((cell) => {
@@ -175,8 +427,20 @@ async function buildChurnReportWorkbook(rows: any[]) {
   return workbook
 }
 
-async function downloadChurnReport(rows: any[], filename: string) {
-  const workbook = await buildChurnReportWorkbook(rows)
+function downloadAnalyticsReportCsv(content: string, filename: string) {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', filename)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  setTimeout(() => URL.revokeObjectURL(url), 60000)
+}
+
+async function downloadAnalyticsReportXlsx(params: any, filename: string) {
+  const workbook = await buildAnalyticsReportWorkbook(params)
   const buffer = await workbook.xlsx.writeBuffer()
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -184,11 +448,11 @@ async function downloadChurnReport(rows: any[], filename: string) {
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = filename
+  link.setAttribute('download', filename)
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  setTimeout(() => URL.revokeObjectURL(url), 60000)
 }
 
 // Catalog of offers the admin can choose from when reaching out to a customer.
@@ -361,19 +625,68 @@ export default function Page() {
     return base
   }, [timeFilteredList])
 
-  function handleExport() {
-    if (filteredList.length === 0) {
+  const [showExportMenu, setShowExportMenu] = useState(false)
+  const exportMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false)
+      }
+    }
+    if (showExportMenu) {
+      document.addEventListener('mousedown', handleOutsideClick)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick)
+    }
+  }, [showExportMenu])
+
+  const timeRangeLabel = useMemo(() => {
+    return TIME_RANGES.find((r) => r.value === timeRange)?.label || 'All Time'
+  }, [timeRange])
+
+  const totalCustomers = counts.all || 0
+  const loyalCount = counts['Loyal Customer'] || 0
+  const newCount = counts['New Customer'] || 0
+  const highRiskCount = counts['High Churn Risk'] || 0
+  const retentionRate = totalCustomers > 0 ? (((loyalCount + newCount) / totalCustomers) * 100).toFixed(1) : '100.0'
+  const avgTicket = (analyticsData?.summary?.jobsDone || 0) > 0
+    ? Math.round((analyticsData?.summary?.revenue || 0) / analyticsData.summary.jobsDone)
+    : 0
+
+  function handleExport(format: 'csv' | 'xlsx' = 'csv') {
+    if (filteredList.length === 0 && (!analyticsData || !analyticsData.summary)) {
       showToast('Nothing to export for the current filters.')
       return
     }
     const stamp = new Date().toISOString().slice(0, 10)
-    downloadChurnReport(filteredList, `churn-report-${stamp}.xlsx`)
-      .then(() => {
-        showToast(`Exported ${filteredList.length} customer${filteredList.length > 1 ? 's' : ''}.`)
-      })
-      .catch(() => {
-        showToast('Export failed. Please try again.')
-      })
+    const exportParams = {
+      analyticsData,
+      counts,
+      timeRangeLabel,
+      rows: filteredList,
+    }
+
+    if (format === 'csv') {
+      try {
+        const csvContent = buildAnalyticsReportCsv(exportParams)
+        downloadAnalyticsReportCsv(csvContent, `autokita-analytics-report-${stamp}.csv`)
+        showToast(`Exported complete analytics & churn report (${filteredList.length} customers) as CSV.`)
+      } catch (err) {
+        console.error('CSV export error:', err)
+        showToast('CSV export failed. Please try again.')
+      }
+    } else {
+      downloadAnalyticsReportXlsx(exportParams, `autokita-analytics-report-${stamp}.xlsx`)
+        .then(() => {
+          showToast(`Exported complete analytics & churn workbook (.xlsx).`)
+        })
+        .catch((err) => {
+          console.error('XLSX export error:', err)
+          showToast('Excel export failed. Please try CSV instead.')
+        })
+    }
   }
 
   function openOfferModal(c: any) {
@@ -442,6 +755,7 @@ export default function Page() {
         </div>
       )}
 
+      {/* Page Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Analytics</h1>
@@ -453,7 +767,7 @@ export default function Page() {
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(Number(e.target.value))}
-            className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600"
+            className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 shadow-2xs outline-none focus:border-slate-400"
           >
             {TIME_RANGES.map((r) => (
               <option key={r.label} value={r.value}>
@@ -461,74 +775,177 @@ export default function Page() {
               </option>
             ))}
           </select>
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90"
-          >
-            <Download size={15} /> Export Reports
-          </button>
+
+          {/* Export Dropdown Menu */}
+          <div className="relative" ref={exportMenuRef}>
+            <button
+              onClick={() => setShowExportMenu((prev) => !prev)}
+              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition-all"
+            >
+              <Download size={15} />
+              Export Reports
+              <ChevronDown size={14} className={`transition-transform duration-200 ${showExportMenu ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showExportMenu && (
+              <div className="absolute right-0 top-full mt-2 w-76 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <button
+                  onClick={() => {
+                    setShowExportMenu(false)
+                    handleExport('csv')
+                  }}
+                  className="w-full text-left p-3 rounded-xl hover:bg-slate-50 transition-colors flex items-start gap-3 group cursor-pointer"
+                >
+                  <FileSpreadsheet className="text-emerald-600 shrink-0 mt-0.5" size={18} />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-slate-800 group-hover:text-emerald-700">Export CSV Report</span>
+                      <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Recommended</span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                      Complete report with Executive KPIs, Monthly Trends, Service Mix & Churn. 100% browser-safe.
+                    </p>
+                  </div>
+                </button>
+
+                <div className="border-t border-slate-100 my-1" />
+
+                <button
+                  onClick={() => {
+                    setShowExportMenu(false)
+                    handleExport('xlsx')
+                  }}
+                  className="w-full text-left p-3 rounded-xl hover:bg-slate-50 transition-colors flex items-start gap-3 group cursor-pointer"
+                >
+                  <FileText className="text-blue-600 shrink-0 mt-0.5" size={18} />
+                  <div>
+                    <span className="text-sm font-bold text-slate-800 group-hover:text-blue-700">Export Excel Workbook (.xlsx)</span>
+                    <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                      Multi-sheet Excel workbook with formatted KPI dashboard and customer churn register.
+                    </p>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="space-y-5">
-          <SummaryCard 
-            label="Revenue Summaries" 
-            value={currency(analyticsData?.summary?.revenue || 0)} 
-            sub="Total Monthly Intake" 
-            trend={`${(analyticsData?.summary?.revenueTrend > 0 ? '+' : '')}${(analyticsData?.summary?.revenueTrend || 0).toFixed(1)}%`} 
-          />
-          <SummaryCard 
-            label="Service Statistics" 
-            value={`${analyticsData?.summary?.jobsDone || 0} Jobs Done`} 
-            sub={`Average ${(analyticsData?.summary?.averageDailyJobs || 0).toFixed(1)} services daily`} 
-            trend={`${(analyticsData?.summary?.jobsTrend > 0 ? '+' : '')}${(analyticsData?.summary?.jobsTrend || 0).toFixed(1)}%`} 
-          />
-          <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              Business Performance Trend
-            </p>
-            <div className="mt-2 flex items-center justify-between">
-              <p className="text-2xl font-bold text-slate-900">
-                {(analyticsData?.summary?.safetyRate || 0) >= 90 ? 'Optimal' : (analyticsData?.summary?.safetyRate || 0) >= 75 ? 'Stable' : 'Needs Review'}
-              </p>
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                {(analyticsData?.summary?.safetyRate || 0) >= 90 ? 'Stable' : 'Warning'}
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-slate-400">{(analyticsData?.summary?.safetyRate || 0).toFixed(1)}% operational safety rate</p>
-          </div>
-        </div>
+      {/* 4 High-Impact KPI Metric Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <SummaryCard 
+          label="Revenue Summaries" 
+          value={currency(analyticsData?.summary?.revenue || 0)} 
+          sub="Total Monthly Intake" 
+          trend={`${(analyticsData?.summary?.revenueTrend > 0 ? '+' : '')}${(analyticsData?.summary?.revenueTrend || 0).toFixed(1)}%`}
+          icon={TrendingUp}
+        />
+        <SummaryCard 
+          label="Service Statistics" 
+          value={`${analyticsData?.summary?.jobsDone || 0} Jobs Done`} 
+          sub={`Average ${(analyticsData?.summary?.averageDailyJobs || 0).toFixed(1)} services daily`} 
+          trend={`${(analyticsData?.summary?.jobsTrend > 0 ? '+' : '')}${(analyticsData?.summary?.jobsTrend || 0).toFixed(1)}%`} 
+          icon={Wrench}
+        />
+        <SummaryCard 
+          label="Customer Retention" 
+          value={`${retentionRate}% Retained`} 
+          sub={`${loyalCount} loyal of ${totalCustomers} active`} 
+          trend={`${highRiskCount} At Risk`}
+          trendColor={highRiskCount > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}
+          icon={Users}
+        />
+        <SummaryCard 
+          label="Average Ticket / ARPU" 
+          value={currency(avgTicket)} 
+          sub="Average revenue per job" 
+          trend="Per Job" 
+          icon={Sparkles}
+        />
+      </div>
 
+      {/* Middle Row: Revenue & Job Trends BarChart + Top Services (Service Mix) Breakdown */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        {/* Left: Revenue & Job Trends Chart (2 cols) */}
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white lg:col-span-2">
           <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
           <div className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Revenue & Job Trends</p>
-              <p className="text-2xl font-bold text-slate-900">{currency(analyticsData?.summary?.revenue || 0)}</p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Revenue & Job Trends</p>
+                <p className="text-2xl font-bold text-slate-900">{currency(analyticsData?.summary?.revenue || 0)}</p>
+              </div>
+              <div className="flex items-center gap-4 text-xs font-semibold text-slate-500">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-slate-900" /> Revenue (₱)
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" /> Services Done
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-4 text-xs font-semibold text-slate-500">
-              <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-slate-900" /> Revenue (₱)
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" /> Services Done
-              </span>
+            <div className="mt-4 h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={analyticsData?.chartData || []} barGap={4}>
+                  <CartesianGrid vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                  <Tooltip />
+                  <Bar dataKey="revenue" fill="#0f172a" radius={[4, 4, 0, 0]} name="Revenue" />
+                  <Bar dataKey="jobsCompleted" fill="#10b981" radius={[4, 4, 0, 0]} name="Services Done" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
-          <div className="mt-4 h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={analyticsData?.chartData || []} barGap={4}>
-                <CartesianGrid vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="revenue" fill="#0f172a" radius={[4, 4, 0, 0]} name="Revenue" />
-                <Bar dataKey="jobsCompleted" fill="#10b981" radius={[4, 4, 0, 0]} name="Services Done" />
-              </BarChart>
-            </ResponsiveContainer>
+        </div>
+
+        {/* Right: Top Services (Service Mix) Demand Distribution */}
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white flex flex-col justify-between">
+          <div>
+            <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
+            <div className="p-6 pb-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Top Service Categories</p>
+                  <h3 className="text-lg font-bold text-slate-900">Service Mix & Demand</h3>
+                </div>
+                <span className="flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                  <Wrench size={12} /> {analyticsData?.serviceMix?.length || 0} Types
+                </span>
+              </div>
+
+              <div className="mt-4 space-y-3.5">
+                {analyticsData?.serviceMix && analyticsData.serviceMix.length > 0 ? (
+                  analyticsData.serviceMix.map((sm: any, idx: number) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-slate-700 truncate max-w-[200px]" title={sm.label}>{sm.label}</span>
+                        <span className="font-bold text-slate-900">{sm.percent}%</span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${sm.percent}%`,
+                            backgroundColor: sm.color || '#1e3a5f'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="py-8 text-center text-xs text-slate-400">Loading service demand metrics…</p>
+                )}
+              </div>
+            </div>
           </div>
+
+          <div className="border-t border-slate-100 p-4 bg-slate-50/60 flex items-center justify-between text-xs">
+            <span className="flex items-center gap-1.5 font-medium text-slate-600">
+              <ShieldCheck size={14} className="text-emerald-600" />
+              Operational Safety Rate
+            </span>
+            <span className="font-bold text-slate-900">{(analyticsData?.summary?.safetyRate || 0).toFixed(1)}% on-time</span>
           </div>
         </div>
       </div>
@@ -959,22 +1376,33 @@ function SummaryCard({
   value,
   sub,
   trend,
+  trendColor,
+  icon: Icon,
 }: {
   label: string
   value: string
   sub: string
   trend: string
+  trendColor?: string
+  icon?: any
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
-        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+        <div className="flex items-center gap-2">
+          {Icon && (
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+              <Icon size={15} />
+            </div>
+          )}
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+        </div>
+        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${trendColor || 'bg-emerald-100 text-emerald-700'}`}>
           {trend}
         </span>
       </div>
-      <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
-      <p className="mt-1 text-sm text-slate-400">{sub}</p>
+      <p className="mt-3 text-2xl font-bold text-slate-900">{value}</p>
+      <p className="mt-1 text-sm text-slate-500">{sub}</p>
     </div>
   )
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { FileText, ChevronRight, Loader2, Camera, AlertCircle, Check, ScanLine } from "lucide-react";
+import { FileText, ChevronRight, Loader2, Camera, AlertCircle, Check, ScanLine, Store } from "lucide-react";
 import { toast } from "sonner";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { Lightbox } from "@/components/Lightbox";
@@ -138,9 +138,35 @@ function Inspecting() {
     );
   }
 
+  if (!jobOrder.date_arrived) {
+    return (
+      <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
+        <StageStepper active={stageForStatus(jobOrder.status, jobOrder.date_arrived)} viewing="inspecting" jobOrderId={jobOrder.job_order_id} />
+        <div className="rounded-2xl border-2 border-amber-200 bg-amber-50/70 p-8 text-center shadow-xs">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-600 text-white shadow-sm mb-4">
+            <Store className="h-6 w-6" />
+          </div>
+          <h2 className="text-2xl font-bold text-amber-950">Awaiting Vehicle Drop-off</h2>
+          <p className="mt-2 text-sm text-amber-900/80 max-w-lg mx-auto">
+            Your booking has been approved, but your vehicle has not been stored in the shop yet. The inspection stage will begin once your vehicle is dropped off and marked as checked in by our shop staff.
+          </p>
+          <div className="mt-6">
+            <Link
+              href={`/dashboard/tracking/received?jobOrderId=${jobOrder.job_order_id}`}
+              className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition-all"
+            >
+              <Store className="h-4 w-4" />
+              View Drop-off & Check-In Details
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active={stageForStatus(jobOrder.status)} viewing="inspecting" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper active={stageForStatus(jobOrder.status, jobOrder.date_arrived)} viewing="inspecting" jobOrderId={jobOrder.job_order_id} />
 
       {scanAuthorization?.decision === "pending" && !isHistorical && (
         <ScanAuthorizationCard
