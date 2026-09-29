@@ -37,6 +37,8 @@ function formatEntityLabel(entityType: string): string {
       return 'Internal AI Session Table'
     case 'internal_ai_messages':
       return 'Internal AI Message Table'
+    case 'users':
+      return 'Customer Account Table'
     default:
       return entityType
         .split('_')
@@ -69,6 +71,8 @@ function formatEntityId(entityType: string, entityId: number): string {
       return `AI-SESS-${entityId}`
     case 'internal_ai_messages':
       return `AI-MSG-${entityId}`
+    case 'users':
+      return `CUST-${entityId}`
     default:
       return `#${entityId}`
   }
@@ -86,6 +90,9 @@ function formatActionTitle(action: string, entityType: string, newVals: any): st
   }
   if (entityType === 'employee_profiles' && action === 'updated') {
     return 'Modified Mechanic Profile'
+  }
+  if (entityType === 'users' && action === 'updated') {
+    return 'Customer Updated Their Account'
   }
   if (entityType === 'employees' && action === 'created') {
     return 'Added New Mechanic'

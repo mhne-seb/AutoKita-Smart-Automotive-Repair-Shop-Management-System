@@ -119,3 +119,20 @@ export async function uploadTaskPhoto(jobOrderId: string, taskId: string, file: 
     const path = `job-orders/${jobOrderId}/tasks/${taskId}-${Date.now()}.${extensionFor(file)}`
     return uploadFile(path, file)
 }
+
+// Customer profile photo. The profile page shrinks it to a small square
+// before upload, so each one is only a few KB — it shows in the header on
+// every customer page.
+export async function uploadAvatar(userId: number, file: File): Promise<string> {
+    return uploadFile(`avatars/${userId}-${Date.now()}.${extensionFor(file)}`, file)
+}
+
+// Deletes a file from the bucket (e.g. a replaced profile photo). A failure is
+// only logged: a leftover file costs a little storage, not a broken page.
+export async function removeFile(ref: string | null | undefined): Promise<void> {
+    const path = ref ? pathOf(ref) : null
+    if (!path) return
+    const { error } = await supabase.storage.from(BUCKET).remove([path])
+    if (error) console.error('Removing file failed:', error.message)
+    passCache.delete(path)
+}
