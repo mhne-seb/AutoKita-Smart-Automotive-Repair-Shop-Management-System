@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { mlFetch } from '@/lib/mlServer'
 
-const ML_SERVER = 'http://localhost:5001'
+// A sleeping online ML server can take about a minute to answer the first time.
+export const maxDuration = 60
 
 export async function GET() {
   try {
@@ -55,7 +57,7 @@ export async function GET() {
         mileage: c.mileage || ((c.vehicle_year ? new Date().getFullYear() - c.vehicle_year : 5) * 15000),
       }))
 
-      const mlRes = await fetch(`${ML_SERVER}/predict/churn`, {
+      const mlRes = await mlFetch('/predict/churn', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(featurePayloads),
