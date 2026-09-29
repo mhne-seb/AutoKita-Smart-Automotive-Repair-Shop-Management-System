@@ -621,7 +621,9 @@ function BookPage() {
                       icon={MapPin} label="City" required value={f.city}
                       onChange={selectCity} options={cityOptions}
                       placeholder={f.province ? "Select city" : "Select province first"}
-                      disabled={!f.province || f.province === OTHERS}
+                      // Stays open for "Others" provinces too: there's no city list for
+                      // them, so "Others (type your own)" is the only choice.
+                      disabled={!f.province}
                       otherValue={f.cityOther} onOtherChange={(v) => set("cityOther", v)}
                       error={showError && !isSelectValid(f.city, f.cityOther) ? "City is required" : undefined}
                     />

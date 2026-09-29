@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { verifyPassword } from '@/lib/password'
-import { SESSION_COOKIE, createSessionToken, sessionCookieOptions, sessionSecretConfigured } from '@/lib/session'
+import { SESSION_COOKIE, REMEMBER_MAX_AGE_SECONDS, createSessionToken, sessionCookieOptions, sessionSecretConfigured } from '@/lib/session'
 
 export async function POST(req: NextRequest) {
-  const { email, password } = await req.json()
+  const { email, password, remember } = await req.json()
 
   if (!email || !password) {
     return NextResponse.json({ success: false, message: 'Email and password are required.' }, { status: 400 })
@@ -45,13 +45,22 @@ export async function POST(req: NextRequest) {
         role: resolvedRole,
       },
       role: resolvedRole,
+      // What the admin sidebar shows under the name, e.g. "finance_adviser" -> "Finance Adviser".
+      title: isCustomer ? null : String(rawRole ?? 'staff').split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
     })
 
     // The wristband. Which table the account came from decides the role —
     // customer #5 and employee #5 are different people.
     if (sessionSecretConfigured()) {
-      const token = await createSessionToken({ userId: found.id, role: isCustomer ? 'customer' : 'staff' })
-      res.cookies.set(SESSION_COOKIE, token, sessionCookieOptions)
+      const session = { userId: found.id, role: isCustomer ? 'customer' as const : 'staff' as const }
+      if (remember === true) {
+        const token = await createSessionToken(session, REMEMBER_MAX_AGE_SECONDS)
+        res.cookies.set(SESSION_COOKIE, token, { ...sessionCookieOptions, maxAge: REMEMBER_MAX_AGE_SECONDS })
+      } else {
+        // No maxAge = the browser throws the cookie away when it closes.
+        const { maxAge: _unused, ...untilBrowserCloses } = sessionCookieOptions
+        res.cookies.set(SESSION_COOKIE, await createSessionToken(session), untilBrowserCloses)
+      }
     } else {
       console.warn('SESSION_SECRET is not set — logged in without a session cookie (see .env.example).')
     }

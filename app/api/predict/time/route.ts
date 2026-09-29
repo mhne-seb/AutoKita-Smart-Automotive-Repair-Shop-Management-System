@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { mlFetch } from '@/lib/mlServer'
 
-const ML_SERVER = 'http://localhost:5001'
+// A sleeping online ML server can take about a minute to answer the first time.
+export const maxDuration = 60
 
 export async function GET(req: NextRequest) {
   const jobOrderId = req.nextUrl.searchParams.get('jobOrderId')
@@ -46,7 +48,7 @@ export async function GET(req: NextRequest) {
     }))
 
     // 2. Send the entire array in a single fetch
-    const res = await fetch(`${ML_SERVER}/predict/time`, {
+    const res = await mlFetch('/predict/time', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(batchPayload),

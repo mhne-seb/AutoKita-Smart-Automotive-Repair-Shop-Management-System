@@ -105,6 +105,57 @@ export async function sendOtpEmail(opts: {
     })
 }
 
+export async function sendPasswordResetEmail(opts: {
+    to: string
+    name: string
+    resetUrl: string
+    expiresMinutes: number
+}) {
+    await transporter.sendMail({
+        from: `"AutoKita" <${process.env.GMAIL_USER}>`,
+        to: opts.to,
+        subject: 'Reset your AutoKita password',
+        text:
+            `Hi ${opts.name},\n\n` +
+            `Someone asked to reset your AutoKita password. Open this link to choose a new one:\n\n` +
+            `${opts.resetUrl}\n\n` +
+            `The link works once, for ${opts.expiresMinutes} minutes.\n` +
+            `Didn't ask for this? Ignore this email. Your password stays the same.\n\n— AutoKita`,
+        html: `
+          <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
+            <h2 style="color:#1e3a5f;font-size:26px">Reset your password</h2>
+            <p style="font-size:16px">Hi ${opts.name},</p>
+            <p style="font-size:16px">Someone asked to reset your AutoKita password. Tap the button to choose a new one.</p>
+            <a href="${opts.resetUrl}" style="display:inline-block;background:#1e3a5f;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-size:16px">Set a new password</a>
+            <p style="margin-top:20px;font-size:14px;color:#666">The link works once, for ${opts.expiresMinutes} minutes. Didn't ask for this? Ignore this email. Your password stays the same.</p>
+          </div>
+        `,
+    })
+}
+
+export async function sendPasswordChangedEmail(opts: { to: string; name: string }) {
+    const when = new Date().toLocaleString('en-PH', {
+        timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short',
+    })
+    await transporter.sendMail({
+        from: `"AutoKita" <${process.env.GMAIL_USER}>`,
+        to: opts.to,
+        subject: 'Your AutoKita password was changed',
+        text:
+            `Hi ${opts.name},\n\n` +
+            `Your AutoKita password was changed on ${when}.\n\n` +
+            `If this wasn't you, call the shop right away.\n\n— AutoKita`,
+        html: `
+          <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
+            <h2 style="color:#1e3a5f;font-size:26px">Your password was changed</h2>
+            <p style="font-size:16px">Hi ${opts.name},</p>
+            <p style="font-size:16px">Your AutoKita password was changed on <b>${when}</b>.</p>
+            <p style="font-size:16px">If this wasn't you, call the shop right away.</p>
+          </div>
+        `,
+    })
+}
+
 // Sent when the admin uploads an inspection report or quotation to the
 // customer portal for review ("Upload to customer portal" / "Send to
 // Customer") — the pre_diagnostics round itself has no email of its own yet.

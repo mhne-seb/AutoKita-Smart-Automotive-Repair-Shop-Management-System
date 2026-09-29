@@ -11,3 +11,7 @@ models/synthetic_job_orders/
 seed_synthetic.js
 docs/*.md
 obd2_scanner stuff
+# Python
+venv/
+__pycache__/
+*.pyc

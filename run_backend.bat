@@ -3,7 +3,9 @@ echo Starting Python backend
 
 cd models
 
-IF NOT EXIST "venv" (
+REM Check for Python itself, not just the folder: models\venv also holds a few
+REM files that were committed from another laptop, so the folder alone always exists.
+IF NOT EXIST "venv\Scripts\python.exe" (
     echo [1/3] Creating virtual environment...
     py -3 -m venv venv || python -m venv venv
 ) ELSE (
