@@ -20,6 +20,8 @@ export interface JobOrderCard {
   customer: string
   vehicle: string
   customerId: string
+  avatarUrl?: string | null
+  rawUserId?: number
   stage: Stage
   service: string
   time: string
