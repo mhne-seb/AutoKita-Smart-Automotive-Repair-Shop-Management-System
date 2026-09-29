@@ -33,7 +33,7 @@ function downloadCsv(filename: string, headers: string[], rows: (string | number
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  setTimeout(() => URL.revokeObjectURL(url), 60000)
 }
 
 // Helper: compute subtotal from itemized breakdown
@@ -189,9 +189,9 @@ function downloadInvoice(p: PaymentRecord) {
           <tr><td class="label">Subtotal:</td><td style="text-align:right;">${currency(subtotal)}</td></tr>
           ${
             isDownpayment
-              ? `<tr><td class="label">Downpayment received:</td><td style="text-align:right; color:#059669;">- ${currency(p.downpaymentAmount ?? 0)}</td></tr>
-                 <tr class="grand"><td>Balance Due:</td><td style="text-align:right;">${currency(subtotal - (p.downpaymentAmount ?? 0))}</td></tr>`
-              : `<tr class="grand"><td>Total Paid:</td><td style="text-align:right; color:#059669;">${currency(subtotal)}</td></tr>`
+              ? `<tr><td class="label">Downpayment received:</td><td style="text-align:right; color:#059669;">- ${currency(p.downpaymentAmount ?? p.amount)}</td></tr>
+                 <tr class="grand"><td>Balance Due:</td><td style="text-align:right;">${currency(p.balance ?? Math.max(0, subtotal - (p.downpaymentAmount ?? p.amount)))}</td></tr>`
+              : `<tr class="grand"><td>${p.status === 'Paid' ? 'Total Paid:' : 'Amount Due:'}</td><td style="text-align:right; color:${p.status === 'Paid' ? '#059669' : '#e11d48'};">${currency(p.amount || subtotal)}</td></tr>`
           }
         </table>
 
@@ -399,30 +399,77 @@ export default function page() {
     )
   }, [kpi.totalCommissionPool, kpi.totalCommissions, weeklyGrossSales, mechanics, poolRate])
 
-  // ---------- Customer Payment Records: search + status filter ----------
+  // ---------- Customer Payment Records: search + status filter + pagination ----------
   const [paymentSearch, setPaymentSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'All' | 'Paid' | 'To Be Paid'>('All')
   const [selectedPayment, setSelectedPayment] = useState<PaymentRecord | null>(null)
+  const [paymentsPage, setPaymentsPage] = useState(1)
+  const paymentsPageSize = 15
+
+  const paymentCounts = useMemo(() => {
+    let paid = 0
+    let toBePaid = 0
+    for (const p of paymentRecords) {
+      if (p.status === 'Paid') paid++
+      else toBePaid++
+    }
+    return { all: paymentRecords.length, paid, toBePaid }
+  }, [paymentRecords])
 
   const filteredPayments = useMemo(() => {
     const q = paymentSearch.trim().toLowerCase()
-    return paymentRecords.filter((p) => {
+    const list = paymentRecords.filter((p) => {
       const matchesSearch =
         !q ||
-        p.customerId.toLowerCase().includes(q) ||
-        p.name.toLowerCase().includes(q) ||
-        p.contact.toLowerCase().includes(q) ||
-        p.services.toLowerCase().includes(q)
-      const matchesStatus = statusFilter === 'All' || p.status === statusFilter
-      return matchesSearch && matchesStatus
+        (p.customerId && String(p.customerId).toLowerCase().includes(q)) ||
+        (p.name && String(p.name).toLowerCase().includes(q)) ||
+        (p.contact && String(p.contact).toLowerCase().includes(q)) ||
+        (p.services && String(p.services).toLowerCase().includes(q)) ||
+        (p.paymentId && String(p.paymentId).toLowerCase().includes(q))
+      const matchesStatus =
+        !statusFilter ||
+        statusFilter === 'All' ||
+        statusFilter.toLowerCase() === 'all' ||
+        (p.status && String(p.status).toLowerCase() === statusFilter.toLowerCase())
+      return Boolean(matchesSearch && matchesStatus)
     })
+
+    // If 'All' is selected, prioritize 'To Be Paid' at the top so pending actions are seen first
+    if (statusFilter === 'All') {
+      return [...list].sort((a, b) => {
+        if (a.status === 'To Be Paid' && b.status === 'Paid') return -1
+        if (a.status === 'Paid' && b.status === 'To Be Paid') return 1
+        return 0
+      })
+    }
+    return list
+  }, [paymentSearch, statusFilter, paymentRecords])
+
+  const totalPagesPayments = Math.max(1, Math.ceil(filteredPayments.length / paymentsPageSize))
+  const paginatedPayments = useMemo(() => {
+    const start = (paymentsPage - 1) * paymentsPageSize
+    return filteredPayments.slice(start, start + paymentsPageSize)
+  }, [filteredPayments, paymentsPage, paymentsPageSize])
+
+  useEffect(() => {
+    setPaymentsPage(1)
   }, [paymentSearch, statusFilter])
 
   const exportPayments = () => {
     downloadCsv(
       'customer-payment-records.csv',
-      ['Customer ID', 'Name', 'Contact No.', 'Services', 'Mode of Payment', 'Payment Type', 'Amount', 'Status'],
-      filteredPayments.map((p) => [p.customerId, p.name, p.contact, p.services, p.modeOfPayment, p.paymentType, p.amount, p.status]),
+      ['Customer ID', 'Name', 'Contact No.', 'Services', 'Mode of Payment', 'Payment Type', 'Amount Paid', 'Remaining Balance', 'Status'],
+      filteredPayments.map((p) => [
+        p.customerId,
+        p.name,
+        p.contact,
+        p.services,
+        p.modeOfPayment,
+        p.paymentType,
+        p.amount,
+        p.balance ?? 0,
+        p.status,
+      ]),
     )
   }
 
@@ -615,119 +662,257 @@ export default function page() {
       </div>
 
       {activeTab === 'payments' && (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
           <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
           <div className="p-6">
-          <div className="flex items-center justify-between border-l-4 border-slate-900 pl-3">
-            <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">
-              Customer Payment Records
-            </h3>
-            <span className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600">
-              <Info size={13} /> To Be Paid entries require action
-            </span>
-          </div>
-
-          {/* Search + filter toolbar */}
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 min-w-[220px]">
-              <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                value={paymentSearch}
-                onChange={(e) => setPaymentSearch(e.target.value)}
-                placeholder="Search by customer, ID, contact, or service..."
-                className="w-full rounded-full border border-slate-200 py-2 pl-9 pr-4 text-sm text-slate-700 outline-none focus:border-slate-400"
-              />
+            <div className="flex flex-wrap items-center justify-between gap-4 border-l-4 border-slate-900 pl-3">
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">
+                  Customer Payment Records
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Track full payments, received downpayments, and outstanding vehicle balances
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 border border-rose-200">
+                  <AlertCircle size={13} className="text-rose-600" /> {paymentCounts.toBePaid} Action Required
+                </span>
+                <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
+                  <CheckCircle2 size={13} className="text-emerald-600" /> {paymentCounts.paid} Settled
+                </span>
+              </div>
             </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
-              className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600 outline-none focus:border-slate-400"
-            >
-              <option value="All">All Statuses</option>
-              <option value="Paid">Paid</option>
-              <option value="To Be Paid">To Be Paid</option>
-            </select>
-            <button
-              onClick={exportPayments}
-              className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
-            >
-              <Download size={14} /> Export CSV
-            </button>
-          </div>
 
-          <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
-                <th className="py-3 font-semibold">Customer ID</th>
-                <th className="py-3 font-semibold">Name</th>
-                <th className="py-3 font-semibold">Contact No.</th>
-                <th className="py-3 font-semibold">Services</th>
-                <th className="py-3 font-semibold">Mode of Payment</th>
-                <th className="py-3 font-semibold">Payment Type</th>
-                <th className="py-3 font-semibold">Amount</th>
-                <th className="py-3 font-semibold">Status</th>
-                <th className="py-3 font-semibold text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPayments.map((p) => (
-                <tr
-                  key={p.customerId}
-                  onClick={() => setSelectedPayment(p)}
-                  className="cursor-pointer border-b border-slate-50 last:border-0 hover:bg-slate-50"
+            {/* Segmented Status Tabs & Search Toolbar */}
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              {/* Status Segmented Buttons */}
+              <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1">
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('All')}
+                  className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
+                    statusFilter === 'All'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
                 >
-                  <td className="py-4 font-semibold text-slate-800">{p.customerId}</td>
-                  <td className="py-4 text-slate-700">{p.name}</td>
-                  <td className="py-4 text-slate-500">{p.contact}</td>
-                  <td className="py-4 text-slate-600">{p.services}</td>
-                  <td className="py-4">
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                      {p.modeOfPayment}
-                    </span>
-                  </td>
-                  <td className="py-4">
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                        p.paymentType === 'Full Payment'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-amber-100 text-amber-700'
-                      }`}
-                    >
-                      {p.paymentType}
-                    </span>
-                  </td>
-                  <td className="py-4 font-semibold text-slate-800">{currency(p.amount)}</td>
-                  <td className="py-4">
-                    <StatusBadge status={p.status} />
-                  </td>
-                  <td className="py-4 text-right">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setSelectedPayment(p)
-                      }}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100"
-                    >
-                      <Eye size={13} /> View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filteredPayments.length === 0 && (
-                <tr>
-                  <td colSpan={9} className="py-8 text-center text-sm text-slate-400">
-                    No matching payment records.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table></div>
+                  <span>All Records</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    statusFilter === 'All' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-600'
+                  }`}>
+                    {paymentCounts.all}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('To Be Paid')}
+                  className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
+                    statusFilter === 'To Be Paid'
+                      ? 'bg-rose-600 text-white shadow-xs'
+                      : 'text-rose-700 hover:bg-rose-50'
+                  }`}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
+                  <span>To Be Paid</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    statusFilter === 'To Be Paid' ? 'bg-rose-800 text-white' : 'bg-rose-100 text-rose-700'
+                  }`}>
+                    {paymentCounts.toBePaid}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('Paid')}
+                  className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
+                    statusFilter === 'Paid'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'text-emerald-700 hover:bg-emerald-50'
+                  }`}
+                >
+                  <CheckCircle2 size={12} />
+                  <span>Paid & Settled</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    statusFilter === 'Paid' ? 'bg-emerald-800 text-white' : 'bg-emerald-100 text-emerald-700'
+                  }`}>
+                    {paymentCounts.paid}
+                  </span>
+                </button>
+              </div>
 
-          <div className="mt-3 flex items-center justify-between text-sm text-slate-400">
-            <p>* Highlighted rows indicate pending customer payments that require collection or follow-up.</p>
-            <p>{filteredPayments.length} of {paymentRecords.length} records shown</p>
-          </div>
+              {/* Search + Export */}
+              <div className="flex flex-1 items-center justify-end gap-2.5 min-w-[280px]">
+                <div className="relative flex-1 max-w-sm">
+                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={paymentSearch}
+                    onChange={(e) => setPaymentSearch(e.target.value)}
+                    placeholder="Search customer, ID, contact, or service..."
+                    className="w-full rounded-full border border-slate-200 py-1.5 pl-9 pr-4 text-xs text-slate-700 outline-none focus:border-slate-400 bg-white"
+                  />
+                </div>
+                <button
+                  onClick={exportPayments}
+                  className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90 shrink-0"
+                >
+                  <Download size={13} /> Export CSV
+                </button>
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50/70 text-[11px] uppercase tracking-wider text-slate-500">
+                    <th className="px-4 py-3.5 font-bold w-28">Customer ID</th>
+                    <th className="px-4 py-3.5 font-bold min-w-[140px]">Customer</th>
+                    <th className="px-4 py-3.5 font-bold min-w-[120px]">Contact No.</th>
+                    <th className="px-4 py-3.5 font-bold min-w-[240px] max-w-[320px]">Services</th>
+                    <th className="px-4 py-3.5 font-bold w-28">Mode</th>
+                    <th className="px-4 py-3.5 font-bold w-36">Payment Type</th>
+                    <th className="px-4 py-3.5 font-bold min-w-[140px]">Amount / Balance</th>
+                    <th className="px-4 py-3.5 font-bold w-28">Status</th>
+                    <th className="px-4 py-3.5 font-bold text-right w-24">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {paginatedPayments.map((p, idx) => {
+                    const isUnpaid = p.status === 'To Be Paid'
+                    const isDownpayment = p.paymentType === 'Downpayment'
+                    return (
+                      <tr
+                        key={`${p.paymentId || 'P'}-${p.jobOrderId || 'JO'}-${p.customerId}-${idx}`}
+                        onClick={() => setSelectedPayment(p)}
+                        className={`cursor-pointer transition-colors ${
+                          isUnpaid
+                            ? 'bg-rose-50/30 hover:bg-rose-100/50 border-l-4 border-l-rose-500'
+                            : 'bg-white hover:bg-slate-50/80 border-l-4 border-l-emerald-500'
+                        }`}
+                      >
+                        <td className="px-4 py-3.5 align-middle">
+                          <span className="font-bold text-slate-900">{p.customerId}</span>
+                          {p.jobOrderId && (
+                            <div className="text-[10px] text-slate-400 font-mono">JO #{p.jobOrderId}</div>
+                          )}
+                        </td>
+                        <td className="px-4 py-3.5 align-middle font-medium text-slate-800">
+                          {p.name}
+                        </td>
+                        <td className="px-4 py-3.5 align-middle font-mono text-slate-600">
+                          {p.contact}
+                        </td>
+                        <td className="px-4 py-3.5 align-middle">
+                          <p className="line-clamp-2 text-slate-600 leading-relaxed font-normal" title={p.services}>
+                            {p.services}
+                          </p>
+                        </td>
+                        <td className="px-4 py-3.5 align-middle">
+                          <span className="inline-block rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                            {p.modeOfPayment}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3.5 align-middle">
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                              isDownpayment
+                                ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                                : 'bg-blue-100 text-blue-800 border border-blue-200'
+                            }`}
+                          >
+                            {isDownpayment && <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
+                            {p.paymentType}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3.5 align-middle">
+                          {isDownpayment ? (
+                            <div>
+                              <div className="font-bold text-slate-900">
+                                {currency(p.amount)} <span className="text-[10px] font-normal text-slate-500">paid</span>
+                              </div>
+                              {p.balance !== undefined && p.balance > 0 ? (
+                                <div className="text-[11px] font-bold text-rose-600">
+                                  Due: {currency(p.balance)}
+                                </div>
+                              ) : null}
+                            </div>
+                          ) : (
+                            <div>
+                              <div className={`font-bold ${isUnpaid ? 'text-rose-600' : 'text-slate-900'}`}>
+                                {currency(p.amount)}
+                              </div>
+                              <span className={`text-[10px] font-semibold ${isUnpaid ? 'text-rose-500' : 'text-emerald-600'}`}>
+                                {isUnpaid ? 'Payment Due' : 'Fully Settled'}
+                              </span>
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-4 py-3.5 align-middle">
+                          <StatusBadge status={p.status} />
+                        </td>
+                        <td className="px-4 py-3.5 align-middle text-right">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedPayment(p)
+                            }}
+                            className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-100"
+                          >
+                            <Eye size={12} /> View
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                  {paginatedPayments.length === 0 && (
+                    <tr>
+                      <td colSpan={9} className="py-12 text-center text-sm text-slate-400">
+                        No matching payment records found for the selected filter.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination and Summary footer */}
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 border-t border-slate-100 pt-3">
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-rose-500" /> Red border = To Be Paid
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" /> Green border = Settled
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>
+                  Showing {filteredPayments.length === 0 ? 0 : (paymentsPage - 1) * paymentsPageSize + 1}–
+                  {Math.min(paymentsPage * paymentsPageSize, filteredPayments.length)} of {filteredPayments.length}
+                </span>
+                <div className="flex items-center gap-1 ml-2">
+                  <button
+                    onClick={() => setPaymentsPage((p) => Math.max(1, p - 1))}
+                    disabled={paymentsPage === 1}
+                    className="flex items-center gap-0.5 rounded-lg border border-slate-200 px-2 py-1 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                  >
+                    <ChevronLeft size={13} /> Prev
+                  </button>
+                  <span className="font-semibold text-slate-700 px-1.5">
+                    {paymentsPage} / {totalPagesPayments}
+                  </span>
+                  <button
+                    onClick={() => setPaymentsPage((p) => Math.min(totalPagesPayments, p + 1))}
+                    disabled={paymentsPage >= totalPagesPayments}
+                    className="flex items-center gap-0.5 rounded-lg border border-slate-200 px-2 py-1 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                  >
+                    Next <ChevronRight size={13} />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1064,10 +1249,10 @@ export default function page() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredServices.map((s) => {
+                      {filteredServices.map((s, idx) => {
                         const billedTotal = s.totalAmount || (s.qty * s.price)
                         return (
-                          <tr key={s.name} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
+                          <tr key={`${s.name}-${idx}`} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
                             <td className="py-4 font-semibold text-slate-800">{s.name}</td>
                             <td className="py-4 text-center">
                               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">
@@ -1297,8 +1482,8 @@ export default function page() {
                               <span>{category}</span>
                               <span>{currency(sectionTotal)}</span>
                             </div>
-                            {rows.map((it) => (
-                              <div key={it.name} className="mt-1.5 flex items-center justify-between text-sm">
+                            {rows.map((it, itIdx) => (
+                              <div key={`${it.name}-${itIdx}`} className="mt-1.5 flex items-center justify-between text-sm">
                                 <span className="text-slate-700">{it.name}</span>
                                 <span className="flex items-center gap-3 text-slate-500">
                                   <span>x{it.qty}</span>
@@ -1344,20 +1529,24 @@ export default function page() {
                       <div className="flex items-center justify-between text-slate-600">
                         <span>Downpayment received</span>
                         <span className="font-semibold text-emerald-600">
-                          - {currency(selectedPayment.downpaymentAmount ?? 0)}
+                          - {currency(selectedPayment.downpaymentAmount ?? selectedPayment.amount)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between border-t border-slate-200 pt-2">
                         <span className="font-bold text-slate-900">Balance Due</span>
-                        <span className="text-xl font-bold text-slate-900">
-                          {currency(getSubtotal(selectedPayment) - (selectedPayment.downpaymentAmount ?? 0))}
+                        <span className="text-xl font-bold text-rose-600">
+                          {currency(selectedPayment.balance ?? Math.max(0, getSubtotal(selectedPayment) - (selectedPayment.downpaymentAmount ?? selectedPayment.amount)))}
                         </span>
                       </div>
                     </>
                   ) : (
                     <div className="flex items-center justify-between border-t border-slate-200 pt-2">
-                      <span className="font-bold text-slate-900">Total Paid</span>
-                      <span className="text-xl font-bold text-emerald-600">{currency(getSubtotal(selectedPayment))}</span>
+                      <span className="font-bold text-slate-900">
+                        {selectedPayment.status === 'Paid' ? 'Total Paid' : 'Amount Due'}
+                      </span>
+                      <span className={`text-xl font-bold ${selectedPayment.status === 'Paid' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        {currency(selectedPayment.amount || getSubtotal(selectedPayment))}
+                      </span>
                     </div>
                   )}
                 </div>

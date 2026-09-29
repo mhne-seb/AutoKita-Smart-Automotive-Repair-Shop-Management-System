@@ -120,6 +120,7 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
       mechanicId: row.mechanic_id ?? undefined,
       mechanicName: row.mechanic_name ?? undefined,
       estimatedFinish: row.estimated_finish ? new Date(row.estimated_finish).toISOString() : undefined,
+      estimatedHours: row.estimated_hours != null ? Number(row.estimated_hours) : undefined,
       photoUrl: row.completion_photo_url ?? undefined,
       findingId: row.finding_id ?? undefined,
       parts: partsByService.get(partsKey(row.task_title, row.finding_id)) ?? [],
@@ -303,6 +304,7 @@ export async function getInspectingData(userId: number, jobOrderId?: number) {
     jobOrder: {
       job_order_id: number
       status: string
+      date_arrived?: string | null
       quotation_approved: boolean
       estimated_duration: string
       actual_duration: string

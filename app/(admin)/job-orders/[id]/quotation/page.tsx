@@ -12,6 +12,7 @@ import { getQuotationById, getJobOrderPayment, verifyJobOrderPayment, type JobOr
 import { getLatestPreDiagnostic, sendForApproval, recallApproval } from '@/controllers/preDiagnosticController'
 import { getInspectionById } from '@/controllers/inspectionController'
 import { currency } from '@/data/mockData'
+import { toast } from 'sonner'
 import { QuotationService, JobOrderCard, QuotationData, MechanicalFinding, findingStatusMeta, QuotationPart } from '@/data/types'
 
 export default function page() {
@@ -138,8 +139,10 @@ export default function page() {
   // together would each replace the whole quotation — the job order would
   // then end up with two copies of every service.
   const saveInFlight = useRef(false)
-  // AI predictions for each service
+  // AI predictions for each service & cache ref to prevent duplicate/loop calls
+  const [availableServices, setAvailableServices] = useState<any[]>([])
   const [aiPredictions, setAiPredictions] = useState<Record<string, { predicted_amount: number; predicted_duration_mins?: number; is_mock?: boolean; is_low_data?: boolean; sample_count?: number; min_samples_required?: number }>>({})
+  const fetchedPredictionsRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     // Don't auto-save until initial data has loaded and seeded
@@ -158,7 +161,7 @@ export default function page() {
     const timer = setTimeout(() => { void persistQuotation() }, 1000)
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notes, services, aiPredictions, jobOrderId])
+  }, [notes, services, jobOrderId])
 
   // Don't let the tab close on top of an in-flight or not-yet-fired save.
   useEffect(() => {
@@ -189,10 +192,15 @@ export default function page() {
     const vehicleType = (match ? match[2] : jobOrder.vehicle) || 'Unknown'
     const actualMileage = jobOrder.mileage || (vehicleAge * 15000)
 
-    // Fetch AI cost predictions for each service
+    // Fetch AI cost predictions for each service with deduplication
     services.forEach(async (s) => {
       // Skip AI estimation for custom services since they lack historical store data
       if (!s.dbServiceId) return
+
+      // Deduplicate: Don't re-predict if we already have this exact configuration cached or requested
+      const cacheKey = `${s.id}_${s.dbServiceId}_${s.laborHours || 1}_${s.laborCost || 0}_${actualMileage}`
+      if (fetchedPredictionsRef.current.has(cacheKey)) return
+      fetchedPredictionsRef.current.add(cacheKey)
       
       const dbService = availableServices.find(as => as.id === s.dbServiceId)
       const basePrice = dbService ? Number(dbService.base_price) : (s.laborCost || 0)
@@ -239,7 +247,7 @@ export default function page() {
         }
       }
     })
-  }, [jobOrder, services.length])
+  }, [jobOrder?.id, jobOrder?.vehicleYear, jobOrder?.vehicle, jobOrder?.mileage, services, availableServices])
 
   const partsStatusCount = useMemo(() => {
     let inStock = 0
@@ -249,7 +257,6 @@ export default function page() {
     return { inStock, toOrder }
   }, [services])
 
-  const [availableServices, setAvailableServices] = useState<any[]>([])
   const [showServiceModal, setShowServiceModal] = useState(false)
   // Several services are usually added in one go, so the picker is a
   // checkbox list rather than a single choice.
@@ -301,22 +308,72 @@ export default function page() {
     return () => { active = false }
   }, [])
 
-  // Auto-refresh while the quotation is out with the customer, so their
-  // confirmation shows up here without a reload. Same test as
-  // quotationPending below, written with ?. because this runs before the
-  // loading guards. Editing is locked while pending, so re-fetching can't
-  // clobber anything (and seeding is one-shot via hasSeeded anyway).
-  const awaitingCustomer = !initial?.quotationApproved && preDiagnostic?.status === 'pending'
+  // The customer's actual decision on THIS quotation — unlike preDiagnostic.status,
+  // which reflects the latest pre_diagnostics round for the whole job order and can
+  // still read 'approved' from an earlier stage (e.g. the inspection) even though
+  // no quotation has been sent yet. This is what should lock editing.
+  const quotationApproved = Boolean(initial?.quotationApproved)
+  // Same idea for "pending": a round can only be waiting on THIS quotation if
+  // the quotation hasn't been decided yet. Once it's approved, whatever
+  // pre_diagnostics says is history — never offer to recall it.
+  const quotationPending = !quotationApproved && preDiagnostic?.status === 'pending'
+
+  // Auto-refresh while waiting on customer response (quotation approval, dispute, or payment submission),
+  // so the admin screen updates dynamically without needing a manual page reload.
   useEffect(() => {
-    if (!awaitingCustomer) return
-    const interval = setInterval(() => {
-      getLatestPreDiagnostic(jobOrderId).then(setPreDiagnostic)
-      getQuotationById(jobOrderId).then((data) => setInitial(data ?? null))
-      getJobOrderById(jobOrderId).then((data) => data && setJobOrder(data))
-      getJobOrderPayment(jobOrderId).then(setPayment)
-    }, 5000)
+    // Poll if waiting on customer approval, or if waiting for customer downpayment submission/update
+    const shouldPoll = quotationPending || (quotationApproved && (!payment || payment.verificationStatus === 'pending'))
+    if (!shouldPoll) return
+
+    const interval = setInterval(async () => {
+      // Pause polling if user is on another tab or window is hidden
+      if (typeof document !== 'undefined' && document.hidden) return
+
+      try {
+        const [freshQuotation, freshRound, freshPayment, freshJobOrder] = await Promise.all([
+          getQuotationById(jobOrderId),
+          getLatestPreDiagnostic(jobOrderId),
+          getJobOrderPayment(jobOrderId),
+          getJobOrderById(jobOrderId),
+        ])
+
+        const isNowApproved = Boolean(freshQuotation?.quotationApproved) || freshRound?.status === 'approved'
+
+        if (isNowApproved) {
+          if (freshQuotation && !quotationApproved) {
+            setInitial((prev) => (prev ? { ...prev, quotationApproved: true } : freshQuotation))
+          }
+          if (freshRound && preDiagnostic?.status !== freshRound.status) {
+            setPreDiagnostic(freshRound)
+          }
+          if (freshPayment && (!payment || payment.id !== freshPayment.id || payment.verificationStatus !== freshPayment.verificationStatus)) {
+            setPayment(freshPayment)
+          }
+          if (freshJobOrder && jobOrder?.stage !== freshJobOrder.stage) {
+            setJobOrder(freshJobOrder)
+          }
+
+          if (!quotationApproved) {
+            toast.success('Customer has approved the quotation!', { id: 'quotation-approved-toast' })
+          }
+        } else if (freshRound && freshRound.status !== 'pending' && freshRound.status !== preDiagnostic?.status) {
+          setPreDiagnostic(freshRound)
+          if (freshRound.status === 'disputed') {
+            toast.info('Customer raised concerns on the quotation.', { id: 'quotation-status-toast' })
+          }
+        }
+
+        // Also check if new payment was submitted
+        if (freshPayment && (!payment || payment.id !== freshPayment.id || payment.verificationStatus !== freshPayment.verificationStatus)) {
+          setPayment(freshPayment)
+        }
+      } catch (err) {
+        console.error('Quotation polling error:', err)
+      }
+    }, 4000)
+
     return () => clearInterval(interval)
-  }, [awaitingCustomer, jobOrderId])
+  }, [quotationPending, quotationApproved, payment?.id, payment?.verificationStatus, preDiagnostic?.status, jobOrderId, jobOrder?.stage])
 
   if (jobOrder === undefined || initial === undefined || preDiagnostic === undefined) {
     return (
@@ -333,16 +390,6 @@ export default function page() {
       </div>
     )
   }
-
-  // The customer's actual decision on THIS quotation — unlike preDiagnostic.status,
-  // which reflects the latest pre_diagnostics round for the whole job order and can
-  // still read 'approved' from an earlier stage (e.g. the inspection) even though
-  // no quotation has been sent yet. This is what should lock editing.
-  const quotationApproved = initial.quotationApproved
-  // Same idea for "pending": a round can only be waiting on THIS quotation if
-  // the quotation hasn't been decided yet. Once it's approved, whatever
-  // pre_diagnostics says is history — never offer to recall it.
-  const quotationPending = !quotationApproved && preDiagnostic?.status === 'pending'
 
   function updateLaborCost(serviceId: string, laborCost: number) {
     setServices((prev) => prev.map((s) => (s.id === serviceId ? { ...s, laborCost } : s)))
@@ -1048,8 +1095,8 @@ export default function page() {
       </div>
 
       {showSendReview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setShowSendReview(false)}>
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900">Review before sending</h3>
               <button onClick={() => setShowSendReview(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
@@ -1133,8 +1180,8 @@ export default function page() {
       )}
 
       {showServiceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setShowServiceModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-slate-900">Add Services</h3>
               <button onClick={() => setShowServiceModal(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
@@ -1226,8 +1273,8 @@ export default function page() {
       )}
 
       {showPartModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setShowPartModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900"><PackagePlus size={18} className="text-emerald-600" /> {editingPartId ? 'Edit Part' : 'Add Part'}</h3>
               <button onClick={() => setShowPartModal(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>

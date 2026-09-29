@@ -24,12 +24,21 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           spt.mechanic_id,
           spt.completion_photo_url,
           spt.finding_id,
-          spt.scheduled_date + (jos.estimated_hours * INTERVAL '1 hour') as estimated_finish,
+          COALESCE(
+            spt.scheduled_date + (jos.estimated_hours * INTERVAL '1 hour'),
+            spt.scheduled_date + INTERVAL '1.5 hours'
+          ) as estimated_finish,
+          COALESCE(jos.estimated_hours, 1.5)::numeric as estimated_hours,
           e.full_name as mechanic_name
         FROM service_progress_tasks spt
         LEFT JOIN employees e ON e.id = spt.mechanic_id
-        LEFT JOIN services s ON s.service_name = spt.task_title
-        LEFT JOIN job_order_services jos ON jos.service_id = s.id AND jos.job_order_id = spt.job_order_id
+        LEFT JOIN LATERAL (
+          SELECT jos.estimated_hours
+          FROM services s
+          JOIN job_order_services jos ON jos.service_id = s.id AND jos.job_order_id = spt.job_order_id
+          WHERE s.service_name = spt.task_title
+          LIMIT 1
+        ) jos ON true
         WHERE spt.job_order_id = $1
         ORDER BY spt.section_id ASC, spt.id ASC
       `,
