@@ -45,6 +45,8 @@ export async function POST(req: NextRequest) {
         role: resolvedRole,
       },
       role: resolvedRole,
+      // What the admin sidebar shows under the name, e.g. "finance_adviser" -> "Finance Adviser".
+      title: isCustomer ? null : String(rawRole ?? 'staff').split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
     })
 
     // The wristband. Which table the account came from decides the role —
