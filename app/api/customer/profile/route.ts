@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { hashPassword, verifyPassword } from '@/lib/password'
+import { signFileUrl } from '@/lib/storage'
+import { logCustomerAccountChange } from '@/lib/audit'
 
 const SELECT_USER = `
-  SELECT id, first_name, last_name, nickname, email, contact_number, address
+  SELECT id, first_name, last_name, nickname, email, contact_number, address, avatar_url
   FROM users WHERE id = $1`
+
+// The photo is in a private bucket, so the page gets a link that expires.
+async function withPhotoLink(user: Record<string, any>) {
+  return { ...user, avatar_url: await signFileUrl(user.avatar_url) }
+}
 
 export async function GET(req: NextRequest) {
   const userId = parseInt(req.nextUrl.searchParams.get('userId') || '', 10)
@@ -15,13 +22,13 @@ export async function GET(req: NextRequest) {
   if (rows.length === 0) {
     return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
   }
-  return NextResponse.json({ success: true, user: rows[0] })
+  return NextResponse.json({ success: true, user: await withPhotoLink(rows[0]) })
 }
 
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, firstName, lastName, nickname, currentPassword, newPassword } = body
+    const { userId, firstName, lastName, nickname, address, currentPassword, newPassword } = body
 
     if (!userId) {
       return NextResponse.json({ success: false, message: 'Missing userId' }, { status: 400 })
@@ -51,6 +58,18 @@ export async function PATCH(req: NextRequest) {
         return NextResponse.json({ success: false, code: 'BAD_PASSWORD', message: 'Current password is incorrect.' }, { status: 400 })
       }
       await db.query(`UPDATE users SET password = $1 WHERE id = $2`, [await hashPassword(newPassword), userId])
+      // Only the fact that it changed — never the password itself.
+      await logCustomerAccountChange(userId, { password: 'hidden' }, { password: 'changed' })
+    }
+
+    if (address !== undefined && String(address).trim().length > 200) {
+      return NextResponse.json({ success: false, message: 'Please keep your address under 200 characters.' }, { status: 400 })
+    }
+
+    // Kept to log what the customer changed (see the end of this function).
+    const before = await db.query(SELECT_USER, [userId])
+    if (before.rows.length === 0) {
+      return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
     }
 
     // Profile fields.
@@ -65,8 +84,23 @@ export async function PATCH(req: NextRequest) {
       )
     }
 
+    // Home address — used for home-service visits. Unlike email/phone it
+    // carries no codes, so the customer may change it. Blank clears it.
+    if (address !== undefined) {
+      await db.query(`UPDATE users SET address = $2 WHERE id = $1`, [userId, String(address).trim() || null])
+    }
+
     const { rows } = await db.query(SELECT_USER, [userId])
-    return NextResponse.json({ success: true, user: rows[0] })
+    // "None" is what older bookings stored for no address — same as blank.
+    const fields = (u: Record<string, unknown>) => ({
+      first_name: u.first_name,
+      last_name: u.last_name,
+      nickname: u.nickname,
+      address: u.address === 'None' ? null : u.address,
+    })
+    await logCustomerAccountChange(userId, fields(before.rows[0]), fields(rows[0]))
+
+    return NextResponse.json({ success: true, user: await withPhotoLink(rows[0]) })
   } catch (err: any) {
     console.error('Profile update error:', err)
     return NextResponse.json({ success: false, message: 'Internal server error', debug: err.message }, { status: 500 })

@@ -40,7 +40,7 @@ export function DashHeader() {
   const [open, setOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [me, setMe] = useState<{ name: string; email: string } >({ name: "Customer", email: ""});
+  const [me, setMe] = useState<{ name: string; email: string; photo: string | null }>({ name: "Customer", email: "", photo: null });
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
 
@@ -82,21 +82,26 @@ export function DashHeader() {
     return () => { alive = false; clearInterval(t); };
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
     const userId = stored ? parseInt(stored, 10) : FALLBACK_USER_ID;
-    fetch(`/api/customer/profile?userId=${userId}`)
-      .then((r) => r.json())
-      .then((j) => {
-        if (j.success) {
-          const name =
-            [j.user.first_name, j.user.last_name].filter(Boolean).join(" ") || j.user.nickname || "Customer";
-          setMe({ name, email: j.user.email ?? "" });
-        }
-      })
-      .catch(() => {
-        /* keep the placeholder if it fails */
-      });
+    const load = () =>
+      fetch(`/api/customer/profile?userId=${userId}`)
+        .then((r) => r.json())
+        .then((j) => {
+          if (j.success) {
+            const name =
+              [j.user.first_name, j.user.last_name].filter(Boolean).join(" ") || j.user.nickname || "Customer";
+            setMe({ name, email: j.user.email ?? "", photo: j.user.avatar_url ?? null });
+          }
+        })
+        .catch(() => {
+          /* keep the placeholder if it fails */
+        });
+    load();
+    // The profile page fires this after a save or a new photo.
+    window.addEventListener("autokita-profile-changed", load);
+    return () => window.removeEventListener("autokita-profile-changed", load);
   }, []);
 
   async function confirmLogout() {
@@ -146,18 +151,28 @@ export function DashHeader() {
                 className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2.5 transition-colors hover:bg-muted/60"
               >
                 <span
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-white shadow-sm"
+                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-white shadow-sm"
                   style={{ backgroundImage: BRAND_GRADIENT }}
                 >
-                  <User className="h-4 w-4" />
+                  {me.photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={me.photo} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <User className="h-4 w-4" />
+                  )}
                 </span>
                 <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
               </button>
               {open && (
                 <div className="animate-fade-up absolute right-0 mt-2 w-60 origin-top-right overflow-hidden rounded-xl border bg-card shadow-xl">
                   <div className="flex items-center gap-3 border-b p-4" style={{ backgroundImage: BRAND_GRADIENT }}>
-                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-white/15 text-white ring-2 ring-white/25">
-                      <User className="h-4 w-4" />
+                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/15 text-white ring-2 ring-white/25">
+                      {me.photo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={me.photo} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <User className="h-4 w-4" />
+                      )}
                     </span>
                     <div className="min-w-0">
                       <div className="truncate text-sm font-semibold text-white">{me.name}</div>
