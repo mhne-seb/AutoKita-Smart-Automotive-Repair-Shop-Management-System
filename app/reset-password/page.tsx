@@ -120,7 +120,7 @@ export default function ResetPasswordPage() {
       <img src="/assets/login-workshop.jpg" alt="" className="fixed inset-0 h-full w-full object-cover" />
       <div className="fixed inset-0 bg-gradient-to-b from-brand/55 via-brand/45 to-brand/65" />
       <Header variant="transparent" />
-      <div className="relative z-10 flex min-h-[calc(100vh-4rem)] flex-col items-center justify-start px-6 pt-16 pb-10">
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 pt-20 pb-10">
         <div className="w-full max-w-sm rounded-xl border border-white/10 bg-card/95 p-8 shadow-2xl">
           <div className="mb-5 flex justify-center"><Logo /></div>
           {/* useSearchParams needs a Suspense boundary so Next.js can build this page ahead of time. */}
