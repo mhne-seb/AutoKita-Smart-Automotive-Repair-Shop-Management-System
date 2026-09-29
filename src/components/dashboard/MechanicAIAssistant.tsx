@@ -4,6 +4,7 @@ import { uid } from '@/lib/utils'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { formatChatMarkdown } from '@/lib/chatMarkdown'
 import {
   X,
   Download,
@@ -806,7 +807,7 @@ function MessageBubble({ msg }: { msg: DiagnosticMsg }) {
           [&_ul]:my-1.5 [&_ul]:pl-5 [&_ul]:list-disc
           [&_ol]:my-1.5 [&_ol]:pl-5 [&_ol]:list-decimal
           [&_li]:my-0.5 [&_p]:my-1 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text ?? ''}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{formatChatMarkdown(msg.text ?? '')}</ReactMarkdown>
         </div>
         <span className="mt-1 text-[10px] text-muted-foreground">{msg.time}</span>
       </div>

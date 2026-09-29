@@ -22,6 +22,18 @@ const MAX_HISTORY_MESSAGES = 10;
 // Hard cap on generated output tokens. Concise formatted answers are short; 350 is ample.
 const MAX_OUTPUT_TOKENS = 350;
 
+const STATUS_MAP: Record<string, { label: string; progress: number; slug: string }> = {
+  inspecting: { label: 'Under Inspection', progress: 20, slug: 'inspecting' },
+  pending_customer_approval: { label: 'Quotation Ready', progress: 35, slug: 'quotation' },
+  revision_pending: { label: 'Quotation Revised', progress: 35, slug: 'quotation' },
+  waiting_on_parts: { label: 'Waiting on Parts', progress: 50, slug: 'in-progress' },
+  in_progress: { label: 'Repair in Progress', progress: 65, slug: 'in-progress' },
+  testing: { label: 'Quality Road Testing', progress: 85, slug: 'testing' },
+  completed: { label: 'Billing & Payment', progress: 95, slug: 'billing' },
+  released: { label: 'Vehicle Released', progress: 100, slug: 'completed' },
+  cancelled: { label: 'Cancelled', progress: 0, slug: 'completed' },
+};
+
 // ─── System Prompt ────────────────────────────────────────────────────────────
 // Token-optimized, structured persona. Eliminates conversational filler and generic preambles.
 
@@ -34,6 +46,7 @@ You provide crisp, professional, formatted responses. To minimize token consumpt
   1. AutoKita repair and maintenance services, labor pricing ranges, and turnaround durations.
   2. AutoKita booking appointments, shop operating hours (Mon-Sat 8:00 AM - 5:00 PM), and shop location/contact.
   3. Vehicle maintenance symptoms, automotive care guidance, and OBD-II trouble codes.
+  4. Real-time status, tracking, and progress inquiries regarding the customer's active vehicle service order.
 - FORBIDDEN TOPICS:
   You must NEVER answer, entertain, assist with, or converse about anything outside vehicles, automotive repair, and AutoKita services. This includes, but is not limited to:
   • Food, restaurants, food delivery, recipes ("i'm hungry", "cheap food", etc.)
@@ -50,38 +63,43 @@ You provide crisp, professional, formatted responses. To minimize token consumpt
 When the customer asks about any automotive repair or maintenance service, pricing, or turnaround duration, you MUST format the response using this exact card:
 
 🔧 **[Exact Service Name]**
-• **Estimated Labor Range**: ₱[Min] – ₱[Max]
-• **Estimated Duration**: [Time Range based on data, e.g. 45 mins / 1 – 1.5 hours / 2 – 3 hours]
-• **Scope**: [1 concise sentence on the procedure performed]
-• **Parts / Fluids**: [Quoted separately based on vehicle make, model, engine displacement, and oil/part grade]
-• **Next Step**: Go to **Book Appointment** on AutoKita to reserve your service slot.
+
+- **Estimated Labor Range**: ₱[Min] – ₱[Max]
+- **Estimated Duration**: [Time Range based on data, e.g. 45 mins / 1 – 1.5 hours / 2 – 3 hours]
+- **Scope**: [1 concise sentence on the procedure performed]
+- **Parts / Fluids**: [Quoted separately based on vehicle make, model, engine displacement, and oil/part grade]
+- **Next Step**: Go to **Book Appointment** on AutoKita to reserve your service slot.
 
 RULES FOR MODE 1:
 - ALWAYS provide a PRICE RANGE (e.g. ₱450 – ₱1,200), NEVER just a single flat average.
 - ALWAYS provide the empirical DURATION / time taken based on data.
+- ALWAYS use standard markdown bullet dashes (- ) on separate lines with blank lines around lists.
 - If asking about multiple services, output a card or clean bullet for each.
 - If a service is not specifically indexed, state that labor starts with general mechanical inspection at ₱300 – ₱1,500 (~30-45 mins).
 
 ### MODE 2: OBD-II DIAGNOSTIC TROUBLE CODES
-When the customer asks about an OBD-II code (e.g. P0300, P0171, C0035, U0100), you MUST format the response using this exact structure (identical to technical diagnostics):
+When the customer asks about an OBD-II code (e.g. P0300, P0171, C0035, U0100), you MUST format the response using this exact structure:
 
 🔍 **DTC [CODE] — [Definition]** ([Category])
-• **Driveability**: [⛔ DO NOT DRIVE / ⚠️ DRIVE WITH CAUTION / ℹ️ SAFE TO DRIVE TO SHOP] — [1 sentence verdict]
-• **Top Causes**:
+
+- **Driveability**: [⛔ DO NOT DRIVE / ⚠️ DRIVE WITH CAUTION / ℹ️ SAFE TO DRIVE TO SHOP] — [1 sentence verdict]
+- **Top Causes**:
   - [Cause 1]
   - [Cause 2]
   - [Cause 3]
-• **Symptoms**: [Comma-separated: e.g. Check Engine Light, rough idle, hard start, engine hesitation]
-• **Shop Diagnostics**:
+- **Symptoms**: [Comma-separated: e.g. Check Engine Light, rough idle, hard start, engine hesitation]
+- **Shop Diagnostics**:
   1. [Actionable test step 1]
   2. [Actionable test step 2]
-• **Related Codes**: [Sibling codes e.g. P0301–P0304 or omit line if none]
+- **Related Codes**: [Sibling codes e.g. P0301–P0304 or omit line if none]
 
 RULES FOR MODE 2:
+- ALWAYS use standard markdown dashes (- ) on separate lines for all list items.
 - If code is NOT in verified database, output ONLY:
   🔍 **DTC [CODE] — Not in Verified Database**
-  • **Status**: Code [CODE] is not registered in AutoKita's verified technical database.
-  • **Action**: Bring your vehicle to AutoKita workshop for an official OBD-II diagnostic scan. Do not guess root causes or driving risks.
+
+  - **Status**: Code [CODE] is not registered in AutoKita's verified technical database.
+  - **Action**: Bring your vehicle to AutoKita workshop for an official OBD-II diagnostic scan. Do not guess root causes or driving risks.
 
 ### MODE 3: SHOP & APPOINTMENT BOOKING INQUIRIES
 - Keep answers strictly within 2–3 sentences.
@@ -89,13 +107,124 @@ RULES FOR MODE 2:
 - Shop hours: Monday – Saturday, 8:00 AM – 5:00 PM.
 - In-shop services: General PMS, brake service, engine diagnosis, suspension, air conditioning, electrical systems.
 
+### MODE 4: ACTIVE VEHICLE SERVICE TRACKING & STATUS
+When the customer asks about the status of their vehicle, active service, or repair progress:
+- If an ACTIVE SERVICE IN PROGRESS exists in their authenticated profile:
+  🔧 **[Vehicle Year Make Model] — Job Order [Job Order ID]**
+
+  - **Current Status**: [Status Label] — **[X]% complete**
+  - **Stage**: [Stage Name]
+  - **Service Being Performed**: [Service Names]
+  - **Next Step**: You can view real-time photo findings, technician notes, and full tracking directly on your AutoKita dashboard.
+- If NO active service is in progress:
+  Politely inform the customer that their vehicle is not currently checked in for active repair. If they have registered vehicles, mention their vehicle and offer to help them book an appointment.
+
 ━━━ PRIVACY & ISOLATION CONSTRAINTS (STRICT ZERO-TOLERANCE) ━━━
 - Connect ONLY to verified reference OBD-II codes from the reference database.
 - ZERO SCANNER INFORMATION: Never disclose or reference diagnostic scanner hardware tools (Launch/Autel), scanner software versions, scanner report files, or internal shop scan logs.
-- ZERO PII: Never disclose, query, or mention any Personally Identifiable Information — NO customer names, license plates, VIN numbers, phone numbers, email addresses, or other customers' repair history.
+- ZERO CROSS-CUSTOMER PII: Never disclose, query, or mention other customers' private data, phone numbers, email addresses, or other vehicles' repair history. You may only refer to the currently authenticated customer's own first name, registered vehicles, and active service order if provided in their profile context.
 - Never discuss competitors. Keep tone helpful, technical, and concise.`;
 
-// ─── Route Handler ────────────────────────────────────────────────────────────
+// ─── Route Handlers ───────────────────────────────────────────────────────────
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const rawUserId = searchParams.get('userId');
+  const userId = rawUserId ? parseInt(rawUserId, 10) : null;
+
+  if (!userId || isNaN(userId)) {
+    return NextResponse.json({
+      success: true,
+      user: null,
+      activeJob: null,
+      recentMessages: [],
+    });
+  }
+
+  try {
+    // 1. Fetch user profile from Supabase
+    const userRes = await db.query(
+      `SELECT id, first_name, last_name, nickname, email FROM users WHERE id = $1`,
+      [userId]
+    );
+    const user = userRes.rows[0] || null;
+    const firstName = user?.first_name || user?.nickname || 'there';
+
+    // 2. Fetch active job order (if any) from Supabase
+    const joRes = await db.query(`
+      SELECT jo.id, jo.status, jo.date_arrived, jo.date_promised,
+             v.vehicle_make, v.vehicle_model, v.vehicle_year, v.plate_number,
+             COALESCE(
+               (SELECT STRING_AGG(s.service_name, ', ')
+                FROM job_order_services jos
+                JOIN services s ON s.id = jos.service_id
+                WHERE jos.job_order_id = jo.id),
+               'General Automotive Service'
+             ) AS service_names
+      FROM job_orders jo
+      LEFT JOIN vehicles v ON v.id = jo.vehicle_id
+      WHERE jo.user_id = $1 AND jo.status NOT IN ('released', 'cancelled', 'completed')
+      ORDER BY jo.id DESC
+      LIMIT 1
+    `, [userId]);
+
+    let activeJob = null;
+    if (joRes.rows.length > 0) {
+      const row = joRes.rows[0];
+      const vehTitle = `${row.vehicle_year || ''} ${row.vehicle_make || ''} ${row.vehicle_model || ''}`.trim() || 'Vehicle';
+      const meta = STATUS_MAP[row.status] || { label: row.status.replace(/_/g, ' '), progress: 50, slug: 'in-progress' };
+      activeJob = {
+        id: row.id,
+        jobOrderNumber: `#JO-${row.id}`,
+        vehicle: vehTitle,
+        plateNumber: row.plate_number,
+        serviceName: row.service_names,
+        rawStatus: row.status,
+        statusLabel: meta.label,
+        progressPercent: meta.progress,
+        trackingSlug: meta.slug,
+      };
+    }
+
+    // 3. Fetch past messages for this user from Supabase (latest session)
+    const msgRes = await db.query(`
+      SELECT cs.id AS session_id, cm.id, cm.sender_type, cm.message_text, cm.sent_at
+      FROM (
+        SELECT id FROM chat_sessions 
+        WHERE customer_user_id = $1 
+        ORDER BY last_activity_at DESC NULLS LAST, id DESC 
+        LIMIT 1
+      ) cs
+      JOIN chat_messages cm ON cm.session_id = cs.id
+      ORDER BY cm.sent_at ASC, cm.id ASC
+      LIMIT 30
+    `, [userId]);
+
+    const recentMessages = msgRes.rows.map((r: any) => ({
+      id: String(r.id),
+      role: r.sender_type === 'customer' ? 'user' : 'bot',
+      text: r.message_text,
+      time: new Date(r.sent_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+    }));
+
+    const activeSessionId = msgRes.rows[0]?.session_id ?? null;
+
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: user?.id,
+        firstName,
+        fullName: [user?.first_name, user?.last_name].filter(Boolean).join(' ') || firstName,
+      },
+      activeJob,
+      recentMessages,
+      sessionId: activeSessionId,
+    });
+  } catch (error) {
+    console.error('Error in GET /api/chat/customer:', error);
+    return NextResponse.json({ success: false, error: 'Database error' }, { status: 500 });
+  }
+}
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? '127.0.0.1';
@@ -289,6 +418,74 @@ export async function POST(req: NextRequest) {
   ];
 
   try {
+    // ── Live Supabase Customer Profile & Active Job Context ──────────────────
+    let customerContext = '';
+    let activeJobData: any = null;
+    if (validatedCustomerId) {
+      try {
+        const uRes = await db.query(`SELECT first_name, last_name, nickname FROM users WHERE id = $1`, [validatedCustomerId]);
+        const userRow = uRes.rows[0];
+        const custName = userRow?.first_name || userRow?.nickname || 'Customer';
+
+        const vRes = await db.query(
+          `SELECT vehicle_make, vehicle_model, vehicle_year, plate_number FROM vehicles WHERE user_id = $1 ORDER BY id ASC`,
+          [validatedCustomerId]
+        );
+        const vehList = vRes.rows.map((r: any) => `${r.vehicle_year || ''} ${r.vehicle_make || ''} ${r.vehicle_model || ''} (Plate: ${r.plate_number || 'N/A'})`.trim()).join('; ');
+
+        const joRes = await db.query(`
+          SELECT jo.id, jo.status, jo.date_arrived, jo.date_promised,
+                 v.vehicle_make, v.vehicle_model, v.vehicle_year, v.plate_number,
+                 COALESCE(
+                   (SELECT STRING_AGG(s.service_name, ', ')
+                    FROM job_order_services jos
+                    JOIN services s ON s.id = jos.service_id
+                    WHERE jos.job_order_id = jo.id),
+                   'General Automotive Service'
+                 ) AS service_names
+          FROM job_orders jo
+          LEFT JOIN vehicles v ON v.id = jo.vehicle_id
+          WHERE jo.user_id = $1 AND jo.status NOT IN ('released', 'cancelled', 'completed')
+          ORDER BY jo.id DESC
+          LIMIT 1
+        `, [validatedCustomerId]);
+
+        if (joRes.rows.length > 0) {
+          const row = joRes.rows[0];
+          const vehTitle = `${row.vehicle_year || ''} ${row.vehicle_make || ''} ${row.vehicle_model || ''}`.trim() || 'Vehicle';
+          const meta = STATUS_MAP[row.status] || { label: row.status.replace(/_/g, ' '), progress: 50, slug: 'in-progress' };
+          activeJobData = {
+            id: row.id,
+            jobOrderNumber: `#JO-${row.id}`,
+            vehicle: vehTitle,
+            plateNumber: row.plate_number,
+            serviceName: row.service_names,
+            rawStatus: row.status,
+            statusLabel: meta.label,
+            progressPercent: meta.progress,
+            trackingSlug: meta.slug,
+          };
+
+          customerContext = `\n\n## Authenticated Customer Profile (Supabase Verified)
+- Customer Name: ${custName}
+- Registered Vehicles: ${vehList || 'None registered yet'}
+- ACTIVE SERVICE IN PROGRESS:
+  • Job Order ID: #JO-${row.id}
+  • Vehicle: ${vehTitle} (Plate: ${row.plate_number || 'N/A'})
+  • Services: ${row.service_names}
+  • Live Status: ${meta.label} (${meta.progress}% complete)
+  • Internal Status: ${row.status}`;
+        } else {
+          customerContext = `\n\n## Authenticated Customer Profile (Supabase Verified)
+- Customer Name: ${custName}
+- Registered Vehicles: ${vehList || 'None registered yet'}
+- ACTIVE SERVICE IN PROGRESS: None currently active in the workshop.`;
+        }
+      } catch (custErr) {
+        console.error('Error fetching customer context from Supabase:', custErr);
+      }
+    }
+
     // ── Live Supabase Service Pricing & Duration ─────────────────────────────
     const pricingContext = await getLiveCustomerPricingContext(userText);
 
@@ -314,8 +511,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Enrich system prompt with live service & verified OBD-II context if found
+    // Enrich system prompt with customer context, live service & verified OBD-II context if found
     const contextAdditions = [
+      customerContext,
       pricingContext ? `\n\n${pricingContext}` : '',
       serviceContext ? `\n\n## Relevant Services & Knowledge\n${serviceContext}` : '',
       obdContext,
@@ -358,11 +556,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const isStatusQuery = /\b(status|track|tracking|progress|update|my car|my vehicle|my service|ongoing|current service)\b/i.test(userText);
+
     return NextResponse.json({
       reply: replyText,
       sessionId: activeSessionId,
       tokensUsed: totalTokens,
       tokensRemaining: remaining(ip, 'customer'),
+      activeJob: activeJobData,
+      showJobCard: Boolean(isStatusQuery && activeJobData),
     });
   } catch (err: unknown) {
     const apiErr = err as { status?: number; code?: string };
