@@ -21,10 +21,21 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, firstName, lastName, nickname, contactNumber, email, currentPassword, newPassword } = body
+    const { userId, firstName, lastName, nickname, currentPassword, newPassword } = body
 
     if (!userId) {
       return NextResponse.json({ success: false, message: 'Missing userId' }, { status: 400 })
+    }
+
+    // Email and contact number are where login links and approval codes go, so
+    // only the shop changes them, after checking it's really the customer.
+    // Refused here (not just hidden on the page) because anyone can call this
+    // route directly.
+    if (body.email !== undefined || body.contactNumber !== undefined) {
+      return NextResponse.json(
+        { success: false, code: 'LOCKED_FIELD', message: 'To change your email or contact number, please contact the shop.' },
+        { status: 403 },
+      )
     }
 
     // Password change — only runs when a newPassword is supplied.
@@ -43,25 +54,14 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Profile fields.
-    if ([firstName, lastName, nickname, contactNumber, email].some((v) => v !== undefined)) {
-      if (email) {
-        const taken = await db.query(
-          `SELECT 1 FROM users WHERE LOWER(email) = LOWER($1) AND id <> $2`,
-          [email, userId],
-        )
-        if (taken.rows.length > 0) {
-          return NextResponse.json({ success: false, code: 'EMAIL_TAKEN', message: 'That email is already in use.' }, { status: 409 })
-        }
-      }
+    if ([firstName, lastName, nickname].some((v) => v !== undefined)) {
       await db.query(
         `UPDATE users SET
-           first_name     = COALESCE($2, first_name),
-           last_name      = COALESCE($3, last_name),
-           nickname       = COALESCE($4, nickname),
-           contact_number = COALESCE($5, contact_number),
-           email          = COALESCE($6, email)
+           first_name = COALESCE($2, first_name),
+           last_name  = COALESCE($3, last_name),
+           nickname   = COALESCE($4, nickname)
          WHERE id = $1`,
-        [userId, firstName ?? null, lastName ?? null, nickname ?? null, contactNumber ?? null, email ?? null],
+        [userId, firstName ?? null, lastName ?? null, nickname ?? null],
       )
     }
 
