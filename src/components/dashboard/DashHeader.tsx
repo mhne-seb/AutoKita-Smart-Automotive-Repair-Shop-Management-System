@@ -58,7 +58,8 @@ export function DashHeader() {
     const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
     const userId = stored ? parseInt(stored, 10) : FALLBACK_USER_ID;
     let alive = true;
-    const load = () =>
+    const load = () => {
+      if (typeof document !== "undefined" && document.hidden) return;
       fetch(`/api/customer/notifications?userId=${userId}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then((json) => {
@@ -77,6 +78,7 @@ export function DashHeader() {
         .catch(() => {
           /* leave the bell as it was if the fetch fails */
         });
+    };
     load();
     const t = setInterval(load, 10000);
     return () => { alive = false; clearInterval(t); };

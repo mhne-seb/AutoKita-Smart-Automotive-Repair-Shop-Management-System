@@ -272,24 +272,26 @@ export default function page() {
 
                   <div className="mt-4">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Open Tasks</span>
+                      <span className="text-muted-foreground">Ongoing Job Orders</span>
                       <span className={`font-semibold ${full ? 'text-destructive' : 'text-foreground'}`}>
                         {m.openTasks}/{m.jobsCapacity}
                       </span>
                     </div>
                     <div className="mt-2 flex gap-1">
-                      {Array.from({ length: m.jobsCapacity }).map((_, i) => (
+                      {Array.from({ length: Math.min(20, Math.max(1, m.jobsCapacity)) }).map((_, i) => (
                         <span
                           key={i}
                           className={`h-1.5 flex-1 rounded-full ${
-                            i < m.openTasks ? (full ? 'bg-destructive' : 'bg-emerald-500') : 'bg-accent'
+                            i < Math.round((m.openTasks / Math.max(1, m.jobsCapacity)) * Math.min(20, Math.max(1, m.jobsCapacity)))
+                              ? (full ? 'bg-destructive' : 'bg-emerald-500')
+                              : 'bg-accent'
                           }`}
                         />
                       ))}
                     </div>
                     {full && (
                       <p className="mt-1.5 flex items-center gap-1 text-xs text-destructive">
-                        <AlertCircle size={12} /> At capacity — can't take new tasks
+                        <AlertCircle size={12} /> At capacity — can't take new job orders
                       </p>
                     )}
                   </div>
@@ -694,14 +696,14 @@ function MechanicFormModal({
           </div>
 
           <div className="sm:w-1/2">
-            <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Job Capacity *</label>
+            <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Ongoing Job Orders Capacity *</label>
             <input
               value={form.jobsCapacity}
               onChange={(e) => set('jobsCapacity', e.target.value)}
               inputMode="numeric"
               className={fieldClass('jobsCapacity')}
             />
-            <p className="mt-1 text-xs text-muted-foreground">Max open tasks at once. The scheduler won't assign more than this.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Max ongoing job orders at once. The scheduler won't assign more than this.</p>
             <ErrorText field="jobsCapacity" />
           </div>
 

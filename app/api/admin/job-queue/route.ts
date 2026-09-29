@@ -31,7 +31,10 @@ export async function GET(req: NextRequest) {
                 AND c.user_id IS NOT NULL
           ) AS diagnostic_scan_authorized,
           COALESCE(st.assigned_mechanic_id, jo.assigned_mechanic_id) as mechanic_id,
-          wc.id IS NOT NULL AS is_warranty_claim
+          wc.id IS NOT NULL AS is_warranty_claim,
+          jo.id as job_order_id,
+          jo.date_arrived,
+          jo.status as job_order_status
       FROM service_tickets st
       LEFT JOIN warranty_claims wc ON wc.ticket_id = st.id
       JOIN users u ON u.id = st.user_id
@@ -192,7 +195,74 @@ export async function POST(req: NextRequest) {
         }
       }
 
+      const checkInNow = Boolean(body.checkInNow)
+      if (checkInNow && newJo) {
+        const updateRes = await db.query(`UPDATE job_orders SET date_arrived = NOW() WHERE id = $1 RETURNING date_arrived`, [newJo.id])
+        newJo.date_arrived = updateRes.rows[0]?.date_arrived ?? new Date().toISOString()
+        try {
+          await db.query(`SELECT * FROM get_or_create_inspection($1)`, [newJo.id])
+        } catch {}
+        try {
+          await db.query(
+            `INSERT INTO system_audit_logs (
+              employees_id, action_performed, entity_type, entity_id, new_values, action_date
+            ) VALUES ($1, 'vehicle_checked_in', 'job_orders', $2, $3, NOW())`,
+            [
+              actingEmpId,
+              newJo.id,
+              JSON.stringify({
+                date_arrived: newJo.date_arrived,
+                checked_in_by: employeeName,
+                description: `Vehicle arrived and physically stored in the shop upon approval by ${employeeName}`
+              })
+            ]
+          )
+        } catch {}
+      }
+
       return NextResponse.json({ success: true, jobOrder: newJo })
+    }
+    else if (action === 'check_in') {
+      const { ticketId, jobOrderId } = body
+      let resolvedJoId = jobOrderId
+      if (!resolvedJoId && ticketId) {
+        const findJo = await db.query(`SELECT id FROM job_orders WHERE ticket_id = $1 LIMIT 1`, [ticketId])
+        if (findJo.rows.length > 0) {
+          resolvedJoId = findJo.rows[0].id
+        }
+      }
+
+      if (!resolvedJoId) {
+        return NextResponse.json({ success: false, message: 'Job order not found for this ticket' }, { status: 404 })
+      }
+
+      const updateRes = await db.query(
+        `UPDATE job_orders SET date_arrived = NOW() WHERE id = $1 RETURNING id, date_arrived, status`,
+        [resolvedJoId]
+      )
+
+      try {
+        await db.query(`SELECT * FROM get_or_create_inspection($1)`, [resolvedJoId])
+      } catch {}
+
+      try {
+        await db.query(
+          `INSERT INTO system_audit_logs (
+            employees_id, action_performed, entity_type, entity_id, new_values, action_date
+          ) VALUES ($1, 'vehicle_checked_in', 'job_orders', $2, $3, NOW())`,
+          [
+            actingEmpId,
+            resolvedJoId,
+            JSON.stringify({
+              date_arrived: updateRes.rows[0].date_arrived,
+              checked_in_by: employeeName,
+              description: `Vehicle arrived and physically stored in the shop by ${employeeName}. Inspection unlocked.`
+            })
+          ]
+        )
+      } catch {}
+
+      return NextResponse.json({ success: true, jobOrder: updateRes.rows[0] })
     }
     else if (action === 'reject') {
       const rejectQuery = `SELECT update_ticket_status($1, 'declined')`

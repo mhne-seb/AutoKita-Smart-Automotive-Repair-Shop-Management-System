@@ -478,6 +478,7 @@ function Dashboard() {
                   const matchedVehicle = vehicles.find(
                     (v) => v.vehicle_year === job.vehicle_year && v.vehicle_model === job.vehicle_model,
                   );
+                  const isAwaitingDropoff = job.status === "inspecting" && !job.date_arrived;
                   return (
                     <ServiceCard
                       key={job.id}
@@ -485,9 +486,9 @@ function Dashboard() {
                       plate={matchedVehicle?.plate_number}
                       jobOrderId={`#JO-${job.id}`}
                       jobId={job.id}
-                      status={STATUS_LABEL[job.status] ?? job.status}
+                      status={isAwaitingDropoff ? "Awaiting Drop-off" : (STATUS_LABEL[job.status] ?? job.status)}
                       note={job.service_name ?? "Service"}
-                      stepIndex={STATUS_TO_STEP[job.status] ?? 0}
+                      stepIndex={isAwaitingDropoff ? 0 : (STATUS_TO_STEP[job.status] ?? 0)}
                       isDone={DONE_STATUSES.has(job.status)}
                       balanceDue={job.status === "cancelled" ? 0 : Number(job.balance ?? 0)}
                       cancelled={job.status === "cancelled"}

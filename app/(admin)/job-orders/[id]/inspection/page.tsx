@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from "next/link";
-import { Camera, Plus, Pencil, Trash2, Check, X, Cloud, Clock, ChevronRight, CheckCircle2, Loader2, Maximize2, AlertCircle, ScanLine, Info, ClipboardList, MapPin, FileText, Upload, Link2, ChevronDown, ChevronUp, Mail, RefreshCw } from 'lucide-react'
+import { Camera, Plus, Pencil, Trash2, Check, X, Cloud, Clock, ChevronRight, CheckCircle2, Loader2, Maximize2, AlertCircle, ScanLine, Info, ClipboardList, MapPin, FileText, Upload, Link2, ChevronDown, ChevronUp, Mail, RefreshCw, Store } from 'lucide-react'
 import { toast } from 'sonner'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
@@ -61,6 +61,31 @@ export default function page() {
   const [warrantyClaim, setWarrantyClaim] = useState<WarrantyClaim | null>(null)
   const loadWarrantyClaim = () => getWarrantyClaim(jobOrderId).then(setWarrantyClaim)
   useEffect(() => { loadWarrantyClaim() }, [jobOrderId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const [checkingInVehicle, setCheckingInVehicle] = useState(false)
+  const handleCheckInVehicle = async () => {
+    if (checkingInVehicle) return
+    setCheckingInVehicle(true)
+    try {
+      const activeEmpId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
+      const res = await fetch(`/api/job-orders/${jobOrderId}/check-in`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ employeeId: activeEmpId ? Number(activeEmpId) : undefined }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success('Vehicle marked as arrived and stored in the shop!')
+        setJobOrder((prev) => (prev ? { ...prev, arrived: true, dateArrived: data.date_arrived } : prev))
+      } else {
+        toast.error(data.message || 'Check-in failed')
+      }
+    } catch {
+      toast.error('Check-in failed. Please try again.')
+    } finally {
+      setCheckingInVehicle(false)
+    }
+  }
 
   const [photoSlots, setPhotoSlots] = useState<InspectionData['photoSlots']>([])
   // Set true after a blocked send attempt, so empty slots highlight red
@@ -322,23 +347,75 @@ export default function page() {
   const claimPending = warrantyClaim?.decision === 'pending'
   const reportLocked = isLocked || claimPending
 
-  // Auto-refresh while waiting on the customer's decision, so the admin sees
-  // "Approved" / "Customer has concerns" without having to reload the page.
-  useEffect(() => {
-    if (inspectionStatus !== 'pending') return
-    const interval = setInterval(() => {
-      getLatestPreDiagnostic(jobOrderId).then(setPreDiagnostic)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [inspectionStatus, jobOrderId])
-
+  const hasSeededInspection = useRef(false)
   // Once the real data arrives, seed the editable state from it.
   useEffect(() => {
-    if (initial) {
+    if (initial && !hasSeededInspection.current) {
+      hasSeededInspection.current = true
       setPhotoSlots(initial.photoSlots)
       setFindings(initial.findings)
     }
   }, [initial])
+
+  // Auto-refresh while waiting on the customer's decision (OBD-II scanner consent or inspection report review),
+  // so the admin sees "Authorized" or "Approved" immediately without having to reload the page.
+  useEffect(() => {
+    const isScanPending = initial?.scanAuthorization?.decision === 'pending' || (!initial?.diagnosticScanAuthorized && requestingScan)
+    const isReportPending = inspectionStatus === 'pending'
+    if (!isScanPending && !isReportPending) return
+
+    const interval = setInterval(async () => {
+      // Pause polling if tab is backgrounded
+      if (typeof document !== 'undefined' && document.hidden) return
+
+      if (isScanPending) {
+        try {
+          const fresh = await getInspectionById(jobOrderId)
+          if (fresh) {
+            const isNowAuth = Boolean(fresh.diagnosticScanAuthorized)
+            const freshDecision = fresh.scanAuthorization?.decision
+
+            if (isNowAuth || (freshDecision && freshDecision !== 'pending')) {
+              setInitial((prev) => {
+                if (!prev) return fresh
+                return {
+                  ...prev,
+                  diagnosticScanAuthorized: isNowAuth,
+                  scanAuthorization: fresh.scanAuthorization,
+                }
+              })
+
+              if (isNowAuth || freshDecision === 'approved') {
+                toast.success('Customer approved the OBD-II diagnostic scan fee!', { id: 'scan-auth-toast' })
+              } else if (freshDecision === 'disputed') {
+                toast.info('Customer declined the diagnostic scanner request.', { id: 'scan-auth-toast' })
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Scan auth polling error:', err)
+        }
+      }
+
+      if (isReportPending) {
+        try {
+          const round = await getLatestPreDiagnostic(jobOrderId)
+          if (round && round.status !== 'pending' && round.status !== preDiagnostic?.status) {
+            setPreDiagnostic(round)
+            if (round.status === 'approved') {
+              toast.success('Customer approved the inspection report!', { id: 'report-auth-toast' })
+            } else if (round.status === 'disputed') {
+              toast.info('Customer raised concerns on the inspection report.', { id: 'report-auth-toast' })
+            }
+          }
+        } catch (err) {
+          console.error('Pre-diagnostic polling error:', err)
+        }
+      }
+    }, 4000)
+
+    return () => clearInterval(interval)
+  }, [initial?.scanAuthorization?.decision, initial?.diagnosticScanAuthorized, requestingScan, inspectionStatus, jobOrderId, preDiagnostic?.status])
 
   useMemo(() => findings.filter((f) => f.status === 'ok').length, [findings])
 
@@ -603,16 +680,61 @@ export default function page() {
         </p>
       )}
 
+      {jobOrder && !jobOrder.arrived && (
+        <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-5 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-sm">
+                <Store size={22} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-amber-950">Vehicle Not Checked In Yet</h3>
+                <p className="mt-1 text-xs text-amber-800 leading-relaxed">
+                  This job order is approved, but the vehicle has not yet been marked as arrived and stored in the shop.
+                  Click the button below once the vehicle is on-site to mark it as stored in the shop.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleCheckInVehicle}
+              disabled={checkingInVehicle}
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:opacity-95 active:scale-[0.99] disabled:opacity-50 transition-all"
+            >
+              <Store size={15} />
+              {checkingInVehicle ? 'Checking In…' : 'Mark Vehicle Stored in Shop'}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className={hasSidebar ? "grid grid-cols-1 gap-6 xl:grid-cols-[1fr_340px]" : "block"}>
         <div className="space-y-6">
           <div className="flex items-start justify-between">
             <div>
               <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Inspection Report</p>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-3xl font-bold text-slate-900">{initial.vehicleTitle}</h1>
                 <span className="rounded-lg bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-600">
                   {initial.plate}
                 </span>
+                {jobOrder && (
+                  jobOrder.arrived ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
+                      <CheckCircle2 size={13} className="text-emerald-600" />
+                      Vehicle Checked In
+                    </span>
+                  ) : (
+                    <button
+                      onClick={handleCheckInVehicle}
+                      disabled={checkingInVehicle}
+                      title="Click to check in vehicle (mark stored in shop)"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900 shadow-2xs hover:bg-amber-100 active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+                    >
+                      <Store size={13} className="text-amber-700" />
+                      {checkingInVehicle ? 'Checking In…' : 'Check In Vehicle (Store in Shop)'}
+                    </button>
+                  )
+                )}
               </div>
             </div>
             <div className="flex items-center gap-3">

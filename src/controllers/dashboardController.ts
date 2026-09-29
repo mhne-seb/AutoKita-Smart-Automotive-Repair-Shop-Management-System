@@ -32,6 +32,7 @@ export interface DashboardJobOrder {
   actual_grand_total: string
   balance: string
   jo_date: string
+  date_arrived?: string | null
   vehicle_model: string
   vehicle_year: number
   plate_number: string
@@ -150,7 +151,9 @@ export async function getDashboardVehicles(userId: number): Promise<DashboardVeh
 
 export async function getDashboardActiveJobOrders(userId: number): Promise<DashboardJobOrder[]> {
   const { rows } = await db.query(
-    `SELECT * FROM get_dashboard_active_job_orders($1)`,
+    `SELECT g.*, jo.date_arrived::text as date_arrived
+     FROM get_dashboard_active_job_orders($1) g
+     JOIN job_orders jo ON jo.id = g.id`,
     [userId],
   )
   // job_orders.balance / actual_grand_total are never written (always 0.00),
