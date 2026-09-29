@@ -53,7 +53,11 @@ function LoginPage() {
       return
     }
 
-    startSession(result.role, result.user!.id, remember)
+    const u = result.user!
+    startSession(result.role, u.id, remember, {
+      name: u.nickname || [u.first_name, u.last_name].filter(Boolean).join(' ') || u.email,
+      title: result.title ?? null,
+    })
     const isCustomer = result.role === 'customer' || result.role === 'c'
     router.push(isCustomer ? '/dashboard' : '/overview')
   }
