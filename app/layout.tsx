@@ -21,6 +21,8 @@ const restoreRememberedLogin = `try {
     if (!sessionStorage.getItem('autokita_user_id')) {
       sessionStorage.setItem(r.flag, 'true');
       sessionStorage.setItem('autokita_user_id', String(r.userId));
+      if (r.name) sessionStorage.setItem('autokita_user_name', r.name);
+      if (r.title) sessionStorage.setItem('autokita_user_title', r.title);
     }
   } else if (r) {
     localStorage.removeItem('autokita_remember');
