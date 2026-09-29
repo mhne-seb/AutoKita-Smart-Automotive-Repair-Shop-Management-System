@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ClipboardList, Search, FileText, Wrench, CheckCircle2, Eye, ChevronLeft, ChevronRight, Car, Hash, Calendar, UserCog, Gauge, Receipt, SlidersHorizontal, X, Store } from 'lucide-react'
 import { toast } from 'sonner'
 import { TopBar } from '@/components/TopBar'
+import { avatarColorClass } from '@/lib/avatarColor'
 import { getJobOrders, checkInJobOrder } from '@/controllers/jobOrderController'
 import { JobOrderCard, Stage, stageOrder, stageLabels } from '@/data/types'
 
@@ -455,8 +456,16 @@ export default function page() {
                     <tr key={c.id} className="border-b border-border/60 align-top last:border-0">
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-xs font-semibold text-white">
+                          <div className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ${avatarColorClass(c.rawUserId || c.customerId)}`}>
                             {c.customer.charAt(0)}
+                            {c.avatarUrl && (
+                              <img
+                                src={c.avatarUrl}
+                                alt={c.customer}
+                                className="absolute inset-0 h-9 w-9 rounded-full object-cover"
+                                onError={(e) => { e.currentTarget.style.display = 'none' }}
+                              />
+                            )}
                           </div>
                           <div>
                             <p className="font-semibold text-foreground">{c.customer}</p>
