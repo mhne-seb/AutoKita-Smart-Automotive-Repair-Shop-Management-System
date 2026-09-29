@@ -16,6 +16,7 @@ import { getLatestPreDiagnostic, sendForApproval, type PreDiagnosticRound } from
 import { requestScanAuthorization } from '@/controllers/preDiagnosticController'
 import { getWarrantyClaim, type WarrantyClaim } from '@/controllers/warrantyClaimController'
 import { WarrantyClaimCard } from '@/components/dashboard/WarrantyClaimCard'
+import { EditCustomerModal } from '@/components/dashboard/EditCustomerModal'
 import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData, InspectionPhotoSlot } from '@/data/types'
 
 export default function page() {
@@ -80,6 +81,7 @@ export default function page() {
   // a chip no longer commits (and discards) an in-progress name/note edit.
   const [editFindingStatus, setEditFindingStatus] = useState<FindingStatus>('ok')
   const [approvalDecision, setApprovalDecision] = useState<'pending' | 'confirmed' | 'reverted'>('pending')
+  const [editModalOpen, setEditModalOpen] = useState(false)
 
   // Real "send for approval" round — replaces the old local `uploaded` flag.
   const [preDiagnostic, setPreDiagnostic] = useState<PreDiagnosticRound | null | undefined>(undefined)
@@ -584,6 +586,8 @@ export default function page() {
   // actually has something to show, otherwise let the report use the full page.
   const hasSidebar = Boolean(initial.request) || Boolean(initial.pullOutRequested) || (isApproved && !initial.quotationStarted)
 
+  const isJobOrderLocked = jobOrder.stage === 'completed' || jobOrder.stage === 'released' || jobOrder.cancelled === true
+
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-8">
       <TopBar title="Vehicle Inspection" subtitle="Inspection workflow & time tracking." showSearch={false} />
@@ -665,29 +669,41 @@ export default function page() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <div className="mb-6 grid grid-cols-2 sm:grid-cols-5 gap-6 text-sm">
-              <div>
-                <p className="text-slate-400">Vehicle</p>
-                <p className="font-bold text-slate-900">{initial.vehicleTitle}</p>
+            <div className="mb-6 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              <div className="grid flex-1 grid-cols-2 gap-6 text-sm sm:grid-cols-5">
+                <div>
+                  <p className="text-slate-400">Vehicle</p>
+                  <p className="font-bold text-slate-900">{initial.vehicleTitle}</p>
+                </div>
+                <div>
+                  <p className="text-slate-400">Plate No.</p>
+                  <p className="font-bold text-slate-900">{initial.plate}</p>
+                </div>
+                <div>
+                  <p className="text-slate-400">Customer</p>
+                  <p className="font-bold text-slate-900">{initial.customer}</p>
+                </div>
+                <div>
+                  <p className="text-slate-400">Phone Number</p>
+                  <p className="font-bold text-slate-900">{initial.contactNumber || '—'}</p>
+                </div>
+                <div>
+                  <p className="text-slate-400">Job Order</p>
+                  <span className="inline-block rounded bg-slate-900 px-2 py-1 text-xs font-bold text-white">
+                    JO-{jobOrderId.toUpperCase()}
+                  </span>
+                </div>
               </div>
-              <div>
-                <p className="text-slate-400">Plate No.</p>
-                <p className="font-bold text-slate-900">{initial.plate}</p>
-              </div>
-              <div>
-                <p className="text-slate-400">Customer</p>
-                <p className="font-bold text-slate-900">{initial.customer}</p>
-              </div>
-              <div>
-                <p className="text-slate-400">Phone Number</p>
-                <p className="font-bold text-slate-900">{initial.contactNumber || '—'}</p>
-              </div>
-              <div>
-                <p className="text-slate-400">Job Order</p>
-                <span className="inline-block rounded bg-slate-900 px-2 py-1 text-xs font-bold text-white">
-                  JO-{jobOrderId.toUpperCase()}
-                </span>
-              </div>
+              <button
+                type="button"
+                onClick={() => setEditModalOpen(true)}
+                disabled={isJobOrderLocked}
+                title={isJobOrderLocked ? "Details are locked once the job is completed." : undefined}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-600 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Pencil size={14} />
+                Edit customer & vehicle
+              </button>
             </div>
 
             {/* The mechanic's go-ahead for the scanner. Without this the
@@ -1598,6 +1614,18 @@ export default function page() {
 
       {lightbox && (
         <Lightbox url={lightbox.url} label={lightbox.label} onClose={() => setLightbox(null)} />
+      )}
+
+      {editModalOpen && initial && (
+        <EditCustomerModal
+          jobOrderId={jobOrderId}
+          data={initial}
+          locked={isJobOrderLocked}
+          onClose={() => setEditModalOpen(false)}
+          onSaved={() => {
+            getInspectionById(jobOrderId).then((data) => setInitial(data ?? null))
+          }}
+        />
       )}
     </div>
   )

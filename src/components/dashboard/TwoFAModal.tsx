@@ -116,8 +116,8 @@ export function TwoFAModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div className="w-full max-w-sm rounded-xl bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-sm rounded-xl bg-card p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div>
             <h3 className="text-lg font-bold">Verify It's You</h3>

@@ -173,6 +173,8 @@ export async function sendJobUpdateEmail(opts: {
     const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const url = `${base}/dashboard/tracking/in-progress?jobOrderId=${opts.jobOrderId}`
 
+    const escapeHtml = (s: string) => (s || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;')
+
     await transporter.sendMail({
         from: `"AutoKita" <${process.env.GMAIL_USER}>`,
         to: opts.to,
@@ -192,10 +194,10 @@ ${url}
 — AutoKita`,
         html: `
           <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
-            <h2 style="color:#1e3a5f;font-size:26px">${opts.title}</h2>
-            <p style="font-size:16px">Hi ${opts.name},</p>
-            <p style="font-size:16px">${opts.message}</p>
-            <p style="font-size:16px">Your <b>${opts.vehicle} (${opts.plate})</b> — job order <b>JO-${opts.jobOrderId}</b>.</p>
+            <h2 style="color:#1e3a5f;font-size:26px">${escapeHtml(opts.title)}</h2>
+            <p style="font-size:16px">Hi ${escapeHtml(opts.name)},</p>
+            <p style="font-size:16px;white-space:pre-line">${escapeHtml(opts.message)}</p>
+            <p style="font-size:16px">Your <b>${escapeHtml(opts.vehicle)} (${escapeHtml(opts.plate)})</b> — job order <b>JO-${opts.jobOrderId}</b>.</p>
             <a href="${url}" style="display:inline-block;background:#1e3a5f;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-size:16px">Open service tracker</a>
           </div>
         `,
