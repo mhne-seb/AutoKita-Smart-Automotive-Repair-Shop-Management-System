@@ -36,7 +36,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         [jobOrderId],
       ),
       db.query(
-        `SELECT id, description AS name, part_number, quantity, retail_unit_price, total_retail_amount, is_warranty_replacement
+        `SELECT id, description AS name, part_number, quantity, retail_unit_price, total_retail_amount, is_warranty_replacement, warranty_months
          FROM job_order_parts WHERE job_order_id = $1 ORDER BY id`,
         [jobOrderId],
       ),
@@ -59,7 +59,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       parts: parts.rows.map((p) => ({
         id: p.id, name: p.name, partNo: p.part_number, qty: Number(p.quantity ?? 1),
         unitPrice: Number(p.retail_unit_price ?? 0), amount: Number(p.total_retail_amount ?? 0),
-        warranty: Boolean(p.is_warranty_replacement),
+        warranty: Boolean(p.is_warranty_replacement), warranty_months: p.warranty_months,
       })),
     })
   } catch (error) {
@@ -107,23 +107,56 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       const bill = await getJobOrderBill(jobOrderId)
       if (bill.balance > 0) return NextResponse.json({ success: false, message: `Balance of ₱${bill.balance.toLocaleString('en-PH')} is still unpaid` }, { status: 409 })
 
-      // { partId: warrantyMonths } — admin-entered at release, one field per
-      // part so a battery can carry a longer term than a brake pad. Each
-      // becomes its own row in `warranties` (already read by
-      // get_customer_warranties / get_customer_warranty_history — this was
-      // the only piece of that feature never wired up). Written in the same
-      // transaction as the release stamp, and there's no edit endpoint
-      // afterward, so once set it can't be changed.
-      const warrantyByPart = (body.warrantyByPart ?? {}) as Record<string, number>
+      const warrantyByPart = (body.warrantyByPart ?? {}) as Record<string, any>
+
+      const partsRes = await db.query(`SELECT id, warranty_months, is_warranty_replacement FROM job_order_parts WHERE job_order_id = $1`, [jobOrderId])
+      const dbParts = partsRes.rows
+      
+      const finalWarrantyByPart: Record<number, number> = {}
+
+      for (const dbPart of dbParts) {
+        if (dbPart.is_warranty_replacement) continue
+
+        const pIdStr = String(dbPart.id)
+        let finalVal = dbPart.warranty_months
+        if (pIdStr in warrantyByPart) {
+          const clientVal = warrantyByPart[pIdStr]
+          if (typeof clientVal !== 'number' || !Number.isInteger(clientVal) || clientVal < 0 || clientVal > 60) {
+            return NextResponse.json({ success: false, message: 'Warranty must be a whole number between 0 and 60.' }, { status: 400 })
+          }
+          finalVal = clientVal
+        }
+
+        if (finalVal === null) {
+          return NextResponse.json({ success: false, message: 'Every part must have an explicit warranty choice.' }, { status: 400 })
+        }
+
+        if (dbPart.warranty_months !== null && finalVal < dbPart.warranty_months) {
+          return NextResponse.json({ success: false, message: `Cannot lower a quoted warranty term.` }, { status: 400 })
+        }
+
+        finalWarrantyByPart[dbPart.id] = finalVal
+      }
+
+      for (const pIdStr of Object.keys(warrantyByPart)) {
+        const pId = Number(pIdStr)
+        const dbPart = dbParts.find(p => p.id === pId)
+        if (!dbPart || dbPart.is_warranty_replacement) {
+          return NextResponse.json({ success: false, message: 'Invalid part ID provided.' }, { status: 400 })
+        }
+      }
+
       const client = await db.connect()
       try {
         await client.query('BEGIN')
-        for (const [partId, months] of Object.entries(warrantyByPart)) {
-          const m = Number(months)
+        for (const [partIdStr, m] of Object.entries(finalWarrantyByPart)) {
+          const partId = Number(partIdStr)
+          await client.query(`UPDATE job_order_parts SET warranty_months = $1::int WHERE id = $2::int AND job_order_id = $3::int`, [m, partId, jobOrderId])
+          
           if (!(m > 0)) continue
           const part = await client.query(
             `SELECT description, part_number FROM job_order_parts WHERE id = $1 AND job_order_id = $2`,
-            [Number(partId), jobOrderId],
+            [partId, jobOrderId],
           )
           const row = part.rows[0]
           if (!row) continue
@@ -131,7 +164,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           await client.query(
             `INSERT INTO warranties (job_order_id, job_order_part_id, coverage_description, start_date, expiration_date, status)
              VALUES ($1, $2, $3, CURRENT_DATE, CURRENT_DATE + ($4 || ' months')::interval, 'active'::warranty_status)`,
-            [jobOrderId, Number(partId), coverage, m],
+            [jobOrderId, partId, coverage, m],
           )
         }
         // advance_job_order_stage stamps released_at.
