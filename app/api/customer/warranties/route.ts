@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
 
+import { effectiveWarrantyStatus } from '@/lib/warranty'
+
 // The customer's Warranties tab (Service History) — every warranty across
 // every visit, active or past, via Jubert's get_customer_warranties /
 // get_customer_warranty_history. Also flags a warranty that already has a
@@ -31,16 +33,36 @@ export async function GET(request: NextRequest) {
       description: r.coverage_description,
       startDate: r.start_date,
       expirationDate: r.expiration_date,
-      status: r.status as string,
+      status: effectiveWarrantyStatus(r.status as string, r.expiration_date),
       jobOrderId: r.job_order_id,
       vehicle: [r.vehicle_model, r.plate_number].filter(Boolean).join(' — '),
       hasPendingClaim: pendingIds.has(r.warranty_id),
+      completedAt: r.completed_at ?? null,
     })
+
+    const mappedActive = active.rows.map(map)
+    const mappedHistory = history.rows.map(map)
+
+    const trulyActive = mappedActive.filter(w => w.status === 'active' || w.status === 'nearing_expiration')
+    const actuallyExpired = mappedActive.filter(w => w.status !== 'active' && w.status !== 'nearing_expiration')
+    
+    const combinedHistory = [...actuallyExpired, ...mappedHistory]
+
+    const sortWarranties = (list: any[]) => {
+      return list.sort((a, b) => {
+        const dateA = a.completedAt ?? a.startDate
+        const dateB = b.completedAt ?? b.startDate
+        const tA = dateA ? new Date(dateA).getTime() : 0
+        const tB = dateB ? new Date(dateB).getTime() : 0
+        if (tB !== tA) return tB - tA
+        return a.warrantyId - b.warrantyId
+      })
+    }
 
     return NextResponse.json({
       success: true,
-      active: active.rows.map(map),
-      history: history.rows.map(map),
+      active: sortWarranties(trulyActive),
+      history: sortWarranties(combinedHistory),
     })
   } catch (error) {
     console.error('[/api/customer/warranties] error:', error)
