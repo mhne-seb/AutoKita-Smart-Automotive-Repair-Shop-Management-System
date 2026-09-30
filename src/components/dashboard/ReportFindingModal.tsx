@@ -10,12 +10,12 @@
 // shop, not part of any one service).
 
 import { useEffect, useRef, useState } from 'react'
-import { AlertTriangle, Camera, Loader2, Plus, Search, Send, Trash2, Upload, X } from 'lucide-react'
+import { AlertTriangle, Camera, Loader2, Plus, Search, Send, Trash2, Upload, X, Pencil, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ProposedPart, ProposedService } from '@/data/types'
 import { reportFinding, uploadFindingPhoto } from '@/controllers/findingsController'
 
-type CatalogService = { id: number; service_name: string; base_price: string | number; base_duration_hours: string | number }
+type CatalogService = { id: number; service_name: string; base_price: string | number; base_duration_hours: string | number; is_price_fixed?: boolean }
 type TaskOption = { id: number; title: string }
 
 const peso = (n: number) => `₱${n.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
@@ -23,11 +23,13 @@ const peso = (n: number) => `₱${n.toLocaleString('en-PH', { minimumFractionDig
 export function ReportFindingModal({
   jobOrderId,
   task,
+  vehicle,
   onClose,
   onSent,
 }: {
   jobOrderId: string
   task?: TaskOption // present = opened from that task's card; absent = general finding
+  vehicle?: { year: number | null; type: string; mileage: number | null }
   onClose: () => void
   onSent: () => void
 }) {
@@ -61,6 +63,9 @@ export function ReportFindingModal({
   const [partQty, setPartQty] = useState('1')
   const [partPrice, setPartPrice] = useState('')
   const [partInStock, setPartInStock] = useState(false)
+  const [editVals, setEditVals] = useState<Record<string, { hours: string; price: string }>>({})
+
+  const [aiPredictions, setAiPredictions] = useState<Record<string, { predicted_amount: number; predicted_duration_mins?: number; is_mock?: boolean; is_low_data?: boolean; sample_count?: number; min_samples_required?: number }>>({})
 
   const [sending, setSending] = useState(false)
 
@@ -89,13 +94,68 @@ export function ReportFindingModal({
     setServices((prev) => [...prev, { serviceId: s.id, name: s.service_name, hours: Number(s.base_duration_hours || 1), price: Number(s.base_price || 0) }])
     setSearch('')
     setDropdownOpen(false)
+
+    if (vehicle) {
+      const age = Math.max(0, new Date().getFullYear() - (vehicle.year || new Date().getFullYear()))
+      const actualMileage = vehicle.mileage || (age * 15000)
+      const baseHours = Number(s.base_duration_hours || 1)
+      const basePrice = Number(s.base_price || 0)
+
+      fetch('/api/predict/cost', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          estimated_duration_mins: baseHours * 60,
+          service_id: s.id,
+          base_price: basePrice,
+          base_duration_hours: baseHours,
+          is_price_fixed: s.is_price_fixed ? 1 : 0,
+          vehicle_age: age,
+          vehicle_type: vehicle.type,
+          mileage: actualMileage,
+        }),
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.is_low_data || data.can_estimate === false) {
+          setAiPredictions(prev => ({ ...prev, [s.service_name]: { is_low_data: true, sample_count: data.sample_count ?? 0, min_samples_required: data.min_samples_required ?? 10, predicted_amount: 0 } }))
+        } else if (data.predicted_amount) {
+          setAiPredictions(prev => ({ ...prev, [s.service_name]: data }))
+        }
+      })
+      .catch(() => {})
+    }
+  }
+  function updateService(name: string, hours: number, price: number) {
+    setServices((prev) => prev.map((s) => (s.name === name ? { ...s, hours, price } : s)))
+  }
+  function validateHoursStr(str: string) {
+    const t = str.trim()
+    if (!t) return 'Enter the hours.'
+    if (!/^\d+(\.\d{1,2})?$/.test(t)) return 'Enter the hours as a number, like 1.5.'
+    const n = Number(t)
+    if (n <= 0) return 'Hours must be more than 0.'
+    if (n > 100) return 'Hours is too high.'
+    return null
+  }
+  // Checks the typed text itself: Number('-000') is -0, which slips past a "< 0" test.
+  function validatePriceStr(str: string, what = 'labor price') {
+    const t = str.trim()
+    if (!t) return `Enter the ${what}.`
+    if (t.startsWith('-')) return "Price can't be negative."
+    if (!/^\d+(\.\d{1,2})?$/.test(t)) return `Enter the ${what} as a number, like 3500 or 3500.50.`
+    if (Number(t) > 1000000) return 'Price is too high.'
+    return null
   }
   function addCustomService() {
     const name = customName.trim()
     if (!name) return toast.error('Give the service a name.')
     if (services.some((s) => s.name.toLowerCase() === name.toLowerCase())) return toast.error('That service is already added.')
-    if (customPrice.trim() === '' || !(Number(customPrice) >= 0)) return toast.error('Enter the labor price.')
-    setServices((prev) => [...prev, { serviceId: null, name, hours: Number(customHours) > 0 ? Number(customHours) : 1, price: Number(customPrice) }])
+    const hoursError = validateHoursStr(customHours)
+    if (hoursError) return toast.error(hoursError)
+    const priceError = validatePriceStr(customPrice)
+    if (priceError) return toast.error(priceError)
+    setServices((prev) => [...prev, { serviceId: null, name, hours: Number(customHours), price: Number(customPrice) }])
     setCustomName(''); setCustomHours('1'); setCustomPrice('')
     setCustomOpen(false)
   }
@@ -107,7 +167,8 @@ export function ReportFindingModal({
   function addPart() {
     if (!partFor) return
     if (!partName.trim()) return toast.error('Give the part a name.')
-    if (partPrice.trim() === '' || !(Number(partPrice) >= 0)) return toast.error('Enter the part price.')
+    const priceError = validatePriceStr(partPrice, 'part price')
+    if (priceError) return toast.error(priceError)
     const qty = Math.max(1, Math.round(Number(partQty) || 1))
     setParts((prev) => [...prev, { name: partName.trim(), partNo: partNo.trim(), qty, unitPrice: Number(partPrice), serviceName: partFor, inStock: partInStock }])
     setPartName(''); setPartNo(''); setPartQty('1'); setPartPrice(''); setPartInStock(false)
@@ -136,8 +197,13 @@ export function ReportFindingModal({
     if (customOpen && customName.trim()) return toast.error('Finish adding the custom service (click Add) or cancel it first.')
     if (partFor && (partName.trim() || partPrice.trim())) return toast.error('Finish adding the part (click Add) or cancel it first.')
     if (services.length === 0) return toast.error('Add at least one service — parts are listed under a service.')
+    for (const [name, vals] of Object.entries(editVals)) {
+      if (validateHoursStr(vals.hours) || validatePriceStr(vals.price)) return toast.error('Please fix invalid values before sending.')
+    }
+    const finalServices = services.map(s => editVals[s.name] !== undefined ? { ...s, hours: Number(editVals[s.name].hours), price: Number(editVals[s.name].price) } : s)
+
     setSending(true)
-    const r = await reportFinding(jobOrderId, { taskId: task?.id ?? null, findings: findings.trim(), photoUrl, services, parts })
+    const r = await reportFinding(jobOrderId, { taskId: task?.id ?? null, findings: findings.trim(), photoUrl, services: finalServices, parts })
     setSending(false)
     if (!r.ok) return toast.error(r.message)
     toast.success(r.emailed ? 'Sent to the customer — they were emailed too.' : 'Sent to the customer.')
@@ -154,7 +220,7 @@ export function ReportFindingModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div>
             <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900"><AlertTriangle size={18} className="text-amber-500" /> Report a finding</h3>
@@ -254,14 +320,148 @@ export function ReportFindingModal({
 
           {services.length > 0 && (
             <ul className="mt-2 divide-y divide-slate-100 rounded-lg border border-slate-200">
-              {services.map((s) => (
+              {services.map((s) => {
+                const isEditing = editVals[s.name] !== undefined
+                const editPriceStr = isEditing ? editVals[s.name].price : ''
+                const editHoursStr = isEditing ? editVals[s.name].hours : ''
+                const priceError = isEditing ? validatePriceStr(editPriceStr) : null
+                const hoursError = isEditing ? validateHoursStr(editHoursStr) : null
+                const error = hoursError || priceError
+
+
+                const onKey = (e: React.KeyboardEvent) => {
+                  if (e.key === 'Enter' && !error) {
+                    e.preventDefault()
+                    updateService(s.name, Number(editHoursStr), Number(editPriceStr))
+                    setEditVals(prev => { const n = {...prev}; delete n[s.name]; return n })
+                  } else if (e.key === 'Escape') {
+                    e.preventDefault()
+                    setEditVals(prev => { const n = {...prev}; delete n[s.name]; return n })
+                  }
+                }
+
+                return (
                 <li key={s.name} className="p-3">
-                  <div className="flex items-center justify-between gap-2 text-sm">
-                    <span className="font-semibold text-slate-800">{s.name} <span className="font-normal text-slate-400">· {s.hours} hr{s.hours === 1 ? '' : 's'}{s.serviceId === null ? ' · custom' : ''}</span></span>
-                    <span className="flex items-center gap-3">
-                      <span className="font-semibold text-slate-800">{peso(s.price)}</span>
+                  <div className="flex items-start justify-between gap-2 text-sm">
+                    <div>
+                      <span className="font-semibold text-slate-800">{s.name} <span className="font-normal text-slate-400">{s.serviceId === null ? ' · custom' : ''}</span></span>
+
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      {!isEditing && (
+                        <button
+                          type="button"
+                          onClick={() => setEditVals(prev => ({...prev, [s.name]: { hours: String(s.hours), price: String(s.price) }}))}
+                          className="text-slate-400 hover:text-emerald-600"
+                          aria-label={`Edit for ${s.name}`}
+                        >
+                          <Pencil size={14} />
+                        </button>
+                      )}
                       <button type="button" onClick={() => removeService(s.name)} className="text-slate-400 hover:text-red-500" aria-label={`Remove ${s.name}`}><X size={14} /></button>
-                    </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-2 flex items-start gap-6 text-sm">
+                    {/* Time Column */}
+                    <div className="flex-1">
+                      <p className="mb-1 flex items-center gap-1.5 text-slate-400">
+                        Labor Time
+                        {!s.serviceId || aiPredictions[s.name]?.is_low_data ? (
+                          <span
+                            className="inline-flex cursor-help items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 hover:bg-slate-200"
+                            title={aiPredictions[s.name]?.sample_count !== undefined
+                              ? `Need at least 10 completed jobs for AI estimation (${aiPredictions[s.name].sample_count}/10 completed)`
+                              : "Need more historical data for AI estimation"}
+                          >
+                            🤖 Low Data
+                          </span>
+                        ) : aiPredictions[s.name] && aiPredictions[s.name].predicted_duration_mins && (
+                          <span
+                            className="inline-flex cursor-help items-center gap-1 rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-700 hover:bg-purple-200"
+                            title={`${aiPredictions[s.name].is_mock ? 'ai' : 'AI'} suggests ${Math.round(aiPredictions[s.name].predicted_duration_mins! / 60 * 10) / 10} hrs`}
+                          >
+                            🤖 {Math.round(aiPredictions[s.name].predicted_duration_mins! / 60 * 10) / 10} hrs
+                          </span>
+                        )}
+                      </p>
+                      {isEditing ? (
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              min={0.5}
+                              step={0.5}
+                              value={editHoursStr}
+                              onChange={e => setEditVals(prev => ({...prev, [s.name]: { ...prev[s.name], hours: e.target.value }}))}
+                              onKeyDown={onKey}
+                              autoFocus
+                              className={`w-full rounded-md border p-1.5 text-sm outline-none ${hoursError ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-emerald-500'}`}
+                            />
+                            <span className="text-xs text-slate-500">hrs</span>
+                          </div>
+                          {hoursError && <span className="text-[10px] leading-tight text-red-500 w-full">{hoursError}</span>}
+                        </div>
+                      ) : (
+                        <span className="font-semibold text-slate-800">{s.hours} hr{s.hours === 1 ? '' : 's'}</span>
+                      )}
+                    </div>
+
+                    {/* Cost Column */}
+                    <div className="flex-1">
+                      <p className="mb-1 flex items-center gap-1.5 text-slate-400">
+                        Labor Cost
+                        {!s.serviceId || aiPredictions[s.name]?.is_low_data ? (
+                          <span
+                            className="inline-flex cursor-help items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 hover:bg-slate-200"
+                            title={aiPredictions[s.name]?.sample_count !== undefined
+                              ? `Need at least 10 completed jobs for AI estimation (${aiPredictions[s.name].sample_count}/10 completed)`
+                              : "Need more historical data for AI estimation"}
+                          >
+                            🤖 Low Data
+                          </span>
+                        ) : aiPredictions[s.name] && aiPredictions[s.name].predicted_amount ? (
+                          <span
+                            className="inline-flex cursor-help items-center gap-1 rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-700 hover:bg-purple-200"
+                            title={`${aiPredictions[s.name].is_mock ? 'ai' : 'AI'} suggests ${peso(aiPredictions[s.name].predicted_amount)}`}
+                          >
+                            🤖 {peso(aiPredictions[s.name].predicted_amount)}
+                          </span>
+                        ) : null}
+                      </p>
+                      {isEditing ? (
+                        <div className="flex items-start gap-2">
+                          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <input
+                              type="number"
+                              min={0}
+                              step={1}
+                              value={editPriceStr}
+                              onChange={e => setEditVals(prev => ({...prev, [s.name]: { ...prev[s.name], price: e.target.value }}))}
+                              onKeyDown={onKey}
+                              className={`w-full rounded-md border p-1.5 text-sm outline-none ${priceError ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-emerald-500'}`}
+                            />
+                            {priceError && <span className="text-[10px] leading-tight text-red-500 w-full">{priceError}</span>}
+                          </div>
+                          <button
+                            type="button"
+                            disabled={!!error}
+                            onClick={() => {
+                              if (!error) {
+                                updateService(s.name, Number(editHoursStr), Number(editPriceStr))
+                                setEditVals(prev => { const n = {...prev}; delete n[s.name]; return n })
+                              }
+                            }}
+                            className={`mt-0.5 shrink-0 rounded p-1 ${error ? 'text-slate-300' : 'text-emerald-600 hover:bg-emerald-50'}`}
+                            aria-label="Save edits"
+                          >
+                            <Check size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="font-semibold text-slate-800">{peso(s.price)}</span>
+                      )}
+                    </div>
                   </div>
                   {/* Parts under this service */}
                   {parts.filter((p) => p.serviceName === s.name).map((p, i) => (
@@ -311,7 +511,7 @@ export function ReportFindingModal({
                     <button type="button" onClick={() => setPartFor(s.name)} className="mt-1.5 flex items-center gap-1 pl-3 text-xs font-semibold text-emerald-600 hover:underline"><Plus size={12} /> Add part</button>
                   )}
                 </li>
-              ))}
+              )})}
             </ul>
           )}
         </div>

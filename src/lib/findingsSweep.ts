@@ -11,7 +11,7 @@
 
 import { db } from '@/lib/db'
 import { notifyCustomer } from '@/lib/customerNotify'
-import { FINDING_REMINDER_HOURS, FINDING_TIMEOUT_HOURS } from '@/data/findingPolicy'
+import { FINDING_REMINDER_MINUTES, FINDING_TIMEOUT_HOURS } from '@/data/findingPolicy'
 
 let lastRunAt = 0
 const MIN_GAP_MS = 60_000 // the bell polls faster than this; once a minute is plenty
@@ -30,8 +30,8 @@ export async function sweepPendingFindings(force = false): Promise<{ reminded: n
                       AND s.new_values LIKE '{"notify":true,"event":"finding_overdue"%') AS escalated
      FROM service_findings f
      WHERE f.decision = 'pending'
-       AND f.created_at < NOW() - ($1 * INTERVAL '1 hour')`,
-    [FINDING_REMINDER_HOURS],
+       AND f.created_at < NOW() - ($1 * INTERVAL '1 minute')`,
+    [FINDING_REMINDER_MINUTES],
   )
 
   let reminded = 0
@@ -47,10 +47,10 @@ export async function sweepPendingFindings(force = false): Promise<{ reminded: n
         entityId: f.id,
         event: 'finding_overdue',
         title: 'Final Notice: Approval Needed',
-        message: `We still haven't heard back on the ${cost} of additional work found on your vehicle (Job Order #JO-${f.job_order_id}). The shop will call you; your vehicle may be moved to staging until you decide.`,
+        message: `We still haven't heard back on the ${cost} of additional work found on your vehicle (Job Order #JO-${f.job_order_id}). The request is now on hold until you answer. Please approve or decline it, or the shop will call you.`,
       })
       overdue++
-    } else if (age >= FINDING_REMINDER_HOURS && !f.reminded) {
+    } else if (age >= FINDING_REMINDER_MINUTES / 60 && !f.reminded) {
       await notifyCustomer({
         jobOrderId: f.job_order_id,
         entityType: 'service_findings',

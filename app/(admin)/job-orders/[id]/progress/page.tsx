@@ -15,7 +15,7 @@ import { getQuotationById, getJobOrderBill, type JobOrderBill } from '@/controll
 import { getServiceProgressById, scheduleTask, setPartStatus, finishTask, getSuppliers, addSupplier, recordPartsPurchase } from '@/controllers/serviceProgressController'
 import { ReportFindingModal } from '@/components/dashboard/ReportFindingModal'
 import { decidePullOut } from '@/controllers/pullOutController'
-import { FINDING_TIMEOUT_HOURS, findingAgeHours, findingIsOverdue } from '@/data/findingPolicy'
+import { FINDING_TIMEOUT_HOURS, SUSPENDED_LABEL, findingAgeHours, findingIsOverdue } from '@/data/findingPolicy'
 import { isRoadTest } from '@/data/roadTest'
 import { isDiagnosticScanTask } from '@/data/diagnosticScan'
 import { mechanicIsFull } from '@/data/mechanicPolicy'
@@ -239,6 +239,16 @@ export default function page() {
     const fromQuotation = quotation?.services.reduce((sum, s) => sum + (s.laborHours || 0), 0) ?? 0
     return fromQuotation > 0 ? Math.round(fromQuotation * 10) / 10 : (initial?.timer.estimatedDurationHours ?? 0)
   }, [quotation, initial?.timer.estimatedDurationHours])
+
+  const vehicleProp = useMemo(() => {
+    if (!jobOrder) return undefined
+    const match = !jobOrder.vehicleYear ? jobOrder.vehicle.match(/^(\d{4})\s+(.+)$/) : null
+    const year = jobOrder.vehicleYear || (match ? parseInt(match[1]) : new Date().getFullYear())
+    const type = (match ? match[2] : jobOrder.vehicle) || 'Unknown'
+    const age = Math.max(0, new Date().getFullYear() - year)
+    const mileage = jobOrder.mileage || (age * 15000)
+    return { year, type, mileage }
+  }, [jobOrder])
 
   // Job-level finish = the latest estimate across ALL tasks — the same number
   // the task cards show, rolled up. Finished tasks count too, so it's one
@@ -848,14 +858,14 @@ export default function page() {
                   <span className={`flex items-center gap-1.5 text-sm font-semibold ${tone.text}`}><Hourglass size={14} /> Finding sent to customer · {currency(f.extraCost)}</span>
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${tone.pill}`}>
                     {overdue
-                      ? `No answer for ${findingAgeHours(f.createdAt, now)} h`
+                      ? `${SUSPENDED_LABEL} · ${findingAgeHours(f.createdAt, now)} h`
                       : `Waiting ${findingAgeHours(f.createdAt, now)} h · ${Math.round((FINDING_TIMEOUT_HOURS - findingAgeHours(f.createdAt, now)) * 10) / 10} h left to answer`}
                   </span>
                 </div>
                 <p className={`mt-1 text-sm ${tone.sub}`}>{f.findings}</p>
                 {overdue && (
                   <p className="mt-1 text-xs font-semibold text-rose-700">
-                    Past the {FINDING_TIMEOUT_HOURS}-hour window. Call the customer; per shop policy the vehicle moves to staging until they decide.
+                    Past the {FINDING_TIMEOUT_HOURS}-hour window. Call the customer. This request stays on hold until they decide; the mechanics can keep working on the approved services.
                   </p>
                 )}
                 <p className={`mt-1 text-xs ${tone.meta}`}>
@@ -1207,6 +1217,7 @@ export default function page() {
         <ReportFindingModal
           jobOrderId={jobOrderId}
           task={findingModal.task}
+          vehicle={vehicleProp}
           onClose={() => setFindingModal(null)}
           onSent={refreshTasks}
         />
