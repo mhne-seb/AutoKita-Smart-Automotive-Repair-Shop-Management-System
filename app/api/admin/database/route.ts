@@ -90,6 +90,15 @@ function formatActionTitle(action: string, entityType: string, newVals: any, emp
   if (entityType === 'service_tickets' && action === 'rejected') {
     return 'Declined Service Ticket'
   }
+  if (entityType === 'payments' && action === 'approved') {
+    return 'Payment Verified'
+  }
+  if (entityType === 'payments' && action === 'rejected') {
+    return 'Payment Rejected'
+  }
+  if (entityType === 'payments' && action === 'created') {
+    return 'Payment Submitted'
+  }
   if (entityType === 'service_tickets' && action === 'status_changed') {
     return 'Modified Ticket Status'
   }
@@ -312,7 +321,7 @@ export async function GET(req: NextRequest) {
   } catch (err: any) {
     console.error('Database administration audit logs GET error:', err)
     return NextResponse.json(
-      { success: false, message: 'Failed to fetch audit logs', debug: err.message },
+      { success: false, message: 'Failed to fetch audit logs', ...(process.env.NODE_ENV !== 'production' ? { debug: err.message } : {}) },
       { status: 500 }
     )
   }

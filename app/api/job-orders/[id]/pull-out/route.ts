@@ -1,7 +1,6 @@
 import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getLatestPullOut } from '@/lib/pullOut'
 import { notifyCustomer } from '@/lib/customerNotify'
 
 // The shop answers a pull-out request (paper UC 15, steps 4–7 and 4a–4c).
@@ -45,7 +44,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const client = await db.connect()
   try {
     await client.query('BEGIN')
-    const req = await getLatestPullOut(jobOrderId)
+    // Read (and lock) the latest request inside this transaction, so two
+    // admins answering at once cannot both decide it.
+    const reqRes = await client.query(
+      `SELECT id, decision::text AS decision FROM pull_out_requests
+       WHERE job_order_id = $1 ORDER BY created_at DESC, id DESC LIMIT 1 FOR UPDATE`,
+      [jobOrderId],
+    )
+    const req = reqRes.rows[0]
     if (!req || req.decision !== 'pending') {
       await client.query('ROLLBACK')
       return NextResponse.json({ success: false, message: 'No pending pull-out request on this job order' }, { status: 409 })
@@ -54,8 +60,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     let cancelled: string[] = []
     let committed: string[] = []
     if (action === 'approve') {
-      // 1. Unstarted tasks with NO ordered part → cancelled. A task is
-      //    committed if any part on its service is past 'to_order'. Parts
+      // 1. Unstarted tasks with NO bought part → cancelled. A task is
+      //    committed if any part on its service was actually bought
+      //    (ordered, in transit, received or installed). A part still to
+      //    order, or one that was already in stock, costs the shop nothing
+      //    extra, so it does not commit the service. Parts
       //    match tasks by service name AND finding (two same-named services
       //    from different findings must not share parts) — the same rule
       //    the progress page uses.
@@ -68,9 +77,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
              JOIN services s ON s.id = jos.service_id
              WHERE jos.job_order_id = $1 AND s.service_name = spt.task_title
                AND jos.finding_id IS NOT DISTINCT FROM spt.finding_id
-               AND p.status <> 'to_order'
+               AND p.status IN ('ordered', 'in_transit', 'received', 'installed')
            )
-         RETURNING task_title`,
+         RETURNING task_title, finding_id`,
         [jobOrderId],
       )
       cancelled = c.rows.map((r) => r.task_title)
@@ -82,12 +91,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
       if (cancelled.length > 0) {
         // 2. Cancelled labor and its never-bought parts come off the bill.
+        // Match by service name AND finding, the same way the tasks were
+        // matched above, so a same-named service from another finding keeps its price.
         const jos = await client.query(
           `UPDATE job_order_services jos SET actual_amount = 0
-           FROM services s
-           WHERE jos.job_order_id = $1 AND s.id = jos.service_id AND s.service_name = ANY($2::text[])
+           FROM services s, unnest($2::text[], $3::int[]) AS c(title, fid)
+           WHERE jos.job_order_id = $1 AND s.id = jos.service_id
+             AND s.service_name = c.title AND jos.finding_id IS NOT DISTINCT FROM c.fid
            RETURNING jos.id`,
-          [jobOrderId, cancelled],
+          [jobOrderId, c.rows.map((r) => r.task_title), c.rows.map((r) => r.finding_id)],
         )
         const ids = jos.rows.map((r) => r.id)
         if (ids.length > 0) {
@@ -116,10 +128,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       [req.id, action === 'approve' ? 'approved' : 'disputed', note || null],
     )
     await client.query(
-      `INSERT INTO system_audit_logs (action_performed, entity_type, entity_id, new_values, action_date)
-       VALUES ($1::audit_action_enum, 'pull_out_requests', $2, $3, NOW())`,
+      `INSERT INTO system_audit_logs (employees_id, action_performed, entity_type, entity_id, new_values, action_date)
+       VALUES ($4, $1::audit_action_enum, 'pull_out_requests', $2, $3, NOW())`,
       [action === 'approve' ? 'approved' : 'rejected', req.id,
-       JSON.stringify({ event: action === 'approve' ? 'pull_out_approved' : 'pull_out_denied', job_order_id: jobOrderId, cancelled_tasks: cancelled, committed_tasks: committed, note: note || null })],
+       JSON.stringify({ event: action === 'approve' ? 'pull_out_approved' : 'pull_out_denied', job_order_id: jobOrderId, cancelled_tasks: cancelled, committed_tasks: committed, note: note || null }),
+       auth.session.userId],
     )
     await client.query('COMMIT')
 
@@ -136,7 +149,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   } catch (error) {
     await client.query('ROLLBACK')
     console.error('Pull-out decision error:', error)
-    return NextResponse.json({ success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
+    return NextResponse.json({ success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: error instanceof Error ? error.message : String(error) } : {}) }, { status: 500 })
   } finally {
     client.release()
   }

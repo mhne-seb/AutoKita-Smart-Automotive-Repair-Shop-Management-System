@@ -47,6 +47,7 @@ export async function GET() {
     )
 
     let churnResults: any[] = []
+    let mlOffline = false
     if (customersWithData.length > 0) {
       // Build feature payloads for the churn model
       const featurePayloads = customersWithData.map((c: any) => ({
@@ -60,12 +61,20 @@ export async function GET() {
         mileage: c.mileage || ((c.vehicle_year ? new Date().getFullYear() - c.vehicle_year : 5) * 15000),
       }))
 
-      const mlRes = await mlFetch('/predict/churn', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(featurePayloads),
-      })
-      churnResults = await mlRes.json()
+      // If the ML server is asleep or offline, do not fail the whole page:
+      // fall back to the estimated grouping below and tell the screen.
+      try {
+        const mlRes = await mlFetch('/predict/churn', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(featurePayloads),
+        })
+        churnResults = await mlRes.json()
+      } catch (mlErr) {
+        console.error('Churn: ML server unavailable, using estimates:', mlErr)
+        mlOffline = true
+        churnResults = []
+      }
     }
 
     // Deterministic pseudo-hash helper based on string seed
@@ -168,7 +177,7 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json({ success: true, data: output })
+    return NextResponse.json({ success: true, data: output, mlOffline })
   } catch (error) {
     console.error('Churn prediction error:', error)
     return NextResponse.json(

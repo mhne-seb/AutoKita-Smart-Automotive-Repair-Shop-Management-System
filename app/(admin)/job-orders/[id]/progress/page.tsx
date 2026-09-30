@@ -803,7 +803,9 @@ export default function page() {
           <p className="mt-2 text-xs text-rose-800/80">
             {(() => {
               const pending = serviceTasks.filter((t) => t.status === 'pending')
-              const committed = pending.filter((t) => (t.parts ?? []).some((p) => p.status !== 'to_order'))
+              // Same rule as the server: only parts the shop actually bought
+              // commit a service. Parts still to order, or already in stock, do not.
+              const committed = pending.filter((t) => (t.parts ?? []).some((p) => ['ordered', 'in_transit', 'received', 'installed'].includes(p.status)))
               const free = pending.length - committed.length
               return `Approving cancels ${free} unstarted service${free === 1 ? '' : 's'} at no charge. ${committed.length ? `${committed.length} unstarted service${committed.length === 1 ? ' has' : 's have'} parts already ordered — ${committed.length === 1 ? 'it stays' : 'they stay'} and must be completed. ` : ''}Finished and started work is billed as usual.`
             })()}

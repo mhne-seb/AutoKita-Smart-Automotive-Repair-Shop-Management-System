@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
 import { uploadPaymentProof } from '@/lib/storage'
-import { readTransferDetails } from '@/lib/paymentForm'
+import { readTransferDetails, hasImageSignature, referenceAlreadyUsed, PROOF_NOT_IMAGE_MESSAGE, REFERENCE_USED_MESSAGE } from '@/lib/paymentForm'
 import { getJobOrderBill } from '@/lib/jobOrderBill'
 
 // Customer settles the remaining balance on a finished job (paper: Table 16,
@@ -63,6 +63,8 @@ export async function POST(request: NextRequest) {
     if (method === 'ewallet') {
       const transfer = readTransferDetails(form)
       if (!transfer.ok) return NextResponse.json({ error: transfer.error }, { status: transfer.status })
+      if (!(await hasImageSignature(transfer.file))) return NextResponse.json({ error: PROOF_NOT_IMAGE_MESSAGE }, { status: 415 })
+      if (await referenceAlreadyUsed(transfer.referenceNumber)) return NextResponse.json({ error: REFERENCE_USED_MESSAGE }, { status: 409 })
       dbMethod = transfer.channel.type
       channelLabel = transfer.channel.label
       referenceNumber = transfer.referenceNumber

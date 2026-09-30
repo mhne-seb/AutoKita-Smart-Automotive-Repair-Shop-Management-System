@@ -69,7 +69,7 @@ export async function GET() {
   } catch (err: any) {
     console.error('Schedule GET error:', err)
     return NextResponse.json(
-      { success: false, message: 'Internal server error', debug: err.message },
+      { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: err.message } : {}) },
       { status: 500 }
     )
   }

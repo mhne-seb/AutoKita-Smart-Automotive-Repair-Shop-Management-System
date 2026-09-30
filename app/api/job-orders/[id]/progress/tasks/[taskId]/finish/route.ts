@@ -72,7 +72,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   } catch (error) {
     console.error('Task finish error:', error)
     return NextResponse.json(
-      { success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) },
+      { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: error instanceof Error ? error.message : String(error) } : {}) },
       { status: 500 },
     )
   }
