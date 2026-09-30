@@ -3,6 +3,8 @@ import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
 import { getJobOrderBill } from '@/lib/jobOrderBill'
 
+import { effectiveWarrantyStatus } from '@/lib/warranty'
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const userIdParam = searchParams.get('userId')
@@ -52,7 +54,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       jobOrder,
       logs: logsRes.rows,
-      warranties: warrantiesRes.rows,
+      warranties: warrantiesRes.rows.map(w => ({ ...w, status: effectiveWarrantyStatus(w.status, w.expiration_date) })),
       services: servicesRes.rows,
       parts: partsRes.rows,
       bill,

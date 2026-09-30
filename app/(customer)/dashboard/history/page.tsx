@@ -835,14 +835,14 @@ function WarrantiesPanel({ userId }: { userId: number }) {
                   <div>
                     <div className="text-sm font-medium">{w.description}</div>
                     <div className="text-xs text-muted-foreground">
-                      {w.vehicle} · Covered until {fmtDate(w.expirationDate)}
+                      {w.vehicle}{w.completedAt ? ` · Completed ${fmtDate(w.completedAt)}` : ''} · Covered until {fmtDate(w.expirationDate)}
                     </div>
                   </div>
                   {w.hasPendingClaim ? (
                     <span className="shrink-0 rounded-full bg-warning/15 px-2.5 py-1 text-[11px] font-semibold text-warning">
                       Report sent — waiting for the shop
                     </span>
-                  ) : claimingId !== w.warrantyId ? (
+                  ) : claimingId !== w.warrantyId && (w.status === 'active' || w.status === 'nearing_expiration') ? (
                     <button
                       onClick={() => openReport(w.warrantyId)}
                       className="shrink-0 rounded-md border px-3 py-1.5 text-xs font-semibold hover:bg-accent"
@@ -923,7 +923,9 @@ function WarrantiesPanel({ userId }: { userId: number }) {
               <div key={w.warrantyId} className="flex items-center justify-between gap-3 py-3">
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">{w.description}</div>
-                  <div className="text-xs text-muted-foreground">{w.vehicle}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {w.vehicle}{w.completedAt ? ` · Completed ${fmtDate(w.completedAt)}` : ''}
+                  </div>
                 </div>
                 <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold capitalize text-muted-foreground">
                   {w.status}

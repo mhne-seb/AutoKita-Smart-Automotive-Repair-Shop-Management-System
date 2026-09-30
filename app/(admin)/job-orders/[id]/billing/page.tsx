@@ -43,11 +43,7 @@ export default function BillingPage() {
   const [rejectingPayment, setRejectingPayment] = useState<BillingPayment | null>(null)
   const [releasing, setReleasing] = useState(false)
   const [confirmRelease, setConfirmRelease] = useState(false)
-  // Warranty is entered once, at release, and can't be edited afterward —
-  // bulkMonths is the default applied to every part; a part in this map
-  // overrides that default (e.g. a battery carrying a longer term).
-  const [bulkMonths, setBulkMonths] = useState(6)
-  const [warrantyOverrides, setWarrantyOverrides] = useState<Record<number, number>>({})
+  const [warrantyChoices, setWarrantyChoices] = useState<Record<number, number | ''>>({})
 
   async function load() {
     const [jo, b] = await Promise.all([getJobOrderById(jobOrderId), getBillingData(jobOrderId)])
@@ -84,9 +80,12 @@ export default function BillingPage() {
 
   async function onRelease() {
     setReleasing(true)
-    const warrantyByPart = Object.fromEntries(
-      (data?.parts ?? []).map((p) => [p.id, warrantyOverrides[p.id] ?? bulkMonths]),
-    )
+    const warrantyByPart: Record<number, number> = {}
+    for (const p of data?.parts ?? []) {
+      if (p.warranty || p.warranty_months !== null) continue
+      const w = warrantyChoices[p.id]
+      if (w !== undefined && w !== '') warrantyByPart[p.id] = Number(w)
+    }
     const r = await releaseVehicle(jobOrderId, warrantyByPart)
     setReleasing(false)
     setConfirmRelease(false)
@@ -231,49 +230,55 @@ export default function BillingPage() {
                 </p>
                 {confirmRelease ? (
                   <div className="mt-3 space-y-3">
-                    {data.parts.length > 0 && (
+                    {data.parts.filter(p => !p.warranty).length > 0 && (
                       <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                        <div className="flex items-end gap-2">
-                          <div className="flex-1">
-                            <label className="text-xs font-semibold text-slate-600">Apply warranty to all parts</label>
-                            <select
-                              value={bulkMonths}
-                              onChange={(e) => setBulkMonths(Number(e.target.value))}
-                              className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm"
-                            >
-                              <option value={3}>3 months</option>
-                              <option value={6}>6 months</option>
-                              <option value={12}>12 months</option>
-                            </select>
-                          </div>
-                          <button
-                            onClick={() => setWarrantyOverrides({})}
-                            className="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100"
-                          >
-                            Apply
-                          </button>
+                        <h4 className="text-xs font-bold text-slate-700">Warranty per part</h4>
+                        <p className="mt-1 mb-3 text-[11px] text-slate-500">Terms were agreed on the quotation and start today. Parts quoted before warranties were added need a choice here.</p>
+                        <div className="space-y-1.5">
+                          {data.parts.filter(p => !p.warranty).map((p) => {
+                            if (p.warranty_months !== null) {
+                              const label = p.warranty_months === 0 ? 'No warranty' : `${p.warranty_months} month${p.warranty_months === 1 ? '' : 's'}`
+                              return (
+                                <div key={p.id} className="text-xs text-slate-600 truncate">
+                                  {p.name} &middot; {label}
+                                </div>
+                              )
+                            }
+
+                            const choice = warrantyChoices[p.id]
+                            const w = choice !== undefined ? choice : ''
+                            
+                            return (
+                              <div key={p.id} className="flex items-center justify-between gap-2 text-xs">
+                                <span className="truncate text-slate-600">{p.name}</span>
+                                <select
+                                  value={w}
+                                  onChange={(e) => setWarrantyChoices((prev) => ({ ...prev, [p.id]: e.target.value === '' ? '' : Number(e.target.value) }))}
+                                  className={`rounded-md border bg-white px-1.5 py-1 text-xs ${w === '' ? 'border-rose-500' : 'border-slate-200'}`}
+                                >
+                                  {w === '' && <option value="" disabled>Choose…</option>}
+                                  <option value={0}>No warranty</option>
+                                  <option value={1}>1 month</option>
+                                  <option value={3}>3 months</option>
+                                  <option value={6}>6 months</option>
+                                  <option value={12}>12 months</option>
+                                  <option value={24}>24 months</option>
+                                </select>
+                              </div>
+                            )
+                          })}
                         </div>
-                        <div className="mt-2 space-y-1.5">
-                          {data.parts.map((p) => (
-                            <div key={p.id} className="flex items-center justify-between gap-2 text-xs">
-                              <span className="truncate text-slate-600">{p.name}</span>
-                              <select
-                                value={warrantyOverrides[p.id] ?? bulkMonths}
-                                onChange={(e) => setWarrantyOverrides((prev) => ({ ...prev, [p.id]: Number(e.target.value) }))}
-                                className="rounded-md border border-slate-200 bg-white px-1.5 py-1 text-xs"
-                              >
-                                <option value={3}>3 months</option>
-                                <option value={6}>6 months</option>
-                                <option value={12}>12 months</option>
-                              </select>
-                            </div>
-                          ))}
-                        </div>
-                        <p className="mt-2 text-[11px] text-slate-400">Locked once released — each part keeps its own term.</p>
+                        <p className="mt-2 text-[11px] text-slate-400">Saved when you release.</p>
                       </div>
                     )}
                     <div className="flex gap-2">
-                      <button onClick={onRelease} disabled={releasing} className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50">{releasing ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Yes, released</button>
+                      <button 
+                        onClick={onRelease} 
+                        disabled={releasing || data.parts.filter(p => !p.warranty && p.warranty_months === null).some(p => warrantyChoices[p.id] === undefined || warrantyChoices[p.id] === '')} 
+                        className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                      >
+                        {releasing ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Yes, released
+                      </button>
                       <button onClick={() => setConfirmRelease(false)} disabled={releasing} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
                     </div>
                   </div>

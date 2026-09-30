@@ -10,6 +10,7 @@ export type CustomerWarranty = {
   jobOrderId: number
   vehicle: string
   hasPendingClaim: boolean
+  completedAt: string | null
 }
 
 export async function getCustomerWarranties(userId: number): Promise<{ active: CustomerWarranty[]; history: CustomerWarranty[] }> {
