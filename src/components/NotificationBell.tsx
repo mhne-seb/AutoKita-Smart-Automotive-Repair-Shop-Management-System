@@ -10,16 +10,21 @@ export type NotificationItem = {
   title: string
   message: string
   time: string
+  at?: string
   href?: string
 }
+
+import { NotificationsModal } from './NotificationsModal'
 
 export function NotificationBell({
   notifications,
   storageKey,
+  loadAll,
   buttonClassName = 'relative rounded-md p-2 hover:bg-accent',
 }: {
   notifications: NotificationItem[]
   storageKey: string
+  loadAll?: () => Promise<NotificationItem[]>
   buttonClassName?: string
 }) {
   const router = useRouter()
@@ -29,13 +34,18 @@ export function NotificationBell({
   const lsKey = `${storageKey}:read`
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(lsKey)
-      if (raw) setReadKeys(new Set(JSON.parse(raw)))
-    } catch {
-      /* storage unavailable */
+    const handleStorageChange = () => {
+      try {
+        const raw = localStorage.getItem(lsKey)
+        if (raw) setReadKeys(new Set(JSON.parse(raw)))
+      } catch {}
     }
+    handleStorageChange()
+    window.addEventListener('autokita-notifs-read', handleStorageChange)
+    return () => window.removeEventListener('autokita-notifs-read', handleStorageChange)
   }, [lsKey])
+
+  const [modalOpen, setModalOpen] = useState(false)
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -138,7 +148,28 @@ export function NotificationBell({
               })
             )}
           </div>
+          {loadAll && (
+            <div className="border-t p-2">
+              <button
+                onClick={() => {
+                  setOpen(false)
+                  setModalOpen(true)
+                }}
+                className="w-full rounded-md py-2 text-center text-sm font-medium text-primary hover:bg-accent hover:underline"
+              >
+                View all notifications
+              </button>
+            </div>
+          )}
         </div>
+      )}
+
+      {modalOpen && loadAll && (
+        <NotificationsModal
+          storageKey={storageKey}
+          loadAll={loadAll}
+          onClose={() => setModalOpen(false)}
+        />
       )}
     </div>
   )

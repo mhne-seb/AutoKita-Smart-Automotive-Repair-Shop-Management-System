@@ -21,18 +21,7 @@ const TABS = [
 
 const FALLBACK_USER_ID = 280
 
-function timeAgo(iso: string): string {
-  const then = new Date(iso).getTime()
-  if (isNaN(then)) return ''
-  const mins = Math.floor((Date.now() - then) / 60_000)
-  if (mins < 1) return 'Just now'
-  if (mins < 60) return `${mins}m ago`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  const days = Math.floor(hrs / 24)
-  if (days < 7) return `${days}d ago`
-  return new Date(iso).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })
-}
+import { loadCustomerNotifications } from '@/lib/notificationFeeds'
 
 export function DashHeader() {
   const pathname = usePathname();
@@ -60,20 +49,9 @@ export function DashHeader() {
     let alive = true;
     const load = () => {
       if (typeof document !== "undefined" && document.hidden) return;
-      fetch(`/api/customer/notifications?userId=${userId}`)
-        .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((json) => {
-          if (!alive) return;
-          const items: NotificationItem[] = (json.notifications ?? []).map(
-            (a: { type: string; id: number; title: string; description: string; time: string; days_remaining?: number; job_order_id?: number; href?: string }) => ({
-              key: a.days_remaining !== undefined ? `${a.type}-${a.id}-${a.days_remaining}` : `${a.type}-${a.id}`,
-              title: a.title,
-              message: a.description,
-              time: timeAgo(a.time),
-              href: a.href || (a.job_order_id ? `/dashboard/tracking/${a.job_order_id}` : '/dashboard'),
-            }),
-          );
-          setNotifications(items);
+      loadCustomerNotifications()
+        .then((items) => {
+          if (alive) setNotifications(items)
         })
         .catch(() => {
           /* leave the bell as it was if the fetch fails */
@@ -146,7 +124,7 @@ export function DashHeader() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <NotificationBell notifications={notifications} storageKey="autokita-customer-notifs" />
+            <NotificationBell notifications={notifications} storageKey="autokita-customer-notifs" loadAll={() => loadCustomerNotifications(100)} />
             <div ref={ref} className="relative">
               <button
                 onClick={() => setOpen((v) => !v)}
