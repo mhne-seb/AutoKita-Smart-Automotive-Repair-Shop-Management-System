@@ -1,7 +1,10 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { searchParams } = new URL(request.url)
     const cycle = searchParams.get('cycle') || 'weekly'
@@ -343,9 +346,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const body = await request.json()
-    const { employeeId, field, value, adminId } = body
+    const { employeeId, field, value } = body
 
     if (!employeeId || !field || value === undefined) {
       return NextResponse.json(
@@ -355,7 +360,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const empIdNum = parseInt(String(employeeId), 10)
-    const currentAdminId = adminId ? parseInt(String(adminId), 10) : 1 // Fallback to System Admin
+    const currentAdminId = auth.session.userId
 
     const client = await db.connect()
     try {

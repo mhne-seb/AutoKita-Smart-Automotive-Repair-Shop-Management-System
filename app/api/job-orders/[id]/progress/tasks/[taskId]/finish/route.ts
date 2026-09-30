@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { uploadTaskPhoto, signFileUrl } from '@/lib/storage'
@@ -13,6 +14,8 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 // marked done, the job-order-level consequences run (road test creation,
 // job completion) — see lib/taskCompletion.
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string; taskId: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id, taskId } = await params
   const jobOrderId = Number(id)
   const form = await request.formData()

@@ -1,8 +1,11 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { DEFAULT_MECHANIC_CAPACITY } from '@/data/mechanicPolicy'
 
 export async function GET() {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const query = `
       SELECT 

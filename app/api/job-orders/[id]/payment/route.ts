@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { notifyCustomer } from '@/lib/customerNotify'
@@ -10,6 +11,8 @@ import { signFileUrl } from '@/lib/storage'
 // file isn't touched without going through Jubert.
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id } = await params
     const result = await db.query(
@@ -35,6 +38,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
 // PATCH — admin verifies or rejects the latest payment for this job order.
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id } = await params
     const { paymentId, decision } = await request.json()

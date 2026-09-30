@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server'
 import { getJobOrderBill } from '@/lib/jobOrderBill'
+import { requireStaffOrJobOrderOwner } from '@/lib/authGuard'
 
 // Admin-side: what this job order costs, what's been paid, and the latest
 // payment waiting on (or already through) verification.
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
+    
+    const auth = await requireStaffOrJobOrderOwner(Number(id))
+    if (!auth.ok) return auth.response
+    
     const bill = await getJobOrderBill(Number(id))
     return NextResponse.json({ success: true, bill })
   } catch (error) {

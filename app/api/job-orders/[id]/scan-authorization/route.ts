@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getLatestScanAuthorization } from '@/lib/scanAuthorization'
@@ -13,13 +14,17 @@ import { notifyCustomer } from '@/lib/customerNotify'
 //           approve. Refused if one is already pending, same rule as
 //           pull-out requests.
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id } = await params
   const jobOrderId = Number(id)
-  const auth = await getLatestScanAuthorization(jobOrderId)
-  return NextResponse.json({ success: true, authorization: auth })
+  const scanAuth = await getLatestScanAuthorization(jobOrderId)
+  return NextResponse.json({ success: true, authorization: scanAuth })
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id } = await params
   const jobOrderId = Number(id)
   const body = await request.json().catch(() => ({}))

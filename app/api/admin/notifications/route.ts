@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { sweepPendingFindings } from '@/lib/findingsSweep'
@@ -7,6 +8,8 @@ import { FINDING_TIMEOUT_HOURS } from '@/data/findingPolicy'
 // admin notification list in application code. Each row self-clears once the
 // admin acts (advance stage / release / verify payment).
 export async function GET(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const limitParam = req.nextUrl.searchParams.get('limit')
     let limit = 20
