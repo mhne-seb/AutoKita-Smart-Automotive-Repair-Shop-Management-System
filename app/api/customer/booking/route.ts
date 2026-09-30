@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 import { sendTempPasswordEmail } from '@/lib/mail'
 import { hashPassword } from '@/lib/password'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
@@ -27,6 +28,13 @@ export async function POST(req: NextRequest) {
     // Resolve the customer: use the logged-in id when we have one, otherwise
     // find them by email or create the account — same as the admin booking route.
     let finalUserId = userId
+    
+    if (finalUserId) {
+      const guard = await requireCustomer(finalUserId)
+      if (!guard.ok) return guard.response
+      finalUserId = guard.session.userId
+    }
+
     let tempPassword: string | null = null
     let accountEmailed = false
     let newCustomerName = ''
@@ -68,6 +76,13 @@ export async function POST(req: NextRequest) {
     }
 
     let finalVehicleId = vehicleId
+
+    if (finalUserId && finalVehicleId) {
+      const ownVeh = await db.query(`SELECT 1 FROM vehicles WHERE id = $1 AND user_id = $2`, [finalVehicleId, finalUserId])
+      if (ownVeh.rows.length === 0) {
+        return NextResponse.json({ success: false, message: 'Forbidden: not your vehicle' }, { status: 403 })
+      }
+    }
 
     // Insert the vehicle only if this plate is not already registered.
     if (!finalVehicleId && newVehicleDetails) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 import { getFindingsForJobOrder } from '@/lib/findings'
 import { getJobOrderBill } from '@/lib/jobOrderBill'
 import { getLatestPullOut } from '@/lib/pullOut'
@@ -13,10 +14,9 @@ export async function GET(request: NextRequest) {
   if (!userIdParam) {
     return NextResponse.json({ error: 'Missing required query parameter: userId' }, { status: 400 })
   }
-  const userId = parseInt(userIdParam, 10)
-  if (isNaN(userId)) {
-    return NextResponse.json({ error: 'userId must be a number' }, { status: 400 })
-  }
+  const guard = await (userIdParam ? requireCustomer(parseInt(userIdParam, 10)) : requireCustomer())
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
 
   try {
     let jobOrder

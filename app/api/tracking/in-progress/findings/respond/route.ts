@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 import { verifyOtp, FINDING_OTP_PURPOSE } from '@/lib/otp'
 import type { ProposedService, ProposedPart } from '@/data/types'
 import { isVerificationBypassed } from '@/lib/testMode'
@@ -12,10 +13,15 @@ import { isVerificationBypassed } from '@/lib/testMode'
 //   decline -> nothing is added; the finding stays on the job order as a
 //              "recommended, not done" record.
 export async function POST(request: NextRequest) {
-  const { userId, findingId, approved, otpToken, otpCode } = await request.json().catch(() => ({}))
-  if (!userId || !findingId || typeof approved !== 'boolean') {
-    return NextResponse.json({ success: false, message: 'userId, findingId and approved are required' }, { status: 400 })
+  const body = await request.json().catch(() => ({}))
+  const userIdRaw = body.userId
+  const { findingId, approved, otpToken, otpCode } = body
+  if (!findingId || typeof approved !== 'boolean') {
+    return NextResponse.json({ success: false, message: 'findingId and approved are required' }, { status: 400 })
   }
+  const guard = await (userIdRaw ? requireCustomer(userIdRaw) : requireCustomer())
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
   const bypass = isVerificationBypassed()
   if (approved && !bypass) {
     if (!otpToken || !otpCode) {
@@ -23,6 +29,12 @@ export async function POST(request: NextRequest) {
     }
     const otp = verifyOtp(String(otpToken), String(otpCode), FINDING_OTP_PURPOSE, `${userId}:${findingId}`)
     if (!otp.ok) {
+      if (otp.reason === 'too_many_attempts') {
+        return NextResponse.json(
+          { success: false, code: otp.reason, message: 'Too many wrong codes. Please try again in a few minutes.' },
+          { status: 429 },
+        )
+      }
       return NextResponse.json(
         { success: false, code: otp.reason, message: otp.reason === 'expired' ? 'That code has expired. Request a new one.' : 'Incorrect code. Please try again.' },
         { status: 401 },

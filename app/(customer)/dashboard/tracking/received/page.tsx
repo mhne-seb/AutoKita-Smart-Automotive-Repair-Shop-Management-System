@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Car, Clock, ShieldCheck, ClipboardList, Wrench, AlertCircle, Loader2, Store } from "lucide-react";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getReceivedData } from "@/controllers/serviceProgressController";
@@ -10,6 +10,7 @@ import { ShopLoading } from "@/components/ShopLoading";
 function Received() {
   useEffect(() => { document.title = "Vehicle Received — AutoKita"; }, []);
 
+  const router = useRouter();
   const searchParams = useSearchParams();
   const jobOrderIdParam = searchParams.get("jobOrderId");
 
@@ -21,7 +22,16 @@ function Received() {
     const jobOrderId = jobOrderIdParam ? Number(jobOrderIdParam) : undefined;
     setLoading(true);
     getReceivedData(userId, jobOrderId)
-      .then(setData)
+      .then((res: any) => {
+        if (res?._status === 401 || res?._status === 403) {
+          sessionStorage.removeItem("autokita_customer");
+          sessionStorage.removeItem("autokita_user_id");
+          sessionStorage.removeItem("autokita_user_name");
+          router.replace('/login');
+          return;
+        }
+        setData(res);
+      })
       .finally(() => setLoading(false));
   }, [jobOrderIdParam]);
 

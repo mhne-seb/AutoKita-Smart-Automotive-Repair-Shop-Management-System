@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 import { uploadPaymentProof } from '@/lib/storage'
 import { readTransferDetails } from '@/lib/paymentForm'
 
@@ -26,8 +27,38 @@ export async function POST(request: NextRequest) {
     // ignore
   }
 
+  if (!Array.isArray(acceptedServiceIds) || !acceptedServiceIds.every(id => Number.isInteger(id))) {
+    return NextResponse.json({ error: 'acceptedServiceIds must be an array of integers' }, { status: 400 })
+  }
+  if (!Array.isArray(declinedServiceIds) || !declinedServiceIds.every(id => Number.isInteger(id))) {
+    return NextResponse.json({ error: 'declinedServiceIds must be an array of integers' }, { status: 400 })
+  }
+
   if (!jobOrderId || !method || Number.isNaN(amount) || !Array.isArray(acceptedServiceIds)) {
     return NextResponse.json({ error: 'jobOrderId, method, amount, and acceptedServiceIds are required' }, { status: 400 })
+  }
+
+  const guard = await requireCustomer()
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
+
+  const ownerCheck = await db.query(
+    `SELECT user_id, status, quotation_approved FROM job_orders WHERE id = $1`,
+    [jobOrderId]
+  )
+  if (ownerCheck.rows.length === 0) return NextResponse.json({ error: 'Job order not found' }, { status: 404 })
+  const jo = ownerCheck.rows[0]
+  if (jo.user_id !== userId) return NextResponse.json({ error: 'Not your account.' }, { status: 403 })
+  if (jo.status !== 'pending_customer_approval' || jo.quotation_approved) {
+    return NextResponse.json({ error: 'Quotation already confirmed' }, { status: 409 })
+  }
+
+  const pendingPaymentCheck = await db.query(
+    `SELECT 1 FROM payments WHERE job_order_id = $1 AND verification_status = 'pending'`,
+    [jobOrderId]
+  )
+  if (pendingPaymentCheck.rows.length > 0) {
+    return NextResponse.json({ error: 'You already sent a payment. Please wait for the shop to confirm it.' }, { status: 409 })
   }
 
   // "Pay at Shop" is settled in cash at the counter — no proof needed.
@@ -37,7 +68,7 @@ export async function POST(request: NextRequest) {
   let dbMethod: 'cash' | 'e_wallet' | 'bank_transfer' = 'cash'
   let channelLabel: string | null = null
   let referenceNumber: string | null = null
-  let proofUrl: string | null = null
+  let proofFile: File | null = null
 
   if (method !== 'shop') {
     const transfer = readTransferDetails(form)
@@ -45,92 +76,72 @@ export async function POST(request: NextRequest) {
     dbMethod = transfer.channel.type
     channelLabel = transfer.channel.label
     referenceNumber = transfer.referenceNumber
-    proofUrl = await uploadPaymentProof(String(jobOrderId), transfer.file)
+    proofFile = transfer.file
   }
 
   try {
-    const { rows: joRows } = await db.query(
-      `SELECT quotation_approved FROM job_orders WHERE id = $1`, [jobOrderId]
-    )
-    if (joRows[0]?.quotation_approved) {
-      return NextResponse.json({ error: 'Quotation already confirmed' }, { status: 409 })
-    }
-
-    // 1. Fetch current services on the job order
+    // 1. Fetch current services on the job order to compute total
     const curRes = await db.query(
-      `SELECT jos.id, jos.service_id, s.service_name
+      `SELECT jos.id, jos.service_id, jos.actual_amount, s.service_name
        FROM job_order_services jos
        JOIN services s ON s.id = jos.service_id
        WHERE jos.job_order_id = $1`,
       [jobOrderId],
     )
     const currentServices = curRes.rows
+    const validServiceIds = new Set(currentServices.map((s) => Number(s.id)))
 
+    acceptedServiceIds = acceptedServiceIds.filter(id => validServiceIds.has(id))
+    declinedServiceIds = declinedServiceIds.filter(id => validServiceIds.has(id))
+
+    const acceptedSet = new Set<number>(acceptedServiceIds.map(Number))
     const feeServiceIds = new Set(
       currentServices
         .filter((s) => s.service_name === 'OBD-II Diagnostic Scan')
         .map((s) => Number(s.id)),
     )
 
-    const acceptedSet = new Set<number>(acceptedServiceIds.map(Number))
-    const declinedSet = new Set<number>(Array.isArray(declinedServiceIds) ? declinedServiceIds.map(Number) : [])
-
-    const customerAcceptedAll =
-      (Array.isArray(declinedServiceIds) && declinedServiceIds.length === 0) ||
-      (declinedSet.size === 0 && acceptedSet.size >= currentServices.length)
-
-    let idsToDelete: number[] = []
-
-    if (!customerAcceptedAll && currentServices.length > 0) {
-      const currentIds = currentServices.map((s) => Number(s.id))
-      const hasDeclinedOverlap = currentIds.some((id) => declinedSet.has(id))
-      const hasAcceptedOverlap = currentIds.some((id) => acceptedSet.has(id))
-
-      if (hasDeclinedOverlap) {
-        idsToDelete = currentIds.filter((id) => declinedSet.has(id) && !feeServiceIds.has(id))
-      } else if (hasAcceptedOverlap) {
-        idsToDelete = currentIds.filter((id) => !acceptedSet.has(id) && !feeServiceIds.has(id))
-      } else {
-        console.warn(
-          `[/api/tracking/quotation/payment] Warning: ID desynchronization detected for JO-${jobOrderId}. Client IDs: [${acceptedServiceIds}], Current IDs: [${currentIds}]. Skipping deletion to prevent data loss.`,
-        )
+    let serverTotal = 0
+    for (const s of currentServices) {
+      if (acceptedSet.has(Number(s.id)) || feeServiceIds.has(Number(s.id))) {
+        serverTotal += Number(s.actual_amount || 0)
       }
     }
 
-    if (idsToDelete.length > 0) {
-      await db.query(
-        `DELETE FROM job_order_parts
-         WHERE job_order_id = $1 AND job_order_service_id IS NOT NULL AND job_order_service_id = ANY($2::int[])`,
-        [jobOrderId, idsToDelete],
-      )
-      await db.query(
-        `DELETE FROM job_order_services WHERE job_order_id = $1 AND id = ANY($2::int[])`,
-        [jobOrderId, idsToDelete],
-      )
+    if (amount <= 0 || amount > serverTotal) {
+      return NextResponse.json({ error: `Amount must be greater than 0 and not exceed the total of ₱${serverTotal}` }, { status: 400 })
     }
+
+    if (serverTotal >= 50000) {
+      const minAmount = Math.round(serverTotal * 0.2)
+      if (amount < minAmount) {
+        return NextResponse.json({ error: `A 20% downpayment (₱${minAmount.toLocaleString()}) is required for bills of ₱50,000 or more.` }, { status: 400 })
+      }
+    }
+
+    let proofUrl: string | null = null
+    if (proofFile) {
+      proofUrl = await uploadPaymentProof(String(jobOrderId), proofFile)
+    }
+
+    const quotationSelection = JSON.stringify({ acceptedServiceIds, declinedServiceIds })
 
     const { rows } = await db.query(
       `INSERT INTO payments
-        (job_order_id, payment_method, amount_paid, payment_date, verification_status, payment_channel, reference_number, proof_of_payment_image)
-       VALUES ($1, $2::payment_method, $3, NOW(), 'pending', $4, $5, $6)
+        (job_order_id, payment_method, amount_paid, payment_date, verification_status, payment_channel, reference_number, proof_of_payment_image, quotation_selection)
+       VALUES ($1, $2::payment_method, $3, NOW(), 'pending', $4, $5, $6, $7::jsonb)
        RETURNING id`,
-      [jobOrderId, dbMethod, amount, channelLabel, referenceNumber, proofUrl]
+      [jobOrderId, dbMethod, amount, channelLabel, referenceNumber, proofUrl, quotationSelection]
+    )
+    const paymentId = rows[0].id
+
+    await db.query(
+      `INSERT INTO system_audit_logs (user_id, action_performed, entity_type, entity_id, new_values, action_date)
+       VALUES ($1, 'created'::audit_action_enum, 'payments', $2, $3, NOW())`,
+      [userId, paymentId, JSON.stringify({ event: 'quotation_payment_submitted', job_order_id: jobOrderId, acceptedServiceIds, declinedServiceIds })],
     )
 
-    // Submitting payment counts as confirming the quotation selection —
-    // lock it immediately so it can't be re-picked while payment is pending.
-    await db.query(`SELECT set_quotation_approval($1, $2)`, [jobOrderId, true])
-
-    // That also answers the quotation review round. The job order's stage
-    // deliberately does NOT move yet — a downpayment has to be verified by
-    // the shop before work starts (see the admin verify route).
-    const roundRes = await db.query(`SELECT id, customer_approval_status FROM get_pre_diagnostic($1)`, [jobOrderId])
-    const round = roundRes.rows[0]
-    if (round?.customer_approval_status === 'pending') {
-      await db.query(`SELECT update_pre_diagnostic_approval($1, 'approved'::approval_status)`, [round.id])
-    }
-
-    return NextResponse.json({ success: true, paymentId: rows[0].id })
+    return NextResponse.json({ success: true, paymentId })
   } catch (err) {
     console.error('[/api/tracking/quotation/payment] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

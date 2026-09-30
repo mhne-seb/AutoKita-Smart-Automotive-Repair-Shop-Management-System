@@ -30,7 +30,7 @@ function timeAgoAdmin(iso: string): string {
 
 export async function loadCustomerNotifications(limit?: number): Promise<NotificationItem[]> {
   const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null
-  const userId = stored ? parseInt(stored, 10) : 280
+  const userId = stored ? parseInt(stored, 10) : 0
   
   const url = limit ? `/api/customer/notifications?userId=${userId}&limit=${limit}` : `/api/customer/notifications?userId=${userId}`
   const res = await fetch(url)

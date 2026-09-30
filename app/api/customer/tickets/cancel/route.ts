@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 
 // Lets a customer withdraw a booking the shop hasn't started on. This is the
 // only cancellation the customer can do on their own: once a ticket becomes a
@@ -8,11 +9,17 @@ import { db } from '@/lib/db'
 // not this endpoint.
 export async function POST(request: NextRequest) {
   try {
-    const { userId, ticketId } = await request.json()
+    const body = await request.json()
+    const userIdRaw = body.userId
+    const ticketId = body.ticketId
 
-    if (!userId || !ticketId) {
-      return NextResponse.json({ success: false, message: 'Missing userId or ticketId' }, { status: 400 })
+    if (!ticketId) {
+      return NextResponse.json({ success: false, message: 'Missing ticketId' }, { status: 400 })
     }
+
+    const guard = await (userIdRaw ? requireCustomer(Number(userIdRaw)) : requireCustomer())
+    if (!guard.ok) return guard.response
+    const userId = guard.session.userId
 
     // All three guards live in the WHERE clause so there's no window between
     // checking and updating: must be this customer's ticket, must still be

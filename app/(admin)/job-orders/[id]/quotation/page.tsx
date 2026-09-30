@@ -14,6 +14,7 @@ import { getInspectionById } from '@/controllers/inspectionController'
 import { currency } from '@/data/mockData'
 import { toast } from 'sonner'
 import { QuotationService, JobOrderCard, QuotationData, MechanicalFinding, findingStatusMeta, QuotationPart } from '@/data/types'
+import { RejectPaymentModal } from '@/components/dashboard/RejectPaymentModal'
 
 export default function page() {
   const jobOrderId = String(useParams().id)
@@ -89,6 +90,7 @@ export default function page() {
   const [payment, setPayment] = useState<JobOrderPayment | null | undefined>(undefined)
   const [verifyingPayment, setVerifyingPayment] = useState(false)
   const [showProofLightbox, setShowProofLightbox] = useState(false)
+  const [showRejectModal, setShowRejectModal] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -100,12 +102,27 @@ export default function page() {
     }
   }, [jobOrderId])
 
-  async function handleVerifyPayment(decision: 'verified' | 'rejected') {
+  async function handleVerifyPayment(decision: 'verified' | 'rejected', reason?: string) {
     if (!payment) return
     setVerifyingPayment(true)
-    const ok = await verifyJobOrderPayment(jobOrderId, payment.id, decision)
-    if (ok) setPayment({ ...payment, verificationStatus: decision })
+    const ok = await verifyJobOrderPayment(jobOrderId, payment.id, decision, reason)
+    if (ok) {
+      setPayment({ ...payment, verificationStatus: decision })
+      const [freshQuotation, freshJobOrder] = await Promise.all([
+        getQuotationById(jobOrderId),
+        getJobOrderById(jobOrderId)
+      ])
+      if (freshQuotation) {
+        setInitial(freshQuotation)
+        setServices(freshQuotation.services)
+        setNotes(freshQuotation.notes)
+      }
+      if (freshJobOrder) {
+        setJobOrder(freshJobOrder)
+      }
+    }
     setVerifyingPayment(false)
+    setShowRejectModal(false)
   }
 
   // The handoff to the floor. Normally the stage is already in_progress by the
@@ -992,7 +1009,7 @@ export default function page() {
               {payment.verificationStatus === 'pending' && (
                 <div className="mt-4 flex gap-2">
                   <button
-                    onClick={() => handleVerifyPayment('rejected')}
+                    onClick={() => setShowRejectModal(true)}
                     disabled={verifyingPayment}
                     className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
                   >
@@ -1369,6 +1386,14 @@ export default function page() {
 
       {showProofLightbox && payment?.proofOfPaymentImage && (
         <Lightbox url={payment.proofOfPaymentImage} label="Proof of payment" onClose={() => setShowProofLightbox(false)} />
+      )}
+
+      {showRejectModal && (
+        <RejectPaymentModal
+          onClose={() => setShowRejectModal(false)}
+          onConfirm={(reason) => handleVerifyPayment('rejected', reason)}
+          isWorking={verifyingPayment}
+        />
       )}
     </div>
   )

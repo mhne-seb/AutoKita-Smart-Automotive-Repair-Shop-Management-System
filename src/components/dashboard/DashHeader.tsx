@@ -19,8 +19,6 @@ const TABS = [
   { to: "/dashboard/history", label: "Service History", icon: History },
 ] as const;
 
-const FALLBACK_USER_ID = 280
-
 import { loadCustomerNotifications } from '@/lib/notificationFeeds'
 
 export function DashHeader() {
@@ -45,7 +43,7 @@ export function DashHeader() {
   // without the customer reloading the page.
   useEffect(() => {
     const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
-    const userId = stored ? parseInt(stored, 10) : FALLBACK_USER_ID;
+    const userId = stored ? parseInt(stored, 10) : 0;
     let alive = true;
     const load = () => {
       if (typeof document !== "undefined" && document.hidden) return;
@@ -64,7 +62,7 @@ export function DashHeader() {
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
-    const userId = stored ? parseInt(stored, 10) : FALLBACK_USER_ID;
+    const userId = stored ? parseInt(stored, 10) : 0;
     const load = () =>
       fetch(`/api/customer/profile?userId=${userId}`)
         .then((r) => r.json())

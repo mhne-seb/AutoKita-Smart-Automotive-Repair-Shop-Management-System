@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 
 // The customer's Warranties tab (Service History) — every warranty across
 // every visit, active or past, via Jubert's get_customer_warranties /
 // get_customer_warranty_history. Also flags a warranty that already has a
 // pending claim, so the tab can hide/disable its Claim button.
 export async function GET(request: NextRequest) {
-  const userId = Number(request.nextUrl.searchParams.get('userId'))
-  if (!userId) return NextResponse.json({ success: false, message: 'userId is required' }, { status: 400 })
+  const userIdParam = request.nextUrl.searchParams.get('userId')
+  const guard = await (userIdParam ? requireCustomer(parseInt(userIdParam, 10)) : requireCustomer())
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
 
   try {
     const [active, history, pending] = await Promise.all([
