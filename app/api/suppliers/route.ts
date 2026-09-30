@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
@@ -7,6 +8,8 @@ import { db } from '@/lib/db'
 // is ever built.
 
 export async function GET() {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const result = await db.query(
       `SELECT id, supplier_name AS name
@@ -22,6 +25,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { name } = await request.json()
     const trimmed = String(name ?? '').trim()

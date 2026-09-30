@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
@@ -11,6 +12,8 @@ import { db } from '@/lib/db'
  *   { report_id: number, job_order_id: number, employee_id: number }
  */
 export async function PATCH(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const body = await req.json()
     const { report_id, job_order_id, employee_id } = body
@@ -80,6 +83,8 @@ export async function PATCH(req: NextRequest) {
  *   { report_id: number, employee_id?: number }
  */
 export async function DELETE(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const body = await req.json()
     const { report_id, employee_id = 1 } = body

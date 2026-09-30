@@ -1,8 +1,11 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import type { PoolClient } from 'pg'
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id } = await params
 
@@ -51,6 +54,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   // Declared out here so the catch below can roll the transaction back.
   let client: PoolClient | null = null
   try {

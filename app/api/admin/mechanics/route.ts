@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { DEFAULT_MECHANIC_CAPACITY } from '@/data/mechanicPolicy'
@@ -36,6 +37,8 @@ const AUDIT_SQL = `
   LIMIT 30`
 
 export async function GET() {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const [roster, payroll, auditLogsRes] = await Promise.all([
       db.query(`
@@ -125,6 +128,8 @@ function validate(b: Partial<MechanicBody>): string | null {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const body = (await request.json()) as MechanicBody
   const problem = validate(body)
   if (problem) return NextResponse.json({ success: false, message: problem }, { status: 400 })
@@ -195,6 +200,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const body = (await request.json()) as MechanicBody
   if (!body.id) return NextResponse.json({ success: false, message: 'Missing id' }, { status: 400 })
   const problem = validate(body)
@@ -311,6 +318,8 @@ export async function PATCH(request: NextRequest) {
 // payroll history must survive. remove_mechanic() verifies 0 open tasks
 // and sets status = 'terminated' and EOC = CURRENT_DATE.
 export async function DELETE(request: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const url = new URL(request.url)
   const id = Number(url.searchParams.get('id'))
   const adminIdParam = url.searchParams.get('adminId')

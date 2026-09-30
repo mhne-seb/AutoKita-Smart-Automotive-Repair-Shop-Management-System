@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server'
+import { requireStaff } from '@/lib/authGuard'
+import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { sweepPendingFindings } from '@/lib/findingsSweep'
 import { FINDING_TIMEOUT_HOURS } from '@/data/findingPolicy'
@@ -6,11 +7,22 @@ import { FINDING_TIMEOUT_HOURS } from '@/data/findingPolicy'
 // No new DB objects. Reads only existing stored functions and builds the
 // admin notification list in application code. Each row self-clears once the
 // admin acts (advance stage / release / verify payment).
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
+    const limitParam = req.nextUrl.searchParams.get('limit')
+    let limit = 20
+    if (limitParam) {
+      const parsed = parseInt(limitParam, 10)
+      if (!isNaN(parsed)) limit = Math.max(1, Math.min(100, parsed))
+    }
+
     // The bell polls every 30 s while an admin tab is on screen — that's
     // the app's clock for finding reminders (see lib/findingsSweep).
-    sweepPendingFindings().catch((e) => console.error('[notifications] sweep failed:', e))
+    if (!limitParam) {
+      sweepPendingFindings().catch((e) => console.error('[notifications] sweep failed:', e))
+    }
 
     // Only fetch rows that can become a notification. Pulling every job order
     // and every payment on each poll (then keeping 20) was most of the
@@ -41,7 +53,8 @@ export async function GET() {
            AND sal.action_performed IN ('approved', 'rejected')
            AND sal.entity_type IN ('pre_diagnostics', 'job_orders', 'service_findings')
          ORDER BY sal.action_date DESC
-         LIMIT 30`,
+         LIMIT $1`,
+         [Math.max(30, limit)]
       ),
       // get_job_orders_list() only has jo_date (a plain DATE, no time — the
       // job order was 'created' by create_job_order_from_ticket() at some
@@ -255,7 +268,7 @@ export async function GET() {
     }
     notifs.sort((a, b) => rank(b.notif_time) - rank(a.notif_time))
 
-    return NextResponse.json({ success: true, notifications: notifs.slice(0, 20) })
+    return NextResponse.json({ success: true, notifications: notifs.slice(0, limit) })
   } catch (err: unknown) {
     console.error('Admin notifications GET error:', err)
     return NextResponse.json(

@@ -1,9 +1,12 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { sendReviewReadyEmail } from '@/lib/mail'
 
 // GET — returns the most recent pre-diagnostic round for a job order, or null.
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id } = await params
     const result = await db.query(`SELECT * FROM get_pre_diagnostic($1)`, [id])
@@ -38,6 +41,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 // POST — creates a new pre-diagnostic round ("send for approval"). There's
 // no database function for this yet, so we insert directly.
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id } = await params
     const { notes, context } = await request.json()
@@ -98,6 +103,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 // DELETE — recalls (removes) a pending pre-diagnostic round so the admin can
 // make changes before re-sending. Only works when status is still 'pending'.
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id } = await params
 

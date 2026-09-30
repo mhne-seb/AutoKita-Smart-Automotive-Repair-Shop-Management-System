@@ -116,7 +116,9 @@ export function ReportFindingModal({
 
   async function pickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
+    e.target.value = '' // re-picking the same file still fires onChange
     if (!f) return
+    if (f.size > 5 * 1024 * 1024) return toast.error('Photo must be under 5MB.')
     setUploading(true)
     const r = await uploadFindingPhoto(jobOrderId, f)
     setUploading(false)
@@ -151,8 +153,8 @@ export function ReportFindingModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div>
             <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900"><AlertTriangle size={18} className="text-amber-500" /> Report a finding</h3>

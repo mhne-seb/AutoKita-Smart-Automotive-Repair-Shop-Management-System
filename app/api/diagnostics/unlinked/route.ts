@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
@@ -11,6 +12,8 @@ import { db } from '@/lib/db'
  *   { reports: OBD2Report[] }
  */
 export async function GET() {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const result = await db.query(`
       SELECT
@@ -52,6 +55,8 @@ export async function GET() {
  *   { report_id: number, employee_id?: number }
  */
 export async function DELETE(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const body = await req.json()
     const { report_id, employee_id = 1 } = body

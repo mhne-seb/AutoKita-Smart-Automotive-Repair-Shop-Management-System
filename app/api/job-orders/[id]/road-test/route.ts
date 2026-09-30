@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getRoadTestHistory, currentAttempt } from '@/lib/roadTest'
@@ -15,6 +16,8 @@ import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 // the fail instead, so unapproved work never lands in the bill.
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id } = await params
   const jobOrderId = Number(id)
   try {
@@ -68,6 +71,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 //   pass : notes?, photo?
 //   fail : notes (required), reworkTaskIds (JSON array, at least one), failedPartIds? (JSON array), photo?
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id } = await params
   const jobOrderId = Number(id)
   const form = await request.formData()

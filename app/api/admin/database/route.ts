@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
@@ -39,6 +40,8 @@ function formatEntityLabel(entityType: string): string {
       return 'Internal AI Message Table'
     case 'users':
       return 'Customer Account Table'
+    case 'vehicles':
+      return 'Vehicle Table'
     default:
       return entityType
         .split('_')
@@ -73,12 +76,14 @@ function formatEntityId(entityType: string, entityId: number): string {
       return `AI-MSG-${entityId}`
     case 'users':
       return `CUST-${entityId}`
+    case 'vehicles':
+      return `VEH-${entityId}`
     default:
       return `#${entityId}`
   }
 }
 
-function formatActionTitle(action: string, entityType: string, newVals: any): string {
+function formatActionTitle(action: string, entityType: string, newVals: any, employeeId: number | null): string {
   if (entityType === 'service_tickets' && action === 'approved') {
     return 'Accepted Service Ticket'
   }
@@ -92,7 +97,10 @@ function formatActionTitle(action: string, entityType: string, newVals: any): st
     return 'Modified Mechanic Profile'
   }
   if (entityType === 'users' && action === 'updated') {
-    return 'Customer Updated Their Account'
+    return employeeId ? 'Staff Updated Customer Details' : 'Customer Updated Their Account'
+  }
+  if (entityType === 'vehicles' && action === 'updated') {
+    return 'Staff Updated Vehicle Details'
   }
   if (entityType === 'employees' && action === 'created') {
     return 'Added New Mechanic'
@@ -182,6 +190,8 @@ function parseDiff(oldValues: string | null, newValues: string | null): Array<{ 
 }
 
 export async function GET(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { searchParams } = new URL(req.url)
     const limit = parseInt(searchParams.get('limit') || '500', 10)
@@ -241,7 +251,7 @@ export async function GET(req: NextRequest) {
         employeeDisplay = `Employee #${row.employees_id}`
       }
 
-      const actionTitle = formatActionTitle(row.action_performed, row.entity_type, parsedNew)
+      const actionTitle = formatActionTitle(row.action_performed, row.entity_type, parsedNew, row.employees_id)
       const entityLabel = formatEntityLabel(row.entity_type)
       const entityIdFormatted = formatEntityId(row.entity_type, row.entity_id)
 

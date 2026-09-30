@@ -167,10 +167,11 @@ export async function getDashboardActiveJobOrders(userId: number): Promise<Dashb
   )
 }
 
-export async function getDashboardRecentActivity(userId: number): Promise<DashboardActivity[]> {
+export async function getDashboardRecentActivity(userId: number, limit?: number): Promise<DashboardActivity[]> {
+ const qLimit = limit ?? 10
  const base = await db.query(
-    `SELECT * FROM get_dashboard_recent_activity($1)`,
-    [userId],
+    `SELECT * FROM get_dashboard_recent_activity($1) ORDER BY job_time DESC LIMIT $2`,
+    [userId, qLimit],
   )
 
   // 2. "Booking accepted" events. When an admin approves a ticket,
@@ -192,8 +193,8 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
        AND sal.action_performed = 'created'
        AND sal.entity_id IN (SELECT jo.id FROM job_orders jo WHERE jo.user_id = $1)
      ORDER BY sal.action_date DESC
-     LIMIT 10`,
-    [userId],
+     LIMIT $2`,
+    [userId, qLimit],
   )
 
   // 3. "Your report is ready" — fires when the mechanic sends a round for
@@ -243,8 +244,8 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
         WHERE vi.job_order_id IN (SELECT jo.id FROM job_orders jo WHERE jo.user_id = $1)
      ) r
      ORDER BY r.datetime_created DESC
-     LIMIT 10`,
-    [userId],
+     LIMIT $2`,
+    [userId, qLimit],
   )
 
   // 4. Appointment reminders: notify customer 2 days and 1 day (tomorrow)
@@ -300,8 +301,8 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
                 THEN (sal.new_values::jsonb ->> 'job_order_id')::int END
            IN (SELECT jo.id FROM job_orders jo WHERE jo.user_id = $1)
      ORDER BY sal.action_date DESC
-     LIMIT 10`,
-    [userId],
+     LIMIT $2`,
+    [userId, qLimit],
   )
 
   type RawActivityRow = {
@@ -345,7 +346,7 @@ export async function getDashboardRecentActivity(userId: number): Promise<Dashbo
       }
     })
     .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-    .slice(0, 10)
+    .slice(0, qLimit)
 }
 
 // Bookings the customer submitted that the shop hasn't turned into a job order

@@ -17,7 +17,29 @@ export default function AdminGroupLayout({ children }: { children: ReactNode }) 
       router.replace('/login')
       return
     }
-    setChecked(true)
+    
+    fetch('/api/auth/me')
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success || data.session?.role !== 'staff') {
+          sessionStorage.removeItem('autokita_admin')
+          sessionStorage.removeItem('autokita_customer')
+          sessionStorage.removeItem('autokita_user_id')
+          sessionStorage.removeItem('autokita_user_name')
+          sessionStorage.removeItem('autokita_user_title')
+          router.replace('/login')
+        } else {
+          setChecked(true)
+        }
+      })
+      .catch(() => {
+        sessionStorage.removeItem('autokita_admin')
+        sessionStorage.removeItem('autokita_customer')
+        sessionStorage.removeItem('autokita_user_id')
+        sessionStorage.removeItem('autokita_user_name')
+        sessionStorage.removeItem('autokita_user_title')
+        router.replace('/login')
+      })
   }, [router])
 
   if (!checked) return null

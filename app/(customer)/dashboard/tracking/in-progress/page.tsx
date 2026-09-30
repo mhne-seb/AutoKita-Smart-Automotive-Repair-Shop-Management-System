@@ -686,11 +686,9 @@ function PullOutModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
     >
       <div
         className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl bg-card p-6 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
       >
         {status === "done" ? (
           <div className="flex flex-col items-center gap-2 py-8 text-center">

@@ -1,7 +1,11 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { signFileUrls } from '@/lib/storage'
 
 export async function GET(request: Request) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1', 10)
@@ -27,6 +31,7 @@ export async function GET(request: Request) {
         gol.actual_grand_total,
         jo.balance,
         jo.user_id,
+        u.avatar_url,
         gol.first_name,
         gol.last_name,
         gol.vehicle_model,
@@ -37,17 +42,24 @@ export async function GET(request: Request) {
         gol.assigned_mechanic_id
       FROM get_job_orders_list() gol
       JOIN job_orders jo ON jo.id = gol.id
+      LEFT JOIN users u ON u.id = jo.user_id
       LEFT JOIN vehicles v ON v.id = jo.vehicle_id
       LEFT JOIN job_order_services jos ON jos.job_order_id = gol.id
       LEFT JOIN services s ON s.id = jos.service_id
       GROUP BY gol.id, jo.date_arrived, gol.status, gol.actual_grand_total, jo.balance,
-               jo.user_id, gol.first_name, gol.last_name, gol.vehicle_model,
+               jo.user_id, u.avatar_url, gol.first_name, gol.last_name, gol.vehicle_model,
                v.vehicle_year, gol.plate_number, gol.mechanic_name, gol.assigned_mechanic_id
-      ORDER BY gol.id
+      ORDER BY gol.id DESC
       LIMIT $1 OFFSET $2
       `,
       [pageSize, offset]
     )
+
+    const avatars = result.rows.map((r: any) => r.avatar_url)
+    const signedAvatars = await signFileUrls(avatars)
+    for (let i = 0; i < result.rows.length; i++) {
+      result.rows[i].avatar_url = signedAvatars[i]
+    }
 
     return NextResponse.json({
       success: true,

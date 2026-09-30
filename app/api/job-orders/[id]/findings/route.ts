@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { toStoredRef, signFileUrl } from '@/lib/storage'
@@ -36,6 +37,8 @@ function toUiStatus(s: string): string {
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id: jobOrderId } = await params
     const body = await request.json()
@@ -74,6 +77,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id: jobOrderId } = await params
     const body = await request.json()
@@ -132,6 +137,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id: jobOrderId } = await params
     const url = new URL(request.url)
