@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 import { hashPassword, verifyPassword } from '@/lib/password'
 import { signFileUrl } from '@/lib/storage'
 import { logCustomerAccountChange } from '@/lib/audit'
@@ -14,10 +15,10 @@ async function withPhotoLink(user: Record<string, any>) {
 }
 
 export async function GET(req: NextRequest) {
-  const userId = parseInt(req.nextUrl.searchParams.get('userId') || '', 10)
-  if (isNaN(userId)) {
-    return NextResponse.json({ success: false, message: 'userId must be a number' }, { status: 400 })
-  }
+  const userIdParam = req.nextUrl.searchParams.get('userId')
+  const guard = await (userIdParam ? requireCustomer(parseInt(userIdParam, 10)) : requireCustomer())
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
   const { rows } = await db.query(SELECT_USER, [userId])
   if (rows.length === 0) {
     return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
@@ -28,11 +29,11 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, firstName, lastName, nickname, address, currentPassword, newPassword } = body
+    const { userId: userIdRaw, firstName, lastName, nickname, address, currentPassword, newPassword } = body
 
-    if (!userId) {
-      return NextResponse.json({ success: false, message: 'Missing userId' }, { status: 400 })
-    }
+    const guard = await (userIdRaw ? requireCustomer(Number(userIdRaw)) : requireCustomer())
+    if (!guard.ok) return guard.response
+    const userId = guard.session.userId
 
     // Email and contact number are where login links and approval codes go, so
     // only the shop changes them, after checking it's really the customer.

@@ -35,7 +35,16 @@ function Inspecting() {
     const jobOrderId = jobOrderIdParam ? Number(jobOrderIdParam) : undefined;
     setLoading(true);
     getInspectingData(userId, jobOrderId)
-      .then(setData)
+      .then((res: any) => {
+        if (res?._status === 401 || res?._status === 403) {
+          sessionStorage.removeItem("autokita_customer");
+          sessionStorage.removeItem("autokita_user_id");
+          sessionStorage.removeItem("autokita_user_name");
+          router.replace('/login');
+          return;
+        }
+        setData(res);
+      })
       .finally(() => setLoading(false));
   }, [jobOrderIdParam]);
 
@@ -71,7 +80,16 @@ function Inspecting() {
     const userId = Number(sessionStorage.getItem("autokita_user_id"));
     const jobOrderId = jobOrderIdParam ? Number(jobOrderIdParam) : undefined;
     const interval = setInterval(() => {
-      getInspectingData(userId, jobOrderId).then(setData);
+      getInspectingData(userId, jobOrderId).then((res: any) => {
+        if (res?._status === 401 || res?._status === 403) {
+          sessionStorage.removeItem("autokita_customer");
+          sessionStorage.removeItem("autokita_user_id");
+          sessionStorage.removeItem("autokita_user_name");
+          router.replace('/login');
+          return;
+        }
+        setData(res);
+      });
     }, 5000);
     return () => clearInterval(interval);
   }, [waitingOnShop, jobOrderIdParam]);

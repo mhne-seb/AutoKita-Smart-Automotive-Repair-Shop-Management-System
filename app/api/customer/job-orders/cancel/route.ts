@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 
 // Lets a customer withdraw a booking the shop has accepted but not started.
 //
@@ -10,11 +11,17 @@ import { db } from '@/lib/db'
 // owe. Cancelling here is free precisely because nothing has happened yet.
 export async function POST(request: NextRequest) {
   try {
-    const { userId, jobOrderId } = await request.json()
+    const body = await request.json()
+    const userIdRaw = body.userId
+    const jobOrderId = body.jobOrderId
 
-    if (!userId || !jobOrderId) {
-      return NextResponse.json({ success: false, message: 'Missing userId or jobOrderId' }, { status: 400 })
+    if (!jobOrderId) {
+      return NextResponse.json({ success: false, message: 'Missing jobOrderId' }, { status: 400 })
     }
+
+    const guard = await (userIdRaw ? requireCustomer(Number(userIdRaw)) : requireCustomer())
+    if (!guard.ok) return guard.response
+    const userId = guard.session.userId
 
     // Every condition sits in the WHERE clause so the check and the cancel are
     // one atomic statement — a photo uploaded a millisecond earlier makes this

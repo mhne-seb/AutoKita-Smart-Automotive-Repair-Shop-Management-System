@@ -256,7 +256,8 @@ export async function getReceivedData(userId: number, jobOrderId?: number) {
   const qs = new URLSearchParams({ userId: String(userId) })
   if (jobOrderId) qs.set('jobOrderId', String(jobOrderId))
   const res = await fetch(`/api/tracking/received?${qs}`)
-  return res.json() as Promise<{
+  const data = await res.json()
+  return { _status: res.status, ...data } as {
     jobOrder: {
       job_order_id: number
       status: string
@@ -293,14 +294,15 @@ export async function getReceivedData(userId: number, jobOrderId?: number) {
       photo: string
       logged_date: string
     }[]
-  }>
+  }
 }
 
 export async function getInspectingData(userId: number, jobOrderId?: number) {
   const qs = new URLSearchParams({ userId: String(userId) })
   if (jobOrderId) qs.set('jobOrderId', String(jobOrderId))
   const res = await fetch(`/api/tracking/inspecting?${qs}`)
-  return res.json() as Promise<{
+  const data = await res.json()
+  return { _status: res.status, ...data } as {
     jobOrder: {
       job_order_id: number
       status: string
@@ -358,7 +360,7 @@ export async function getInspectingData(userId: number, jobOrderId?: number) {
     // codes only) — no raw codes or system jargon, see /api/tracking/inspecting.
     scannerFindings: string[]
     shop: { name: string; address: string } | null
-  }>
+  }
 }
 
 /** Withdraws an accepted booking the shop hasn't started on. The server
@@ -408,7 +410,8 @@ export async function getInProgressData(userId: number, jobOrderId?: number) {
   const qs = new URLSearchParams({ userId: String(userId) })
   if (jobOrderId) qs.set('jobOrderId', String(jobOrderId))
   const res = await fetch(`/api/tracking/in-progress?${qs}`)
-  return res.json() as Promise<{
+  const data = await res.json()
+  return { _status: res.status, ...data } as {
     jobOrder: {
       job_order_id: number
       status: string
@@ -443,7 +446,7 @@ export async function getInProgressData(userId: number, jobOrderId?: number) {
     findings: ServiceFinding[]
     pullOut: PullOutRequest | null
     bill: { total: number; paid: number; balance: number } | null
-  }>
+  }
 }
 
 // The customer's final bill, computed live on the server (see lib/jobOrderBill).
@@ -487,7 +490,8 @@ export async function getTestingData(userId: number, jobOrderId?: number) {
   const qs = new URLSearchParams({ userId: String(userId) })
   if (jobOrderId) qs.set('jobOrderId', String(jobOrderId))
   const res = await fetch(`/api/tracking/testing?${qs}`, { cache: 'no-store' })
-  return res.json() as Promise<{
+  const data = await res.json()
+  return { _status: res.status, ...data } as {
     jobOrder: {
       job_order_id: number
       status: string
@@ -498,14 +502,15 @@ export async function getTestingData(userId: number, jobOrderId?: number) {
     history: RoadTestAttempt[]
     current: RoadTestAttempt | null
     allServicesDone: boolean
-  }>
+  }
 }
 
 export async function getCompletedData(userId: number, jobOrderId?: number) {
   const qs = new URLSearchParams({ userId: String(userId) })
   if (jobOrderId) qs.set('jobOrderId', String(jobOrderId))
   const res = await fetch(`/api/tracking/completed?${qs}`)
-  return res.json() as Promise<{
+  const data = await res.json()
+  return { _status: res.status, ...data } as {
     jobOrder: {
       job_order_id: number
       status: string
@@ -545,5 +550,5 @@ export async function getCompletedData(userId: number, jobOrderId?: number) {
       total_retail_amount: string
     }[]
     bill: CustomerBill | null
-  }>
+  }
 }

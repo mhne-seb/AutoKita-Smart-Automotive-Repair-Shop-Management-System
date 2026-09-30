@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Check, FileText, ShieldCheck, Download, Clock, Car, User, PackageCheck, CreditCard, HourglassIcon, AlertCircle, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 import { PaymentModal, type PaymentMethod } from "@/components/dashboard/PaymentModal";
@@ -41,6 +41,7 @@ type CompletedData = Awaited<ReturnType<typeof getCompletedData>>;
 function Completed() {
   useEffect(() => { document.title = "Billing & Completion — AutoKita"; }, []);
 
+  const router = useRouter();
   const searchParams = useSearchParams();
   const jobOrderIdParam = searchParams.get("jobOrderId");
 
@@ -53,7 +54,16 @@ function Completed() {
     const userId = Number(sessionStorage.getItem("autokita_user_id"));
     const jobOrderId = jobOrderIdParam ? Number(jobOrderIdParam) : undefined;
     return getCompletedData(userId, jobOrderId)
-      .then(setData)
+      .then((res: any) => {
+        if (res?._status === 401 || res?._status === 403) {
+          sessionStorage.removeItem("autokita_customer");
+          sessionStorage.removeItem("autokita_user_id");
+          sessionStorage.removeItem("autokita_user_name");
+          router.replace('/login');
+          return;
+        }
+        setData(res);
+      })
       .catch(() => setError("Failed to load service report."));
   };
 

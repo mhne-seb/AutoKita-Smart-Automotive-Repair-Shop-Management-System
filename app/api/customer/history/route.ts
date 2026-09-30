@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 
 // The customer's Service History — every job order of theirs that has been
 // closed out, released or cancelled. One row per job order, with the service
@@ -7,10 +8,10 @@ import { db } from '@/lib/db'
 // receipt without another round trip.
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const userId = Number(searchParams.get('userId'))
-  if (!userId) {
-    return NextResponse.json({ success: false, message: 'userId is required' }, { status: 400 })
-  }
+  const userIdParam = searchParams.get('userId')
+  const guard = await (userIdParam ? requireCustomer(parseInt(userIdParam, 10)) : requireCustomer())
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
 
   try {
     const jobs = await db.query(

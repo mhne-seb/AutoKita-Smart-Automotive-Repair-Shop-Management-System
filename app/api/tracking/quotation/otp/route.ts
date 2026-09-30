@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 import { issueOtp, OTP_TTL_MINUTES, QUOTATION_OTP_PURPOSE } from '@/lib/otp'
 import { sendOtpEmail } from '@/lib/mail'
 import { isVerificationBypassed } from '@/lib/testMode'
@@ -18,10 +19,16 @@ function maskEmail(email: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, jobOrderId } = await request.json()
-    if (!userId || !jobOrderId) {
-      return NextResponse.json({ success: false, message: 'Missing userId or jobOrderId' }, { status: 400 })
+    const body = await request.json()
+    const userIdRaw = body.userId
+    const jobOrderId = body.jobOrderId
+    if (!jobOrderId) {
+      return NextResponse.json({ success: false, message: 'Missing jobOrderId' }, { status: 400 })
     }
+
+    const guard = await (userIdRaw ? requireCustomer(userIdRaw) : requireCustomer())
+    if (!guard.ok) return guard.response
+    const userId = guard.session.userId
 
     // Ownership — a customer can only confirm their own job order.
     const joRes = await db.query(`SELECT * FROM get_job_order_by_id($1)`, [jobOrderId])

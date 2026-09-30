@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const userId = parseInt(searchParams.get('userId') ?? '', 10)
+  const userIdParam = searchParams.get('userId')
   const jobOrderIdParam = searchParams.get('jobOrderId')
 
-  if (isNaN(userId)) return NextResponse.json({ error: 'userId must be a number' }, { status: 400 })
+  const guard = await (userIdParam ? requireCustomer(parseInt(userIdParam, 10)) : requireCustomer())
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
 
   try {
     let jobOrder
@@ -31,7 +34,13 @@ export async function GET(request: NextRequest) {
 
     const [servicesRes, paymentRes, partsRes, preDiagRes, scanAuthRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_quotation_services($1)`, [jobOrder.job_order_id]),
-      db.query(`SELECT * FROM get_job_order_payment_status($1)`, [jobOrder.job_order_id]),
+      db.query(
+        `SELECT id, payment_method, amount_paid, verification_status, payment_date, rejection_reason 
+         FROM payments 
+         WHERE job_order_id = $1 
+         ORDER BY payment_date DESC LIMIT 1`, 
+        [jobOrder.job_order_id]
+      ),
       db.query(`SELECT * FROM get_job_order_parts($1)`, [jobOrder.job_order_id]),
       db.query(
         `SELECT pd.customer_approval_status, pd.mechanic_notes

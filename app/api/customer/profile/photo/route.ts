@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 import { uploadAvatar, removeFile, signFileUrl } from '@/lib/storage'
 import { logCustomerAccountChange } from '@/lib/audit'
 
@@ -12,11 +13,11 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'] // the bucket's 
 export async function POST(request: NextRequest) {
   try {
     const form = await request.formData()
-    const userId = parseInt(String(form.get('userId') ?? ''), 10)
+    const userIdParam = form.get('userId')
     const file = form.get('file')
-    if (isNaN(userId)) {
-      return NextResponse.json({ success: false, message: 'userId must be a number' }, { status: 400 })
-    }
+    const guard = await (userIdParam ? requireCustomer(parseInt(String(userIdParam), 10)) : requireCustomer())
+    if (!guard.ok) return guard.response
+    const userId = guard.session.userId
     if (!(file instanceof File)) {
       return NextResponse.json({ success: false, message: 'No photo uploaded' }, { status: 400 })
     }
@@ -54,10 +55,10 @@ export async function POST(request: NextRequest) {
 // Removes the photo; the page goes back to the plain icon.
 export async function DELETE(request: NextRequest) {
   try {
-    const userId = parseInt(request.nextUrl.searchParams.get('userId') || '', 10)
-    if (isNaN(userId)) {
-      return NextResponse.json({ success: false, message: 'userId must be a number' }, { status: 400 })
-    }
+    const userIdParam = request.nextUrl.searchParams.get('userId')
+    const guard = await (userIdParam ? requireCustomer(parseInt(userIdParam, 10)) : requireCustomer())
+    if (!guard.ok) return guard.response
+    const userId = guard.session.userId
     const { rows } = await db.query(`SELECT avatar_url FROM users WHERE id = $1`, [userId])
     if (rows.length === 0) {
       return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
