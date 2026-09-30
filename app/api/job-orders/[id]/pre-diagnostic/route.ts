@@ -47,6 +47,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const { id } = await params
     const { notes, context } = await request.json()
 
+    if (context === 'quotation') {
+      const partsResult = await db.query('SELECT 1 FROM job_order_parts WHERE job_order_id = $1::int AND warranty_months IS NULL LIMIT 1', [id])
+      if (partsResult.rows.length > 0) {
+         return NextResponse.json({ success: false, message: 'Choose a warranty for every part (No warranty is allowed).' }, { status: 400 })
+      }
+    }
+
     const inspRes = await db.query(
       `SELECT id FROM get_or_create_inspection($1)`,
       [id]

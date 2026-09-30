@@ -36,12 +36,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       [id]
     )
 
+    const warranties = await db.query('SELECT id, warranty_months FROM job_order_parts WHERE job_order_id = $1::int', [id])
+    const wMap = new Map(warranties.rows.map((r: any) => [r.id, r.warranty_months]))
+    const partsWithWarranty = partsResult.rows.map((p: any) => ({ ...p, warranty_months: wMap.get(p.id) ?? null }))
+
     return NextResponse.json({
       success: true,
       data: {
         ...headerResult.rows[0],
         services: servicesResult.rows,
-        parts: partsResult.rows,
+        parts: partsWithWarranty,
       },
     })
   } catch (error) {
@@ -160,6 +164,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               : 'to_order'
             const totalRetail = (p.qty || 1) * (p.unitPrice || 0)
 
+            const warranty = p.warranty_months
+            if (warranty !== null && warranty !== undefined) {
+              const wNum = Number(warranty)
+              if (!Number.isInteger(wNum) || wNum < 0 || wNum > 60) {
+                await client!.query('ROLLBACK')
+                client!.release()
+                return NextResponse.json({ success: false, message: `Check the warranty of ${p.name || 'a part'}: choose No warranty or 1 to 60 months.` }, { status: 400 })
+              }
+            }
+            const validWarranty = (warranty === null || warranty === undefined) ? null : Number(warranty)
+
             const parsedPartId =
               typeof p.id === 'string' && p.id.startsWith('PRT-') && !p.id.startsWith('PRT-new-')
                 ? parseInt(p.id.replace('PRT-', ''), 10)
@@ -172,17 +187,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               await client!.query(
                 `UPDATE job_order_parts
                  SET job_order_service_id = $1::int, status = $2, part_number = $3,
-                     description = $4, quantity = $5::int, retail_unit_price = $6::numeric, total_retail_amount = $7::numeric
-                 WHERE id = $8::int`,
-                [jobOrderServiceId, dbStatus, p.partNo || '', p.name || '', p.qty || 1, p.unitPrice || 0, totalRetail, parsedPartId],
+                     description = $4, quantity = $5::int, retail_unit_price = $6::numeric, total_retail_amount = $7::numeric, 
+                     warranty_months = CASE WHEN $10::boolean THEN $8::int ELSE warranty_months END
+                 WHERE id = $9::int`,
+                [jobOrderServiceId, dbStatus, p.partNo || '', p.name || '', p.qty || 1, p.unitPrice || 0, totalRetail, validWarranty, parsedPartId, warranty !== undefined],
               )
               partId = parsedPartId
             } else {
               const prtRes = await client!.query(
                 `INSERT INTO job_order_parts
-                 (job_order_id, job_order_service_id, status, part_number, description, quantity, retail_unit_price, total_retail_amount)
-                 VALUES ($1::int, $2::int, $3, $4, $5, $6::int, $7::numeric, $8::numeric) RETURNING id`,
-                [id, jobOrderServiceId, dbStatus, p.partNo || '', p.name || '', p.qty || 1, p.unitPrice || 0, totalRetail],
+                 (job_order_id, job_order_service_id, status, part_number, description, quantity, retail_unit_price, total_retail_amount, warranty_months)
+                 VALUES ($1::int, $2::int, $3, $4, $5, $6::int, $7::numeric, $8::numeric, $9::int) RETURNING id`,
+                [id, jobOrderServiceId, dbStatus, p.partNo || '', p.name || '', p.qty || 1, p.unitPrice || 0, totalRetail, validWarranty],
               )
               partId = prtRes.rows[0].id
             }
