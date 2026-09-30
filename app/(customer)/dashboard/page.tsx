@@ -41,6 +41,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceModal";
+import { NotificationsModal } from "@/components/NotificationsModal";
+import { loadCustomerNotifications } from "@/lib/notificationFeeds";
 import { ShopLoading } from "@/components/ShopLoading";
 import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
 import type {
@@ -101,7 +103,7 @@ function Dashboard() {
   useEffect(() => { document.title = "Dashboard — AutoKita"; }, []);
 
   const [contactOpen, setContactOpen] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
+  const [notificationsModalOpen, setNotificationsModalOpen] = useState(false);
   const [bookServiceOpen, setBookServiceOpen] = useState(false);
   const [reportJobId, setReportJobId] = useState<number | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalData | null>(null);
@@ -556,7 +558,7 @@ function Dashboard() {
                 <Clock className="h-3.5 w-3.5" /> Recent Activity
               </div>
               <button
-                onClick={() => setHistoryOpen(true)}
+                onClick={() => setNotificationsModalOpen(true)}
                 className="text-[11px] font-medium text-brand hover:underline"
               >
                 View All
@@ -589,7 +591,13 @@ function Dashboard() {
       </div>
 
       {contactOpen && <ContactShopModal shop={shop} onClose={() => setContactOpen(false)} />}
-      {historyOpen && <HistoryModal activities={recentActivity} onClose={() => setHistoryOpen(false)} />}
+      {notificationsModalOpen && (
+        <NotificationsModal
+          storageKey="autokita-customer-notifs"
+          loadAll={() => loadCustomerNotifications(100)}
+          onClose={() => setNotificationsModalOpen(false)}
+        />
+      )}
       {bookServiceOpen && (
         <BookServiceModal
           onClose={() => setBookServiceOpen(false)}
@@ -753,64 +761,7 @@ function ContactShopModal({ shop, onClose }: { shop: DashboardShop | null; onClo
   );
 }
 
-// Full History modal
 
-function HistoryModal({ activities, onClose }: { activities: DashboardActivity[]; onClose: () => void }) {
-  const activityMeta = (type: DashboardActivity["type"]) => {
-    switch (type) {
-      case "payment":
-        return { icon: CreditCard, color: "text-success" };
-      case "progress_log":
-        return { icon: Wrench, color: "text-brand" };
-      case "status_change":
-        return { icon: RefreshCw, color: "text-warning" };
-      case "booking_accepted":
-        return { icon: CheckCircle2, color: "text-success" };
-      case "report_ready":
-        return { icon: ClipboardCheck, color: "text-brand" };
-      case "appointment_reminder":
-        return { icon: CalendarClock, color: "text-amber-500" };
-      case "job_update":
-        return { icon: Wrench, color: "text-brand" };
-      default:
-        return { icon: FileText, color: "text-muted-foreground" };
-    }
-  };
-
-  return (
-    <Modal onClose={onClose} panelClassName="w-full max-w-lg max-h-[80vh] overflow-y-auto">
-      {({ close }) => (
-        <>
-          <div className="flex items-start justify-between">
-            <h3 className="text-lg font-semibold">Full Activity History</h3>
-            <button onClick={close} className="rounded-md p-1 transition-colors hover:bg-accent">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-          <div className="mt-5 space-y-5">
-            {activities.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No activity history yet.</p>
-            ) : (
-              activities.map((act) => {
-                const meta = activityMeta(act.type);
-                return (
-                  <Activity
-                    key={`hist-${act.type}-${act.id}`}
-                    icon={meta.icon}
-                    color={meta.color}
-                    title={act.title}
-                    time={formatRelativeTime(act.time)}
-                    desc={act.description}
-                  />
-                );
-              })
-            )}
-          </div>
-        </>
-      )}
-    </Modal>
-  );
-}
 
 // Book New Service modal — ported from the public /book page (BookPage) so the
 // dashboard flow matches it field-for-field, just shown as a modal instead of
