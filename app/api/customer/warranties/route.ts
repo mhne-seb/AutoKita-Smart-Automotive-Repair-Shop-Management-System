@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[/api/customer/warranties] error:', error)
     return NextResponse.json(
-      { success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) },
+      { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: error instanceof Error ? error.message : String(error) } : {}) },
       { status: 500 },
     )
   }

@@ -64,7 +64,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     })
   } catch (error) {
     console.error('Billing GET error:', error)
-    return NextResponse.json({ success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
+    return NextResponse.json({ success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: error instanceof Error ? error.message : String(error) } : {}) }, { status: 500 })
   }
 }
 
@@ -154,6 +154,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ success: false, message: 'action must be record_cash or release' }, { status: 400 })
   } catch (error) {
     console.error('Billing POST error:', error)
-    return NextResponse.json({ success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
+    return NextResponse.json({ success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: error instanceof Error ? error.message : String(error) } : {}) }, { status: 500 })
   }
 }

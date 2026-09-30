@@ -3,6 +3,7 @@
 // serviceMix).Separated from billingController since these are
 // pre-aggregated reporting numbers, not individual transaction records.
 
+import { toast } from 'sonner'
 import { revenueTrend, serviceMix, churnList, type RevenuePoint, type ServiceMixSlice } from '@/data/mockData'
 
 function simulateDelay<T>(value: T, ms = 250): Promise<T> {
@@ -62,7 +63,11 @@ export async function getChurnList() {
   try {
     const res = await fetch('/api/predict/churn')
     const json = await res.json()
-    if (json.success) return json.data
+    if (json.success) {
+      // The paper's "Prediction offline" notice: the list still loads, using estimates.
+      if (json.mlOffline) toast.warning('Prediction service is offline. Risk levels shown are estimates.')
+      return json.data
+    }
     console.error('Failed to load churn predictions:', json.error)
     return []
   } catch (error) {

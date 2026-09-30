@@ -50,7 +50,7 @@ export async function GET() {
     return NextResponse.json({
       success: false,
       message: 'Failed to fetch shop info',
-      debug: error.message,
+      ...(process.env.NODE_ENV !== 'production' ? { debug: error.message } : {}),
     }, { status: 500 })
   }
 }

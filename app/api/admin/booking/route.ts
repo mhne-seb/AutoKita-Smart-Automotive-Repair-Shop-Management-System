@@ -24,7 +24,10 @@ export async function POST(req: NextRequest) {
     const lastName = nameParts.slice(1).join(' ') || 'Customer'
     
     let userId;
-    const checkUser = await db.query(`SELECT id FROM users WHERE email = $1`, [ticketData.email])
+    // Emails are compared and stored in lowercase, so "Juan@Mail.com" and
+    // "juan@mail.com" are the same person.
+    const emailLower = String(ticketData.email ?? '').trim().toLowerCase()
+    const checkUser = await db.query(`SELECT id FROM users WHERE LOWER(email) = $1`, [emailLower])
     
     if (checkUser.rows.length > 0) {
       userId = checkUser.rows[0].id
@@ -40,7 +43,7 @@ export async function POST(req: NextRequest) {
           lastName, 
           firstName, // Fallback for nickname
           ticketData.contactNumber, 
-          ticketData.email,
+          emailLower,
           await hashPassword(tempPassword)
         ]
       )
@@ -144,7 +147,7 @@ export async function POST(req: NextRequest) {
       )
     }
     return NextResponse.json(
-      { success: false, message: 'Internal server error', debug: err.message },
+      { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: err.message } : {}) },
       { status: 500 }
     )
   }

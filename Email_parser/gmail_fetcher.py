@@ -53,6 +53,9 @@ _load_env()
 GMAIL_EMAIL        = os.environ.get("GMAIL_USER", "")       # matches GMAIL_USER in .env.local
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
 APP_URL            = os.environ.get("NEXT_PUBLIC_APP_URL", "http://localhost:3000")
+# Shared secret the website checks on /api/diagnostics/store (X-API-Key header).
+# Must be the same value as DIAGNOSTICS_API_KEY in the website's .env.local / Vercel.
+DIAGNOSTICS_API_KEY = os.environ.get("DIAGNOSTICS_API_KEY", "")
 
 # Localhost Next.js dev server runs over plain HTTP
 if APP_URL.startswith("https://localhost") or APP_URL.startswith("https://127.0.0.1"):
@@ -139,6 +142,7 @@ def _post_to_store(payload: dict, filename: str, pdf_bytes: bytes) -> bool:
         data=body,
         headers={
             "Content-Type": "application/json",
+            "X-API-Key": DIAGNOSTICS_API_KEY,
         },
         method="POST",
     )
@@ -159,6 +163,12 @@ def _post_to_store(payload: dict, filename: str, pdf_bytes: bytes) -> bool:
 def fetch_and_process():
     if not GMAIL_EMAIL or not GMAIL_APP_PASSWORD:
         print("[ERROR] GMAIL_EMAIL or GMAIL_APP_PASSWORD not set in environment / .env.local")
+        sys.exit(1)
+
+    # The website now refuses reports without the shared key, so stop before
+    # reading (and marking as read) any email that could not be stored.
+    if not DIAGNOSTICS_API_KEY:
+        print("[ERROR] DIAGNOSTICS_API_KEY not set in environment / .env.local (it must match the website's value)")
         sys.exit(1)
 
     print(f"[>>] Connecting to {IMAP_HOST} as {GMAIL_EMAIL}...")

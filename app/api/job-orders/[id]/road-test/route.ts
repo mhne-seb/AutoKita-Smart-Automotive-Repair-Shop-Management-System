@@ -61,7 +61,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     })
   } catch (error) {
     console.error('Road test GET error:', error)
-    return NextResponse.json({ success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) }, { status: 500 })
+    return NextResponse.json({ success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: error instanceof Error ? error.message : String(error) } : {}) }, { status: 500 })
   }
 }
 
@@ -171,6 +171,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const msg = error instanceof Error ? error.message : String(error)
     console.error('Road test POST error:', error)
     const known = /Cannot start road test|already in progress|not in progress|requires at least one/i.test(msg)
-    return NextResponse.json({ success: false, message: known ? msg : 'Internal server error', debug: msg }, { status: known ? 409 : 500 })
+    return NextResponse.json({ success: false, message: known ? msg : 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: msg } : {}) }, { status: known ? 409 : 500 })
   }
 }
