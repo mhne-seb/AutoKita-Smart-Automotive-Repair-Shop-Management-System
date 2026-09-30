@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 // app/api/chat/admin/route.ts
 // Admin / Mechanic chatbot endpoint.
 // Model: gpt-5.4 (configurable via OPENAI_ADMIN_MODEL env var)
@@ -579,6 +580,8 @@ You MUST use the exact token-optimized format below to conserve tokens (~120-150
 // ─── Route Handler ────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   // Get caller IP for token budgeting
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? '127.0.0.1';
 

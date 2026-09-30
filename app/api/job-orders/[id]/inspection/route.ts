@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
@@ -5,6 +6,8 @@ import { getLatestScanAuthorization } from '@/lib/scanAuthorization'
 import { signFileUrls } from '@/lib/storage'
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id } = await params
 
@@ -14,10 +17,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const headerResult = await db.query(
       `
       SELECT gid.*, jo.started_at, jo.date_promised, jo.estimated_duration, jo.actual_grand_total,
-             u.contact_number
+             u.contact_number, u.first_name, u.last_name, u.email, u.address,
+             v.plate_number, v.vehicle_make, v.vehicle_model, v.vehicle_year, v.mileage
       FROM get_inspection_data($1) gid
       JOIN job_orders jo ON jo.id = gid.id
       JOIN users u ON u.id = jo.user_id
+      JOIN vehicles v ON v.id = jo.vehicle_id
       `,
       [id]
     )

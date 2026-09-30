@@ -1,8 +1,12 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { signFileUrls } from '@/lib/storage'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 
 export async function GET(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
 
     const query = `
@@ -14,6 +18,7 @@ export async function GET(req: NextRequest) {
           st.request_date,
           st.preferred_datetime,
           u.id as user_id,
+          u.avatar_url,
           u.first_name,
           u.last_name,
           u.contact_number,
@@ -30,6 +35,7 @@ export async function GET(req: NextRequest) {
                 -- 'approved' row on it, but by an employee — that isn't consent.
                 AND c.user_id IS NOT NULL
           ) AS diagnostic_scan_authorized,
+          ap.approved_at,
           COALESCE(st.assigned_mechanic_id, jo.assigned_mechanic_id) as mechanic_id,
           wc.id IS NOT NULL AS is_warranty_claim,
           jo.id as job_order_id,
@@ -40,10 +46,23 @@ export async function GET(req: NextRequest) {
       JOIN users u ON u.id = st.user_id
       JOIN vehicles v ON v.id = st.vehicle_id
       LEFT JOIN job_orders jo ON jo.ticket_id = st.id
-      ORDER BY st.request_date DESC
+      LEFT JOIN LATERAL (
+        SELECT MAX(c.action_date) AS approved_at
+        FROM system_audit_logs c
+        WHERE c.entity_type = 'service_tickets'
+          AND c.entity_id = st.id
+          AND c.action_performed = 'approved'
+          AND c.employees_id IS NOT NULL
+      ) ap ON true
+      ORDER BY COALESCE(ap.approved_at, st.request_date) DESC, st.id DESC
     `
     const result = await db.query(query)
 
+    const avatars = result.rows.map((r: any) => r.avatar_url)
+    const signedAvatars = await signFileUrls(avatars)
+    for (let i = 0; i < result.rows.length; i++) {
+      result.rows[i].avatar_url = signedAvatars[i]
+    }
 
     const mechanicsQuery = `SELECT id, full_name, email FROM employees WHERE role = 'mechanic'`
     const mechanicsResult = await db.query(mechanicsQuery)
@@ -64,9 +83,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const body = await req.json()
-    const { action, ticketId, mechanicId, holdReason, employeeId } = body
+    const { action, ticketId, mechanicId, holdReason } = body
 
     if (!action) {
       return NextResponse.json({ success: false, message: 'Missing action parameter' }, { status: 400 })
@@ -78,7 +99,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Resolve employee who performed this action
-    let actingEmpId = employeeId ? parseInt(String(employeeId), 10) : null
+    let actingEmpId = auth.session.userId
     let employeeName = 'Shop Administrator'
     try {
       if (actingEmpId) {

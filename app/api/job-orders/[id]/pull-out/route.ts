@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getLatestPullOut } from '@/lib/pullOut'
@@ -26,6 +27,8 @@ async function stillOpen(jobOrderId: number): Promise<boolean> {
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id } = await params
   const jobOrderId = Number(id)
   const body = await request.json().catch(() => ({}))

@@ -441,13 +441,9 @@ function RegisterVehicle() {
       )}
 
       {showConfirmModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => setShowConfirmModal(false)}
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div
             className="w-full max-w-sm overflow-hidden rounded-xl bg-card text-center shadow-lg"
-            onClick={(e) => e.stopPropagation()}
           >
             <div className="h-1 w-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
             <div className="p-6">
