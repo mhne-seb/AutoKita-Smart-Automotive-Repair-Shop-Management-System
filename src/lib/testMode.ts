@@ -4,6 +4,9 @@ import path from 'path'
 const CONFIG_PATH = path.join(process.cwd(), 'src', 'config', 'test-mode.json')
 
 export function isVerificationBypassed(): boolean {
+  if (process.env.NODE_ENV === 'production') {
+    return false
+  }
   if (process.env.BYPASS_VERIFICATION === 'true' || process.env.BYPASS_VERIFICATION === '1') {
     return true
   }
