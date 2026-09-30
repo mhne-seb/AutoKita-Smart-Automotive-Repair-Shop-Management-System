@@ -30,7 +30,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   } catch (error) {
     console.error('Finding photo upload error:', error)
     return NextResponse.json(
-      { success: false, message: 'Upload failed', debug: error instanceof Error ? error.message : String(error) },
+      { success: false, message: 'Upload failed', ...(process.env.NODE_ENV !== 'production' ? { debug: error instanceof Error ? error.message : String(error) } : {}) },
       { status: 500 },
     )
   }

@@ -30,7 +30,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   } catch (error) {
     console.error('Payment fetch error:', error)
     return NextResponse.json(
-      { success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) },
+      { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: error instanceof Error ? error.message : String(error) } : {}) },
       { status: 500 },
     )
   }
@@ -166,6 +166,26 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         [decision, auth.session.userId, decision === 'rejected' ? String(reason ?? '').trim() : null, paymentId],
       )
 
+      // Who decided, when, and why: part of the same transaction, so a
+      // decision without its record cannot exist.
+      await client.query(
+        `INSERT INTO system_audit_logs (employees_id, action_performed, entity_type, entity_id, old_values, new_values, action_date)
+         VALUES ($1, $2::audit_action_enum, 'payments', $3, $4, $5, NOW())`,
+        [
+          auth.session.userId,
+          decision === 'verified' ? 'approved' : 'rejected',
+          paymentId,
+          JSON.stringify({ verification_status: 'pending' }),
+          JSON.stringify({
+            event: decision === 'verified' ? 'payment_verified' : 'payment_rejected',
+            job_order_id: Number(id),
+            verification_status: decision,
+            amount_paid: Number(row.amount_paid ?? 0),
+            reason: decision === 'rejected' ? String(reason ?? '').trim() : null,
+          }),
+        ],
+      )
+
       await client.query('COMMIT')
 
       const amount = `₱${Number(row.amount_paid ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`
@@ -190,7 +210,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       await client.query('ROLLBACK')
       console.error('Payment verification error:', error)
       return NextResponse.json(
-        { success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) },
+        { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: error instanceof Error ? error.message : String(error) } : {}) },
         { status: 500 },
       )
     } finally {
@@ -199,7 +219,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   } catch (error) {
     console.error('Outer payment verification error:', error)
     return NextResponse.json(
-      { success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) },
+      { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: error instanceof Error ? error.message : String(error) } : {}) },
       { status: 500 },
     )
   }

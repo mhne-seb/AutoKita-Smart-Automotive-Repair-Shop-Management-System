@@ -1,4 +1,4 @@
-import { requireStaff } from '@/lib/authGuard'
+import { requireStaffOrApiKey } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { mlFetch } from '@/lib/mlServer'
@@ -46,7 +46,8 @@ interface ParsedReport {
  *   form field "source" = "manual_upload"
  */
 export async function POST(req: NextRequest) {
-  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+  // The admin page calls this with a login; the Gmail fetcher script sends DIAGNOSTICS_API_KEY.
+  const auth = await requireStaffOrApiKey(req, 'DIAGNOSTICS_API_KEY'); if (!auth.ok) return auth.response;
 
   const contentType = req.headers.get('content-type') || ''
   let source: string = 'gmail'

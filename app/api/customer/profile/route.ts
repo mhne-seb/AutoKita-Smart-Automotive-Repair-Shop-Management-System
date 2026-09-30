@@ -104,6 +104,6 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ success: true, user: await withPhotoLink(rows[0]) })
   } catch (err: any) {
     console.error('Profile update error:', err)
-    return NextResponse.json({ success: false, message: 'Internal server error', debug: err.message }, { status: 500 })
+    return NextResponse.json({ success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: err.message } : {}) }, { status: 500 })
   }
 }

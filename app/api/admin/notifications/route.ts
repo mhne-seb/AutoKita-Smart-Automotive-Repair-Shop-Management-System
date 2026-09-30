@@ -272,7 +272,7 @@ export async function GET(req: NextRequest) {
   } catch (err: unknown) {
     console.error('Admin notifications GET error:', err)
     return NextResponse.json(
-      { success: false, message: 'Internal server error', debug: err instanceof Error ? err.message : String(err) },
+      { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: err instanceof Error ? err.message : String(err) } : {}) },
       { status: 500 },
     )
   }
