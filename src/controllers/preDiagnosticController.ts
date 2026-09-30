@@ -65,25 +65,7 @@ export async function recallApproval(jobOrderId: string): Promise<boolean> {
   return json.success === true
 }
 
-/**
- * Simulates the customer's decision on the latest round. Pass advanceToStage
- * when approval should also move the job order's real stage forward (e.g.
- * approving the final quotation moves it to 'in-progress').
- */
-export async function simulateCustomerResponse(
-  jobOrderId: string,
-  status: 'approved' | 'disputed',
-  advanceToStage?: Stage
-): Promise<PreDiagnosticRound | null> {
-  const res = await fetch(`/api/job-orders/${jobOrderId}/pre-diagnostic/respond`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status, advanceToStage }),
-  })
-  const json = await res.json()
-  if (!json.success) return null
-  return toPreDiagnosticRound(json.data)
-}
+
 // --- Mid-inspection OBD-II scan authorization -------------------------------
 // Only reachable when diagnosticScanAuthorized is false on the inspection
 // page — the customer wasn't asked about the scanner at booking, so using it
