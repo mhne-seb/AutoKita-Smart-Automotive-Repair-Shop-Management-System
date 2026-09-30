@@ -39,7 +39,7 @@ type JobOrder = {
   plate_number: string;
 };
 
-type PaymentStatus = "none" | "pending" | "confirmed";
+type PaymentStatus = "none" | "pending" | "confirmed" | "rejected";
 
 function Quotation() {
   useEffect(() => { document.title = "Quotation — AutoKita"; }, []);
@@ -60,6 +60,8 @@ function Quotation() {
 
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("none");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [errorState, setErrorState] = useState(false);
 
   const goToInProgress = () => router.push(`/dashboard/tracking/in-progress?jobOrderId=${jobOrder?.job_order_id}`);
 
@@ -71,23 +73,44 @@ function Quotation() {
     const userId = Number(sessionStorage.getItem("autokita_user_id"));
     const jobOrderId = jobOrderIdParam ? Number(jobOrderIdParam) : undefined;
     setLoading(true);
+    setErrorState(false);
     getQuotationData(userId, jobOrderId)
-      .then((data) => {
+      .then((data: any) => {
+        if (data._status === 401 || data._status === 403) {
+          sessionStorage.removeItem("autokita_customer");
+          sessionStorage.removeItem("autokita_user_id");
+          sessionStorage.removeItem("autokita_user_name");
+          router.replace('/login');
+          return;
+        }
+        if (!Array.isArray(data.services)) {
+          setErrorState(true);
+          setServices([]);
+          return;
+        }
         setJobOrder(data.jobOrder);
         setQuotationStatus(data.quotationStatus || 'ready');
-        setServices(data.services);
-        setChecked(Object.fromEntries(data.services.map((s) => [s.id, true])));
+        setServices(data.services || []);
+        setChecked(Object.fromEntries(data.services.map((s: any) => [s.id, true])));
         if (data.paymentStatus) {
           if (data.paymentStatus.verification_status === "verified") {
             setPaymentStatus("confirmed");
           } else if (data.paymentStatus.verification_status === "pending") {
             setPaymentStatus("pending");
             setPaymentMethod(data.paymentStatus.payment_method === "cash" ? "shop" : "ewallet");
+          } else if (data.paymentStatus.verification_status === "rejected") {
+            setPaymentStatus("rejected");
+            setPaymentMethod(data.paymentStatus.payment_method === "cash" ? "shop" : "ewallet");
+            setRejectionReason(data.paymentStatus.rejection_reason || "");
           }
         }
       })
+      .catch(() => {
+        setErrorState(true);
+        setServices([]);
+      })
       .finally(() => setLoading(false));
-  }, [jobOrderIdParam]);
+  }, [jobOrderIdParam, router]);
 
   const total = services
     .filter((s) => checked[s.id])
@@ -118,20 +141,19 @@ function Quotation() {
     method: PaymentMethod,
     actual_amount: number,
     proof?: PaymentProof,
-  ): Promise<boolean> => {
-    if (!jobOrder) return false;
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!jobOrder) return { success: false };
     const acceptedServiceIds = Object.entries(checked).filter(([, v]) => v).map(([k]) => Number(k));
     const declinedServiceIds = Object.entries(checked).filter(([, v]) => !v).map(([k]) => Number(k));
     const res = await submitQuotationPayment(jobOrder.job_order_id, method, actual_amount, acceptedServiceIds, proof, declinedServiceIds);
     if (!res.success) {
       toast.error(res.error ?? "Could not submit your payment. Please try again.");
-      return false;
+      return { success: false, error: res.error };
     }
     setPaymentMethod(method);
     setPaymentStatus("pending");
-    setJobOrder({ ...jobOrder, quotation_approved: true });
     setShowPay(false);
-    return true;
+    return { success: true };
   };
 
   // The modal owns the code-entry UI; this owns the network round-trips.
@@ -160,6 +182,28 @@ function Quotation() {
   if (loading) {
     return (
       <ShopLoading message="Loading your quotation" />
+    );
+  }
+
+  if (errorState) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center p-4">
+        <div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-xl border border-rose-200 bg-rose-50 p-6 text-center shadow-sm">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-500">
+            <AlertCircle size={24} />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-rose-900">Something went wrong</h2>
+            <p className="mt-1 text-sm text-rose-600">We couldn't load your quotation. Please try again.</p>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 w-full rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-600"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
     );
   }
 
@@ -236,13 +280,13 @@ function Quotation() {
               // ever having agreed to it, and that case must stay untickable
               // like any other service).
               const isAuthorizedFee = s.service_name === DIAGNOSTIC_SCAN_SERVICE_NAME && jobOrder.diagnostic_scan_authorized;
-              const frozen = locked || isAuthorizedFee;
+              const frozen = locked || isAuthorizedFee || paymentStatus === 'pending';
               return (
               <label
                 key={s.id}
                 className={`block rounded-xl border-2 bg-card p-5 ${checked[s.id] ? "border-teal" : "border-border"} ${
                   frozen ? "cursor-not-allowed" : "cursor-pointer"
-                } ${locked ? "opacity-80" : ""}`}
+                } ${frozen ? "opacity-80" : ""}`}
               >
                 <div className="flex items-start gap-4">
                   <input
@@ -345,56 +389,20 @@ function Quotation() {
                   </p>
                   {paymentStatus !== "none" && <PaymentStatusCard status={paymentStatus} method={paymentMethod} />}
                 </div>
-              ) : needsDownpayment ? (
-                <>
-                  <div className="mt-4 rounded-lg bg-[color:oklch(0.97_0.04_50)] p-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-[color:oklch(0.55_0.15_50)]"><AlertCircle className="h-4 w-4" /> Downpayment Required</div>
-                    <p className="mt-2 text-xs text-[color:oklch(0.5_0.13_50)]">Your total bill exceeds ₱50,000. A 20% downpayment is required before we begin servicing your vehicle.</p>
-                    <div className="mt-3 rounded-lg bg-background p-3">
-                      <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground"><span>Required Downpayment (20%)</span><span>Total Bill</span></div>
-                      <div className="mt-1 flex items-center justify-between"><b className="text-lg">₱{downpayment.toLocaleString()}</b><b>₱{total.toLocaleString()}</b></div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setShowPay(true)}
-                    disabled={selectedCount === 0}
-                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-3 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <CreditCard className="h-4 w-4" /> Proceed to Payment
-                  </button>
-                </>
+              ) : paymentStatus === "pending" ? (
+                <PaymentStatusCard status={paymentStatus} method={paymentMethod} />
               ) : (
                 <>
-                  <div className="mt-4 grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => setPayChoice("2fa")}
-                      className={`flex flex-col items-center gap-1.5 rounded-lg border-2 p-3 text-center ${
-                        payChoice === "2fa" ? "border-brand bg-brand-soft/30" : "border-border"
-                      }`}
-                    >
-                      <ShieldCheck className="h-4 w-4 text-teal" />
-                      <span className="text-xs font-semibold">Confirm via 2FA</span>
-                      <span className="text-[10px] text-muted-foreground">No payment now</span>
-                    </button>
-                    <button
-                      onClick={() => setPayChoice("downpayment")}
-                      className={`flex flex-col items-center gap-1.5 rounded-lg border-2 p-3 text-center ${
-                        payChoice === "downpayment" ? "border-brand bg-brand-soft/30" : "border-border"
-                      }`}
-                    >
-                      <Wallet className="h-4 w-4 text-brand" />
-                      <span className="text-xs font-semibold">Pay Downpayment</span>
-                      <span className="text-[10px] text-muted-foreground">Optional, 20% now</span>
-                    </button>
-                  </div>
-
-                  {payChoice === "downpayment" ? (
+                  {paymentStatus === "rejected" && (
+                    <PaymentStatusCard status={paymentStatus} method={paymentMethod} reason={rejectionReason} />
+                  )}
+                  {needsDownpayment ? (
                     <>
-                      <div className="mt-3 rounded-lg bg-brand-soft/50 p-4">
-                        <div className="flex items-center gap-2 text-sm font-semibold"><Wallet className="h-4 w-4 text-brand" /> Optional Downpayment</div>
-                        <p className="mt-2 text-xs text-muted-foreground">Not required for this actual_amount, but paying now can help speed up your drop-off.</p>
+                      <div className="mt-4 rounded-lg bg-[color:oklch(0.97_0.04_50)] p-4">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-[color:oklch(0.55_0.15_50)]"><AlertCircle className="h-4 w-4" /> Downpayment Required</div>
+                        <p className="mt-2 text-xs text-[color:oklch(0.5_0.13_50)]">Your total bill exceeds ₱50,000. A 20% downpayment is required before we begin servicing your vehicle.</p>
                         <div className="mt-3 rounded-lg bg-background p-3">
-                          <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground"><span>Downpayment (20%)</span><span>Total Bill</span></div>
+                          <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground"><span>Required Downpayment (20%)</span><span>Total Bill</span></div>
                           <div className="mt-1 flex items-center justify-between"><b className="text-lg">₱{downpayment.toLocaleString()}</b><b>₱{total.toLocaleString()}</b></div>
                         </div>
                       </div>
@@ -408,17 +416,62 @@ function Quotation() {
                     </>
                   ) : (
                     <>
-                      <div className="mt-3 rounded-lg bg-brand-soft/50 p-4">
-                        <div className="flex items-center gap-2 text-sm font-semibold"><ShieldCheck className="h-4 w-4 text-teal" /> 2FA Confirmation Required</div>
-                        <p className="mt-2 text-xs text-muted-foreground">No payment required now. Confirm your selected services using Two-Factor Authentication.</p>
+                      <div className="mt-4 grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => setPayChoice("2fa")}
+                          className={`flex flex-col items-center gap-1.5 rounded-lg border-2 p-3 text-center ${
+                            payChoice === "2fa" ? "border-brand bg-brand-soft/30" : "border-border"
+                          }`}
+                        >
+                          <ShieldCheck className="h-4 w-4 text-teal" />
+                          <span className="text-xs font-semibold">Confirm via 2FA</span>
+                          <span className="text-[10px] text-muted-foreground">No payment now</span>
+                        </button>
+                        <button
+                          onClick={() => setPayChoice("downpayment")}
+                          className={`flex flex-col items-center gap-1.5 rounded-lg border-2 p-3 text-center ${
+                            payChoice === "downpayment" ? "border-brand bg-brand-soft/30" : "border-border"
+                          }`}
+                        >
+                          <Wallet className="h-4 w-4 text-brand" />
+                          <span className="text-xs font-semibold">Pay Downpayment</span>
+                          <span className="text-[10px] text-muted-foreground">Optional, 20% now</span>
+                        </button>
                       </div>
-                      <button
-                        onClick={() => setShow2FA(true)}
-                        disabled={selectedCount === 0}
-                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-3 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <Mail className="h-4 w-4" /> Verify & Confirm (2FA)
-                      </button>
+
+                      {payChoice === "downpayment" ? (
+                        <>
+                          <div className="mt-3 rounded-lg bg-brand-soft/50 p-4">
+                            <div className="flex items-center gap-2 text-sm font-semibold"><Wallet className="h-4 w-4 text-brand" /> Optional Downpayment</div>
+                            <p className="mt-2 text-xs text-muted-foreground">Not required for this amount, but paying now can help speed up your drop-off.</p>
+                            <div className="mt-3 rounded-lg bg-background p-3">
+                              <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground"><span>Downpayment (20%)</span><span>Total Bill</span></div>
+                              <div className="mt-1 flex items-center justify-between"><b className="text-lg">₱{downpayment.toLocaleString()}</b><b>₱{total.toLocaleString()}</b></div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setShowPay(true)}
+                            disabled={selectedCount === 0}
+                            className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-3 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <CreditCard className="h-4 w-4" /> Proceed to Payment
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="mt-3 rounded-lg bg-brand-soft/50 p-4">
+                            <div className="flex items-center gap-2 text-sm font-semibold"><ShieldCheck className="h-4 w-4 text-teal" /> 2FA Confirmation Required</div>
+                            <p className="mt-2 text-xs text-muted-foreground">No payment required now. Confirm your selected services using Two-Factor Authentication.</p>
+                          </div>
+                          <button
+                            onClick={() => setShow2FA(true)}
+                            disabled={selectedCount === 0}
+                            className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-3 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <Mail className="h-4 w-4" /> Verify & Confirm (2FA)
+                          </button>
+                        </>
+                      )}
                     </>
                   )}
                 </>
@@ -451,7 +504,7 @@ function Quotation() {
   );
 }
 
-function PaymentStatusCard({ status, method }: { status: PaymentStatus; method: PaymentMethod | null }) {
+function PaymentStatusCard({ status, method, reason }: { status: PaymentStatus; method: PaymentMethod | null, reason?: string }) {
   if (status === "confirmed") {
     return (
       <div className="mt-3 flex items-start gap-3 rounded-lg bg-success/10 p-3">
@@ -461,18 +514,34 @@ function PaymentStatusCard({ status, method }: { status: PaymentStatus; method: 
     );
   }
 
+  if (status === "rejected") {
+    return (
+      <div className="mt-3 mb-4 rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-destructive">Payment Rejected</div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {reason || "Your payment could not be verified. Please try again."}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="mt-3 rounded-lg border border-warning/30 bg-warning/10 p-3">
+    <div className="mt-4 rounded-lg border border-warning/30 bg-warning/10 p-4">
       <div className="flex items-start gap-3">
         <HourglassIcon className="mt-0.5 h-4 w-4 shrink-0 text-[color:oklch(0.55_0.15_60)] animate-pulse" />
         <div className="min-w-0">
-          <div className="text-xs font-semibold text-[color:oklch(0.5_0.13_50)]">
+          <div className="text-sm font-semibold text-[color:oklch(0.5_0.13_50)]">
             {method === "shop" ? "Pending Payment at Shop" : "Pending Verification"}
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
             {method === "shop"
-              ? "Please settle your downpayment at the shop counter."
-              : "We're checking your transfer and proof against the shop's account."}
+              ? "Please pay at the shop. Work starts once staff confirm your payment."
+              : "We received your proof. Work starts once staff confirm it."}
           </p>
         </div>
       </div>

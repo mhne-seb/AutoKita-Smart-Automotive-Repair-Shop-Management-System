@@ -1,16 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 
 // Customer reports a covered part failed. This doesn't decide anything —
 // it just opens a normal service ticket (so it goes through Job Queue like
 // any booking) tagged to the warranty, so the admin/mechanic can inspect the
 // part before approving or denying the claim.
 export async function POST(request: NextRequest) {
-  const { userId, warrantyId, description, preferredDatetime, serviceMode } = await request.json().catch(() => ({}))
+  const body = await request.json().catch(() => ({}))
+  const userIdRaw = body.userId
+  const { warrantyId, description, preferredDatetime, serviceMode } = body
   const mode = serviceMode === 'Home Service' ? 'home_service' : 'walk_in'
-  if (!userId || !warrantyId || !String(description ?? '').trim()) {
-    return NextResponse.json({ success: false, message: 'userId, warrantyId and description are required' }, { status: 400 })
+  if (!warrantyId || !String(description ?? '').trim()) {
+    return NextResponse.json({ success: false, message: 'warrantyId and description are required' }, { status: 400 })
   }
+
+  const guard = await (userIdRaw ? requireCustomer(userIdRaw) : requireCustomer())
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
   if (preferredDatetime && new Date(preferredDatetime).getTime() < Date.now()) {
     return NextResponse.json({ success: false, message: 'Pick a visit date and time that hasn\'t passed yet.' }, { status: 400 })
   }

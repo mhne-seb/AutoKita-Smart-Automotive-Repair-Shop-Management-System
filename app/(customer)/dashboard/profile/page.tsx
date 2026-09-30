@@ -24,7 +24,6 @@ import {
 import phAddress from "@/data/ph-address.json";
 
 const BRAND_GRADIENT = "linear-gradient(90deg, #0b1730 0%, #1d3a68 55%, #3b6cb4 100%)";
-const FALLBACK_USER_ID = 280;
 
 // Same province/city lists and "Others" choice as the booking form.
 const OTHERS = "Others";
@@ -106,7 +105,7 @@ async function shrinkPhoto(file: File): Promise<File> {
 function Profile() {
   useEffect(() => { document.title = "Profile Settings — AutoKita"; }, []);
 
-  const [userId, setUserId] = useState<number>(FALLBACK_USER_ID);
+  const [userId, setUserId] = useState<number>(0);
   const [form, setForm] = useState<ProfileForm | null>(null);
   const [savedForm, setSavedForm] = useState<ProfileForm | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -139,7 +138,7 @@ function Profile() {
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
-    const id = stored ? parseInt(stored, 10) : FALLBACK_USER_ID;
+    const id = stored ? parseInt(stored, 10) : 0;
     setUserId(id);
     fetch(`/api/customer/profile?userId=${id}`)
       .then((r) => r.json())

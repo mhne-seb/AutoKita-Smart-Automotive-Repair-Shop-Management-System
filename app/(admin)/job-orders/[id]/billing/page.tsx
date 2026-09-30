@@ -17,6 +17,7 @@ import { Lightbox } from '@/components/Lightbox'
 import { getJobOrderById } from '@/controllers/jobOrderController'
 import { verifyJobOrderPayment } from '@/controllers/quotationController'
 import { getBillingData, releaseVehicle, type BillingData, type BillingPayment } from '@/controllers/billingStageController'
+import { RejectPaymentModal } from '@/components/dashboard/RejectPaymentModal'
 import type { JobOrderCard } from '@/data/types'
 
 const currency = (n: number) => `₱${n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -39,6 +40,7 @@ export default function BillingPage() {
   const [data, setData] = useState<BillingData | null>(null)
   const [proof, setProof] = useState<string | null>(null)
   const [busyPaymentId, setBusyPaymentId] = useState<number | null>(null)
+  const [rejectingPayment, setRejectingPayment] = useState<BillingPayment | null>(null)
   const [releasing, setReleasing] = useState(false)
   const [confirmRelease, setConfirmRelease] = useState(false)
   // Warranty is entered once, at release, and can't be edited afterward —
@@ -64,10 +66,11 @@ export default function BillingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [awaiting])
 
-  async function decide(p: BillingPayment, decision: 'verified' | 'rejected') {
+  async function decide(p: BillingPayment, decision: 'verified' | 'rejected', reason?: string) {
     setBusyPaymentId(p.id)
-    const ok = await verifyJobOrderPayment(jobOrderId, p.id, decision)
+    const ok = await verifyJobOrderPayment(jobOrderId, p.id, decision, reason)
     setBusyPaymentId(null)
+    setRejectingPayment(null)
     if (!ok) return toast.error('Could not update the payment.')
     const cash = p.payment_method === 'cash'
     toast.success(
@@ -164,7 +167,7 @@ export default function BillingPage() {
                       <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${cashIntent ? 'bg-sky-100 text-sky-700' : STATUS_PILL[p.verification_status]}`}>{cashIntent ? 'Awaiting cash' : p.verification_status}</span>
                       {p.verification_status === 'pending' && (
                         <div className="flex shrink-0 gap-2">
-                          <button onClick={() => decide(p, 'rejected')} disabled={busy} className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"><XCircle size={13} /> {cashIntent ? "Didn't pay" : 'Reject'}</button>
+                          <button onClick={() => setRejectingPayment(p)} disabled={busy} className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"><XCircle size={13} /> {cashIntent ? "Didn't pay" : 'Reject'}</button>
                           <button onClick={() => decide(p, 'verified')} disabled={busy} className="flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50">{busy ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />} {cashIntent ? 'Cash received' : 'Verify'}</button>
                         </div>
                       )}
@@ -291,6 +294,14 @@ export default function BillingPage() {
       </div>
 
       {proof && <Lightbox url={proof} label="Proof of payment" onClose={() => setProof(null)} />}
+      
+      {rejectingPayment && (
+        <RejectPaymentModal
+          onClose={() => setRejectingPayment(null)}
+          onConfirm={(reason) => decide(rejectingPayment, 'rejected', reason)}
+          isWorking={busyPaymentId === rejectingPayment.id}
+        />
+      )}
     </div>
   )
 }

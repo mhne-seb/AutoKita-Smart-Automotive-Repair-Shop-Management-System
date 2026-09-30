@@ -37,37 +37,59 @@ export function issueOtp(purpose: string, subject: string): { code: string; toke
   return { code, token, expiresAt: exp }
 }
 
+const attempts = new Map<string, { count: number; expiresAt: number }>()
+
 export function verifyOtp(
   token: string,
   code: string,
   purpose: string,
   subject: string,
-): { ok: true } | { ok: false; reason: 'expired' | 'invalid' } {
+): { ok: true } | { ok: false; reason: 'expired' | 'invalid' | 'too_many_attempts' } {
   if (isVerificationBypassed()) {
     return { ok: true }
+  }
+
+  const attemptKey = `${purpose}:${subject}`
+  const now = Date.now()
+
+  // Clean up old attempts for this key if they've expired
+  const record = attempts.get(attemptKey)
+  if (record && now > record.expiresAt) {
+    attempts.delete(attemptKey)
+  } else if (record && record.count >= 5) {
+    return { ok: false, reason: 'too_many_attempts' }
   }
 
   let parts: string[]
   try {
     parts = Buffer.from(token, 'base64url').toString('utf8').split('|')
   } catch {
-    return { ok: false, reason: 'invalid' }
+    return recordFailure(attemptKey, now + TTL_MS)
   }
-  if (parts.length !== 4) return { ok: false, reason: 'invalid' }
+  if (parts.length !== 4) return recordFailure(attemptKey, now + TTL_MS)
 
   const [tPurpose, tSubject, tExp, mac] = parts
   const exp = Number(tExp)
   if (tPurpose !== purpose || tSubject !== subject || !Number.isFinite(exp)) {
-    return { ok: false, reason: 'invalid' }
+    return recordFailure(attemptKey, exp > now ? exp : now + TTL_MS)
   }
-  if (Date.now() > exp) return { ok: false, reason: 'expired' }
+  if (now > exp) return { ok: false, reason: 'expired' }
 
   const expected = sign(purpose, subject, exp, String(code).trim())
   const a = Buffer.from(mac)
   const b = Buffer.from(expected)
-  if (a.length !== b.length || !timingSafeEqual(a, b)) return { ok: false, reason: 'invalid' }
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
+    return recordFailure(attemptKey, exp)
+  }
 
+  attempts.delete(attemptKey)
   return { ok: true }
+}
+
+function recordFailure(key: string, expiresAt: number): { ok: false; reason: 'invalid' } {
+  const current = attempts.get(key)?.count || 0
+  attempts.set(key, { count: current + 1, expiresAt })
+  return { ok: false, reason: 'invalid' }
 }
 
 export const OTP_TTL_MINUTES = TTL_MS / 60_000

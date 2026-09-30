@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 import { verifyOtp, QUOTATION_OTP_PURPOSE } from '@/lib/otp'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 import { isVerificationBypassed } from '@/lib/testMode'
@@ -14,14 +15,20 @@ import { isVerificationBypassed } from '@/lib/testMode'
 // Policy), so it's written to the audit log with the customer's id.
 export async function POST(request: NextRequest) {
   try {
-    const { userId, jobOrderId, acceptedServiceIds, declinedServiceIds, otpToken, otpCode } = await request.json()
+    const body = await request.json()
+    const userIdRaw = body.userId
+    const { jobOrderId, acceptedServiceIds, declinedServiceIds, otpToken, otpCode } = body
 
-    if (!userId || !jobOrderId || !Array.isArray(acceptedServiceIds)) {
+    if (!jobOrderId || !Array.isArray(acceptedServiceIds)) {
       return NextResponse.json(
-        { success: false, message: 'userId, jobOrderId and acceptedServiceIds are required' },
+        { success: false, message: 'jobOrderId and acceptedServiceIds are required' },
         { status: 400 },
       )
     }
+
+    const guard = await (userIdRaw ? requireCustomer(userIdRaw) : requireCustomer())
+    if (!guard.ok) return guard.response
+    const userId = guard.session.userId
 
     const bypass = isVerificationBypassed()
     if (!bypass) {
@@ -31,6 +38,12 @@ export async function POST(request: NextRequest) {
 
       const otp = verifyOtp(String(otpToken), String(otpCode), QUOTATION_OTP_PURPOSE, `${userId}:${jobOrderId}`)
       if (!otp.ok) {
+        if (otp.reason === 'too_many_attempts') {
+          return NextResponse.json(
+            { success: false, code: otp.reason, message: 'Too many wrong codes. Please try again in a few minutes.' },
+            { status: 429 },
+          )
+        }
         return NextResponse.json(
           {
             success: false,

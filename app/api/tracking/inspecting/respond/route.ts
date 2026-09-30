@@ -1,19 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 
 // The customer's decision on the inspection pre-diagnostic round.
 // Approving is what advances the job order to the quotation stage —
 // sending it for approval no longer does.
 export async function POST(request: NextRequest) {
   try {
-    const { userId, jobOrderId, decision, reason } = await request.json()
+    const body = await request.json()
+    const userIdRaw = body.userId
+    const { jobOrderId, decision, reason } = body
 
     if (decision !== 'approved' && decision !== 'disputed') {
       return NextResponse.json({ success: false, message: 'Invalid decision' }, { status: 400 })
     }
-    if (!userId || !jobOrderId) {
-      return NextResponse.json({ success: false, message: 'Missing userId or jobOrderId' }, { status: 400 })
+    if (!jobOrderId) {
+      return NextResponse.json({ success: false, message: 'Missing jobOrderId' }, { status: 400 })
     }
+
+    const guard = await (userIdRaw ? requireCustomer(userIdRaw) : requireCustomer())
+    if (!guard.ok) return guard.response
+    const userId = guard.session.userId
 
     // A dispute with no reason is the "oral agreement" the shop is trying to
     // get away from — the mechanic needs something to revise toward.

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 import { issueOtp, OTP_TTL_MINUTES, FINDING_OTP_PURPOSE } from '@/lib/otp'
 import { sendOtpEmail } from '@/lib/mail'
 import { isVerificationBypassed } from '@/lib/testMode'
@@ -16,10 +17,16 @@ function maskEmail(email: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, findingId } = await request.json()
-    if (!userId || !findingId) {
-      return NextResponse.json({ success: false, message: 'Missing userId or findingId' }, { status: 400 })
+    const body = await request.json()
+    const userIdRaw = body.userId
+    const findingId = body.findingId
+    if (!findingId) {
+      return NextResponse.json({ success: false, message: 'Missing findingId' }, { status: 400 })
     }
+
+    const guard = await (userIdRaw ? requireCustomer(userIdRaw) : requireCustomer())
+    if (!guard.ok) return guard.response
+    const userId = guard.session.userId
 
     // Ownership: the finding's job order must belong to this customer, and it
     // must still be waiting on them.
