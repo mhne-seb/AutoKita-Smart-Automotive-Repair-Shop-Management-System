@@ -1,0 +1,2661 @@
+{
+  "chat_messages": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "session_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "sender_type",
+      "type": "character varying",
+      "length": 30,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "sender_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "message_text",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "sent_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "is_read_by_customer",
+      "type": "boolean",
+      "length": null,
+      "nullable": "YES",
+      "default": "false"
+    },
+    {
+      "column": "is_read_by_admin",
+      "type": "boolean",
+      "length": null,
+      "nullable": "YES",
+      "default": "false"
+    }
+  ],
+  "chat_sessions": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "customer_user_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "assigned_employee_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "reference_type",
+      "type": "character varying",
+      "length": 30,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "reference_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "session_status",
+      "type": "character varying",
+      "length": 30,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "started_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "last_activity_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "employee_profiles": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "employee_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "shop_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "branch",
+      "type": "character varying",
+      "length": 100,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "location",
+      "type": "character varying",
+      "length": 100,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "rank",
+      "type": "character varying",
+      "length": 50,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "base_salary",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "commission_percent",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "jobs_capacity",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "color",
+      "type": "character varying",
+      "length": 100,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "employees": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "full_name",
+      "type": "character varying",
+      "length": 70,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "email",
+      "type": "character varying",
+      "length": 80,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "password",
+      "type": "character varying",
+      "length": 100,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "contact_number",
+      "type": "character varying",
+      "length": 11,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "role",
+      "type": "employee_role",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "hire_date",
+      "type": "date",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "EOC",
+      "type": "date",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "status",
+      "type": "employee_status",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    }
+  ],
+  "inspection_photos": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "inspection_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "title",
+      "type": "character varying",
+      "length": 100,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "note",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "photo_url",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "logged_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "status",
+      "type": "finding_status",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "internal_ai_messages": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "session_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "sender",
+      "type": "character varying",
+      "length": 30,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "message_text",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "sent_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "internal_ai_sessions": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "employee_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "query_category",
+      "type": "character varying",
+      "length": 40,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "context_vehicle_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "started_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "job_order_parts": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "job_order_service_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "purchase_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "status",
+      "type": "job_order_parts_status",
+      "length": null,
+      "nullable": "YES",
+      "default": "'in_stock'::job_order_parts_status"
+    },
+    {
+      "column": "part_number",
+      "type": "character varying",
+      "length": 60,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "description",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "quantity",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "retail_unit_price",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "total_retail_amount",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "supplier_unit_cost",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "is_oem",
+      "type": "boolean",
+      "length": null,
+      "nullable": "YES",
+      "default": "false"
+    },
+    {
+      "column": "tier",
+      "type": "character varying",
+      "length": 20,
+      "nullable": "YES",
+      "default": "'replacement'::character varying"
+    },
+    {
+      "column": "replaces_part_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "is_warranty_replacement",
+      "type": "boolean",
+      "length": null,
+      "nullable": "YES",
+      "default": "false"
+    },
+    {
+      "column": "finding_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "job_order_services": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "service_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "description_of_work",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "estimated_duration",
+      "type": "time without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "actual_duration",
+      "type": "time without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "estimated_hours",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "actual_hours",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "estimated_amount",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "actual_amount",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "finding_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "assigned_mechanic_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "job_orders": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "ticket_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "user_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "vehicle_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "jo_date",
+      "type": "date",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "date_arrived",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "date_promised",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "started_at",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "completed_at",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "released_at",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "estimated_duration",
+      "type": "time without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "actual_duration",
+      "type": "time without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "estimated_grand_total",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "actual_grand_total",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "partial_payment",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "balance",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "status",
+      "type": "job_orders_status",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "quotation_notes",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "quotation_approved",
+      "type": "boolean",
+      "length": null,
+      "nullable": "YES",
+      "default": "false"
+    },
+    {
+      "column": "assigned_mechanic_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "created_by_employee_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "obd2_codes": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": "nextval('obd2_codes_id_seq'::regclass)"
+    },
+    {
+      "column": "code",
+      "type": "character varying",
+      "length": 10,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "category",
+      "type": "character varying",
+      "length": 50,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "description",
+      "type": "text",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "meaning",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "symptoms",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "causes",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "seriousness",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "can_i_still_drive",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "how_to_diagnose",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "inspection_difficulty",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "more_about",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "related_codes",
+      "type": "ARRAY",
+      "length": null,
+      "nullable": "YES",
+      "default": "'{}'::text[]"
+    },
+    {
+      "column": "is_primary",
+      "type": "boolean",
+      "length": null,
+      "nullable": "YES",
+      "default": "true"
+    },
+    {
+      "column": "parent_code",
+      "type": "character varying",
+      "length": 10,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "raw_content",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "source_url",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": "now()"
+    },
+    {
+      "column": "updated_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": "now()"
+    }
+  ],
+  "obd2_diagnostic_reports": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "scanner_tool",
+      "type": "character varying",
+      "length": 80,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "scanner_software",
+      "type": "character varying",
+      "length": 50,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "report_date",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "test_mileage",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "reported_vin",
+      "type": "character",
+      "length": 17,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "reported_plate",
+      "type": "character varying",
+      "length": 20,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "reported_make",
+      "type": "character varying",
+      "length": 40,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "reported_model",
+      "type": "character varying",
+      "length": 40,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "reported_year",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "reported_engine",
+      "type": "character varying",
+      "length": 50,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "source",
+      "type": "character varying",
+      "length": 20,
+      "nullable": "YES",
+      "default": "'gmail'::character varying"
+    },
+    {
+      "column": "source_email_uid",
+      "type": "character varying",
+      "length": 100,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "pdf_storage_url",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "linked_by",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "linked_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "datetime_created",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "NO",
+      "default": "now()"
+    },
+    {
+      "column": "filename",
+      "type": "character varying",
+      "length": 255,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "obd2_dtc_codes": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "report_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "dtc_code",
+      "type": "character varying",
+      "length": 30,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "description",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "state",
+      "type": "character varying",
+      "length": 50,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "system",
+      "type": "character varying",
+      "length": 150,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "datetime_logged",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "NO",
+      "default": "now()"
+    }
+  ],
+  "part_catalog": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "oem_part_number",
+      "type": "character varying",
+      "length": 60,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "brand",
+      "type": "character varying",
+      "length": 50,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "part_category",
+      "type": "character varying",
+      "length": 50,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "part_name",
+      "type": "character varying",
+      "length": 100,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "is_oem",
+      "type": "boolean",
+      "length": null,
+      "nullable": "YES",
+      "default": "false"
+    },
+    {
+      "column": "description",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "part_fitments": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "vehicle_catalog_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "part_catalog_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "notes",
+      "type": "character varying",
+      "length": 100,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "payments": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "payment_method",
+      "type": "payment_method",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "proof_of_payment_image",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "amount_paid",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "payment_date",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "verification_status",
+      "type": "payment_verification_status",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "payment_channel",
+      "type": "character varying",
+      "length": 30,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "reference_number",
+      "type": "character varying",
+      "length": 50,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "verified_by_employee_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "payroll_summaries": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "employee_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "period_start",
+      "type": "date",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "period_end",
+      "type": "date",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "base_pay",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "commission_pay",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "deductions",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": "0"
+    },
+    {
+      "column": "net_pay",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "status",
+      "type": "payroll_status_enum",
+      "length": null,
+      "nullable": "YES",
+      "default": "'draft'::payroll_status_enum"
+    },
+    {
+      "column": "date_generated",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "payment_date",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "pre_diagnostics": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "mechanic_notes",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "customer_approval_status",
+      "type": "approval_status",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "datetime_created",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "datetime_approved",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "inspection_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "pull_out_requests": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": "nextval('pull_out_requests_id_seq'::regclass)"
+    },
+    {
+      "column": "job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "reason",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "decision",
+      "type": "approval_status",
+      "length": null,
+      "nullable": "NO",
+      "default": "'pending'::approval_status"
+    },
+    {
+      "column": "admin_note",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "NO",
+      "default": "now()"
+    },
+    {
+      "column": "decided_at",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "purchase_orders": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "supplier_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "order_date",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "expected_delivery_date",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "actual_delivery_date",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "total_supplier_cost",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "status",
+      "type": "purchase_order_status",
+      "length": null,
+      "nullable": "YES",
+      "default": "'drafting'::purchase_order_status"
+    }
+  ],
+  "repair_progress_logs": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "activity_description",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "log_time",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "employee_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "retention_offers": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "user_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "promo_code",
+      "type": "character varying",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "offer_type",
+      "type": "promo_offer_type",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "discount_value",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "description",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "issue_date",
+      "type": "date",
+      "length": null,
+      "nullable": "YES",
+      "default": "CURRENT_DATE"
+    },
+    {
+      "column": "expiration_date",
+      "type": "date",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "is_claimed",
+      "type": "boolean",
+      "length": null,
+      "nullable": "YES",
+      "default": "false"
+    },
+    {
+      "column": "claimed_on_job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "road_tests": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": "nextval('road_tests_id_seq'::regclass)"
+    },
+    {
+      "column": "job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "attempt_no",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "tester_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "started_at",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "NO",
+      "default": "now()"
+    },
+    {
+      "column": "ended_at",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "result",
+      "type": "road_test_result",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "notes",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "photo_url",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "rework_task_ids",
+      "type": "ARRAY",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "rework_prev_photos",
+      "type": "ARRAY",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "failed_part_ids",
+      "type": "ARRAY",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "extra_service_ids",
+      "type": "ARRAY",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "extra_part_ids",
+      "type": "ARRAY",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "extra_cost",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": "0"
+    },
+    {
+      "column": "extra_decision",
+      "type": "approval_status",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "extra_decision_at",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": "now()"
+    }
+  ],
+  "scan_authorizations": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": "nextval('scan_authorizations_id_seq'::regclass)"
+    },
+    {
+      "column": "job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "admin_note",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "decision",
+      "type": "approval_status",
+      "length": null,
+      "nullable": "NO",
+      "default": "'pending'::approval_status"
+    },
+    {
+      "column": "requested_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "NO",
+      "default": "now()"
+    },
+    {
+      "column": "decided_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "service_findings": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": "nextval('service_findings_id_seq'::regclass)"
+    },
+    {
+      "column": "job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "task_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "reported_by",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "findings",
+      "type": "text",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "photo_url",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "proposed_services",
+      "type": "jsonb",
+      "length": null,
+      "nullable": "NO",
+      "default": "'[]'::jsonb"
+    },
+    {
+      "column": "proposed_parts",
+      "type": "jsonb",
+      "length": null,
+      "nullable": "NO",
+      "default": "'[]'::jsonb"
+    },
+    {
+      "column": "extra_cost",
+      "type": "numeric",
+      "length": null,
+      "nullable": "NO",
+      "default": "0"
+    },
+    {
+      "column": "decision",
+      "type": "approval_status",
+      "length": null,
+      "nullable": "NO",
+      "default": "'pending'::approval_status"
+    },
+    {
+      "column": "decided_at",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "NO",
+      "default": "now()"
+    }
+  ],
+  "service_progress_tasks": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "section_id",
+      "type": "section_type",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "task_title",
+      "type": "character varying",
+      "length": 100,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "note",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "task_status",
+      "type": "character varying",
+      "length": null,
+      "nullable": "YES",
+      "default": "'pending'::character varying"
+    },
+    {
+      "column": "completed_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "price",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "billable",
+      "type": "boolean",
+      "length": null,
+      "nullable": "YES",
+      "default": "true"
+    },
+    {
+      "column": "scheduled_date",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "mechanic_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "estimated_finish",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "completion_photo_url",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "started_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "rework_count",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": "0"
+    },
+    {
+      "column": "finding_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "service_tickets": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "user_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "vehicle_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "service_mode",
+      "type": "service_mode",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "home_service_address",
+      "type": "character varying",
+      "length": 255,
+      "nullable": "YES",
+      "default": "'None'::character varying"
+    },
+    {
+      "column": "customer_concern",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "ticket_status",
+      "type": "ticket_status",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "request_date",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "preferred_datetime",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "assigned_mechanic_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "handled_by_employee_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "services": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "shop_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "service_name",
+      "type": "character varying",
+      "length": 70,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "description",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "base_price",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "base_duration_hours",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "is_price_fixed",
+      "type": "boolean",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "is_active",
+      "type": "boolean",
+      "length": null,
+      "nullable": "YES",
+      "default": "true"
+    }
+  ],
+  "shops": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "name",
+      "type": "character varying",
+      "length": 40,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "address",
+      "type": "character varying",
+      "length": 255,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "contact_number",
+      "type": "character varying",
+      "length": 11,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "email",
+      "type": "character varying",
+      "length": 80,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "owner_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "operating_hours",
+      "type": "json",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "subcontracted_services": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "supplier_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "description_of_work",
+      "type": "character varying",
+      "length": 255,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "date_informed",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "date_started",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "date_ended",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "supplier_cost",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "retail_price",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "suppliers": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "supplier_name",
+      "type": "character varying",
+      "length": 70,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "contact_person",
+      "type": "character varying",
+      "length": 70,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "contact_number",
+      "type": "character varying",
+      "length": 11,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "email",
+      "type": "character varying",
+      "length": 50,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "address",
+      "type": "character varying",
+      "length": 255,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "is_active",
+      "type": "boolean",
+      "length": null,
+      "nullable": "YES",
+      "default": "true"
+    },
+    {
+      "column": "description",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "system_audit_logs": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "user_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "employees_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "action_performed",
+      "type": "audit_action_enum",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "entity_type",
+      "type": "character varying",
+      "length": 50,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "entity_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "old_values",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "new_values",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "action_date",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "users": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "email",
+      "type": "character varying",
+      "length": 80,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "nickname",
+      "type": "character varying",
+      "length": 40,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "password",
+      "type": "character varying",
+      "length": 100,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "first_name",
+      "type": "character varying",
+      "length": 40,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "last_name",
+      "type": "character varying",
+      "length": 40,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "contact_number",
+      "type": "character varying",
+      "length": 11,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "address",
+      "type": "character varying",
+      "length": 255,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "registration_date",
+      "type": "timestamp with time zone",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "role",
+      "type": "character",
+      "length": 8,
+      "nullable": "YES",
+      "default": "'customer'::bpchar"
+    }
+  ],
+  "vehicle_catalog": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "make",
+      "type": "character varying",
+      "length": 40,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "model",
+      "type": "character varying",
+      "length": 40,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "year_start",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "year_end",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "trim_variant",
+      "type": "character varying",
+      "length": 40,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "engine_type",
+      "type": "character varying",
+      "length": 50,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "transmission",
+      "type": "character varying",
+      "length": 20,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "drive_type",
+      "type": "character varying",
+      "length": 10,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "fuel_type",
+      "type": "character varying",
+      "length": 20,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "vehicle_inspections": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "started_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "fulfilled_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "inspected_by_employee_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "vehicles": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "user_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "vin",
+      "type": "character",
+      "length": 17,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "plate_number",
+      "type": "character varying",
+      "length": 10,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "vehicle_model",
+      "type": "character varying",
+      "length": 40,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "vehicle_year",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "mileage",
+      "type": "numeric",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "vehicle_type",
+      "type": "character varying",
+      "length": 40,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "vehicle_make",
+      "type": "character varying",
+      "length": 40,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "warranties": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "job_order_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "coverage_description",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "start_date",
+      "type": "date",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "expiration_date",
+      "type": "date",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "status",
+      "type": "warranty_status",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "job_order_part_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "warranty_claims": [
+    {
+      "column": "id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": "nextval('warranty_claims_id_seq'::regclass)"
+    },
+    {
+      "column": "warranty_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "ticket_id",
+      "type": "integer",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "customer_description",
+      "type": "text",
+      "length": null,
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "decision",
+      "type": "approval_status",
+      "length": null,
+      "nullable": "NO",
+      "default": "'pending'::approval_status"
+    },
+    {
+      "column": "mechanic_finding",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "deny_reason",
+      "type": "text",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "voids_warranty",
+      "type": "boolean",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "decided_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "decided_by",
+      "type": "integer",
+      "length": null,
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp without time zone",
+      "length": null,
+      "nullable": "NO",
+      "default": "now()"
+    }
+  ]
+}

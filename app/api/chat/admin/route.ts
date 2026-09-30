@@ -15,7 +15,7 @@ const MAX_RAG_CHUNK_CHARS = 900;
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getOpenAIClient, ADMIN_MODEL } from '@/lib/openai';
-import { hasBudget, deduct, remaining } from '@/lib/tokenBudget';
+import { checkRateLimit, recordRequestStart, recordRequestEnd, remaining } from '@/lib/tokenBudget';
 import { db } from '@/lib/db';
 import { getAdminIndex } from '@/lib/pinecone';
 import { semanticSearch, formatContext } from '@/lib/vectorSearch';
@@ -582,13 +582,20 @@ export async function POST(req: NextRequest) {
   // Get caller IP for token budgeting
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? '127.0.0.1';
 
-  // Check token budget
-  if (!hasBudget(ip, 'admin')) {
+  // Fast-rate malicious bot failsafe & rolling daily token budget check
+  const rateLimit = checkRateLimit(ip, 'admin');
+  if (!rateLimit.allowed) {
     return NextResponse.json(
-      { error: "You've reached your daily AI limit. Try again tomorrow." },
-      { status: 429 }
+      { error: rateLimit.reason },
+      { 
+        status: 429,
+        headers: rateLimit.retryAfterSeconds ? { 'Retry-After': String(rateLimit.retryAfterSeconds) } : undefined
+      }
     );
   }
+
+  // Record active in-flight request to prevent parallel concurrency floods
+  recordRequestStart(ip, 'admin');
 
   // Track which sources were consulted this request (for UI status indicator)
   // 'pinecone' will be added once Pinecone is configured (Phase 2).
@@ -597,6 +604,7 @@ export async function POST(req: NextRequest) {
   // Check API key
   const client = getOpenAIClient();
   if (!client) {
+    recordRequestEnd(ip, 'admin', 0);
     return NextResponse.json(
       { error: 'AI assistant is currently unavailable. Please contact the administrator.' },
       { status: 503 }
@@ -801,16 +809,16 @@ export async function POST(req: NextRequest) {
 
       // Final answer
       const replyText = choice.message.content ?? '';
-      deduct(ip, 'admin', totalTokens);
+      recordRequestEnd(ip, 'admin', totalTokens);
 
       // Record AI assistant reply in internal_ai_messages
       if (activeSessionId && replyText) {
         try {
           await db.query(
             `INSERT INTO internal_ai_messages (
-              session_id,
-              sender,
-              message_text,
+              session_id, 
+              sender, 
+              message_text, 
               sent_at
             ) VALUES ($1, 'bot', $2, NOW())`,
             [activeSessionId, replyText]
@@ -831,15 +839,15 @@ export async function POST(req: NextRequest) {
 
     // Fallback if tool loop exhausted without a final text response
     const fallbackText = 'I was unable to complete the lookup after multiple attempts. Please try rephrasing your question.';
-    deduct(ip, 'admin', totalTokens);
+    recordRequestEnd(ip, 'admin', totalTokens);
 
     if (activeSessionId) {
       try {
         await db.query(
           `INSERT INTO internal_ai_messages (
-            session_id,
-            sender,
-            message_text,
+            session_id, 
+            sender, 
+            message_text, 
             sent_at
           ) VALUES ($1, 'bot', $2, NOW())`,
           [activeSessionId, fallbackText]
@@ -857,6 +865,7 @@ export async function POST(req: NextRequest) {
       toolCallStatus: sourcesUsed.has('sql') ? 'sql' : 'none',
     });
   } catch (err: unknown) {
+    recordRequestEnd(ip, 'admin', 0);
     // Handle OpenAI API errors gracefully
     const apiErr = err as { status?: number; code?: string };
     if (apiErr?.status === 429) {
