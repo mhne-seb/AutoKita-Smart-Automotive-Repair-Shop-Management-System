@@ -156,6 +156,7 @@ export interface QuotationPart {
   qty: number
   unitPrice: number
   status: PartStatus
+  warranty_months?: number | null
 }
 
 export interface QuotationService {
