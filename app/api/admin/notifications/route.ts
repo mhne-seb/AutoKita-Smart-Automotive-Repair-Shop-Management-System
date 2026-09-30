@@ -113,7 +113,7 @@ export async function GET(req: NextRequest) {
     }
 
     const peso = (v: unknown) =>
-      'PHP ' +
+      '₱' +
       Number(v ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     const name = (f?: string | null, l?: string | null) =>
       [f, l].filter(Boolean).join(' ') || 'a customer'
