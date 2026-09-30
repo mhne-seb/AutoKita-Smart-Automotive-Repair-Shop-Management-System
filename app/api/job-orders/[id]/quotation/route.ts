@@ -47,7 +47,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   } catch (error) {
     console.error('Quotation fetch error:', error)
     return NextResponse.json(
-      { success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) },
+      { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: error instanceof Error ? error.message : String(error) } : {}) },
       { status: 500 }
     )
   }
@@ -222,7 +222,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       /* the connection is already gone */
     }
     return NextResponse.json(
-      { success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) },
+      { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: error instanceof Error ? error.message : String(error) } : {}) },
       { status: 500 }
     )
   }

@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error('Profile photo upload error:', err)
     return NextResponse.json(
-      { success: false, message: 'Upload failed', debug: err instanceof Error ? err.message : String(err) },
+      { success: false, message: 'Upload failed', ...(process.env.NODE_ENV !== 'production' ? { debug: err instanceof Error ? err.message : String(err) } : {}) },
       { status: 500 },
     )
   }
@@ -72,7 +72,7 @@ export async function DELETE(request: NextRequest) {
   } catch (err) {
     console.error('Profile photo remove error:', err)
     return NextResponse.json(
-      { success: false, message: 'Could not remove the photo', debug: err instanceof Error ? err.message : String(err) },
+      { success: false, message: 'Could not remove the photo', ...(process.env.NODE_ENV !== 'production' ? { debug: err instanceof Error ? err.message : String(err) } : {}) },
       { status: 500 },
     )
   }

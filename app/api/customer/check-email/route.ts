@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   } catch (err: any) {
     console.error('check-email error:', err)
     return NextResponse.json(
-      { success: false, message: 'Internal server error', debug: err.message },
+      { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: err.message } : {}) },
       { status: 500 }
     )
   }

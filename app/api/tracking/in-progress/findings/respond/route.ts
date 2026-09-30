@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     await client.query('ROLLBACK')
     console.error('[/api/tracking/in-progress/findings/respond] error:', error)
     return NextResponse.json(
-      { success: false, message: 'Internal server error', debug: error instanceof Error ? error.message : String(error) },
+      { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: error instanceof Error ? error.message : String(error) } : {}) },
       { status: 500 },
     )
   } finally {

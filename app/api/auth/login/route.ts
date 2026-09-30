@@ -3,33 +3,71 @@ import { db } from '@/lib/db'
 import { verifyPassword } from '@/lib/password'
 import { SESSION_COOKIE, REMEMBER_MAX_AGE_SECONDS, createSessionToken, sessionCookieOptions, sessionSecretConfigured } from '@/lib/session'
 
-export async function POST(req: NextRequest) {
-  const { email, password, remember } = await req.json()
+// Lockout after repeated wrong passwords (paper: UC 8, Exception 1). Kept in
+// memory, so each server instance counts on its own; that slows guessing down
+// but is not a hard guarantee across several instances.
+const MAX_WRONG_ATTEMPTS = 5
+const LOCK_MS = 15 * 60 * 1000
+const wrongAttempts = new Map<string, { count: number; firstAt: number }>()
 
-  if (!email || !password) {
+function lockedForMinutes(key: string): number {
+  const rec = wrongAttempts.get(key)
+  if (!rec) return 0
+  const age = Date.now() - rec.firstAt
+  if (age > LOCK_MS) {
+    wrongAttempts.delete(key)
+    return 0
+  }
+  return rec.count >= MAX_WRONG_ATTEMPTS ? Math.ceil((LOCK_MS - age) / 60000) : 0
+}
+
+function recordWrongAttempt(key: string) {
+  if (wrongAttempts.size > 2000) wrongAttempts.clear() // keep memory small
+  const rec = wrongAttempts.get(key)
+  if (!rec || Date.now() - rec.firstAt > LOCK_MS) wrongAttempts.set(key, { count: 1, firstAt: Date.now() })
+  else rec.count += 1
+}
+
+export async function POST(req: NextRequest) {
+  const { email: rawEmail, password, remember } = await req.json()
+
+  if (!rawEmail || !password) {
     return NextResponse.json({ success: false, message: 'Email and password are required.' }, { status: 400 })
+  }
+  const email = String(rawEmail).trim()
+  const attemptKey = email.toLowerCase()
+
+  const wait = lockedForMinutes(attemptKey)
+  if (wait > 0) {
+    return NextResponse.json(
+      { success: false, message: `Too many wrong attempts. Please try again in ${wait} minute${wait === 1 ? '' : 's'}.` },
+      { status: 429 },
+    )
   }
 
   try {
-    // Find the account by email only. The password check happens in code,
-    // because a salted hash can't be compared inside the SQL.
+    // Find the account by email only (upper/lower case does not matter). The
+    // password check happens in code, because a salted hash can't be compared
+    // inside the SQL. If two rows differ only by case, the exact match wins.
     let isCustomer = true
     let result = await db.query(
-      'SELECT id, email, nickname, first_name, last_name, role, password FROM users WHERE email = $1',
+      'SELECT id, email, nickname, first_name, last_name, role, password FROM users WHERE LOWER(email) = LOWER($1) ORDER BY (email = $1) DESC LIMIT 1',
       [email]
     )
     if (result.rows.length === 0) {
       isCustomer = false
       result = await db.query(
-        "SELECT id, email, full_name as nickname, split_part(full_name, ' ', 1) as first_name, split_part(full_name, ' ', 2) as last_name, role, password FROM employees WHERE email = $1",
+        "SELECT id, email, full_name as nickname, split_part(full_name, ' ', 1) as first_name, split_part(full_name, ' ', 2) as last_name, role, password FROM employees WHERE LOWER(email) = LOWER($1) ORDER BY (email = $1) DESC LIMIT 1",
         [email]
       )
     }
 
     const found = result.rows[0]
     if (!found || !(await verifyPassword(password, found.password))) {
+      recordWrongAttempt(attemptKey)
       return NextResponse.json({ success: false, message: 'Invalid email or password.' }, { status: 401 })
     }
+    wrongAttempts.delete(attemptKey)
 
     // Never send the hash back to the browser.
     const user = { ...found }

@@ -72,9 +72,21 @@ export function NotificationBell({
   }
 
   // Live pop-up: the parent re-fetches every few seconds; anything with a
-  // key we haven't seen before gets a toast (with an Open button) on top of
-  // the badge. The first load is only a baseline — no toasts for history.
+  // key we haven't seen before AND a genuinely recent time gets a toast (with
+  // an Open button) on top of the badge. The first load is only a baseline —
+  // no toasts for history.
+  // The recent-time rule matters because the list only holds the newest few
+  // items: when one disappears (a ticket is declined, say), an OLDER item
+  // slides into view with a key we haven't seen. That is not news, so it must
+  // not pop up as if it were.
   const seenKeys = useRef<Set<string> | null>(null)
+  const loadedAt = useRef(Date.now())
+  const isFresh = (at?: string) => {
+    if (!at) return false
+    const t = new Date(at).getTime()
+    if (Number.isNaN(t)) return false
+    return t >= loadedAt.current - 60_000 && t <= Date.now() + 5 * 60_000
+  }
   useEffect(() => {
     if (notifications.length === 0 && seenKeys.current === null) return
     if (seenKeys.current === null) {
@@ -85,6 +97,7 @@ export function NotificationBell({
       if (seenKeys.current.has(n.key)) continue
       seenKeys.current.add(n.key)
       if (readKeys.has(n.key)) continue
+      if (!isFresh(n.at)) continue
       toast(n.title, {
         description: n.message,
         duration: 8000,
