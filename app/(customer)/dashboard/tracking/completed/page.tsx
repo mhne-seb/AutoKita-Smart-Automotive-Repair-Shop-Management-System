@@ -33,6 +33,7 @@ function warrantyDuration(start: string | null, end: string | null) {
 }
 
 function statusLabel(status: string) {
+  if (status === "nearing_expiration") return "Expiring Soon";
   return status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
