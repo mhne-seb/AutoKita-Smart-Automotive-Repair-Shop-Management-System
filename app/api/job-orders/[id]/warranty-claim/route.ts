@@ -59,7 +59,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const claimRes = await client.query(
       `SELECT wc.id AS claim_id, wc.warranty_id, wc.decision::text,
-              w.coverage_description, w.expiration_date::text, w.job_order_part_id,
+              w.coverage_description, w.expiration_date::text, w.expiration_date >= CURRENT_DATE AS is_not_expired, w.job_order_part_id,
               jop.description, jop.part_number, jop.quantity, jop.is_oem, jop.tier, jop.job_order_service_id,
               jos.service_id, jos.estimated_hours
        FROM warranty_claims wc
@@ -85,6 +85,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     if (action === 'approve') {
+      if (!claim.is_not_expired) {
+        await client.query('ROLLBACK')
+        return NextResponse.json({ success: false, message: "This warranty has expired, so it can't be approved." }, { status: 409 })
+      }
+      if (!claim.job_order_part_id) {
+        await client.query('ROLLBACK')
+        return NextResponse.json({ success: false, message: "This warranty is not tied to a part and can't be replaced automatically." }, { status: 409 })
+      }
+
       // Labor first (part+labor both free — see the shop's warranty policy),
       // so the new part row can point at it.
       const newService = await client.query(

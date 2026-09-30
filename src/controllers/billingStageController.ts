@@ -21,7 +21,7 @@ export interface BillingData {
   bill: { total: number; paid: number; balance: number }
   payments: BillingPayment[]
   services: { name: string; amount: number; addedMidService: boolean }[]
-  parts: { id: number; name: string; partNo: string | null; qty: number; unitPrice: number; amount: number; warranty: boolean }[]
+  parts: { id: number; name: string; partNo: string | null; qty: number; unitPrice: number; amount: number; warranty: boolean; warranty_months: number | null }[]
 }
 
 type Result = { ok: boolean; message?: string }

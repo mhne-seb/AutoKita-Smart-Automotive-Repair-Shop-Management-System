@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const w = await db.query(
-      `SELECT w.id, w.status::text, w.expiration_date, w.coverage_description, jo.user_id, jo.vehicle_id, u.address
+      `SELECT w.id, w.status::text, w.expiration_date::text, w.expiration_date >= CURRENT_DATE AS is_not_expired, w.coverage_description, jo.user_id, jo.vehicle_id, u.address
        FROM warranties w
        JOIN job_orders jo ON jo.id = w.job_order_id
        JOIN users u ON u.id = jo.user_id
@@ -37,6 +37,9 @@ export async function POST(request: NextRequest) {
     }
     if (warranty.status !== 'active' && warranty.status !== 'nearing_expiration') {
       return NextResponse.json({ success: false, message: 'This warranty is not active' }, { status: 409 })
+    }
+    if (!warranty.is_not_expired) {
+      return NextResponse.json({ success: false, message: 'This warranty has expired.' }, { status: 409 })
     }
     // Home service goes to the address on the customer's own account, read
     // here rather than trusted from the request.
