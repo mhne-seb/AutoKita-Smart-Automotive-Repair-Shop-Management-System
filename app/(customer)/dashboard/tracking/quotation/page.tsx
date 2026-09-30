@@ -328,8 +328,17 @@ function Quotation() {
                           <div className="font-semibold text-[10px] uppercase tracking-wider mb-1">Required Parts</div>
                           <ul className="space-y-1">
                             {s.parts.map((p: any, idx: number) => (
-                              <li key={idx} className="flex justify-between">
-                                <span>{p.quantity}x {p.description || p.part_number}</span>
+                              <li key={idx} className="flex justify-between items-start">
+                                <div>
+                                  <div>{p.quantity}x {p.description || p.part_number}</div>
+                                  <div className="text-[10px] opacity-80 mt-0.5">
+                                    {p.warranty_months === null || p.warranty_months === undefined
+                                      ? ""
+                                      : p.warranty_months === 0
+                                      ? "No warranty"
+                                      : `Warranty: ${p.warranty_months} month${p.warranty_months === 1 ? '' : 's'}`}
+                                  </div>
+                                </div>
                                 <span>₱{Number(p.total_retail_amount).toLocaleString()}</span>
                               </li>
                             ))}

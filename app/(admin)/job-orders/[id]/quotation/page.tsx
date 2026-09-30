@@ -60,6 +60,7 @@ export default function page() {
   // reads; there's no manual Save button because auto-save already does it.
   const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [missingWarrantyError, setMissingWarrantyError] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -311,6 +312,8 @@ export default function page() {
   const [partQty, setPartQty] = useState('1')
   const [partUnitPrice, setPartUnitPrice] = useState('')
   const [partStatus, setPartStatus] = useState<'in-stock' | 'to-order'>('to-order')
+  const [partWarranty, setPartWarranty] = useState<number | string>('')
+  const [partWarrantyError, setPartWarrantyError] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -432,6 +435,8 @@ export default function page() {
     setPartQty('1')
     setPartUnitPrice('')
     setPartStatus('to-order')
+    setPartWarranty('')
+    setPartWarrantyError(false)
     setShowPartModal(true)
   }
 
@@ -444,6 +449,8 @@ export default function page() {
     setPartQty(String(part.qty))
     setPartUnitPrice(String(part.unitPrice))
     setPartStatus(part.status)
+    setPartWarranty(part.warranty_months === null || part.warranty_months === undefined ? '' : part.warranty_months)
+    setPartWarrantyError(false)
     setShowPartModal(true)
   }
 
@@ -457,6 +464,10 @@ export default function page() {
   function confirmPart() {
     const name = partName.trim()
     if (!name || !partModalServiceId) return
+    if (partWarranty === '') {
+      setPartWarrantyError(true)
+      return
+    }
     const serviceId = partModalServiceId
     const draft = {
       name,
@@ -464,6 +475,7 @@ export default function page() {
       qty: Math.max(1, Number(partQty) || 1),
       unitPrice: Math.max(0, Number(partUnitPrice) || 0),
       status: partStatus,
+      warranty_months: Number(partWarranty),
     }
     setServices((prev) =>
       prev.map((s) => {
@@ -593,6 +605,23 @@ export default function page() {
     setHasUnsavedChanges(true)
   }
 
+  function updatePartWarranty(serviceId: string, partId: string, warranty: number | null) {
+    setServices((prev) =>
+      prev.map((s) => {
+        if (s.id !== serviceId) return s
+        return {
+          ...s,
+          parts: s.parts.map((p) => {
+            if (p.id !== partId) return p
+            return { ...p, warranty_months: warranty }
+          }),
+        }
+      })
+    )
+    setHasUnsavedChanges(true)
+    setMissingWarrantyError(false)
+  }
+
   async function confirmAddService() {
     const picked: QuotationService[] = []
     let nextNum = services.length
@@ -711,7 +740,15 @@ export default function page() {
                 )
               )}
               <button
-                onClick={() => setShowSendReview(true)}
+                onClick={() => {
+                  const missing = services.some(s => s.parts.some(p => p.warranty_months === null || p.warranty_months === undefined))
+                  if (missing) {
+                    setMissingWarrantyError(true)
+                  } else {
+                    setMissingWarrantyError(false)
+                    setShowSendReview(true)
+                  }
+                }}
                 disabled={sending || quotationApproved}
                 className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
               >
@@ -731,7 +768,43 @@ export default function page() {
         <div className="space-y-5">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-slate-900">Services & Required Parts</h2>
-            <span className="text-sm text-slate-400">{services.length} services added</span>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-slate-400">{services.length} services added</span>
+              {services.some(s => s.parts.length > 0) && !quotationPending && !quotationApproved && (
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-slate-500">Set warranty for all parts:</span>
+                  <select
+                    className="rounded-lg border border-slate-200 py-1 pl-2 pr-6 outline-none focus:border-emerald-500"
+                    onChange={(e) => {
+                      if (!e.target.value) return
+                      const val = e.target.value === '0' ? 0 : Number(e.target.value)
+                      let numParts = 0
+                      setServices(prev => prev.map(s => {
+                        numParts += s.parts.length
+                        return {
+                          ...s, 
+                          parts: s.parts.map(p => ({ ...p, warranty_months: val }))
+                        }
+                      }))
+                      setHasUnsavedChanges(true)
+                      setMissingWarrantyError(false)
+                      e.target.value = ''
+                      
+                      const msgLabel = val === 0 ? "No warranty" : `${val} month${val === 1 ? '' : 's'}`
+                      toast.success(`Warranty set to ${msgLabel} for ${numParts} part${numParts === 1 ? '' : 's'}.`)
+                    }}
+                  >
+                    <option value="">Choose warranty…</option>
+                    <option value="0">No warranty</option>
+                    <option value="1">1 month</option>
+                    <option value="3">3 months</option>
+                    <option value="6">6 months</option>
+                    <option value="12">12 months</option>
+                    <option value="24">24 months</option>
+                  </select>
+                </div>
+              )}
+            </div>
           </div>
 
           {services.length === 0 && (
@@ -876,6 +949,7 @@ export default function page() {
                         <th className="px-3 py-2 text-left font-medium">Qty</th>
                         <th className="px-3 py-2 text-left font-medium">Unit Price</th>
                         <th className="px-3 py-2 text-left font-medium">Status</th>
+                        <th className="px-3 py-2 text-left font-medium">Warranty</th>
                         <th className="px-3 py-2 text-right font-medium"></th>
                       </tr>
                     </thead>
@@ -896,6 +970,28 @@ export default function page() {
                             >
                               {p.status === 'in-stock' ? 'In Stock' : 'To Order'}
                             </span>
+                          </td>
+                          <td className="px-3 py-2">
+                             <select
+                               value={p.warranty_months === null || p.warranty_months === undefined ? '' : p.warranty_months}
+                               onChange={(e) => {
+                                 const val = e.target.value === '' ? null : Number(e.target.value)
+                                 updatePartWarranty(s.id, p.id, val)
+                               }}
+                               disabled={quotationPending || quotationApproved}
+                               className={`rounded-lg border py-1.5 pl-2 pr-6 text-xs outline-none focus:border-emerald-500 ${missingWarrantyError && (p.warranty_months === null || p.warranty_months === undefined) ? 'border-rose-300 bg-rose-50' : 'border-slate-200'}`}
+                             >
+                                <option value="">Choose…</option>
+                                <option value="0">No warranty</option>
+                                <option value="1">1 month</option>
+                                <option value="3">3 months</option>
+                                <option value="6">6 months</option>
+                                <option value="12">12 months</option>
+                                <option value="24">24 months</option>
+                                {p.warranty_months !== null && p.warranty_months !== undefined && ![0, 1, 3, 6, 12, 24].includes(p.warranty_months) && (
+                                  <option value={p.warranty_months}>{p.warranty_months} months</option>
+                                )}
+                             </select>
                           </td>
                           <td className="px-3 py-2 text-right">
                             <div className="flex items-center justify-end gap-1">
@@ -921,7 +1017,7 @@ export default function page() {
                       ))}
                       {s.parts.length === 0 && (
                         <tr>
-                          <td colSpan={5} className="px-3 py-4 text-center text-xs text-slate-400">
+                          <td colSpan={6} className="px-3 py-4 text-center text-xs text-slate-400">
                             No parts added yet.
                           </td>
                         </tr>
@@ -939,6 +1035,9 @@ export default function page() {
               </div>
             )
           })}
+          {missingWarrantyError && (
+            <p className="text-sm font-semibold text-rose-600">Choose a warranty for every part (No warranty is allowed).</p>
+          )}
         </div>
 
         <div className="space-y-6">
@@ -1366,6 +1465,30 @@ export default function page() {
                     To Order
                   </button>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Warranty</label>
+                <select
+                  value={partWarranty}
+                  onChange={(e) => {
+                    setPartWarranty(e.target.value)
+                    setPartWarrantyError(false)
+                  }}
+                  className={`w-full rounded-lg border p-2.5 text-sm outline-none focus:border-emerald-500 ${partWarrantyError ? 'border-rose-500 bg-rose-50 text-rose-900' : 'border-slate-200 text-slate-700'}`}
+                >
+                  <option value="">Choose…</option>
+                  <option value="0">No warranty</option>
+                  <option value="1">1 month</option>
+                  <option value="3">3 months</option>
+                  <option value="6">6 months</option>
+                  <option value="12">12 months</option>
+                  <option value="24">24 months</option>
+                  {partWarranty !== '' && ![0, 1, 3, 6, 12, 24].includes(Number(partWarranty)) && (
+                    <option value={partWarranty}>{partWarranty} months</option>
+                  )}
+                </select>
+                {partWarrantyError && <p className="mt-1 text-xs text-rose-600">Choose a warranty, or No warranty.</p>}
               </div>
 
               <div className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3 text-sm">

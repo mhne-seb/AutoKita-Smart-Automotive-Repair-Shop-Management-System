@@ -41,7 +41,12 @@ export async function GET(request: NextRequest) {
          ORDER BY payment_date DESC LIMIT 1`, 
         [jobOrder.job_order_id]
       ),
-      db.query(`SELECT * FROM get_job_order_parts($1)`, [jobOrder.job_order_id]),
+      db.query(
+        `SELECT p.*, wp.warranty_months 
+         FROM get_job_order_parts($1) p
+         LEFT JOIN job_order_parts wp ON wp.id = p.id`,
+        [jobOrder.job_order_id]
+      ),
       db.query(
         `SELECT pd.customer_approval_status, pd.mechanic_notes
          FROM pre_diagnostics pd
