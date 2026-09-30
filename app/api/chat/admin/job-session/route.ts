@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 // app/api/chat/admin/job-session/route.ts
 //
 // GET ?search=<query>&limit=20
@@ -69,6 +70,8 @@ function buildContextString(session: Omit<JobOrderSession, 'contextString'>): st
 // ─── Route Handler ────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { searchParams } = new URL(req.url);
   const jobOrderId = searchParams.get('job_order_id');
   const search     = searchParams.get('search');

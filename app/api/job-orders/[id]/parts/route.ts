@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { notifyCustomer } from '@/lib/customerNotify'
@@ -10,6 +11,8 @@ import { notifyCustomer } from '@/lib/customerNotify'
 const ALLOWED = new Set(['received', 'to_order', 'ordered'])
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id: jobOrderId } = await params
     const { partId, status } = await request.json()

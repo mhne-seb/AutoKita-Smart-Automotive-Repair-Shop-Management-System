@@ -1,9 +1,12 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { hashPassword } from '@/lib/password'
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
 
 export async function POST(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const body = await req.json()
     const { ticketData } = body
@@ -96,7 +99,7 @@ export async function POST(req: NextRequest) {
 
     // Record audit log for admin creating the ticket
     try {
-      const actingEmpId = body.employeeId ? parseInt(String(body.employeeId), 10) : 1
+      const actingEmpId = auth.session.userId
       let empName = 'Shop Administrator'
       const eRes = await db.query(`SELECT full_name FROM employees WHERE id = $1`, [actingEmpId])
       if (eRes.rows.length > 0) empName = eRes.rows[0].full_name
