@@ -7,7 +7,7 @@
 // its own.
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Gauge, CheckCircle2, XCircle, Clock, AlertCircle, Wrench, ShieldCheck, ArrowRight } from "lucide-react";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
@@ -23,6 +23,7 @@ const fmt = (iso: string | null) =>
 function Testing() {
   useEffect(() => { document.title = "Testing — AutoKita"; }, []);
 
+  const router = useRouter();
   const searchParams = useSearchParams();
   const jobOrderIdParam = searchParams.get("jobOrderId");
   const [data, setData] = useState<TestingData | null>(null);
@@ -32,7 +33,16 @@ function Testing() {
   const load = () => {
     const userId = Number(sessionStorage.getItem("autokita_user_id"));
     const jobOrderId = jobOrderIdParam ? Number(jobOrderIdParam) : undefined;
-    return getTestingData(userId, jobOrderId).then(setData);
+    return getTestingData(userId, jobOrderId).then((res: any) => {
+      if (res?._status === 401 || res?._status === 403) {
+        sessionStorage.removeItem("autokita_customer");
+        sessionStorage.removeItem("autokita_user_id");
+        sessionStorage.removeItem("autokita_user_name");
+        router.replace('/login');
+        return;
+      }
+      setData(res);
+    });
   };
   useEffect(() => {
     setLoading(true);

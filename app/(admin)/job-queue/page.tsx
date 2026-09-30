@@ -317,6 +317,7 @@ export default function page() {
 
   const [checkInTarget, setCheckInTarget] = useState<Job | null>(null);
   const [checkingIn, setCheckingIn] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
 
   const confirmCheckIn = async (job: Job) => {
     if (checkingIn) return;
@@ -349,33 +350,59 @@ export default function page() {
   };
 
   const confirmReject = async (job: Job) => {
-    const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
-    await fetch('/api/admin/job-queue', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'reject',
-        ticketId: job.ticketId,
-        employeeId: activeEmployeeId ? Number(activeEmployeeId) : null,
-      })
-    });
-    setRejectTarget(null);
-    fetchJobs();
+    setRejecting(true);
+    try {
+      const res = await fetch('/api/admin/job-queue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reject',
+          ticketId: job.ticketId,
+        })
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success('Ticket declined.');
+        setRejectTarget(null);
+        fetchJobs();
+      } else {
+        console.error('Failed to decline ticket:', json.message || json.debug);
+        toast.error('Could not decline the ticket. Please try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Could not decline the ticket. Please try again.');
+    } finally {
+      setRejecting(false);
+    }
   }
 
   const confirmDelete = async (job: Job) => {
-    const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
-    await fetch('/api/admin/job-queue', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'reject',
-        ticketId: job.ticketId,
-        employeeId: activeEmployeeId ? Number(activeEmployeeId) : null,
-      }) // treat delete as reject for now
-    });
-    setDeleteTarget(null);
-    fetchJobs();
+    setRejecting(true);
+    try {
+      const res = await fetch('/api/admin/job-queue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reject',
+          ticketId: job.ticketId,
+        })
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success('Ticket declined.');
+        setDeleteTarget(null);
+        fetchJobs();
+      } else {
+        console.error('Failed to decline ticket:', json.message || json.debug);
+        toast.error('Could not decline the ticket. Please try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Could not decline the ticket. Please try again.');
+    } finally {
+      setRejecting(false);
+    }
   }
 
   const addTicket = async (data: NewTicketData) => {
@@ -771,52 +798,54 @@ export default function page() {
                       >
                         <Eye size={14} />
                       </button>
-                      {approvedLike ? (
-                        <>
-                          {!c.dateArrived ? (
-                            <button
-                              onClick={() => setCheckInTarget(c)}
-                              title="Vehicle Arrived — Store in Shop & Check In"
-                              className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 transition-all"
-                            >
-                              <Store size={13} /> Check In
-                            </button>
-                          ) : (
-                            c.jobOrderId && (
-                              <a
-                                href={`/job-orders/${c.jobOrderId}/inspection`}
-                                title="Go to Inspection"
-                                className="flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent"
+                      {c.status !== 'Cancelled' && (
+                        approvedLike ? (
+                          <>
+                            {!c.dateArrived ? (
+                              <button
+                                onClick={() => setCheckInTarget(c)}
+                                title="Vehicle Arrived — Store in Shop & Check In"
+                                className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 transition-all"
                               >
-                                <Search size={14} />
-                              </a>
-                            )
-                          )}
-                          <button
-                            onClick={() => setDeleteTarget(c)}
-                            title="Delete"
-                            className="flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => setApproveTarget(c)}
-                            title="Approve"
-                            className="flex items-center justify-center rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] p-2 text-brand-foreground hover:opacity-90"
-                          >
-                            <Check size={14} />
-                          </button>
-                          <button
-                            onClick={() => setRejectTarget(c)}
-                            title="Reject"
-                            className="flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50"
-                          >
-                            <X size={14} />
-                          </button>
-                        </>
+                                <Store size={13} /> Check In
+                              </button>
+                            ) : (
+                              c.jobOrderId && (
+                                <a
+                                  href={`/job-orders/${c.jobOrderId}/inspection`}
+                                  title="Go to Inspection"
+                                  className="flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent"
+                                >
+                                  <Search size={14} />
+                                </a>
+                              )
+                            )}
+                            <button
+                              onClick={() => setDeleteTarget(c)}
+                              title="Delete"
+                              className="flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => setApproveTarget(c)}
+                              title="Approve"
+                              className="flex items-center justify-center rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] p-2 text-brand-foreground hover:opacity-90"
+                            >
+                              <Check size={14} />
+                            </button>
+                            <button
+                              onClick={() => setRejectTarget(c)}
+                              title="Reject"
+                              className="flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50"
+                            >
+                              <X size={14} />
+                            </button>
+                          </>
+                        )
                       )}
                     </div>
                   </td>
@@ -865,9 +894,10 @@ export default function page() {
           tone="danger"
           title="Reject this ticket?"
           description={`${rejectTarget.name}'s job order for ${rejectTarget.vehicle} will be marked as cancelled.`}
-          confirmLabel="Reject Ticket"
+          confirmLabel={rejecting ? "Rejecting..." : "Reject Ticket"}
           onClose={() => setRejectTarget(null)}
           onConfirm={() => confirmReject(rejectTarget)}
+          disabled={rejecting}
         />
       )}
 
@@ -878,11 +908,12 @@ export default function page() {
       {deleteTarget && (
         <ConfirmModal
           tone="danger"
-          title="Delete this job order?"
-          description={`This will permanently remove ${deleteTarget.name}'s job order for ${deleteTarget.vehicle}. This action cannot be undone.`}
-          confirmLabel="Delete"
+          title="Decline this ticket?"
+          description="This ticket will be marked as declined and moved to Cancelled. It is not erased."
+          confirmLabel={rejecting ? "Declining..." : "Decline"}
           onClose={() => setDeleteTarget(null)}
           onConfirm={() => confirmDelete(deleteTarget)}
+          disabled={rejecting}
         />
       )}
     </div>
@@ -1139,6 +1170,7 @@ function ConfirmModal({
   confirmLabel,
   onClose,
   onConfirm,
+  disabled,
 }: {
   tone: 'danger' | 'default' | 'brand'
   title: string
@@ -1146,6 +1178,7 @@ function ConfirmModal({
   confirmLabel: string
   onClose: () => void
   onConfirm: () => void
+  disabled?: boolean
 }) {
   const isDanger = tone === 'danger'
   const isBrand = tone === 'brand'
@@ -1174,17 +1207,18 @@ function ConfirmModal({
         <p className="mt-1 text-sm text-muted-foreground">{description}</p>
 
         <div className="mt-6 flex justify-end gap-3">
-          <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent">
+          <button onClick={onClose} disabled={disabled} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50">
             Cancel
           </button>
           <button
             onClick={onConfirm}
+            disabled={disabled}
             className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
               isDanger
-                ? 'bg-destructive text-destructive-foreground hover:opacity-90'
+                ? 'bg-destructive text-destructive-foreground hover:opacity-90 disabled:opacity-50'
                 : isBrand
-                ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white hover:opacity-90'
-                : 'bg-primary text-primary-foreground hover:opacity-90'
+                ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white hover:opacity-90 disabled:opacity-50'
+                : 'bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50'
             }`}
           >
             {confirmLabel}

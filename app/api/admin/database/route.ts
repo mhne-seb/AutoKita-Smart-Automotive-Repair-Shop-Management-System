@@ -88,7 +88,7 @@ function formatActionTitle(action: string, entityType: string, newVals: any, emp
     return 'Accepted Service Ticket'
   }
   if (entityType === 'service_tickets' && action === 'rejected') {
-    return 'Rejected Service Ticket'
+    return 'Declined Service Ticket'
   }
   if (entityType === 'service_tickets' && action === 'status_changed') {
     return 'Modified Ticket Status'

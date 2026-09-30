@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
                 -- 'approved' row on it, but by an employee — that isn't consent.
                 AND c.user_id IS NOT NULL
           ) AS diagnostic_scan_authorized,
-          ap.approved_at,
+          la.last_activity,
           COALESCE(st.assigned_mechanic_id, jo.assigned_mechanic_id) as mechanic_id,
           wc.id IS NOT NULL AS is_warranty_claim,
           jo.id as job_order_id,
@@ -47,14 +47,13 @@ export async function GET(req: NextRequest) {
       JOIN vehicles v ON v.id = st.vehicle_id
       LEFT JOIN job_orders jo ON jo.ticket_id = st.id
       LEFT JOIN LATERAL (
-        SELECT MAX(c.action_date) AS approved_at
+        SELECT MAX(c.action_date) AS last_activity
         FROM system_audit_logs c
         WHERE c.entity_type = 'service_tickets'
           AND c.entity_id = st.id
-          AND c.action_performed = 'approved'
-          AND c.employees_id IS NOT NULL
-      ) ap ON true
-      ORDER BY COALESCE(ap.approved_at, st.request_date) DESC, st.id DESC
+          AND NOT (c.action_performed = 'approved' AND c.user_id IS NOT NULL)
+      ) la ON true
+      ORDER BY GREATEST(CASE WHEN st.request_date <= NOW() THEN st.request_date END, la.last_activity) DESC NULLS LAST, st.id DESC
     `
     const result = await db.query(query)
 
@@ -118,20 +117,33 @@ export async function POST(req: NextRequest) {
       console.warn('Could not resolve employee details for audit:', empErr)
     }
 
+    if (['approve', 'reject', 'hold'].includes(action)) {
+      const existing = await db.query(`SELECT id FROM job_orders WHERE ticket_id = $1 LIMIT 1`, [ticketId])
+      if (existing.rows.length > 0) {
+        if (action === 'approve') {
+          return NextResponse.json({
+            success: true,
+            alreadyApproved: true,
+            jobOrder: existing.rows[0],
+            message: 'This ticket already has a job order.',
+          })
+        } else {
+          return NextResponse.json({ success: false, message: 'This ticket already has a job order.' }, { status: 409 })
+        }
+      }
+
+      const ticketCheck = await db.query(`SELECT ticket_status FROM service_tickets WHERE id = $1`, [ticketId])
+      if (ticketCheck.rows.length === 0) {
+        return NextResponse.json({ success: false, message: 'Ticket not found.' }, { status: 404 })
+      }
+      const status = ticketCheck.rows[0].ticket_status
+      if (!['pending', 'queued', 'inspection_scheduled'].includes(status)) {
+        return NextResponse.json({ success: false, message: 'This ticket can no longer be changed.' }, { status: 409 })
+      }
+    }
+
     if (action === 'approve') {
 
-      const existing = await db.query(
-        `SELECT id FROM job_orders WHERE ticket_id = $1 LIMIT 1`,
-        [ticketId]
-      )
-      if (existing.rows.length > 0 ){
-        return NextResponse.json({
-          success: true,
-          alreadyApproved: true,
-          jobOrder: existing.rows[0],
-          message: 'This ticket already has a job order.',
-        })
-      }
 
       const joQuery = `SELECT * FROM create_job_order_from_ticket($1, $2)`
       const joResult = await db.query(joQuery, [ticketId, mechanicId || null])

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 import { uploadPaymentProof } from '@/lib/storage'
 import { readTransferDetails } from '@/lib/paymentForm'
 import { getJobOrderBill } from '@/lib/jobOrderBill'
@@ -17,12 +18,16 @@ import { getJobOrderBill } from '@/lib/jobOrderBill'
 export async function POST(request: NextRequest) {
   const form = await request.formData()
   const jobOrderId = Number(form.get('jobOrderId'))
-  const userId = Number(form.get('userId'))
+  const userIdRaw = form.get('userId')
   const method = String(form.get('method') ?? '')
 
-  if (!jobOrderId || !userId || (method !== 'shop' && method !== 'ewallet')) {
-    return NextResponse.json({ error: 'jobOrderId, userId and a valid method are required' }, { status: 400 })
+  if (!jobOrderId || (method !== 'shop' && method !== 'ewallet')) {
+    return NextResponse.json({ error: 'jobOrderId and a valid method are required' }, { status: 400 })
   }
+
+  const guard = await (userIdRaw ? requireCustomer(Number(userIdRaw)) : requireCustomer())
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
 
   try {
     const jo = await db.query(`SELECT user_id, status FROM job_orders WHERE id = $1`, [jobOrderId])

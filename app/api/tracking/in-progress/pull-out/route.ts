@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 import { getLatestPullOut } from '@/lib/pullOut'
 
 // Customer side of a pull-out (paper UC 15): ask to take the vehicle back
@@ -15,8 +16,14 @@ async function ownedInProgress(userId: number, jobOrderId: number) {
 }
 
 export async function POST(request: NextRequest) {
-  const { userId, jobOrderId, reason } = await request.json().catch(() => ({}))
-  if (!userId || !jobOrderId) return NextResponse.json({ success: false, message: 'userId and jobOrderId are required' }, { status: 400 })
+  const body = await request.json().catch(() => ({}))
+  const userIdRaw = body.userId
+  const { jobOrderId, reason } = body
+  if (!jobOrderId) return NextResponse.json({ success: false, message: 'jobOrderId is required' }, { status: 400 })
+
+  const guard = await (userIdRaw ? requireCustomer(userIdRaw) : requireCustomer())
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
 
   try {
     const own = await ownedInProgress(Number(userId), Number(jobOrderId))
@@ -56,8 +63,14 @@ export async function POST(request: NextRequest) {
 
 // Withdraw a request the shop hasn't answered yet.
 export async function DELETE(request: NextRequest) {
-  const { userId, jobOrderId } = await request.json().catch(() => ({}))
-  if (!userId || !jobOrderId) return NextResponse.json({ success: false, message: 'userId and jobOrderId are required' }, { status: 400 })
+  const body = await request.json().catch(() => ({}))
+  const userIdRaw = body.userId
+  const { jobOrderId } = body
+  if (!jobOrderId) return NextResponse.json({ success: false, message: 'jobOrderId is required' }, { status: 400 })
+
+  const guard = await (userIdRaw ? requireCustomer(userIdRaw) : requireCustomer())
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
   try {
     const own = await ownedInProgress(Number(userId), Number(jobOrderId))
     if ('error' in own) return NextResponse.json({ success: false, message: own.error }, { status: own.status })

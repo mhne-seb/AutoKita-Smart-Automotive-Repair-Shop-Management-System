@@ -54,7 +54,7 @@ export function PaymentModal({
   amount: number;
   optional?: boolean;
   onClose: () => void;
-  onSubmitted: (method: PaymentMethod, amount: number, proof?: PaymentProof) => Promise<boolean>;
+  onSubmitted: (method: PaymentMethod, amount: number, proof?: PaymentProof) => Promise<{ success: boolean; error?: string } | boolean>;
 }) {
   const copy = COPY[kind];
   const [method, setMethod] = useState<PaymentMethod>("shop");
@@ -66,6 +66,7 @@ export function PaymentModal({
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const selectedChannel = PAYMENT_CHANNELS.find((c) => c.id === channelId) ?? null;
@@ -114,7 +115,16 @@ export function PaymentModal({
         method === "ewallet" && selectedChannel && proofFile
           ? { channelId: selectedChannel.id, referenceNumber: referenceNumber.trim(), file: proofFile }
           : undefined;
-      const ok = await onSubmitted(method, amount, proof);
+      const res = await onSubmitted(method, amount, proof);
+      let ok = false;
+      if (typeof res === 'boolean') {
+        ok = res;
+      } else {
+        ok = res.success;
+        if (!res.success && res.error) {
+          setServerError(res.error);
+        }
+      }
       setStatus(ok ? "success" : "idle");
     }, 800);
   };
@@ -142,6 +152,7 @@ export function PaymentModal({
               <div className="flex items-center justify-between text-[10px] uppercase tracking-wider"><span>{copy.amountLabel(optional)}</span><span className="text-white/70">Total Bill</span></div>
               <div className="mt-1 flex items-center justify-between"><b className="text-xl">₱{amount.toLocaleString()}</b><b>₱{total.toLocaleString()}</b></div>
             </div>
+            {serverError && <p className="mt-2 text-xs font-semibold text-destructive">{serverError}</p>}
 
             <div className="mt-4 grid grid-cols-2 gap-3">
               <button

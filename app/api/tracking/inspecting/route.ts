@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 import { getLatestScanAuthorization } from '@/lib/scanAuthorization'
 import { signFileUrls } from '@/lib/storage'
 
@@ -8,8 +9,9 @@ export async function GET(request: NextRequest) {
   const userIdParam = searchParams.get('userId')
   const jobOrderIdParam = searchParams.get('jobOrderId')
 
-  const userId = parseInt(userIdParam ?? '', 10)
-  if (isNaN(userId)) return NextResponse.json({ error: 'userId must be a number' }, { status: 400 })
+  const guard = await (userIdParam ? requireCustomer(parseInt(userIdParam, 10)) : requireCustomer())
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
 
   try {
     let jobOrder

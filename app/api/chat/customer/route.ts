@@ -4,6 +4,7 @@
 // Features: Pinecone Static RAG (service/FAQ context), token budget, no DB/tool access.
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireCustomer } from '@/lib/authGuard';
 import { getOpenAIClient, CUSTOMER_MODEL } from '@/lib/openai';
 import { checkRateLimit, recordRequestStart, recordRequestEnd, remaining } from '@/lib/tokenBudget';
 import { getCustomerIndex } from '@/lib/pinecone';
@@ -130,16 +131,9 @@ When the customer asks about the status of their vehicle, active service, or rep
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const rawUserId = searchParams.get('userId');
-  const userId = rawUserId ? parseInt(rawUserId, 10) : null;
-
-  if (!userId || isNaN(userId)) {
-    return NextResponse.json({
-      success: true,
-      user: null,
-      activeJob: null,
-      recentMessages: [],
-    });
-  }
+  const guard = await (rawUserId ? requireCustomer(parseInt(rawUserId, 10)) : requireCustomer())
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
 
   try {
     // 1. Fetch user profile from Supabase
@@ -255,6 +249,18 @@ export async function POST(req: NextRequest) {
   }
 
   // Parse request body
+  let body: any = {};
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 });
+  }
+
+  const rawUserId = body.userId;
+  const guard = await (rawUserId ? requireCustomer(parseInt(String(rawUserId), 10)) : requireCustomer())
+  if (!guard.ok) return guard.response
+  // Note: we still extract customerUserId from body later if it's there.
+
   let messages: ChatCompletionMessageParam[];
   let incomingSessionId: number | null = null;
   let customerUserId: number | null = null;

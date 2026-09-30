@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireCustomer } from '@/lib/authGuard'
 import { notifyCustomer } from '@/lib/customerNotify'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 
@@ -21,10 +22,16 @@ import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE } from '@/data/diagno
 //              scanner report until they ask again (or the customer agrees
 //              some other way, off-system).
 export async function POST(request: NextRequest) {
-  const { userId, authorizationId, approved } = await request.json().catch(() => ({}))
-  if (!userId || !authorizationId || typeof approved !== 'boolean') {
-    return NextResponse.json({ success: false, message: 'userId, authorizationId and approved are required' }, { status: 400 })
+  const body = await request.json().catch(() => ({}))
+  const userIdRaw = body.userId
+  const { authorizationId, approved } = body
+  if (!authorizationId || typeof approved !== 'boolean') {
+    return NextResponse.json({ success: false, message: 'authorizationId and approved are required' }, { status: 400 })
   }
+
+  const guard = await (userIdRaw ? requireCustomer(userIdRaw) : requireCustomer())
+  if (!guard.ok) return guard.response
+  const userId = guard.session.userId
 
   const client = await db.connect()
   try {

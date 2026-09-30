@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Clock,
   AlertCircle,
@@ -105,6 +105,7 @@ function getTag(status: string): "completed" | "active" | "pending" | "cancelled
 function InProgress() {
   useEffect(() => { document.title = "In Progress — AutoKita"; }, []);
 
+  const router = useRouter();
   const searchParams = useSearchParams();
   const jobOrderIdParam = searchParams.get("jobOrderId");
 
@@ -118,7 +119,16 @@ function InProgress() {
   const load = () => {
     const userId = Number(sessionStorage.getItem("autokita_user_id"));
     const jobOrderId = jobOrderIdParam ? Number(jobOrderIdParam) : undefined;
-    return getInProgressData(userId, jobOrderId).then(setData);
+    return getInProgressData(userId, jobOrderId).then((res: any) => {
+      if (res?._status === 401 || res?._status === 403) {
+        sessionStorage.removeItem("autokita_customer");
+        sessionStorage.removeItem("autokita_user_id");
+        sessionStorage.removeItem("autokita_user_name");
+        router.replace('/login');
+        return;
+      }
+      setData(res);
+    });
   };
 
   useEffect(() => {

@@ -72,7 +72,9 @@ export async function getQuotationData(userId: number, jobOrderId?: number) {
   const qs = new URLSearchParams({ userId: String(userId) })
   if (jobOrderId) qs.set('jobOrderId', String(jobOrderId))
   const res = await fetch(`/api/tracking/quotation?${qs}`)
-  return res.json() as Promise<{
+  const data = await res.json()
+  return { _status: res.status, ...data } as {
+    _status: number
     jobOrder: {
       job_order_id: number
       status: string
@@ -92,8 +94,8 @@ export async function getQuotationData(userId: number, jobOrderId?: number) {
       estimated_amount: string | null;
       parts: any[];
     }[]
-    paymentStatus: { id: number; payment_method: string; amount_paid: string; verification_status: string; payment_date: string } | null
-  }>
+    paymentStatus: { id: number; payment_method: string; amount_paid: string; verification_status: string; payment_date: string; rejection_reason?: string } | null
+  }
 }
 
 /** Emails the customer a 6-digit code and returns the signed token to present
@@ -170,7 +172,7 @@ export async function submitQuotationPayment(
 export async function getQuotationPaymentStatus(jobOrderId: number) {
   const res = await fetch(`/api/tracking/quotation/payment-status?jobOrderId=${jobOrderId}`)
   return res.json() as Promise<{
-    paymentStatus: { verification_status: string; payment_method: string } | null
+    paymentStatus: { verification_status: string; payment_method: string; rejection_reason?: string } | null
   }>
 }
 
@@ -245,11 +247,12 @@ export async function verifyJobOrderPayment(
   jobOrderId: string,
   paymentId: number,
   decision: 'verified' | 'rejected',
+  reason?: string
 ): Promise<boolean> {
   const res = await fetch(`/api/job-orders/${jobOrderId}/payment`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ paymentId, decision }),
+    body: JSON.stringify({ paymentId, decision, reason }),
   })
   const json = await res.json()
   return json.success === true
