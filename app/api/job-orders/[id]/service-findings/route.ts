@@ -43,6 +43,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ success: false, message: 'Each part must be under one of the added services' }, { status: 400 })
   }
 
+  for (const s of services) {
+    if (!s.name || typeof s.name !== 'string' || s.name.trim() === '' || s.name.length > 100) {
+      return NextResponse.json({ success: false, message: 'Check the name of a service: it must be between 1 and 100 characters.' }, { status: 400 })
+    }
+    if (typeof s.price !== 'number' || !Number.isFinite(s.price) || s.price < 0 || s.price > 1000000) {
+      return NextResponse.json({ success: false, message: `Check the price of ${s.name}: it must be between 0 and 1,000,000.` }, { status: 400 })
+    }
+    if (typeof s.hours !== 'number' || !Number.isFinite(s.hours) || s.hours <= 0 || s.hours > 100) {
+      return NextResponse.json({ success: false, message: `Check the hours of ${s.name}: it must be greater than 0 and at most 100.` }, { status: 400 })
+    }
+  }
+
+  for (const p of parts) {
+    if (!p.name || typeof p.name !== 'string' || p.name.trim() === '' || p.name.length > 100) {
+      return NextResponse.json({ success: false, message: 'Check the name of a part: it must be between 1 and 100 characters.' }, { status: 400 })
+    }
+    if (typeof p.qty !== 'number' || !Number.isInteger(p.qty) || p.qty < 1 || p.qty > 1000) {
+      return NextResponse.json({ success: false, message: `Check the quantity of ${p.name}: it must be a whole number between 1 and 1,000.` }, { status: 400 })
+    }
+    if (typeof p.unitPrice !== 'number' || !Number.isFinite(p.unitPrice) || p.unitPrice < 0 || p.unitPrice > 1000000) {
+      return NextResponse.json({ success: false, message: `Check the price of ${p.name}: it must be between 0 and 1,000,000.` }, { status: 400 })
+    }
+  }
+
   try {
     // The job must be on the floor, and the task (if given) must be its own.
     const jo = await db.query(`SELECT status::text FROM job_orders WHERE id = $1`, [jobOrderId])

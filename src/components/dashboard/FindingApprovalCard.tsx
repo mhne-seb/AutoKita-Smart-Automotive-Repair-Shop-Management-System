@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import type { ServiceFinding } from "@/data/types";
 import { TwoFAModal } from "@/components/dashboard/TwoFAModal";
 import { requestFindingOtp, respondToFinding } from "@/controllers/findingsController";
-import { FINDING_TIMEOUT_HOURS, findingAgeHours, findingIsOverdue } from "@/data/findingPolicy";
+import { FINDING_TIMEOUT_HOURS, SUSPENDED_LABEL, findingAgeHours, findingIsOverdue } from "@/data/findingPolicy";
 
 const peso = (n: number) => `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 
@@ -91,7 +91,7 @@ export function FindingApprovalCard({
 
           <p className={`mt-3 text-xs font-semibold ${overdue ? "text-destructive" : "text-warning"}`}>
             {overdue
-              ? `The ${FINDING_TIMEOUT_HOURS}-hour response window has passed — the shop may move your vehicle to staging until you decide.`
+              ? `${SUSPENDED_LABEL}. The ${FINDING_TIMEOUT_HOURS}-hour response window has passed, so this request is on hold until you approve or decline it.`
               : `Please answer within ${FINDING_TIMEOUT_HOURS} hours of the request (about ${hoursLeft} h left) so work isn't held up.`}
           </p>
           <p className="mt-1.5 text-xs text-muted-foreground">
