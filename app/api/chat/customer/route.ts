@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getOpenAIClient, CUSTOMER_MODEL } from '@/lib/openai';
-import { hasBudget, deduct, remaining } from '@/lib/tokenBudget';
+import { checkRateLimit, recordRequestStart, recordRequestEnd, remaining } from '@/lib/tokenBudget';
 import { getCustomerIndex } from '@/lib/pinecone';
 import { semanticSearch, formatContext } from '@/lib/vectorSearch';
 import { db } from '@/lib/db';
@@ -229,17 +229,25 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? '127.0.0.1';
 
-  // Check token budget
-  if (!hasBudget(ip, 'customer')) {
+  // Fast-rate malicious bot failsafe & rolling daily token budget check
+  const rateLimit = checkRateLimit(ip, 'customer');
+  if (!rateLimit.allowed) {
     return NextResponse.json(
-      { error: "You've reached your daily chat limit. Please try again tomorrow." },
-      { status: 429 }
+      { error: rateLimit.reason },
+      { 
+        status: 429,
+        headers: rateLimit.retryAfterSeconds ? { 'Retry-After': String(rateLimit.retryAfterSeconds) } : undefined
+      }
     );
   }
+
+  // Record active in-flight request to prevent parallel concurrency floods
+  recordRequestStart(ip, 'customer');
 
   // Check API key
   const client = getOpenAIClient();
   if (!client) {
+    recordRequestEnd(ip, 'customer', 0);
     return NextResponse.json(
       { error: 'Our AI assistant is temporarily unavailable. Please contact us directly for assistance.' },
       { status: 503 }
@@ -534,7 +542,7 @@ export async function POST(req: NextRequest) {
 
     const replyText = response.choices[0]?.message.content ?? '';
     const totalTokens = response.usage?.total_tokens ?? 0;
-    deduct(ip, 'customer', totalTokens);
+    recordRequestEnd(ip, 'customer', totalTokens);
 
     // Record AI bot reply in chat_messages
     if (activeSessionId && replyText) {
@@ -567,6 +575,7 @@ export async function POST(req: NextRequest) {
       showJobCard: Boolean(isStatusQuery && activeJobData),
     });
   } catch (err: unknown) {
+    recordRequestEnd(ip, 'customer', 0);
     const apiErr = err as { status?: number; code?: string };
     if (apiErr?.status === 429) {
       const isBilling = apiErr?.code === 'credit_balance_exhausted' || apiErr?.code === 'insufficient_quota';
