@@ -2,7 +2,7 @@ import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { sweepPendingFindings } from '@/lib/findingsSweep'
-import { FINDING_TIMEOUT_HOURS } from '@/data/findingPolicy'
+import { FINDING_ADMIN_FLAG_HOURS, FINDING_TIMEOUT_HOURS, SUSPENDED_LABEL } from '@/data/findingPolicy'
 
 // No new DB objects. Reads only existing stored functions and builds the
 // admin notification list in application code. Each row self-clears once the
@@ -75,13 +75,16 @@ export async function GET(req: NextRequest) {
       // Findings the customer hasn't answered inside the policy window
       // (paper: UC 14, Exception 1). Shows until they answer.
       db.query(
-        `SELECT f.id, f.job_order_id, f.extra_cost, f.created_at, u.first_name, u.last_name, u.contact_number
+        `SELECT f.id, f.job_order_id, f.extra_cost, f.created_at, u.first_name, u.last_name, u.contact_number,
+                EXTRACT(EPOCH FROM (NOW() - f.created_at)) / 3600 AS age_hours,
+                f.created_at + ($1 * INTERVAL '1 hour') AS flagged_at,
+                f.created_at + ($2 * INTERVAL '1 hour') AS suspended_at
          FROM service_findings f
          JOIN job_orders jo ON jo.id = f.job_order_id
          JOIN users u ON u.id = jo.user_id
          WHERE f.decision = 'pending' AND f.created_at < NOW() - ($1 * INTERVAL '1 hour')
          ORDER BY f.created_at ASC`,
-        [FINDING_TIMEOUT_HOURS],
+        [FINDING_ADMIN_FLAG_HOURS, FINDING_TIMEOUT_HOURS],
       ),
       // A customer just filed a claim — surfaces even before the ticket is
       // accepted into a job order, since that's where the admin decides
@@ -208,14 +211,18 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // 5. No answer on a finding within the policy window — someone has to
-    //    call. Clears the moment the customer approves or declines.
+    // 5. No answer on a finding: at 2 hours someone has to call; at 4 hours the
+    //    request shows as suspended. Both clear the moment the customer approves
+    //    or declines. (Suspended is worked out from the age, not stored.)
     for (const f of overdueFindings.rows) {
+      const suspended = Number(f.age_hours) >= FINDING_TIMEOUT_HOURS
       notifs.push({
-        notif_key: `finding-overdue-${f.id}`,
-        title: 'Customer has not answered',
-        message: `${name(f.first_name, f.last_name)} hasn't responded to ${peso(f.extra_cost)} of additional work on JO-${f.job_order_id} for over ${FINDING_TIMEOUT_HOURS} hours. Call them${f.contact_number ? ` (${f.contact_number})` : ''}; per policy the vehicle moves to staging until they decide.`,
-        notif_time: f.created_at,
+        notif_key: suspended ? `finding-suspended-${f.id}` : `finding-overdue-${f.id}`,
+        title: suspended ? SUSPENDED_LABEL : 'Customer has not answered',
+        message: suspended
+          ? `${name(f.first_name, f.last_name)} still hasn't answered ${peso(f.extra_cost)} of additional work on JO-${f.job_order_id} after ${FINDING_TIMEOUT_HOURS} hours. Call them${f.contact_number ? ` (${f.contact_number})` : ''}. The request stays on hold until they decide.`
+          : `${name(f.first_name, f.last_name)} hasn't responded to ${peso(f.extra_cost)} of additional work on JO-${f.job_order_id} for over ${FINDING_ADMIN_FLAG_HOURS} hours. Please call them${f.contact_number ? ` (${f.contact_number})` : ''}.`,
+        notif_time: suspended ? f.suspended_at : f.flagged_at,
         href: `/job-orders/${f.job_order_id}/progress`,
       })
     }

@@ -22,6 +22,7 @@ function toQuotationData(row: any): QuotationData {
       qty: part.quantity ?? 1,
       unitPrice: Number(part.retail_unit_price ?? 0),
       status: part.status === 'in_stock' ? 'in-stock' : 'to-order',
+      warranty_months: part.warranty_months ?? null,
     })
     return acc
   }, {})
