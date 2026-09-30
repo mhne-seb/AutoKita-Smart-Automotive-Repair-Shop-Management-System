@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { uploadFindingPhoto, signFileUrl } from '@/lib/storage'
 
@@ -7,6 +8,8 @@ const MAX_BYTES = 5 * 1024 * 1024 // matches the bucket's own 5MB limit
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'] // and its allowed types
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id } = await params
     const form = await request.formData()

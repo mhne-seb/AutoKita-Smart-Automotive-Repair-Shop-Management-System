@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { DEFAULT_MECHANIC_CAPACITY } from '@/data/mechanicPolicy'
@@ -6,6 +7,8 @@ import { ROAD_TEST_TITLE } from '@/data/roadTest'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id: jobOrderId } = await params
     const body = await request.json()

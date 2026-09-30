@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { notifyCustomer } from '@/lib/customerNotify'
@@ -14,6 +15,8 @@ import { notifyCustomer } from '@/lib/customerNotify'
 //           deny: the original warranty is voided only for misuse/accident;
 //             the job order continues as a normal paid repair either way.
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id } = await params
   const jobOrderId = Number(id)
   try {
@@ -39,10 +42,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id } = await params
   const jobOrderId = Number(id)
   const body = await request.json().catch(() => ({}))
-  const { action, mechanicFinding, denyReason, voidsWarranty, employeeId } = body
+  const { action, mechanicFinding, denyReason, voidsWarranty } = body
 
   if (action !== 'approve' && action !== 'deny') {
     return NextResponse.json({ success: false, message: 'action must be approve or deny' }, { status: 400 })
@@ -113,7 +118,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       )
       await client.query(
         `UPDATE warranty_claims SET decision = 'approved'::approval_status, mechanic_finding = $2, decided_at = NOW(), decided_by = $3 WHERE id = $1`,
-        [claim.claim_id, mechanicFinding ?? null, employeeId ?? null],
+        [claim.claim_id, mechanicFinding ?? null, auth.session.userId],
       )
 
       await client.query('COMMIT')
@@ -129,7 +134,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // deny
     await client.query(
       `UPDATE warranty_claims SET decision = 'disputed'::approval_status, mechanic_finding = $2, deny_reason = $3, voids_warranty = $4, decided_at = NOW(), decided_by = $5 WHERE id = $1`,
-      [claim.claim_id, mechanicFinding ?? null, denyReason ?? null, Boolean(voidsWarranty), employeeId ?? null],
+      [claim.claim_id, mechanicFinding ?? null, denyReason ?? null, Boolean(voidsWarranty), auth.session.userId],
     )
     if (voidsWarranty) {
       await client.query(`UPDATE warranties SET status = 'voided'::warranty_status WHERE id = $1`, [claim.warranty_id])

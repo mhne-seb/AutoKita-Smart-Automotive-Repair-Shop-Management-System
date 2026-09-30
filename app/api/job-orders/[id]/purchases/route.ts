@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
@@ -10,6 +11,8 @@ import { db } from '@/lib/db'
 type PurchasedPart = { partId: number; unitCost: number }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id: jobOrderId } = await params
   const body = await request.json()
   const supplierId = Number(body.supplierId)

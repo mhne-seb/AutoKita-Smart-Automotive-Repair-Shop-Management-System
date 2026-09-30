@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { mlFetch } from '@/lib/mlServer'
 
@@ -5,6 +6,8 @@ import { mlFetch } from '@/lib/mlServer'
 export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   let body: any = {}
   try {
     body = await req.json()

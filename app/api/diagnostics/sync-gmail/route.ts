@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { mlFetch, MlServerError } from '@/lib/mlServer'
 
@@ -13,6 +14,8 @@ export const maxDuration = 60
  * Returns a summary of what was processed.
  */
 export async function POST() {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const res = await mlFetch('/gmail/sync', { method: 'POST' })
     const data = await res.json()
