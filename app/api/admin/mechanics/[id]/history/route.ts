@@ -1,9 +1,12 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
 // Recent tasks this mechanic worked on — straight from service_progress_tasks,
 // which is where assignments actually live. Finished ones first.
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id } = await params
   try {
     const result = await db.query(

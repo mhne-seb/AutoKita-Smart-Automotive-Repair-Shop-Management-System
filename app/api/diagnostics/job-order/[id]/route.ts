@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
@@ -17,6 +18,8 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id } = await params
   const jobOrderId = parseInt(id, 10)
   if (isNaN(jobOrderId)) {

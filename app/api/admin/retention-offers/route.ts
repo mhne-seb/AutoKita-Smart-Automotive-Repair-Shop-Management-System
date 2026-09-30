@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 // app/api/admin/retention-offers/route.ts
 // API route for managing retention offers in Supabase.
 
@@ -19,6 +20,8 @@ function generatePromoCode(offerType: string): string {
 }
 
 export async function GET(request: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { searchParams } = new URL(request.url)
     const userIdParam = searchParams.get('userId')
@@ -81,6 +84,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const body = await request.json()
     const {

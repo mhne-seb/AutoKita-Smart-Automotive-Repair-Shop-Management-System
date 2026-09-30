@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
@@ -13,6 +14,8 @@ const STAGE_TO_DB_STATUS: Record<string, string> = {
 // building that page isn't part of this task — only the Admin-side
 // buttons need to actually persist the result.
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { id } = await params
     const { status, advanceToStage } = await request.json()

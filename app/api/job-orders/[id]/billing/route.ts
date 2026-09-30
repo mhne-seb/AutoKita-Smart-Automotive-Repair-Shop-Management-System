@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getJobOrderBill } from '@/lib/jobOrderBill'
@@ -9,6 +10,8 @@ import { signFileUrls } from '@/lib/storage'
 // through lib/jobOrderBill so the numbers match the customer's screen.
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id } = await params
   const jobOrderId = Number(id)
   try {
@@ -69,6 +72,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 //                                     is the verifier, so it's verified at once.
 //         'release'                — hand the vehicle back; only at ₱0 balance.
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id } = await params
   const jobOrderId = Number(id)
   const body = await request.json().catch(() => ({}))

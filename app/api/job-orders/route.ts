@@ -1,8 +1,11 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { signFileUrls } from '@/lib/storage'
 
 export async function GET(request: Request) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1', 10)

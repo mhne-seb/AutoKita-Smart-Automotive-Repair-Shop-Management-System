@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { mlFetch } from '@/lib/mlServer'
@@ -6,6 +7,8 @@ import { mlFetch } from '@/lib/mlServer'
 export const maxDuration = 60
 
 export async function GET() {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     // 1. Get all customers with their service history and vehicle info
     const result = await db.query(`

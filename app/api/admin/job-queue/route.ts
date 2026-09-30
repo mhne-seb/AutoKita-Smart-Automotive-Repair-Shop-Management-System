@@ -1,9 +1,12 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { signFileUrls } from '@/lib/storage'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 
 export async function GET(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
 
     const query = `
@@ -80,9 +83,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   try {
     const body = await req.json()
-    const { action, ticketId, mechanicId, holdReason, employeeId } = body
+    const { action, ticketId, mechanicId, holdReason } = body
 
     if (!action) {
       return NextResponse.json({ success: false, message: 'Missing action parameter' }, { status: 400 })
@@ -94,7 +99,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Resolve employee who performed this action
-    let actingEmpId = employeeId ? parseInt(String(employeeId), 10) : null
+    let actingEmpId = auth.session.userId
     let employeeName = 'Shop Administrator'
     try {
       if (actingEmpId) {

@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 ﻿// app/api/chat/admin/history/route.ts
 // Returns the most recent internal_ai_session + its messages for a given employee.
 // Used by the MechanicAIAssistant to restore chat history when the panel re-opens.
@@ -6,6 +7,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const url = new URL(req.url);
   const employeeIdRaw = url.searchParams.get("employee_id");
   const limitRaw = url.searchParams.get("limit") ?? "30";

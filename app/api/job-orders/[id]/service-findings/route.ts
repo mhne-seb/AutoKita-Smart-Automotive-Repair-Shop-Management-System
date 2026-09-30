@@ -1,3 +1,4 @@
+import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { findingTotal } from '@/lib/findings'
@@ -15,6 +16,8 @@ import type { ProposedService, ProposedPart } from '@/data/types'
 // approves (see /api/tracking/in-progress/findings/respond), so nothing on
 // the job order changes yet.
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+
   const { id } = await params
   const jobOrderId = Number(id)
   const body = await request.json().catch(() => null)
