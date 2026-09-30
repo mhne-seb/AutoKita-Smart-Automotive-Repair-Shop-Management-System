@@ -833,7 +833,12 @@ function WarrantiesPanel({ userId }: { userId: number }) {
               <div key={w.warrantyId} className="py-3">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-sm font-medium">{w.description}</div>
+                    <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                      {w.description}
+                      {w.status === 'nearing_expiration' && (
+                        <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-semibold text-warning">Expiring soon</span>
+                      )}
+                    </div>
                     <div className="text-xs text-muted-foreground">
                       {w.vehicle}{w.completedAt ? ` · Completed ${fmtDate(w.completedAt)}` : ''} · Covered until {fmtDate(w.expirationDate)}
                     </div>
