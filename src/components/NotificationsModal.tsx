@@ -12,12 +12,15 @@ interface NotificationsModalProps {
   onClose: () => void
 }
 
-function getDayGroup(iso: string | undefined): 'Today' | 'Yesterday' | 'Earlier' {
+function getDayGroup(iso: string | undefined): 'Upcoming' | 'Today' | 'Yesterday' | 'Earlier' {
   if (!iso) return 'Earlier'
   const date = new Date(iso)
   if (isNaN(date.getTime())) return 'Earlier'
   
   const today = new Date()
+  const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999)
+  if (date > endOfToday) return 'Upcoming'
+  
   const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)
   
@@ -101,6 +104,7 @@ export function NotificationsModal({ storageKey, loadAll, onClose }: Notificatio
   const filteredItems = items.filter((n) => tab === 'all' || !readKeys.has(n.key))
 
   const grouped: Record<string, NotificationItem[]> = {
+    Upcoming: [],
     Today: [],
     Yesterday: [],
     Earlier: [],
@@ -194,7 +198,7 @@ export function NotificationsModal({ storageKey, loadAll, onClose }: Notificatio
             </div>
           ) : (
             <div className="p-4 sm:p-6 space-y-6">
-              {(['Today', 'Yesterday', 'Earlier'] as const).map(
+              {(['Upcoming', 'Today', 'Yesterday', 'Earlier'] as const).map(
                 (group) =>
                   grouped[group].length > 0 && (
                     <div key={group}>
