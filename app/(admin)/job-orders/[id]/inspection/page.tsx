@@ -18,6 +18,7 @@ import { getWarrantyClaim, type WarrantyClaim } from '@/controllers/warrantyClai
 import { WarrantyClaimCard } from '@/components/dashboard/WarrantyClaimCard'
 import { EditCustomerModal } from '@/components/dashboard/EditCustomerModal'
 import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData, InspectionPhotoSlot } from '@/data/types'
+import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 
 export default function page() {
   const jobOrderId = String(useParams().id)
@@ -88,6 +89,7 @@ export default function page() {
   }
 
   const [photoSlots, setPhotoSlots] = useState<InspectionData['photoSlots']>([])
+  const [confirmCheckInVehicle, setConfirmCheckInVehicle] = useState(false)
   // Set true after a blocked send attempt, so empty slots highlight red
   // until the admin fixes them (paper's Exception 1 on this use case).
   const [showPhotoWarning, setShowPhotoWarning] = useState(false)
@@ -696,7 +698,7 @@ export default function page() {
               </div>
             </div>
             <button
-              onClick={handleCheckInVehicle}
+              onClick={() => setConfirmCheckInVehicle(true)}
               disabled={checkingInVehicle}
               className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:opacity-95 active:scale-[0.99] disabled:opacity-50 transition-all"
             >
@@ -725,7 +727,7 @@ export default function page() {
                     </span>
                   ) : (
                     <button
-                      onClick={handleCheckInVehicle}
+                      onClick={() => setConfirmCheckInVehicle(true)}
                       disabled={checkingInVehicle}
                       title="Click to check in vehicle (mark stored in shop)"
                       className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900 shadow-2xs hover:bg-amber-100 active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
@@ -1746,6 +1748,21 @@ export default function page() {
           onClose={() => setEditModalOpen(false)}
           onSaved={() => {
             getInspectionById(jobOrderId).then((data) => setInitial(data ?? null))
+          }}
+        />
+      )}
+      
+      {confirmCheckInVehicle && jobOrder && (
+        <ConfirmActionModal
+          tone="brand"
+          title="Confirm vehicle arrival?"
+          description={`Confirm that ${jobOrder.customer}'s ${jobOrder.vehicle} (${jobOrder.plate}) has arrived and is stored in the shop. This unlocks the inspection.`}
+          confirmLabel="Store in shop & check in"
+          busy={checkingInVehicle}
+          onClose={() => setConfirmCheckInVehicle(false)}
+          onConfirm={async () => {
+            await handleCheckInVehicle()
+            setConfirmCheckInVehicle(false)
           }}
         />
       )}
