@@ -167,7 +167,6 @@ export default function page() {
             icon={Car}
             iconBg="bg-gradient-to-br from-brand/20 to-brand/5"
             iconColor="text-brand"
-            trend={{ text: '↗ +0 today' }}
           />
         </Link>
         <Link href="/mechanics" className="min-w-[220px] flex-1">
@@ -177,7 +176,6 @@ export default function page() {
             icon={Users}
             iconBg="bg-gradient-to-br from-emerald-100 to-emerald-50"
             iconColor="text-emerald-600"
-            trend={{ text: '✓ All on duty' }}
           />
         </Link>
         <Link href="/sales-payroll" className="min-w-[220px] flex-1">
@@ -187,7 +185,6 @@ export default function page() {
             icon={Wallet}
             iconBg="bg-gradient-to-br from-violet-100 to-violet-50"
             iconColor="text-violet-600"
-            trend={{ text: '↗ +18% YoY' }}
           />
         </Link>
       </div>
@@ -204,7 +201,7 @@ export default function page() {
               onClick={() => router.push('/analytics')}
               className="rounded-full bg-gradient-to-r from-brand/20 to-brand/5 px-3 py-1 text-xs font-semibold text-brand transition-colors hover:from-brand/30 hover:to-brand/10"
             >
-              ↗ Trending Up
+              View Analytics
             </button>
           </div>
           <div className="mt-4 h-64">
@@ -244,7 +241,7 @@ export default function page() {
 
         <div className="rounded-2xl border border-border bg-card p-6">
           <h3 className="text-lg font-bold text-foreground">Service Mix</h3>
-          <p className="text-sm text-muted-foreground">Share of jobs this quarter</p>
+          <p className="text-sm text-muted-foreground">Share of all services recorded</p>
           <div className="relative mt-4 h-44">
             {serviceMix.length === 0 ? (
               <div className="flex h-full w-full flex-col items-center justify-center text-center">
