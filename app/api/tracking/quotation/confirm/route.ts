@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     // 1. Fetch current services on the job order
     const curRes = await db.query(
-      `SELECT jos.id, jos.service_id, s.service_name
+      `SELECT jos.id, jos.service_id, jos.actual_amount, s.service_name
        FROM job_order_services jos
        JOIN services s ON s.id = jos.service_id
        WHERE jos.job_order_id = $1`,
@@ -112,6 +112,25 @@ export async function POST(request: NextRequest) {
           `[/api/tracking/quotation/confirm] Warning: ID desynchronization detected for JO-${jobOrderId}. Client IDs: [${acceptedServiceIds}], Current IDs: [${currentIds}]. Skipping deletion to prevent data loss.`,
         )
       }
+    }
+
+    // Downpayment policy: a bill of PHP 50,000 or more is approved by paying the 20% downpayment
+    // (see the payment route), never by the emailed code alone. The screen already hides this
+    // path for such bills; this makes the server refuse it too. The total is what will remain
+    // on the job order after the customer's choices, counted the same way as the payment route
+    // and the screen. This is a business rule, so the test-mode bypass above does not skip it.
+    const remainingTotal = currentServices
+      .filter((s) => !idsToDelete.includes(Number(s.id)))
+      .reduce((sum, s) => sum + Number(s.actual_amount || 0), 0)
+    if (remainingTotal >= 50000) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'DOWNPAYMENT_REQUIRED',
+          message: 'Bills of ₱50,000 or more need a 20% downpayment. Please choose “Pay Downpayment” instead of using the code.',
+        },
+        { status: 400 },
+      )
     }
 
     if (idsToDelete.length > 0) {

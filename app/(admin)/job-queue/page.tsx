@@ -39,6 +39,7 @@ import { ShopLoading } from '@/components/ShopLoading'
 import { StatusBadge } from '@/components/StatusBadge'
 import { PROVINCES, SERVICE_CATEGORIES, YEARS } from '@/data/ticketFormOptions'
 import { isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
+import { MAX_EMAIL, MAX_MODEL, MAX_NAME, parseMileage, splitFullName } from '@/lib/bookingRules'
 
 export type JobStatus = 'Pending' | 'In Progress' | 'Approved' | 'Cancelled' | 'Completed'
 
@@ -425,8 +426,9 @@ export default function page() {
         toast.success('Ticket created');
       } else {
         // Technical detail stays in the console for us; the user gets plain English.
+        // A 400/409 message is already plain ("This plate is already registered to another customer…").
         console.error('Create ticket failed:', result.debug || result.message);
-        toast.error('Could not create the ticket. Please check the details and try again.');
+        toast.error(res.status < 500 && result.message ? result.message : 'Could not create the ticket. Please check the details and try again.');
       }
     } catch (err) {
       console.error(err);
@@ -1265,8 +1267,9 @@ const emptyTicket: NewTicketData = {
   serviceCategory: '',
 }
 
-function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (data: NewTicketData) => void }) {
+function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (data: NewTicketData) => void | Promise<void> }) {
   const [form, setForm] = useState<NewTicketData>(emptyTicket)
+  const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof NewTicketData, string>>>({})
 
   const set = <K extends keyof NewTicketData>(key: K, value: NewTicketData[K]) => {
@@ -1275,16 +1278,21 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
 
   const validate = (): boolean => {
     const next: Partial<Record<keyof NewTicketData, string>> = {}
+    const name = splitFullName(form.fullName)
     if (!form.fullName.trim()) next.fullName = 'Full name is required'
+    else if (!name) next.fullName = 'Enter the first and last name'
+    else if (name.first.length > MAX_NAME || name.last.length > MAX_NAME) next.fullName = `Each name can be up to ${MAX_NAME} characters`
     if (!validPhone(form.contactNumber)) next.contactNumber = 'Enter a valid PH mobile number'
-    if (!validEmail(form.email)) next.email = 'Enter a valid email address'
+    if (!validEmail(form.email) || form.email.trim().length > MAX_EMAIL) next.email = 'Enter a valid email address'
     if (!form.province) next.province = 'Province is required'
     if (!form.city) next.city = 'City is required'
     if (!form.barangay) next.barangay = 'Barangay is required'
     if (!form.vehicleModel.trim()) next.vehicleModel = 'Vehicle model is required'
+    else if (form.vehicleModel.trim().length > MAX_MODEL) next.vehicleModel = `Up to ${MAX_MODEL} characters`
     if (!form.year) next.year = 'Year is required'
     if (!form.transmission) next.transmission = 'Transmission is required'
     if (!form.mileage.trim()) next.mileage = 'Mileage is required'
+    else if (parseMileage(form.mileage) === null) next.mileage = 'Enter a number from 0 to 1,000,000'
     if (!form.licensePlate.trim()) {
       next.licensePlate = 'License plate is required'
     } else if (!isValidPlateNumber(form.licensePlate)) {
@@ -1295,9 +1303,16 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
     return Object.keys(next).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (validate()) onSubmit(form)
+    if (submitting || !validate()) return
+    setSubmitting(true)
+    try {
+      // "45,000 km" is saved as 45000
+      await onSubmit({ ...form, mileage: String(parseMileage(form.mileage)) })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const fieldClass = (key: keyof NewTicketData) =>
@@ -1348,6 +1363,7 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
                     value={form.fullName}
                     onChange={(e) => set('fullName', e.target.value)}
                     placeholder="Enter name"
+                    maxLength={MAX_NAME * 2 + 1}
                     className={fieldClass('fullName')}
                   />
                 </div>
@@ -1380,6 +1396,7 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
                       value={form.email}
                       onChange={(e) => set('email', e.target.value)}
                       placeholder="you@email.com"
+                      maxLength={MAX_EMAIL}
                       className={fieldClass('email')}
                     />
                   </div>
@@ -1494,6 +1511,7 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
                       value={form.vehicleModel}
                       onChange={(e) => set('vehicleModel', e.target.value)}
                       placeholder="e.g., Toyota Camry 2022"
+                      maxLength={MAX_MODEL}
                       className={fieldClass('vehicleModel')}
                     />
                   </div>
@@ -1660,8 +1678,8 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
             >
               Cancel
             </button>
-            <button type="submit" className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm hover:opacity-90">
-              Create Ticket
+            <button type="submit" disabled={submitting} className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">
+              {submitting ? 'Creating…' : 'Create Ticket'}
             </button>
           </div>
         </form>
