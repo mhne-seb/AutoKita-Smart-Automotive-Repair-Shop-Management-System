@@ -234,12 +234,14 @@ export async function GET(request: NextRequest) {
           COALESCE((
             SELECT SUM(amount_paid)::float 
             FROM payments 
-            WHERE payment_date >= NOW() - $1::interval
+            WHERE verification_status = 'verified'
+              AND payment_date >= NOW() - $1::interval
           ), 0) AS "grossSales",
           COALESCE((
             SELECT SUM(amount_paid)::float 
             FROM payments 
-            WHERE payment_date >= NOW() - ($1::interval * 2) 
+            WHERE verification_status = 'verified'
+              AND payment_date >= NOW() - ($1::interval * 2) 
               AND payment_date < NOW() - $1::interval
           ), 0) AS "prevGrossSales"
       `, [intervalStr]),
