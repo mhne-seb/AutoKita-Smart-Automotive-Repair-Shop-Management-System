@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Car, Clock, ShieldCheck, ClipboardList, Wrench, AlertCircle, Loader2, Store } from "lucide-react";
+import { Car, Clock, ShieldCheck, AlertCircle, Store } from "lucide-react";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getReceivedData } from "@/controllers/serviceProgressController";
 import { ShopLoading } from "@/components/ShopLoading";
@@ -36,11 +36,17 @@ function Received() {
   }, [jobOrderIdParam]);
 
   const jobOrder = data?.jobOrder ?? null;
-  const services = data?.services ?? [];
-  const customerConcern = data?.customerConcern ?? null;
 
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
   const isArrived = Boolean(jobOrder?.date_arrived);
+  // "October 1, 2026 at 3:21 AM" — the moment the shop checked the vehicle in.
+  const arrivedAt = (() => {
+    if (!jobOrder?.date_arrived) return "";
+    const d = new Date(jobOrder.date_arrived);
+    return Number.isNaN(d.getTime())
+      ? String(jobOrder.date_arrived)
+      : d.toLocaleString("en-PH", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
+  })();
 
   if (loading) {
     return (
@@ -81,7 +87,7 @@ function Received() {
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs">
-                      <Clock className="h-3 w-3" /> Arrived {jobOrder.date_arrived}
+                      <Clock className="h-3 w-3" /> Checked in {arrivedAt}
                     </span>
                     <span className="inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs">
                       <ShieldCheck className="h-3 w-3" /> Security Verified
@@ -120,43 +126,6 @@ function Received() {
                     </p>
                   </div>
                 </div>
-              </div>
-            </div>
-          )}
-
-          <div>
-            <div className="flex items-center justify-between">
-              <h3 className="flex items-center gap-2 font-semibold"><ClipboardList className="h-4 w-4" /> Scheduled Services</h3>
-              <span className="rounded-full border px-3 py-0.5 text-xs">{services.length} Total Tasks</span>
-            </div>
-            <div className="mt-3 space-y-3">
-              {services.map((s) => (
-                <div key={s.id} className="rounded-xl border bg-card p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-md bg-brand-soft text-brand"><Wrench className="h-4 w-4" /></div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <div className="font-semibold">{s.service_name}</div>
-                        <span className="rounded-full border px-2.5 py-0.5 text-[10px]">Pending</span>
-                      </div>
-                      <p className="mt-1 text-xs text-muted-foreground">{s.description_of_work}</p>
-                      <div className="mt-2 text-xs text-warning">📦 Parts allocation in progress</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {services.length === 0 && (
-                <p className="text-xs text-muted-foreground">No services have been scheduled yet.</p>
-              )}
-            </div>
-          </div>
-
-          {customerConcern && (
-            <div>
-              <h3 className="flex items-center gap-2 font-semibold"><ClipboardList className="h-4 w-4" /> Service Notes</h3>
-              <div className="mt-3 rounded-xl border bg-card p-5">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Customer Request</div>
-                <p className="mt-1 text-sm italic text-muted-foreground">"{customerConcern}"</p>
               </div>
             </div>
           )}

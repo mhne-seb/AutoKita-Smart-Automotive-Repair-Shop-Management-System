@@ -3,13 +3,12 @@
 // Admin "Completed" page — the job order's closing summary once the vehicle
 // has been released: what was done, what it cost, how it was paid, the road
 // test, and the milestones. This is also where the Job Order document is
-// generated (Generate Job Order / Download PDF). Read-only.
+// generated (Generate Job Order). Read-only.
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle2, Wrench, Package, ShieldCheck, Banknote, Gauge, Clock, FileText, Download, Loader2, ArrowLeft, Car } from 'lucide-react'
-import { toast } from 'sonner'
+import { CheckCircle2, Wrench, Package, ShieldCheck, Banknote, Gauge, Clock, FileText, ArrowLeft, Car } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { GenerateJobOrderModal } from '@/components/dashboard/GenerateJobOrderModal'
@@ -17,7 +16,7 @@ import { Lightbox } from '@/components/Lightbox'
 import { getJobOrderById } from '@/controllers/jobOrderController'
 import { getBillingData, type BillingData } from '@/controllers/billingStageController'
 import { getRoadTestData, type RoadTestData } from '@/controllers/roadTestController'
-import { fetchJobOrderPdfData, generateJobOrderPdf } from '@/lib/jobOrderPdf'
+
 import type { JobOrderCard } from '@/data/types'
 
 const currency = (n: number) => `₱${n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -32,7 +31,6 @@ export default function CompletedPage() {
   const [billing, setBilling] = useState<BillingData | null>(null)
   const [roadTest, setRoadTest] = useState<RoadTestData | null>(null)
   const [showGenerate, setShowGenerate] = useState(false)
-  const [downloading, setDownloading] = useState(false)
   const [photo, setPhoto] = useState<{ url: string; label: string } | null>(null)
 
   useEffect(() => {
@@ -44,21 +42,12 @@ export default function CompletedPage() {
     return () => { active = false }
   }, [jobOrderId])
 
-  async function downloadPdf() {
-    setDownloading(true)
-    try {
-      const d = await fetchJobOrderPdfData(jobOrderId)
-      if (!d) return toast.error('Could not build the job order PDF.')
-      await generateJobOrderPdf(d)
-    } finally {
-      setDownloading(false)
-    }
-  }
-
   if (jobOrder === undefined || !billing) return <div className="p-8 text-sm text-slate-400">Loading…</div>
   if (!jobOrder) return <div className="p-8 text-sm text-slate-400">Job order not found.</div>
 
   const released = billing.status === 'released'
+  // The Job Order document is a closing record: only available once the job is Completed or Released.
+  const canGenerate = jobOrder.stage === 'completed' || jobOrder.stage === 'released'
   const { bill } = billing
   const laborTotal = billing.services.reduce((t, s) => t + s.amount, 0)
   const partsTotal = billing.parts.reduce((t, p) => t + p.amount, 0)
@@ -84,11 +73,8 @@ export default function CompletedPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button onClick={() => setShowGenerate(true)} className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold ${released ? 'bg-white text-slate-900 hover:bg-slate-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
+            <button onClick={() => setShowGenerate(true)} disabled={!canGenerate} title={canGenerate ? undefined : 'Available once the job is completed'} className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold ${released ? 'bg-white text-slate-900 hover:bg-slate-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
               <FileText size={14} /> Generate Job Order
-            </button>
-            <button onClick={downloadPdf} disabled={downloading} className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50 ${released ? 'border border-slate-600 text-white hover:bg-slate-800' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
-              {downloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />} Download PDF
             </button>
           </div>
         </div>

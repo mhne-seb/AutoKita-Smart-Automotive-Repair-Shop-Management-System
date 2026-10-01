@@ -1132,6 +1132,31 @@ export default function page() {
           </div>
         )}
 
+        {/* What the customer has paid so far, while the work is still going on.
+            (Once the road test passes, the Billing card below takes over.) */}
+        {bill && jobOrder.stage !== 'completed' && jobOrder.stage !== 'released' && (
+          <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400"><Receipt size={13} /> Payment</p>
+            <div className="mt-2 space-y-1 text-sm">
+              <div className="flex items-baseline justify-between"><span className="text-slate-500">Total so far</span><span className="font-semibold text-slate-800">{currency(bill.total)}</span></div>
+              <div className="flex items-baseline justify-between"><span className="text-slate-500">Paid (verified)</span><span className="font-semibold text-emerald-600">{currency(bill.paid)}</span></div>
+              <div className="flex items-baseline justify-between border-t border-slate-100 pt-1"><span className="text-slate-500">Balance</span><span className="text-lg font-bold text-slate-900">{currency(bill.balance)}</span></div>
+            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              {bill.latestPayment?.verificationStatus === 'pending'
+                ? `A payment of ${currency(bill.latestPayment.amountPaid)} is waiting for you to verify.`
+                : bill.paid > 0
+                ? 'The customer has paid. The balance is collected after the road test.'
+                : 'No payment has been verified yet.'}
+            </p>
+            {bill.latestPayment?.verificationStatus === 'pending' && (
+              <Link href={`/job-orders/${jobOrderId}/quotation`} className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+                Verify payment <ArrowRight size={14} />
+              </Link>
+            )}
+          </div>
+        )}
+
         {/* Hand-off to Billing once the road test has passed. The bill,
             payment verification and vehicle release all live there. */}
         {(jobOrder.stage === 'completed' || jobOrder.stage === 'released') && (
