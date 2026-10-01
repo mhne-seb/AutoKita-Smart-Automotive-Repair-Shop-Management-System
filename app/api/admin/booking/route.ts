@@ -3,152 +3,155 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { hashPassword } from '@/lib/password'
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
+import {
+  EMAIL_RE, PHONE_RE, MAX_NAME, MAX_MODEL, MAX_EMAIL, MAX_MILEAGE,
+  cleanPhone, maxVehicleYear, parseMileage, splitFullName,
+} from '@/lib/bookingRules'
+
+// Walk-in "New Ticket" (staff books for a customer standing at the counter).
+// Same rules as the customer's online booking: everything is checked BEFORE
+// anything is written, then the account, vehicle, ticket and audit entry are
+// saved together or not at all (one transaction).
+
+const SERVICE_MODES: Record<string, 'walk_in' | 'home_service'> = { 'Shop Visit': 'walk_in', 'Home Service': 'home_service' }
 
 export async function POST(req: NextRequest) {
-  const auth = await requireStaff(); if (!auth.ok) return auth.response;
+  const auth = await requireStaff(); if (!auth.ok) return auth.response
 
+  const bad = (message: string, field?: string, status = 400) =>
+    NextResponse.json({ success: false, message, ...(field ? { field } : {}) }, { status })
+
+  let t: Record<string, unknown>
   try {
     const body = await req.json()
-    const { ticketData } = body
+    t = body?.ticketData
+  } catch {
+    return bad('Missing ticket data')
+  }
+  if (!t || typeof t !== 'object') return bad('Missing ticket data')
 
-    if (!ticketData) {
-      return NextResponse.json({ success: false, message: 'Missing ticket data' }, { status: 400 })
-    }
-    if (!ticketData.licensePlate || !isValidPlateNumber(normalizePlateNumber(ticketData.licensePlate))) {
-      return NextResponse.json({ success: false, message: PLATE_FORMAT_ERROR_MESSAGE }, { status: 400 })
-    }
+  // ---- 1. Validate every input (the screen checks these too; this is the real check) ----
+  const name = splitFullName(t.fullName)
+  if (!name) return bad("Enter the customer's first and last name.", 'fullName')
+  if (name.first.length > MAX_NAME || name.last.length > MAX_NAME) return bad(`Each name can be up to ${MAX_NAME} characters.`, 'fullName')
 
-    // 1. Handle User creation / lookup
-    const nameParts = (ticketData.fullName || '').trim().split(' ')
-    const firstName = nameParts[0] || 'Unknown'
-    const lastName = nameParts.slice(1).join(' ') || 'Customer'
-    
-    let userId;
-    // Emails are compared and stored in lowercase, so "Juan@Mail.com" and
-    // "juan@mail.com" are the same person.
-    const emailLower = String(ticketData.email ?? '').trim().toLowerCase()
-    const checkUser = await db.query(`SELECT id FROM users WHERE LOWER(email) = $1`, [emailLower])
-    
-    if (checkUser.rows.length > 0) {
-      userId = checkUser.rows[0].id
-    } else {
-      const tempPassword = `temp-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString().slice(-6)}`
+  const email = String(t.email ?? '').trim().toLowerCase()
+  if (!EMAIL_RE.test(email) || email.length > MAX_EMAIL) return bad('Enter a valid email address.', 'email')
 
-      // 7 target columns and 7 expressions (including NOW())
-      const insUser = await db.query(
-        `INSERT INTO users (first_name, last_name, nickname, contact_number, email, password, registration_date) 
-         VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING id`,
-        [
-          firstName, 
-          lastName, 
-          firstName, // Fallback for nickname
-          ticketData.contactNumber, 
-          emailLower,
-          await hashPassword(tempPassword)
-        ]
-      )
-      userId = insUser.rows[0].id
-    }
+  const phone = cleanPhone(t.contactNumber)
+  if (!PHONE_RE.test(phone)) return bad('Enter a valid mobile number, like 09171234567.', 'contactNumber')
 
-    // 2. Find or insert the vehicle.
-    // vehicles.plate_number is UNIQUE, so reuse the car if it is already
-    // registered — same lookup-then-insert we do for the user above.
-    let vehicleId
-    const cleanPlate = normalizePlateNumber(ticketData.licensePlate)
-    if (ticketData.licensePlate && !isValidPlateNumber(cleanPlate)) {
-      return NextResponse.json({ success: false, message: PLATE_FORMAT_ERROR_MESSAGE }, { status: 400 })
-    }
+  const modelText = String(t.vehicleModel ?? '').trim()
+  if (!modelText || modelText.length > MAX_MODEL) return bad(`Enter the vehicle model (up to ${MAX_MODEL} characters).`, 'vehicleModel')
 
-    const checkVeh = await db.query(
-      `SELECT id FROM vehicles WHERE UPPER(plate_number) = UPPER($1) OR UPPER(plate_number) = UPPER($2)`,
-      [cleanPlate, ticketData.licensePlate || '']
-    )
+  const yearNum = Number(t.year)
+  if (!Number.isInteger(yearNum) || yearNum < 1900 || yearNum > maxVehicleYear()) return bad('Enter a valid vehicle year.', 'year')
 
-    if (checkVeh.rows.length > 0) {
-      vehicleId = checkVeh.rows[0].id
-    } else {
-      const vehResult = await db.query(
-        `INSERT INTO vehicles (user_id, vehicle_model, vehicle_year, plate_number, vehicle_type, mileage)
-         VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-        [
-          userId,
-          ticketData.vehicleModel || 'Unknown',
-          parseInt(ticketData.year) || 2026,
-          cleanPlate,
-          ticketData.transmission || 'Automatic',
-          parseFloat(ticketData.mileage) || 0
-        ]
-      )
-      vehicleId = vehResult.rows[0].id
+  const mileage = parseMileage(t.mileage)
+  if (mileage === null) return bad(`Enter the mileage as a number from 0 to ${MAX_MILEAGE.toLocaleString('en-PH')} km.`, 'mileage')
+
+  const cleanPlate = normalizePlateNumber(String(t.licensePlate ?? ''))
+  if (!cleanPlate || !isValidPlateNumber(cleanPlate)) return bad(PLATE_FORMAT_ERROR_MESSAGE, 'licensePlate')
+
+  const transmission = String(t.transmission ?? '').trim()
+  if (!['Manual', 'Automatic', 'CVT'].includes(transmission)) return bad('Choose the transmission.', 'transmission')
+
+  const serviceCategory = String(t.serviceCategory ?? '').trim()
+  if (!serviceCategory || serviceCategory.length > 100) return bad('Choose a service category.', 'serviceCategory')
+
+  const serviceMode = SERVICE_MODES[String(t.pickupOption ?? '')]
+  if (!serviceMode) return bad('Choose Shop Visit or Home Service.', 'pickupOption')
+
+  const place = ['barangay', 'city', 'province'].map((k) => String(t[k] ?? '').trim())
+  if (place.some((p) => p.length > 100)) return bad('The address is too long.', 'province')
+  if (serviceMode === 'home_service' && place.some((p) => !p)) return bad('A home service needs the barangay, city and province.', 'province')
+  const address = serviceMode === 'home_service' ? place.join(', ') : 'None'
+
+  try {
+    // ---- 2. Look up what already exists (read only) ----
+    const found = await db.query(`SELECT id FROM users WHERE LOWER(email) = $1`, [email])
+    let userId: number | null = found.rows[0]?.id ?? null
+
+    const veh = await db.query(`SELECT id, user_id FROM vehicles WHERE UPPER(plate_number) = UPPER($1)`, [cleanPlate])
+    let vehicleId: number | null = veh.rows[0]?.id ?? null
+    // A plate belongs to one customer. Never put a ticket for this customer on someone else's car.
+    if (vehicleId !== null && (userId === null || Number(veh.rows[0].user_id) !== Number(userId))) {
+      return bad('This plate is already registered to another customer. Check the plate number.', 'licensePlate', 409)
     }
 
-    // 3. Create Service Ticket using your database procedure
-    const mappedServiceMode = ticketData.pickupOption === 'Home Service' ? 'home_service' : 'walk_in'
-    
-    const fullAddress = `${ticketData.barangay || ''}, ${ticketData.city || ''}, ${ticketData.province || ''}`.trim()
-    const address = mappedServiceMode === 'home_service' ? (fullAddress || 'None') : 'None'
-    
-    // We pass exactly 5 arguments to match your create_service_ticket function
-    const ticketQuery = `SELECT * FROM create_service_ticket($1, $2, $3, $4, $5)`
-    const ticketResult = await db.query(ticketQuery, [
-      userId,
-      vehicleId,
-      mappedServiceMode,
-      address,
-      ticketData.serviceCategory || 'General Service'
-    ])
+    // Hashing is slow, so do it before the transaction opens. The temporary
+    // password is only ever stored hashed.
+    const passwordHash = userId === null
+      ? await hashPassword(`temp-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString().slice(-6)}`)
+      : null
 
-    const newTicket = ticketResult.rows[0]
-
-    // Record audit log for admin creating the ticket
+    // ---- 3. Write everything in ONE transaction ----
+    const client = await db.connect()
     try {
-      const actingEmpId = auth.session.userId
-      let empName = 'Shop Administrator'
-      const eRes = await db.query(`SELECT full_name FROM employees WHERE id = $1`, [actingEmpId])
-      if (eRes.rows.length > 0) empName = eRes.rows[0].full_name
+      await client.query('BEGIN')
 
-      await db.query(
-        `INSERT INTO system_audit_logs (
-          employees_id,
-          action_performed,
-          entity_type,
-          entity_id,
-          new_values,
-          action_date
-        ) VALUES ($1, 'created', 'service_tickets', $2, $3, NOW())`,
+      if (userId === null) {
+        const created = await client.query(
+          `INSERT INTO users (first_name, last_name, nickname, contact_number, email, password, registration_date)
+           VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING id`,
+          [name.first, name.last, name.first, phone, email, passwordHash],
+        )
+        userId = created.rows[0].id
+      }
+
+      if (vehicleId === null) {
+        const created = await client.query(
+          `INSERT INTO vehicles (user_id, vehicle_model, vehicle_year, plate_number, vehicle_type, mileage)
+           VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+          [userId, modelText, yearNum, cleanPlate, transmission, mileage],
+        )
+        vehicleId = created.rows[0].id
+      }
+
+      const ticketResult = await client.query(
+        `SELECT * FROM create_service_ticket($1, $2, $3, $4, $5)`,
+        [userId, vehicleId, serviceMode, address, serviceCategory],
+      )
+      const newTicket = ticketResult.rows[0]
+
+      // Who created it: part of the same transaction, so a ticket without its record cannot exist.
+      const emp = await client.query(`SELECT full_name FROM employees WHERE id = $1`, [auth.session.userId])
+      await client.query(
+        `INSERT INTO system_audit_logs (employees_id, action_performed, entity_type, entity_id, new_values, action_date)
+         VALUES ($1, 'created', 'service_tickets', $2, $3, NOW())`,
         [
-          actingEmpId,
+          auth.session.userId,
           newTicket?.id,
           JSON.stringify({
             ticket_id: newTicket?.id,
-            customer_name: `${firstName} ${lastName}`.trim(),
-            vehicle_plate: ticketData.licensePlate,
-            service_mode: mappedServiceMode,
-            service_category: ticketData.serviceCategory || 'General Service',
-            created_by: empName,
-          })
-        ]
+            customer_name: `${name.first} ${name.last}`,
+            vehicle_plate: cleanPlate,
+            service_mode: serviceMode,
+            service_category: serviceCategory,
+            created_by: emp.rows[0]?.full_name ?? 'Shop Administrator',
+          }),
+        ],
       )
-    } catch (auditErr) {
-      console.warn('Could not record admin booking audit log:', auditErr)
+
+      await client.query('COMMIT')
+      return NextResponse.json({ success: true, ticket: newTicket })
+    } catch (err) {
+      await client.query('ROLLBACK')
+      throw err
+    } finally {
+      client.release()
     }
-
-    return NextResponse.json({ 
-      success: true, 
-      ticket: newTicket
-    })
-
   } catch (err: any) {
     console.error('Admin booking error:', err)
-    if (err?.code === '23514' && err?.constraint === 'vehicles_plate_number_format') {
-      return NextResponse.json(
-        { success: false, message: PLATE_FORMAT_ERROR_MESSAGE },
-        { status: 400 }
-      )
+    // Someone else saved the same email or plate between our check and our write.
+    if (err?.code === '23505') {
+      const plate = String(err.constraint ?? '').includes('plate')
+      return bad(plate ? 'This plate was just registered. Please check the plate number.' : 'This email was just registered. Please try again.', plate ? 'licensePlate' : 'email', 409)
     }
+    if (err?.code === '23514' && err?.constraint === 'vehicles_plate_number_format') return bad(PLATE_FORMAT_ERROR_MESSAGE, 'licensePlate')
     return NextResponse.json(
-      { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: err.message } : {}) },
-      { status: 500 }
+      { success: false, message: 'Internal server error', ...(process.env.NODE_ENV !== 'production' ? { debug: err?.message } : {}) },
+      { status: 500 },
     )
   }
 }

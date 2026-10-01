@@ -5,6 +5,7 @@ import { sendTempPasswordEmail } from '@/lib/mail'
 import { hashPassword } from '@/lib/password'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
+import { EMAIL_RE, PHONE_RE } from '@/lib/bookingRules'
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,9 +22,7 @@ export async function POST(req: NextRequest) {
       preferredDatetime,
     } = body
 
-    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    const PHONE_RE = /^(\+?63|0)9\d{9}$/
-    const bad = (message: string, code?: string) =>
+    const bad =(message: string, code?: string) =>
       NextResponse.json({ success: false, message, ...(code ? { code } : {}) }, { status: 400 })
 
     if (!vehicleId && !newVehicleDetails) return bad('Missing vehicle information')
