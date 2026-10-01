@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { verifyPassword } from '@/lib/password'
-import { SESSION_COOKIE, REMEMBER_MAX_AGE_SECONDS, createSessionToken, sessionCookieOptions, sessionSecretConfigured } from '@/lib/session'
+import {
+  SESSION_COOKIE,
+  STAFF_SESSION_COOKIE,
+  CUSTOMER_SESSION_COOKIE,
+  REMEMBER_MAX_AGE_SECONDS,
+  createSessionToken,
+  sessionCookieOptions,
+  sessionSecretConfigured,
+} from '@/lib/session'
 
 // Lockout after repeated wrong passwords (paper: UC 8, Exception 1). Kept in
 // memory, so each server instance counts on its own; that slows guessing down
@@ -46,18 +54,17 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Find the account by email only (upper/lower case does not matter). The
-    // password check happens in code, because a salted hash can't be compared
-    // inside the SQL. If two rows differ only by case, the exact match wins.
-    let isCustomer = true
+    // Find the account by email. We check employees first so staff accounts
+    // cannot be overshadowed or demoted by a user record.
+    let isCustomer = false
     let result = await db.query(
-      'SELECT id, email, nickname, first_name, last_name, role, password FROM users WHERE LOWER(email) = LOWER($1) ORDER BY (email = $1) DESC LIMIT 1',
+      "SELECT id, email, full_name as nickname, split_part(full_name, ' ', 1) as first_name, split_part(full_name, ' ', 2) as last_name, role, password FROM employees WHERE LOWER(email) = LOWER($1) ORDER BY (email = $1) DESC LIMIT 1",
       [email]
     )
     if (result.rows.length === 0) {
-      isCustomer = false
+      isCustomer = true
       result = await db.query(
-        "SELECT id, email, full_name as nickname, split_part(full_name, ' ', 1) as first_name, split_part(full_name, ' ', 2) as last_name, role, password FROM employees WHERE LOWER(email) = LOWER($1) ORDER BY (email = $1) DESC LIMIT 1",
+        'SELECT id, email, nickname, first_name, last_name, role, password FROM users WHERE LOWER(email) = LOWER($1) ORDER BY (email = $1) DESC LIMIT 1',
         [email]
       )
     }
@@ -87,17 +94,20 @@ export async function POST(req: NextRequest) {
       title: isCustomer ? null : String(rawRole ?? 'staff').split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
     })
 
-    // The wristband. Which table the account came from decides the role —
-    // customer #5 and employee #5 are different people.
+    // The wristband. Set role-specific cookie so staff and customer do not evict each other
     if (sessionSecretConfigured()) {
       const session = { userId: found.id, role: isCustomer ? 'customer' as const : 'staff' as const }
+      const roleCookieName = isCustomer ? CUSTOMER_SESSION_COOKIE : STAFF_SESSION_COOKIE
+      const cookieAge = remember === true ? REMEMBER_MAX_AGE_SECONDS : undefined
+      const token = await createSessionToken(session, cookieAge)
+
       if (remember === true) {
-        const token = await createSessionToken(session, REMEMBER_MAX_AGE_SECONDS)
+        res.cookies.set(roleCookieName, token, { ...sessionCookieOptions, maxAge: REMEMBER_MAX_AGE_SECONDS })
         res.cookies.set(SESSION_COOKIE, token, { ...sessionCookieOptions, maxAge: REMEMBER_MAX_AGE_SECONDS })
       } else {
-        // No maxAge = the browser throws the cookie away when it closes.
         const { maxAge: _unused, ...untilBrowserCloses } = sessionCookieOptions
-        res.cookies.set(SESSION_COOKIE, await createSessionToken(session), untilBrowserCloses)
+        res.cookies.set(roleCookieName, token, untilBrowserCloses)
+        res.cookies.set(SESSION_COOKIE, token, untilBrowserCloses)
       }
     } else {
       console.warn('SESSION_SECRET is not set — logged in without a session cookie (see .env.example).')

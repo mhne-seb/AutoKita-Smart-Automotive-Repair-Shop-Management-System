@@ -52,7 +52,7 @@ export function Sidebar() {
   }, [pathname])
 
   const handleLogout = async () => {
-    await logout()
+    await logout('admin')
     router.push('/login')
   }
 

@@ -84,7 +84,7 @@ export function DashHeader() {
 
   async function confirmLogout() {
     setLogoutConfirmOpen(false);
-    await logout();
+    await logout('customer');
     router.push("/login");
   }
 

@@ -1,19 +1,15 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getSession } from '@/lib/session'
+import { requireStaff } from '@/lib/authGuard'
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
 import { logStaffCustomerEdit } from '@/lib/audit'
 import { sendJobUpdateEmail } from '@/lib/mail'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getSession()
-    if (!session) {
-      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
-    }
-    if (session.role !== 'staff') {
-      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 })
-    }
+    const auth = await requireStaff()
+    if (!auth.ok) return auth.response
+    const session = auth.session
 
     const { id } = await params
     const jobId = Number(id)

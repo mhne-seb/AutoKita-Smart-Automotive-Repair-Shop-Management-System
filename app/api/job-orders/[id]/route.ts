@@ -66,6 +66,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     if (resolvedMechanicId) {
+      const mechCheck = await db.query(
+        `SELECT full_name, status FROM employees WHERE id = $1 AND role = 'mechanic'`,
+        [resolvedMechanicId]
+      )
+      if (mechCheck.rows.length === 0 || mechCheck.rows[0].status !== 'active') {
+        return NextResponse.json({
+          success: false,
+          code: 'MECHANIC_UNAVAILABLE',
+          message: `${mechCheck.rows[0]?.full_name || 'This mechanic'} is currently on leave and cannot be assigned.`
+        }, { status: 400 })
+      }
       await db.query(`SELECT assign_mechanic_to_job_order($1, $2)`, [id, resolvedMechanicId])
     }
 

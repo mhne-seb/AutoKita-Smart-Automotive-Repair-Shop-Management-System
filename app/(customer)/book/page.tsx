@@ -12,7 +12,7 @@ import { Footer } from "@/components/site/Footer";
 import phAddress from "@/data/ph-address.json";
 import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
 import { normalizePlateNumber, isValidPlateNumber } from "@/lib/plate";
-import { fy } from "date-fns/locale";
+import { toManilaIso } from "@/lib/bookingSlotsShared";
 
 const TIMES = ["08:00 AM", "09:30 AM", "10:30 AM", "01:00 PM", "02:30 PM", "04:00 PM"];
 const DAYS_TO_SHOW = 30;
@@ -77,6 +77,42 @@ function isPastSlot(date: Date, time: string) {
   const slot = new Date(date);
   slot.setHours(h, m, 0, 0);
   return slot.getTime() < Date.now();
+}
+
+function normalizeTimeSlot(t: string): string {
+  const match = t.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+  if (!match) return t.trim();
+  let h = parseInt(match[1], 10);
+  const m = match[2].padStart(2, "0");
+  const ap = (match[3] || "AM").toUpperCase();
+  return `${String(h).padStart(2, "0")}:${m} ${ap}`;
+}
+
+// True if this time slot is already occupied by a ticket/job order for the given date
+function isOccupiedSlot(date: Date, time: string, occupiedByDate: Record<string, string[]> = {}) {
+  if (!date || !time) return false;
+  const dateKey = toDateValue(date);
+  const occupiedTimes = occupiedByDate[dateKey] || [];
+  if (occupiedTimes.length === 0) return false;
+
+  const normalizedTarget = normalizeTimeSlot(time);
+  if (occupiedTimes.map(normalizeTimeSlot).includes(normalizedTarget)) {
+    return true;
+  }
+
+  // Also check if entered custom time is within 30 minutes of any booked slot
+  const { h: targetH, m: targetM } = parseTime(time);
+  const targetTotalMinutes = targetH * 60 + targetM;
+
+  for (const occ of occupiedTimes) {
+    const { h: occH, m: occM } = parseTime(occ);
+    const occTotalMinutes = occH * 60 + occM;
+    if (Math.abs(targetTotalMinutes - occTotalMinutes) < 30) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function formatDayLabel(d: Date) {
@@ -169,11 +205,15 @@ type Form = {
   scanAcknowledged: boolean;
 };
 
-function isStepValid(step: number, f: Form): boolean {
+function isStepValid(step: number, f: Form, occupiedByDate: Record<string, string[]> = {}): boolean {
   switch (step) {
     case 0:
-      // date/time always have a default selection, nothing to block here
-      return !!f.date && !!f.time && !isPastSlot(f.date, f.time);
+      return (
+        !!f.date &&
+        !!f.time &&
+        !isPastSlot(f.date, f.time) &&
+        !isOccupiedSlot(f.date, f.time, occupiedByDate)
+      );
     case 1:
       return (
         isFilled(f.firstName) &&
@@ -222,6 +262,8 @@ function BookPage() {
   const [accountEmailed, setAccountEmailed] = useState(false);
   const [bookingId, setBookingId] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [occupiedByDate, setOccupiedByDate] = useState<Record<string, string[]>>({});
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   const [f, setF] = useState<Form>({
     date: startOfToday(),
@@ -265,8 +307,38 @@ function BookPage() {
     }));
   };
 
+  const fetchOccupiedSlots = async () => {
+    try {
+      setLoadingSlots(true);
+      const res = await fetch("/api/customer/booking/occupied-slots");
+      const data = await res.json();
+      if (data.success && data.occupiedByDate) {
+        setOccupiedByDate(data.occupiedByDate);
+        setF((prev) => {
+          if (isOccupiedSlot(prev.date, prev.time, data.occupiedByDate) || isPastSlot(prev.date, prev.time)) {
+            const firstAvailable = TIMES.find(
+              (t) => !isPastSlot(prev.date, t) && !isOccupiedSlot(prev.date, t, data.occupiedByDate)
+            );
+            if (firstAvailable) {
+              return { ...prev, time: firstAvailable };
+            }
+          }
+          return prev;
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load occupied slots:", err);
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOccupiedSlots();
+  }, []);
+
   const next = async () => {
-    if (!isStepValid(step, f)) {
+    if (!isStepValid(step, f, occupiedByDate)) {
       setAttemptedNext(true);
       return;
     }
@@ -326,16 +398,16 @@ function BookPage() {
 
   const selectDate = (d: Date) => {
     set("date", d);
-    // If the currently selected time is already past for the newly picked date, bump to next available
-    if (isPastSlot(d, f.time)) {
-      const firstAvailable = TIMES.find((t) => !isPastSlot(d, t));
+    // If the currently selected time is already past OR occupied for the newly picked date, bump to next available
+    if (isPastSlot(d, f.time) || isOccupiedSlot(d, f.time, occupiedByDate)) {
+      const firstAvailable = TIMES.find((t) => !isPastSlot(d, t) && !isOccupiedSlot(d, t, occupiedByDate));
       if (firstAvailable) set("time", firstAvailable);
     }
   };
 
   const cityOptions = f.province && f.province !== OTHERS ? CITIES_BY_PROVINCE[f.province] ?? [] : [];
 
-  const currentStepValid = isStepValid(step, f);
+  const currentStepValid = isStepValid(step, f, occupiedByDate);
   const showError = attemptedNext && !currentStepValid;
 
   // Called from the review modal's "Confirm Booking" button.
@@ -354,20 +426,8 @@ function BookPage() {
       ].filter(Boolean).join(", ");
 
       let preferredDatetime: string | null = null;
-      if (f.date instanceof Date && !isNaN(f.date.getTime())) {
-        const dt = new Date(f.date);
-        if (f.time) {
-          const match = f.time.match(/(\d+):(\d+)\s*(AM|PM)?/i);
-          if (match) {
-            let hours = parseInt(match[1], 10);
-            const minutes = parseInt(match[2], 10);
-            const ampm = match[3]?.toUpperCase();
-            if (ampm === "PM" && hours < 12) hours += 12;
-            if (ampm === "AM" && hours === 12) hours = 0;
-            dt.setHours(hours, minutes, 0, 0);
-          }
-        }
-        preferredDatetime = dt.toISOString();
+      if (f.date instanceof Date && !isNaN(f.date.getTime()) && f.time) {
+        preferredDatetime = toManilaIso(toDateValue(f.date), f.time);
       }
 
       const res = await fetch("/api/customer/booking", {
@@ -406,6 +466,18 @@ function BookPage() {
         setBookingId(`AC-${result.ticket.id}-${new Date().getFullYear()}`);
         setAccountEmailed(!!result.accountEmailed);
         setSubmitted(true);
+        if (result.userId || result.ticket?.user_id) {
+          const uid = String(result.userId || result.ticket.user_id);
+          sessionStorage.setItem('autokita_customer', 'true');
+          sessionStorage.setItem('autokita_user_id', uid);
+          sessionStorage.setItem('autokita_user_name', f.nickname || f.firstName || 'Customer');
+        }
+      } else if (result.code === "SLOT_TAKEN") {
+        setShowReview(false);
+        setStep(0);
+        setAttemptedNext(true);
+        toast.error(result.message || "This time slot is already booked. Please choose an available time.");
+        fetchOccupiedSlots();
       } else if (result.code === "EMAIL_REGISTERED") {
         setShowReview(false);
         setStep(1);
@@ -442,6 +514,7 @@ function BookPage() {
     setAccountEmailed(false);
     setAttemptedNext(false);
     setStep(0);
+    fetchOccupiedSlots();
     setF({
       date: startOfToday(),
       time: TIMES.find((t) => !isPastSlot(startOfToday(), t)) ?? TIMES[0],
@@ -502,9 +575,14 @@ function BookPage() {
                     const sel = isSameDay(day, f.date);
                     const today = isToday(day);
                     const label = formatDayLabel(day);
+                    const dayKey = toDateValue(day);
+                    const dayOccupied = occupiedByDate[dayKey] || [];
+                    const allBooked = TIMES.every((t) => isPastSlot(day, t) || isOccupiedSlot(day, t, occupiedByDate));
+                    const hasOccupied = dayOccupied.length > 0;
                     return (
                       <button
                         key={day.toISOString()}
+                        type="button"
                         onClick={() => selectDate(day)}
                         className={`relative w-[4.5rem] flex-shrink-0 rounded-lg border p-3 text-center transition ${sel ? "border-brand bg-brand text-brand-foreground shadow-lg" : "hover:bg-accent"
                           }`}
@@ -517,6 +595,15 @@ function BookPage() {
                         </div>
                         <div className="mt-1 text-2xl font-bold">{label.n}</div>
                         <div className={`text-[10px] ${sel ? "text-white/80" : "text-muted-foreground"}`}>{label.m}</div>
+                        {allBooked ? (
+                          <span className={`mt-1 block text-[9px] font-bold uppercase tracking-wider ${sel ? "text-rose-200" : "text-rose-500"}`}>
+                            Full
+                          </span>
+                        ) : hasOccupied ? (
+                          <span className={`mt-1 block text-[9px] font-medium ${sel ? "text-white/70" : "text-muted-foreground"}`}>
+                            {TIMES.filter((t) => !isPastSlot(day, t) && !isOccupiedSlot(day, t, occupiedByDate)).length} left
+                          </span>
+                        ) : null}
                       </button>
                     );
                   })}
@@ -527,27 +614,52 @@ function BookPage() {
                   {TIMES.map((t) => {
                     const sel = f.time === t;
                     const past = isPastSlot(f.date, t);
+                    const occupied = isOccupiedSlot(f.date, t, occupiedByDate);
+                    const disabled = past || occupied;
                     return (
                       <button
                         key={t}
-                        onClick={() => !past && set("time", t)}
-                        disabled={past}
-                        title={past ? "This time has already passed for today" : undefined}
-                        className={`rounded-md border py-2.5 text-sm transition ${past
-                          ? "cursor-not-allowed border-dashed text-muted-foreground/40"
-                          : sel
-                            ? "border-brand bg-brand text-brand-foreground"
+                        type="button"
+                        onClick={() => !disabled && set("time", t)}
+                        disabled={disabled}
+                        title={
+                          past
+                            ? "This time has already passed for today"
+                            : occupied
+                            ? "This time slot is already booked"
+                            : undefined
+                        }
+                        className={`relative flex flex-col items-center justify-center rounded-md border py-2.5 px-3 text-sm font-medium transition ${
+                          disabled
+                            ? occupied
+                              ? "cursor-not-allowed border-rose-200 bg-rose-50/70 text-rose-400 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-500"
+                              : "cursor-not-allowed border-dashed text-muted-foreground/40"
+                            : sel
+                            ? "border-brand bg-brand text-brand-foreground shadow-sm"
                             : "hover:border-brand hover:bg-brand-soft"
-                          }`}
+                        }`}
                       >
-                        {t}
+                        <span className={occupied ? "line-through opacity-75" : ""}>{t}</span>
+                        {occupied && (
+                          <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400">
+                            Booked
+                          </span>
+                        )}
                       </button>
                     );
                   })}
                 </div>
 
+                {/* Day full notice if all times are taken or past */}
+                {TIMES.every((t) => isPastSlot(f.date, t) || isOccupiedSlot(f.date, t, occupiedByDate)) && (
+                  <div className="mt-3 flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
+                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                    <span>All preset time slots for this date are fully booked or have passed. Please select another date.</span>
+                  </div>
+                )}
+
                 {/* Or enter an exact time */}
-                <div className="mt-3">
+                <div className="mt-4">
                   <label className="text-[10px] font-semibold uppercase text-muted-foreground">
                     Or enter a specific time
                   </label>
@@ -555,11 +667,21 @@ function BookPage() {
                     type="time"
                     value={to24h(f.time)}
                     onChange={(e) => e.target.value && set("time", to12h(e.target.value))}
-                    className="mt-1.5 block rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
+                    className={`mt-1.5 block rounded-md border bg-background px-3 py-2 text-sm focus:outline-none ${
+                      isOccupiedSlot(f.date, f.time, occupiedByDate)
+                        ? "border-rose-500 text-rose-600 focus:border-rose-500"
+                        : "focus:border-brand"
+                    }`}
                   />
                   {isPastSlot(f.date, f.time) && (
                     <p className="mt-1 text-[11px] text-amber-600">
                       That time has already passed for today — pick a later one.
+                    </p>
+                  )}
+                  {!isPastSlot(f.date, f.time) && isOccupiedSlot(f.date, f.time, occupiedByDate) && (
+                    <p className="mt-1 flex items-center gap-1 text-[11px] font-medium text-rose-500">
+                      <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                      This time slot is already booked. Please choose an available time.
                     </p>
                   )}
                 </div>
@@ -782,7 +904,12 @@ function BookPage() {
           <div className="mt-10 border-t pt-6">
             {showError && (
               <p className="mb-4 flex items-center gap-1.5 text-xs font-medium text-red-500">
-                <AlertCircle className="h-3.5 w-3.5" /> Please complete all required fields before continuing.
+                <AlertCircle className="h-3.5 w-3.5" />
+                {step === 0 && isOccupiedSlot(f.date, f.time, occupiedByDate)
+                  ? "The selected time slot is already booked. Please pick an available time."
+                  : step === 0 && isPastSlot(f.date, f.time)
+                  ? "The selected time has already passed. Please pick an upcoming time."
+                  : "Please complete all required fields before continuing."}
               </p>
             )}
             <div className="flex items-center justify-between">

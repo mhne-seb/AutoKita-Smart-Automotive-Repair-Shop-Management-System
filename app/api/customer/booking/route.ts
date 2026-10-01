@@ -6,6 +6,30 @@ import { hashPassword } from '@/lib/password'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
 import { EMAIL_RE, PHONE_RE } from '@/lib/bookingRules'
+import { getOccupiedBookingSlots, isSlotOccupiedInDb } from '@/lib/bookingSlots'
+import { CUSTOMER_SESSION_COOKIE, createSessionToken, sessionCookieOptions, sessionSecretConfigured } from '@/lib/session'
+
+export const dynamic = 'force-dynamic'
+
+export async function GET(_req: NextRequest) {
+  try {
+    const { occupiedByDate, slots } = await getOccupiedBookingSlots()
+    return NextResponse.json(
+      { success: true, occupiedByDate, slots },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        },
+      }
+    )
+  } catch (err: any) {
+    console.error('[/api/customer/booking GET] error:', err)
+    return NextResponse.json(
+      { success: false, message: 'Failed to retrieve occupied slots', error: err?.message },
+      { status: 500 }
+    )
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,6 +80,14 @@ export async function POST(req: NextRequest) {
       if (found.rows.length > 0) {
         return NextResponse.json(
           { success: false, code: 'EMAIL_REGISTERED', message: 'This email already has an account. Please log in to book.' },
+          { status: 409 },
+        )
+      }
+
+      const foundEmp = await db.query(`SELECT id FROM employees WHERE LOWER(email) = $1`, [email])
+      if (foundEmp.rows.length > 0) {
+        return NextResponse.json(
+          { success: false, code: 'EMAIL_REGISTERED', message: 'This email belongs to a staff account. Please use a customer email.' },
           { status: 409 },
         )
       }
@@ -134,6 +166,21 @@ export async function POST(req: NextRequest) {
         finalVehicleId = vehicleResult.rows[0].id
       }
 
+      if (preferredDatetime) {
+        const slotOccupied = await isSlotOccupiedInDb(preferredDatetime, client)
+        if (slotOccupied) {
+          await client.query('ROLLBACK')
+          return NextResponse.json(
+            {
+              success: false,
+              code: 'SLOT_TAKEN',
+              message: 'This time slot is already booked. Please choose another date or time.',
+            },
+            { status: 409 },
+          )
+        }
+      }
+
       // Call SQL function to create ticket (6 arguments including preferred_datetime)
       const ticketResult = await client.query(`SELECT * FROM create_service_ticket($1, $2, $3, $4, $5, $6)`, [
         finalUserId,
@@ -189,11 +236,24 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       ticket,
       accountEmailed,
+      userId: finalUserId,
     })
+
+    if (sessionSecretConfigured() && finalUserId) {
+      try {
+        const session = { userId: finalUserId, role: 'customer' as const }
+        const token = await createSessionToken(session)
+        res.cookies.set(CUSTOMER_SESSION_COOKIE, token, sessionCookieOptions)
+      } catch (tokenErr) {
+        console.error('Failed to create customer session token:', tokenErr)
+      }
+    }
+
+    return res
   } catch (err: any) {
     console.error('Booking error:', err)
     if (err?.code === '23514' && err?.constraint === 'vehicles_plate_number_format') {

@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
       result.rows[i].avatar_url = signedAvatars[i]
     }
 
-    const mechanicsQuery = `SELECT id, full_name, email FROM employees WHERE role = 'mechanic'`
+    const mechanicsQuery = `SELECT id, full_name, email, status FROM employees WHERE role = 'mechanic' ORDER BY full_name ASC`
     const mechanicsResult = await db.query(mechanicsQuery)
     const mechanics = mechanicsResult.rows
 
@@ -178,6 +178,21 @@ export async function POST(req: NextRequest) {
         if (locked.rows.length === 0 || !['pending', 'queued', 'inspection_scheduled'].includes(locked.rows[0].ticket_status)) {
           await client.query('ROLLBACK')
           return NextResponse.json({ success: false, message: 'This ticket can no longer be changed.' }, { status: 409 })
+        }
+
+        if (mechanicId) {
+          const mechCheck = await client.query(
+            `SELECT full_name, status FROM employees WHERE id = $1 AND role = 'mechanic'`,
+            [mechanicId]
+          )
+          if (mechCheck.rows.length === 0 || mechCheck.rows[0].status !== 'active') {
+            await client.query('ROLLBACK')
+            return NextResponse.json({
+              success: false,
+              code: 'MECHANIC_UNAVAILABLE',
+              message: `${mechCheck.rows[0]?.full_name || 'This mechanic'} is currently on leave and cannot be assigned.`
+            }, { status: 400 })
+          }
         }
 
         const joResult = await client.query(`SELECT * FROM create_job_order_from_ticket($1, $2)`, [ticketId, mechanicId || null])

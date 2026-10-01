@@ -8,6 +8,7 @@ import remarkGfm from "remark-gfm";
 import { X, Maximize2, MoreVertical, Paperclip, Send, ShieldCheck, Clock, Calendar, HelpCircle, Wrench, Bot } from "lucide-react";
 import { Logo } from "@/components/site/Logo";
 import { formatChatMarkdown } from "@/lib/chatMarkdown";
+import { DraggableChatTrigger } from "./DraggableChatTrigger";
 
 export interface LiveJobCardData {
   id: number;
@@ -187,17 +188,17 @@ export function ChatWidget() {
 
   return (
     <>
-      {/* Floating trigger */}
-      <button
+      {/* Movable floating trigger button */}
+      <DraggableChatTrigger
+        open={open}
         onClick={() => setOpen(true)}
-        aria-label="Open AutoKita Assistant"
-        className={`fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-brand text-brand-foreground shadow-lg ring-1 ring-black/5 transition hover:scale-105 hover:shadow-xl hover:opacity-95 ${open ? "hidden" : ""}`}
-      >
-        <Bot className="h-6 w-6" strokeWidth={2.25} />
-      </button>
+        ariaLabel="Open AutoKita Assistant"
+        title="AutoKita AI Assistant (Drag to move or click to open)"
+        storageKey="autokita_customer_chat_btn_pos"
+      />
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
           <div
             className={`relative flex flex-col overflow-hidden rounded-2xl border bg-card shadow-2xl ${

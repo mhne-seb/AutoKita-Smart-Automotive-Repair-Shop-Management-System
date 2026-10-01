@@ -10,6 +10,8 @@ import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 
 export const SESSION_COOKIE = 'autokita_session'
+export const STAFF_SESSION_COOKIE = 'autokita_staff_session'
+export const CUSTOMER_SESSION_COOKIE = 'autokita_customer_session'
 const MAX_AGE_SECONDS = 12 * 60 * 60
 // "Keep me signed in" ticked.
 export const REMEMBER_MAX_AGE_SECONDS = 30 * 24 * 60 * 60
@@ -48,9 +50,43 @@ export async function readSessionToken(token: string | undefined): Promise<Sessi
   }
 }
 
-// For route handlers: who is making this request, according to the cookie.
+// Specifically gets the staff session, checking staff cookie first, then fallback to shared cookie
+export async function getStaffSession(): Promise<Session | null> {
+  const cookieStore = await cookies()
+  const staffCookie = cookieStore.get(STAFF_SESSION_COOKIE)?.value
+  const staffSession = await readSessionToken(staffCookie)
+  if (staffSession && staffSession.role === 'staff') return staffSession
+
+  // Fallback to shared cookie
+  const sharedCookie = cookieStore.get(SESSION_COOKIE)?.value
+  const sharedSession = await readSessionToken(sharedCookie)
+  if (sharedSession && sharedSession.role === 'staff') return sharedSession
+
+  return null
+}
+
+// Specifically gets the customer session, checking customer cookie first, then fallback to shared cookie
+export async function getCustomerSession(): Promise<Session | null> {
+  const cookieStore = await cookies()
+  const custCookie = cookieStore.get(CUSTOMER_SESSION_COOKIE)?.value
+  const custSession = await readSessionToken(custCookie)
+  if (custSession && custSession.role === 'customer') return custSession
+
+  // Fallback to shared cookie
+  const sharedCookie = cookieStore.get(SESSION_COOKIE)?.value
+  const sharedSession = await readSessionToken(sharedCookie)
+  if (sharedSession && sharedSession.role === 'customer') return sharedSession
+
+  return null
+}
+
+// For general route handlers: checks staff first, then customer, then shared cookie
 export async function getSession(): Promise<Session | null> {
-  return readSessionToken((await cookies()).get(SESSION_COOKIE)?.value)
+  const staff = await getStaffSession()
+  if (staff) return staff
+  const customer = await getCustomerSession()
+  if (customer) return customer
+  return null
 }
 
 export const sessionCookieOptions = {
