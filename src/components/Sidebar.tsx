@@ -14,7 +14,6 @@ import {
   Database,
   Users,
   History,
-  ChevronDown,
   MoreVertical,
   LogOut,
   X,
@@ -28,32 +27,22 @@ const primaryNav = [
   { label: 'Overview', to: '/overview', icon: LayoutGrid },
   { label: 'Job Queue', to: '/job-queue', icon: ListChecks },
   { label: 'Job Orders', to: '/job-orders', icon: Wrench },
+  { label: 'Service History', to: '/history', icon: History },
   { label: 'Analytics', to: '/analytics', icon: BarChart3 },
   { label: 'Sales & Payroll', to: '/sales-payroll', icon: LineChart },
   { label: 'Database Administration', to: '/database', icon: Database },
   { label: 'Mechanics Management', to: '/mechanics', icon: Users },
 ] as const
 
-// Each of these opens its own dedicated History Logs page (see
-// pages/HistoryLogs.tsx) with its own mock data, stat cards, search/filter,
-// and pagination — separate from the live/operational pages above.
-const historyLogNav = [
-  { label: 'Job Orders', to: '/history/job-orders' },
-  { label: 'Tickets', to: '/history/tickets' },
-  { label: 'Customers', to: '/history/customers' },
-] as const
-
 // ---- Component ----------------------------------------------------------
 
 export function Sidebar() {
-  const [historyOpen, setHistoryOpen] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
 
   const isActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`)
-  const historyActive = historyLogNav.some((h) => isActive(h.to))
 
   // Below lg the sidebar is an off-canvas drawer opened from a slim top bar;
   // at lg and up it's the always-visible column it has always been.
@@ -150,43 +139,6 @@ export function Sidebar() {
             )
           })}
         </ul>
-
-        {/* History logs (collapsible) */}
-        <div className="mt-6 rounded-lg border bg-muted/20 p-1.5">
-          <button
-            type="button"
-            onClick={() => setHistoryOpen((prev) => !prev)}
-            className={`flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
-              historyActive ? 'text-brand' : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <History size={14} />
-            <span className="flex-1 text-left">History Logs</span>
-            <ChevronDown size={14} className={`transition-transform duration-200 ${historyOpen ? 'rotate-180' : ''}`} />
-          </button>
-
-          {historyOpen && (
-            <ul className="mt-1 space-y-0.5 pl-2">
-              {historyLogNav.map(({ label, to }) => {
-                const active = isActive(to)
-                return (
-                  <li key={to}>
-                    <Link
-                      href={to}
-                      className={[
-                        'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
-                        active ? 'bg-brand-soft font-semibold text-brand' : 'text-muted-foreground hover:bg-accent hover:text-foreground',
-                      ].join(' ')}
-                    >
-                      <span className={`h-1 w-1 shrink-0 rounded-full ${active ? 'bg-brand' : 'bg-muted-foreground/40'}`} />
-                      {label}
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </div>
       </nav>
 
       {/* User footer */}
