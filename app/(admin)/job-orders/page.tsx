@@ -9,6 +9,7 @@ import { TopBar } from '@/components/TopBar'
 import { avatarColorClass } from '@/lib/avatarColor'
 import { getJobOrders, checkInJobOrder } from '@/controllers/jobOrderController'
 import { JobOrderCard, Stage, stageOrder, stageLabels } from '@/data/types'
+import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 
 type TabKey = 'all' | Stage
 
@@ -50,6 +51,8 @@ export default function page() {
   const [jobOrders, setJobOrders] = useState<JobOrderCard[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  const [confirmCheckIn, setConfirmCheckIn] = useState<JobOrderCard | null>(null)
 
   // Local pagination state
   const [page, setPage] = useState(1)
@@ -544,7 +547,7 @@ export default function page() {
                         <div className="flex items-center justify-end gap-1.5">
                           {c.stage === 'inspecting' && !c.arrived && (
                             <button
-                              onClick={() => handleCheckIn(c)}
+                              onClick={() => setConfirmCheckIn(c)}
                               disabled={checkingInId === c.id}
                               title="Check In Vehicle (Mark Stored in Shop)"
                               className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 shadow-2xs hover:bg-amber-100 disabled:opacity-50 transition-all"
@@ -569,6 +572,21 @@ export default function page() {
             </table>
           </div>
         </div>
+      )}
+      
+      {confirmCheckIn && (
+        <ConfirmActionModal
+          tone="brand"
+          title="Confirm vehicle arrival?"
+          description={`Confirm that ${confirmCheckIn.customer}'s ${confirmCheckIn.vehicle} (${confirmCheckIn.plate}) has arrived and is stored in the shop. This unlocks the inspection.`}
+          confirmLabel="Store in shop & check in"
+          busy={checkingInId === confirmCheckIn.id}
+          onClose={() => setConfirmCheckIn(null)}
+          onConfirm={async () => {
+            await handleCheckIn(confirmCheckIn)
+            setConfirmCheckIn(null)
+          }}
+        />
       )}
     </div>
   )

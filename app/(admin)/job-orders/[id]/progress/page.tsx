@@ -21,6 +21,7 @@ import { isDiagnosticScanTask } from '@/data/diagnosticScan'
 import { mechanicIsFull } from '@/data/mechanicPolicy'
 import { currency } from '@/data/mockData'
 import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, PartsPurchase, Supplier, ServiceFinding, PullOutRequest, partIsReady } from '@/data/types'
+import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 
 const sectionColors: Record<string, string> = {
   received: 'text-emerald-600',
@@ -91,6 +92,7 @@ export default function page() {
   const [bill, setBill] = useState<JobOrderBill | null>(null)
   const [lightboxPhoto, setLightboxPhoto] = useState<{ url: string; label: string } | null>(null)
   const loadBill = () => getJobOrderBill(jobOrderId).then(setBill)
+  const [confirmPullOutAction, setConfirmPullOutAction] = useState<'approve' | 'deny' | null>(null)
   useEffect(() => { void loadBill() }, [jobOrderId])
   
   useEffect(() => {
@@ -833,10 +835,10 @@ export default function page() {
               className="min-w-0 flex-1 rounded-lg border border-rose-200 bg-white p-2 text-sm text-slate-700 outline-none focus:border-rose-400"
             />
             <div className="flex shrink-0 gap-2">
-              <button type="button" onClick={() => onDecidePullOut('deny')} disabled={decidingPullOut !== null} className="flex items-center gap-1 rounded-lg border border-rose-300 bg-white px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50">
+              <button type="button" onClick={() => setConfirmPullOutAction('deny')} disabled={decidingPullOut !== null} className="flex items-center gap-1 rounded-lg border border-rose-300 bg-white px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50">
                 {decidingPullOut === 'deny' ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />} Deny
               </button>
-              <button type="button" onClick={() => onDecidePullOut('approve')} disabled={decidingPullOut !== null} className="flex items-center gap-1 rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50">
+              <button type="button" onClick={() => setConfirmPullOutAction('approve')} disabled={decidingPullOut !== null} className="flex items-center gap-1 rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50">
                 {decidingPullOut === 'approve' ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Approve pull-out
               </button>
             </div>
@@ -1395,6 +1397,35 @@ export default function page() {
               .then(r => r.json())
               .then(d => { if(d.success) setScheduleData({ tasks: d.tasks || [], mechanics: d.mechanics || [] }) })
               .catch(() => {})
+          }}
+        />
+      )}
+      {confirmPullOutAction === 'approve' && (
+        <ConfirmActionModal
+          tone="danger"
+          title="Approve the pull-out?"
+          description="The customer's vehicle will be released as-is. Services not yet started are cancelled and charges are locked for finished work."
+          confirmLabel="Approve pull-out"
+          busy={decidingPullOut !== null}
+          onClose={() => setConfirmPullOutAction(null)}
+          onConfirm={async () => {
+            await onDecidePullOut('approve')
+            setConfirmPullOutAction(null)
+          }}
+        />
+      )}
+      
+      {confirmPullOutAction === 'deny' && (
+        <ConfirmActionModal
+          tone="default"
+          title="Deny the pull-out request?"
+          description="Work continues on the vehicle and the customer is told the request was denied."
+          confirmLabel="Deny request"
+          busy={decidingPullOut !== null}
+          onClose={() => setConfirmPullOutAction(null)}
+          onConfirm={async () => {
+            await onDecidePullOut('deny')
+            setConfirmPullOutAction(null)
           }}
         />
       )}

@@ -21,6 +21,7 @@ import { getJobOrderById } from '@/controllers/jobOrderController'
 import { getRoadTestData, startRoadTest, passRoadTest, failRoadTest, type RoadTestData } from '@/controllers/roadTestController'
 import { isDiagnosticScanTask } from '@/data/diagnosticScan'
 import type { JobOrderCard } from '@/data/types'
+import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 
 const fmt = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—'
@@ -44,6 +45,8 @@ export default function TestingPage() {
   const [photo, setPhoto] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [confirmStart, setConfirmStart] = useState(false)
+  const [confirmSubmitResult, setConfirmSubmitResult] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const galleryRef = useRef<HTMLInputElement>(null)
 
@@ -57,6 +60,8 @@ export default function TestingPage() {
 
   function pickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0] ?? null
+    e.target.value = '' // re-picking the same file still fires onChange
+    if (f && f.size > 5 * 1024 * 1024) return toast.error('Photo must be under 5MB.')
     setPhoto(f)
     if (preview) URL.revokeObjectURL(preview)
     setPreview(f ? URL.createObjectURL(f) : null)
@@ -68,7 +73,6 @@ export default function TestingPage() {
   }
 
   async function onStart() {
-    if (!testerId) return toast.error('Pick who is driving the test.')
     setStarting(true)
     const r = await startRoadTest(jobOrderId, Number(testerId))
     setStarting(false)
@@ -87,7 +91,6 @@ export default function TestingPage() {
   }
 
   async function onSubmitResult() {
-    if (!verdict) return
     setSaving(true)
     const effectiveRework = data ? new Set([...rework, ...tasksRequiredByFailedParts(data, failedParts)]) : rework
     const r = verdict === 'pass'
@@ -235,7 +238,10 @@ export default function TestingPage() {
 
                   <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
                     <button type="button" onClick={() => setVerdict(null)} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                    <button type="button" onClick={onSubmitResult} disabled={saving}
+                    <button type="button" onClick={() => {
+                      if (!verdict) return
+                      setConfirmSubmitResult(true)
+                    }} disabled={saving}
                       className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 ${verdict === 'pass' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'}`}>
                       {saving ? <Loader2 size={14} className="animate-spin" /> : verdict === 'pass' ? <CheckCircle2 size={14} /> : <RotateCcw size={14} />}
                       {verdict === 'pass' ? 'Mark passed & complete job' : 'Record fail & send back to floor'}
@@ -261,7 +267,10 @@ export default function TestingPage() {
                     {data.mechanics.map((m) => <option key={m.id} value={m.id}>{m.full_name}</option>)}
                   </select>
                 </div>
-                <button type="button" onClick={onStart} disabled={!canStart || starting}
+                <button type="button" onClick={() => {
+                  if (!testerId) return toast.error('Pick who is driving the test.')
+                  setConfirmStart(true)
+                }} disabled={!canStart || starting}
                   className="flex items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-40">
                   {starting ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />} Start road test
                 </button>
@@ -323,6 +332,36 @@ export default function TestingPage() {
       </div>
 
       {lightbox && <Lightbox url={lightbox.url} label={lightbox.label} onClose={() => setLightbox(null)} />}
+      
+      {confirmStart && (
+        <ConfirmActionModal
+          tone="brand"
+          title="Start the road test?"
+          description="The job order moves to Testing. Pick the driver first."
+          confirmLabel="Start road test"
+          busy={starting}
+          onClose={() => setConfirmStart(false)}
+          onConfirm={async () => {
+            await onStart()
+            setConfirmStart(false)
+          }}
+        />
+      )}
+      
+      {confirmSubmitResult && verdict && (
+        <ConfirmActionModal
+          tone={verdict === 'pass' ? 'brand' : 'danger'}
+          title={verdict === 'pass' ? 'Mark the road test as passed?' : 'Record the road test as failed?'}
+          description={verdict === 'pass' ? 'The job order becomes Completed and the customer is notified.' : 'The ticked services go back to the floor for rework.'}
+          confirmLabel={verdict === 'pass' ? 'Mark as passed' : 'Record as failed'}
+          busy={saving}
+          onClose={() => setConfirmSubmitResult(false)}
+          onConfirm={async () => {
+            await onSubmitResult()
+            setConfirmSubmitResult(false)
+          }}
+        />
+      )}
     </div>
   )
 }
