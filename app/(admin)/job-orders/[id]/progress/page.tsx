@@ -514,7 +514,11 @@ export default function page() {
                       Waiting on parts is a real state, so that one stays. */}
                   {task.status === 'pending' && unscheduled && missing.length === 0 && (
                     <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-                      Not scheduled
+                      {!task.scheduledDate && !task.mechanicId
+                        ? 'Not scheduled'
+                        : task.scheduledDate && !task.mechanicId
+                        ? 'No mechanic yet'
+                        : 'No date yet'}
                     </span>
                   )}
                   {(task.status !== 'pending' || missing.length > 0) && (
@@ -542,7 +546,7 @@ export default function page() {
                       title="Pick a date and time and assign a mechanic"
                       className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-indigo-700 active:scale-95"
                     >
-                      <CalendarDays size={13} /> Schedule
+                      <CalendarDays size={13} /> {task.scheduledDate && !task.mechanicId ? 'Assign mechanic' : 'Schedule'}
                     </button>
                   )}
                   {task.status === 'pending' && !unscheduled && (
