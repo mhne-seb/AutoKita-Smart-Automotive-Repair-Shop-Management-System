@@ -3,6 +3,7 @@ import type { NotificationItem } from '@/components/NotificationBell'
 function timeAgoCustomer(iso: string): string {
   const then = new Date(iso).getTime()
   if (isNaN(then)) return ''
+  if (then > Date.now()) return 'Upcoming'
   const mins = Math.floor((Date.now() - then) / 60_000)
   if (mins < 1) return 'Just now'
   if (mins < 60) return `${mins}m ago`
@@ -42,7 +43,7 @@ export async function loadCustomerNotifications(limit?: number): Promise<Notific
       key: a.days_remaining !== undefined ? `${a.type}-${a.id}-${a.days_remaining}` : `${a.type}-${a.id}`,
       title: a.title,
       message: a.description,
-      time: timeAgoCustomer(a.time),
+      time: a.type === 'appointment_reminder' ? 'Reminder' : timeAgoCustomer(a.time),
       at: a.time,
       href: a.href || (a.job_order_id ? `/dashboard/tracking/${a.job_order_id}` : '/dashboard'),
     }),
