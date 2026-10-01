@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
 import { issueOtp, OTP_TTL_MINUTES, FINDING_OTP_PURPOSE } from '@/lib/otp'
-import { sendOtpEmail } from '@/lib/mail'
+import { sendOtpEmail, isMailConfigured } from '@/lib/mail'
 import { isVerificationBypassed } from '@/lib/testMode'
 
 // Step 1 of approving a mid-service finding — same shape as the quotation
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
     const { code, token, expiresAt } = issueOtp(FINDING_OTP_PURPOSE, `${userId}:${findingId}`)
 
-    const mailConfigured = Boolean(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD)
+    const mailConfigured = isMailConfigured()
     let devCode: string | undefined
     if (mailConfigured) {
       await sendOtpEmail({
