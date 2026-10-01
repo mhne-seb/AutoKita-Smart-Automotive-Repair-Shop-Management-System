@@ -462,6 +462,7 @@ export interface CustomerBill {
     amount_paid: number
     payment_date: string
     verification_status: 'pending' | 'verified' | 'rejected' | 'refunded'
+    rejection_reason?: string | null
   } | null
 }
 
