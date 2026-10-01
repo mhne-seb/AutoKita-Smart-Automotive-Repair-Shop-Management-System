@@ -1,13 +1,31 @@
 import nodemailer from 'nodemailer'
 
-//Gmail SMTP. GMAIL_APP_PASSWORD is a google "app password", not the account password.
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-    },
-})
+// Email goes out through Resend (SMTP) when RESEND_API_KEY is set — our domain autokita.me is verified there, so
+// mail passes SPF/DKIM/DMARC and stays out of spam. Without the key it falls back to Gmail SMTP (GMAIL_APP_PASSWORD
+// is a Google "app password", not the account password), so switching back is just removing the variable.
+const useResend = Boolean(process.env.RESEND_API_KEY)
+
+const transporter = useResend
+    ? nodemailer.createTransport({
+          host: 'smtp.resend.com',
+          port: 465,
+          secure: true,
+          auth: { user: 'resend', pass: process.env.RESEND_API_KEY },
+      })
+    : nodemailer.createTransport({
+          service: 'gmail',
+          auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
+      })
+
+// Sender shown to customers. With Resend it must be an address on the verified domain.
+const FROM = useResend
+    ? (process.env.MAIL_FROM || 'AutoKita <noreply@autokita.me>')
+    : `"AutoKita" <${process.env.GMAIL_USER}>`
+
+/** True when at least one email provider is set up. */
+export function isMailConfigured(): boolean {
+    return useResend || Boolean(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD)
+}
 
 export async function sendTempPasswordEmail(opts: {
     to: string
@@ -43,7 +61,7 @@ export async function sendTempPasswordEmail(opts: {
         : ''
 
     await transporter.sendMail({
-        from: `"AutoKita" <${process.env.GMAIL_USER}>`,
+        from: FROM,
         to: opts.to,
         subject: 'Your AutoKita account - temporary password',
         text:
@@ -83,7 +101,7 @@ export async function sendOtpEmail(opts: {
     subjectSuffix?: string
 }) {
     await transporter.sendMail({
-        from: `"AutoKita" <${process.env.GMAIL_USER}>`,
+        from: FROM,
         to: opts.to,
         subject: opts.subjectSuffix
             ? `${opts.code} — code to approve ${opts.subjectSuffix}`
@@ -112,7 +130,7 @@ export async function sendPasswordResetEmail(opts: {
     expiresMinutes: number
 }) {
     await transporter.sendMail({
-        from: `"AutoKita" <${process.env.GMAIL_USER}>`,
+        from: FROM,
         to: opts.to,
         subject: 'Reset your AutoKita password',
         text:
@@ -138,7 +156,7 @@ export async function sendPasswordChangedEmail(opts: { to: string; name: string 
         timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short',
     })
     await transporter.sendMail({
-        from: `"AutoKita" <${process.env.GMAIL_USER}>`,
+        from: FROM,
         to: opts.to,
         subject: 'Your AutoKita password was changed',
         text:
@@ -176,7 +194,7 @@ export async function sendJobUpdateEmail(opts: {
     const escapeHtml = (s: string) => (s || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;')
 
     await transporter.sendMail({
-        from: `"AutoKita" <${process.env.GMAIL_USER}>`,
+        from: FROM,
         to: opts.to,
         subject: `JO-${opts.jobOrderId}: ${opts.title}`,
         text:
@@ -224,7 +242,7 @@ export async function sendReviewReadyEmail(opts: {
     const actionLabel = copy.action
 
     await transporter.sendMail({
-        from: `"AutoKita" <${process.env.GMAIL_USER}>`,
+        from: FROM,
         to: opts.to,
         subject: `JO-${opts.jobOrderId}: ${heading}`,
         text:
