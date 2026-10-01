@@ -1,8 +1,6 @@
-'use client'
+import { redirect } from 'next/navigation'
 
-// Route: /history/job-orders — thin wrapper that renders the shared HistoryLogs page pre-filtered to the Job Orders tab.
-import { HistoryLogs } from '@/components/admin/HistoryLogs'
-
+// The three separate history pages were merged into one Service History page.
 export default function Page() {
-  return <HistoryLogs tab="job-orders" />
+  redirect('/history')
 }

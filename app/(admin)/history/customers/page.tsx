@@ -1,8 +1,6 @@
-'use client'
+import { redirect } from 'next/navigation'
 
-// Route: /history/customers — thin wrapper that renders the shared HistoryLogs page pre-filtered to the Customers tab.
-import { HistoryLogs } from '@/components/admin/HistoryLogs'
-
+// The three separate history pages were merged into one Service History page.
 export default function Page() {
-  return <HistoryLogs tab="customers" />
+  redirect('/history')
 }
