@@ -56,15 +56,48 @@ export async function login(email: string, password: string, remember = false): 
 }
 
 /** Clears the browser's session flags and has the server take back the login cookie. */
-export async function logout() {
+export async function logout(role?: 'admin' | 'customer' | 'staff') {
   if (typeof window === 'undefined') return
-  sessionStorage.removeItem('autokita_admin')
-  sessionStorage.removeItem('autokita_customer')
-  sessionStorage.removeItem('autokita_user_id')
-  sessionStorage.removeItem('autokita_user_name')
-  sessionStorage.removeItem('autokita_user_title')
-  localStorage.removeItem(REMEMBER_KEY)
-  await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+  const isCust = role === 'customer'
+  const isAdm = role === 'admin' || role === 'staff'
+
+  if (isCust) {
+    sessionStorage.removeItem('autokita_customer')
+    const r = JSON.parse(localStorage.getItem(REMEMBER_KEY) || 'null')
+    if (r?.flag === 'autokita_customer') {
+      localStorage.removeItem(REMEMBER_KEY)
+      sessionStorage.removeItem('autokita_user_id')
+      sessionStorage.removeItem('autokita_user_name')
+      sessionStorage.removeItem('autokita_user_title')
+    }
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'customer' }),
+    }).catch(() => {})
+  } else if (isAdm) {
+    sessionStorage.removeItem('autokita_admin')
+    sessionStorage.removeItem('autokita_user_title')
+    const r = JSON.parse(localStorage.getItem(REMEMBER_KEY) || 'null')
+    if (r?.flag === 'autokita_admin') {
+      localStorage.removeItem(REMEMBER_KEY)
+      sessionStorage.removeItem('autokita_user_id')
+      sessionStorage.removeItem('autokita_user_name')
+    }
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'staff' }),
+    }).catch(() => {})
+  } else {
+    sessionStorage.removeItem('autokita_admin')
+    sessionStorage.removeItem('autokita_customer')
+    sessionStorage.removeItem('autokita_user_id')
+    sessionStorage.removeItem('autokita_user_name')
+    sessionStorage.removeItem('autokita_user_title')
+    localStorage.removeItem(REMEMBER_KEY)
+    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+  }
 }
 
 // "Keep me signed in": sessionStorage dies with the tab, so a copy goes in

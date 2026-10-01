@@ -191,6 +191,7 @@ export default function page() {
     return mechanics.map((m) => ({
       id: m.id?.toString(),
       name: m.full_name || `${m.first_name || ''} ${m.last_name || ''}`.trim() || `Mechanic #${m.id}`,
+      status: m.status,
     }))
   }, [mechanics])
 
@@ -273,16 +274,28 @@ export default function page() {
   ]
   const warrantyClaimCount = jobs.filter((j) => j.isWarrantyClaim).length
 
-  const updateMechanic = (ticketId: number, mechanic: string) => {
+  const updateMechanic = (ticketId: number, mechanicIdStr: string) => {
+    if (mechanicIdStr !== 'Unassigned') {
+      const selected = mechanics.find((m) => m.id?.toString() === mechanicIdStr)
+      if (selected && selected.status !== 'active') {
+        toast.error(`${selected.full_name || 'This mechanic'} is currently on leave and cannot be assigned.`)
+        return
+      }
+    }
     setJobs((prev) =>
-      prev.map((j) => (j.ticketId === ticketId ? { ...j, assignedMechanic: mechanic === 'Unassigned' ? undefined : mechanic } : j)),
+      prev.map((j) => (j.ticketId === ticketId ? { ...j, assignedMechanic: mechanicIdStr === 'Unassigned' ? undefined : mechanicIdStr } : j)),
     )
   }
 
   const confirmApprove = async (job: Job, checkInNow = false) => {
     if (approving) return;
     if (!job.assignedMechanic || job.assignedMechanic === 'Unassigned') {
-      alert("Please assign a mechanic first");
+      toast.error("Please assign a mechanic first");
+      return;
+    }
+    const assignedMech = mechanics.find((m) => m.id?.toString() === job.assignedMechanic)
+    if (assignedMech && assignedMech.status !== 'active') {
+      toast.error(`${assignedMech.full_name || 'This mechanic'} is currently on leave and cannot be assigned.`);
       return;
     }
     setApproving(true);
@@ -306,9 +319,11 @@ export default function page() {
             ? `Ticket approved & vehicle marked as stored in shop! Inspection is ready.`
             : `Ticket approved! Awaiting vehicle arrival at the shop.`
         );
+        setApproveTarget(null);
+        fetchJobs();
+      } else {
+        toast.error(data.message || 'Approval failed');
       }
-      setApproveTarget(null);
-      fetchJobs();
     } catch (err: any) {
       toast.error(err.message || 'Approval failed');
     } finally {
@@ -602,7 +617,9 @@ export default function page() {
                       <option value="all">All</option>
                       <option value="unassigned">Unassigned Only</option>
                       {mechanicOptions.map((m) => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
+                        <option key={m.id} value={m.id}>
+                          {m.name}{m.status === 'on_leave' ? ' (On Leave)' : m.status && m.status !== 'active' ? ` (${m.status})` : ''}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -770,9 +787,20 @@ export default function page() {
                           }`}
                       >
                         <option value="Unassigned">Unassigned</option>
-                        {mechanics.map(m => (
-                          <option key={m.id} value={m.id.toString()}>{m.full_name}</option>
-                        ))}
+                        {mechanics.map(m => {
+                          const isLeave = m.status === 'on_leave'
+                          const isUnavailable = m.status !== 'active'
+                          const isCurrent = c.assignedMechanic === m.id.toString()
+                          return (
+                            <option
+                              key={m.id}
+                              value={m.id.toString()}
+                              disabled={isUnavailable && !isCurrent}
+                            >
+                              {m.full_name} {isLeave ? '(On Leave)' : isUnavailable ? `(${m.status})` : ''}
+                            </option>
+                          )
+                        })}
                       </select>
                     </div>
                   </td>
@@ -929,7 +957,16 @@ export default function page() {
 
 function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; mechanics: any[]; busy: boolean; onClose: () => void; onConfirm: (checkInNow: boolean) => void }) {
   const unassigned = !job.assignedMechanic || job.assignedMechanic === 'Unassigned'
-  const mechanicName = unassigned ? 'Unassigned' : mechanics.find((m) => m.id.toString() === job.assignedMechanic)?.full_name ?? job.assignedMechanic
+  const assignedMech = unassigned ? null : mechanics.find((m) => m.id?.toString() === job.assignedMechanic)
+  const isMechanicOnLeave = assignedMech ? assignedMech.status !== 'active' : false
+  const mechanicName = unassigned
+    ? 'Unassigned'
+    : (assignedMech?.full_name ?? job.assignedMechanic) +
+      (assignedMech?.status === 'on_leave'
+        ? ' (On Leave)'
+        : assignedMech?.status && assignedMech.status !== 'active'
+        ? ` (${assignedMech.status})`
+        : '')
   const [checkInNow, setCheckInNow] = useState(false)
 
   return (
@@ -978,7 +1015,7 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
           )}
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">Assigned Mechanic</dt>
-            <dd className={`font-medium ${unassigned ? 'text-amber-600' : 'text-foreground'}`}>
+            <dd className={`font-medium ${unassigned ? 'text-amber-600' : isMechanicOnLeave ? 'text-rose-600' : 'text-foreground'}`}>
               {mechanicName}
             </dd>
           </div>
@@ -1008,13 +1045,20 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
           </div>
         )}
 
+        {isMechanicOnLeave && (
+          <div className="mt-3 flex items-start gap-2 rounded-lg bg-rose-50 px-3 py-2.5 text-xs text-rose-700">
+            <AlertCircle size={14} className="mt-0.5 shrink-0" />
+            The assigned mechanic ({assignedMech?.full_name}) is currently on leave and cannot take new job orders. Please reassign this ticket to an available mechanic before approving.
+          </div>
+        )}
+
         <div className="mt-6 flex justify-end gap-3">
           <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent">
             Cancel
           </button>
           <button
             onClick={() => onConfirm(checkInNow)}
-            disabled={unassigned || busy}
+            disabled={unassigned || isMechanicOnLeave || busy}
             className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {busy ? 'Approving...' : 'Confirm Approval'}
@@ -1030,9 +1074,15 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
 // ---------------------------------------------------------------------------
 
 function ViewModal({ job, mechanics, onClose }: { job: Job; mechanics: any[]; onClose: () => void }) {
+  const assignedMech = !job.assignedMechanic ? null : mechanics.find((m) => m.id?.toString() === job.assignedMechanic)
   const mechanicName = !job.assignedMechanic
     ? 'Not yet assigned'
-    : mechanics.find((m) => m.id.toString() === job.assignedMechanic)?.full_name ?? job.assignedMechanic
+    : (assignedMech?.full_name ?? job.assignedMechanic) +
+      (assignedMech?.status === 'on_leave'
+        ? ' (On Leave)'
+        : assignedMech?.status && assignedMech.status !== 'active'
+        ? ` (${assignedMech.status})`
+        : '')
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg rounded-xl bg-background p-6 shadow-2xl">

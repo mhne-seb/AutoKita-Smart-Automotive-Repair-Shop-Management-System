@@ -427,7 +427,15 @@ export default function page() {
         </div>
       ) : error ? (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-12 text-center text-sm text-red-500">
-          {error}
+          <p>{error}</p>
+          {error.toLowerCase().includes('log in') && (
+            <Link
+              href="/login"
+              className="mt-3 inline-block rounded-xl bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2 text-xs font-semibold text-white shadow hover:opacity-90"
+            >
+              Sign In to AutoKita Admin
+            </Link>
+          )}
         </div>
       ) : visibleCards.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center text-sm text-muted-foreground">
