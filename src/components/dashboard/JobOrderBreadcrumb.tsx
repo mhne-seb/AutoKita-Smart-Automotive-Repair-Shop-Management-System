@@ -1,9 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, FileText } from 'lucide-react'
-import { GenerateJobOrderModal } from './GenerateJobOrderModal'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { stageOrder, type Stage } from '@/data/types'
 
 type CrumbKey = 'inspection' | 'quotation' | 'progress' | 'testing' | 'billing' | 'completed'
@@ -27,7 +25,6 @@ interface Props {
 }
 
 export function JobOrderBreadcrumb({ jobOrderId, current, stage }: Props) {
-  const [showGenerateModal, setShowGenerateModal] = useState(false)
   const reachedIndex = stageOrder.indexOf(stage)
 
   const crumbs: { key: CrumbKey; label: string; href: string }[] = [
@@ -79,23 +76,7 @@ export function JobOrderBreadcrumb({ jobOrderId, current, stage }: Props) {
             )
           })}
         </div>
-
-        {/* The printable job order document only makes sense once the quotation
-            is approved and work is actually underway — so it only shows on the
-            Service Progress stage, not Inspection or Quotation. */}
-        {current === 'progress' && (
-          <button
-            onClick={() => setShowGenerateModal(true)}
-            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            <FileText size={14} /> Generate Job Order
-          </button>
-        )}
       </div>
-
-      {showGenerateModal && (
-        <GenerateJobOrderModal jobOrderId={jobOrderId} onClose={() => setShowGenerateModal(false)} />
-      )}
     </div>
   )
 }
