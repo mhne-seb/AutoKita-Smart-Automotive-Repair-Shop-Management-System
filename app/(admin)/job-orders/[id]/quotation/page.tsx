@@ -15,6 +15,7 @@ import { currency } from '@/data/mockData'
 import { toast } from 'sonner'
 import { QuotationService, JobOrderCard, QuotationData, MechanicalFinding, findingStatusMeta, QuotationPart } from '@/data/types'
 import { RejectPaymentModal } from '@/components/dashboard/RejectPaymentModal'
+import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 
 export default function page() {
   const jobOrderId = String(useParams().id)
@@ -92,6 +93,9 @@ export default function page() {
   const [verifyingPayment, setVerifyingPayment] = useState(false)
   const [showProofLightbox, setShowProofLightbox] = useState(false)
   const [showRejectModal, setShowRejectModal] = useState(false)
+  const [confirmVerifyQuotation, setConfirmVerifyQuotation] = useState(false)
+  const [confirmRemoveService, setConfirmRemoveService] = useState<{ id: string; name: string } | null>(null)
+  const [confirmRemovePart, setConfirmRemovePart] = useState<{ serviceId: string; partId: string; name: string } | null>(null)
 
   useEffect(() => {
     let active = true
@@ -919,7 +923,7 @@ export default function page() {
                         {editing ? <Check size={13} /> : <Pencil size={13} />} {editing ? 'Done' : 'Edit'}
                       </button>
                       <button
-                        onClick={() => removeService(s.id)}
+                        onClick={() => setConfirmRemoveService({ id: s.id, name: s.name })}
                         disabled={quotationPending || quotationApproved}
                         className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Remove Service"
@@ -1004,7 +1008,7 @@ export default function page() {
                                 <Pencil size={13} />
                               </button>
                               <button
-                                onClick={() => removePart(s.id, p.id)}
+                                onClick={() => setConfirmRemovePart({ serviceId: s.id, partId: p.id, name: p.name })}
                                 disabled={preDiagnostic?.status === 'pending' || quotationApproved}
                                 title="Remove part"
                                 className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
@@ -1115,7 +1119,7 @@ export default function page() {
                     <XCircle size={14} /> Reject
                   </button>
                   <button
-                    onClick={() => handleVerifyPayment('verified')}
+                    onClick={() => setConfirmVerifyQuotation(true)}
                     disabled={verifyingPayment}
                     className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
                   >
@@ -1516,6 +1520,50 @@ export default function page() {
           onClose={() => setShowRejectModal(false)}
           onConfirm={(reason) => handleVerifyPayment('rejected', reason)}
           isWorking={verifyingPayment}
+        />
+      )}
+      {payment && confirmVerifyQuotation && (
+        <ConfirmActionModal
+          tone="brand"
+          title="Verify this payment?"
+          description={`${currency(payment.amountPaid)} via ${payment.paymentChannel || payment.paymentMethod.replace('_', ' ')}${payment.referenceNumber ? `, ref ${payment.referenceNumber}` : ''}. The customer will be told it was received.`}
+          confirmLabel="Verify payment"
+          busy={verifyingPayment}
+          onClose={() => setConfirmVerifyQuotation(false)}
+          onConfirm={async () => {
+            await handleVerifyPayment('verified')
+            setConfirmVerifyQuotation(false)
+          }}
+        />
+      )}
+      
+      {confirmRemoveService && (
+        <ConfirmActionModal
+          tone="danger"
+          title="Remove this service?"
+          description={`${confirmRemoveService.name} and its parts will be removed from the quotation.`}
+          confirmLabel="Remove service"
+          busy={false}
+          onClose={() => setConfirmRemoveService(null)}
+          onConfirm={() => {
+            removeService(confirmRemoveService.id)
+            setConfirmRemoveService(null)
+          }}
+        />
+      )}
+      
+      {confirmRemovePart && (
+        <ConfirmActionModal
+          tone="danger"
+          title="Remove this part?"
+          description={`${confirmRemovePart.name} will be removed from this service.`}
+          confirmLabel="Remove part"
+          busy={false}
+          onClose={() => setConfirmRemovePart(null)}
+          onConfirm={() => {
+            removePart(confirmRemovePart.serviceId, confirmRemovePart.partId)
+            setConfirmRemovePart(null)
+          }}
         />
       )}
     </div>
