@@ -19,6 +19,7 @@ export interface BillPayment {
   amount_paid: number
   payment_date: string
   verification_status: 'pending' | 'verified' | 'rejected' | 'refunded'
+  rejection_reason: string | null
 }
 
 export interface JobOrderBill {
@@ -42,7 +43,7 @@ export async function getJobOrderBill(jobOrderId: number): Promise<JobOrderBill>
     ),
     db.query(
       `SELECT id, payment_method::text, payment_channel, reference_number, proof_of_payment_image,
-              amount_paid, payment_date::text, verification_status::text
+              amount_paid, payment_date::text, verification_status::text, rejection_reason
        FROM payments
        WHERE job_order_id = $1
        ORDER BY payment_date DESC, id DESC

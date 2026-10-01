@@ -293,7 +293,12 @@ function Completed() {
                 {paymentRejected && (
                   <div className="mt-4 flex items-start gap-2 rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
                     <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                    Your last payment couldn't be verified. Please check the reference number and re-upload a clear screenshot, or pay at the counter.
+                    <div>
+                      Your last payment couldn't be verified. Please check the reference number and re-upload a clear screenshot, or pay at the counter.
+                      {latestPayment?.rejection_reason && (
+                        <div className="mt-1">Reason from the shop: {latestPayment.rejection_reason}</div>
+                      )}
+                    </div>
                   </div>
                 )}
                 <button
