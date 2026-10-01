@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { ShieldCheck, Check, X, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { decideWarrantyClaim, type WarrantyClaim } from '@/controllers/warrantyClaimController'
+import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 
 export function WarrantyClaimCard({
   claim,
@@ -22,6 +23,8 @@ export function WarrantyClaimCard({
   const [finding, setFinding] = useState('')
   const [denyReason, setDenyReason] = useState<'misuse' | 'not_covered'>('misuse')
   const [busy, setBusy] = useState<'approve' | 'deny' | null>(null)
+  const [confirmApprove, setConfirmApprove] = useState(false)
+  const [confirmDeny, setConfirmDeny] = useState(false)
 
   const daysLeft = Math.max(0, Math.round((new Date(claim.expirationDate).getTime() - Date.now()) / 86400000))
   const expired = daysLeft <= 0
@@ -114,14 +117,14 @@ export function WarrantyClaimCard({
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <button
-          onClick={approve}
+          onClick={() => setConfirmApprove(true)}
           disabled={busy !== null || !finding.trim()}
           className="flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {busy === 'approve' ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Approve · ₱0 replacement
         </button>
         <button
-          onClick={deny}
+          onClick={() => setConfirmDeny(true)}
           disabled={busy !== null || !finding.trim()}
           className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
         >
@@ -140,6 +143,36 @@ export function WarrantyClaimCard({
           <option value="not_covered">Not a covered defect — warranty stays active</option>
         </select>
       </div>
+      
+      {confirmApprove && (
+        <ConfirmActionModal
+          tone="brand"
+          title="Approve this warranty claim?"
+          description="The part and labor are added to this job order at ₱0 and the customer is notified."
+          confirmLabel="Approve claim"
+          busy={busy === 'approve'}
+          onClose={() => setConfirmApprove(false)}
+          onConfirm={async () => {
+            await approve()
+            setConfirmApprove(false)
+          }}
+        />
+      )}
+      
+      {confirmDeny && (
+        <ConfirmActionModal
+          tone="danger"
+          title="Deny this warranty claim?"
+          description={`You are denying because: ${denyReason === 'misuse' ? 'Misuse or accident' : 'Not a covered defect'}.${denyReason === 'misuse' ? ' This also voids the warranty.' : ''}`}
+          confirmLabel="Deny claim"
+          busy={busy === 'deny'}
+          onClose={() => setConfirmDeny(false)}
+          onConfirm={async () => {
+            await deny()
+            setConfirmDeny(false)
+          }}
+        />
+      )}
     </div>
   )
 }

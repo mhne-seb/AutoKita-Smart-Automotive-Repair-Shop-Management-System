@@ -18,6 +18,7 @@ import { getJobOrderById } from '@/controllers/jobOrderController'
 import { verifyJobOrderPayment } from '@/controllers/quotationController'
 import { getBillingData, releaseVehicle, type BillingData, type BillingPayment } from '@/controllers/billingStageController'
 import { RejectPaymentModal } from '@/components/dashboard/RejectPaymentModal'
+import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import type { JobOrderCard } from '@/data/types'
 
 const currency = (n: number) => `₱${n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -41,6 +42,7 @@ export default function BillingPage() {
   const [proof, setProof] = useState<string | null>(null)
   const [busyPaymentId, setBusyPaymentId] = useState<number | null>(null)
   const [rejectingPayment, setRejectingPayment] = useState<BillingPayment | null>(null)
+  const [confirmVerify, setConfirmVerify] = useState<BillingPayment | null>(null)
   const [releasing, setReleasing] = useState(false)
   const [confirmRelease, setConfirmRelease] = useState(false)
   const [warrantyChoices, setWarrantyChoices] = useState<Record<number, number | ''>>({})
@@ -167,7 +169,7 @@ export default function BillingPage() {
                       {p.verification_status === 'pending' && (
                         <div className="flex shrink-0 gap-2">
                           <button onClick={() => setRejectingPayment(p)} disabled={busy} className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"><XCircle size={13} /> {cashIntent ? "Didn't pay" : 'Reject'}</button>
-                          <button onClick={() => decide(p, 'verified')} disabled={busy} className="flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50">{busy ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />} {cashIntent ? 'Cash received' : 'Verify'}</button>
+                          <button onClick={() => setConfirmVerify(p)} disabled={busy} className="flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50">{busy ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />} {cashIntent ? 'Cash received' : 'Verify'}</button>
                         </div>
                       )}
                     </li>
@@ -305,6 +307,25 @@ export default function BillingPage() {
           onClose={() => setRejectingPayment(null)}
           onConfirm={(reason) => decide(rejectingPayment, 'rejected', reason)}
           isWorking={busyPaymentId === rejectingPayment.id}
+        />
+      )}
+      
+      {confirmVerify && (
+        <ConfirmActionModal
+          tone="brand"
+          title={confirmVerify.payment_method === 'cash' ? 'Confirm cash received?' : 'Verify this payment?'}
+          description={
+            confirmVerify.payment_method === 'cash'
+              ? `You are recording ${currency(confirmVerify.amount_paid)} as received at the counter. The customer will be notified.`
+              : `${currency(confirmVerify.amount_paid)} via ${confirmVerify.payment_channel || confirmVerify.payment_method.replace('_', ' ')}${confirmVerify.reference_number ? `, ref ${confirmVerify.reference_number}` : ''}. The customer will be told it was received.`
+          }
+          confirmLabel={confirmVerify.payment_method === 'cash' ? 'Cash received' : 'Verify payment'}
+          busy={busyPaymentId === confirmVerify.id}
+          onClose={() => setConfirmVerify(null)}
+          onConfirm={async () => {
+            await decide(confirmVerify, 'verified')
+            setConfirmVerify(null)
+          }}
         />
       )}
     </div>
