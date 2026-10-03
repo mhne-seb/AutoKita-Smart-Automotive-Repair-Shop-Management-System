@@ -137,6 +137,12 @@ export function PaymentModal({
             <CheckCircle2 className="h-10 w-10 text-success" />
             <div className="font-semibold">{method === "shop" ? "Payment Method Saved" : "Submitted for Approval"}</div>
             <p className="text-xs text-muted-foreground">{method === "shop" ? copy.shopDone : copy.transferDone}</p>
+            <button
+              onClick={onClose}
+              className="mt-4 rounded-lg bg-brand px-8 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90 transition-opacity"
+            >
+              OK
+            </button>
           </div>
         ) : (
           <>

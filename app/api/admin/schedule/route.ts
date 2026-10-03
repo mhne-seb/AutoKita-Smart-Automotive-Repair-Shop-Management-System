@@ -12,21 +12,22 @@ export async function GET() {
         spt.id,
         spt.job_order_id,
         spt.task_title as title,
-        spt.scheduled_date,
+        spt.scheduled_date::text,
         COALESCE(
           spt.scheduled_date + (jos.estimated_hours * INTERVAL '1 hour'),
           spt.scheduled_date + INTERVAL '1.5 hours'
-        ) AS estimated_finish,
+        )::text AS estimated_finish,
         COALESCE(jos.estimated_hours, 1.5)::numeric AS estimated_hours,
         spt.task_status as status,
-        spt.mechanic_id,
-        e.full_name as mechanic_name,
+        COALESCE(spt.mechanic_id, jo.assigned_mechanic_id) AS mechanic_id,
+        COALESCE(e.full_name, jo_m.full_name) as mechanic_name,
         jo.vehicle_id,
         v.vehicle_model,
         v.plate_number
       FROM service_progress_tasks spt
       LEFT JOIN employees e ON e.id = spt.mechanic_id
       JOIN job_orders jo ON jo.id = spt.job_order_id
+      LEFT JOIN employees jo_m ON jo_m.id = jo.assigned_mechanic_id
       LEFT JOIN vehicles v ON v.id = jo.vehicle_id
       LEFT JOIN LATERAL (
         SELECT jos.estimated_hours

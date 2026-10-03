@@ -16,6 +16,9 @@ const BURST_WINDOW_MS = 10 * 1000;         // 10 seconds
 const MAX_BURST_REQUESTS = 5;              // Max 5 queries within 10 seconds
 const MIN_REQUEST_INTERVAL_MS = 1000;      // Minimum 1 second between consecutive messages
 const PENALTY_LOCK_MS = 60 * 1000;         // 60-second temporary lockout for aggressive spamming
+// Safety timeout: if a request has been in-flight for longer than this,
+// it is considered leaked (hot-reload, crash, etc.) and will be auto-cleared.
+const IN_FLIGHT_MAX_AGE_MS = 120 * 1000;   // 120 seconds
 
 type BudgetEntry = {
   used: number;
@@ -61,6 +64,14 @@ function getEntry(ip: string, role: Role): BudgetEntry {
     };
     store.set(k, entry);
   }
+  // Safety valve: if inFlight is stuck (> 0 for too long), auto-heal it.
+  // This handles hot-reloads, unhandled exceptions, and server restarts
+  // where recordRequestEnd was never called.
+  if (entry.inFlight > 0 && entry.lastRequestTime > 0 && Date.now() - entry.lastRequestTime > IN_FLIGHT_MAX_AGE_MS) {
+    entry.inFlight = 0;
+    store.set(k, entry);
+  }
+
   return entry;
 }
 

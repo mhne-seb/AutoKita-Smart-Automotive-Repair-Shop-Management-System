@@ -80,7 +80,7 @@ export async function GET() {
           ), 0) AS billed_this_month
         FROM employees e
         LEFT JOIN employee_profiles ep ON ep.employee_id = e.id
-        WHERE e.role = 'mechanic'
+        WHERE e.role = 'mechanic' AND e.status != 'terminated'
         ORDER BY e.full_name ASC
       `, [DEFAULT_MECHANIC_CAPACITY]),
       db.query(PAYROLL_SQL),
@@ -122,8 +122,15 @@ function validate(b: Partial<MechanicBody>): string | null {
   if (!b.email?.trim()) return 'Email is required'
   const phone = normalizePhone(b.phone ?? '')
   if (!/^09\d{9}$/.test(phone)) return 'Enter a valid PH mobile number'
-  if (!(Number(b.jobsCapacity) > 0)) return 'Job capacity must be at least 1'
-  if (Number(b.commissionPercent) < 0 || Number(b.commissionPercent) > 100) return 'Commission must be 0–100'
+  if (b.baseSalary == null || isNaN(Number(b.baseSalary)) || Number(b.baseSalary) < 0) {
+    return 'Base salary must be a valid non-negative number'
+  }
+  if (b.jobsCapacity == null || isNaN(Number(b.jobsCapacity)) || !(Number(b.jobsCapacity) > 0)) {
+    return 'Job capacity must be at least 1'
+  }
+  if (b.commissionPercent == null || isNaN(Number(b.commissionPercent)) || Number(b.commissionPercent) < 0 || Number(b.commissionPercent) > 100) {
+    return 'Commission must be 0–100'
+  }
   return null
 }
 
@@ -134,56 +141,101 @@ export async function POST(request: NextRequest) {
   const problem = validate(body)
   if (problem) return NextResponse.json({ success: false, message: problem }, { status: 400 })
 
-  const actingAdminId = body.adminId ? parseInt(String(body.adminId), 10) : 1
+  const actingAdminId = (body.adminId && Number(body.adminId) > 0)
+    ? parseInt(String(body.adminId), 10)
+    : (auth.session.userId > 0 ? auth.session.userId : 1)
 
   const client = await db.connect()
   try {
     await client.query('BEGIN')
 
-    const res = await client.query(
-      `SELECT add_mechanic($1, $2, $3, $4, $5, $6, $7, $8, $9) AS id`,
-      [
-        body.name.trim(),
-        body.email.trim().toLowerCase(),
-        normalizePhone(body.phone),
-        body.branch,
-        body.location,
-        body.rank,
-        body.baseSalary,
-        body.commissionPercent,
-        body.jobsCapacity,
-      ],
-    )
-    const id = res.rows[0]?.id
+    let id: number | null = null
 
-    // Record audit log for mechanic hiring/creation
-    await client.query(
-      `INSERT INTO system_audit_logs (
-        employees_id,
-        action_performed,
-        entity_type,
-        entity_id,
-        old_values,
-        new_values,
-        action_date
-      ) VALUES ($1, 'created', 'employees', $2, NULL, $3, NOW())`,
-      [
-        actingAdminId,
-        id,
-        JSON.stringify({
-          full_name: body.name.trim(),
-          email: body.email.trim().toLowerCase(),
-          contact_number: normalizePhone(body.phone),
-          branch: body.branch,
-          location: body.location,
-          rank: body.rank,
-          base_salary: body.baseSalary,
-          commission_percent: body.commissionPercent,
-          jobs_capacity: body.jobsCapacity,
-          status: 'active',
-        }),
-      ],
-    )
+    try {
+      const res = await client.query(
+        `SELECT add_mechanic(
+          $1::varchar, 
+          $2::varchar, 
+          $3::varchar, 
+          $4::varchar, 
+          $5::varchar, 
+          $6::varchar, 
+          $7::numeric, 
+          $8::numeric, 
+          $9::int, 
+          $10::int
+        ) AS id`,
+        [
+          body.name.trim(),
+          body.email.trim().toLowerCase(),
+          normalizePhone(body.phone),
+          body.branch,
+          body.location,
+          body.rank,
+          body.baseSalary,
+          body.commissionPercent,
+          body.jobsCapacity,
+          actingAdminId,
+        ],
+      )
+      id = res.rows[0]?.id
+    } catch (procErr: unknown) {
+      if ((procErr as { code?: string })?.code === '23505') throw procErr
+      console.warn('add_mechanic proc failed, using fallback direct insert:', procErr)
+
+      const empRes = await client.query(
+        `INSERT INTO employees (full_name, email, contact_number, status, role, hire_date) 
+         VALUES ($1, $2, $3, 'active', 'mechanic', CURRENT_DATE) RETURNING id`,
+        [
+          body.name.trim(),
+          body.email.trim().toLowerCase(),
+          normalizePhone(body.phone),
+        ],
+      )
+      id = empRes.rows[0]?.id
+
+      await client.query(
+        `INSERT INTO employee_profiles (employee_id, branch, location, rank, base_salary, commission_percent, jobs_capacity)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          id,
+          body.branch,
+          body.location,
+          body.rank,
+          body.baseSalary,
+          body.commissionPercent,
+          body.jobsCapacity,
+        ],
+      )
+
+      await client.query(
+        `INSERT INTO system_audit_logs (
+          employees_id,
+          action_performed,
+          entity_type,
+          entity_id,
+          old_values,
+          new_values,
+          action_date
+        ) VALUES ($1, 'created', 'employees', $2, NULL, $3, NOW())`,
+        [
+          actingAdminId,
+          id,
+          JSON.stringify({
+            full_name: body.name.trim(),
+            email: body.email.trim().toLowerCase(),
+            contact_number: normalizePhone(body.phone),
+            branch: body.branch,
+            location: body.location,
+            rank: body.rank,
+            base_salary: body.baseSalary,
+            commission_percent: body.commissionPercent,
+            jobs_capacity: body.jobsCapacity,
+            status: 'active',
+          }),
+        ],
+      )
+    }
 
     await client.query('COMMIT')
     return NextResponse.json({ success: true, id })
@@ -193,7 +245,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'That email is already used by another employee.' }, { status: 409 })
     }
     console.error('Mechanics POST error:', error)
-    return NextResponse.json({ success: false, message: 'Failed to add mechanic' }, { status: 500 })
+    const message = (error as { message?: string })?.message || 'Failed to add mechanic'
+    return NextResponse.json({ success: false, message }, { status: 500 })
   } finally {
     client.release()
   }
@@ -207,7 +260,9 @@ export async function PATCH(request: NextRequest) {
   const problem = validate(body)
   if (problem) return NextResponse.json({ success: false, message: problem }, { status: 400 })
 
-  const actingAdminId = body.adminId ? parseInt(String(body.adminId), 10) : 1
+  const actingAdminId = (body.adminId && Number(body.adminId) > 0)
+    ? parseInt(String(body.adminId), 10)
+    : (auth.session.userId > 0 ? auth.session.userId : 1)
 
   const client = await db.connect()
   try {
@@ -308,7 +363,8 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'That email is already used by another employee.' }, { status: 409 })
     }
     console.error('Mechanics PATCH error:', error)
-    return NextResponse.json({ success: false, message: 'Failed to update mechanic' }, { status: 500 })
+    const message = (error as { message?: string })?.message || 'Failed to update mechanic'
+    return NextResponse.json({ success: false, message }, { status: 500 })
   } finally {
     client.release()
   }
@@ -323,7 +379,9 @@ export async function DELETE(request: NextRequest) {
   const url = new URL(request.url)
   const id = Number(url.searchParams.get('id'))
   const adminIdParam = url.searchParams.get('adminId')
-  const actingAdminId = adminIdParam ? parseInt(adminIdParam, 10) : 1
+  const actingAdminId = (adminIdParam && Number(adminIdParam) > 0)
+    ? parseInt(adminIdParam, 10)
+    : (auth.session.userId > 0 ? auth.session.userId : 1)
 
   if (!id) return NextResponse.json({ success: false, message: 'Missing id' }, { status: 400 })
 
@@ -331,12 +389,55 @@ export async function DELETE(request: NextRequest) {
   try {
     await client.query('BEGIN')
 
-    // Fetch previous status and name
-    const prevRes = await client.query(`SELECT full_name, status FROM employees WHERE id = $1`, [id])
-    const prevEmp = prevRes.rows[0]
+    let outcome: { success: boolean; message: string } | null = null
 
-    const res = await client.query(`SELECT * FROM remove_mechanic($1)`, [id])
-    const outcome = res.rows[0]
+    try {
+      const res = await client.query(`SELECT * FROM remove_mechanic($1::integer, $2::integer)`, [id, actingAdminId])
+      outcome = res.rows[0]
+    } catch (procErr: unknown) {
+      console.warn('remove_mechanic proc failed, falling back to direct queries:', procErr)
+      const tasksRes = await client.query(
+        `SELECT COUNT(*)::int AS count FROM service_progress_tasks WHERE mechanic_id = $1 AND task_status <> 'completed'`,
+        [id],
+      )
+      const openTasks = tasksRes.rows[0]?.count ?? 0
+      if (openTasks > 0) {
+        await client.query('ROLLBACK')
+        return NextResponse.json(
+          { success: false, message: `Cannot remove: Mechanic has ${openTasks} active task(s). Reassign them first.` },
+          { status: 409 },
+        )
+      }
+
+      const prevRes = await client.query(`SELECT full_name, status FROM employees WHERE id = $1`, [id])
+      const prevEmp = prevRes.rows[0]
+
+      await client.query(
+        `UPDATE employees SET status = 'terminated', "EOC" = CURRENT_DATE WHERE id = $1 AND role = 'mechanic'`,
+        [id],
+      )
+
+      await client.query(
+        `INSERT INTO system_audit_logs (
+          employees_id,
+          action_performed,
+          entity_type,
+          entity_id,
+          old_values,
+          new_values,
+          action_date
+        ) VALUES ($1, 'status_changed', 'employees', $2, $3, $4, NOW())`,
+        [
+          actingAdminId,
+          id,
+          JSON.stringify({ full_name: prevEmp?.full_name ?? '', status: prevEmp?.status ?? 'active' }),
+          JSON.stringify({ full_name: prevEmp?.full_name ?? '', status: 'terminated', EOC: new Date().toISOString().slice(0, 10) }),
+        ],
+      )
+
+      outcome = { success: true, message: 'Mechanic successfully terminated.' }
+    }
+
     if (!outcome?.success) {
       await client.query('ROLLBACK')
       return NextResponse.json(
@@ -345,31 +446,13 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Insert termination audit log
-    await client.query(
-      `INSERT INTO system_audit_logs (
-        employees_id,
-        action_performed,
-        entity_type,
-        entity_id,
-        old_values,
-        new_values,
-        action_date
-      ) VALUES ($1, 'status_changed', 'employees', $2, $3, $4, NOW())`,
-      [
-        actingAdminId,
-        id,
-        JSON.stringify({ full_name: prevEmp?.full_name ?? '', status: prevEmp?.status ?? 'active' }),
-        JSON.stringify({ full_name: prevEmp?.full_name ?? '', status: 'terminated' }),
-      ],
-    )
-
     await client.query('COMMIT')
     return NextResponse.json({ success: true })
   } catch (error) {
     await client.query('ROLLBACK')
     console.error('Mechanics DELETE error:', error)
-    return NextResponse.json({ success: false, message: 'Failed to remove mechanic' }, { status: 500 })
+    const message = (error as { message?: string })?.message || 'Failed to remove mechanic'
+    return NextResponse.json({ success: false, message }, { status: 500 })
   } finally {
     client.release()
   }

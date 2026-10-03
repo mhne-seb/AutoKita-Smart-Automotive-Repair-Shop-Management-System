@@ -113,10 +113,10 @@ export function ChatWidget() {
     if (!customText) setInput("");
     setWaiting(true);
 
-    conversationHistory.current = [
-      ...conversationHistory.current,
-      { role: 'user', content: t },
-    ];
+    // Optimistically push the user message to conversation history.
+    // We'll roll it back if the request fails so history stays clean.
+    const historyBeforeSend = [...conversationHistory.current];
+    conversationHistory.current = [...historyBeforeSend, { role: 'user', content: t }];
 
     const isAdmin = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_admin') === 'true' : false;
     const storedIdRaw = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null;
@@ -137,6 +137,24 @@ export function ChatWidget() {
     })
       .then(async (res) => {
         const data = await res.json();
+
+        if (!res.ok) {
+          // Rollback user message from history so it doesn't get re-sent
+          // on the next successful request
+          conversationHistory.current = historyBeforeSend;
+          const errText = data.error ?? data.message ?? 'Something went wrong. Please try again.';
+          setMessages((m) => [
+            ...m,
+            {
+              id: uid(),
+              role: 'bot' as const,
+              text: `⚠️ ${errText}`,
+              time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+            },
+          ]);
+          return;
+        }
+
         if (data.sessionId) {
           sessionIdRef.current = data.sessionId;
         }
@@ -144,16 +162,13 @@ export function ChatWidget() {
           setActiveJob(data.activeJob);
         }
 
-        const reply: string = res.ok
-          ? (data.reply ?? '')
-          : (data.error ?? 'Something went wrong. Please try again.');
+        const reply: string = data.reply ?? '';
 
-        if (res.ok) {
-          conversationHistory.current = [
-            ...conversationHistory.current,
-            { role: 'assistant', content: reply },
-          ];
-        }
+        // Only add the assistant reply to history on success
+        conversationHistory.current = [
+          ...conversationHistory.current,
+          { role: 'assistant', content: reply },
+        ];
 
         // Show live status card if inquiry is about vehicle tracking and an active job exists in Supabase
         const isStatusInquiry = /\b(status|track|tracking|progress|update|my car|my vehicle|my service|ongoing|current service)\b/i.test(t);
@@ -173,12 +188,14 @@ export function ChatWidget() {
         ]);
       })
       .catch(() => {
+        // Network-level failure — rollback history too
+        conversationHistory.current = historyBeforeSend;
         setMessages((m) => [
           ...m,
           {
             id: uid(),
             role: 'bot',
-            text: 'Network error. Please check your connection and try again.',
+            text: '⚠️ Network error. Please check your connection and try again.',
             time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
           },
         ]);
@@ -248,33 +265,41 @@ export function ChatWidget() {
               <QuickChip
                 icon={Clock}
                 label="Track Service"
+                disabled={waiting}
                 onClick={() => send("I'd like to check the status of my current service.")}
               />
               <QuickChip
                 icon={Calendar}
                 label="Book Appointment"
+                disabled={waiting}
                 onClick={() => send("I would like to book an appointment for my vehicle.")}
               />
               <QuickChip
                 icon={HelpCircle}
                 label="General FAQs"
+                disabled={waiting}
                 onClick={() => send("What are your shop hours, location, and services offered?")}
               />
             </div>
 
             {/* Composer */}
             <div className="border-t bg-background px-5 py-3">
-              <div className="flex items-center gap-2 rounded-full border bg-muted/30 pl-3 pr-1">
-                <button className="text-muted-foreground hover:text-foreground"><Paperclip className="h-4 w-4" /></button>
+              <div className={`flex items-center gap-2 rounded-full border pl-3 pr-1 transition-colors ${waiting ? 'bg-muted/10 opacity-60' : 'bg-muted/30'}`}>
+                <button className="text-muted-foreground hover:text-foreground" disabled={waiting}><Paperclip className="h-4 w-4" /></button>
                 <input
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && send()}
-                  placeholder="Type your message..."
-                  className="flex-1 bg-transparent py-2.5 text-sm outline-none placeholder:text-muted-foreground"
+                  onKeyDown={(e) => e.key === "Enter" && !waiting && send()}
+                  placeholder={waiting ? "Waiting for response..." : "Type your message..."}
+                  disabled={waiting}
+                  className="flex-1 bg-transparent py-2.5 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
                 />
-                <button onClick={() => send()} className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-brand-foreground hover:opacity-90">
+                <button
+                  onClick={() => send()}
+                  disabled={waiting}
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-brand-foreground hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
                   <Send className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -364,12 +389,13 @@ function StatusCard({ job }: { job: LiveJobCardData }) {
   );
 }
 
-function QuickChip({ icon: Icon, label, onClick }: { icon: any; label: string; onClick?: () => void }) {
+function QuickChip({ icon: Icon, label, onClick, disabled }: { icon: any; label: string; onClick?: () => void; disabled?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition hover:bg-accent active:scale-95"
+      disabled={disabled}
+      className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition hover:bg-accent active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
     >
       <Icon className="h-3.5 w-3.5 text-brand" /> {label}
     </button>
