@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import { SHOP_PROFILE } from '@/data/shopProfile'
 
 // Email goes out through Resend (SMTP) when RESEND_API_KEY is set — our domain autokita.me is verified there, so
 // mail passes SPF/DKIM/DMARC and stays out of spam. Without the key it falls back to Gmail SMTP (GMAIL_APP_PASSWORD
@@ -26,6 +27,27 @@ const FROM = useResend
 export function isMailConfigured(): boolean {
     return useResend || Boolean(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD)
 }
+
+const shopName = SHOP_PROFILE.name.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
+
+// Friendly footer so customers always know how to reach the shop. The sender address (noreply) cannot receive replies.
+const FOOTER_TEXT =
+    '\n\n----------\n' +
+    shopName + '\n' +
+    SHOP_PROFILE.address + '\n' +
+    'Call us: ' + SHOP_PROFILE.phones.join(' / ') + '\n' +
+    'Email: ' + SHOP_PROFILE.email + '\n\n' +
+    "This message was sent automatically, so please don't reply to it. " +
+    'If you have any questions, just contact the shop using the details above. Thank you for choosing us!'
+
+const FOOTER_HTML = `
+  <div style="margin-top:28px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:13px;line-height:1.5;color:#6b7280">
+    <p style="margin:0 0 4px 0;font-weight:600;color:#374151">${shopName}</p>
+    <p style="margin:0">${SHOP_PROFILE.address}</p>
+    <p style="margin:0">Call us: ${SHOP_PROFILE.phones.join(' / ')}</p>
+    <p style="margin:0 0 10px 0">Email: ${SHOP_PROFILE.email}</p>
+    <p style="margin:0">This message was sent automatically, so please don't reply to it. If you have any questions, just contact the shop using the details above. Thank you for choosing us!</p>
+  </div>`
 
 export async function sendTempPasswordEmail(opts: {
     to: string
@@ -71,7 +93,7 @@ export async function sendTempPasswordEmail(opts: {
             `Temporary password: ${opts.tempPassword}\n\n` +
             `Log in: ${loginUrl}\n\n` +
             summaryText + `\n` +
-            'Please change your password after your first login. \n\n— AutoKita',
+            'Please change your password after your first login. \n\n— AutoKita' + FOOTER_TEXT,
         html: `
           <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
         <h2 style="color:#1e3a5f;font-size:26px">Welcome to AutoKita</h2>
@@ -84,6 +106,7 @@ export async function sendTempPasswordEmail(opts: {
         <a href="${loginUrl}" style="display:inline-block;background:#1e3a5f;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-size:16px">Log in to AutoKita</a>
         ${summaryHtml}
         <p style="margin-top:20px;font-size:14px;color:#666">Please change your password after your first login.</p>
+        ${FOOTER_HTML}
       </div>
         `,
     })
@@ -110,7 +133,7 @@ export async function sendOtpEmail(opts: {
             `Hi ${opts.name},\n\n` +
             `Use this code to ${opts.context}:\n\n` +
             `    ${opts.code}\n\n` +
-            `It expires in ${opts.expiresMinutes} minutes. If you didn't request this, you can ignore this email.\n\n— AutoKita`,
+            `It expires in ${opts.expiresMinutes} minutes. If you didn't request this, you can ignore this email.\n\n— AutoKita` + FOOTER_TEXT,
         html: `
           <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
             <h2 style="color:#1e3a5f;font-size:26px">Your verification code</h2>
@@ -118,6 +141,7 @@ export async function sendOtpEmail(opts: {
             <p style="font-size:16px">Use this code to ${opts.context}:</p>
             <p style="font-size:40px;font-weight:700;letter-spacing:8px;font-family:monospace;color:#1e3a5f;margin:20px 0">${opts.code}</p>
             <p style="font-size:14px;color:#666">It expires in ${opts.expiresMinutes} minutes. If you didn't request this, you can ignore this email.</p>
+            ${FOOTER_HTML}
           </div>
         `,
     })
@@ -138,7 +162,7 @@ export async function sendPasswordResetEmail(opts: {
             `Someone asked to reset your AutoKita password. Open this link to choose a new one:\n\n` +
             `${opts.resetUrl}\n\n` +
             `The link works once, for ${opts.expiresMinutes} minutes.\n` +
-            `Didn't ask for this? Ignore this email. Your password stays the same.\n\n— AutoKita`,
+            `Didn't ask for this? Ignore this email. Your password stays the same.\n\n— AutoKita` + FOOTER_TEXT,
         html: `
           <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
             <h2 style="color:#1e3a5f;font-size:26px">Reset your password</h2>
@@ -146,6 +170,7 @@ export async function sendPasswordResetEmail(opts: {
             <p style="font-size:16px">Someone asked to reset your AutoKita password. Tap the button to choose a new one.</p>
             <a href="${opts.resetUrl}" style="display:inline-block;background:#1e3a5f;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-size:16px">Set a new password</a>
             <p style="margin-top:20px;font-size:14px;color:#666">The link works once, for ${opts.expiresMinutes} minutes. Didn't ask for this? Ignore this email. Your password stays the same.</p>
+            ${FOOTER_HTML}
           </div>
         `,
     })
@@ -162,13 +187,14 @@ export async function sendPasswordChangedEmail(opts: { to: string; name: string 
         text:
             `Hi ${opts.name},\n\n` +
             `Your AutoKita password was changed on ${when}.\n\n` +
-            `If this wasn't you, call the shop right away.\n\n— AutoKita`,
+            `If this wasn't you, please call the shop right away using the numbers below.\n\n— AutoKita` + FOOTER_TEXT,
         html: `
           <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
             <h2 style="color:#1e3a5f;font-size:26px">Your password was changed</h2>
             <p style="font-size:16px">Hi ${opts.name},</p>
             <p style="font-size:16px">Your AutoKita password was changed on <b>${when}</b>.</p>
-            <p style="font-size:16px">If this wasn't you, call the shop right away.</p>
+            <p style="font-size:16px">If this wasn't you, please call the shop right away using the numbers below.</p>
+            ${FOOTER_HTML}
           </div>
         `,
     })
@@ -209,7 +235,7 @@ export async function sendJobUpdateEmail(opts: {
             `Track it here:
 ${url}
 
-— AutoKita`,
+— AutoKita` + FOOTER_TEXT,
         html: `
           <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
             <h2 style="color:#1e3a5f;font-size:26px">${escapeHtml(opts.title)}</h2>
@@ -217,6 +243,7 @@ ${url}
             <p style="font-size:16px;white-space:pre-line">${escapeHtml(opts.message)}</p>
             <p style="font-size:16px">Your <b>${escapeHtml(opts.vehicle)} (${escapeHtml(opts.plate)})</b> — job order <b>JO-${opts.jobOrderId}</b>.</p>
             <a href="${url}" style="display:inline-block;background:#1e3a5f;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-size:16px">Open service tracker</a>
+            ${FOOTER_HTML}
           </div>
         `,
     })
@@ -248,7 +275,7 @@ export async function sendReviewReadyEmail(opts: {
         text:
             `Hi ${opts.name},\n\n` +
             `${heading} — ${opts.vehicle} (${opts.plate}), job order JO-${opts.jobOrderId}.\n\n` +
-            `Log in to review and approve, or raise a concern:\n${url}\n\n— AutoKita`,
+            `Log in to review and approve, or raise a concern:\n${url}\n\n— AutoKita` + FOOTER_TEXT,
         html: `
           <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
             <h2 style="color:#1e3a5f;font-size:26px">${heading}</h2>
@@ -256,6 +283,7 @@ export async function sendReviewReadyEmail(opts: {
             <p style="font-size:16px">Your <b>${opts.vehicle} (${opts.plate})</b> — job order <b>JO-${opts.jobOrderId}</b> — has an update waiting for you.</p>
             <a href="${url}" style="display:inline-block;background:#1e3a5f;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-size:16px">${actionLabel}</a>
             <p style="margin-top:20px;font-size:14px;color:#666">Log in to review and approve, or raise a concern.</p>
+            ${FOOTER_HTML}
           </div>
         `,
     })

@@ -1450,6 +1450,7 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
                       className={fieldClass('email')}
                     />
                   </div>
+                  <p className="mt-1 text-xs text-muted-foreground">Check the spelling carefully and read it back to the customer. They need this email to set their password ("Forgot password").</p>
                   <ErrorText field="email" />
                 </div>
               </div>
