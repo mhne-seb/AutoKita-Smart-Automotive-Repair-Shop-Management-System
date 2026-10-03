@@ -18,6 +18,7 @@ import { DIAGNOSTIC_SCAN_SERVICE_NAME } from "@/data/diagnosticScan";
 import { PAYMENT_CHANNELS } from "@/data/paymentChannels";
 import { PaymentModal, type PaymentMethod } from "@/components/dashboard/PaymentModal";
 import { ShopLoading } from "@/components/ShopLoading";
+import { WarrantyTermsCard } from "@/components/dashboard/WarrantyTermsCard";
 
 type FetchedService = {
   id: number;
@@ -405,6 +406,7 @@ function Quotation() {
                   {paymentStatus === "rejected" && (
                     <PaymentStatusCard status={paymentStatus} method={paymentMethod} reason={rejectionReason} />
                   )}
+                  <p className="mt-4 text-xs text-muted-foreground">By confirming or paying, you agree to the warranty terms shown on this page.</p>
                   {needsDownpayment ? (
                     <>
                       <div className="mt-4 rounded-lg bg-[color:oklch(0.97_0.04_50)] p-4">
@@ -487,6 +489,8 @@ function Quotation() {
               )}
             </div>
           </div>
+
+          <WarrantyTermsCard collapsible />
 
           {!locked && (
             <div className="rounded-xl border bg-card p-4 text-xs text-muted-foreground">
