@@ -632,9 +632,11 @@ export async function POST(req: NextRequest) {
     if (body.category) queryCategory = String(body.category);
 
     if (!Array.isArray(messages) || messages.length === 0) {
+      recordRequestEnd(ip, 'admin', 0);
       return NextResponse.json({ error: 'messages array is required.' }, { status: 400 });
     }
   } catch {
+    recordRequestEnd(ip, 'admin', 0);
     return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 });
   }
 

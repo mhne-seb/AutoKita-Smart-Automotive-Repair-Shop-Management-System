@@ -253,33 +253,31 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
+    recordRequestEnd(ip, 'customer', 0);
     return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 });
   }
 
-  const rawUserId = body.userId;
-  const guard = await (rawUserId ? requireCustomer(parseInt(String(rawUserId), 10)) : requireCustomer())
-  if (!guard.ok) return guard.response
-  // Note: we still extract customerUserId from body later if it's there.
+  const rawUserId = body?.userId;
+  const guard = await (rawUserId ? requireCustomer(parseInt(String(rawUserId), 10)) : requireCustomer());
+  if (!guard.ok) {
+    recordRequestEnd(ip, 'customer', 0);
+    return guard.response;
+  }
 
-  let messages: ChatCompletionMessageParam[];
+  const messages: ChatCompletionMessageParam[] = body?.messages ?? [];
   let incomingSessionId: number | null = null;
-  let customerUserId: number | null = null;
+  let customerUserId: number | null = guard.session.userId ?? null;
   let employeeId: number | null = null;
   let jobOrderId: number | null = null;
 
-  try {
-    const body = await req.json();
-    messages = body.messages ?? [];
-    if (body.sessionId) incomingSessionId = parseInt(String(body.sessionId), 10) || null;
-    if (body.userId) customerUserId = parseInt(String(body.userId), 10) || null;
-    if (body.employeeId) employeeId = parseInt(String(body.employeeId), 10) || null;
-    if (body.jobOrderId) jobOrderId = parseInt(String(body.jobOrderId), 10) || null;
+  if (body?.sessionId) incomingSessionId = parseInt(String(body.sessionId), 10) || null;
+  if (body?.userId) customerUserId = parseInt(String(body.userId), 10) || customerUserId;
+  if (body?.employeeId) employeeId = parseInt(String(body.employeeId), 10) || null;
+  if (body?.jobOrderId) jobOrderId = parseInt(String(body.jobOrderId), 10) || null;
 
-    if (!Array.isArray(messages) || messages.length === 0) {
-      return NextResponse.json({ error: 'messages array is required.' }, { status: 400 });
-    }
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 });
+  if (!Array.isArray(messages) || messages.length === 0) {
+    recordRequestEnd(ip, 'customer', 0);
+    return NextResponse.json({ error: 'messages array is required.' }, { status: 400 });
   }
 
   // ── History trimming: keep only the last MAX_HISTORY_MESSAGES messages ──────

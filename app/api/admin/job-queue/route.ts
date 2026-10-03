@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
       result.rows[i].avatar_url = signedAvatars[i]
     }
 
-    const mechanicsQuery = `SELECT id, full_name, email, status FROM employees WHERE role = 'mechanic' ORDER BY full_name ASC`
+    const mechanicsQuery = `SELECT id, full_name, email, status FROM employees WHERE role = 'mechanic' AND status = 'active' ORDER BY full_name ASC`
     const mechanicsResult = await db.query(mechanicsQuery)
     const mechanics = mechanicsResult.rows
 

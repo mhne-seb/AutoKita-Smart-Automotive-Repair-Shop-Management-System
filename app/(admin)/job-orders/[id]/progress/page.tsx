@@ -298,13 +298,32 @@ export default function page() {
       setFindings(data.findings)
       setPullOut(data.pullOut)
     }
+    fetch('/api/admin/schedule')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          setScheduleData({ tasks: d.tasks || [], mechanics: d.mechanics || [] })
+        }
+      })
+      .catch(() => {})
   }
 
   // Start lives on the card — one tap, in the moment. Schedule/mechanic/note
   // are passed through unchanged (the stored function is a full update).
   async function setTaskStatus(task: ServiceTask, next: TaskStatus) {
     setBusyTaskId(task.id)
-    const result = await scheduleTask(jobOrderId, task.id, task.scheduledDate ?? null, next, task.mechanicId, task.note)
+
+    // Postgres TIMESTAMP columns (without time zone) expect a raw local time string. 
+    // The backend now casts these to text to avoid timezone shifting, so they arrive 
+    // as "YYYY-MM-DD HH:mm:ss". We replace space with 'T' for Safari compatibility.
+    let localDbDate = task.scheduledDate ?? null
+    if (localDbDate) {
+      const safeDate = localDbDate.replace(' ', 'T')
+      const d = new Date(safeDate)
+      localDbDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:00`
+    }
+
+    const result = await scheduleTask(jobOrderId, task.id, localDbDate, next, task.mechanicId, task.note)
     if (!result.ok) {
       toast.error(result.message ?? 'Could not update the task.')
     } else if (next === 'pending') {
@@ -474,7 +493,7 @@ export default function page() {
                   {task.scheduledDate && (
                     <span className="flex items-center gap-1 font-semibold text-indigo-600">
                       <CalendarDays size={13} />
-                      Scheduled: {new Date(task.scheduledDate).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                      Scheduled: {new Date(task.scheduledDate.replace(' ', 'T')).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                     </span>
                   )}
                   {/* A Started task past its estimate is overdue. A Not-Yet task past its
@@ -485,7 +504,7 @@ export default function page() {
                     const label = est.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
                     // Est. Finish is scheduled start + predicted duration, so the
                     // duration is just the gap between the two.
-                    const estHrs = task.scheduledDate ? (est.getTime() - new Date(task.scheduledDate).getTime()) / 3600000 : 0
+                    const estHrs = task.scheduledDate ? (est.getTime() - new Date(task.scheduledDate.replace(' ', 'T')).getTime()) / 3600000 : 0
                     const hrsLabel = estHrs > 0 ? ` (${estHrs % 1 === 0 ? estHrs : estHrs.toFixed(1)} hrs)` : ''
                     return overdueHrs > 0 ? (
                       <span className="flex items-center gap-1 font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
@@ -1387,8 +1406,51 @@ export default function page() {
           allTasks={sections.flatMap((s) => s.tasks)}
           assignedMechanicName={jobOrder?.mechanic}
           onClose={() => setSchedulingTask(null)}
-          onSaved={() => {
+          onSaved={(updates) => {
+            const currentTaskId = schedulingTask.id
             setSchedulingTask(null)
+            
+            // Optimistic update
+            if (updates) {
+              setSections(prev => prev.map(sec => ({
+                ...sec,
+                tasks: sec.tasks.map(t => {
+                  if (t.id === currentTaskId) {
+                    return {
+                      ...t,
+                      scheduledDate: updates.scheduledDate ?? t.scheduledDate,
+                      mechanicId: updates.mechanicId ?? t.mechanicId,
+                      mechanicName: updates.mechanicName ?? t.mechanicName
+                    }
+                  }
+                  return t
+                })
+              })))
+
+              setScheduleData(prev => {
+                // If task isn't in scheduleData yet, we can't easily add it without knowing all fields,
+                // but usually it is there, just unassigned.
+                const exists = prev.tasks.some(t => String(t.id) === String(currentTaskId))
+                if (!exists) return prev
+
+                return {
+                  ...prev,
+                  tasks: prev.tasks.map(t => {
+                    if (String(t.id) === String(currentTaskId)) {
+                      return {
+                        ...t,
+                        scheduled_date: updates.scheduledDate ?? t.scheduled_date,
+                        mechanic_id: updates.mechanicId ?? t.mechanic_id,
+                        mechanic_name: updates.mechanicName ?? t.mechanic_name
+                      }
+                    }
+                    return t
+                  })
+                }
+              })
+            }
+
+            // refresh in background to ensure sync
             getServiceProgressById(jobOrderId).then((data) => {
               if (data) setSections(data.sections)
             })
@@ -1541,6 +1603,20 @@ function toLocalDateValue(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+function getTaskLocalDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return ''
+  const trimmed = String(dateStr).trim()
+  if (trimmed.endsWith('Z')) {
+    return toLocalDateValue(new Date(trimmed))
+  }
+  return trimmed.slice(0, 10)
+}
+
+function parseLocalTimestamp(dateStr: string | null | undefined): number {
+  if (!dateStr) return NaN
+  return new Date(String(dateStr).replace(' ', 'T')).getTime()
+}
+
 // Same rule as the customer booking form: a slot is past only if it's
 // earlier than right now — a past day, or today at a time already gone.
 function isPastDateTime(date: string, time: string): boolean {
@@ -1572,7 +1648,7 @@ function ScheduleModal({
   allTasks?: ServiceTask[],
   assignedMechanicName?: string,
   onClose: () => void, 
-  onSaved: () => void 
+  onSaved: (updates?: { scheduledDate?: string, mechanicId?: number, mechanicName?: string }) => void 
 }) {
   const today = toLocalDateValue(new Date())
 
@@ -1588,21 +1664,21 @@ function ScheduleModal({
   // A saved time that has already passed is stale, not a choice — fall back
   // to today so the modal doesn't open showing an error.
   const savedIsPast =
-    task.status === 'pending' && !!task.scheduledDate && new Date(task.scheduledDate).getTime() < Date.now()
+    task.status === 'pending' && !!task.scheduledDate && parseLocalTimestamp(task.scheduledDate) < Date.now()
 
   const [date, setDate] = useState(() => {
     if (task.scheduledDate && !savedIsPast) {
-      // Postgres returns local time timestamp natively as UTC Date on some clients,
-      // but since we send exact string and read exact string we can extract local values directly
-      return toLocalDateValue(new Date(task.scheduledDate))
+      return getTaskLocalDate(task.scheduledDate) || today
     }
     return today
   })
 
   const [time, setTime] = useState(() => {
     if (task.scheduledDate && !savedIsPast) {
-      const d = new Date(task.scheduledDate)
-      return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+      const d = new Date(String(task.scheduledDate).replace(' ', 'T'))
+      if (!isNaN(d.getTime())) {
+        return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+      }
     }
     return defaultTimeFor(today)
   })
@@ -1615,12 +1691,30 @@ function ScheduleModal({
   // Read-only here: the text belongs to the quotation (description_of_work).
   const note = task.note || ''
 
+  // Selected mechanic details
+  const selectedMechanic = useMemo(() => {
+    if (mechanicId === '') return null
+    return scheduleData.mechanics.find((m) => Number(m.id) === Number(mechanicId)) || null
+  }, [mechanicId, scheduleData.mechanics])
+
+  // Formatted date string for user friendly headers
+  const formattedSelectedDate = useMemo(() => {
+    if (!date) return ''
+    const [y, m, d] = date.split('-').map(Number)
+    if (!y || !m || !d) return date
+    return new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+  }, [date])
+
   // Estimated duration of the task being scheduled (in hours and ms)
   const taskDurationHours = useMemo(() => {
     if (task.estimatedHours && task.estimatedHours > 0) return task.estimatedHours
     if (task.estimatedFinish && task.scheduledDate) {
-      const diffHrs = (new Date(task.estimatedFinish).getTime() - new Date(task.scheduledDate).getTime()) / 3600000
-      if (diffHrs > 0) return Math.round(diffHrs * 10) / 10
+      const startMs = parseLocalTimestamp(task.scheduledDate)
+      const finishMs = parseLocalTimestamp(task.estimatedFinish)
+      if (!isNaN(startMs) && !isNaN(finishMs)) {
+        const diffHrs = (finishMs - startMs) / 3600000
+        if (diffHrs > 0) return Math.round(diffHrs * 10) / 10
+      }
     }
     return 1.5
   }, [task.estimatedHours, task.estimatedFinish, task.scheduledDate])
@@ -1655,9 +1749,11 @@ function ScheduleModal({
 
       if (!isSameMechanic && !isSameJobOrder) continue
 
-      const tStart = new Date(t.scheduled_date).getTime()
+      const tStart = parseLocalTimestamp(t.scheduled_date)
+      if (isNaN(tStart)) continue
       const tEstHours = Number(t.estimated_hours ?? 1.5)
-      const tFinish = t.estimated_finish ? new Date(t.estimated_finish).getTime() : tStart + (tEstHours * 3600000)
+      const tFinish = t.estimated_finish ? parseLocalTimestamp(t.estimated_finish) : tStart + (tEstHours * 3600000)
+      if (isNaN(tFinish)) continue
 
       const overlaps = (proposedStart < tFinish) && (proposedFinish > tStart)
       const tooClose = (proposedStart < tFinish + BUFFER_MS) && (proposedFinish + BUFFER_MS > tStart)
@@ -1670,10 +1766,11 @@ function ScheduleModal({
 
         let reason = ''
         if (isSameMechanic) {
-          const mName = t.mechanic_name || scheduleData.mechanics.find((m) => m.id === mechanicId)?.full_name || 'The mechanic'
+          const mName = t.mechanic_name || scheduleData.mechanics.find((m) => Number(m.id) === Number(mechanicId))?.full_name || 'The mechanic'
+          const joContext = isSameJobOrder ? 'on this job order' : `on Job Order #${t.job_order_id}`
           reason = overlaps
-            ? `${mName} is already scheduled for "${t.title}" (${startStr} – ${finishStr}). Services cannot overlap.`
-            : `${mName} has "${t.title}" scheduled (${startStr} – ${finishStr}). Allow at least 15 minutes buffer.`
+            ? `${mName} is already scheduled for "${t.title}" ${joContext} (${startStr} – ${finishStr}). Services cannot overlap.`
+            : `${mName} has "${t.title}" scheduled ${joContext} (${startStr} – ${finishStr}). Allow at least 15 minutes buffer.`
         } else {
           reason = overlaps
             ? `Another service ("${t.title}") on this vehicle is scheduled from ${startStr} to ${finishStr}. Services cannot overlap.`
@@ -1697,6 +1794,51 @@ function ScheduleModal({
     return null
   }, [proposedStart, proposedFinish, task.id, task.status, task.mechanicId, mechanicId, jobOrderId, scheduleData.tasks, scheduleData.mechanics, BUFFER_MS])
 
+  // Daily agenda for the selected mechanic across ALL job orders
+  const mechanicDayTasks = useMemo(() => {
+    if (!mechanicId || !date) return []
+
+    return scheduleData.tasks
+      .filter((t) => {
+        if (!t.scheduled_date) return false
+        if (Number(t.mechanic_id) !== Number(mechanicId)) return false
+        if (t.status === 'completed' || t.status === 'cancelled') return false
+        if (String(t.id) === String(task.id)) return false
+
+        const taskDate = getTaskLocalDate(t.scheduled_date)
+        return taskDate === date
+      })
+      .map((t) => {
+        const tStart = parseLocalTimestamp(t.scheduled_date)
+        const tEstHours = Number(t.estimated_hours ?? 1.5)
+        const tFinish = t.estimated_finish ? parseLocalTimestamp(t.estimated_finish) : tStart + (tEstHours * 3600000)
+
+        const isSameJobOrder = Number(t.job_order_id) === Number(jobOrderId)
+
+        let isConflicting = false
+        if (proposedStart && proposedFinish && !isNaN(tStart) && !isNaN(tFinish)) {
+          const overlaps = (proposedStart < tFinish) && (proposedFinish > tStart)
+          const tooClose = (proposedStart < tFinish + BUFFER_MS) && (proposedFinish + BUFFER_MS > tStart)
+          isConflicting = tooClose
+        }
+
+        const startStr = !isNaN(tStart) ? new Date(tStart).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : ''
+        const finishStr = !isNaN(tFinish) ? new Date(tFinish).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : ''
+
+        return {
+          ...t,
+          tStart,
+          tFinish,
+          tEstHours,
+          isSameJobOrder,
+          isConflicting,
+          startStr,
+          finishStr,
+        }
+      })
+      .sort((a, b) => a.tStart - b.tStart)
+  }, [mechanicId, date, scheduleData.tasks, task.id, jobOrderId, proposedStart, proposedFinish, BUFFER_MS])
+
   const [saving, setSaving] = useState(false)
 
   const handleSave = async () => {
@@ -1713,7 +1855,12 @@ function ScheduleModal({
       toast.error(result.message ?? 'Could not save the schedule.')
       return
     }
-    onSaved()
+    
+    // Pass back optimistic data
+    const dt = datetime.replace('T', ' ')
+    const mId = mechanicId === '' ? undefined : mechanicId
+    const mName = selectedMechanic?.full_name
+    onSaved({ scheduledDate: dt, mechanicId: mId, mechanicName: mName })
   }
 
   const handleQuickPick = (daysToAdd: number) => {
@@ -1726,37 +1873,39 @@ function ScheduleModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-slate-900">Schedule Task</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 rounded-full p-1 hover:bg-slate-100"><X size={20}/></button>
+      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl max-h-[92vh] flex flex-col">
+        <div className="flex items-center justify-between mb-4 shrink-0">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">Schedule Task</h2>
+            <p className="text-xs text-slate-500">Pick a time window and assign a mechanic</p>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 rounded-full p-1.5 hover:bg-slate-100 transition-colors"><X size={18}/></button>
         </div>
         
-        <div className="mb-6 rounded-lg bg-slate-50 p-4 border border-slate-100">
-          <div className="flex items-center justify-between">
-            <p className="font-semibold text-slate-900">{task.title}</p>
-            <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full">
-              Est: {taskDurationHours} {taskDurationHours === 1 ? 'hr' : 'hrs'}
-            </span>
+        <div className="flex-1 overflow-y-auto pr-1 -mr-1 space-y-4">
+          <div className="rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+            <div className="flex items-center justify-between">
+              <p className="font-semibold text-slate-900 text-sm">{task.title}</p>
+              <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full">
+                Est: {taskDurationHours} {taskDurationHours === 1 ? 'hr' : 'hrs'}
+              </span>
+            </div>
+            {note.trim() && note.trim() !== 'Describe the service...' && (
+              <p className="mt-1 text-xs text-slate-500">{note}</p>
+            )}
           </div>
-          {note.trim() && note.trim() !== 'Describe the service...' && (
-            <p className="mt-1 text-sm text-slate-500">{note}</p>
-          )}
-        </div>
 
-        <div className="space-y-4">
           {/* Quick picks only make sense before the task has started. */}
           {task.status === 'pending' && (
             <div className="flex gap-2">
-              <button onClick={() => handleQuickPick(0)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Today</button>
-              <button onClick={() => handleQuickPick(1)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Tomorrow</button>
-              <button onClick={() => handleQuickPick(2)} className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">In 2 Days</button>
+              <button onClick={() => handleQuickPick(0)} className="flex-1 rounded-lg border border-slate-200 bg-white py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs">Today</button>
+              <button onClick={() => handleQuickPick(1)} className="flex-1 rounded-lg border border-slate-200 bg-white py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs">Tomorrow</button>
+              <button onClick={() => handleQuickPick(2)} className="flex-1 rounded-lg border border-slate-200 bg-white py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs">In 2 Days</button>
             </div>
           )}
 
-          {/* Once started, the schedule is history — read-only. The mechanic
-              stays editable (reassignment mid-task is legitimate). */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Date & Time Inputs */}
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Date</label>
               <input
@@ -1764,8 +1913,6 @@ function ScheduleModal({
                 value={date}
                 min={today}
                 onChange={e => {
-                  // min only greys the picker out — it doesn't stop every
-                  // browser from selecting, or anyone from typing, a past date.
                   const picked = e.target.value
                   if (picked && picked < today) {
                     toast.error('That date has already passed.')
@@ -1790,6 +1937,7 @@ function ScheduleModal({
             </p>
           )}
 
+          {/* Conflict Banner */}
           {conflictingSchedule && (
             <div className="rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs text-rose-800 space-y-2 shadow-sm animate-fadeIn">
               <div className="flex items-center gap-1.5 font-bold text-rose-900">
@@ -1821,7 +1969,7 @@ function ScheduleModal({
           )}
           
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 mt-4">Assign Mechanic</label>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Assign Mechanic</label>
             <select
               value={mechanicId}
               onChange={(e) => setMechanicId(e.target.value === '' ? '' : Number(e.target.value))}
@@ -1832,8 +1980,6 @@ function ScheduleModal({
                 const open = Number(m.open_tasks ?? 0)
                 const cap = Number(m.capacity)
                 const alreadyOnOrder = isMechanicAlreadyOnOrder(m.id, m.full_name)
-                // A full mechanic can't take a NEW job order, but stays selectable
-                // if they are ALREADY handling this job order (adding another service).
                 const full = mechanicIsFull(open, cap) && !alreadyOnOrder
                 return (
                   <option key={m.id} value={m.id} disabled={full}>
@@ -1843,7 +1989,7 @@ function ScheduleModal({
               })}
             </select>
             {(() => {
-              const m = scheduleData.mechanics.find((x) => x.id === mechanicId)
+              const m = scheduleData.mechanics.find((x) => Number(x.id) === Number(mechanicId))
               if (!m) return null
               const open = Number(m.open_tasks ?? 0)
               const cap = Number(m.capacity)
@@ -1864,67 +2010,135 @@ function ScheduleModal({
             })()}
           </div>
 
-          {/* Overlap / Daily Schedule View */}
-          {mechanicId !== '' && (
-            <div className="mt-4 rounded-lg bg-indigo-50/50 p-4 border border-indigo-100">
-              <p className="text-xs font-bold uppercase tracking-wider text-indigo-800 mb-2">
-                Mechanic&apos;s Schedule for {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              </p>
-              {(() => {
-                const dayTasks = scheduleData.tasks.filter((t) => 
-                  t.mechanic_id === mechanicId && 
-                  t.scheduled_date && 
-                  new Date(t.scheduled_date).toISOString().split('T')[0] === date &&
-                  String(t.id) !== task.id
-                )
-                
-                if (dayTasks.length === 0) {
-                  return <p className="text-sm text-indigo-600">No other tasks scheduled for this day.</p>
-                }
-
-                return (
-                  <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
-                    {dayTasks.map((t) => {
-                      const tStart = new Date(t.scheduled_date)
-                      const tEst = t.estimated_finish ? new Date(t.estimated_finish) : new Date(tStart.getTime() + Number(t.estimated_hours ?? 1.5) * 3600000)
-                      const isConflicting = conflictingSchedule?.task.id === t.id
-
-                      return (
-                        <div
-                          key={t.id}
-                          className={`flex justify-between items-center text-xs p-2 rounded border shadow-sm transition-colors ${
-                            isConflicting
-                              ? 'bg-rose-50 border-rose-300 text-rose-900'
-                              : 'bg-white border-indigo-100 text-slate-700'
-                          }`}
-                        >
-                          <div className="truncate mr-2 flex-1">
-                            <span className="font-semibold">{t.title}</span>
-                            {isConflicting && (
-                              <span className="ml-2 rounded bg-rose-200 px-1.5 py-0.5 text-[10px] font-bold text-rose-800">
-                                Conflict
-                              </span>
-                            )}
-                          </div>
-                          <span className={`font-medium shrink-0 ${isConflicting ? 'text-rose-700' : 'text-indigo-600'}`}>
-                            {tStart.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} – {tEst.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                          </span>
-                        </div>
-                      )
-                    })}
+          {/* Daily Schedule Timeline View */}
+          {mechanicId === '' ? (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 p-3 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+              <Clock size={15} className="text-slate-400 shrink-0" />
+              <span>Select a mechanic above to view their daily agenda and check for conflicts.</span>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5 shadow-2xs">
+              <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-slate-200">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-6 h-6 rounded-md bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+                    <CalendarDays size={14} />
                   </div>
-                )
-              })()}
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-800 truncate">
+                      {selectedMechanic?.full_name ? `${selectedMechanic.full_name}'s Daily Agenda` : "Mechanic's Agenda"}
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      {formattedSelectedDate}
+                    </p>
+                  </div>
+                </div>
+                <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">
+                  {mechanicDayTasks.length} {mechanicDayTasks.length === 1 ? 'task' : 'tasks'}
+                </span>
+              </div>
+
+              {mechanicDayTasks.length === 0 ? (
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-3 text-center">
+                  <p className="text-xs font-semibold text-emerald-800 flex items-center justify-center gap-1.5">
+                    <Check size={14} className="text-emerald-600" /> Fully Free on this Day
+                  </p>
+                  <p className="text-[11px] text-emerald-600 mt-0.5">
+                    No other tasks are scheduled for {selectedMechanic?.full_name ?? 'this mechanic'} on this date.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {mechanicDayTasks.map((t) => {
+                    const vehicleInfo = [t.vehicle_model, t.plate_number].filter(Boolean).join(' • ')
+                    return (
+                      <div
+                        key={t.id}
+                        className={`relative rounded-lg border p-2.5 transition-all text-xs ${
+                          t.isConflicting
+                            ? 'border-rose-300 bg-rose-50/90 shadow-sm ring-1 ring-rose-200'
+                            : 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className={`font-semibold ${t.isConflicting ? 'text-rose-900 font-bold' : 'text-slate-800'}`}>
+                                {t.title}
+                              </span>
+                              {t.isConflicting ? (
+                                <span className="inline-flex items-center gap-1 rounded bg-rose-200/80 px-1.5 py-0.5 text-[10px] font-bold text-rose-800 animate-pulse">
+                                  <AlertTriangle size={10} /> Conflict
+                                </span>
+                              ) : t.status === 'in_progress' ? (
+                                <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
+                                  <Play size={9} /> In Progress
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+                                  Scheduled
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="mt-1 flex items-center gap-1.5 flex-wrap text-[11px]">
+                              {t.isSameJobOrder ? (
+                                <span className="inline-flex items-center font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-1.5 py-0.2 rounded">
+                                  This Job Order (JO #{t.job_order_id})
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center font-semibold text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded">
+                                  JO #{t.job_order_id}
+                                </span>
+                              )}
+                              {vehicleInfo && (
+                                <span className="text-slate-500 font-medium truncate">
+                                  • {vehicleInfo}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <div className={`font-semibold ${t.isConflicting ? 'text-rose-700 font-bold' : 'text-indigo-600'}`}>
+                              {t.startStr} – {t.finishStr}
+                            </div>
+                            <span className="text-[10px] text-slate-400">
+                              {t.tEstHours} {t.tEstHours === 1 ? 'hr' : 'hrs'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {t.isConflicting && conflictingSchedule?.earliestAfter && (
+                          <div className="mt-2 pt-2 border-t border-rose-200/80 flex items-center justify-between text-[11px]">
+                            <span className="text-rose-700 font-medium">Overlaps with your proposed slot</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = conflictingSchedule.earliestAfterDate
+                                setDate(toLocalDateValue(next))
+                                setTime(`${String(next.getHours()).padStart(2, '0')}:${String(next.getMinutes()).padStart(2, '0')}`)
+                              }}
+                              className="rounded bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white hover:bg-rose-700 transition-colors shadow-2xs"
+                            >
+                              Jump to {conflictingSchedule.earliestAfter}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
         
-        <div className="mt-6 flex gap-3">
+        <div className="mt-5 pt-3 border-t border-slate-100 flex gap-3 shrink-0">
           <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">Cancel</button>
           <button
             onClick={handleSave}
             disabled={saving || pickedPast || !!conflictingSchedule || (() => {
-              const m = scheduleData.mechanics.find((x) => x.id === mechanicId)
+              const m = scheduleData.mechanics.find((x) => Number(x.id) === Number(mechanicId))
               if (!m) return false
               const alreadyOnOrder = isMechanicAlreadyOnOrder(m.id, m.full_name)
               return !alreadyOnOrder && mechanicIsFull(Number(m.open_tasks ?? 0), Number(m.capacity))

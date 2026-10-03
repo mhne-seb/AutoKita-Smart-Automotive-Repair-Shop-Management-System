@@ -599,19 +599,31 @@ function MechanicFormModal({
     if (!validPhone(form.phone)) next.phone = 'Enter a valid PH mobile number'
     if (!form.branch.trim()) next.branch = 'Branch is required'
     if (!form.location.trim()) next.location = 'Location is required'
-    if (!form.baseSalary || Number(form.baseSalary) <= 0) next.baseSalary = 'Enter a valid salary'
-    if (form.commissionPercent === '' || Number(form.commissionPercent) < 0 || Number(form.commissionPercent) > 100)
+
+    const baseSalaryNum = Number(form.baseSalary)
+    if (!form.baseSalary.trim() || isNaN(baseSalaryNum) || baseSalaryNum < 0) {
+      next.baseSalary = 'Enter a valid base salary'
+    }
+
+    const commissionNum = Number(form.commissionPercent)
+    if (form.commissionPercent.trim() === '' || isNaN(commissionNum) || commissionNum < 0 || commissionNum > 100) {
       next.commissionPercent = 'Enter a rate between 0–100'
-    if (!form.jobsCapacity || Number(form.jobsCapacity) <= 0) next.jobsCapacity = 'Enter a valid capacity'
+    }
+
+    const jobsCapacityNum = Number(form.jobsCapacity)
+    if (!form.jobsCapacity.trim() || isNaN(jobsCapacityNum) || jobsCapacityNum <= 0 || !Number.isInteger(jobsCapacityNum)) {
+      next.jobsCapacity = 'Enter a valid capacity (at least 1)'
+    }
+
     setErrors(next)
     if (Object.keys(next).length > 0) return
     onSubmit({
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
-      branch: form.branch,
-      location: form.location,
-      rank: form.rank,
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      branch: form.branch.trim(),
+      location: form.location.trim(),
+      rank: form.rank.trim(),
       baseSalary: Number(form.baseSalary),
       commissionPercent: Number(form.commissionPercent),
       jobsCapacity: Number(form.jobsCapacity),
@@ -648,7 +660,18 @@ function MechanicFormModal({
             </div>
             <div>
               <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Phone *</label>
-              <input value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="09171234567" className={fieldClass('phone')} />
+              <input
+                value={form.phone}
+                onChange={(e) => {
+                  const val = e.target.value
+                  if (val === '' || /^[0-9+\s-]*$/.test(val)) {
+                    set('phone', val)
+                    if (errors.phone) setErrors((prev) => ({ ...prev, phone: undefined }))
+                  }
+                }}
+                placeholder="09171234567"
+                className={fieldClass('phone')}
+              />
               <ErrorText field="phone" />
             </div>
           </div>
@@ -675,9 +698,16 @@ function MechanicFormModal({
               <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Base Salary *</label>
               <input
                 value={form.baseSalary}
-                onChange={(e) => set('baseSalary', e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value
+                  // Allow only numbers and up to 2 decimal places (prevents letters completely)
+                  if (val === '' || /^\d*\.?\d{0,2}$/.test(val)) {
+                    set('baseSalary', val)
+                    if (errors.baseSalary) setErrors((prev) => ({ ...prev, baseSalary: undefined }))
+                  }
+                }}
                 placeholder="e.g., 15000"
-                inputMode="numeric"
+                inputMode="decimal"
                 className={fieldClass('baseSalary')}
               />
               <ErrorText field="baseSalary" />
@@ -686,9 +716,15 @@ function MechanicFormModal({
               <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Commission % *</label>
               <input
                 value={form.commissionPercent}
-                onChange={(e) => set('commissionPercent', e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value
+                  if (val === '' || (/^\d*\.?\d{0,2}$/.test(val) && Number(val) <= 100)) {
+                    set('commissionPercent', val)
+                    if (errors.commissionPercent) setErrors((prev) => ({ ...prev, commissionPercent: undefined }))
+                  }
+                }}
                 placeholder="e.g., 8"
-                inputMode="numeric"
+                inputMode="decimal"
                 className={fieldClass('commissionPercent')}
               />
               <ErrorText field="commissionPercent" />
@@ -699,7 +735,15 @@ function MechanicFormModal({
             <label className="text-xs font-semibold uppercase tracking-wide text-foreground">Ongoing Job Orders Capacity *</label>
             <input
               value={form.jobsCapacity}
-              onChange={(e) => set('jobsCapacity', e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value
+                // Allow only whole integer digits
+                if (val === '' || /^\d*$/.test(val)) {
+                  set('jobsCapacity', val)
+                  if (errors.jobsCapacity) setErrors((prev) => ({ ...prev, jobsCapacity: undefined }))
+                }
+              }}
+              placeholder="e.g., 5"
               inputMode="numeric"
               className={fieldClass('jobsCapacity')}
             />

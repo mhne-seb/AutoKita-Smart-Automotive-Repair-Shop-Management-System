@@ -19,18 +19,18 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           spt.task_title,
           spt.note,
           spt.task_status,
-          spt.started_at,
-          spt.completed_at,
+          spt.started_at::text,
+          spt.completed_at::text,
           spt.price,
           spt.billable,
-          spt.scheduled_date,
+          spt.scheduled_date::text,
           spt.mechanic_id,
           spt.completion_photo_url,
           spt.finding_id,
           COALESCE(
             spt.scheduled_date + (jos.estimated_hours * INTERVAL '1 hour'),
             spt.scheduled_date + INTERVAL '1.5 hours'
-          ) as estimated_finish,
+          )::text as estimated_finish,
           COALESCE(jos.estimated_hours, 1.5)::numeric as estimated_hours,
           e.full_name as mechanic_name
         FROM service_progress_tasks spt
