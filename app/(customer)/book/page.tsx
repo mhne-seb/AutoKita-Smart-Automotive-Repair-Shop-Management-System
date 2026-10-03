@@ -718,6 +718,7 @@ function BookPage() {
                     <IField
                       icon={Mail} label="Email Address" required value={f.email} onChange={(v) => { set("email", v); setEmailTaken(false); }}
                       placeholder="you@email.com"
+                      hint="Use an email you can open. We send your temporary password and verification codes here."
                       error={showError && !isValidEmail(f.email) ? "Enter a valid email address" : emailTaken ? "This email already has an account. Please log in first" : undefined}
                     />
                   </div>
@@ -1128,10 +1129,10 @@ function Section({ icon: Icon, title, subtitle, children }: { icon: any; title: 
 }
 
 function IField({
-  icon: Icon, label, value, onChange, placeholder, required, error,
+  icon: Icon, label, value, onChange, placeholder, required, error, hint,
 }: {
   icon: any; label: string; value: string; onChange: (v: string) => void; placeholder?: string;
-  required?: boolean; error?: string;
+  required?: boolean; error?: string; hint?: string;
 }) {
   return (
     <div>
@@ -1152,6 +1153,9 @@ function IField({
         <p className="mt-1 flex items-center gap-1 text-[11px] text-red-500">
           <AlertCircle className="h-3 w-3" /> {error}
         </p>
+      )}
+      {!error && hint && (
+        <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>
       )}
     </div>
   );
@@ -1376,11 +1380,14 @@ function BookingSubmittedPanel({
           </div>
 
           {accountEmailed && (
-            <p className="mx-auto mt-3 flex max-w-md items-center justify-center gap-1.5 text-xs text-muted-foreground">
-              <Mail className="h-3.5 w-3.5 flex-shrink-0 text-brand" />
-              We've emailed a temporary password to{" "}
-              <span className="font-medium text-foreground">{f.email}</span> so you can track this booking.
-            </p>
+            <div className="mx-auto mt-3 flex max-w-md flex-col items-center gap-1 text-xs text-muted-foreground">
+              <p className="flex items-center justify-center gap-1.5">
+                <Mail className="h-3.5 w-3.5 flex-shrink-0 text-brand" />
+                We've emailed a temporary password to{" "}
+                <span className="font-medium text-foreground">{f.email}</span> so you can track this booking.
+              </p>
+              <p>Can't find it? Check your Spam or Promotions folder.</p>
+            </div>
           )}
         </div>
 
@@ -1399,8 +1406,7 @@ function BookingSubmittedPanel({
 
         <div className="mt-4 flex items-start gap-2 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
           <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand" />
-          You'll get a confirmation call or SMS once your booking is approved. You can reschedule or cancel up to
-          24 hours before the scheduled time.
+          Our team will contact you, and you'll see the update in your account once your booking is approved. You can cancel the booking from your dashboard until the shop starts work.
         </div>
       </div>
 

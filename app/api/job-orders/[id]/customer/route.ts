@@ -228,7 +228,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         }
 
         if (lines.length > 0) {
-          const message = lines.join('\n') + '\n\nIf this isn\'t right, please contact the shop.'
+          const message = lines.join('\n') + '\n\nIf this isn\'t right, please contact the shop using the details below.'
           
           void (async () => {
             try {
