@@ -27,6 +27,7 @@ import type { ServiceRecord } from "@/data/history";
 import { ShopLoading } from "@/components/ShopLoading";
 import { fetchJobOrderPdfData, generateJobOrderPdf } from "@/lib/jobOrderPdf";
 import { getCustomerWarranties, submitWarrantyClaim, type CustomerWarranty } from "@/controllers/warrantyController";
+import { WarrantyTermsCard } from "@/components/dashboard/WarrantyTermsCard";
 
 const CURRENT_USER_ID = 280;
 
@@ -823,6 +824,7 @@ function WarrantiesPanel({ userId }: { userId: number }) {
 
   return (
     <div className="mt-6 space-y-6">
+      <WarrantyTermsCard collapsible />
       <div className="rounded-xl border bg-card p-5">
         <h3 className="text-sm font-bold">Active</h3>
         {active.length === 0 ? (
