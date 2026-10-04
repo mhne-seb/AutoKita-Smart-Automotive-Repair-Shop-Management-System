@@ -460,7 +460,7 @@ export default function page() {
         rightSlot={
           <button
             onClick={() => setShowNewTicket(true)}
-            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm hover:opacity-90"
+            className="cursor-pointer flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:opacity-90 active:translate-y-0"
           >
             <Plus size={15} /> New Ticket
           </button>
@@ -483,7 +483,7 @@ export default function page() {
           <button
             key={label}
             onClick={() => { setTab(label); setCurrentPage(1); }}
-            className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${tab === label ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-brand-foreground' : 'text-muted-foreground hover:text-foreground'
+            className={`cursor-pointer flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${tab === label ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-brand-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
               }`}
           >
             <Icon size={14} />
@@ -500,7 +500,7 @@ export default function page() {
 
       <button
         onClick={() => { setWarrantyOnly((v) => !v); setCurrentPage(1); }}
-        className={`mt-3 flex w-fit items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors ${warrantyOnly ? 'border-brand bg-brand-soft text-brand' : 'border-border text-muted-foreground hover:text-foreground'
+        className={`cursor-pointer mt-3 flex w-fit items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${warrantyOnly ? 'border-brand bg-brand-soft text-brand shadow-sm' : 'border-border text-muted-foreground hover:text-foreground hover:bg-accent/50'
           }`}
       >
         <ShieldCheck size={14} />
@@ -533,7 +533,7 @@ export default function page() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
               >
                 <X size={14} />
               </button>
@@ -548,7 +548,7 @@ export default function page() {
                 activeFilterCount > 0
                   ? 'border-brand bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-brand-foreground'
                   : 'border-border bg-card text-foreground hover:bg-accent'
-              }`}
+              } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
             >
               <SlidersHorizontal size={15} />
               <span>Filter</span>
@@ -569,7 +569,7 @@ export default function page() {
                   {activeFilterCount > 0 && (
                     <button
                       onClick={resetFilters}
-                      className="text-xs font-medium text-rose-500 hover:underline"
+                      className="text-xs font-medium text-rose-500 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                     >
                       Reset All
                     </button>
@@ -628,7 +628,7 @@ export default function page() {
                 <div className="mt-4 flex justify-end border-t border-border pt-3">
                   <button
                     onClick={() => setShowFilterMenu(false)}
-                    className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-1.5 text-xs font-semibold text-brand-foreground hover:opacity-90"
+                    className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-1.5 text-xs font-semibold text-brand-foreground hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                   >
                     Done
                   </button>
@@ -664,22 +664,22 @@ export default function page() {
           {selectedVehicle !== 'all' && (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
               Vehicle: {selectedVehicle}
-              <button onClick={() => setSelectedVehicle('all')} className="hover:opacity-70"><X size={12} /></button>
+              <button onClick={() => setSelectedVehicle('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
             </span>
           )}
           {selectedMode !== 'all' && (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
               Mode: {selectedMode}
-              <button onClick={() => setSelectedMode('all')} className="hover:opacity-70"><X size={12} /></button>
+              <button onClick={() => setSelectedMode('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
             </span>
           )}
           {selectedMechanic !== 'all' && (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
               Mechanic: {selectedMechanic === 'unassigned' ? 'Unassigned' : (mechanicOptions.find(m => m.id === selectedMechanic)?.name || selectedMechanic)}
-              <button onClick={() => setSelectedMechanic('all')} className="hover:opacity-70"><X size={12} /></button>
+              <button onClick={() => setSelectedMechanic('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
             </span>
           )}
-          <button onClick={resetFilters} className="text-xs text-muted-foreground hover:text-rose-500 hover:underline">
+          <button onClick={resetFilters} className="text-xs text-muted-foreground hover:text-rose-500 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
             Clear all
           </button>
         </div>
@@ -783,7 +783,7 @@ export default function page() {
                       <select
                         value={c.assignedMechanic ?? 'Unassigned'}
                         onChange={(e) => updateMechanic(c.ticketId, e.target.value)}
-                        className={`w-full min-w-[150px] rounded-md border py-1 pl-8 pr-2 text-sm text-foreground ${unassigned ? 'border-amber-300 bg-amber-50' : 'border-border'
+                        className={`cursor-pointer transition-all w-full min-w-[150px] rounded-md border py-1 pl-8 pr-2 text-sm text-foreground ${unassigned ? 'border-amber-300 bg-amber-50 hover:bg-amber-100/80' : 'border-border hover:bg-accent'
                           }`}
                       >
                         <option value="Unassigned">Unassigned</option>
@@ -824,7 +824,7 @@ export default function page() {
                       <button
                         onClick={() => setViewTarget(c)}
                         title="View"
-                        className="flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent"
+                        className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent active:translate-y-0"
                       >
                         <Eye size={14} />
                       </button>
@@ -835,7 +835,7 @@ export default function page() {
                               <button
                                 onClick={() => setCheckInTarget(c)}
                                 title="Vehicle Arrived — Store in Shop & Check In"
-                                className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 transition-all"
+                                className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
                               >
                                 <Store size={13} /> Check In
                               </button>
@@ -844,7 +844,7 @@ export default function page() {
                                 <a
                                   href={`/job-orders/${c.jobOrderId}/inspection`}
                                   title="Go to Inspection"
-                                  className="flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent"
+                                  className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent active:translate-y-0"
                                 >
                                   <Search size={14} />
                                 </a>
@@ -853,7 +853,7 @@ export default function page() {
                             <button
                               onClick={() => setDeleteTarget(c)}
                               title="Delete"
-                              className="flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50"
+                              className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50 active:translate-y-0"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -863,14 +863,14 @@ export default function page() {
                             <button
                               onClick={() => setApproveTarget(c)}
                               title="Approve"
-                              className="flex items-center justify-center rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] p-2 text-brand-foreground hover:opacity-90"
+                              className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] p-2 text-brand-foreground hover:opacity-90 active:translate-y-0"
                             >
                               <Check size={14} />
                             </button>
                             <button
                               onClick={() => setRejectTarget(c)}
                               title="Reject"
-                              className="flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50"
+                              className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50 active:translate-y-0"
                             >
                               <X size={14} />
                             </button>
@@ -976,7 +976,7 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand/10 text-brand">
             <CheckCircle2 size={20} />
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+          <button onClick={onClose} className="rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0" aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -1053,13 +1053,13 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
         )}
 
         <div className="mt-6 flex justify-end gap-3">
-          <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent">
+          <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm">
             Cancel
           </button>
           <button
             onClick={() => onConfirm(checkInNow)}
             disabled={unassigned || isMechanicOnLeave || busy}
-            className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
             {busy ? 'Approving...' : 'Confirm Approval'}
           </button>
@@ -1093,7 +1093,7 @@ function ViewModal({ job, mechanics, onClose }: { job: Job; mechanics: any[]; on
             </p>
             <h3 className="mt-1 text-lg font-bold text-foreground">Customer Booking Record</h3>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+          <button onClick={onClose} className="rounded-md p-1 cursor-pointer text-muted-foreground transition-all duration-200 hover:text-foreground hover:bg-accent hover:-translate-y-0.5 active:translate-y-0" aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -1202,7 +1202,7 @@ function ViewModal({ job, mechanics, onClose }: { job: Job; mechanics: any[]; on
         </div>
 
         <div className="mt-6 flex justify-end">
-          <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent">
+          <button onClick={onClose} className="cursor-pointer rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:bg-accent hover:shadow-sm">
             Close
           </button>
         </div>
@@ -1250,7 +1250,7 @@ function ConfirmModal({
           >
             {isDanger ? <Trash2 size={20} /> : isBrand ? <Store size={20} /> : <AlertCircle size={20} />}
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+          <button onClick={onClose} className="rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0" aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -1259,18 +1259,22 @@ function ConfirmModal({
         <p className="mt-1 text-sm text-muted-foreground">{description}</p>
 
         <div className="mt-6 flex justify-end gap-3">
-          <button onClick={onClose} disabled={disabled} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50">
+          <button
+            onClick={onClose}
+            disabled={disabled}
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+          >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={disabled}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+            className={`rounded-lg px-4 py-2 text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none ${
               isDanger
-                ? 'bg-destructive text-destructive-foreground hover:opacity-90 disabled:opacity-50'
+                ? 'bg-destructive text-destructive-foreground hover:opacity-90'
                 : isBrand
-                ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white hover:opacity-90 disabled:opacity-50'
-                : 'bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50'
+                ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white hover:opacity-90'
+                : 'bg-primary text-primary-foreground hover:opacity-90'
             }`}
           >
             {confirmLabel}
@@ -1384,7 +1388,7 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
             <h2 className="text-lg font-bold text-foreground">New Ticket</h2>
             <p className="text-sm text-muted-foreground">Fill out the customer and vehicle details.</p>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+          <button onClick={onClose} className="rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0" aria-label="Close">
             <X size={20} />
           </button>
         </div>
@@ -1668,7 +1672,7 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
                     className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium ${form.pickupOption === 'Shop Visit'
                       ? 'border-brand bg-brand/5 text-brand'
                       : 'border-border text-muted-foreground hover:bg-accent'
-                      }`}
+                      } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
                   >
                     <span
                       className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${form.pickupOption === 'Shop Visit' ? 'border-brand' : 'border-border'
@@ -1684,7 +1688,7 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
                     className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium ${form.pickupOption === 'Home Service'
                       ? 'border-brand bg-brand/5 text-brand'
                       : 'border-border text-muted-foreground hover:bg-accent'
-                      }`}
+                      } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
                   >
                     <span
                       className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${form.pickupOption === 'Home Service' ? 'border-brand' : 'border-border'
@@ -1725,11 +1729,15 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent"
+              className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
             >
               Cancel
             </button>
-            <button type="submit" disabled={submitting} className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+            >
               {submitting ? 'Creating…' : 'Create Ticket'}
             </button>
           </div>

@@ -376,7 +376,7 @@ function History() {
           <button
             onClick={exportCSV}
             disabled={exporting}
-            className="inline-flex items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm transition-colors hover:bg-accent disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-60"
           >
             {exporting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -727,7 +727,7 @@ function DetailsModal({ row, onClose }: { row: ServiceRecord; onClose: () => voi
           <button
             onClick={downloadJobOrder}
             disabled={row.items.length === 0 || downloading}
-            className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-40"
             title={row.items.length === 0 ? "No job order available for cancelled bookings" : "Download the Job Order PDF"}
           >
             {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Download Job Order

@@ -168,7 +168,11 @@ function LoginPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
+                className={`flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-200 ${
+                  submitting
+                    ? "cursor-not-allowed opacity-60"
+                    : "cursor-pointer hover:-translate-y-0.5 hover:bg-brand/90 hover:shadow-md active:translate-y-0"
+                }`}
               >
                 {submitting ? (
                   <>Signing in… <Loader2 className="h-4 w-4 animate-spin" /></>
@@ -190,7 +194,7 @@ function LoginPage() {
                   key={acc.label}
                   type="button"
                   onClick={() => fillDemo(acc)}
-                  className="flex items-center justify-between rounded-md border bg-muted/30 px-3 py-2 text-left text-xs transition-colors hover:border-brand/30 hover:bg-brand-soft"
+                  className="cursor-pointer flex items-center justify-between rounded-md border bg-muted/30 px-3 py-2 text-left text-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/30 hover:bg-brand-soft hover:shadow-sm active:translate-y-0"
                 >
                   <span className="text-muted-foreground">
                     <span className="font-semibold text-foreground">{acc.label}</span> — {acc.email}
@@ -286,7 +290,7 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
                   <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" /> {err}
                 </p>
               )}
-              <button disabled={sending} className="flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60">
+              <button disabled={sending} className={`flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-200 ${sending ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:-translate-y-0.5 hover:bg-brand/90 hover:shadow-md active:translate-y-0"}`}>
                 {sending ? <>Sending… <Loader2 className="h-4 w-4 animate-spin" /></> : 'Send reset link'}
               </button>
             </form>
@@ -303,7 +307,7 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
               <p className="text-xs text-muted-foreground">
                 Didn't get it? Check your spam folder, or ask the shop to reset it for you.
               </p>
-              <button onClick={onClose} className="w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01]">
+              <button onClick={onClose} className="cursor-pointer w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand/90 hover:shadow-md active:translate-y-0">
                 Back to sign in
               </button>
             </div>

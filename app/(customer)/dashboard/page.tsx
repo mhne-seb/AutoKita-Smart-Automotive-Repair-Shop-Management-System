@@ -56,6 +56,21 @@ import { getCompletedData } from "@/controllers/serviceProgressController";
 import { fetchJobOrderPdfData, generateJobOrderPdf } from "@/lib/jobOrderPdf";
 import { formatStamp, cn } from "@/lib/utils";
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from "@/lib/plate";
+import { TimeslotPicker } from "@/components/TimeslotPicker";
+import { toManilaIso } from "@/lib/bookingSlotsShared";
+
+function startOfToday() {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+function toDateValue(d: Date) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const dy = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${dy}`
+}
 
 // Status
 const STATUS_TO_STEP: Record<string, number> = {
@@ -107,6 +122,7 @@ function Dashboard() {
   const [bookServiceOpen, setBookServiceOpen] = useState(false);
   const [reportJobId, setReportJobId] = useState<number | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalData | null>(null);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   // Dynamic data from PostgreSQL
   const [data, setData] = useState<DashboardData | null>(null);
@@ -130,6 +146,10 @@ function Dashboard() {
       const userId = storedUserId ? parseInt(storedUserId, 10) : CURRENT_USER_ID;
 
       const res = await fetch(`/api/dashboard?userId=${userId}`);
+      if (res.status === 401) {
+        setSessionExpired(true);
+        return;
+      }
       if (!res.ok) throw new Error("Failed to fetch dashboard data");
       const json: DashboardData = await res.json();
       setData(json);
@@ -179,10 +199,11 @@ function Dashboard() {
   // every 10 s in the background, so what the shop does shows up here
   // without a reload (the bell in the header does the same).
   useEffect(() => {
+    if (sessionExpired) return;
     const t = setInterval(() => fetchDashboard(false, true), 10000);
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [sessionExpired]);
 
   // Activity icon/colour helpers
   const activityMeta = (type: DashboardActivity["type"]) => {
@@ -404,12 +425,28 @@ function Dashboard() {
                       {t.vehicle_year} {t.vehicle_model}
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">{t.plate_number}</div>
-                    <div className="mt-3 flex items-start gap-1.5 text-xs text-muted-foreground">
-                      <Clock className="mt-0.5 h-3 w-3 flex-shrink-0" />
-                      <span>
-                        Requested {formatRelativeTime(t.request_date)} ·{" "}
-                        {t.service_mode === "home_service" ? "Home Service" : "Walk-in"}
-                      </span>
+                    <div className="mt-3 space-y-1">
+                      <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                        <Clock className="mt-0.5 h-3 w-3 flex-shrink-0" />
+                        <span>
+                          Requested {formatRelativeTime(t.request_date)} ·{" "}
+                          {t.service_mode === "home_service" ? "Home Service" : "Walk-in"}
+                        </span>
+                      </div>
+                      {t.preferred_datetime && (
+                        <div className="flex items-start gap-1.5 text-xs font-medium text-brand">
+                          <Calendar className="mt-0.5 h-3 w-3 flex-shrink-0" />
+                          <span>
+                            Schedule: {new Date(t.preferred_datetime).toLocaleString("en-PH", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              hour: "numeric",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Free to cancel while the shop hasn't started — the API
@@ -511,13 +548,13 @@ function Dashboard() {
             <div className="mt-4 space-y-2">
               <button
                 onClick={() => setBookServiceOpen(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-transform duration-150 hover:opacity-90 active:scale-[0.98]"
+                className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:opacity-90 active:translate-y-0"
               >
                 <Plus className="h-4 w-4" /> Book New Service
               </button>
               <button
                 onClick={() => setContactOpen(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-md border py-2.5 text-sm font-medium transition-transform duration-150 hover:bg-accent active:scale-[0.98]"
+                className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-md border py-2.5 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-accent active:translate-y-0"
               >
                 <MessageCircle className="h-4 w-4" /> Contact Shop Office
               </button>
@@ -609,6 +646,30 @@ function Dashboard() {
       )}
       {confirmModal && (
         <ConfirmModal data={confirmModal} onClose={() => setConfirmModal(null)} />
+      )}
+
+      {sessionExpired && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-xl bg-card p-6 text-center shadow-2xl">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+              <AlertCircle className="h-6 w-6" />
+            </div>
+            <h3 className="mt-4 text-lg font-bold">Session Expired</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              For your security, your session has timed out. Please log in again to continue.
+            </p>
+            <button
+              onClick={() => {
+                sessionStorage.removeItem('autokita_customer');
+                sessionStorage.removeItem('autokita_user_id');
+                window.location.href = '/login';
+              }}
+              className="mt-5 w-full rounded-md bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90"
+            >
+              Log In Again
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -806,7 +867,8 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [pickup, setPickup] = useState<"shop" | "home">("shop");
-  const [preferredDatetime, setPreferredDatetime] = useState("");
+  const [preferredDate, setPreferredDate] = useState<Date>(startOfToday());
+  const [preferredTime, setPreferredTime] = useState<string>("08:00 AM");
   const [serviceCategory, setServiceCategory] = useState("");
   const [serviceCategoryOther, setServiceCategoryOther] = useState("");
   const [notes, setNotes] = useState("");
@@ -895,7 +957,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
       customerConcern: `Category: ${category || "Not specified"}. Notes: ${notes || "None"}`,
       homeAddress: user?.address || "None",
       diagnosticScanAuthorized: needsScan && scanAcknowledged,
-      preferredDatetime: preferredDatetime ? new Date(preferredDatetime).toISOString() : null,
+      preferredDatetime: preferredDate && preferredTime ? toManilaIso(toDateValue(preferredDate), preferredTime) : null,
     };
 
     if (selectedVehicleId === "new") {
@@ -979,7 +1041,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
           </div>
         ) : (
           <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-            <div className="space-y-5">
+            <div className="space-y-5 min-w-0">
               <BookModalCard icon={User} title="Customer Details" subtitle="Review your contact details for this booking.">
                 <div>
                   <label className="text-[10px] font-semibold uppercase text-muted-foreground">Full Name</label>
@@ -1108,14 +1170,14 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                   <BookRadioTile icon={Car} label="Home Service" active={pickup === "home"} onClick={() => setPickup("home")} />
                 </div>
                 <div className="mt-4">
-                  <label className="text-sm font-medium">Preferred Date &amp; Time (optional)</label>
-                  <input
-                    type="datetime-local"
-                    value={preferredDatetime}
-                    min={new Date().toISOString().slice(0, 16)}
-                    onChange={(e) => setPreferredDatetime(e.target.value)}
-                    className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
-                  />
+                  <div className="mt-2">
+                    <TimeslotPicker
+                      date={preferredDate}
+                      time={preferredTime}
+                      onChangeDate={setPreferredDate}
+                      onChangeTime={setPreferredTime}
+                    />
+                  </div>
                 </div>
                 <div className="mt-4">
                   <label className="text-sm font-medium">Service Category</label>
@@ -1220,10 +1282,10 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                   <BookSumRow label="Vehicle" value={displayVehicle} />
                   <BookSumRow label="Service Option" value={pickup === "shop" ? "Shop Visit" : "Home Service"} />
                   <BookSumRow label="Service Needed" value={serviceCategory || "—"} />
-                  {preferredDatetime && (
+                  {preferredDate && preferredTime && (
                     <BookSumRow
                       label="Preferred Date"
-                      value={new Date(preferredDatetime).toLocaleString("en-PH", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
+                      value={new Date(toManilaIso(toDateValue(preferredDate), preferredTime)).toLocaleString("en-PH", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
                     />
                   )}
                 </div>
@@ -1676,7 +1738,7 @@ function ServiceReportModal({ jobId, onClose }: { jobId: number; onClose: () => 
               {(data.bill?.balance ?? 0) > 0 && (
                 <Link
                   href={`/dashboard/tracking/billing?jobOrderId=${jobId}`}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                 >
                   <CreditCard className="h-4 w-4" /> Pay Remaining Balance
                 </Link>
@@ -1699,7 +1761,7 @@ function ServiceReportModal({ jobId, onClose }: { jobId: number; onClose: () => 
               <button
                 onClick={handleDownload}
                 disabled={downloading}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-50"
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md hover:opacity-90 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50"
               >
                 {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Download Job Order
               </button>
@@ -1735,7 +1797,7 @@ function ConfirmModal({ data, onClose }: { data: ConfirmModalData; onClose: () =
         <>
           <div className="flex items-start justify-between">
             <h3 className="text-lg font-semibold">{data.title}</h3>
-            <button onClick={close} className="rounded-md p-1 transition-colors hover:bg-accent">
+            <button onClick={close} className="rounded-md p-1 transition-all duration-200 hover:bg-accent cursor-pointer hover:-translate-y-0.5 active:translate-y-0">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -1759,13 +1821,13 @@ function ConfirmModal({ data, onClose }: { data: ConfirmModalData; onClose: () =
                 data.onConfirm();
                 close();
               }}
-              className={`flex-1 rounded-md py-2.5 text-sm font-semibold transition-transform duration-150 active:scale-[0.98] ${confirmClasses}`}
+              className={`flex-1 rounded-md py-2.5 text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md ${confirmClasses}`}
             >
               {data.confirmLabel}
             </button>
             <button
               onClick={close}
-              className="flex-1 rounded-md border py-2.5 text-sm font-medium transition-colors hover:bg-accent"
+              className="flex-1 rounded-md border py-2.5 text-sm font-medium cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:bg-accent hover:shadow-sm"
             >
               Cancel
             </button>

@@ -652,7 +652,7 @@ export default function page() {
                 isActive
                   ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
-              }`}
+              } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
             >
               <Icon size={16} className={isActive ? 'text-white' : 'text-slate-400'} />
               {tab.label}
@@ -695,7 +695,7 @@ export default function page() {
                     statusFilter === 'All'
                       ? 'bg-white text-slate-900 shadow-xs'
                       : 'text-slate-500 hover:text-slate-800'
-                  }`}
+                  } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
                 >
                   <span>All Records</span>
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
@@ -711,7 +711,7 @@ export default function page() {
                     statusFilter === 'To Be Paid'
                       ? 'bg-rose-600 text-white shadow-xs'
                       : 'text-rose-700 hover:bg-rose-50'
-                  }`}
+                  } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
                   <span>To Be Paid</span>
@@ -728,7 +728,7 @@ export default function page() {
                     statusFilter === 'Paid'
                       ? 'bg-emerald-600 text-white shadow-xs'
                       : 'text-emerald-700 hover:bg-emerald-50'
-                  }`}
+                  } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
                 >
                   <CheckCircle2 size={12} />
                   <span>Paid & Settled</span>
@@ -754,7 +754,7 @@ export default function page() {
                 </div>
                 <button
                   onClick={exportPayments}
-                  className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90 shrink-0"
+                  className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90 shrink-0 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                 >
                   <Download size={13} /> Export CSV
                 </button>
@@ -858,7 +858,7 @@ export default function page() {
                               e.stopPropagation()
                               setSelectedPayment(p)
                             }}
-                            className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-100"
+                            className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-100 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                           >
                             <Eye size={12} /> View
                           </button>
@@ -971,10 +971,10 @@ export default function page() {
                     className="w-14 rounded border border-slate-300 px-1.5 py-0.5 text-xs font-bold text-slate-800 outline-none focus:border-emerald-500"
                   />
                   <span className="text-xs font-bold text-slate-600">%</span>
-                  <button onClick={savePoolRate} className="text-emerald-600 hover:text-emerald-700 p-0.5" title="Save pool percentage">
+                  <button onClick={savePoolRate} className="text-emerald-600 hover:text-emerald-700 p-0.5 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md" title="Save pool percentage">
                     <Check size={15} />
                   </button>
-                  <button onClick={() => setIsEditingPoolRate(false)} className="text-rose-500 hover:text-rose-600 p-0.5" title="Cancel">
+                  <button onClick={() => setIsEditingPoolRate(false)} className="text-rose-500 hover:text-rose-600 p-0.5 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md" title="Cancel">
                     <X size={15} />
                   </button>
                 </div>
@@ -1017,7 +1017,7 @@ export default function page() {
             </button>
             <button
               onClick={exportPayroll}
-              className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+              className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
             >
               <Download size={14} /> Export CSV
             </button>
@@ -1073,17 +1073,17 @@ export default function page() {
                             }}
                             className="w-40 rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 outline-none focus:border-slate-500"
                           />
-                          <button onClick={saveEdit} className="text-emerald-600 hover:text-emerald-700">
+                          <button onClick={saveEdit} className="text-emerald-600 hover:text-emerald-700 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                             <Check size={16} />
                           </button>
-                          <button onClick={cancelEdit} className="text-rose-500 hover:text-rose-600">
+                          <button onClick={cancelEdit} className="text-rose-500 hover:text-rose-600 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                             <X size={16} />
                           </button>
                         </div>
                       ) : (
                         <button
                           onClick={() => startEdit(m.id, 'rank', m.rank)}
-                          className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:border-slate-400"
+                          className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:border-slate-400 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                         >
                           {m.rank}
                           <Pencil size={12} className="text-slate-400" />
@@ -1108,10 +1108,10 @@ export default function page() {
                             className="w-16 rounded-lg border border-blue-400 bg-white px-2 py-1 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-200"
                           />
                           <span className="text-xs font-bold text-slate-500">%</span>
-                          <button onClick={saveEdit} className="text-emerald-600 hover:text-emerald-700 p-0.5">
+                          <button onClick={saveEdit} className="text-emerald-600 hover:text-emerald-700 p-0.5 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                             <Check size={16} />
                           </button>
-                          <button onClick={cancelEdit} className="text-rose-500 hover:text-rose-600 p-0.5">
+                          <button onClick={cancelEdit} className="text-rose-500 hover:text-rose-600 p-0.5 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                             <X size={16} />
                           </button>
                         </div>
@@ -1195,7 +1195,7 @@ export default function page() {
                     servicesViewMode === 'aggregate'
                       ? 'bg-white text-slate-900 shadow-xs'
                       : 'text-slate-500 hover:text-slate-800'
-                  }`}
+                  } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
                 >
                   Aggregated Service Categories ({weeklyServices.length})
                 </button>
@@ -1205,7 +1205,7 @@ export default function page() {
                     servicesViewMode === 'itemized'
                       ? 'bg-white text-slate-900 shadow-xs'
                       : 'text-slate-500 hover:text-slate-800'
-                  }`}
+                  } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
                 >
                   Itemized Finished Services Log ({servicesDone.length})
                 </button>
@@ -1231,7 +1231,7 @@ export default function page() {
                   </div>
                   <button
                     onClick={exportServices}
-                    className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+                    className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                   >
                     <Download size={14} /> Export Summary CSV
                   </button>
@@ -1312,7 +1312,7 @@ export default function page() {
                   </div>
                   <button
                     onClick={exportServicesDone}
-                    className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+                    className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                   >
                     <Download size={14} /> Export Itemized CSV
                   </button>
@@ -1430,7 +1430,7 @@ export default function page() {
               </div>
               <button
                 onClick={() => setSelectedPayment(null)}
-                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
               >
                 <X size={18} />
               </button>
@@ -1561,13 +1561,13 @@ export default function page() {
             <div className="mt-6 flex justify-end gap-2">
               <button
                 onClick={() => downloadInvoice(selectedPayment)}
-                className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+                className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
               >
                 <Download size={14} /> Download Invoice
               </button>
               <button
                 onClick={() => setSelectedPayment(null)}
-                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
               >
                 Close
               </button>

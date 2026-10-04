@@ -780,7 +780,7 @@ export default function Page() {
           <div className="relative" ref={exportMenuRef}>
             <button
               onClick={() => setShowExportMenu((prev) => !prev)}
-              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition-all"
+              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition-all cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
             >
               <Download size={15} />
               Export Reports
@@ -966,7 +966,7 @@ export default function Page() {
                   chartType === opt.value
                     ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white shadow-sm'
                     : 'text-slate-500 hover:text-slate-700'
-                }`}
+                } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
               >
                 {opt.label}
               </button>
@@ -1185,9 +1185,9 @@ export default function Page() {
                           <button
                             onClick={() => !sent && openOfferModal(c)}
                             disabled={sent}
-                            className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
+                            className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-default disabled:hover:translate-y-0 disabled:hover:shadow-none ${
                               sent
-                                ? 'cursor-default border border-emerald-200 bg-emerald-50 text-emerald-700'
+                                ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
                                 : 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white hover:opacity-90'
                             }`}
                           >
@@ -1264,7 +1264,7 @@ export default function Page() {
                             pageNum === safePage
                               ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white'
                               : 'text-slate-500 hover:bg-slate-100'
-                          }`}
+                          } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
                         >
                           {pageNum}
                         </button>
@@ -1352,7 +1352,7 @@ export default function Page() {
             <div className="mt-6 flex items-center justify-end gap-3">
               <button
                 onClick={closeOfferModal}
-                className="rounded-full px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100"
+                className="rounded-full px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
               >
                 Cancel
               </button>

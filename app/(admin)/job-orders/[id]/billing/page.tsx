@@ -130,7 +130,7 @@ export default function BillingPage() {
       {notYetDone && (
         <div className="flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
           <AlertTriangle size={16} /> The job isn't complete yet — the balance becomes collectable once the road test passes.
-          <Link href={`/job-orders/${jobOrderId}/testing`} className="ml-auto font-semibold underline">Go to Testing</Link>
+          <Link href={`/job-orders/${jobOrderId}/testing`} className="ml-auto font-semibold underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Go to Testing</Link>
         </div>
       )}
 
@@ -155,7 +155,7 @@ export default function BillingPage() {
                   return (
                     <li key={p.id} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center">
                       {p.proof_of_payment_image ? (
-                        <button type="button" onClick={() => setProof(p.proof_of_payment_image)} className="shrink-0 self-start overflow-hidden rounded-md border">
+                        <button type="button" onClick={() => setProof(p.proof_of_payment_image)} className="shrink-0 self-start overflow-hidden rounded-md border cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                           <img src={p.proof_of_payment_image} alt="" className="h-14 w-20 object-cover" />
                         </button>
                       ) : (
@@ -168,8 +168,8 @@ export default function BillingPage() {
                       <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${cashIntent ? 'bg-sky-100 text-sky-700' : STATUS_PILL[p.verification_status]}`}>{cashIntent ? 'Awaiting cash' : p.verification_status}</span>
                       {p.verification_status === 'pending' && (
                         <div className="flex shrink-0 gap-2">
-                          <button onClick={() => setRejectingPayment(p)} disabled={busy} className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"><XCircle size={13} /> {cashIntent ? "Didn't pay" : 'Reject'}</button>
-                          <button onClick={() => setConfirmVerify(p)} disabled={busy} className="flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50">{busy ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />} {cashIntent ? 'Cash received' : 'Verify'}</button>
+                          <button onClick={() => setRejectingPayment(p)} disabled={busy} className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"><XCircle size={13} /> {cashIntent ? "Didn't pay" : 'Reject'}</button>
+                          <button onClick={() => setConfirmVerify(p)} disabled={busy} className="flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none">{busy ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />} {cashIntent ? 'Cash received' : 'Verify'}</button>
                         </div>
                       )}
                     </li>
@@ -277,15 +277,15 @@ export default function BillingPage() {
                       <button 
                         onClick={onRelease} 
                         disabled={releasing || data.parts.filter(p => !p.warranty && p.warranty_months === null).some(p => warrantyChoices[p.id] === undefined || warrantyChoices[p.id] === '')} 
-                        className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                        className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                       >
                         {releasing ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Yes, released
                       </button>
-                      <button onClick={() => setConfirmRelease(false)} disabled={releasing} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                      <button onClick={() => setConfirmRelease(false)} disabled={releasing} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none">Cancel</button>
                     </div>
                   </div>
                 ) : (
-                  <button onClick={() => setConfirmRelease(true)} disabled={!paidInFull || notYetDone} className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"><Car size={14} /> Release vehicle</button>
+                  <button onClick={() => setConfirmRelease(true)} disabled={!paidInFull || notYetDone} className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"><Car size={14} /> Release vehicle</button>
                 )}
               </>
             )}
@@ -295,7 +295,7 @@ export default function BillingPage() {
             <p className="flex items-center gap-1.5 font-semibold uppercase tracking-wide text-slate-400"><Clock size={13} /> Timeline</p>
             <p className="mt-2">Completed: <span className="text-slate-700">{fmt(data.completedAt)}</span></p>
             <p className="mt-1">Released: <span className="text-slate-700">{fmt(data.releasedAt)}</span></p>
-            <Link href={`/job-orders/${jobOrderId}/progress`} className="mt-3 inline-flex items-center gap-1 font-semibold text-slate-500 hover:text-slate-800 hover:underline"><ArrowLeft size={12} /> Service Progress</Link>
+            <Link href={`/job-orders/${jobOrderId}/progress`} className="mt-3 inline-flex items-center gap-1 font-semibold text-slate-500 hover:text-slate-800 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><ArrowLeft size={12} /> Service Progress</Link>
           </div>
         </div>
       </div>

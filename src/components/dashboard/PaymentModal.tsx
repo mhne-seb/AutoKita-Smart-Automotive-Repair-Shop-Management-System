@@ -151,7 +151,7 @@ export function PaymentModal({
                 <h3 className="text-lg font-bold">Choose Payment Method</h3>
                 <p className="text-sm text-muted-foreground">Select your preferred way to settle this bill.</p>
               </div>
-              <button onClick={onClose} className="rounded-full border p-1 hover:bg-accent"><X className="h-4 w-4" /></button>
+              <button onClick={onClose} className="rounded-full border p-1 hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X className="h-4 w-4" /></button>
             </div>
 
             <div className="mt-4 rounded-lg bg-brand p-4 text-brand-foreground">
@@ -163,7 +163,7 @@ export function PaymentModal({
             <div className="mt-4 grid grid-cols-2 gap-3">
               <button
                 onClick={() => setMethod("shop")}
-                className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 ${
+                className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md ${
                   method === "shop" ? "border-brand bg-brand-soft/30" : "border-border"
                 }`}
               >
@@ -171,7 +171,7 @@ export function PaymentModal({
               </button>
               <button
                 onClick={() => setMethod("ewallet")}
-                className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 ${
+                className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md ${
                   method === "ewallet" ? "border-brand bg-brand-soft/30" : "border-border"
                 }`}
               >
@@ -188,7 +188,7 @@ export function PaymentModal({
                       <button
                         key={c.id}
                         onClick={() => setChannelId(c.id)}
-                        className={`rounded-lg border-2 py-2 text-xs font-semibold ${
+                        className={`rounded-lg border-2 py-2 text-xs font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md ${
                           channelId === c.id ? "border-brand bg-brand-soft/30" : "border-border hover:bg-accent"
                         }`}
                       >
@@ -208,7 +208,7 @@ export function PaymentModal({
                       </div>
                       <button
                         onClick={copyAccountNumber}
-                        className="flex shrink-0 items-center gap-1 rounded-md border px-2.5 py-1.5 text-xs font-semibold hover:bg-accent"
+                        className="flex shrink-0 items-center gap-1 rounded-md border px-2.5 py-1.5 text-xs font-semibold hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                       >
                         {copied ? <><Check className="h-3 w-3 text-success" /> Copied</> : <><Copy className="h-3 w-3" /> Copy</>}
                       </button>
@@ -238,14 +238,14 @@ export function PaymentModal({
                         <p className="truncate text-xs font-medium">{proofFile?.name}</p>
                         <p className="text-[10px] text-muted-foreground">{((proofFile?.size ?? 0) / 1024).toFixed(0)} KB</p>
                       </div>
-                      <label className="shrink-0 cursor-pointer rounded-md border px-2.5 py-1.5 text-xs font-semibold hover:bg-accent">
+                      <label className="shrink-0 cursor-pointer rounded-md border px-2.5 py-1.5 text-xs font-semibold hover:bg-accent transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                         Replace
                         <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleProofChange} className="hidden" />
                       </label>
                     </div>
                   ) : (
                     <label
-                      className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border-2 border-dashed p-5 text-center hover:bg-accent ${!selectedChannel ? "pointer-events-none opacity-50" : ""}`}
+                      className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border-2 border-dashed p-5 text-center hover:bg-accent transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md hover:border-brand ${!selectedChannel ? "pointer-events-none opacity-50" : ""}`}
                     >
                       <Upload className="h-5 w-5 text-muted-foreground" />
                       <span className="text-xs font-semibold">Click to upload a screenshot</span>
@@ -273,7 +273,7 @@ export function PaymentModal({
             <button
               onClick={confirm}
               disabled={status === "processing" || !canConfirm}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-150 hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md hover:opacity-90 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50"
             >
               {status === "processing" ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</>
@@ -283,7 +283,7 @@ export function PaymentModal({
                 <><CheckCircle2 className="h-4 w-4" /> Confirm Payment</>
               )}
             </button>
-            <button onClick={onClose} className="mt-2 w-full rounded-md border py-2 text-sm hover:bg-accent">Cancel</button>
+            <button onClick={onClose} className="mt-2 w-full rounded-md border py-2 text-sm hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Cancel</button>
           </>
         )}
       </div>

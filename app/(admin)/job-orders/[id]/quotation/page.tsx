@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import { QuotationService, JobOrderCard, QuotationData, MechanicalFinding, findingStatusMeta, QuotationPart } from '@/data/types'
 import { RejectPaymentModal } from '@/components/dashboard/RejectPaymentModal'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
+import { ShopLoading } from '@/components/ShopLoading'
 
 export default function page() {
   const jobOrderId = String(useParams().id)
@@ -400,11 +401,7 @@ export default function page() {
   }, [quotationPending, quotationApproved, payment?.id, payment?.verificationStatus, preDiagnostic?.status, jobOrderId, jobOrder?.stage])
 
   if (jobOrder === undefined || initial === undefined || preDiagnostic === undefined) {
-    return (
-      <div className="p-8">
-        <p className="text-sm text-slate-500">Loading quotation…</p>
-      </div>
-    )
+    return <ShopLoading message="Loading quotation…" />
   }
 
   if (!jobOrder || !initial) {
@@ -705,7 +702,7 @@ export default function page() {
           <button
             onClick={openAddServiceModal}
             disabled={quotationPending || quotationApproved}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
             <Plus size={14} /> Add Service
           </button>
@@ -713,7 +710,7 @@ export default function page() {
             <button
               onClick={handleRecallApproval}
               disabled={recalling}
-              className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
             >
               <RotateCcw size={14} /> {recalling ? 'Recalling…' : 'Recall Approval'}
             </button>
@@ -725,7 +722,7 @@ export default function page() {
                 saveState === 'error' ? (
                   <button
                     onClick={() => void persistQuotation()}
-                    className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:underline"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                   >
                     <AlertCircle size={13} /> Couldn't save — retry
                   </button>
@@ -754,7 +751,7 @@ export default function page() {
                   }
                 }}
                 disabled={sending || quotationApproved}
-                className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
               >
                 <Send size={14} />{' '}
                 {sending
@@ -918,14 +915,14 @@ export default function page() {
                       <button
                         onClick={() => setEditingServiceId(editing ? null : s.id)}
                         disabled={quotationPending || quotationApproved}
-                        className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                       >
                         {editing ? <Check size={13} /> : <Pencil size={13} />} {editing ? 'Done' : 'Edit'}
                       </button>
                       <button
                         onClick={() => setConfirmRemoveService({ id: s.id, name: s.name })}
                         disabled={quotationPending || quotationApproved}
-                        className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                         title="Remove Service"
                       >
                         <Trash2 size={13} />
@@ -939,7 +936,7 @@ export default function page() {
                   <button
                     onClick={() => openAddPartModal(s.id)}
                     disabled={quotationPending || quotationApproved}
-                    className="flex items-center gap-1 text-emerald-600 hover:underline disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed"
+                    className="flex items-center gap-1 text-emerald-600 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   >
                     <Plus size={12} /> Add Part
                   </button>
@@ -1003,7 +1000,7 @@ export default function page() {
                                 onClick={() => openEditPartModal(s.id, p)}
                                 disabled={preDiagnostic?.status === 'pending' || quotationApproved}
                                 title="Edit part"
-                                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                className="rounded-md p-1.5 text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-slate-700 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                               >
                                 <Pencil size={13} />
                               </button>
@@ -1011,7 +1008,7 @@ export default function page() {
                                 onClick={() => setConfirmRemovePart({ serviceId: s.id, partId: p.id, name: p.name })}
                                 disabled={preDiagnostic?.status === 'pending' || quotationApproved}
                                 title="Remove part"
-                                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
+                                className="rounded-md p-1.5 text-slate-400 transition-all duration-200 hover:bg-rose-50 hover:text-rose-600 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                               >
                                 <Trash2 size={13} />
                               </button>
@@ -1099,7 +1096,7 @@ export default function page() {
               </div>
 
               {payment.proofOfPaymentImage && (
-                <button type="button" onClick={() => setShowProofLightbox(true)} className="mt-3 block w-full">
+                <button type="button" onClick={() => setShowProofLightbox(true)} className="mt-3 block w-full cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                   <img
                     src={payment.proofOfPaymentImage}
                     alt="Proof of payment"
@@ -1114,14 +1111,14 @@ export default function page() {
                   <button
                     onClick={() => setShowRejectModal(true)}
                     disabled={verifyingPayment}
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                   >
                     <XCircle size={14} /> Reject
                   </button>
                   <button
                     onClick={() => setConfirmVerifyQuotation(true)}
                     disabled={verifyingPayment}
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-white hover:bg-emerald-600 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                   >
                     <Check size={14} /> {verifyingPayment ? 'Saving…' : 'Verify'}
                   </button>
@@ -1182,7 +1179,7 @@ export default function page() {
             )}
             <button
               onClick={() => setEditingNotes((v) => !v)}
-              className="mt-2 text-sm font-semibold text-emerald-600 hover:underline"
+              className="mt-2 text-sm font-semibold text-emerald-600 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
             >
               {editingNotes ? 'Save Notes' : 'Edit Notes'}
             </button>
@@ -1205,7 +1202,7 @@ export default function page() {
                 onClick={continueToServiceProgress}
                 disabled={startingWork || Boolean(paymentBlocks)}
                 title={paymentBlocks ?? undefined}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
               >
                 {startingWork ? 'Starting…' : 'Continue to Service Progress'} <ChevronRight size={15} />
               </button>
@@ -1219,7 +1216,7 @@ export default function page() {
           <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900">Review before sending</h3>
-              <button onClick={() => setShowSendReview(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
+              <button onClick={() => setShowSendReview(false)} className="rounded-full p-1 hover:bg-slate-100 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={16} className="text-slate-500" /></button>
             </div>
 
             <p className="text-sm text-slate-500">
@@ -1284,7 +1281,7 @@ export default function page() {
             </div>
 
             <div className="mt-6 flex justify-end gap-3">
-              <button onClick={() => setShowSendReview(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50">
+              <button onClick={() => setShowSendReview(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                 Keep editing
               </button>
               <button
@@ -1304,7 +1301,7 @@ export default function page() {
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-slate-900">Add Services</h3>
-              <button onClick={() => setShowServiceModal(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
+              <button onClick={() => setShowServiceModal(false)} className="rounded-full p-1 hover:bg-slate-100 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={16} className="text-slate-500" /></button>
             </div>
             
             <div className="space-y-4">
@@ -1335,7 +1332,7 @@ export default function page() {
                             disabled={added}
                             checked={selectedServiceIds.includes(String(s.id))}
                             onChange={() => toggleService(String(s.id))}
-                            className="h-4 w-4 accent-emerald-600"
+                            className="h-4 w-4 accent-emerald-600 cursor-pointer disabled:cursor-not-allowed"
                           />
                           <span className="flex-1">{s.service_name}</span>
                           {added ? (
@@ -1382,8 +1379,12 @@ export default function page() {
                 {pickedCount > 0 ? `${pickedCount} selected` : 'Nothing selected yet'}
               </span>
               <div className="flex gap-3">
-                <button onClick={() => setShowServiceModal(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50">Cancel</button>
-                <button onClick={confirmAddService} disabled={pickedCount === 0} className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">
+                <button onClick={() => setShowServiceModal(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Cancel</button>
+                <button
+                  onClick={confirmAddService}
+                  disabled={pickedCount === 0}
+                  className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                >
                   {pickedCount > 1 ? `Add ${pickedCount} Services` : 'Add Service'}
                 </button>
               </div>
@@ -1397,7 +1398,7 @@ export default function page() {
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900"><PackagePlus size={18} className="text-emerald-600" /> {editingPartId ? 'Edit Part' : 'Add Part'}</h3>
-              <button onClick={() => setShowPartModal(false)} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
+              <button onClick={() => setShowPartModal(false)} className="rounded-full p-1 hover:bg-slate-100 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={16} className="text-slate-500" /></button>
             </div>
 
             <div className="space-y-4">
@@ -1457,14 +1458,14 @@ export default function page() {
                   <button
                     type="button"
                     onClick={() => setPartStatus('in-stock')}
-                    className={`rounded-lg border-2 px-3 py-2 text-sm font-semibold ${partStatus === 'in-stock' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                    className={`rounded-lg border-2 px-3 py-2 text-sm font-semibold ${partStatus === 'in-stock' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'} cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
                   >
                     In Stock
                   </button>
                   <button
                     type="button"
                     onClick={() => setPartStatus('to-order')}
-                    className={`rounded-lg border-2 px-3 py-2 text-sm font-semibold ${partStatus === 'to-order' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                    className={`rounded-lg border-2 px-3 py-2 text-sm font-semibold ${partStatus === 'to-order' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'} cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
                   >
                     To Order
                   </button>
@@ -1502,8 +1503,12 @@ export default function page() {
             </div>
 
             <div className="mt-6 flex justify-end gap-3">
-              <button onClick={() => setShowPartModal(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50">Cancel</button>
-              <button onClick={confirmPart} disabled={!partName.trim()} className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition-all duration-150 hover:bg-emerald-600 active:scale-95 disabled:opacity-50">
+              <button onClick={() => setShowPartModal(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Cancel</button>
+              <button
+                onClick={confirmPart}
+                disabled={!partName.trim()}
+                className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+              >
                 {editingPartId ? <Check size={14} /> : <PackagePlus size={14} />} {editingPartId ? 'Save Part' : 'Add Part'}
               </button>
             </div>

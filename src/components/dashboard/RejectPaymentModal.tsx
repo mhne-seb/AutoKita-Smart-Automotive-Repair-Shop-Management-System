@@ -17,7 +17,7 @@ export function RejectPaymentModal({
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold text-slate-900">Reject Payment</h3>
-          <button onClick={onClose} className="rounded-full p-1 hover:bg-slate-100"><X size={16} className="text-slate-500" /></button>
+          <button onClick={onClose} className="rounded-full p-1 hover:bg-slate-100 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={16} className="text-slate-500" /></button>
         </div>
         
         <div className="space-y-4">
@@ -39,11 +39,11 @@ export function RejectPaymentModal({
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
-          <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50">Cancel</button>
+          <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Cancel</button>
           <button
             onClick={() => onConfirm(rejectReason.trim())}
             disabled={rejectReason.trim().length < 3 || rejectReason.length > 200 || isWorking}
-            className="flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-150 hover:bg-rose-700 active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white cursor-pointer transition-all duration-200 hover:bg-rose-700 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
             {isWorking ? 'Rejecting...' : 'Confirm Reject'}
           </button>

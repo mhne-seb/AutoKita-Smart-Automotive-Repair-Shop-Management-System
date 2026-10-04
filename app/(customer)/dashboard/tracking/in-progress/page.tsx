@@ -424,7 +424,7 @@ function InProgress() {
                         <button
                           type="button"
                           onClick={() => setPhotoView({ url: (entry as { photo?: string }).photo!, label: `${entry.label} — finished work` })}
-                          className="mt-2 flex items-center gap-2 rounded-lg border p-1.5 text-left text-[11px] text-muted-foreground transition-colors hover:bg-accent"
+                          className="cursor-pointer mt-2 flex items-center gap-2 rounded-lg border p-1.5 text-left text-[11px] text-muted-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent hover:shadow-sm active:translate-y-0"
                         >
                           <img src={(entry as { photo?: string }).photo} alt={`${entry.label} finished`} className="h-12 w-16 shrink-0 rounded-md object-cover" />
                           <span><Camera className="mr-1 inline h-3 w-3" />Photo of the finished work — tap to enlarge</span>
@@ -590,7 +590,7 @@ function InProgress() {
                     toast.success("Pull-out request withdrawn — work continues.");
                     await load();
                   }}
-                  className="mt-3 w-full rounded-md border py-2 text-xs font-semibold hover:bg-accent"
+                  className="cursor-pointer mt-3 w-full rounded-md border py-2 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent hover:shadow-sm active:translate-y-0"
                 >
                   Cancel Request
                 </button>
@@ -612,7 +612,11 @@ function InProgress() {
                 <button
                   onClick={() => setShowWarn(true)}
                   disabled={allServicesDone}
-                  className="mt-3 w-full rounded-md bg-[color:oklch(0.6_0.22_350)] py-2 text-xs font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                  className={`mt-3 w-full rounded-md bg-[color:oklch(0.6_0.22_350)] py-2 text-xs font-semibold text-white transition-all duration-200 ${
+                    allServicesDone
+                      ? "cursor-not-allowed opacity-40"
+                      : "cursor-pointer hover:-translate-y-0.5 hover:bg-[color:oklch(0.54_0.22_350)] hover:shadow-md active:translate-y-0"
+                  }`}
                 >
                   Pull Out Vehicle
                 </button>
@@ -809,7 +813,11 @@ function PullOutModal({
             <button
               onClick={submit}
               disabled={status === "submitting"}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-[color:oklch(0.6_0.22_350)] py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-[color:oklch(0.54_0.22_350)] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none disabled:active:scale-100"
+              className={`mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-[color:oklch(0.6_0.22_350)] py-2.5 text-sm font-semibold text-white transition-all duration-200 ${
+                status === "submitting"
+                  ? "cursor-not-allowed opacity-60"
+                  : "cursor-pointer hover:-translate-y-0.5 hover:bg-[color:oklch(0.54_0.22_350)] hover:shadow-md active:translate-y-0"
+              }`}
             >
               {status === "submitting" ? (
                 <>
@@ -821,7 +829,7 @@ function PullOutModal({
             </button>
             <button
               onClick={onClose}
-              className="mt-2 w-full rounded-md border py-2 text-sm transition-all duration-150 hover:border-foreground/30 hover:bg-accent active:scale-[0.98]"
+              className="mt-2 cursor-pointer w-full rounded-md border py-2 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-foreground/30 hover:bg-accent hover:shadow-sm active:translate-y-0"
             >
               Keep Servicing My Vehicle
             </button>

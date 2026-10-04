@@ -183,7 +183,7 @@ export function ServiceHistory() {
             <button
               key={label}
               onClick={() => { setStatus(key); setPage(1) }}
-              className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+              className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md ${
                 active ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -231,7 +231,7 @@ export function ServiceHistory() {
         <button
           onClick={exportCsv}
           disabled={exporting || total === 0}
-          className="flex items-center gap-2 rounded-xl border border-border bg-card px-3.5 py-2 text-sm font-semibold shadow-sm hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl border border-border bg-card px-3.5 py-2 text-sm font-semibold shadow-sm hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50"
         >
           {exporting ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />} Export
         </button>
@@ -291,7 +291,7 @@ export function ServiceHistory() {
                   <td className="whitespace-nowrap px-4 py-3 text-right">{peso(r.total)}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-right">{peso(r.paid)}</td>
                   <td className="px-4 py-3 text-right">
-                    <button onClick={() => setDetailId(r.ticketId)} aria-label={`View record ST-${r.ticketId}`} className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold hover:bg-accent">
+                    <button onClick={() => setDetailId(r.ticketId)} aria-label={`View record ST-${r.ticketId}`} className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                       <Eye size={13} /> View
                     </button>
                   </td>

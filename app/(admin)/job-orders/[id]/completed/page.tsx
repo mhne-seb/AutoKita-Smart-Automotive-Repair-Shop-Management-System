@@ -73,7 +73,7 @@ export default function CompletedPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button onClick={() => setShowGenerate(true)} disabled={!canGenerate} title={canGenerate ? undefined : 'Available once the job is completed'} className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold ${released ? 'bg-white text-slate-900 hover:bg-slate-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
+            <button onClick={() => setShowGenerate(true)} disabled={!canGenerate} title={canGenerate ? undefined : 'Available once the job is completed'} className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50 ${released ? 'bg-white text-slate-900 hover:bg-slate-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
               <FileText size={14} /> Generate Job Order
             </button>
           </div>
@@ -123,7 +123,7 @@ export default function CompletedPage() {
                       {a.result === 'fail' && a.reworkTaskTitles.length > 0 && <p className="text-xs text-slate-500">Sent back: {a.reworkTaskTitles.join(', ')}</p>}
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
-                      {a.photoUrl && <button type="button" onClick={() => setPhoto({ url: a.photoUrl!, label: `Road test attempt ${a.attemptNo}` })}><img src={a.photoUrl} alt="" className="h-9 w-12 rounded border object-cover" /></button>}
+                      {a.photoUrl && <button type="button" onClick={() => setPhoto({ url: a.photoUrl!, label: `Road test attempt ${a.attemptNo}` })} className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><img src={a.photoUrl} alt="" className="h-9 w-12 rounded border object-cover" /></button>}
                       <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${a.result === 'pass' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>{a.result === 'pass' ? 'Passed' : 'Failed'}</span>
                     </div>
                   </li>
@@ -144,7 +144,7 @@ export default function CompletedPage() {
               ))}
               <div className="flex justify-between border-t border-slate-100 pt-1.5"><span className="font-semibold text-slate-700">Balance</span><span className={`text-lg font-bold ${bill.balance <= 0 ? 'text-emerald-600' : 'text-slate-900'}`}>{currency(bill.balance)}</span></div>
             </div>
-            {!released && <Link href={`/job-orders/${jobOrderId}/billing`} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:underline"><ArrowLeft size={12} /> Billing</Link>}
+            {!released && <Link href={`/job-orders/${jobOrderId}/billing`} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><ArrowLeft size={12} /> Billing</Link>}
           </div>
 
           {/* Milestones */}

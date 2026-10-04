@@ -39,7 +39,7 @@ export function AdminNotificationBell({ buttonClassName }: { buttonClassName?: s
       loadAll={() => loadAdminNotifications(100)}
       buttonClassName={
         buttonClassName ??
-        'relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+        'relative cursor-pointer flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:bg-slate-50 active:translate-y-0'
       }
     />
   )
