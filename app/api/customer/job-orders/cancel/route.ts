@@ -2,13 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
 
-// Lets a customer withdraw a booking the shop has accepted but not started.
-//
-// "Not started" is the whole rule: no walkaround photos, no findings, no
-// report sent. Once any of those exist the mechanic has put time in — and
-// once the scanner has been used there's a fee — so from that point the
-// customer has to talk to the shop, and the quotation flow handles what they
-// owe. Cancelling here is free precisely because nothing has happened yet.
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()

@@ -4,11 +4,6 @@ import { db } from '@/lib/db'
 import { notifyCustomer } from '@/lib/customerNotify'
 import { signFileUrl } from '@/lib/storage'
 
-// Admin-side view of the latest payment submitted for a job order, plus the
-// action to verify/reject it. Raw queries straight against `payments` —
-// get_payment_records() (sql/Other/run_all_functions.sql) doesn't expose the
-// payment_channel/reference_number/proof_of_payment_image columns, and that
-// file isn't touched without going through Jubert.
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;

@@ -19,9 +19,7 @@ import json
 import re
 
 
-# ---------------------------------------------------------------------------
 # Configuration
-# ---------------------------------------------------------------------------
 
 # Check 2: filename keywords (case-insensitive OR match)
 # Matches diagnostic terms, scanners, and automotive makes/models commonly used
@@ -70,9 +68,7 @@ DTC_TABLE_HEADERS = ["dtc", "code", "fault code", "diagnostic trouble code", "dt
 DTC_CODE_REGEX = re.compile(r'\b[PCBU][0-9A-Z]{4,}(?:[:\-][0-9A-Z\-]+)?\b', re.IGNORECASE)
 
 
-# ---------------------------------------------------------------------------
 # Individual checks
-# ---------------------------------------------------------------------------
 
 def check_filename(pdf_path: str) -> tuple[bool, str]:
     """
@@ -168,9 +164,7 @@ def check_dtc_table(doc) -> tuple[bool, str]:
     return False, "no DTC table or fault codes detected"
 
 
-# ---------------------------------------------------------------------------
 # Main validation pipeline
-# ---------------------------------------------------------------------------
 
 def validate(pdf_path: str) -> dict:
     """
@@ -228,9 +222,7 @@ def validate(pdf_path: str) -> dict:
         doc.close()
 
 
-# ---------------------------------------------------------------------------
 # Entry point
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

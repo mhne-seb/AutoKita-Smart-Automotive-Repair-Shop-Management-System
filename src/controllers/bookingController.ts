@@ -1,8 +1,3 @@
-// bookingController
-//
-// Backs the /book flow (Customer side). Right now "submitting" a booking just
-// resolves with a generated booking id — there is no persistence, matching
-// the rest of this frontend-only demo
 
 export interface BookingRequest {
   service: string

@@ -2,11 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
 
-// Lets a customer withdraw a booking the shop hasn't started on. This is the
-// only cancellation the customer can do on their own: once a ticket becomes a
-// job order, whether they can walk away (and what they owe if a diagnostic
-// scan was already run) is a shop-policy question the quotation flow handles,
-// not this endpoint.
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()

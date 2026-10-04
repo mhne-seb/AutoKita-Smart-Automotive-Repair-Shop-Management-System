@@ -3,14 +3,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { DEFAULT_MECHANIC_CAPACITY } from '@/data/mechanicPolicy'
 
-// Mechanics roster for the admin Mechanics page.
-//
-// A mechanic is two rows: `employees` (who they are, hire date, active /
-// on_leave / terminated) and `employee_profiles` (branch, rank, pay, and the
-// jobs_capacity the assignment cap checks against). Workload comes from
-// service_progress_tasks — the same count the scheduling modal uses, so the
-// two screens never disagree about who is full.
-//
 
 // Latest payroll row per mechanic (empty until payroll is generated).
 const PAYROLL_SQL = `

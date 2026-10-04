@@ -101,10 +101,6 @@ export async function GET(request: NextRequest) {
 
     const preDiagnostic = preDiagRes.rows[0] ?? null
 
-    // Until the mechanic clicks "Upload to customer portal" there is no round,
-    // and what's in vehicle_inspections is a draft — don't hand it to the
-    // customer's browser at all. Completed/released jobs are the read-only
-    // history view and always show what was recorded.
     const isHistorical = jobOrder.status === 'completed' || jobOrder.status === 'released'
     const reportSent = Boolean(preDiagnostic?.approval_status) || isHistorical
 
@@ -113,10 +109,6 @@ export async function GET(request: NextRequest) {
     const scanAuthorization = await getLatestScanAuthorization(jobOrder.job_order_id)
 
     const walkaround = reportSent ? walkaroundRes.rows : []
-    // get_job_order_inspections() mixes inspection_photos rows into its
-    // result (they come back with status: null and a real photo URL) —
-    // keep those out of the findings list, they're intake documentation
-    // shown separately above, not something the mechanic diagnosed.
     const findings = reportSent ? findingsRes.rows.filter((r) => !(r.status === null && r.photo)) : []
     const signed = await signFileUrls([...walkaround.map((w) => w.photo), ...findings.map((f) => f.photo)])
     walkaround.forEach((w, i) => { w.photo = signed[i] })

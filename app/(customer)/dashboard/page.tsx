@@ -1498,11 +1498,6 @@ type ReportTimelineEntry = {
   image?: string;
 };
 
-// Same milestone shape as the In Progress tracker's Service Timeline, just
-// built from completed-job-order data (logs instead of live tasks). Optional
-// per-stage timestamps (inspection_completed_at, quotation_prepared_at,
-// downpayment_received_at, released_at, release_photo_url) aren't in the
-// CompletedData type yet — add them to getCompletedData once wired up.
 function buildReportTimeline(data: Awaited<ReturnType<typeof getCompletedData>>): ReportTimelineEntry[] {
   const { jobOrder, logs } = data;
   if (!jobOrder) return [];

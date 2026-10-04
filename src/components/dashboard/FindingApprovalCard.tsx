@@ -1,9 +1,5 @@
 "use client";
 
-// FindingApprovalCard — the customer's side of a mid-service finding. Shows
-// what the mechanic found (with photo), what it would add to the bill, and
-// two answers: Approve (emailed code, like the quotation) or Decline (no
-// code — declining adds nothing). Either way the shop keeps the record.
 
 import { useState } from "react";
 import { AlertTriangle, CheckCircle2, Loader2, X } from "lucide-react";

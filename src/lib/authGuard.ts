@@ -18,11 +18,6 @@ export async function requireStaff(): Promise<AuthResult> {
   return { ok: true, session }
 }
 
-// For a route that a program (not a person) also calls, like the Gmail fetcher
-// script. Lets in a logged-in staff member, OR a caller that sends the shared
-// secret in the `X-API-Key` header. If the secret is not set on the server, the
-// key path is always refused, so a forgotten setting can never open the door.
-// The key path counts as staff with id 0 ("system").
 export async function requireStaffOrApiKey(request: Request, envName: string): Promise<AuthResult> {
   const expected = process.env[envName] ?? ''
   const sent = request.headers.get('x-api-key') ?? ''

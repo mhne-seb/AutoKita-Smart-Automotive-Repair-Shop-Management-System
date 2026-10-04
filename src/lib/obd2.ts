@@ -1,10 +1,3 @@
-// src/lib/obd2.ts
-// ---------------------------------------------------------------------------
-// Deterministic OBD-II Diagnostic Trouble Code (DTC) Service
-// Provides zero-hallucination lookups from the obd2_codes database table.
-// Covers Powertrain (P), Body (B), Chassis (C), and Network (U) trouble codes,
-// including sibling/sub-codes (e.g., P0002-P0004 under P0001).
-// ---------------------------------------------------------------------------
 
 import { db } from '@/lib/db';
 

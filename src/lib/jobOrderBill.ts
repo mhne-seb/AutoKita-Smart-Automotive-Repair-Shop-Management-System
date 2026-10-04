@@ -1,11 +1,3 @@
-// jobOrderBill.ts — the one place that says what a job order costs and what
-// has been paid. Server-side only (uses db).
-//
-// job_orders.actual_grand_total and job_orders.balance exist in the schema but
-// nothing ever writes them, so they read 0.00 on every job. Computing live
-// from the line items and verified payments is the only number that's true.
-// (Flagged to Jubert — either completion should write those columns, or they
-// should go.)
 
 import { db } from '@/lib/db'
 import { signFileUrl } from '@/lib/storage'

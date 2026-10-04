@@ -1,9 +1,5 @@
 "use client";
 
-// TwoFAModal — the customer's "verify it's you" step. Opening the modal
-// requests an emailed 6-digit code; typing it back is the documented
-// go-signal for whatever the caller is confirming (quotation, a mid-service
-// finding). The caller does the actual request/submit; this only owns the UI.
 
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, KeyboardEvent } from "react";
@@ -37,11 +33,6 @@ export function TwoFAModal({
   const code = digits.join("");
   const complete = code.length === 6;
 
-  // Send the code the moment the modal opens — opening it IS the request.
-  // Guarded by a ref, not an effect cleanup: React Strict Mode (dev) runs
-  // mount effects twice, and a cleanup flag only discards the second
-  // *response* — the second *email* had already gone out. The ref survives
-  // the simulated remount, so exactly one request is ever made per open.
   const requestedOnce = useRef(false);
   useEffect(() => {
     if (requestedOnce.current) return;

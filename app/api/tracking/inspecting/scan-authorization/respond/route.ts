@@ -4,23 +4,6 @@ import { requireCustomer } from '@/lib/authGuard'
 import { notifyCustomer } from '@/lib/customerNotify'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 
-// The customer answers a mid-inspection scan request.
-//
-// No OTP: the fee is fixed (PHP 1,500) and disclosed in the same words every
-// time, so it's closer to a standard shop fee than a negotiated repair —
-// being logged in is enough. Requiring a fresh emailed code for the same
-// known amount on every visit is exactly the "security fatigue" NIST warns
-// about (Stanton et al., 2016) — it trains customers to stop reading and
-// just click through, which is worse, not better. OTP stays where the
-// amount actually varies: the mid-service findings flow.
-//
-//   approve -> the PHP 1,500 fee becomes a real job_order_services row NOW,
-//              same as if it had been agreed to at booking — payable even if
-//              the customer later declines the quotation, same policy as the
-//              booking-time path.
-//   decline -> nothing is billed. The admin sees it and can't attach a
-//              scanner report until they ask again (or the customer agrees
-//              some other way, off-system).
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}))
   const userIdRaw = body.userId

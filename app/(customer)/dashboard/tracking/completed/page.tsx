@@ -108,10 +108,6 @@ function Completed() {
 
   const { jobOrder, warranties, services, parts } = data;
 
-  // NOTE: release-related fields (released_at / released_to / odometer /
-  // release_photo_url) aren't in the current CompletedData shape yet — add
-  // them to getCompletedData's return once the release flow is wired up on
-  // the admin side. Falling back gracefully below in the meantime.
   const releasedAt = (jobOrder as any).released_at ?? null;
   const releasedTo = (jobOrder as any).released_to ?? "Customer / Authorized Representative";
   const releasePhoto = (jobOrder as any).release_photo_url ?? null;
@@ -328,9 +324,3 @@ function Completed() {
 
 export default Completed;
 
-// ---------------------------------------------------------------------------
-// PDF generation — same visual format as the History page's downloadable
-// invoice (logo header, SERVICE INVOICE title, details block, itemized
-// DESCRIPTION/AMOUNT table covering both labor and parts, total, footer note),
-// just sourced from the completed job order's data instead of a history row.
-// ---------------------------------------------------------------------------

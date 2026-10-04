@@ -12,10 +12,6 @@ import { login, startSession } from '@/controllers/authController'
 
 const loginBg = '/assets/login-workshop.jpg' // static asset path
 
-// These buttons hold real account passwords (one is the shop owner's), so the
-// live site leaves them out unless NEXT_PUBLIC_SHOW_DEMO_LOGIN=true, e.g. for
-// the defense. Both values are fixed at build time, so when the flag is off the
-// passwords aren't even in the page's JavaScript.
 const showDemo = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_SHOW_DEMO_LOGIN === 'true'
 const demoAccounts = showDemo
   ? [

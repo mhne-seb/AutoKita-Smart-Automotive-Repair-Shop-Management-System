@@ -1,12 +1,6 @@
 import { db } from '@/lib/db'
 import { PoolClient } from 'pg'
 
-// Records a customer changing their own account (name, address, password,
-// photo) so staff can see it on the Database Administration page. Only the
-// fields that actually changed are saved, as "from → to".
-//
-// A failed log is reported but doesn't undo the customer's save — the change
-// itself already went through.
 export async function logCustomerAccountChange(
   userId: number,
   oldValues: Record<string, unknown>,

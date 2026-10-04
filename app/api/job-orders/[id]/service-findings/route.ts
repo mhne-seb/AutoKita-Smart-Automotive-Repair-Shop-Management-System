@@ -7,14 +7,6 @@ import { notifyCustomer } from '@/lib/customerNotify'
 import { toStoredRef } from '@/lib/storage'
 import type { ProposedService, ProposedPart } from '@/data/types'
 
-// NOTE: this is the MID-SERVICE finding (job already in progress).
-// The inspection report's Mechanical Findings are a different thing and
-// live at /api/job-orders/[id]/findings — don't merge the two.
-// Admin reports something found mid-service that the approved quotation
-// didn't cover. This only records the finding and tells the customer — the
-// proposed services/parts stay on the finding row as JSON until the customer
-// approves (see /api/tracking/in-progress/findings/respond), so nothing on
-// the job order changes yet.
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
 

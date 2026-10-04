@@ -1,9 +1,5 @@
 'use client'
 
-// WarrantyClaimCard — sits at the top of the inspection page for a job order
-// that started from a customer's warranty claim. The mechanic's finding is
-// the evidence for the admin's decision: approve (part + labor go on this
-// job order at ₱0) or deny (with a reason, and whether it voids the warranty).
 
 import { useState } from 'react'
 import { ShieldCheck, Check, X, Loader2 } from 'lucide-react'

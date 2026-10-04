@@ -2,11 +2,6 @@ import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
-// "Record purchase" on Service Progress. This is the shop's purchase ledger,
-// not a procurement workflow — nothing is sent to the supplier. One save =
-// one purchase_orders row (status 'sent') plus every ticked part pointed at
-// it and moved to 'ordered'. The parts aren't in hand yet — they're marked
-// received one by one on the task cards as they actually arrive.
 
 type PurchasedPart = { partId: number; unitCost: number }
 

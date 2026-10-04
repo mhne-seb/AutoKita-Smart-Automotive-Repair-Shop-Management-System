@@ -1,22 +1,4 @@
-/**
- * License plate normalization, formatting, and validation matching
- * Land Transportation Office (LTO) Philippine vehicle plate standards
- * and the PostgreSQL database check constraint `vehicles_plate_number_format`:
- * 
- * CHECK (
- *   (plate_number ~ '^[A-Z]{3}[0-9]{2,4}$') OR
- *   (plate_number ~ '^[A-Z]{2}[0-9]{4,5}$') OR
- *   (plate_number ~ '^[0-9]{4}[A-Z]{2}$') OR
- *   (plate_number ~ '^[0-9]{3}[A-Z]{3}$') OR
- *   (plate_number ~ '^[0-9]{1,5}$') OR
- *   (plate_number ~ '^[0-9]{7}$')
- * )
- */
 
-/**
- * Normalizes a plate string by removing whitespace, hyphens, and converting to uppercase.
- * Example: 'abc-1234' -> 'ABC1234', '123 abc' -> '123ABC', 'ab 1234' -> 'AB1234'
- */
 export function normalizePlateNumber(plate?: string | null): string {
   if (!plate) return '';
   return plate.replace(/[^A-Za-z0-9]/g, '').toUpperCase().trim();

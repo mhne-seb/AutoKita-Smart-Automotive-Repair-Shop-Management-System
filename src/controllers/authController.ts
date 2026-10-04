@@ -1,7 +1,3 @@
-// authController
-//
-// Controllers in this project are the single seam between UI components and
-// data. This file talks to the real database via /api/auth/login.
 
 export type UserRole = 'admin' | 'customer' | 'c'
 

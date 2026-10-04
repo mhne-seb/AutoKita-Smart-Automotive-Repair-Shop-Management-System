@@ -2,11 +2,6 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireStaffOrJobOrderOwner } from '@/lib/authGuard'
 
-// Everything the printable Job Order form needs, in one call: the customer,
-// the vehicle, the quoted parts and services, and what's been paid. Mirrors
-// the shop's paper form (name / address / phone / date / date promised /
-// plate / year & model, then parts left, work right, totals, partial
-// payment, balance).
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const jobOrderId = Number(id)

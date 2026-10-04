@@ -3,12 +3,6 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { toStoredRef, signFileUrl } from '@/lib/storage'
 
-// Mechanical Findings on the INSPECTION report (admin inspection page).
-// Findings raised later, while the job is on the floor, are a separate
-// feature at /api/job-orders/[id]/service-findings.
-//
-// Helper: get or create the vehicle_inspections header row for a job order.
-// All findings hang off this parent via inspection_id.
 async function getOrCreateInspectionId(jobOrderId: string): Promise<number> {
   const res = await db.query(
     `SELECT id FROM vehicle_inspections WHERE job_order_id = $1 LIMIT 1`,

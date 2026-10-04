@@ -56,9 +56,7 @@ export async function POST(req: NextRequest) {
 
   try {
     if (contentType.includes('multipart/form-data')) {
-      // -----------------------------------------------------------------------
       // Manual PDF upload from the UI
-      // -----------------------------------------------------------------------
       const formData = await req.formData()
       source = (formData.get('source') as string) || 'manual_upload'
       const file = formData.get('file') as File | null
@@ -85,9 +83,7 @@ export async function POST(req: NextRequest) {
       }
       parsed = (await parseRes.json()) as ParsedReport
     } else {
-      // -----------------------------------------------------------------------
       // JSON payload from gmail_fetcher.py
-      // -----------------------------------------------------------------------
       const body = await req.json()
       source = body.source ?? 'gmail'
       filename = body.filename ?? 'report.pdf'

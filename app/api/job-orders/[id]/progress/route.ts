@@ -48,10 +48,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       [id]
     )
 
-    // Job-order-level clock: started_at is stamped by advance_job_order_stage
-    // when the job enters in_progress; date_promised / estimated_duration are
-    // the pickup window. Returned alongside the tasks (not inside data[]) so
-    // the existing consumer is untouched.
     const timingResult = await db.query(
       `SELECT started_at::text, completed_at::text, date_promised::text, estimated_duration::text
        FROM job_orders WHERE id = $1`,

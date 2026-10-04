@@ -7,9 +7,7 @@ function simulateDelay<T>(value: T, ms = 250): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), ms))
 }
 
-// ---------------------------------------------------------------------------
 // Real database-backed listing (used by the Job Orders board / JobOrders.tsx)
-// ---------------------------------------------------------------------------
 
 // Your DB has 7 status values, but the UI only understands 4 stages.
 // This function maps one to the other.
@@ -55,10 +53,6 @@ function toJobOrderCard(row: any): JobOrderCard {
   const grandTotal = Number(row.actual_grand_total ?? 0)
   const balance = row.balance !== null ? Number(row.balance) : null
 
-  // Payment status logic:
-  // When a job order starts (inspecting or quotation), payment starts as 'Pending'.
-  // Once quotation has finished and the job order is in "in progress phase", it is regarded as 'Unpaid'.
-  // Once paid/released or balance <= 0, it is regarded as 'Paid'.
   let paymentStatus: PaymentStatus = 'Pending'
   let paid = false
 
@@ -145,9 +139,7 @@ export async function getJobOrders(page = 1, pageSize = 12): Promise<PaginatedJo
   }
 }
 
-// ---------------------------------------------------------------------------
 // Real database-backed lookups and mutations
-// ---------------------------------------------------------------------------
 
 /** Looks up a single job order by its id from the real database, or null if it doesn't exist. */
 export async function getJobOrderById(id: string): Promise<JobOrderCard | null> {

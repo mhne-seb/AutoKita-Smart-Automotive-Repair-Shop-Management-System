@@ -5,16 +5,6 @@ import { uploadPaymentProof } from '@/lib/storage'
 import { readTransferDetails, hasImageSignature, referenceAlreadyUsed, PROOF_NOT_IMAGE_MESSAGE, REFERENCE_USED_MESSAGE } from '@/lib/paymentForm'
 import { getJobOrderBill } from '@/lib/jobOrderBill'
 
-// Customer settles the remaining balance on a finished job (paper: Table 16,
-// "Access Final Bill and Payment"). Multipart because a transfer carries a
-// proof screenshot.
-//
-// The amount is never taken from the client — it's always the live balance
-// (services + parts − verified payments). Either way a `payments` row goes in
-// as 'pending' and the admin verifies it on the Service Progress page:
-//   - bank / e-wallet: channel + reference + proof, admin checks the account
-//   - cash at the counter: recorded now as the customer's intent ("Pending
-//     Counter Settlement"), admin confirms when the cash is in hand
 export async function POST(request: NextRequest) {
   const form = await request.formData()
   const jobOrderId = Number(form.get('jobOrderId'))

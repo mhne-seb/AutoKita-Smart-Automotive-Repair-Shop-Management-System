@@ -1,11 +1,3 @@
-// preDiagnosticController — real database-backed "send for approval" /
-// "customer decision" flow, built on pre_diagnostics + your teammate's
-// update_pre_diagnostic_approval() function.
-//
-// The real Customer-portal approval page is someone else's task — these
-// functions exist so the Admin-side buttons ("Upload to customer portal",
-// "Send to Customer") actually persist real data, and so we can simulate
-// what the customer's decision would do.
 
 import type { Stage } from '@/data/types'
 
@@ -66,10 +58,6 @@ export async function recallApproval(jobOrderId: string): Promise<boolean> {
 }
 
 
-// --- Mid-inspection OBD-II scan authorization -------------------------------
-// Only reachable when diagnosticScanAuthorized is false on the inspection
-// page — the customer wasn't asked about the scanner at booking, so using it
-// now needs a fresh, explicit approval. See scan-authorization/route.ts.
 
 export interface ScanAuthorization {
   id: number

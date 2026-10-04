@@ -4,10 +4,6 @@ import { requireCustomer } from '@/lib/authGuard'
 
 import { effectiveWarrantyStatus } from '@/lib/warranty'
 
-// The customer's Warranties tab (Service History) — every warranty across
-// every visit, active or past, via Jubert's get_customer_warranties /
-// get_customer_warranty_history. Also flags a warranty that already has a
-// pending claim, so the tab can hide/disable its Claim button.
 export async function GET(request: NextRequest) {
   const userIdParam = request.nextUrl.searchParams.get('userId')
   const guard = await (userIdParam ? requireCustomer(parseInt(userIdParam, 10)) : requireCustomer())

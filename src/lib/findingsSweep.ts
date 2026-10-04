@@ -1,13 +1,3 @@
-// findingsSweep.ts — the clock on pending findings. Server-side only.
-//
-// The app has no background scheduler, so this runs whenever the admin bell
-// polls (every 45 s while anyone from the shop has the app open) and from
-// /api/cron/findings-sweep for a real cron in production. It's cheap: one
-// query for pending findings past a threshold, one row written per step.
-//
-// Each step is recorded as a notifyCustomer() audit row with a distinct
-// event name, and a step is only sent if that row doesn't exist yet — so
-// the sweep can run as often as you like and never double-sends.
 
 import { db } from '@/lib/db'
 import { notifyCustomer } from '@/lib/customerNotify'

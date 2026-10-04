@@ -56,11 +56,6 @@ export async function GET(request: NextRequest) {
          LIMIT 1`,
         [jobOrder.job_order_id],
       ),
-      // The real "did the customer actually agree to this at booking" signal —
-      // an audit-log event on the original ticket, not just "is the OBD-II
-      // line item present on the job order" (a mechanic can add that line
-      // item later, e.g. for an "Others" booking, without the customer ever
-      // having pre-authorized it).
       db.query(
         `SELECT EXISTS (
            SELECT 1 FROM system_audit_logs sal
@@ -75,14 +70,6 @@ export async function GET(request: NextRequest) {
       ),
     ])
 
-    // pre_diagnostics holds a round per stage (inspection first, then the
-    // quotation) with nothing to say which is which — so "the latest round
-    // is pending/approved" alone isn't enough: right after a customer
-    // approves their INSPECTION, that same round is still the latest one,
-    // and its status is 'approved', which would wrongly say the quotation
-    // is ready too. The quotation admin page always summarizes its round
-    // starting with "Quotation total:" (see sendQuotationForApproval) — use
-    // that to confirm the latest round is actually about the quotation.
     const latestRound = preDiagRes.rows[0]
     const isQuotationRound = Boolean(latestRound?.mechanic_notes?.startsWith('Quotation total:'))
     const latestStatus = latestRound?.customer_approval_status

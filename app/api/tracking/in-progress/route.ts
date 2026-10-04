@@ -64,11 +64,6 @@ export async function GET(request: NextRequest) {
         )).rows
       : []
 
-    // The same three numbers the admin's Time Tracking panel computes, so the
-    // customer never sees a different story. job_orders.estimated_duration /
-    // actual_duration / date_promised are never written, so the panel can't
-    // read them — labor hours is the sum of the quoted services' hours, and
-    // the finish estimate is the latest (scheduled start + hours) across tasks.
     const timing = jobOrder
       ? (await db.query(
           `SELECT

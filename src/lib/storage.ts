@@ -38,10 +38,6 @@ export async function signFileUrl(ref: string | null | undefined): Promise<strin
     return (await signFileUrls([ref]))[0]
 }
 
-// Every signing makes a different link, and pages that refresh every few
-// seconds would then make the browser re-download each photo every time.
-// Reusing a pass until it's close to expiring keeps the link the same, so the
-// browser's cached copy is used instead.
 const REUSE_UNTIL_MS_LEFT = 15 * 60 * 1000
 const passCache = new Map<string, { url: string; expiresAt: number }>()
 

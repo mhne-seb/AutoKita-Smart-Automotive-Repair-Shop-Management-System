@@ -1,8 +1,4 @@
 import { requireStaff } from '@/lib/authGuard'
-// app/api/chat/admin/route.ts
-// Admin / Mechanic chatbot endpoint.
-// Model: gpt-5.4 (configurable via OPENAI_ADMIN_MODEL env var)
-// Features: 11 read-only SQL tools, Pinecone Hybrid RAG, agentic tool loop, token budget.
 
 // ─── Token-Reduction Constants ────────────────────────────────────────────────
 // Keep only the last N user/assistant messages (tool messages excluded from this

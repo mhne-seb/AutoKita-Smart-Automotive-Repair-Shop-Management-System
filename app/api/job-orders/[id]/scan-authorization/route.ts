@@ -4,15 +4,6 @@ import { db } from '@/lib/db'
 import { getLatestScanAuthorization } from '@/lib/scanAuthorization'
 import { notifyCustomer } from '@/lib/customerNotify'
 
-// Admin side of mid-inspection OBD-II scan consent (see
-// sql/Other/migration_add_scan_authorizations.sql). Only reachable when the
-// job order wasn't already authorized at booking — see
-// diagnosticScanAuthorized on GET /api/job-orders/[id]/inspection.
-//
-//   GET  -> the latest request (pending / approved / disputed), if any.
-//   POST -> raise a new one. Just asks — no code needed to ASK, only to
-//           approve. Refused if one is already pending, same rule as
-//           pull-out requests.
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
 

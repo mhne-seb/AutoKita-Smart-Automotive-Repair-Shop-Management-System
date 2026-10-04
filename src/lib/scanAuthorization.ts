@@ -1,7 +1,3 @@
-// scanAuthorization.ts — server-side helpers for mid-inspection OBD-II scan
-// consent (see sql/Other/migration_add_scan_authorizations.sql). Shared by
-// the admin inspection route and the customer inspecting-tracking route so
-// both read the request the same way.
 
 import { db } from '@/lib/db'
 

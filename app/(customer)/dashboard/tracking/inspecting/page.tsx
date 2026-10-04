@@ -58,11 +58,6 @@ function Inspecting() {
 
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
 
-  // pre_diagnostics holds a round per stage (inspection first, then the
-  // quotation), and the API hands back the newest one whatever it is. While
-  // the job is still 'inspecting' that IS the inspection round. Once the job
-  // has moved on, the inspection was approved — that's the only way it moves
-  // — so a pending quotation round must not re-open "please review" here.
   const stillInspecting = jobOrder?.status === "inspecting";
   const inspectionStatus: string | undefined = stillInspecting ? preDiagnostic?.approval_status ?? undefined : "approved";
   const movedOn = !stillInspecting && !isHistorical && Boolean(jobOrder);

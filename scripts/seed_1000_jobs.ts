@@ -1,9 +1,3 @@
-/**
- * scripts/seed_1000_jobs.ts
- *
- * Inserts 1,000 diverse job order instances spanning Jan 2024 – Sep 2026.
- * Run with: npx tsx --env-file=.env.local scripts/seed_1000_jobs.ts
- */
 
 import { config } from 'dotenv';
 config({ path: '.env.local' });

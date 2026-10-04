@@ -50,10 +50,6 @@ export interface DashboardActivity {
   href?: string
 }
 
-// Same job_orders.status -> tracking-page mapping the dashboard's own "View
-// Tracking" links use (app/(customer)/dashboard/page.tsx) — so a notification
-// lands on the same page the customer would already land on from their job
-// order card.
 const STATUS_TO_TRACKING_SLUG: Record<string, string> = {
   inspecting: 'inspecting',
   pending_customer_approval: 'quotation',
@@ -175,11 +171,6 @@ export async function getDashboardRecentActivity(userId: number, limit?: number)
     [userId, qLimit],
   )
 
-  // 2. "Booking accepted" events. When an admin approves a ticket,
-  //    create_job_order_from_ticket() logs it as action_performed = 'created'
-  //    on job_orders — which the function above doesn't surface, so the
-  //    customer never hears their booking went through. Inline query, no new
-  //    stored function.
   const accepted = await db.query(
     `SELECT
         sal.id,
@@ -198,11 +189,6 @@ export async function getDashboardRecentActivity(userId: number, limit?: number)
     [userId, qLimit],
   )
 
-  // 3. "Your report is ready" — fires when the mechanic sends a round for
-  //    approval. Nothing else surfaces this to the customer, and it's the one
-  //    event that actually needs them to do something.
-  //    A second round on the same job order is a revision (the customer had a
-  //    concern), so say so instead of repeating the first message verbatim.
   const reportReady = await db.query(
     `SELECT
         r.id,
@@ -283,11 +269,6 @@ export async function getDashboardRecentActivity(userId: number, limit?: number)
     [userId],
   )
 
-  // 4. Progress updates written by lib/customerNotify: a service started,
-  //    its parts arrived, it finished, the mechanic found something. The
-  //    audit row's new_values is JSON tagged "notify":true and already holds
-  //    the title/message to show. The CASE guards the jsonb cast so only
-  //    rows that start with that tag are ever parsed.
   const updates = await db.query(
     `SELECT
         sal.id,

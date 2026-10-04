@@ -1,13 +1,5 @@
 'use client'
 
-// Admin "Testing" page — the road test that gates every job order before it
-// is handed back (paper: quality testing milestone; shop rule in
-// data/roadTest.ts). Backed by the road_tests table and Jubert's
-// start/pass/fail_road_test functions, which move the job order:
-//   in_progress --start--> testing --pass--> completed
-//                                  --fail--> in_progress (ticked tasks reopen,
-//                                            failed parts get a free warranty
-//                                            replacement)
 
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
@@ -81,10 +73,6 @@ export default function TestingPage() {
     await load()
   }
 
-  // A failed part can't be swapped in without touching its service again —
-  // the labor isn't done until the (working) part is actually installed. So
-  // any task whose service a ticked part belongs to is required, not
-  // optional, regardless of whether it was separately ticked by hand.
   function tasksRequiredByFailedParts(data: RoadTestData, failed: Set<number>): Set<number> {
     const requiredTitles = new Set(data.parts.filter((p) => failed.has(p.id)).map((p) => p.service_name))
     return new Set(data.tasks.filter((t) => requiredTitles.has(t.task_title)).map((t) => t.id))

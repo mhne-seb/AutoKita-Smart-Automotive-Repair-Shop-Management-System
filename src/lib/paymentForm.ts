@@ -1,7 +1,3 @@
-// paymentForm.ts — reads a manual bank/e-wallet transfer out of a multipart
-// form the same way for every payment route (downpayment and final balance),
-// so the rules live in one place: a known channel, a reference number, and a
-// screenshot as evidence for the admin to check against the shop's account.
 
 import { getPaymentChannel, type PaymentChannel } from '@/data/paymentChannels'
 import { db } from '@/lib/db'

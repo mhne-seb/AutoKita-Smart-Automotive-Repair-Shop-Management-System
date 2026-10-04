@@ -132,10 +132,6 @@ export interface InspectionData {
   pullOutRequested?: boolean
   // The admin has added at least one service to the quotation.
   quotationStarted?: boolean
-  // What the customer asked for when they booked (from the service ticket).
-  // category/notes/requestedSlot are parsed out of the free-text concern
-  // field when it matches a known booking-form format; `raw` always has
-  // the original text as a fallback.
   request?: {
     serviceMode: 'Shop Visit' | 'Home Service'
     homeAddress: string | null
@@ -242,10 +238,6 @@ export interface ServiceSection {
   tasks: ServiceTask[]
 }
 
-// A mid-service finding: something the mechanic noticed that the approved
-// quotation didn't cover. Proposed services/parts live on the finding as
-// plain lists until the customer decides; only on approval do they become
-// real job_order_services / job_order_parts / service_progress_tasks rows.
 export interface ProposedService {
   serviceId: number | null // null = custom service not in the catalog yet
   name: string

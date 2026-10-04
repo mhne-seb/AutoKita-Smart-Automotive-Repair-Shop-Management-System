@@ -505,10 +505,8 @@ function MobileServicesAccordion() {
   );
 }
 
-/* ---------------------------------------------------------------------- */
 /* Simple flat icon badge — soft ring + solid circle, subtle pulse ring   */
 /* animation. Replaces the old layered/gradient "realistic" icon set.     */
-/* ---------------------------------------------------------------------- */
 function StepIconBadge({ Icon }: { Icon: React.ComponentType<{ className?: string }> }) {
   return (
     <div className="relative flex h-[72px] w-[72px] items-center justify-center">

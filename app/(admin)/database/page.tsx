@@ -218,9 +218,7 @@ export default function page() {
   )
 }
 
-// ---------------------------------------------------------------------------
 // Log detail modal — shown when the eye icon is clicked.
-// ---------------------------------------------------------------------------
 
 function LogDetailModal({ entry, onClose }: { entry: AuditLogEntry; onClose: () => void }) {
   const [showRaw, setShowRaw] = useState(false)

@@ -1,13 +1,5 @@
 'use client'
 
-// ReportFindingModal — the mechanic found something mid-service that the
-// approved quotation didn't cover. They describe it, optionally attach a
-// photo, list the services/parts it would take, and send it to the customer.
-// Nothing is added to the job until the customer approves.
-//
-// Opened from a task card the finding is tied to that task; opened from the
-// sidebar it's a general finding (something noticed while the car was in the
-// shop, not part of any one service).
 
 import { useEffect, useRef, useState } from 'react'
 import { AlertTriangle, Camera, Loader2, Plus, Search, Send, Trash2, Upload, X, Pencil, Check } from 'lucide-react'

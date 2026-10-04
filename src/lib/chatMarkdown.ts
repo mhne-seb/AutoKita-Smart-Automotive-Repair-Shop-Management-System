@@ -1,12 +1,3 @@
-/**
- * src/lib/chatMarkdown.ts
- * 
- * Normalizes chatbot messages for clean, structured markdown rendering.
- * - Converts raw bullet characters (•, ·) into standard markdown list syntax (- )
- * - Splits inline bullets (e.g. "Title • **Heading**: ...") into separate list items
- * - Ensures blank lines exist between headers and list blocks for CommonMark compliance
- * - Preserves nested indentation for sub-lists and numbered diagnostics
- */
 export function formatChatMarkdown(raw: string): string {
   if (!raw) return '';
 

@@ -1,7 +1,3 @@
-// mechanicController — the admin Mechanics page's view of /api/admin/mechanics.
-//
-// A mechanic = employees row + employee_profiles row + a live workload count
-// from service_progress_tasks (the same count the assignment cap uses).
 
 export type EmployeeStatus = 'active' | 'on_leave' | 'terminated'
 export type MechanicStatus = 'Available' | 'Busy' | 'On Leave'

@@ -2,10 +2,6 @@ import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
-// Suppliers are only ever created from the "Record purchase" modal on Service
-// Progress (there's no dedicated suppliers screen yet), so a name is all that's
-// required — the rest of the columns can be filled in later if a page for it
-// is ever built.
 
 export async function GET() {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;

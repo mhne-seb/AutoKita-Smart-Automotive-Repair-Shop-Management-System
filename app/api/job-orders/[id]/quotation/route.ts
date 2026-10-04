@@ -67,10 +67,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const body = await request.json()
     const { notes, services, estimated_grand_total, actual_grand_total } = body
 
-    // The save replaces every service and part for this job order. Without a
-    // transaction two overlapping saves interleave their DELETEs and INSERTs
-    // and the job order ends up with both copies, so take one connection and
-    // do the whole replace inside BEGIN/COMMIT.
     client = await db.connect()
     await client.query('BEGIN')
 

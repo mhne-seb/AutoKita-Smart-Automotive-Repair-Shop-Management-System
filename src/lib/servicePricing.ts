@@ -1,10 +1,4 @@
 // src/lib/servicePricing.ts
-// ---------------------------------------------------------------------------
-// Dynamic Supabase Service Pricing & Duration Service for AutoKita
-// Directly queries Supabase PostgreSQL tables: `services`, `job_order_services`,
-// and `job_order_parts` to provide live, single-source-of-truth price ranges
-// and empirical durations for customer chat inquiries.
-// ---------------------------------------------------------------------------
 
 import { db } from '@/lib/db';
 

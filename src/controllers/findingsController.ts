@@ -1,7 +1,3 @@
-// findingsController.ts — browser-side calls for mid-service findings.
-// Admin reports one from Service Progress; the customer answers it from the
-// In Progress tracking page. Reading findings happens through the existing
-// progress / tracking loaders, which include them.
 
 import type { ProposedService, ProposedPart } from '@/data/types'
 

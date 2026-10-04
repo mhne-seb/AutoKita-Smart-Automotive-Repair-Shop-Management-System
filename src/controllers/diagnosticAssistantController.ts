@@ -1,8 +1,3 @@
-// src/controllers/diagnosticAssistantController.ts
-// ---------------------------------------------------------------------------
-// Fetches live job order session data from /api/chat/admin/job-session.
-// All static mock data has been removed — every value comes from the DB.
-// ---------------------------------------------------------------------------
 
 export type { JobOrderSummary, JobOrderSession, JobOrderService, JobOrderPart, InspectionNote }
   from '@/types/jobOrder';

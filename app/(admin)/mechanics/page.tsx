@@ -375,10 +375,8 @@ export default function page() {
   )
 }
 
-// ---------------------------------------------------------------------------
 // Profile modal — pay setup + this month's commission + last payroll run.
 // Read-only: payroll runs are generated from the Sales & Payroll page.
-// ---------------------------------------------------------------------------
 
 function ProfileModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: () => void }) {
   const lp = mechanic.lastPayroll
@@ -459,9 +457,7 @@ function ProfileModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: () =
   )
 }
 
-// ---------------------------------------------------------------------------
 // Task history modal — what this mechanic has actually worked on.
-// ---------------------------------------------------------------------------
 
 function TaskHistoryModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: () => void }) {
   const [rows, setRows] = useState<MechanicHistoryRow[] | null>(null)
@@ -516,9 +512,7 @@ function TaskHistoryModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: 
   )
 }
 
-// ---------------------------------------------------------------------------
 // Add / Edit mechanic modal (shared form)
-// ---------------------------------------------------------------------------
 
 type FormState = {
   name: string

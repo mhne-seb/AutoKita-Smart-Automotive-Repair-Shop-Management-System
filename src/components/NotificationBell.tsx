@@ -71,14 +71,6 @@ export function NotificationBell({
     persist(new Set(notifications.map((n) => n.key)))
   }
 
-  // Live pop-up: the parent re-fetches every few seconds; anything with a
-  // key we haven't seen before AND a genuinely recent time gets a toast (with
-  // an Open button) on top of the badge. The first load is only a baseline —
-  // no toasts for history.
-  // The recent-time rule matters because the list only holds the newest few
-  // items: when one disappears (a ticket is declined, say), an OLDER item
-  // slides into view with a key we haven't seen. That is not news, so it must
-  // not pop up as if it were.
   const seenKeys = useRef<Set<string> | null>(null)
   const loadedAt = useRef(Date.now())
   const isFresh = (at?: string) => {

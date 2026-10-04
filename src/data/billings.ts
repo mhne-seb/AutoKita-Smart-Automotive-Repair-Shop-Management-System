@@ -62,9 +62,7 @@ function randomImage() {
 
 export const REWARDS_BANNER_IMAGE = "/assets/cars/tesla.jpg";
 
-// ---------------------------------------------------------------------------
 // Mock data
-// ---------------------------------------------------------------------------
 export const INITIAL_SERVICES: Service[] = [
   {
     id: "srv-1",
@@ -187,9 +185,7 @@ export const REWARDS: Rewards = {
   ],
 };
 
-// ---------------------------------------------------------------------------
 // Style maps
-// ---------------------------------------------------------------------------
 export const STATUS_STYLE: Record<PaymentStatus, { label: string; className: string }> = {
   paid: { label: "Paid", className: "bg-[color:oklch(0.93_0.06_155)] text-success" },
   downpayment: { label: "Downpayment", className: "bg-[color:oklch(0.94_0.06_80)] text-warning" },
@@ -204,9 +200,7 @@ export const WARRANTY_STATUS_STYLE: Record<Warranty["status"], string> = {
   Claimed: "text-brand",
 };
 
-// ---------------------------------------------------------------------------
 // Formatting / calculation helpers
-// ---------------------------------------------------------------------------
 export const peso = (n: number) =>
   n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 

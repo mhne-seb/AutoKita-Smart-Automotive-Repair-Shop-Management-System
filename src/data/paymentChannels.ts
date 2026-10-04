@@ -1,10 +1,3 @@
-// The shop's own receiving accounts for manual bank/e-wallet transfers.
-// Customers pick one of these, send the downpayment themselves outside the
-// app, then submit the reference number + a screenshot as proof — there's no
-// live payment gateway integration yet, so this is a manually-verified flow.
-//
-// TODO: replace the placeholder account details below with the shop's real
-// GCash/Maya numbers and bank accounts before this goes live.
 
 export type PaymentChannelType = 'e_wallet' | 'bank_transfer'
 

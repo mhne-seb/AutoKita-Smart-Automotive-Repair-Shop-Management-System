@@ -2,10 +2,6 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
 
-// The customer's Service History — every job order of theirs that has been
-// closed out, released or cancelled. One row per job order, with the service
-// lines and parts that make up what they paid, so the page can show the
-// receipt without another round trip.
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const userIdParam = searchParams.get('userId')

@@ -3,19 +3,6 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { notifyCustomer } from '@/lib/customerNotify'
 
-// The shop answers a pull-out request (paper UC 15, steps 4–7 and 4a–4c).
-//
-//   approve → the job is trimmed down to what the shop has committed to:
-//             - finished and started services stay (billed)
-//             - an unstarted service whose parts have ALREADY BEEN ORDERED is
-//               committed: it stays, the shop completes it, it's billed
-//               (shop policy — ordered parts make a service non-cancellable)
-//             - an unstarted service with nothing ordered is cancelled: its
-//               labor and its to-order parts come off the bill
-//             If work remains, the job stays in_progress and finishes the
-//             normal way (Testing → Billing). If only finished work is left,
-//             it goes straight to 'completed' (Billing) for release.
-//   deny    → the request is closed with the shop's note and work resumes.
 async function stillOpen(jobOrderId: number): Promise<boolean> {
   const { rows } = await db.query(
     `SELECT COUNT(*)::int AS n FROM service_progress_tasks
@@ -60,14 +47,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     let cancelled: string[] = []
     let committed: string[] = []
     if (action === 'approve') {
-      // 1. Unstarted tasks with NO bought part → cancelled. A task is
-      //    committed if any part on its service was actually bought
-      //    (ordered, in transit, received or installed). A part still to
-      //    order, or one that was already in stock, costs the shop nothing
-      //    extra, so it does not commit the service. Parts
-      //    match tasks by service name AND finding (two same-named services
-      //    from different findings must not share parts) — the same rule
-      //    the progress page uses.
       const c = await client.query(
         `UPDATE service_progress_tasks spt SET task_status = 'cancelled'
          WHERE spt.job_order_id = $1 AND spt.section_id = 'in_progress' AND spt.task_status = 'pending'

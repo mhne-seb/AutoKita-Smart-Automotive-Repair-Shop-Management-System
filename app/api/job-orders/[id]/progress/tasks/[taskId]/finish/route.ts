@@ -8,11 +8,6 @@ import { notifyCustomer } from '@/lib/customerNotify'
 const MAX_BYTES = 5 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
-// The ONLY way a task becomes 'completed'. Multipart because the shop's rule
-// is that finishing a task means showing the finished work — a photo is
-// required, no exceptions (the road test included). After the task is
-// marked done, the job-order-level consequences run (road test creation,
-// job completion) — see lib/taskCompletion.
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string; taskId: string }> }) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
 

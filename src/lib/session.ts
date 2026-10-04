@@ -1,10 +1,3 @@
-// session.ts — the login "wristband": a signed cookie the server hands out at
-// login and checks later. Signed with SESSION_SECRET, so the browser can't
-// read it (httpOnly) or change who it says you are without breaking the
-// signature.
-//
-// users and employees are separate tables whose ids overlap (customer #5 and
-// employee #5 are different people), so the role is part of the session.
 
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'

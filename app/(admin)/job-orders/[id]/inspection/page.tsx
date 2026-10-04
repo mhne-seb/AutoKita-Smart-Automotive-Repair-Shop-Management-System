@@ -328,25 +328,10 @@ export default function page() {
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
   const galleryInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
 
-  // While the customer is reviewing the report we sent them, it must not change
-  // underneath them — the record they approve has to be the record we sent.
-  // And once they've approved it, it's final: that exact record is what they
-  // agreed to. Everything stays visible, just not editable. Only 'disputed'
-  // (or no round yet) is editable, since that's when the mechanic revises.
-  //
-  // pre_diagnostics holds the rounds for every stage (inspection first, then
-  // quotation), and getLatestPreDiagnostic returns the newest one whatever it
-  // is. Once the job has left 'inspecting' the inspection round is settled --
-  // the customer's approval is what moved it -- so a later quotation round
-  // (which may well be pending) must not make this page look pending again.
   const inspectionStatus: PreDiagnosticRound['status'] | undefined =
     jobOrder?.stage === 'inspecting' ? preDiagnostic?.status : 'approved'
   const isApproved = inspectionStatus === 'approved'
   const isLocked = inspectionStatus === 'pending' || isApproved
-  // While a warranty claim on this job order is undecided, the report can't
-  // be built yet — free or paid decides what goes in it. Photos stay on plain
-  // isLocked on purpose: they're the evidence a denial ("misuse or
-  // accident") has to rest on, so they must be takeable BEFORE deciding.
   const claimPending = warrantyClaim?.decision === 'pending'
   const reportLocked = isLocked || claimPending
 
@@ -632,10 +617,6 @@ export default function page() {
 
     async function sendInspectionForApproval() {
     if (reportLocked) return
-    // Exception 1 (paper, Manage Real-Time Progress): the report can't go
-    // out without photo evidence of the vehicle's condition — that's what
-    // protects the shop and the customer if the car's state is disputed
-    // later. An empty gallery or an empty slot both count as missing.
     const missingPhotos = photoSlots.length === 0 || photoSlots.some((slot) => !slot.url)
     if (missingPhotos) {
       setShowPhotoWarning(true)
@@ -851,10 +832,6 @@ export default function page() {
                 </span>
               </div>
             ) : (
-              // The customer was never asked about the scanner at booking (only
-              // 2 of 8 categories ask, and "Others" never does), or they were
-              // asked mid-inspection and said no. Either way, don't plug the
-              // scanner in without a fresh yes — ask again from here.
               <div className="mb-5 flex flex-col gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 sm:flex-row sm:items-center sm:justify-between">
                 <span className="flex items-start gap-2.5">
                   <Info size={16} className="mt-0.5 flex-shrink-0" />

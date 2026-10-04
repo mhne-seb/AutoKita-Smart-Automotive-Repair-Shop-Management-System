@@ -24,19 +24,10 @@ export async function GET(req: NextRequest) {
       sweepPendingFindings().catch((e) => console.error('[notifications] sweep failed:', e))
     }
 
-    // Only fetch rows that can become a notification. Pulling every job order
-    // and every payment on each poll (then keeping 20) was most of the
-    // project's Supabase data usage. pending_customer_approval job orders are
-    // kept only so a pending payment can link to the right page below.
     const [tickets, jobOrders, payments, responses, jobOrderCreatedAt, pullOuts, overdueFindings, warrantyClaims] = await Promise.all([
       db.query('SELECT * FROM get_service_tickets_queue()'),
       db.query(`SELECT * FROM get_job_orders_list() WHERE status IN ('inspecting', 'completed', 'pending_customer_approval')`),
       db.query(`SELECT * FROM get_payment_records() WHERE verification_status = 'pending'`),
-      // Every yes/no the customer has given, newest first — inspection report
-      // (pre_diagnostics round), quotation (2FA confirm on job_orders), and
-      // mid-service findings. These are history, not to-dos: they stay in
-      // the list so the shop can always see what the customer decided.
-      // A customer's audit row always has user_id set; staff rows don't.
       db.query(
         `SELECT sal.id, sal.entity_type, sal.action_performed::text AS action,
                 sal.new_values, sal.action_date,
@@ -56,11 +47,6 @@ export async function GET(req: NextRequest) {
          LIMIT $1`,
          [Math.max(30, limit)]
       ),
-      // get_job_orders_list() only has jo_date (a plain DATE, no time — the
-      // job order was 'created' by create_job_order_from_ticket() at some
-      // exact moment, and that's logged here). Without this, "New job
-      // order" always shows midnight of that day instead of when the
-      // ticket was actually approved.
       db.query(
         `SELECT entity_id AS job_order_id, action_date
          FROM system_audit_logs
@@ -261,12 +247,6 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Seed data has job orders dated months into the future — sorted naively,
-    // those permanently outrank anything happening today, so the top-20 cutoff
-    // below gets entirely consumed by fake backlog and a real, brand-new
-    // notification never makes it into the list at all. A timestamp can't
-    // really be in the future, so rank it as far in the past instead of far
-    // ahead — real, current activity then always surfaces first.
     const now = Date.now()
     const rank = (t: string | null) => {
       if (!t) return -Infinity
