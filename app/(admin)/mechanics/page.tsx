@@ -150,7 +150,7 @@ export default function page() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowAdd(true)}
-            className={`flex items-center gap-2 rounded-full ${GRADIENT} px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:opacity-90 active:scale-95`}
+            className={`flex items-center gap-2 rounded-full ${GRADIENT} px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:opacity-90 active:scale-95 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
           >
             <Plus size={15} /> Add Mechanic
           </button>
@@ -200,7 +200,7 @@ export default function page() {
                 <div className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <button onClick={() => setProfileTarget(m)} className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-border">
+                      <button onClick={() => setProfileTarget(m)} className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-border cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                         <img src={avatarUrl(m.name)} alt={m.name} className="h-full w-full object-cover" />
                       </button>
                       <div>
@@ -214,7 +214,7 @@ export default function page() {
                       <div className="relative">
                         <button
                           onClick={() => setOpenCardMenu(openCardMenu === m.id ? null : m.id)}
-                          className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                          className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                           aria-label="Mechanic options"
                         >
                           <MoreVertical size={16} />
@@ -226,13 +226,13 @@ export default function page() {
                                 setOpenCardMenu(null)
                                 setEditTarget(m)
                               }}
-                              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent"
+                              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                             >
                               <Pencil size={14} /> Edit
                             </button>
                             <button
                               onClick={() => toggleLeave(m)}
-                              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent"
+                              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                             >
                               {onLeave ? <UserCheck size={14} /> : <UserMinus size={14} />}
                               {onLeave ? 'Mark Available' : 'Mark On Leave'}
@@ -242,7 +242,7 @@ export default function page() {
                                 setOpenCardMenu(null)
                                 setDeleteTarget(m)
                               }}
-                              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                             >
                               <Trash2 size={14} /> Remove
                             </button>
@@ -301,13 +301,13 @@ export default function page() {
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                     <button
                       onClick={() => setHistoryTarget(m)}
-                      className="flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline"
+                      className="flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                     >
                       <Clock3 size={14} /> Task History
                     </button>
                     <button
                       onClick={() => setProfileTarget(m)}
-                      className="flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline"
+                      className="flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                     >
                       <Wallet size={14} /> Payroll
                     </button>
@@ -337,7 +337,7 @@ export default function page() {
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
                 <Trash2 size={20} />
               </div>
-              <button onClick={() => setDeleteTarget(null)} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+              <button onClick={() => setDeleteTarget(null)} className="text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md" aria-label="Close">
                 <X size={18} />
               </button>
             </div>
@@ -353,7 +353,7 @@ export default function page() {
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
               >
                 Cancel
               </button>
@@ -395,7 +395,7 @@ function ProfileModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: () =
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="text-white/70 hover:text-white" aria-label="Close">
+          <button onClick={onClose} className="text-white/70 hover:text-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md" aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -479,7 +479,7 @@ function TaskHistoryModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: 
             <p className="font-bold text-white">Task History — {mechanic.name}</p>
             <p className="text-xs text-white/70">Most recent tasks assigned to this mechanic</p>
           </div>
-          <button onClick={onClose} className="text-white/70 hover:text-white" aria-label="Close">
+          <button onClick={onClose} className="text-white/70 hover:text-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md" aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -640,7 +640,7 @@ function MechanicFormModal({
               {mode === 'add' ? 'Add a new technician to the roster.' : 'Update this technician’s details.'}
             </p>
           </div>
-          <button onClick={onClose} className="text-white/70 hover:text-white" aria-label="Close">
+          <button onClick={onClose} className="text-white/70 hover:text-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md" aria-label="Close">
             <X size={20} />
           </button>
         </div>
@@ -752,13 +752,13 @@ function MechanicFormModal({
           </div>
 
           <div className="flex justify-end gap-3 border-t border-border pt-4">
-            <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+            <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
               Cancel
             </button>
             <button
               type="submit"
               disabled={busy}
-              className={`flex items-center gap-2 rounded-lg ${GRADIENT} px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:opacity-90 active:scale-95 disabled:opacity-60`}
+              className={`flex items-center gap-2 rounded-lg ${GRADIENT} px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md hover:opacity-90 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-60`}
             >
               {busy ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
               {mode === 'add' ? 'Add Mechanic' : 'Save Changes'}

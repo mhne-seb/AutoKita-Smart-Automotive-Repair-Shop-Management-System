@@ -658,33 +658,7 @@ function BookPage() {
                   </div>
                 )}
 
-                {/* Or enter an exact time */}
-                <div className="mt-4">
-                  <label className="text-[10px] font-semibold uppercase text-muted-foreground">
-                    Or enter a specific time
-                  </label>
-                  <input
-                    type="time"
-                    value={to24h(f.time)}
-                    onChange={(e) => e.target.value && set("time", to12h(e.target.value))}
-                    className={`mt-1.5 block rounded-md border bg-background px-3 py-2 text-sm focus:outline-none ${
-                      isOccupiedSlot(f.date, f.time, occupiedByDate)
-                        ? "border-rose-500 text-rose-600 focus:border-rose-500"
-                        : "focus:border-brand"
-                    }`}
-                  />
-                  {isPastSlot(f.date, f.time) && (
-                    <p className="mt-1 text-[11px] text-amber-600">
-                      That time has already passed for today — pick a later one.
-                    </p>
-                  )}
-                  {!isPastSlot(f.date, f.time) && isOccupiedSlot(f.date, f.time, occupiedByDate) && (
-                    <p className="mt-1 flex items-center gap-1 text-[11px] font-medium text-rose-500">
-                      <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
-                      This time slot is already booked. Please choose an available time.
-                    </p>
-                  )}
-                </div>
+
               </Section>
             </>
           )}
@@ -917,7 +891,11 @@ function BookPage() {
               <button
                 onClick={back}
                 disabled={step === 0}
-                className="flex items-center gap-2 rounded-md border px-5 py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-40"
+                className={`flex items-center gap-2 rounded-md border px-5 py-2.5 text-sm font-medium transition-all duration-200 ${
+                  step === 0
+                    ? "cursor-not-allowed opacity-40"
+                    : "cursor-pointer hover:-translate-y-0.5 hover:bg-accent hover:shadow-sm active:translate-y-0"
+                }`}
               >
                 <ChevronLeft className="h-4 w-4" /> Back
               </button>
@@ -925,17 +903,18 @@ function BookPage() {
                 <button
                   onClick={next}
                   disabled={checkingEmail || checkingPlate}
-                  className={`flex items-center gap-2 rounded-md px-6 py-2.5 text-sm font-semibold transition ${currentStepValid && !checkingEmail && !checkingPlate
-                    ? "bg-brand text-brand-foreground hover:opacity-90"
-                    : "cursor-not-allowed bg-muted text-muted-foreground"
-                    }`}
+                  className={`flex items-center gap-2 rounded-md px-6 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                    checkingEmail || checkingPlate
+                      ? "cursor-not-allowed bg-muted text-muted-foreground"
+                      : "cursor-pointer bg-brand text-brand-foreground hover:-translate-y-0.5 hover:bg-brand/90 hover:shadow-md active:translate-y-0"
+                  }`}
                 >
                   {checkingEmail || checkingPlate ? "Checking..." : "Next"} <ChevronRight className="h-4 w-4" />
                 </button>
               ) : (
                 <button
                   onClick={() => setShowReview(true)}
-                  className="flex items-center gap-2 rounded-md bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90"
+                  className="flex cursor-pointer items-center gap-2 rounded-md bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand/90 hover:shadow-md active:translate-y-0"
                 >
                   Submit for Review <ChevronRight className="h-4 w-4" />
                 </button>
@@ -965,14 +944,18 @@ function BookPage() {
                 <div className="flex items-center justify-end gap-2 border-t bg-background px-6 py-4">
                   <button
                     onClick={() => setShowReview(false)}
-                    className="rounded-md border px-4 py-2 text-sm hover:bg-accent"
+                    className="cursor-pointer rounded-md border px-4 py-2 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent hover:shadow-sm active:translate-y-0"
                   >
                     Edit
                   </button>
                   <button
                     onClick={confirmBooking}
                     disabled={submitting}
-                    className="flex items-center gap-2 rounded-md bg-brand px-5 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90"
+                    className={`flex items-center gap-2 rounded-md bg-brand px-5 py-2 text-sm font-semibold text-brand-foreground transition-all duration-200 ${
+                      submitting
+                        ? "cursor-not-allowed opacity-70"
+                        : "cursor-pointer hover:-translate-y-0.5 hover:bg-brand/90 hover:shadow-md active:translate-y-0"
+                    }`}
                   >
                     <Check className="h-4 w-4" /> {submitting ? "Submitting..." : "Confirm Booking"}
                   </button>
@@ -1413,13 +1396,13 @@ function BookingSubmittedPanel({
       <div className="flex flex-col gap-2 border-t bg-background px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
         <button
           onClick={onNewBooking}
-          className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent"
+          className="cursor-pointer rounded-md border px-4 py-2 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent hover:shadow-sm active:translate-y-0"
         >
           Book Another Service
         </button>
         <button
           onClick={onBackHome}
-          className="flex items-center justify-center gap-2 rounded-md bg-brand px-5 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90"
+          className="flex cursor-pointer items-center justify-center gap-2 rounded-md bg-brand px-5 py-2 text-sm font-semibold text-brand-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand/90 hover:shadow-md active:translate-y-0"
         >
           Back to Home <ChevronRight className="h-4 w-4" />
         </button>

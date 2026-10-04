@@ -19,6 +19,7 @@ import { WarrantyClaimCard } from '@/components/dashboard/WarrantyClaimCard'
 import { EditCustomerModal } from '@/components/dashboard/EditCustomerModal'
 import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData, InspectionPhotoSlot } from '@/data/types'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
+import { ShopLoading } from '@/components/ShopLoading'
 
 export default function page() {
   const jobOrderId = String(useParams().id)
@@ -422,11 +423,7 @@ export default function page() {
   useMemo(() => findings.filter((f) => f.status === 'ok').length, [findings])
 
   if (jobOrder === undefined || initial === undefined) {
-    return (
-      <div className="p-8">
-        <p className="text-sm text-slate-500">Loading inspection…</p>
-      </div>
-    )
+    return <ShopLoading message="Loading inspection…" />
   }
 
   if (!jobOrder || !initial) {
@@ -700,7 +697,7 @@ export default function page() {
             <button
               onClick={() => setConfirmCheckInVehicle(true)}
               disabled={checkingInVehicle}
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:opacity-95 active:scale-[0.99] disabled:opacity-50 transition-all"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:opacity-95 active:scale-[0.99] disabled:opacity-50 transition-all duration-200 cursor-pointer hover:-translate-y-0.5 active:translate-y-0 hover:shadow-lg disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
             >
               <Store size={15} />
               {checkingInVehicle ? 'Checking In…' : 'Mark Vehicle Stored in Shop'}
@@ -730,7 +727,7 @@ export default function page() {
                       onClick={() => setConfirmCheckInVehicle(true)}
                       disabled={checkingInVehicle}
                       title="Click to check in vehicle (mark stored in shop)"
-                      className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900 shadow-2xs hover:bg-amber-100 active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900 shadow-2xs hover:bg-amber-100 disabled:opacity-50 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                     >
                       <Store size={13} className="text-amber-700" />
                       {checkingInVehicle ? 'Checking In…' : 'Check In Vehicle (Store in Shop)'}
@@ -766,8 +763,12 @@ export default function page() {
                 disabled={sending || reportLocked}
                 // Disabled normally means "already sent" (green). Held back by
                 // an undecided claim is not sent — grey it out instead.
-                className={`flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 ${
-                  claimPending && !isLocked ? 'disabled:cursor-not-allowed disabled:opacity-40' : 'disabled:cursor-default disabled:bg-emerald-600'
+                className={`flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 transition-all duration-200 ${
+                  claimPending && !isLocked
+                    ? 'disabled:cursor-not-allowed disabled:opacity-40'
+                    : reportLocked
+                    ? 'disabled:cursor-default disabled:bg-emerald-600'
+                    : 'cursor-pointer hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md'
                 }`}
               >
                 {inspectionStatus === 'disputed' ? (
@@ -823,7 +824,7 @@ export default function page() {
                 onClick={() => setEditModalOpen(true)}
                 disabled={isJobOrderLocked}
                 title={isJobOrderLocked ? "Details are locked once the job is completed." : undefined}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-600 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-600 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
               >
                 <Pencil size={14} />
                 Edit customer & vehicle
@@ -870,7 +871,7 @@ export default function page() {
                   type="button"
                   onClick={askToUseScanner}
                   disabled={requestingScan || reportLocked}
-                  className="flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                 >
                   {requestingScan ? <Loader2 size={13} className="animate-spin" /> : <ScanLine size={13} />}
                   {initial.scanAuthorization?.decision === 'disputed' ? 'Ask Again' : 'Use Scanner'}
@@ -940,7 +941,7 @@ export default function page() {
                 type="button"
                 onClick={addPhotoSlot}
                 disabled={isLocked}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-150 hover:border-slate-300 hover:bg-slate-100 hover:shadow-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 disabled:hover:shadow-none"
+                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-200 hover:border-slate-300 hover:bg-slate-100 hover:shadow-sm cursor-pointer hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
               >
                 <Plus size={13} /> Add Photo
               </button>
@@ -963,7 +964,7 @@ export default function page() {
                         <button
                           type="button"
                           onClick={() => setLightbox({ url: slot.url!, label: slot.title || slot.label })}
-                          className="absolute inset-0 h-full w-full"
+                          className="absolute inset-0 h-full w-full cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                         >
                           <img src={slot.url} alt={slot.title || slot.label} className="h-full w-full object-cover" />
                           <span className="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/40 text-white opacity-0 group-hover:opacity-100">
@@ -983,7 +984,7 @@ export default function page() {
                               onClick={() => fileInputRefs.current[slot.id]?.click()}
                               disabled={uploadingSlot === slot.id}
                               title="Retake with camera"
-                              className="rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700 hover:bg-white [@media(pointer:fine)]:hidden"
+                              className="rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700 hover:bg-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-xs disabled:cursor-not-allowed [@media(pointer:fine)]:hidden"
                             >
                               Retake
                             </button>
@@ -992,7 +993,7 @@ export default function page() {
                               onClick={() => galleryInputRefs.current[slot.id]?.click()}
                               disabled={uploadingSlot === slot.id}
                               title="Replace photo"
-                              className="rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700 hover:bg-white"
+                              className="rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700 hover:bg-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-xs disabled:cursor-not-allowed"
                             >
                               <span className="[@media(pointer:fine)]:hidden">Gallery</span>
                               <span className="hidden [@media(pointer:fine)]:inline">Replace</span>
@@ -1000,7 +1001,7 @@ export default function page() {
                             <button
                               type="button"
                               onClick={() => handlePhotoDelete(slot)}
-                              className="rounded-md bg-white/90 p-1 text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+                              className="rounded-md bg-white/90 p-1 text-slate-500 hover:bg-rose-50 hover:text-rose-600 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                               title="Delete photo"
                             >
                               <Trash2 size={12} />
@@ -1015,7 +1016,7 @@ export default function page() {
                           onClick={() => fileInputRefs.current[slot.id]?.click()}
                           disabled={uploadingSlot === slot.id || isLocked}
                           title="Take photo"
-                          className="flex flex-1 flex-col items-center justify-center gap-1 hover:bg-slate-100 disabled:cursor-not-allowed [@media(pointer:fine)]:hidden"
+                          className="flex flex-1 flex-col items-center justify-center gap-1 hover:bg-slate-100 transition-colors cursor-pointer disabled:cursor-not-allowed [@media(pointer:fine)]:hidden"
                         >
                           <Camera size={18} />
                           <span className="text-[9px] normal-case tracking-normal">Camera</span>
@@ -1025,7 +1026,7 @@ export default function page() {
                           onClick={() => galleryInputRefs.current[slot.id]?.click()}
                           disabled={uploadingSlot === slot.id || isLocked}
                           title="Add photo"
-                          className="flex flex-1 flex-col items-center justify-center gap-1 hover:bg-slate-100 disabled:cursor-not-allowed"
+                          className="flex flex-1 flex-col items-center justify-center gap-1 hover:bg-slate-100 transition-colors cursor-pointer disabled:cursor-not-allowed"
                         >
                           <Camera size={20} className="hidden [@media(pointer:fine)]:block" />
                           <Upload size={18} className="[@media(pointer:fine)]:hidden" />
@@ -1042,7 +1043,7 @@ export default function page() {
                       <button
                         type="button"
                         onClick={() => removeCustomSlot(slot.id)}
-                        className="absolute top-2 right-2 z-10 rounded-md bg-white/80 p-1 text-slate-400 hover:bg-white hover:text-rose-500"
+                        className="absolute top-2 right-2 z-10 rounded-md bg-white/80 p-1 text-slate-400 hover:bg-white hover:text-rose-500 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                         title="Remove photo slot"
                       >
                         <X size={14} />
@@ -1117,7 +1118,7 @@ export default function page() {
                 onClick={addFinding}
                 disabled={reportLocked || editingFindingId !== null || addingFinding}
                 title={editingFindingId !== null ? 'Finish editing the current finding first' : undefined}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-150 hover:border-slate-300 hover:bg-slate-100 hover:shadow-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 disabled:hover:shadow-none"
+                className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-200 hover:border-slate-300 hover:bg-slate-100 hover:shadow-sm cursor-pointer hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
               >
                 {addingFinding ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />} Add Finding
               </button>
@@ -1166,7 +1167,7 @@ export default function page() {
                               onClick={() => updateFindingContent(f.id, editFindingName, editFindingNote, editFindingStatus)}
                               disabled={!editFindingName.trim() || !editFindingNote.trim()}
                               title={!editFindingName.trim() || !editFindingNote.trim() ? 'Fill in both fields before saving' : undefined}
-                              className="rounded bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-indigo-600"
+                              className="rounded bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-indigo-600 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                             >
                               Save
                             </button>
@@ -1192,12 +1193,12 @@ export default function page() {
                                   editFindingStatus === s
                                     ? 'ring-2 ring-slate-900/20 ring-offset-1'
                                     : 'opacity-40 hover:opacity-75'
-                                }`}
+                                } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
                               >
                                 {findingStatusMeta[s].label}
                               </button>
                             ))}
-                            <button onClick={() => cancelEditingFinding(f)} className="ml-1 rounded-lg border border-slate-200 p-1.5 text-slate-400 hover:bg-white">
+                            <button onClick={() => cancelEditingFinding(f)} className="ml-1 rounded-lg border border-slate-200 p-1.5 text-slate-400 hover:bg-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                               <X size={14} />
                             </button>
                           </div>
@@ -1205,7 +1206,7 @@ export default function page() {
                           <button
                             onClick={() => startEditingFinding(f)}
                             disabled={reportLocked}
-                            className={`rounded-full border px-3 py-1 text-xs font-semibold disabled:cursor-not-allowed ${meta.classes}`}
+                            className={`rounded-full border px-3 py-1 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-xs cursor-pointer disabled:cursor-not-allowed disabled:hover:translate-y-0 ${meta.classes}`}
                           >
                             {meta.label}
                           </button>
@@ -1213,14 +1214,14 @@ export default function page() {
                         <button
                           onClick={() => startEditingFinding(f)}
                           disabled={reportLocked}
-                          className="rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                         >
                           <Pencil size={14} />
                         </button>
                         <button
                           onClick={() => deleteFinding(f.id)}
                           disabled={reportLocked}
-                          className="rounded-lg border border-slate-200 p-1.5 text-rose-500 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="rounded-lg border border-slate-200 p-1.5 text-rose-500 hover:bg-rose-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -1250,17 +1251,17 @@ export default function page() {
                     <button
                       type="button"
                       onClick={() => setShowRemoveDialog(true)}
-                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors active:scale-95"
+                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors active:scale-95 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                       title="Detach this report from the job order"
                     >
-                      <Link2 size={13} className="text-slate-500" />
+                      <Link2 size={13} className="text-slate-500 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md" />
                       Detach Report
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={() => setShowDtcs((v) => !v)}
-                    className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                   >
                     {showDtcs ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                     {showDtcs ? 'Collapse' : 'Expand'}
@@ -1271,7 +1272,7 @@ export default function page() {
                   type="button"
                   onClick={handleSyncGmail}
                   disabled={syncingGmail || !initial?.diagnosticScanAuthorized}
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                   title={!initial?.diagnosticScanAuthorized ? 'The customer needs to approve the scan fee first' : 'Run Gmail fetcher to check for scanner diagnostic reports'}
                 >
                   {syncingGmail ? <Loader2 size={13} className="animate-spin text-indigo-600" /> : <Mail size={13} className="text-rose-500" />}
@@ -1302,13 +1303,13 @@ export default function page() {
                     onClick={openPicker}
                     disabled={!initial?.diagnosticScanAuthorized}
                     title={!initial?.diagnosticScanAuthorized ? 'The customer needs to approve the scan fee first' : undefined}
-                    className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-slate-900 disabled:active:scale-100"
+                    className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-slate-900 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                   >
                     <Link2 size={13} /> Attach Report
                   </button>
                   <label
                     title={!initial?.diagnosticScanAuthorized ? 'The customer needs to approve the scan fee first' : undefined}
-                    className={`flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 ${
+                    className={`flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm ${
                       initial?.diagnosticScanAuthorized ? 'cursor-pointer hover:bg-slate-100 active:scale-95' : 'cursor-not-allowed opacity-40'
                     }`}
                   >
@@ -1341,12 +1342,12 @@ export default function page() {
                       type="button"
                       onClick={handleSyncGmail}
                       disabled={syncingGmail}
-                      className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 disabled:opacity-50"
+                      className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0"
                     >
                       {syncingGmail ? <Loader2 size={12} className="animate-spin" /> : <Mail size={12} className="text-rose-500" />}
                       {syncingGmail ? 'Checking Gmail…' : 'Check Gmail'}
                     </button>
-                    <button onClick={() => setShowPicker(false)} className="text-xs text-slate-400 hover:text-slate-600">Cancel</button>
+                    <button onClick={() => setShowPicker(false)} className="text-xs text-slate-400 hover:text-slate-600 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Cancel</button>
                   </div>
                 </div>
                 {pickerLoading && (
@@ -1363,12 +1364,12 @@ export default function page() {
                         type="button"
                         onClick={handleSyncGmail}
                         disabled={syncingGmail}
-                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 active:scale-95 disabled:opacity-50"
+                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                       >
                         {syncingGmail ? <Loader2 size={13} className="animate-spin text-indigo-600" /> : <Mail size={13} className="text-rose-500" />}
                         {syncingGmail ? 'Checking Gmail…' : 'Check Gmail'}
                       </button>
-                      <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+                      <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                         {uploadingPdf ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
                         {uploadingPdf ? 'Uploading…' : 'Upload PDF'}
                         <input
@@ -1419,7 +1420,7 @@ export default function page() {
                               type="button"
                               onClick={() => linkReport(r.id)}
                               disabled={linkingId === r.id || deletingUnlinked}
-                              className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-60 active:scale-95 transition-colors"
+                              className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                             >
                               {linkingId === r.id ? <Loader2 size={12} className="animate-spin" /> : <Link2 size={12} />}
                               Attach
@@ -1428,7 +1429,7 @@ export default function page() {
                               type="button"
                               onClick={() => setDeleteUnlinkedTarget(r)}
                               disabled={linkingId === r.id || deletingUnlinked}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-60 transition-colors active:scale-95"
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                               title="Remove diagnostic report from system"
                             >
                               <Trash2 size={13} />
@@ -1484,7 +1485,7 @@ export default function page() {
                     <div>
                       <p className="text-slate-400">Original PDF</p>
                       <a href={obd2Report.pdf_storage_url} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1 font-semibold text-indigo-600 hover:underline">
+                        className="flex items-center gap-1 font-semibold text-indigo-600 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                         <FileText size={11} /> View PDF
                       </a>
                     </div>
@@ -1613,13 +1614,13 @@ export default function page() {
                     </p>
                     <button
                       onClick={() => setApprovalDecision('confirmed')}
-                      className="mb-2 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+                      className="mb-2 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                     >
                       <Check size={15} /> Confirm Pull Out
                     </button>
                     <button
                       onClick={() => setApprovalDecision('reverted')}
-                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50"
+                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                     >
                       <X size={15} /> Revert Request
                     </button>
@@ -1639,7 +1640,7 @@ export default function page() {
             {isApproved && !initial.quotationStarted && (
               <Link
                 href={`/job-orders/${jobOrderId}/quotation`}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
               >
                 Continue to Quotation <ChevronRight size={15} />
               </Link>
@@ -1673,7 +1674,7 @@ export default function page() {
                 type="button"
                 disabled={unlinking}
                 onClick={() => setShowRemoveDialog(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
@@ -1682,7 +1683,7 @@ export default function page() {
                 type="button"
                 disabled={unlinking}
                 onClick={handleDetachReport}
-                className="flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60 transition-colors active:scale-95"
+                className="flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white hover:bg-slate-800 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none"
               >
                 {unlinking ? <Loader2 size={13} className="animate-spin" /> : <Link2 size={13} />}
                 Detach from this Job Order
@@ -1717,7 +1718,7 @@ export default function page() {
                 type="button"
                 disabled={deletingUnlinked}
                 onClick={() => setDeleteUnlinkedTarget(null)}
-                className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
@@ -1726,7 +1727,7 @@ export default function page() {
                 type="button"
                 disabled={deletingUnlinked}
                 onClick={() => handleDeleteUnlinkedReport(deleteUnlinkedTarget.id)}
-                className="flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-60 transition-colors active:scale-95"
+                className="flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-rose-700 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none"
               >
                 {deletingUnlinked ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                 Remove Report

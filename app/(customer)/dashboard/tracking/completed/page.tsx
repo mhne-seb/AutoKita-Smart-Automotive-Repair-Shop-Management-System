@@ -155,7 +155,7 @@ function Completed() {
             </p>
           </div>
           <div className="ml-auto flex shrink-0 gap-2">
-            <button onClick={handleDownload} className="inline-flex items-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-xs hover:bg-accent"><Download className="h-3 w-3" /> Download</button>
+            <button onClick={handleDownload} className="inline-flex items-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-xs hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><Download className="h-3 w-3" /> Download</button>
           </div>
         </div>
       </div>
@@ -303,7 +303,7 @@ function Completed() {
                 )}
                 <button
                   onClick={() => setShowPay(true)}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                 >
                   <CreditCard className="h-4 w-4" /> Pay Remaining Balance
                 </button>

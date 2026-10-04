@@ -292,10 +292,10 @@ function Contact() {
                       key={i}
                       type="button"
                       onClick={() => setInquiry(i)}
-                      className={`rounded-md border px-4 py-1.5 text-sm transition-all duration-200 ${
+                      className={`cursor-pointer rounded-md border px-4 py-1.5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 ${
                         inquiry === i
-                          ? "border-brand bg-brand-soft text-brand scale-[1.03]"
-                          : "hover:bg-accent hover:scale-[1.03]"
+                          ? "border-brand bg-brand-soft text-brand shadow-sm"
+                          : "hover:bg-accent"
                       }`}
                     >
                       {i}
@@ -324,7 +324,11 @@ function Contact() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-3 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+                className={`mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-3 text-sm font-semibold text-brand-foreground transition-all duration-200 ${
+                  submitting
+                    ? "cursor-not-allowed opacity-70"
+                    : "cursor-pointer hover:-translate-y-0.5 hover:bg-brand/90 hover:shadow-md active:translate-y-0"
+                }`}
               >
                 {submitting ? (
                   <>

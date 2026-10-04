@@ -136,7 +136,7 @@ export default function TestingPage() {
             <div className="rounded-2xl border border-emerald-300 bg-emerald-50 p-6">
               <p className="flex items-center gap-2 text-lg font-bold text-emerald-800"><CheckCircle2 size={22} /> Road test passed</p>
               <p className="mt-1 text-sm text-emerald-800/80">The job order is complete. Collect the balance and release the vehicle on the Billing page.</p>
-              <Link href={`/job-orders/${jobOrderId}/billing`} className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Proceed to Billing <ArrowRight size={14} /></Link>
+              <Link href={`/job-orders/${jobOrderId}/billing`} className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Proceed to Billing <ArrowRight size={14} /></Link>
             </div>
           ) : current ? (
             <div className="rounded-2xl border border-sky-300 bg-white p-6">
@@ -147,10 +147,10 @@ export default function TestingPage() {
 
               {/* Verdict */}
               <div className="mt-5 grid grid-cols-2 gap-3">
-                <button type="button" onClick={() => setVerdict('pass')} className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-colors ${verdict === 'pass' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                <button type="button" onClick={() => setVerdict('pass')} className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-colors ${verdict === 'pass' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'} cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}>
                   <CheckCircle2 size={18} /> Pass — repairs hold up
                 </button>
-                <button type="button" onClick={() => setVerdict('fail')} className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-colors ${verdict === 'fail' ? 'border-rose-500 bg-rose-50 text-rose-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                <button type="button" onClick={() => setVerdict('fail')} className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-colors ${verdict === 'fail' ? 'border-rose-500 bg-rose-50 text-rose-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'} cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}>
                   <XCircle size={18} /> Fail — something's still wrong
                 </button>
               </div>
@@ -224,10 +224,10 @@ export default function TestingPage() {
                         device with a camera (phone OR tablet) — gate on
                         pointer type, not screen width, since a tablet is wide
                         but still has a working camera. */}
-                    <button type="button" onClick={() => fileRef.current?.click()} className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 [@media(pointer:fine)]:hidden">
+                    <button type="button" onClick={() => fileRef.current?.click()} className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 [@media(pointer:fine)]:hidden cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                       <Camera size={13} /> {photo ? 'Retake' : 'Take Photo'}
                     </button>
-                    <button type="button" onClick={() => galleryRef.current?.click()} className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+                    <button type="button" onClick={() => galleryRef.current?.click()} className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                       <Upload size={13} />
                       <span className="[@media(pointer:fine)]:hidden">Gallery</span>
                       <span className="hidden [@media(pointer:fine)]:inline">{photo ? 'Replace photo' : 'Add photo'}</span>
@@ -237,12 +237,12 @@ export default function TestingPage() {
                   </div>
 
                   <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
-                    <button type="button" onClick={() => setVerdict(null)} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                    <button type="button" onClick={() => setVerdict(null)} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Cancel</button>
                     <button type="button" onClick={() => {
                       if (!verdict) return
                       setConfirmSubmitResult(true)
                     }} disabled={saving}
-                      className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 ${verdict === 'pass' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'}`}>
+                      className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50 ${verdict === 'pass' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'}`}>
                       {saving ? <Loader2 size={14} className="animate-spin" /> : verdict === 'pass' ? <CheckCircle2 size={14} /> : <RotateCcw size={14} />}
                       {verdict === 'pass' ? 'Mark passed & complete job' : 'Record fail & send back to floor'}
                     </button>
@@ -271,12 +271,12 @@ export default function TestingPage() {
                   if (!testerId) return toast.error('Pick who is driving the test.')
                   setConfirmStart(true)
                 }} disabled={!canStart || starting}
-                  className="flex items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-40">
+                  className="flex items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md hover:bg-sky-700 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-40">
                   {starting ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />} Start road test
                 </button>
               </div>
               {!data.allServicesDone && (
-                <Link href={`/job-orders/${jobOrderId}/progress`} className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-sky-700 hover:underline"><ArrowLeft size={14} /> Back to Service Progress</Link>
+                <Link href={`/job-orders/${jobOrderId}/progress`} className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-sky-700 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><ArrowLeft size={14} /> Back to Service Progress</Link>
               )}
             </div>
           )}
@@ -302,7 +302,7 @@ export default function TestingPage() {
                     </div>
                   )}
                   {a.photoUrl && (
-                    <button type="button" onClick={() => setLightbox({ url: a.photoUrl!, label: `Road test attempt ${a.attemptNo}` })} className="mt-2 block overflow-hidden rounded-md border">
+                    <button type="button" onClick={() => setLightbox({ url: a.photoUrl!, label: `Road test attempt ${a.attemptNo}` })} className="mt-2 block overflow-hidden rounded-md border cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                       <img src={a.photoUrl} alt="" className="h-16 w-24 object-cover" />
                     </button>
                   )}
@@ -326,7 +326,7 @@ export default function TestingPage() {
                 </li>
               ))}
             </ul>
-            <Link href={`/job-orders/${jobOrderId}/progress`} className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 hover:underline"><ArrowLeft size={12} /> Service Progress</Link>
+            <Link href={`/job-orders/${jobOrderId}/progress`} className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><ArrowLeft size={12} /> Service Progress</Link>
           </div>
         </div>
       </div>

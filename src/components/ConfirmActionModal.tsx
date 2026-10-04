@@ -61,7 +61,7 @@ export function ConfirmActionModal({
               if (!busy) onClose()
             }}
             disabled={busy}
-            className="text-muted-foreground hover:text-foreground disabled:opacity-50"
+            className="rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Close"
           >
             <X size={18} />
@@ -77,19 +77,19 @@ export function ConfirmActionModal({
               if (!busy) onClose()
             }}
             disabled={busy}
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50"
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={busy}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+            className={`rounded-lg px-4 py-2 text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none ${
               isDanger
-                ? 'bg-destructive text-destructive-foreground hover:opacity-90 disabled:opacity-50'
+                ? 'bg-destructive text-destructive-foreground hover:opacity-90'
                 : isBrand
-                ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white hover:opacity-90 disabled:opacity-50'
-                : 'bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50'
+                ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white hover:opacity-90'
+                : 'bg-primary text-primary-foreground hover:opacity-90'
             }`}
           >
             {confirmLabel}

@@ -138,14 +138,14 @@ export function NotificationsModal({ storageKey, loadAll, onClose }: Notificatio
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                className="text-sm font-medium text-primary hover:underline"
+                className="cursor-pointer text-sm font-medium text-primary transition-all duration-200 hover:-translate-y-0.5 hover:underline active:translate-y-0"
               >
                 Mark all as read
               </button>
             )}
             <button
               onClick={onClose}
-              className="rounded-full p-2 text-muted-foreground hover:bg-accent"
+              className="cursor-pointer rounded-full p-2 text-muted-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent hover:shadow-sm active:translate-y-0"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
@@ -156,7 +156,7 @@ export function NotificationsModal({ storageKey, loadAll, onClose }: Notificatio
         <div className="flex border-b px-4 sm:px-6">
           <button
             onClick={() => setTab('all')}
-            className={`border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+            className={`cursor-pointer border-b-2 px-4 py-3 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${
               tab === 'all'
                 ? 'border-primary text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -166,7 +166,7 @@ export function NotificationsModal({ storageKey, loadAll, onClose }: Notificatio
           </button>
           <button
             onClick={() => setTab('unread')}
-            className={`border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+            className={`cursor-pointer border-b-2 px-4 py-3 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${
               tab === 'unread'
                 ? 'border-primary text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -217,7 +217,7 @@ export function NotificationsModal({ storageKey, loadAll, onClose }: Notificatio
                                   router.push(n.href)
                                 }
                               }}
-                              className={`flex w-full items-start gap-4 border-b p-4 text-left last:border-0 hover:bg-accent ${
+                              className={`relative z-10 cursor-pointer flex w-full items-start gap-4 border-b p-4 text-left last:border-0 transition-all duration-200 hover:z-20 hover:bg-accent hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 ${
                                 unread ? 'bg-accent/30' : ''
                               }`}
                             >

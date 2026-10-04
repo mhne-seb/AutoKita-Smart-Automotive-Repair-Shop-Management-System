@@ -126,7 +126,7 @@ export function DashHeader() {
             <div ref={ref} className="relative">
               <button
                 onClick={() => setOpen((v) => !v)}
-                className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2.5 transition-colors hover:bg-muted/60"
+                className="cursor-pointer flex items-center gap-2 rounded-full py-1 pl-1 pr-2.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-muted/60 active:translate-y-0"
               >
                 <span
                   className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-white shadow-sm"
@@ -159,13 +159,13 @@ export function DashHeader() {
                   </div>
                   <button
                     onClick={() => { setOpen(false); router.push("/dashboard/profile"); }}
-                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-colors hover:bg-accent"
+                    className="cursor-pointer flex w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent hover:shadow-sm active:translate-y-0"
                   >
                     <Settings className="h-4 w-4 text-muted-foreground" /> Customize Profile
                   </button>
                   <button
                     onClick={() => { setOpen(false); setLogoutConfirmOpen(true); }}
-                    className="flex w-full items-center gap-2.5 border-t px-4 py-2.5 text-sm text-destructive transition-colors hover:bg-destructive/10"
+                    className="cursor-pointer flex w-full items-center gap-2.5 border-t px-4 py-2.5 text-sm text-destructive transition-all duration-200 hover:-translate-y-0.5 hover:bg-destructive/10 hover:shadow-sm active:translate-y-0"
                   >
                     <LogOut className="h-4 w-4" /> Log Out
                   </button>

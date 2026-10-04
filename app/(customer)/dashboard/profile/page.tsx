@@ -114,6 +114,7 @@ function Profile() {
   const [showAddressErrors, setShowAddressErrors] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [savingPhoto, setSavingPhoto] = useState(false);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const photoInput = useRef<HTMLInputElement>(null);
 
   //Brief green "updated" state on the buttons - a corner toast is easy to miss.
@@ -322,16 +323,24 @@ function Profile() {
                   type="button"
                   onClick={() => photoInput.current?.click()}
                   disabled={savingPhoto}
-                  className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-accent disabled:opacity-60"
+                  className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
+                    savingPhoto
+                      ? "opacity-60 cursor-not-allowed"
+                      : "cursor-pointer hover:-translate-y-0.5 hover:shadow-sm hover:bg-accent active:translate-y-0"
+                  }`}
                 >
                   <Camera className="h-4 w-4" /> {savingPhoto ? "Saving..." : photoUrl ? "Change photo" : "Upload photo"}
                 </button>
                 {photoUrl && (
                   <button
                     type="button"
-                    onClick={removePhoto}
+                    onClick={() => setShowRemoveConfirm(true)}
                     disabled={savingPhoto}
-                    className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-destructive hover:bg-destructive/10 disabled:opacity-60"
+                    className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-destructive transition-all duration-200 ${
+                      savingPhoto
+                        ? "opacity-60 cursor-not-allowed"
+                        : "cursor-pointer hover:-translate-y-0.5 hover:shadow-sm hover:bg-destructive/10 active:translate-y-0"
+                    }`}
                   >
                     <Trash2 className="h-4 w-4" /> Remove
                   </button>
@@ -424,12 +433,12 @@ function Profile() {
             <button
               onClick={saveProfile}
               disabled={savingProfile || !hasChanges}
-              className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors ${
+              className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200 ${
                 profileSaved
                   ? "bg-emerald-600 text-white"
                   : !hasChanges
                   ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "bg-brand text-brand-foreground hover:opacity-90 disabled:opacity-60"
+                  : "bg-brand text-brand-foreground cursor-pointer hover:-translate-y-0.5 hover:shadow-md hover:opacity-90 active:translate-y-0"
               }`}
             >
               {profileSaved ? (
@@ -458,12 +467,12 @@ function Profile() {
             <button
               onClick={savePassword}
               disabled={savingPwd || !hasPwdChanges}
-              className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors ${
+              className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200 ${
                 pwdSaved
                   ? "bg-emerald-600 text-white"
                   : !hasPwdChanges
                   ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "bg-brand text-brand-foreground hover:opacity-90 disabled:opacity-60"
+                  : "bg-brand text-brand-foreground cursor-pointer hover:-translate-y-0.5 hover:shadow-md hover:opacity-90 active:translate-y-0"
               }`}
             >
               {pwdSaved ? (
@@ -497,6 +506,32 @@ function Profile() {
           </div>
         </Section>
       </div>
+
+      {showRemoveConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm rounded-xl bg-card p-6 shadow-xl">
+            <h3 className="text-lg font-bold">Remove profile photo?</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Are you sure you want to remove your profile photo? This action cannot be undone.</p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setShowRemoveConfirm(false)}
+                className="cursor-pointer rounded-md border px-4 py-2 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent hover:shadow-sm active:translate-y-0"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowRemoveConfirm(false);
+                  removePhoto();
+                }}
+                className="cursor-pointer rounded-md bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90 hover:shadow-sm active:translate-y-0"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

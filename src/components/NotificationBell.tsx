@@ -20,7 +20,7 @@ export function NotificationBell({
   notifications,
   storageKey,
   loadAll,
-  buttonClassName = 'relative rounded-md p-2 hover:bg-accent',
+  buttonClassName = 'relative cursor-pointer rounded-md p-2 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-accent active:translate-y-0',
 }: {
   notifications: NotificationItem[]
   storageKey: string
@@ -125,7 +125,7 @@ export function NotificationBell({
           <div className="flex items-center justify-between border-b px-4 py-3">
             <span className="text-sm font-semibold">Notifications</span>
             {unreadCount > 0 && (
-              <button onClick={markAllRead} className="text-xs text-primary hover:underline">
+              <button onClick={markAllRead} className="cursor-pointer text-xs text-primary transition-all duration-200 hover:-translate-y-0.5 hover:underline active:translate-y-0">
                 Mark all as read
               </button>
             )}
@@ -146,7 +146,7 @@ export function NotificationBell({
                         router.push(n.href)
                       }
                     }}
-                    className={`flex w-full flex-col gap-0.5 border-b px-4 py-3 text-left last:border-b-0 hover:bg-accent ${
+                    className={`relative z-10 cursor-pointer flex w-full flex-col gap-0.5 border-b px-4 py-3 text-left last:border-b-0 transition-all duration-200 hover:z-20 hover:bg-accent hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 ${
                       unread ? 'bg-accent/40' : ''
                     }`}
                   >
@@ -168,7 +168,7 @@ export function NotificationBell({
                   setOpen(false)
                   setModalOpen(true)
                 }}
-                className="w-full rounded-md py-2 text-center text-sm font-medium text-primary hover:bg-accent hover:underline"
+                className="cursor-pointer w-full rounded-md py-2 text-center text-sm font-medium text-primary transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent hover:shadow-sm hover:underline active:translate-y-0"
               >
                 View all notifications
               </button>

@@ -96,6 +96,7 @@ export interface DashboardPendingTicket {
   service_mode: string
   concern: string | null
   request_date: string
+  preferred_datetime?: string | null
   vehicle_model: string
   vehicle_year: number
   plate_number: string
@@ -360,6 +361,7 @@ export async function getDashboardPendingTickets(userId: number): Promise<Dashbo
         st.service_mode::text   AS service_mode,
         st.customer_concern     AS concern,
         st.request_date::text   AS request_date,
+        st.preferred_datetime::text AS preferred_datetime,
         v.vehicle_model,
         v.vehicle_year,
         v.plate_number

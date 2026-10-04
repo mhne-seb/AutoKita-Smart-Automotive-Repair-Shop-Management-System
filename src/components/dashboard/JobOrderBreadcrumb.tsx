@@ -40,7 +40,7 @@ export function JobOrderBreadcrumb({ jobOrderId, current, stage }: Props) {
     <div className="space-y-2">
       <Link
         href="/job-orders"
-        className="flex w-fit items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
+        className="flex w-fit items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
       >
         <ChevronLeft size={14} /> Back to Customers
       </Link>
@@ -59,7 +59,7 @@ export function JobOrderBreadcrumb({ jobOrderId, current, stage }: Props) {
                 ) : reachable ? (
                   <Link
                     href={c.href}
-                    className="text-slate-400 hover:text-slate-700 hover:underline"
+                    className="text-slate-400 hover:text-slate-700 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
                   >
                     {c.label}
                   </Link>

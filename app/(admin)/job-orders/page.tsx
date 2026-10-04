@@ -209,8 +209,8 @@ export default function page() {
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                active ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-brand-foreground' : 'text-muted-foreground hover:text-foreground'
+              className={`cursor-pointer flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${
+                active ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-brand-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
               }`}
             >
               <Icon size={14} />
@@ -250,7 +250,7 @@ export default function page() {
             {query && (
               <button
                 onClick={() => setQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
               >
                 <X size={14} />
               </button>
@@ -265,7 +265,7 @@ export default function page() {
                 activeFilterCount > 0
                   ? 'border-brand bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-brand-foreground'
                   : 'border-border bg-card text-foreground hover:bg-accent'
-              }`}
+              } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
             >
               <SlidersHorizontal size={15} />
               <span>Filter</span>
@@ -286,7 +286,7 @@ export default function page() {
                   {activeFilterCount > 0 && (
                     <button
                       onClick={resetFilters}
-                      className="text-xs font-medium text-rose-500 hover:underline"
+                      className="text-xs font-medium text-rose-500 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                     >
                       Reset All
                     </button>
@@ -358,7 +358,7 @@ export default function page() {
                 <div className="mt-4 flex justify-end border-t border-border pt-3">
                   <button
                     onClick={() => setShowFilterMenu(false)}
-                    className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-1.5 text-xs font-semibold text-brand-foreground hover:opacity-90"
+                    className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-1.5 text-xs font-semibold text-brand-foreground hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                   >
                     Done
                   </button>
@@ -394,28 +394,28 @@ export default function page() {
           {selectedVehicle !== 'all' && (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
               Vehicle: {selectedVehicle}
-              <button onClick={() => setSelectedVehicle('all')} className="hover:opacity-70"><X size={12} /></button>
+              <button onClick={() => setSelectedVehicle('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
             </span>
           )}
           {selectedService !== 'all' && (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
               Service: {selectedService}
-              <button onClick={() => setSelectedService('all')} className="hover:opacity-70"><X size={12} /></button>
+              <button onClick={() => setSelectedService('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
             </span>
           )}
           {selectedMechanic !== 'all' && (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
               Mechanic: {selectedMechanic}
-              <button onClick={() => setSelectedMechanic('all')} className="hover:opacity-70"><X size={12} /></button>
+              <button onClick={() => setSelectedMechanic('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
             </span>
           )}
           {selectedPayment !== 'all' && (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
               Payment: {selectedPayment === 'pending' ? 'Pending' : selectedPayment === 'unpaid' ? 'Unpaid' : 'Paid'}
-              <button onClick={() => setSelectedPayment('all')} className="hover:opacity-70"><X size={12} /></button>
+              <button onClick={() => setSelectedPayment('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
             </span>
           )}
-          <button onClick={resetFilters} className="text-xs text-muted-foreground hover:text-rose-500 hover:underline">
+          <button onClick={resetFilters} className="text-xs text-muted-foreground hover:text-rose-500 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
             Clear all
           </button>
         </div>
@@ -431,7 +431,7 @@ export default function page() {
           {error.toLowerCase().includes('log in') && (
             <Link
               href="/login"
-              className="mt-3 inline-block rounded-xl bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2 text-xs font-semibold text-white shadow hover:opacity-90"
+              className="mt-3 inline-block rounded-xl bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2 text-xs font-semibold text-white shadow hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
             >
               Sign In to AutoKita Admin
             </Link>
@@ -558,7 +558,7 @@ export default function page() {
                               onClick={() => setConfirmCheckIn(c)}
                               disabled={checkingInId === c.id}
                               title="Check In Vehicle (Mark Stored in Shop)"
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 shadow-2xs hover:bg-amber-100 disabled:opacity-50 transition-all"
+                              className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 shadow-2xs hover:bg-amber-100 disabled:opacity-50 active:translate-y-0"
                             >
                               <Store size={13} />
                               {checkingInId === c.id ? 'Checking In…' : 'Check In'}
@@ -567,7 +567,7 @@ export default function page() {
                           <Link
                             href={`/job-orders/${c.id}/${stageToRoute[c.stage]}`}
                             title="View Full Job Order"
-                            className="inline-flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent"
+                            className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm inline-flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent active:translate-y-0"
                           >
                             <Eye size={15} />
                           </Link>

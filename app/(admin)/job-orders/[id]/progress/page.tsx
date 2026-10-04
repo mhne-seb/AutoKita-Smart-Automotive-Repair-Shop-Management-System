@@ -22,6 +22,7 @@ import { mechanicIsFull } from '@/data/mechanicPolicy'
 import { currency } from '@/data/mockData'
 import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, PartsPurchase, Supplier, ServiceFinding, PullOutRequest, partIsReady } from '@/data/types'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
+import { ShopLoading } from '@/components/ShopLoading'
 
 const sectionColors: Record<string, string> = {
   received: 'text-emerald-600',
@@ -275,11 +276,7 @@ export default function page() {
   }, [quotation])
 
   if (jobOrder === undefined || initial === undefined || quotation === undefined) {
-    return (
-      <div className="p-8">
-        <p className="text-sm text-slate-500">Loading service progress…</p>
-      </div>
-    )
+    return <ShopLoading message="Loading service progress…" />
   }
 
   if (!jobOrder || !initial) {
@@ -474,7 +471,7 @@ export default function page() {
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setLightboxPhoto({ url: task.photoUrl!, label: `${task.title} — finished work` }) }}
-                      className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700 transition-colors hover:bg-emerald-100"
+                      className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                     >
                       <img src={task.photoUrl} alt="" className="h-4 w-4 rounded-sm object-cover" /> Photo
                     </button>
@@ -565,7 +562,7 @@ export default function page() {
                     <button
                       onClick={() => setSchedulingTask(task)}
                       title="Pick a date and time and assign a mechanic"
-                      className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-indigo-700 active:scale-95"
+                      className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-indigo-700 active:translate-y-0"
                     >
                       <CalendarDays size={13} /> {task.scheduledDate && !task.mechanicId ? 'Assign mechanic' : 'Schedule'}
                     </button>
@@ -579,7 +576,7 @@ export default function page() {
                           ? `Waiting for parts (${parts.length - missing.length} of ${parts.length} received)`
                           : undefined
                       }
-                      className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-indigo-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100"
+                      className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-indigo-700 active:translate-y-0 disabled:hover:-translate-y-0 disabled:hover:shadow-none disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       {busy ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />} Start
                     </button>
@@ -590,7 +587,7 @@ export default function page() {
                         onClick={() => setFinishingTask(task)}
                         disabled={busy}
                         title="Upload a photo of the finished work to mark this done"
-                        className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-150 hover:bg-emerald-700 active:scale-95 disabled:opacity-40"
+                        className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-emerald-700 active:translate-y-0 disabled:hover:-translate-y-0 disabled:hover:shadow-none disabled:opacity-40"
                       >
                         <Camera size={13} /> Finish
                       </button>
@@ -598,7 +595,7 @@ export default function page() {
                         onClick={() => setStoppingTask(task)}
                         disabled={busy}
                         title="Revert back to pending if started accidentally"
-                        className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-700 transition-all duration-150 hover:bg-rose-100 hover:border-rose-300 active:scale-95 disabled:opacity-40"
+                        className="cursor-pointer flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-700 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-rose-100 hover:border-rose-300 active:translate-y-0 disabled:hover:-translate-y-0 disabled:hover:shadow-none disabled:opacity-40"
                       >
                         <RotateCcw size={13} /> Revert / Stop
                       </button>
@@ -609,7 +606,7 @@ export default function page() {
                   {jobOnFloor && task.status === 'active' && !isRoadTest(task) && (
                     <button
                       onClick={() => setFindingModal({ task: { id: Number(task.id), title: task.title } })}
-                      className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 transition-all duration-150 hover:bg-amber-100 active:scale-95"
+                      className="cursor-pointer flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-amber-100 active:translate-y-0"
                     >
                       <AlertTriangle size={13} /> Found a problem?
                     </button>
@@ -765,11 +762,11 @@ export default function page() {
             <div className="mt-4 flex gap-3">
               <button
                 onClick={() => setQuotationConfirmed(true)}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
               >
                 <Check size={15} /> Confirm & Proceed
               </button>
-              <button className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+              <button className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                 Request Changes
               </button>
             </div>
@@ -874,7 +871,7 @@ export default function page() {
             return (
             <div key={f.id} className={`flex items-start gap-3 rounded-xl border p-4 ${tone.box}`}>
               {f.photoUrl && (
-                <button type="button" onClick={() => setLightboxPhoto({ url: f.photoUrl!, label: 'Finding photo' })} className="shrink-0">
+                <button type="button" onClick={() => setLightboxPhoto({ url: f.photoUrl!, label: 'Finding photo' })} className="shrink-0 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                   <img src={f.photoUrl} alt="" className={`h-14 w-20 rounded-md border object-cover ${tone.img}`} />
                 </button>
               )}
@@ -1028,7 +1025,7 @@ export default function page() {
               <button
                 type="button"
                 onClick={() => setFindingModal({})}
-                className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+                className="cursor-pointer mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-amber-100 active:translate-y-0"
               >
                 <AlertTriangle size={14} /> Report a finding
               </button>
@@ -1063,7 +1060,7 @@ export default function page() {
                 </ul>
                 <button
                   onClick={() => openPurchaseModal()}
-                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-900 py-2 text-sm font-semibold text-white transition-all duration-150 hover:bg-slate-800 active:scale-[0.98]"
+                  className="cursor-pointer mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-900 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-slate-800 active:translate-y-0"
                 >
                   <Receipt size={14} /> Record Purchase
                 </button>
@@ -1083,7 +1080,7 @@ export default function page() {
                         <button
                           type="button"
                           onClick={() => setOpenPurchaseId(isOpen ? null : pu.id)}
-                          className="flex w-full items-center justify-between gap-2 rounded-md px-1 py-0.5 text-left hover:bg-slate-50"
+                          className="flex w-full items-center justify-between gap-2 rounded-md px-1 py-0.5 text-left hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                           aria-expanded={isOpen}
                         >
                           <span className="min-w-0 truncate text-slate-700">
@@ -1136,7 +1133,7 @@ export default function page() {
               {allDone || inTesting ? (
                 <Link
                   href={`/job-orders/${jobOrderId}/testing`}
-                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
+                  className="cursor-pointer mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-sky-700 active:translate-y-0"
                 >
                   {inTesting ? 'Open Testing' : 'Proceed to Testing'} <ArrowRight size={14} />
                 </Link>
@@ -1175,7 +1172,7 @@ export default function page() {
                 : 'No payment has been verified yet.'}
             </p>
             {bill.latestPayment?.verificationStatus === 'pending' && (
-              <Link href={`/job-orders/${jobOrderId}/quotation`} className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+              <Link href={`/job-orders/${jobOrderId}/quotation`} className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                 Verify payment <ArrowRight size={14} />
               </Link>
             )}
@@ -1196,7 +1193,7 @@ export default function page() {
             <p className="mt-1 text-xs text-slate-500">
               {jobOrder.stage === 'released' ? 'Paid and released. The summary and Job Order are on the Completed page.' : 'Road test passed. Collect the balance and release the vehicle.'}
             </p>
-            <Link href={`/job-orders/${jobOrderId}/${jobOrder.stage === 'released' ? 'completed' : 'billing'}`} className={`mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold ${jobOrder.stage === 'released' ? 'bg-white text-slate-900 hover:bg-slate-100' : 'bg-slate-900 text-white hover:bg-slate-800'}`}>
+            <Link href={`/job-orders/${jobOrderId}/${jobOrder.stage === 'released' ? 'completed' : 'billing'}`} className={`mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold ${jobOrder.stage === 'released' ? 'bg-white text-slate-900 hover:bg-slate-100' : 'bg-slate-900 text-white hover:bg-slate-800'} cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}>
               {jobOrder.stage === 'released' ? 'Open Completed' : 'Open Billing'} <ArrowRight size={14} />
             </Link>
           </div>
@@ -1244,7 +1241,7 @@ export default function page() {
               <button
                 type="button"
                 onClick={() => setStoppingTask(null)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
               >
                 Cancel
               </button>
@@ -1255,7 +1252,7 @@ export default function page() {
                   setStoppingTask(null)
                   await setTaskStatus(target, 'pending')
                 }}
-                className="flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 active:scale-95 transition-all shadow-sm"
+                className="flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 active:scale-95 transition-all shadow-sm cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
               >
                 <RotateCcw size={14} /> Yes, Stop & Revert
               </button>
@@ -1311,7 +1308,7 @@ export default function page() {
                 <button
                   type="button"
                   onClick={() => { setAddingSupplier((v) => !v); setNewSupplierName('') }}
-                  className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:underline"
+                  className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                 >
                   {addingSupplier ? 'Pick an existing supplier instead' : <><Plus size={12} /> Add new supplier</>}
                 </button>
@@ -1535,7 +1532,7 @@ function FinishTaskModal({ task, onClose, onSubmit }: { task: ServiceTask; onClo
                 : 'Upload a photo of the finished work. Required — it goes on the customer\u2019s record.'}
             </p>
           </div>
-          <button onClick={onClose} className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"><X size={18} /></button>
+          <button onClick={onClose} className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={18} /></button>
         </div>
 
         <div className="mt-5">
@@ -1555,7 +1552,7 @@ function FinishTaskModal({ task, onClose, onSubmit }: { task: ServiceTask; onClo
                     Retake
                     <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={pick} />
                   </label>
-                  <label className="cursor-pointer font-semibold text-indigo-600 hover:underline">
+                  <label className="cursor-pointer font-semibold text-indigo-600 hover:underline transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 inline-block">
                     <span className="[@media(pointer:fine)]:hidden">Gallery</span>
                     <span className="hidden [@media(pointer:fine)]:inline">Replace</span>
                     <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={pick} />
@@ -1565,12 +1562,12 @@ function FinishTaskModal({ task, onClose, onSubmit }: { task: ServiceTask; onClo
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3 [@media(pointer:fine)]:grid-cols-1">
-              <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-6 text-center transition-colors hover:border-indigo-400 hover:bg-indigo-50/40 [@media(pointer:fine)]:hidden">
+              <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-6 text-center transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md hover:border-indigo-400 hover:bg-indigo-50/40 [@media(pointer:fine)]:hidden">
                 <Camera size={22} className="text-slate-400" />
                 <span className="text-sm font-semibold text-slate-700">Take Photo</span>
                 <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={pick} />
               </label>
-              <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-6 text-center transition-colors hover:border-indigo-400 hover:bg-indigo-50/40">
+              <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-6 text-center transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md hover:border-indigo-400 hover:bg-indigo-50/40">
                 <Upload size={22} className="text-slate-400" />
                 <span className="text-sm font-semibold text-slate-700 [@media(pointer:fine)]:hidden">From Gallery</span>
                 <span className="hidden text-sm font-semibold text-slate-700 [@media(pointer:fine)]:inline">Click to choose a photo</span>
@@ -1583,11 +1580,11 @@ function FinishTaskModal({ task, onClose, onSubmit }: { task: ServiceTask; onClo
         </div>
 
         <div className="mt-5 flex gap-3">
-          <button onClick={onClose} disabled={saving} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">Cancel</button>
+          <button onClick={onClose} disabled={saving} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50">Cancel</button>
           <button
             onClick={submit}
             disabled={!file || saving}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-emerald-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-sm font-semibold text-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md hover:bg-emerald-700 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50"
           >
             {saving ? <><Loader2 size={15} className="animate-spin" /> Saving…</> : <><Check size={15} /> Mark Finished</>}
           </button>
@@ -1879,7 +1876,7 @@ function ScheduleModal({
             <h2 className="text-lg font-bold text-slate-900">Schedule Task</h2>
             <p className="text-xs text-slate-500">Pick a time window and assign a mechanic</p>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 rounded-full p-1.5 hover:bg-slate-100 transition-colors"><X size={18}/></button>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 rounded-full p-1.5 hover:bg-slate-100 transition-colors cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={18}/></button>
         </div>
         
         <div className="flex-1 overflow-y-auto pr-1 -mr-1 space-y-4">
@@ -1898,9 +1895,9 @@ function ScheduleModal({
           {/* Quick picks only make sense before the task has started. */}
           {task.status === 'pending' && (
             <div className="flex gap-2">
-              <button onClick={() => handleQuickPick(0)} className="flex-1 rounded-lg border border-slate-200 bg-white py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs">Today</button>
-              <button onClick={() => handleQuickPick(1)} className="flex-1 rounded-lg border border-slate-200 bg-white py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs">Tomorrow</button>
-              <button onClick={() => handleQuickPick(2)} className="flex-1 rounded-lg border border-slate-200 bg-white py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs">In 2 Days</button>
+              <button onClick={() => handleQuickPick(0)} className="flex-1 rounded-lg border border-slate-200 bg-white py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Today</button>
+              <button onClick={() => handleQuickPick(1)} className="flex-1 rounded-lg border border-slate-200 bg-white py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Tomorrow</button>
+              <button onClick={() => handleQuickPick(2)} className="flex-1 rounded-lg border border-slate-200 bg-white py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">In 2 Days</button>
             </div>
           )}
 
@@ -1954,7 +1951,7 @@ function ScheduleModal({
                     setDate(toLocalDateValue(next))
                     setTime(`${String(next.getHours()).padStart(2, '0')}:${String(next.getMinutes()).padStart(2, '0')}`)
                   }}
-                  className="rounded-lg bg-rose-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-rose-700 transition-colors shadow-sm"
+                  className="rounded-lg bg-rose-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-rose-700 transition-colors shadow-sm cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                 >
                   Set to {conflictingSchedule.earliestAfter}
                 </button>
@@ -2118,7 +2115,7 @@ function ScheduleModal({
                                 setDate(toLocalDateValue(next))
                                 setTime(`${String(next.getHours()).padStart(2, '0')}:${String(next.getMinutes()).padStart(2, '0')}`)
                               }}
-                              className="rounded bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white hover:bg-rose-700 transition-colors shadow-2xs"
+                              className="rounded bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white hover:bg-rose-700 transition-colors shadow-2xs cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                             >
                               Jump to {conflictingSchedule.earliestAfter}
                             </button>
@@ -2134,7 +2131,7 @@ function ScheduleModal({
         </div>
         
         <div className="mt-5 pt-3 border-t border-slate-100 flex gap-3 shrink-0">
-          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">Cancel</button>
+          <button onClick={onClose} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Cancel</button>
           <button
             onClick={handleSave}
             disabled={saving || pickedPast || !!conflictingSchedule || (() => {
@@ -2144,7 +2141,7 @@ function ScheduleModal({
               return !alreadyOnOrder && mechanicIsFull(Number(m.open_tasks ?? 0), Number(m.capacity))
             })()}
             title={conflictingSchedule ? conflictingSchedule.reason : undefined}
-            className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2 transition-all shadow-sm"
+            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md hover:bg-indigo-700 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50"
           >
             {saving ? 'Saving...' : <><Check size={16}/> Save</>}
           </button>
