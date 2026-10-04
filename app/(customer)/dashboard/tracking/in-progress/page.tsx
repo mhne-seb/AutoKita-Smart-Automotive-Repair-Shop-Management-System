@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
   Clock,
   AlertCircle,
@@ -267,21 +268,6 @@ function InProgress() {
           time: isHistorical ? fmtWhen(jobOrder.date_promised) : null,
           status: isHistorical ? "completed" : completionPct === 100 ? "completed" : "pending",
         },
-        {
-          key: "payment_received",
-          label: "Payment Received",
-          detail: "Final billing settled for this job order.",
-          time: null,
-          status: Number(jobOrder.balance) <= 0 && isHistorical ? "completed" : "pending",
-        },
-        {
-          key: "released",
-          label: "Vehicle Released",
-          detail: "Vehicle handed back to the customer.",
-          time: fmtWhen(jobOrder.released_at),
-          status: jobOrder.status === "released" ? "completed" : "pending",
-          image: jobOrder.release_photo_url,
-        },
       ]
     : [];
 
@@ -308,6 +294,14 @@ function InProgress() {
       {isHistorical && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
           <AlertCircle className="h-3.5 w-3.5" /> This service has already been completed. You're viewing a read-only record.
+        </div>
+      )}
+      {jobOrder.status === "testing" && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-sky-200 bg-sky-50 px-4 py-2 text-sm text-sky-900">
+          <span>Your vehicle is on its road test now.</span>
+          <Link href={`/dashboard/tracking/testing?jobOrderId=${jobOrder.job_order_id}`} className="font-semibold underline">
+            See road test
+          </Link>
         </div>
       )}
 
