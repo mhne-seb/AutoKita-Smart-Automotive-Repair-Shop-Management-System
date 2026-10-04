@@ -257,9 +257,13 @@ def _extract_dtc_table(doc) -> list[dict]:
                 code_val = str(row[col.get("code", 0)] or "").strip()
                 if not DTC_CODE_PATTERN.match(code_val):
                     continue
+                desc_val = str(row[col.get("description", 1)] or "").strip()
+                # Stop if we've hit the disclaimer section masquerading as a row
+                if re.search(r"(?i)\bdisclaimer\b", desc_val):
+                    break
                 dtc_records.append({
                     "code": code_val.upper(),
-                    "description": str(row[col.get("description", 1)] or "").strip() or None,
+                    "description": desc_val or None,
                     "state": str(row[col.get("state", 2)] or "").strip() or None,
                     "system": str(row[col.get("system", 3)] or "").strip() or None,
                 })
@@ -268,6 +272,16 @@ def _extract_dtc_table(doc) -> list[dict]:
     if not dtc_records:
         for page_idx, page in enumerate(doc.pages):
             words = page.extract_words()
+            # Strip out any words at or below the "Disclaimer" heading so they
+            # are never mistaken for DTC rows or part of a row's description.
+            disclaimer_top = None
+            for w in words:
+                if re.match(r'^disclaimer$', w['text'], re.IGNORECASE):
+                    disclaimer_top = w['top']
+                    break
+            if disclaimer_top is not None:
+                words = [w for w in words if w['top'] < disclaimer_top]
+
             # Look for DTC codes positioned in the leftmost column (x0 < 100)
             code_words = []
             for w in words:
@@ -333,6 +347,10 @@ def _extract_dtc_table(doc) -> list[dict]:
     # Strategy 3: Fallback regex scan of raw text if structured extraction found nothing
     if not dtc_records:
         all_text = _extract_text_all(doc)
+        # Truncate at the disclaimer section before regex scanning
+        disclaimer_match = re.search(r'(?im)^\s*disclaimer\s*$', all_text)
+        if disclaimer_match:
+            all_text = all_text[:disclaimer_match.start()]
         for m in DTC_CODE_PATTERN.finditer(all_text):
             dtc_records.append({
                 "code": m.group(1).upper(),
