@@ -326,39 +326,7 @@ export default function page() {
     }
   }
 
-  const [checkInTarget, setCheckInTarget] = useState<Job | null>(null);
-  const [checkingIn, setCheckingIn] = useState(false);
   const [rejecting, setRejecting] = useState(false);
-
-  const confirmCheckIn = async (job: Job) => {
-    if (checkingIn) return;
-    setCheckingIn(true);
-    try {
-      const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null;
-      const res = await fetch('/api/admin/job-queue', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'check_in',
-          ticketId: job.ticketId,
-          jobOrderId: job.jobOrderId,
-          employeeId: activeEmployeeId ? Number(activeEmployeeId) : null,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        toast.success(`Vehicle for ${job.name} marked as stored in shop! Inspection unlocked.`);
-        setCheckInTarget(null);
-        fetchJobs();
-      } else {
-        toast.error(data.message || 'Check-in failed');
-      }
-    } catch (err: any) {
-      toast.error(err.message || 'Check-in failed');
-    } finally {
-      setCheckingIn(false);
-    }
-  };
 
   const confirmReject = async (job: Job) => {
     setRejecting(true);
@@ -826,24 +794,14 @@ export default function page() {
                       {c.status !== 'Cancelled' && (
                         approvedLike ? (
                           <>
-                            {!c.dateArrived ? (
-                              <button
-                                onClick={() => setCheckInTarget(c)}
-                                title="Vehicle Arrived — Store in Shop & Check In"
-                                className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+                            {c.dateArrived && c.jobOrderId && (
+                              <a
+                                href={`/job-orders/${c.jobOrderId}/inspection`}
+                                title="Go to Inspection"
+                                className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent active:translate-y-0"
                               >
-                                <Store size={13} /> Check In
-                              </button>
-                            ) : (
-                              c.jobOrderId && (
-                                <a
-                                  href={`/job-orders/${c.jobOrderId}/inspection`}
-                                  title="Go to Inspection"
-                                  className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent active:translate-y-0"
-                                >
-                                  <Search size={14} />
-                                </a>
-                              )
+                                <Search size={14} />
+                              </a>
                             )}
                             <button
                               onClick={() => setDeleteTarget(c)}
@@ -903,16 +861,7 @@ export default function page() {
         />
       )}
 
-      {checkInTarget && (
-        <ConfirmModal
-          tone="brand"
-          title="Confirm Vehicle Arrival & Store in Shop"
-          description={`Confirm that ${checkInTarget.name}'s ${checkInTarget.vehicle} (${checkInTarget.plate}) has arrived and is safely stored in the shop. This will mark the vehicle as checked in and unlock the inspection workflow.`}
-          confirmLabel={checkingIn ? "Checking In..." : "Store in Shop & Check In"}
-          onClose={() => setCheckInTarget(null)}
-          onConfirm={() => confirmCheckIn(checkInTarget)}
-        />
-      )}
+
 
       {rejectTarget && (
         <ConfirmModal

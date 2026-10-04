@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, KeyboardEvent } from "react";
 import { X, CheckCircle2, Loader2 } from "lucide-react";
 
+const MAX_WRONG_TRIES = 5;
+
 export function TwoFAModal({
   onClose,
   onRequest,
@@ -29,6 +31,9 @@ export function TwoFAModal({
   const [resent, setResent] = useState(false);
   const [challenge, setChallenge] = useState<{ token: string; sentTo: string; expiresMinutes: number; forWork?: string; devCode?: string; bypassed?: boolean } | null>(null);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+
+  const [wrongTries, setWrongTries] = useState(0);
+  const locked = wrongTries >= MAX_WRONG_TRIES;
 
   const code = digits.join("");
   const complete = code.length === 6;
@@ -78,7 +83,7 @@ export function TwoFAModal({
   };
 
   const verify = async () => {
-    if (!complete || !challenge) return;
+    if (!complete || !challenge || locked) return;
     setStatus("verifying");
     setErrorMsg(null);
     const res = await onSubmit(challenge.token, code);
@@ -87,7 +92,23 @@ export function TwoFAModal({
       setTimeout(() => onVerified(), 900);
     } else {
       setStatus("error");
-      setErrorMsg(res.message ?? "Incorrect code. Please try again.");
+      const msg = res.message ?? "Incorrect code. Please try again.";
+      if (/^too many/i.test(msg)) {
+        // The server's own limit was hit: lock the boxes and show its message as is.
+        setWrongTries(MAX_WRONG_TRIES);
+        setErrorMsg(msg);
+      } else if (/^incorrect code/i.test(msg)) {
+        const next = wrongTries + 1;
+        const left = MAX_WRONG_TRIES - next;
+        setWrongTries(next);
+        setErrorMsg(
+          left > 0
+            ? `Incorrect code. ${left} ${left === 1 ? "try" : "tries"} left.`
+            : "Too many wrong codes. Please wait a few minutes, then tap Resend to get a new code.",
+        );
+      } else {
+        setErrorMsg(msg);
+      }
       setDigits(Array(6).fill(""));
       inputsRef.current[0]?.focus();
     }
@@ -96,6 +117,7 @@ export function TwoFAModal({
   const resend = async () => {
     setDigits(Array(6).fill(""));
     setErrorMsg(null);
+    setWrongTries(0);
     setStatus("sending");
     const c = await onRequest();
     if (!c) { setStatus("idle"); return; }
@@ -129,6 +151,9 @@ export function TwoFAModal({
                 ? "Verification is turned OFF for testing. Proceeding automatically…"
                 : <>Enter the 6-digit code sent to <b>{challenge?.sentTo}</b>. It expires in {challenge?.expiresMinutes} minutes.</>}
             </p>
+            {challenge && !challenge.bypassed && status !== "success" && (
+              <p className="mt-1 text-xs text-muted-foreground">Can't find it? Check your Spam or Promotions folder.</p>
+            )}
           </div>
           <button onClick={onClose} className="rounded-full border p-1 hover:bg-accent"><X className="h-4 w-4" /></button>
         </div>
@@ -151,7 +176,8 @@ export function TwoFAModal({
                   onKeyDown={(e) => handleKeyDown(i, e)}
                   inputMode="numeric"
                   maxLength={1}
-                  className="h-12 w-10 rounded-md border text-center text-lg font-bold focus:border-brand focus:outline-none"
+                  disabled={locked}
+                  className="h-12 w-10 rounded-md border text-center text-lg font-bold focus:border-brand focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 />
               ))}
             </div>
@@ -159,7 +185,7 @@ export function TwoFAModal({
             {resent && <p className="mt-2 text-xs text-success">A new code has been sent.</p>}
             <button
               onClick={verify}
-              disabled={!complete || status === "verifying" || status === "sending"}
+              disabled={locked || !complete || status === "verifying" || status === "sending"}
               className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {status === "verifying" ? (<><Loader2 className="h-4 w-4 animate-spin" /> Verifying…</>) : "Verify & Confirm"}

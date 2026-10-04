@@ -1502,7 +1502,6 @@ function buildReportTimeline(data: Awaited<ReturnType<typeof getCompletedData>>)
   const { jobOrder, logs } = data;
   if (!jobOrder) return [];
   const jo: any = jobOrder;
-  const isReleased = jobOrder.status === "released";
 
   return [
     {
@@ -1552,21 +1551,6 @@ function buildReportTimeline(data: Awaited<ReturnType<typeof getCompletedData>>)
       detail: "All confirmed services finished by our technicians.",
       time: null,
       status: "completed",
-    },
-    {
-      key: "payment_received",
-      label: "Payment Received",
-      detail: "Final billing settled for this job order.",
-      time: null,
-      status: Number(jobOrder.balance) <= 0 ? "completed" : "pending",
-    },
-    {
-      key: "released",
-      label: "Vehicle Released",
-      detail: "Vehicle handed back to the customer.",
-      time: formatDashboardLogTime(jo.released_at) || null,
-      status: isReleased ? "completed" : "pending",
-      image: jo.release_photo_url,
     },
   ];
 }
