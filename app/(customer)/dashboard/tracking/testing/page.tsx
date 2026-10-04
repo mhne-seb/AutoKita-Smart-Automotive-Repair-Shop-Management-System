@@ -1,10 +1,5 @@
 "use client";
 
-// Customer "Testing" stage — read-only view of the road test(s) on their
-// vehicle. Every job is driven before release; a failed attempt sends the
-// ticked services back to the floor at no extra cost, a passed one completes
-// the job. Polls while the vehicle is on the road so the result shows up on
-// its own.
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";

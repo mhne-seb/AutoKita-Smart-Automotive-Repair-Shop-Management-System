@@ -131,10 +131,6 @@ export default function page() {
     setShowRejectModal(false)
   }
 
-  // The handoff to the floor. Normally the stage is already in_progress by the
-  // time this is clicked (2FA confirm / payment verify advance it server-side),
-  // but if it isn't — e.g. an older job order — this advances it, so the
-  // breadcrumb and the customer's tracker agree the work has started.
   const [startingWork, setStartingWork] = useState(false)
   async function continueToServiceProgress() {
     setStartingWork(true)
@@ -333,10 +329,6 @@ export default function page() {
     return () => { active = false }
   }, [])
 
-  // The customer's actual decision on THIS quotation — unlike preDiagnostic.status,
-  // which reflects the latest pre_diagnostics round for the whole job order and can
-  // still read 'approved' from an earlier stage (e.g. the inspection) even though
-  // no quotation has been sent yet. This is what should lock editing.
   const quotationApproved = Boolean(initial?.quotationApproved)
   // Same idea for "pending": a round can only be waiting on THIS quotation if
   // the quotation hasn't been decided yet. Once it's approved, whatever
@@ -529,11 +521,6 @@ export default function page() {
     }
   }
 
-  // Sends the full quotation (services + parts + total) for approval — a
-  // real, persisted database write (creates a new pre_diagnostics round).
-  // Problems worth catching before the customer sees them. The page already
-  // shows the services and the total, so this modal only earns its place by
-  // pointing at what's easy to miss.
   const sendWarnings = (() => {
     const list: string[] = []
     // Naming every row makes the panel unreadable on a long quotation.

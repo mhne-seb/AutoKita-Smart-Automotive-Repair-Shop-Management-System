@@ -1,12 +1,3 @@
-// diagnosticScan.ts — the shop's OBD-II scanner policy, in one place.
-//
-// Using the scanner costs the customer a fixed fee whether or not they go
-// ahead with repairs, so the customer has to be told and has to agree BEFORE
-// the ticket is submitted. Which booking categories trigger it is business
-// policy, not something to infer — edit the set below when the shop changes
-// its mind. Categories not listed never prompt for the fee at booking; if a
-// mechanic later decides a scan is needed anyway, that becomes a separate
-// additional-service approval.
 
 export const DIAGNOSTIC_SCAN_FEE = 1500
 

@@ -1,11 +1,5 @@
 'use client'
 
-// GenerateJobOrderModal — a read-only preview of the Job Order, laid out like
-// the shop's paper form (letterhead; name / date / address / date promised /
-// phone / plate / year & model; parts left, work right; totals; partial
-// payments; balance). Everything comes from the database via
-// /api/job-orders/[id]/document — nothing here is editable, so the printed
-// sheet always matches the record. Download as PDF.
 
 import { useEffect, useMemo, useState } from 'react'
 import { Download, Loader2, X } from 'lucide-react'

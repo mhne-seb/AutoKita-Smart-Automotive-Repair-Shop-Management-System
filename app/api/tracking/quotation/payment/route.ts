@@ -61,10 +61,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'You already sent a payment. Please wait for the shop to confirm it.' }, { status: 409 })
   }
 
-  // "Pay at Shop" is settled in cash at the counter — no proof needed.
-  // Anything else is a manually-verified bank/e-wallet transfer: the customer
-  // must say which channel they sent to, the reference number, and attach a
-  // screenshot as evidence for the admin to check against their own account.
   let dbMethod: 'cash' | 'e_wallet' | 'bank_transfer' = 'cash'
   let channelLabel: string | null = null
   let referenceNumber: string | null = null

@@ -1,13 +1,5 @@
 "use client";
 
-// ScanAuthorizationCard — the customer's side of a mid-inspection OBD-II
-// scan request. Only shown when the shop DIDN'T ask about the scanner at
-// booking (only 2 of 8 categories do, and "Others" never does) and now
-// wants to use it anyway.
-//
-// No OTP: the fee is fixed and disclosed in the same words every time, so
-// being logged in is enough — one plain click either way. OTP stays on the
-// mid-service findings flow, where the amount actually varies.
 
 import { useState } from "react";
 import { ScanLine, CheckCircle2, X, Loader2 } from "lucide-react";

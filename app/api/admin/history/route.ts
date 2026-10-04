@@ -2,12 +2,6 @@ import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
-// Service History (admin): every ticket, together with its job order when it
-// has one, newest first. Real data, searched / filtered / sorted / paged in
-// the database so the browser never receives thousands of rows.
-//
-// One row = one ticket (a booking). A ticket that was declined or is still
-// pending has no job order; a job order always belongs to exactly one ticket.
 
 const STATUSES = ['pending', 'in_progress', 'completed', 'released', 'cancelled'] as const
 const PAGE_SIZES = [10, 20, 50, 100]

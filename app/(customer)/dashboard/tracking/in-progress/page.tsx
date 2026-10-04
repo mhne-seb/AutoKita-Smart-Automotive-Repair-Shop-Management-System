@@ -200,11 +200,6 @@ function InProgress() {
       )
     : 0;
 
-  // --- Unified Service Timeline -----------------------------------------
-  // Combines job-order-level milestones (received → inspecting → quotation →
-  // downpayment → per-task work → completed/released) into a single list.
-  // Milestone timestamps that aren't in the DB yet fall back gracefully so
-  // the timeline still renders something sensible while the backend catches up.
   const timeline: TimelineEntry[] = jobOrder
     ? [
         {

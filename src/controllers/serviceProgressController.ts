@@ -77,10 +77,6 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
 
   const rows: any[] = json.data
 
-  // Parts grouped by service name — tasks are matched to their service by
-  // title (service_progress_tasks has no FK to job_order_services).
-  // Key = service name + which finding added it (blank for quotation work),
-  // so two same-named services from different findings don't share parts.
   const partsKey = (name: string, findingId: number | null | undefined) => `${name}|${findingId ?? ''}`
   const partsByService = new Map<string, TaskPart[]>()
   for (const r of (json.parts ?? []) as any[]) {
@@ -390,10 +386,6 @@ export async function respondToInspection(
   return res.json() as Promise<{ success: boolean; message?: string; decision?: string }>
 }
 
-// --- Mid-inspection OBD-II scan authorization -------------------------------
-// The customer's side of preDiagnosticController.ts's requestScanAuthorization.
-// No OTP — the fee is fixed and disclosed the same way every time, so being
-// logged in is enough. Approve or decline is one plain click either way.
 
 export async function respondToScan(userId: number, authorizationId: number, approved: boolean) {
   const res = await fetch('/api/tracking/inspecting/scan-authorization/respond', {

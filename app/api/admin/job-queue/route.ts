@@ -261,11 +261,6 @@ export async function POST(req: NextRequest) {
             // or switched off, stop instead of silently dropping the charge.
             if (fee.rows.length === 0) throw new Error('SCAN_FEE_SERVICE_MISSING')
 
-            // The scan itself is done during inspection, not the repair stage —
-            // pre-insert its repair-stage task as already completed so it never
-            // shows up asking to be scheduled/started later. set_quotation_approval's
-            // "INSERT new tasks ... WHERE NOT EXISTS" skips a task_title that's
-            // already there, so this row is what it finds and leaves alone.
             await client.query(
               `INSERT INTO service_progress_tasks (job_order_id, section_id, task_title, note, task_status, price, billable)
                VALUES ($1, 'in_progress', $2, $3, 'completed', 0, true)`,

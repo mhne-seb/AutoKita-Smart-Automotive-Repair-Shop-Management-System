@@ -1,16 +1,3 @@
-// otp.ts — one-time codes for 2FA, without a database table.
-//
-// The server issues a 6-digit code and a signed token. The token carries what
-// the code is FOR (purpose + subject) and WHEN it expires, plus an HMAC over
-// all of that AND the code itself. The code goes to the customer by email; the
-// token goes back to the browser (it reveals nothing — the code isn't in it).
-// To verify, the browser sends token + typed code, and we recompute the HMAC.
-// If it matches, that exact code was issued for that exact purpose and hasn't
-// expired. Same idea as a signed password-reset link.
-//
-// Trade-off vs. a table: a code can be verified more than once inside its
-// 10-minute window. Every action that uses this is idempotent (e.g. confirming
-// a quotation refuses a second time), so a replay can't do anything new.
 
 import { createHmac, randomInt, timingSafeEqual } from 'crypto'
 import { isVerificationBypassed } from '@/lib/testMode'

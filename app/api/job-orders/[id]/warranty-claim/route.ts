@@ -3,17 +3,6 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { notifyCustomer } from '@/lib/customerNotify'
 
-// The claim panel on the inspection page of a job order that started from a
-// customer's warranty claim (see warranty_claims / customer/warranties/claim).
-//
-//   GET  -> the claim, the original warranty and part, if this job order has one.
-//   POST -> the admin's decision, after the mechanic has inspected the part.
-//           approve: part + labor go on THIS job order at ₱0, tagged the same
-//             way Jubert's fail_road_test() tags a warranty replacement, and
-//             the replacement gets its own warranty (remaining time only —
-//             see migration_add_warranty_claims.sql).
-//           deny: the original warranty is voided only for misuse/accident;
-//             the job order continues as a normal paid repair either way.
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
 

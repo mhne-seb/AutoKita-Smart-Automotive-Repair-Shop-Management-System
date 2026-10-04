@@ -1,7 +1,3 @@
-// Calls to the Python server (models/predict_server.py): the ML predictions
-// and the email/PDF parser. Locally that's your laptop on port 5001; online
-// it's the Render server, set with ML_SERVER_URL. The key is sent when
-// ML_API_KEY is set (the same value must be set on the server).
 const ML_SERVER = (process.env.ML_SERVER_URL || 'http://127.0.0.1:5001').replace(/\/$/, '')
 
 // A sleeping free Render server takes about a minute to wake up, so wait

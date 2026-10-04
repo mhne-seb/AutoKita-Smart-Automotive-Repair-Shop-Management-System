@@ -1,10 +1,5 @@
 'use client'
 
-// Admin "Billing" page — after the road test passes. The final bill
-// (services + parts − verified payments), every payment the customer sent
-// with its proof, Verify / Reject, a counter-cash entry, and the hand-over.
-// Numbers come from lib/jobOrderBill, the same source as the customer's
-// Completed page, so both screens always agree.
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'

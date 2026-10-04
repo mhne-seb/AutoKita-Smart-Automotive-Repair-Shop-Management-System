@@ -17,11 +17,6 @@ export async function GET(request: Request) {
     )
     const total = parseInt(countResult.rows[0].count, 10)
 
-    // get_job_orders_list() is treated like a table here (Postgres allows
-    // functions that RETURN TABLE to be queried, joined, and paginated just
-    // like a real table). We join back to job_orders/vehicles/services only
-    // for the few fields her function doesn't return yet (date_arrived,
-    // balance, user_id, service names).
     const result = await db.query(
       `
       SELECT

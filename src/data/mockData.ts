@@ -97,7 +97,6 @@ export const customers: Customer[] = [
   },
 ]
 
-// ---------------------------------------------------------------------------
 
 export interface Mechanic {
   id: string
@@ -169,7 +168,6 @@ export const mechanics: Mechanic[] = [
   },
 ]
 
-// ---------------------------------------------------------------------------
 
 export interface RevenuePoint {
   month: string
@@ -201,7 +199,6 @@ export const serviceMix: ServiceMixSlice[] = [
   { label: 'Others', percent: 8, color: '#94a3b8' },
 ]
 
-// ---------------------------------------------------------------------------
 
 export interface ChurnRow {
   customerId: string
@@ -276,7 +273,6 @@ export const churnList: ChurnRow[] = [
   },
 ]
 
-// ---------------------------------------------------------------------------
 
 // A single line item on a customer's invoice — grouped as Parts or Labor
 // in the payment record modal / downloadable invoice.
@@ -416,7 +412,6 @@ export const weeklyServices: WeeklyService[] = [
   { name: 'Full Underchassis Checkup', qty: 32, price: 950, allocatedCommission: 3040 },
 ]
 
-// ---------------------------------------------------------------------------
 
 export interface AuditLogEntry {
   id: string
@@ -440,7 +435,6 @@ export const auditLog: AuditLogEntry[] = [
   },
 ]
 
-// ---------------------------------------------------------------------------
 
 export const currency = (value: number) =>
   `₱${value.toLocaleString('en-PH', { minimumFractionDigits: 0 })}`

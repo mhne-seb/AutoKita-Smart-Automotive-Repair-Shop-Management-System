@@ -1,9 +1,5 @@
 'use client'
 
-// Admin "Completed" page — the job order's closing summary once the vehicle
-// has been released: what was done, what it cost, how it was paid, the road
-// test, and the milestones. This is also where the Job Order document is
-// generated (Generate Job Order). Read-only.
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'

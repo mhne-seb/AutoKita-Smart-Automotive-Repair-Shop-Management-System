@@ -1,7 +1,3 @@
-// reportController — wraps chart/aggregate mock data used by the Admin
-// Overview and Analytics pages (src/data/mockData.ts's revenueTrend and
-// serviceMix).Separated from billingController since these are
-// pre-aggregated reporting numbers, not individual transaction records.
 
 import { toast } from 'sonner'
 import { revenueTrend, serviceMix, churnList, type RevenuePoint, type ServiceMixSlice } from '@/data/mockData'

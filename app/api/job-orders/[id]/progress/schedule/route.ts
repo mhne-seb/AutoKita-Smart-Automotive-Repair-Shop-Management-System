@@ -84,10 +84,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       )
     }
 
-    // A task can't be started with no mechanic or no schedule. The UI checks
-    // this too; this is the guarantee. (The client always sends the task's
-    // current date/mechanic along with a status change.)
-    // Remember where the task was, so "started" is only announced once.
     const before = await db.query(
       `SELECT task_title, task_status FROM service_progress_tasks WHERE id = $1::int AND job_order_id = $2::int`,
       [taskId, jobOrderId],

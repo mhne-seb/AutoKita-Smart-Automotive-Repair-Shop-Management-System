@@ -1,10 +1,5 @@
 'use client'
 
-// PaymentModal — the customer picks how to pay: cash at the counter, or a
-// manual bank / e-wallet transfer with a reference number and a proof
-// screenshot the shop verifies by hand. Used twice: the 20% downpayment on
-// the quotation, and the remaining balance once the job is done. Only the
-// wording differs, so it's a `kind` prop rather than two modals.
 
 import { useEffect, useState } from "react";
 import type { ChangeEvent } from "react";

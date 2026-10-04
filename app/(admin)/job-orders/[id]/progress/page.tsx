@@ -159,10 +159,6 @@ export default function page() {
   // like one and doesn't count toward progress. Counts/estimates use these.
   const serviceTasks = useMemo(() => allTasks.filter((t) => !isRoadTest(t) && t.status !== 'cancelled'), [allTasks])
 
-  // Every part on this job order still waiting to be bought. Tasks that share
-  // a service name share the same parts list, so dedupe by part id.
-  // Every part on this job order once, keyed by id (a part can appear under
-  // more than one task when tasks share a service).
   const allParts = useMemo(() => {
     const seen = new Map<number, TaskPart>()
     for (const t of allTasks) for (const p of t.parts ?? []) seen.set(p.id, p)
@@ -253,11 +249,6 @@ export default function page() {
     return { year, type, mileage }
   }, [jobOrder])
 
-  // Job-level finish = the latest estimate across ALL tasks — the same number
-  // the task cards show, rolled up. Finished tasks count too, so it's one
-  // stable date for the whole job rather than jumping to whichever task is
-  // left. (job_orders.date_promised is never set anywhere in the app, so
-  // reading it just gives '—' forever.)
   const estimatedFinish = useMemo(() => {
     const withEstimate = serviceTasks.filter((t) => t.estimatedFinish)
     if (withEstimate.length === 0) return null
@@ -365,10 +356,6 @@ export default function page() {
     setNewSupplierName('')
     setAddingSupplier(false)
     setPurchaseDate(new Date().toISOString().slice(0, 10))
-    // Every to-order part starts ticked (or only targetPartId if specified).
-    // The 70%-of-quoted-retail guess is only a useful starting point for a
-    // row that's actually in this purchase — an unticked row has no business
-    // showing a number at all, even disabled, since it looks like a real cost.
     setPurchaseLines(
       Object.fromEntries(
         partsToBuy.map((p) => {
@@ -1335,10 +1322,6 @@ export default function page() {
                     <input
                       type="checkbox"
                       checked={line.checked}
-                      // Ticking a part always starts its cost blank — the disabled
-                      // row's pre-filled guess (70% of quoted retail) is a hint for
-                      // the pre-selected part, not a real supplier price, so it must
-                      // never get saved just because someone re-ticked the box.
                       onChange={(e) => {
                         const checked = e.target.checked
                         setPurchaseLines((prev) => ({ ...prev, [p.id]: { checked, unitCost: checked ? '' : line.unitCost } }))

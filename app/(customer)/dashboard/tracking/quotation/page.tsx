@@ -274,12 +274,6 @@ function Quotation() {
 
           <div className="mt-4 space-y-3">
             {services.map((s) => {
-              // Locked only when the customer genuinely pre-authorized the OBD-II
-              // fee at booking (checked via the audit log, not just whether a
-              // line item with this name exists — a mechanic can add that line
-              // item later, e.g. for an "Others" booking, without the customer
-              // ever having agreed to it, and that case must stay untickable
-              // like any other service).
               const isAuthorizedFee = s.service_name === DIAGNOSTIC_SCAN_SERVICE_NAME && jobOrder.diagnostic_scan_authorized;
               const frozen = locked || isAuthorizedFee || paymentStatus === 'pending';
               return (

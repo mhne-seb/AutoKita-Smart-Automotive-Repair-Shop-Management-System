@@ -93,9 +93,7 @@ const STATUS_FONT: Record<string, string> = {
   'New Customer': 'FF0369A1',
 }
 
-// ---------------------------------------------------------------------------
 // Comprehensive Export Builders (KPIs + Monthly Trends + Service Mix + Churn)
-// ---------------------------------------------------------------------------
 
 function buildAnalyticsReportCsv(params: {
   analyticsData: any
@@ -217,9 +215,7 @@ async function buildAnalyticsReportWorkbook(params: {
   const newPct = totalCustomers > 0 ? ((newCount / totalCustomers) * 100).toFixed(1) : '0.0'
   const avgTicket = summary.jobsDone > 0 ? Math.round((summary.revenue || 0) / summary.jobsDone) : 0
 
-  // ----------------------------------------------------
   // SHEET 1: Executive Analytics & KPIs
-  // ----------------------------------------------------
   const sheet1 = workbook.addWorksheet('Analytics & KPIs')
 
   sheet1.mergeCells('A1:D1')
@@ -344,9 +340,7 @@ async function buildAnalyticsReportWorkbook(params: {
     { key: 'col4', width: 50 },
   ]
 
-  // ----------------------------------------------------
   // SHEET 2: Customer Churn Register
-  // ----------------------------------------------------
   const sheet2 = workbook.addWorksheet('Customer Churn Register', {
     views: [{ state: 'frozen', ySplit: 2 }],
   })

@@ -1,13 +1,3 @@
-// roadTest.ts — the shop's rule that every job is road-tested before it's
-// handed back, in one place (same idea as diagnosticScan.ts / mechanicPolicy.ts).
-//
-// The road test is its own stage (Testing), backed by the road_tests table
-// and Jubert's start_road_test / pass_road_test / fail_road_test functions:
-//   in_progress --start--> testing --pass--> completed
-//                                  --fail--> in_progress (ticked tasks reopen)
-// Older job orders modelled it as a service_progress_tasks row titled
-// "Road Test"; isRoadTest() still recognises those so they don't count as
-// services.
 export const ROAD_TEST_TITLE = 'Road Test'
 export const ROAD_TEST_NOTE = 'Drive the vehicle to confirm the repairs hold up on the road before handing it back.'
 

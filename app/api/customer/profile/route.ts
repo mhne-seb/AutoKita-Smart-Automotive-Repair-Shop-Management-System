@@ -35,10 +35,6 @@ export async function PATCH(req: NextRequest) {
     if (!guard.ok) return guard.response
     const userId = guard.session.userId
 
-    // Email and contact number are where login links and approval codes go, so
-    // only the shop changes them, after checking it's really the customer.
-    // Refused here (not just hidden on the page) because anyone can call this
-    // route directly.
     if (body.email !== undefined || body.contactNumber !== undefined) {
       return NextResponse.json(
         { success: false, code: 'LOCKED_FIELD', message: 'To change your email or contact number, please contact the shop.' },

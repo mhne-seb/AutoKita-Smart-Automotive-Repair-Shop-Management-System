@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
 
-// Customer reports a covered part failed. This doesn't decide anything —
-// it just opens a normal service ticket (so it goes through Job Queue like
-// any booking) tagged to the warranty, so the admin/mechanic can inspect the
-// part before approving or denying the claim.
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}))
   const userIdRaw = body.userId

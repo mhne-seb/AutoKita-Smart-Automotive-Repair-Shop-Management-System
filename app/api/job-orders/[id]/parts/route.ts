@@ -3,11 +3,6 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { notifyCustomer } from '@/lib/customerNotify'
 
-// The shop has no inventory system — parts are ordered as needed and the
-// only fact worth recording is "has it arrived yet". So this flips a part
-// to received (or back, if it was tapped by mistake). "Back" is to_order
-// for a part bought elsewhere, or ordered for one on a recorded purchase.
-// The job_order_parts_status enum has more states; the app uses only these.
 const ALLOWED = new Set(['received', 'to_order', 'ordered'])
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -21,10 +16,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ success: false, message: 'partId and a status of received|to_order|ordered are required' }, { status: 400 })
     }
 
-    // A to-order part has no supplier or cost on file yet, so it can only
-    // become received through /purchases (which records that first). Once a
-    // purchase exists — status 'ordered', from an earlier Undo — this route
-    // can flip it back to received without losing that paper trail.
     if (status === 'received') {
       const cur = await db.query(
         `SELECT status::text FROM job_order_parts WHERE id = $1::int AND job_order_id = $2::int`,

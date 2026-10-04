@@ -1,7 +1,3 @@
-// app/api/chat/customer/route.ts
-// Customer-facing chatbot endpoint.
-// Model: gpt-5.4-mini (configurable via OPENAI_CUSTOMER_MODEL env var)
-// Features: Pinecone Static RAG (service/FAQ context), token budget, no DB/tool access.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireCustomer } from '@/lib/authGuard';

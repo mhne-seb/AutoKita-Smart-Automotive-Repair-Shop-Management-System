@@ -6,14 +6,6 @@ import { uploadRoadTestPhoto, signFileUrls } from '@/lib/storage'
 import { notifyCustomer } from '@/lib/customerNotify'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 
-// The Testing stage. Reads through get_road_test_history(); writes through
-// Jubert's start_road_test / pass_road_test / fail_road_test, which own the
-// status changes (in_progress -> testing -> completed, or back to
-// in_progress on a fail) and the audit rows.
-//
-// Extra chargeable work found on the road is NOT sent through
-// fail_road_test's extra_* parameters — the shop reports a finding after
-// the fail instead, so unapproved work never lands in the bill.
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
@@ -65,11 +57,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   }
 }
 
-// Multipart so pass/fail can carry a photo. Fields:
-//   action: 'start' | 'pass' | 'fail'
-//   start: testerId
-//   pass : notes?, photo?
-//   fail : notes (required), reworkTaskIds (JSON array, at least one), failedPartIds? (JSON array), photo?
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
 
@@ -125,10 +112,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       const submittedReworkTaskIds = JSON.parse(String(form.get('reworkTaskIds') ?? '[]')).map(Number).filter(Boolean)
       const failedPartIds = JSON.parse(String(form.get('failedPartIds') ?? '[]')).map(Number).filter(Boolean)
 
-      // A failed part can't be swapped in without touching its service again
-      // — the labor isn't done until the (working) part is installed. The UI
-      // already locks this, but enforce it here too so it holds regardless
-      // of what the client actually sent.
       let reworkTaskIds = submittedReworkTaskIds
       if (failedPartIds.length > 0) {
         const required = await db.query(

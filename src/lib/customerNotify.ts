@@ -1,12 +1,3 @@
-// customerNotify.ts — one call to tell the customer something happened on
-// their job order. Server-side only.
-//
-// Customer notifications aren't a table of their own: the dashboard bell
-// and alerts are built from system_audit_logs (see dashboardController).
-// So "notify" means writing an audit row whose new_values carries the text
-// to show, tagged with "notify": true so the feed query can pick it out,
-// and emailing the same text. Used for: service started, all parts received,
-// service finished, finding reported.
 
 import { db } from '@/lib/db'
 import { sendJobUpdateEmail } from '@/lib/mail'

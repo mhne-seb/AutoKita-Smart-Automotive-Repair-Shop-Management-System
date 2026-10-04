@@ -5,13 +5,6 @@ import { verifyOtp, FINDING_OTP_PURPOSE } from '@/lib/otp'
 import type { ProposedService, ProposedPart } from '@/data/types'
 import { isVerificationBypassed } from '@/lib/testMode'
 
-// The customer answers a mid-service finding.
-//   approve -> needs the emailed code; the proposed services/parts become real
-//              rows (job_order_services, job_order_parts, service_progress_tasks)
-//              tagged with finding_id, so the bill and the timeline pick them up
-//              like any other work.
-//   decline -> nothing is added; the finding stays on the job order as a
-//              "recommended, not done" record.
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}))
   const userIdRaw = body.userId

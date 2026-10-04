@@ -39,9 +39,7 @@ from typing import Optional
 import pdfplumber  # type: ignore
 
 
-# ---------------------------------------------------------------------------
 # Regex helpers
-# ---------------------------------------------------------------------------
 
 # Matches dates like: 2026-09-17 11:38:14AM  /  2026-09-17 11:38:14  /  DATE:2026-09-17...
 DATE_PATTERNS = [
@@ -99,9 +97,7 @@ VEHICLE_FIELD_MAP = {
 SCANNER_TOOLS = ["LAUNCH X-431", "LAUNCH X431", "Autel", "TOPDON", "LAUNCH", "Foxwell", "Thinkcar"]
 
 
-# ---------------------------------------------------------------------------
 # Parsing helpers
-# ---------------------------------------------------------------------------
 
 def _extract_text_all(doc) -> str:
     """Concatenate text from all pages."""
@@ -295,14 +291,6 @@ def _extract_dtc_table(doc) -> list[dict]:
             # Calculate vertical boundaries for each code row
             for i, cw in enumerate(code_words):
                 if i == 0:
-                    # Find the real header row: the single physical line where
-                    # all four column labels appear together. Matching any one
-                    # of these words alone is unsafe — "System" commonly also
-                    # appears as plain text inside a DTC's own module name
-                    # (e.g. "Anti-lock Braking System"), and a stray match like
-                    # that can push row_top into the middle of the first row's
-                    # own wrapped text, truncating its Description/State to a
-                    # single leftover word (seen with a real Toyota report).
                     line_labels: dict[float, set] = {}
                     line_bottom: dict[float, float] = {}
                     for w in words:
@@ -322,11 +310,6 @@ def _extract_dtc_table(doc) -> list[dict]:
                 else:
                     row_bottom = 9999
 
-                # Segment words across columns:
-                # Column 1: DTC Code (x0 < 95)
-                # Column 2: Description (95 <= x0 < 295)
-                # Column 3: State (295 <= x0 < 405)
-                # Column 4: System (x0 >= 405)
                 row_words = [w for w in words if row_top <= w['top'] < row_bottom]
                 desc_words = [w['text'] for w in row_words if 95 <= w['x0'] < 295]
                 state_words = [w['text'] for w in row_words if 295 <= w['x0'] < 405]
@@ -370,9 +353,7 @@ def _extract_dtc_table(doc) -> list[dict]:
     return dtc_records
 
 
-# ---------------------------------------------------------------------------
 # Main parser
-# ---------------------------------------------------------------------------
 
 def parse(pdf_path: str) -> dict:
     filename = os.path.basename(pdf_path)
@@ -390,9 +371,7 @@ def parse(pdf_path: str) -> dict:
     return result
 
 
-# ---------------------------------------------------------------------------
 # Entry point
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

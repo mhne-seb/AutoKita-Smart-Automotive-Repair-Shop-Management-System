@@ -1,12 +1,3 @@
-// quotationController — now backed by the real database (get_job_order_services
-// + get_job_order_parts) instead of src/data/quotations.ts.
-//
-// Known schema gap: job_order_parts only links to job_order_id, not to a
-// specific service — so parts and services are two separate flat lists in
-// the database, unlike the mock data where each service owns its own parts.
-// We keep every real service as its own card, and add all real parts as one
-// extra "Parts & Materials" card, rather than forcing a fake link that
-// doesn't exist in the schema.
 
 import type { QuotationData, QuotationService, QuotationPart } from '@/data/types'
 
@@ -177,9 +168,7 @@ export async function getQuotationPaymentStatus(jobOrderId: number) {
   }>
 }
 
-// ---------------------------------------------------------------------------
 // Admin-side: reviewing and verifying a customer's submitted payment.
-// ---------------------------------------------------------------------------
 
 export interface JobOrderPayment {
   id: number

@@ -1,8 +1,4 @@
 // customerController
-//
-// Wraps src/data/mockData.ts's `customers` list behind an async interface,
-// same pattern as jobOrderController. Used by Admin pages (Overview,
-// Analytics, History) that need customer records.
 
 import { customers, type Customer } from '@/data/mockData'
 import type { JobStatus } from '@/data/mockData'

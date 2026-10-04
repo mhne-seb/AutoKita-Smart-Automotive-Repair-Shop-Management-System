@@ -1,9 +1,3 @@
-// jobOrderPdf.ts — the Job Order as a PDF, laid out like the shop's paper
-// form. Browser-side (jsPDF). Used by the customer's Download button and the
-// admin's Generate Job Order modal, so both produce the same document.
-//
-// Data comes from /api/job-orders/[id]/document; the admin modal may pass
-// its edited rows instead.
 
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'

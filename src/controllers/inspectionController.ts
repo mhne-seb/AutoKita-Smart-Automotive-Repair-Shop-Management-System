@@ -1,18 +1,3 @@
-// inspectionController — now backed by the real database (get_inspection_data
-// + get_inspection_findings) instead of src/data/inspections.ts.
-//
-// Known data gaps (schema has no data for these — every value below is a
-// reasonable default, not something we're hiding from real data):
-//   - photos: vehicle_inspections.photo is NULL for all seed rows, so photo
-//     slots always start empty and technician notes always start empty —
-//     there's no "notes" table in the schema at all.
-//   - finding name/status: vehicle_inspections.name and .status are NULL for
-//     all seed rows — only findings_description has real text. We show that
-//     text as the finding's note, default the name to "Inspection Finding",
-//     and default status to 'needs-attention' so it prompts a mechanic to
-//     actually classify it, rather than silently marking it "OK".
-//   - timer.currentDurationHours / running: derived from job_orders.started_at
-//     if present, otherwise 0 / not running.
 
 import type { InspectionData, MechanicalFinding, InspectionPhotoSlot } from '@/data/types'
 import { REFERENCE_PHOTO_STATUS } from '@/data/types'
@@ -36,11 +21,6 @@ function timeToHours(time: string | null): number {
   return Math.round((h + m / 60) * 10) / 10
 }
 
-// The booking forms cram the customer's request into one free-text column in
-// two different shapes:
-//   /book page:        "Requested: <slot> | Service: <category> | <notes>"
-//   dashboard modal:   "Category: <category>. Notes: <notes>"
-// Pull the parts back out for a clean summary; anything else is shown as-is.
 function parseConcern(raw: string): { category: string | null; notes: string | null; requestedSlot: string | null } {
   const bookPage = raw.match(/^Requested:\s*(.*?)\s*\|\s*Service:\s*(.*?)\s*\|\s*([\s\S]*)$/)
   if (bookPage) {
@@ -309,10 +289,8 @@ export async function deleteInspectionFinding(jobOrderId: string, findingId: str
 }
 
 /**
-// ---------------------------------------------------------------------------
 // inspectionController — wraps src/data/inspections.ts (Admin Inspection
 // Report page).
-// ---------------------------------------------------------------------------
 
 import { getInspectionById as findInspectionById } from '@/data/inspections'
 import type { InspectionData } from '@/data/types'

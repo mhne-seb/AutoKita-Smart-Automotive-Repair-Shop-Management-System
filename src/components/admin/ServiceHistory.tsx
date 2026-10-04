@@ -1,9 +1,5 @@
 'use client'
 
-// ServiceHistory — the admin's one place to look back at past work.
-// Each row is a booking (ticket) with its job order when it has one. Search,
-// status, date range, sorting and paging all happen in the database through
-// /api/admin/history, so this works the same with 20 rows or 20,000.
 
 import { useEffect, useRef, useState } from 'react'
 import { AlertCircle, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Download, Eye, Loader2, Search, X } from 'lucide-react'
@@ -327,7 +323,6 @@ export function ServiceHistory() {
   )
 }
 
-// ---------------------------------------------------------------------------
 // One record in full
 
 interface Detail {

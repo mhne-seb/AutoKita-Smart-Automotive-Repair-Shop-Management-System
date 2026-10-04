@@ -1,7 +1,5 @@
-// ---------------------------------------------------------------------------
 // billingController — wraps src/data/billings.ts (Customer Billing & Warranty
 // page) and src/data/mockData.ts's paymentRecords (Admin Sales & Payroll).
-// ---------------------------------------------------------------------------
 
 import { INITIAL_SERVICES, WARRANTIES, WARRANTY_HISTORY, REWARDS, type Service, type Warranty, type Rewards } from '@/data/billings'
 import { paymentRecords, weeklyServices, type PaymentRecord, type WeeklyService } from '@/data/mockData'

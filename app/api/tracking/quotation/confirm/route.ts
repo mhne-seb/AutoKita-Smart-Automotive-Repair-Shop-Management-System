@@ -5,14 +5,6 @@ import { verifyOtp, QUOTATION_OTP_PURPOSE } from '@/lib/otp'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 import { isVerificationBypassed } from '@/lib/testMode'
 
-// Step 2 of confirming a quotation. The customer picked which services they
-// want, typed the emailed code, and this is where it all gets checked:
-//   - the OTP must be valid for THIS customer and THIS job order
-//   - the job order must belong to them and not already be confirmed
-//   - the OBD-II scan fee, if it's on the job order, stays on it — they agreed
-//     to that at booking, and unticking it here would undo a recorded consent
-// Passing all that is the shop's "documented go signal" (Customer Approval
-// Policy), so it's written to the audit log with the customer's id.
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -114,11 +106,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Downpayment policy: a bill of PHP 50,000 or more is approved by paying the 20% downpayment
-    // (see the payment route), never by the emailed code alone. The screen already hides this
-    // path for such bills; this makes the server refuse it too. The total is what will remain
-    // on the job order after the customer's choices, counted the same way as the payment route
-    // and the screen. This is a business rule, so the test-mode bypass above does not skip it.
     const remainingTotal = currentServices
       .filter((s) => !idsToDelete.includes(Number(s.id)))
       .reduce((sum, s) => sum + Number(s.actual_amount || 0), 0)
@@ -147,10 +134,6 @@ export async function POST(request: NextRequest) {
 
     await db.query(`SELECT set_quotation_approval($1, $2)`, [jobOrderId, true])
 
-    // The customer's go-signal is the answer to the quotation review round
-    // the admin sent — close it as approved so the admin side stops showing
-    // "Recall Approval", then move the job onto the floor. No payment is
-    // involved on this path, so work can start right away.
     const roundRes = await db.query(`SELECT id, customer_approval_status FROM get_pre_diagnostic($1)`, [jobOrderId])
     const round = roundRes.rows[0]
     if (round?.customer_approval_status === 'pending') {

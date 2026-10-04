@@ -1,13 +1,3 @@
-// scripts/hash_existing_passwords.js
-// One-time migration: replaces every plain-text password in users and
-// employees with a bcrypt hash of that same password, so nobody's login
-// changes. Rows already hashed (start with "$2") or empty are skipped.
-//
-//   node scripts/hash_existing_passwords.js          -> dry run, saves nothing
-//   node scripts/hash_existing_passwords.js --apply  -> saves
-//
-// Everyone must be on the bcrypt login code before --apply: old code
-// compares plain text and can't log anyone in once the rows are hashed.
 
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');

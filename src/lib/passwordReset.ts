@@ -1,13 +1,3 @@
-// passwordReset.ts — the "reset your password" link, without a database table.
-//
-// The link carries: which table (customer or staff), the account id, and an
-// expiry time, plus an HMAC signature. The signature also covers the account's
-// CURRENT password hash. So the moment the password changes, the old link's
-// signature no longer matches — each link works once, and nothing has to be
-// stored to remember that it was used.
-//
-// Unlike a 6-digit code, the signature can't be guessed, so there's no need
-// to count wrong attempts.
 
 import { createHmac, timingSafeEqual } from 'crypto'
 import { db } from '@/lib/db'

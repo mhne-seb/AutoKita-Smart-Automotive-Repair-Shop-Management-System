@@ -5,10 +5,6 @@ import { issueOtp, OTP_TTL_MINUTES, QUOTATION_OTP_PURPOSE } from '@/lib/otp'
 import { sendOtpEmail, isMailConfigured } from '@/lib/mail'
 import { isVerificationBypassed } from '@/lib/testMode'
 
-// Step 1 of confirming a quotation: email the customer a 6-digit code and
-// hand the browser a signed token to present alongside it. The confirm
-// endpoint checks the pair. Purpose + subject are baked into the token so a
-// code issued for one job order can't approve a different one.
 
 function maskEmail(email: string): string {
   const [user, domain] = email.split('@')
@@ -57,10 +53,6 @@ export async function POST(request: NextRequest) {
 
     const { code, token, expiresAt } = issueOtp(QUOTATION_OTP_PURPOSE, `${userId}:${jobOrderId}`)
 
-    // Email is the delivery channel. If the shop's mail creds aren't set up in
-    // this environment, the code is logged so local testing still works —
-    // and, outside production only, returned so the tester doesn't need to
-    // read the server console.
     const mailConfigured = isMailConfigured()
     let devCode: string | undefined
     if (mailConfigured) {

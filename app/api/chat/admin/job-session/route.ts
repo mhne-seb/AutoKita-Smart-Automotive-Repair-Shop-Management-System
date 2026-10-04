@@ -1,14 +1,4 @@
 import { requireStaff } from '@/lib/authGuard'
-// app/api/chat/admin/job-session/route.ts
-//
-// GET ?search=<query>&limit=20
-//   → Returns a list of job orders matching the search (by plate or model).
-//     No PII (no customer names) returned.
-//
-// GET ?job_order_id=<N>
-//   → Returns the full session payload for a single job order:
-//     vehicle info, booked services, parts used, inspection notes,
-//     and a pre-built context string ready to inject into the AI chat.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';

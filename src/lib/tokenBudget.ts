@@ -1,15 +1,3 @@
-// src/lib/tokenBudget.ts
-// ---------------------------------------------------------------------------
-// Multi-Tier Token Budget & Malicious Bot Fast-Rate Failsafe System
-//
-// Defends against two distinct attack vectors:
-// 1. Long-term Daily Exhaustion: 24-hour token budget limit per IP/role (50k for customers, 200k for admin).
-// 2. High-Frequency Fast-Rate Bot Attacks:
-//    - Burst Throttling: Max 5 requests per 10 seconds.
-//    - Rapid-Fire Spacing: Minimum 1.0s gap between consecutive requests.
-//    - Active In-Flight Concurrency Lock: Max 1 active in-flight LLM call per IP at a time (stops parallel burst floods).
-//    - Penalty Lockout: 60-second cooldown lock if rapid spamming continues.
-// ---------------------------------------------------------------------------
 
 const DAY_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
 const BURST_WINDOW_MS = 10 * 1000;         // 10 seconds

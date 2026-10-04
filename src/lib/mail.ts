@@ -200,11 +200,6 @@ export async function sendPasswordChangedEmail(opts: { to: string; name: string 
     })
 }
 
-// Sent when the admin uploads an inspection report or quotation to the
-// customer portal for review ("Upload to customer portal" / "Send to
-// Customer") — the pre_diagnostics round itself has no email of its own yet.
-// Plain progress update — a service started, its parts arrived, it finished.
-// Nothing for the customer to do; the button just opens the tracker.
 export async function sendJobUpdateEmail(opts: {
     to: string
     name: string

@@ -15,10 +15,6 @@ const STAGES: { key: string; label: string; icon: LucideIcon; to: string }[] = [
 
 export type StageKey = (typeof STAGES)[number]["key"];
 
-// The stepper must reflect where the job order actually is — not which page
-// the customer happens to be reading. Every tracking page passes the job
-// order's real status through this, so looking back at "Received" while the
-// job is at Inspecting still shows Inspecting as current (and clickable).
 export function stageForStatus(status: string | null | undefined, dateArrived?: string | null): StageKey {
   // If the job order is approved/inspecting but the vehicle has not arrived/stored in shop yet,
   // the stage is still "received" (awaiting vehicle arrival).

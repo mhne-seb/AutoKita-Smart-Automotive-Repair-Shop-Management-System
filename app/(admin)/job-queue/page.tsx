@@ -78,11 +78,6 @@ type Tab = 'Tickets' | 'Pending' | 'Approved' | 'Cancelled'
 const validEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 const validPhone = (v: string) => /^(09\d{9}|\+639\d{9})$/.test(v.replace(/\s|-/g, ''))
 
-// The raw `customer_concern` string sometimes carries extra notes tacked on
-// by the customer, e.g. "Category: General Repair. Notes: helppp" or
-// "Requested: Sep 11, 2026 09:30 AM | Service: Oil Change | asdf". For the
-// table's "Service Needed" column we only want the actual service — the
-// notes are still visible in full in the View modal.
 const getServiceLabel = (raw: string): string => {
   if (!raw) return 'N/A'
   const serviceMatch = raw.match(/Service:\s*([^|]+)/i)
@@ -950,10 +945,8 @@ export default function page() {
   )
 }
 
-// ---------------------------------------------------------------------------
 // Approve modal — shows the job details and blocks approval until a
 // mechanic is assigned.
-// ---------------------------------------------------------------------------
 
 function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; mechanics: any[]; busy: boolean; onClose: () => void; onConfirm: (checkInNow: boolean) => void }) {
   const unassigned = !job.assignedMechanic || job.assignedMechanic === 'Unassigned'
@@ -1069,9 +1062,7 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
   )
 }
 
-// ---------------------------------------------------------------------------
 // Hold modal — requires a reason before putting a job on hold.
-// ---------------------------------------------------------------------------
 
 function ViewModal({ job, mechanics, onClose }: { job: Job; mechanics: any[]; onClose: () => void }) {
   const assignedMech = !job.assignedMechanic ? null : mechanics.find((m) => m.id?.toString() === job.assignedMechanic)
@@ -1211,9 +1202,7 @@ function ViewModal({ job, mechanics, onClose }: { job: Job; mechanics: any[]; on
   )
 }
 
-// ---------------------------------------------------------------------------
 // Generic confirm modal — used for reject + delete.
-// ---------------------------------------------------------------------------
 
 function ConfirmModal({
   tone,
@@ -1285,9 +1274,7 @@ function ConfirmModal({
   )
 }
 
-// ---------------------------------------------------------------------------
 // New Ticket modal — full intake form with validation.
-// ---------------------------------------------------------------------------
 
 type NewTicketData = {
   fullName: string

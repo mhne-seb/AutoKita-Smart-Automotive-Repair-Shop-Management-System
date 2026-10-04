@@ -31,9 +31,7 @@ from pathlib import Path
 from email.message import Message
 
 
-# ---------------------------------------------------------------------------
 # Configuration
-# ---------------------------------------------------------------------------
 
 SCRIPT_DIR = Path(__file__).parent
 ENV_PATH   = SCRIPT_DIR.parent / ".env.local"
@@ -65,9 +63,7 @@ IMAP_HOST = "imap.gmail.com"
 IMAP_PORT = 993
 
 
-# ---------------------------------------------------------------------------
 # Helpers
-# ---------------------------------------------------------------------------
 
 def _decode_header(raw) -> str:
     """Decode email header value to a plain string."""
@@ -156,9 +152,7 @@ def _post_to_store(payload: dict, filename: str, pdf_bytes: bytes) -> bool:
         return False
 
 
-# ---------------------------------------------------------------------------
 # Main fetch loop
-# ---------------------------------------------------------------------------
 
 def fetch_and_process():
     if not GMAIL_EMAIL or not GMAIL_APP_PASSWORD:
@@ -291,9 +285,7 @@ def fetch_and_process():
     return stats
 
 
-# ---------------------------------------------------------------------------
 # Entry point
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     fetch_and_process()

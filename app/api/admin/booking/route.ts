@@ -8,10 +8,6 @@ import {
   cleanPhone, maxVehicleYear, parseMileage, splitFullName,
 } from '@/lib/bookingRules'
 
-// Walk-in "New Ticket" (staff books for a customer standing at the counter).
-// Same rules as the customer's online booking: everything is checked BEFORE
-// anything is written, then the account, vehicle, ticket and audit entry are
-// saved together or not at all (one transaction).
 
 const SERVICE_MODES: Record<string, 'walk_in' | 'home_service'> = { 'Shop Visit': 'walk_in', 'Home Service': 'home_service' }
 
