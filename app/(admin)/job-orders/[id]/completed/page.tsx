@@ -4,12 +4,14 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle2, Wrench, Package, ShieldCheck, Banknote, Gauge, Clock, FileText, ArrowLeft, Car } from 'lucide-react'
+import { CheckCircle2, Wrench, Package, ShieldCheck, Banknote, Gauge, Clock, FileText, ArrowLeft, Car, Download, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { TopBar } from '@/components/TopBar'
 import { JobOrderBreadcrumb } from '@/components/dashboard/JobOrderBreadcrumb'
 import { GenerateJobOrderModal } from '@/components/dashboard/GenerateJobOrderModal'
 import { Lightbox } from '@/components/Lightbox'
 import { getJobOrderById } from '@/controllers/jobOrderController'
+import { fetchJobOrderPdfData, generateJobOrderPdf } from '@/lib/jobOrderPdf'
 import { getBillingData, type BillingData } from '@/controllers/billingStageController'
 import { getRoadTestData, type RoadTestData } from '@/controllers/roadTestController'
 
@@ -28,6 +30,18 @@ export default function CompletedPage() {
   const [roadTest, setRoadTest] = useState<RoadTestData | null>(null)
   const [showGenerate, setShowGenerate] = useState(false)
   const [photo, setPhoto] = useState<{ url: string; label: string } | null>(null)
+  const [downloading, setDownloading] = useState(false)
+
+  async function downloadPdf() {
+    setDownloading(true)
+    try {
+      const d = await fetchJobOrderPdfData(jobOrderId)
+      if (!d) return toast.error('Could not build the job order PDF.')
+      await generateJobOrderPdf(d)
+    } finally {
+      setDownloading(false)
+    }
+  }
 
   useEffect(() => {
     let active = true
@@ -71,6 +85,9 @@ export default function CompletedPage() {
           <div className="flex flex-wrap gap-2">
             <button onClick={() => setShowGenerate(true)} disabled={!canGenerate} title={canGenerate ? undefined : 'Available once the job is completed'} className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50 ${released ? 'bg-white text-slate-900 hover:bg-slate-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
               <FileText size={14} /> Generate Job Order
+            </button>
+            <button onClick={downloadPdf} disabled={!canGenerate || downloading} title={canGenerate ? undefined : 'Available once the job is completed'} className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50 ${released ? 'bg-white text-slate-900 hover:bg-slate-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
+              {downloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />} Download PDF
             </button>
           </div>
         </div>

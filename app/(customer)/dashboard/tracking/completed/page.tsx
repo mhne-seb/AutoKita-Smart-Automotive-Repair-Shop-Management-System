@@ -150,9 +150,11 @@ function Completed() {
                 : `Complete summary for your ${jobOrder.vehicle_year} ${jobOrder.vehicle_model} (${jobOrder.plate_number}) — services performed, parts and labor, payment, warranties, and release details.`}
             </p>
           </div>
-          <div className="ml-auto flex shrink-0 gap-2">
-            <button onClick={handleDownload} className="inline-flex items-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-xs hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><Download className="h-3 w-3" /> Download</button>
-          </div>
+          {jobOrder.status !== "completed" && (
+            <div className="ml-auto flex shrink-0 gap-2">
+              <button onClick={handleDownload} className="inline-flex items-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-xs hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><Download className="h-3 w-3" /> Download</button>
+            </div>
+          )}
         </div>
       </div>
 
