@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
         event: 'promo_offer',
         title: 'You have a new offer',
         message:
-          `${description} Promo code: ${createdOffer.promo_code}.` +
+          `${description.trim().replace(/([^.!?])$/, '$1.')} Promo code: ${createdOffer.promo_code}.` +
           (validUntil ? ` Valid until ${validUntil}.` : '') +
           ' Show the code at the shop on your next visit.',
       })
