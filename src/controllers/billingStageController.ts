@@ -23,7 +23,7 @@ export interface BillingData {
   payments: BillingPayment[]
   services: { name: string; amount: number; addedMidService: boolean }[]
   parts: { id: number; name: string; partNo: string | null; qty: number; unitPrice: number; amount: number; warranty: boolean; warranty_months: number | null }[]
-  voucher: { promo_code: string; discount_applied: number } | null
+  voucher: { promo_code: string; discount_applied: number; label: string } | null
 }
 
 type Result = { ok: boolean; message?: string }

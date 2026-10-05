@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { getJobOrderBill } from '@/lib/jobOrderBill'
 import { notifyCustomer } from '@/lib/customerNotify'
 import { signFileUrls } from '@/lib/storage'
+import { getVoucherRule } from '@/data/voucherRules'
 
 // The Billing stage (after Testing): what the job costs, what's been paid,
 // the admin's verification of each payment, and the hand-over. Reads go
@@ -52,7 +53,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         [jobOrderId],
       ),
       db.query(
-        `SELECT promo_code, discount_applied::float AS discount_applied
+        `SELECT promo_code, rule_key, discount_applied::float AS discount_applied
            FROM retention_offers
           WHERE claimed_on_job_order_id = $1 AND is_claimed = true
           ORDER BY id DESC LIMIT 1`,
@@ -79,7 +80,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         unitPrice: Number(p.retail_unit_price ?? 0), amount: Number(p.total_retail_amount ?? 0),
         warranty: Boolean(p.is_warranty_replacement), warranty_months: p.warranty_months,
       })),
-      voucher: voucherRes.rows[0] ?? null,
+      voucher: voucherRes.rows[0]
+        ? {
+            promo_code: voucherRes.rows[0].promo_code,
+            discount_applied: Number(voucherRes.rows[0].discount_applied ?? 0),
+            // The offer's short name from src/data/voucherRules.ts, e.g. "10% off the diagnostic scan".
+            label: getVoucherRule(voucherRes.rows[0].rule_key)?.label ?? 'Voucher',
+          }
+        : null,
     })
   } catch (error) {
     console.error('Billing GET error:', error)
