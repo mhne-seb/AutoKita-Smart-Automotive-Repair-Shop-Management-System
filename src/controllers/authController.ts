@@ -122,3 +122,22 @@ export function startSession(role: string, userId: number, remember = false, pro
     localStorage.removeItem(REMEMBER_KEY)
   }
 }
+
+/** Where a visitor who is already signed in on this tab belongs, or null when nobody is signed in. */
+export function signedInHome(): string | null {
+  if (typeof window === 'undefined') return null
+  if (sessionStorage.getItem('autokita_admin') === 'true') return '/overview'
+  if (sessionStorage.getItem('autokita_customer') === 'true') return '/dashboard'
+  return null
+}
+
+/** Forgets the 30-day "Keep me signed in" record for one role, once the server says that login is no longer valid. */
+export function forgetRememberedLogin(flag: 'autokita_customer' | 'autokita_admin') {
+  if (typeof window === 'undefined') return
+  try {
+    const r = JSON.parse(localStorage.getItem(REMEMBER_KEY) || 'null')
+    if (r?.flag === flag) localStorage.removeItem(REMEMBER_KEY)
+  } catch {
+    // A broken record is as good as none.
+  }
+}

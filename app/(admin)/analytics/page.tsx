@@ -727,14 +727,16 @@ export default function Page() {
         const promo = json.offer.promo_code
         const displayLabel = promo ? `${promo}: ${offerText}` : offerText
         setOffersSent((prev) => ({ ...prev, [offerTarget.customerId]: displayLabel }))
-        showToast(`Promo ${promo || ''} issued & saved for ${offerTarget.name}.`)
+        showToast(
+          json.emailed
+            ? `Offer sent to ${offerTarget.name}: app notification and email.`
+            : `Offer saved for ${offerTarget.name}. App notification sent, but the email could not be sent.`,
+        )
       } else {
-        setOffersSent((prev) => ({ ...prev, [offerTarget.customerId]: offerText }))
-        showToast(`"${offerText}" sent to ${offerTarget.name}.`)
+        showToast(json?.error || 'Could not send the offer. Please try again.')
       }
     } catch {
-      setOffersSent((prev) => ({ ...prev, [offerTarget.customerId]: offerText }))
-      showToast(`"${offerText}" sent to ${offerTarget.name}.`)
+      showToast('Could not send the offer. Please try again.')
     } finally {
       setIsSubmittingOffer(false)
       closeOfferModal()
