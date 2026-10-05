@@ -287,6 +287,24 @@ export async function getDashboardRecentActivity(userId: number, limit?: number)
     [userId, qLimit],
   )
 
+  // Promo offers sent to this customer (written by app/api/admin/retention-offers/route.ts).
+  const offers = await db.query(
+    `SELECT
+        sal.id,
+        'job_update'::text AS type,
+        (sal.new_values::jsonb ->> 'title')::text AS title,
+        (sal.new_values::jsonb ->> 'message')::text AS description,
+        sal.action_date AS job_time,
+        NULL::int AS job_order_id
+     FROM system_audit_logs sal
+     WHERE sal.entity_type = 'retention_offers'
+       AND sal.user_id = $1
+       AND sal.new_values LIKE '{"notify":true%'
+     ORDER BY sal.action_date DESC
+     LIMIT $2`,
+    [userId, qLimit],
+  )
+
   type RawActivityRow = {
     id: number
     type: DashboardActivity['type']
@@ -298,11 +316,11 @@ export async function getDashboardRecentActivity(userId: number, limit?: number)
     days_remaining?: number
   }
 
-  const rows = [...base.rows, ...accepted.rows, ...reportReady.rows, ...updates.rows, ...reminders.rows] as RawActivityRow[]
+  const rows = [...base.rows, ...accepted.rows, ...reportReady.rows, ...updates.rows, ...reminders.rows, ...offers.rows] as RawActivityRow[]
 
   // So each notification can link straight to the job order it's about,
   // instead of leaving the customer to go find it themselves.
-  const jobOrderIds = [...new Set(rows.map((r) => r.job_order_id))]
+  const jobOrderIds = [...new Set(rows.map((r) => r.job_order_id).filter((id) => id != null))]
   const statusByJobOrderId = new Map<number, string>()
   if (jobOrderIds.length > 0) {
     const statusRes = await db.query(

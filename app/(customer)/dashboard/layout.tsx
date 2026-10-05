@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { DashHeader } from '@/components/dashboard/DashHeader'
 import { ChatWidget } from '@/components/dashboard/ChatWidget'
+import { forgetRememberedLogin } from '@/controllers/authController'
 
 // NOTE: mock/client-side only, same pattern as app/(admin)/layout.tsx.
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -21,6 +22,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       .then(r => r.json())
       .then(data => {
         if (!data.success || data.session?.role !== 'customer') {
+          forgetRememberedLogin('autokita_customer')
           sessionStorage.removeItem('autokita_customer')
           sessionStorage.removeItem('autokita_user_id')
           sessionStorage.removeItem('autokita_user_name')
