@@ -60,10 +60,24 @@ export function ChatWidget() {
           setActiveJob(data.activeJob);
         }
 
-        // If customer has previous message history in Supabase, load it
+        // If customer has previous message history in Supabase, load it and let the browser format the timestamps
         if (data.recentMessages && data.recentMessages.length > 0) {
-          setMessages(data.recentMessages);
-          conversationHistory.current = data.recentMessages.map((m: any) => ({
+          const loadedMessages = data.recentMessages.map((m: any) => {
+            const rawDate = m.sent_at || m.sentAt;
+            const browserTime = rawDate
+              ? new Date(rawDate).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+              : (m.time || new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }));
+            return {
+              id: String(m.id),
+              role: m.role === 'user' ? ('user' as const) : ('bot' as const),
+              text: m.text,
+              time: browserTime,
+              card: m.card,
+              jobCardData: m.jobCardData,
+            };
+          });
+          setMessages(loadedMessages);
+          conversationHistory.current = loadedMessages.map((m: any) => ({
             role: m.role === 'user' ? 'user' : 'assistant',
             content: m.text || '',
           }));
