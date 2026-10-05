@@ -2,7 +2,7 @@
 
 
 import { useEffect, useState } from "react";
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 import { X, CheckCircle2, Loader2, Store, Send, Copy, Check, Upload, ImageIcon } from "lucide-react";
 import { PAYMENT_CHANNELS } from "@/data/paymentChannels";
 import type { PaymentProof } from "@/controllers/quotationController";
@@ -41,6 +41,8 @@ export function PaymentModal({
   total,
   amount,
   optional = false,
+  extra,
+  extraBusy = false,
   onClose,
   onSubmitted,
 }: {
@@ -48,6 +50,8 @@ export function PaymentModal({
   total: number;
   amount: number;
   optional?: boolean;
+  extra?: ReactNode;
+  extraBusy?: boolean;
   onClose: () => void;
   onSubmitted: (method: PaymentMethod, amount: number, proof?: PaymentProof) => Promise<{ success: boolean; error?: string } | boolean>;
 }) {
@@ -265,9 +269,10 @@ export function PaymentModal({
               </div>
             )}
 
+            {extra && <div className="mt-5">{extra}</div>}
             <button
               onClick={confirm}
-              disabled={status === "processing" || !canConfirm}
+              disabled={status === "processing" || !canConfirm || extraBusy}
               className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md hover:opacity-90 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50"
             >
               {status === "processing" ? (

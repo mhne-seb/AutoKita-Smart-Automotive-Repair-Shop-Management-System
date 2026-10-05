@@ -329,34 +329,6 @@ function Completed() {
                     </div>
                   </div>
                 )}
-                {jobOrder.status === "completed" && !data.voucher && (
-                  <div className="mt-4">
-                    <label className="text-[10px] font-semibold uppercase text-muted-foreground block mb-1">Have a voucher code?</label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={voucherCode}
-                        onChange={(e) => {
-                          setVoucherCode(e.target.value.toUpperCase());
-                          setVoucherError(null);
-                        }}
-                        maxLength={30}
-                        placeholder="e.g. SCAN10-123-ABCD"
-                        className="flex-1 rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
-                      />
-                      <button
-                        onClick={handleApplyVoucher}
-                        disabled={applyingVoucher || !voucherCode.trim()}
-                        className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground disabled:opacity-50 transition-all hover:bg-brand/90"
-                      >
-                        Apply
-                      </button>
-                    </div>
-                    {voucherError && (
-                      <p className="mt-1 text-xs text-destructive">{voucherError}</p>
-                    )}
-                  </div>
-                )}
                 <button
                   onClick={() => setShowPay(true)}
                   className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
@@ -376,6 +348,39 @@ function Completed() {
           amount={balanceDue}
           onClose={() => setShowPay(false)}
           onSubmitted={handleBalanceSubmitted}
+          extraBusy={applyingVoucher}
+          extra={
+            jobOrder.status === "completed" && !paymentPending ? (
+              data.voucher ? (
+                <p className="text-xs text-success">
+                  Voucher {data.voucher.promo_code} applied: ₱{formatMoney(data.voucher.discount_applied)} off.
+                </p>
+              ) : (
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">Have a voucher code?</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={voucherCode}
+                      onChange={(e) => { setVoucherCode(e.target.value.toUpperCase()); setVoucherError(null); }}
+                      maxLength={30}
+                      placeholder="e.g. SCAN10-123-ABCD"
+                      className="flex-1 rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyVoucher}
+                      disabled={applyingVoucher || !voucherCode.trim()}
+                      className="rounded-md border px-4 py-2 text-sm font-semibold hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {applyingVoucher ? "Applying…" : "Apply"}
+                    </button>
+                  </div>
+                  {voucherError && <p className="mt-1 text-xs text-destructive">{voucherError}</p>}
+                </div>
+              )
+            ) : undefined
+          }
         />
       )}
     </div>
