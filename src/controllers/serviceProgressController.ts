@@ -478,6 +478,16 @@ export async function submitBalancePayment(
   return res.json() as Promise<{ success?: boolean; paymentId?: number; amount?: number; error?: string }>
 }
 
+/** Applies a voucher code to the customer's final bill. The server does all the checking. */
+export async function applyVoucher(jobOrderId: number, userId: number, code: string) {
+  const res = await fetch('/api/tracking/completed/voucher', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jobOrderId, userId, code }),
+  })
+  return res.json() as Promise<{ success?: boolean; discount?: number; service?: string; error?: string }>
+}
+
 /** Customer's Testing stage: the job order and its road-test attempts. */
 export async function getTestingData(userId: number, jobOrderId?: number) {
   const qs = new URLSearchParams({ userId: String(userId) })
@@ -543,5 +553,6 @@ export async function getCompletedData(userId: number, jobOrderId?: number) {
       total_retail_amount: string
     }[]
     bill: CustomerBill | null
+    voucher: { promo_code: string; description: string; discount_applied: number } | null
   }
 }

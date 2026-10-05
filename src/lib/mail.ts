@@ -307,7 +307,7 @@ export async function sendOfferEmail(opts: {
             `${opts.offerText}\n\n` +
             `Promo code: ${opts.promoCode}` +
             validUntilText + `\n\n` +
-            `Show this code at the shop on your next visit, or mention it when you book.\n\n` +
+            `Enter this code on your Billing page when your service is done.\n\n` +
             `Open my dashboard: ${url}\n\n— AutoKita` + FOOTER_TEXT,
         html: `
           <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
@@ -316,7 +316,7 @@ export async function sendOfferEmail(opts: {
             <p style="font-size:16px">${escapeHtml(opts.offerText)}</p>
             <p style="font-size:16px">Promo code: <b>${escapeHtml(opts.promoCode)}</b></p>
             ${validUntilHtml}
-            <p style="font-size:16px">Show this code at the shop on your next visit, or mention it when you book.</p>
+            <p style="font-size:16px">Enter this code on your Billing page when your service is done.</p>
             <a href="${url}" style="display:inline-block;background:#1e3a5f;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-size:16px">Open my dashboard</a>
             ${FOOTER_HTML}
           </div>

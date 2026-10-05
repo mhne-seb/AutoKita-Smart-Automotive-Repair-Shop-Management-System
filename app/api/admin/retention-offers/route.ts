@@ -5,20 +5,7 @@ import { requireStaff } from '@/lib/authGuard'
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { sendOfferEmail, isMailConfigured } from '@/lib/mail'
-
-function generatePromoCode(offerType: string): string {
-  const prefixMap: Record<string, string> = {
-    percentage_discount: 'PCT',
-    fixed_discount: 'FIX',
-    free_service: 'FREE',
-    service_reminder: 'REMIND',
-    loyalty_reward: 'VIP',
-  }
-  const prefix = prefixMap[offerType] || 'OFFER'
-  const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase()
-  const randomNum = Math.floor(100 + Math.random() * 900)
-  return `${prefix}-${randomNum}-${randomSuffix}`
-}
+import { getVoucherRule } from '@/data/voucherRules'
 
 export async function GET(request: NextRequest) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
@@ -43,7 +30,9 @@ export async function GET(request: NextRequest) {
            issue_date::text AS issue_date,
            expiration_date::text AS expiration_date,
            is_claimed,
-           claimed_on_job_order_id
+           claimed_on_job_order_id,
+           rule_key,
+           discount_applied::float AS discount_applied
          FROM retention_offers
          WHERE user_id = $1
          ORDER BY id DESC`,
@@ -65,6 +54,8 @@ export async function GET(request: NextRequest) {
          ro.expiration_date::text AS expiration_date,
          ro.is_claimed,
          ro.claimed_on_job_order_id,
+         ro.rule_key,
+         ro.discount_applied::float AS discount_applied,
          CONCAT(u.first_name, ' ', u.last_name) AS customer_name,
          u.contact_number,
          u.email
@@ -89,13 +80,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const {
-      userId,
-      offerType = 'percentage_discount',
-      discountValue = 0,
-      description = 'Special Customer Retention Offer',
-      expirationDays = 30,
-    } = body
+    const { userId, ruleKey } = body
 
     if (!userId || isNaN(parseInt(userId, 10))) {
       return NextResponse.json(
@@ -104,18 +89,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const validOfferTypes = [
-      'percentage_discount',
-      'fixed_discount',
-      'free_service',
-      'service_reminder',
-      'loyalty_reward',
-    ]
-    const sanitizedOfferType = validOfferTypes.includes(offerType)
-      ? offerType
-      : 'percentage_discount'
+    const rule = getVoucherRule(ruleKey)
+    if (!rule) {
+      return NextResponse.json({ success: false, error: 'Choose one of the listed offers.' }, { status: 400 })
+    }
 
-    const promoCode = body.promoCode?.trim() || generatePromoCode(sanitizedOfferType)
+    const description = `${rule.label}. ${rule.description}`
+    const expirationDays = 30
+    const promoCode = `${rule.key}-${Math.floor(100 + Math.random() * 900)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
 
     const custRes = await db.query(`SELECT id, email, first_name, nickname FROM users WHERE id = $1`, [parseInt(userId, 10)])
     const customer = custRes.rows[0]
@@ -124,6 +105,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert into retention_offers
+    const unused = await db.query(
+      `SELECT 1 FROM retention_offers
+        WHERE user_id = $1 AND is_claimed = false AND rule_key IS NOT NULL
+          AND (expiration_date IS NULL OR expiration_date >= CURRENT_DATE)
+        LIMIT 1`,
+      [customer.id],
+    )
+    if (unused.rows.length > 0) {
+      return NextResponse.json(
+        { success: false, error: 'This customer already has an unused offer. They can get a new one after using it or when it expires.' },
+        { status: 409 },
+      )
+    }
+
     const { rows } = await db.query(
       `INSERT INTO retention_offers (
          user_id,
@@ -133,7 +128,8 @@ export async function POST(request: NextRequest) {
          description,
          issue_date,
          expiration_date,
-         is_claimed
+         is_claimed,
+         rule_key
        )
        VALUES (
          $1,
@@ -143,7 +139,8 @@ export async function POST(request: NextRequest) {
          $5,
          CURRENT_DATE,
          CURRENT_DATE + ($6 || ' days')::INTERVAL,
-         false
+         false,
+         $7
        )
        RETURNING 
          id,
@@ -158,10 +155,11 @@ export async function POST(request: NextRequest) {
       [
         parseInt(userId, 10),
         promoCode,
-        sanitizedOfferType,
-        parseFloat(discountValue) || 0,
+        rule.offerType,
+        rule.value,
         description,
-        parseInt(expirationDays, 10) || 30,
+        expirationDays,
+        rule.key,
       ]
     )
 
@@ -206,7 +204,7 @@ export async function POST(request: NextRequest) {
         message:
           `${description.trim().replace(/([^.!?])$/, '$1.')} Promo code: ${createdOffer.promo_code}.` +
           (validUntil ? ` Valid until ${validUntil}.` : '') +
-          ' Show the code at the shop on your next visit.',
+          ' Enter the code on your Billing page when your service is done.',
       })
       await db.query(
         `INSERT INTO system_audit_logs (user_id, employees_id, action_performed, entity_type, entity_id, new_values, action_date)

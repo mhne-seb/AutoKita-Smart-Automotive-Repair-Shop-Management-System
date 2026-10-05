@@ -2,6 +2,14 @@ import { requireStaff } from '@/lib/authGuard'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { mlFetch } from '@/lib/mlServer'
+import { VOUCHER_RULES } from '@/data/voucherRules'
+
+function assignOffer(churnStatus: string) {
+  if (churnStatus === 'High Churn Risk') return VOUCHER_RULES['OILFREE'].label
+  if (churnStatus === 'Medium Churn Risk') return VOUCHER_RULES['PMS10'].label
+  if (churnStatus === 'Loyal Customer') return VOUCHER_RULES['BRAKE200'].label
+  return VOUCHER_RULES['SCAN10'].label
+}
 
 // A sleeping online ML server can take about a minute to answer the first time.
 export const maxDuration = 60
@@ -167,13 +175,7 @@ export async function GET() {
           ? new Date(c.last_checkup).toISOString().slice(0, 10)
           : null,
         serviceCount,
-        offer: churnStatus === 'High Churn Risk'
-          ? 'Free Oil Change Reminder'
-          : churnStatus === 'Medium Churn Risk'
-          ? '15% Discount Maintenance Promo'
-          : churnStatus === 'New Customer'
-          ? 'Welcome New Customer Promo'
-          : 'Quick-Service Special Offer',
+        offer: assignOffer(churnStatus),
       }
     })
 

@@ -38,6 +38,7 @@ import {
 import { StatusBadge } from '@/components/StatusBadge'
 import { getAnalytics, getChurnList } from '@/controllers/reportController'
 import { currency } from '@/data/mockData'
+import { VOUCHER_RULES } from '@/data/voucherRules'
 
 // ---- Churn classification helpers -------------------------------------
 
@@ -449,67 +450,13 @@ async function downloadAnalyticsReportXlsx(params: any, filename: string) {
   setTimeout(() => URL.revokeObjectURL(url), 60000)
 }
 
-// Catalog of offers the admin can choose from when reaching out to a customer.
-// `recommendedFor` just pre-selects a sensible default based on churn status —
-// admin can still pick a different one before confirming.
+// The four offers the shop can send (src/data/voucherRules.ts). `recommendedFor` only pre-selects one.
 const OFFER_CATALOG = [
-  {
-    id: 'free-oil-change',
-    label: 'Free Oil Change Reminder',
-    description: 'No-cost oil change coupon, good for one visit.',
-    recommendedFor: ['High Churn Risk'],
-    offerType: 'free_service',
-    discountValue: 0,
-  },
-  {
-    id: 'discount-15',
-    label: '15% Discount Maintenance Promo',
-    description: '15% off any single maintenance service.',
-    recommendedFor: ['Medium Churn Risk'],
-    offerType: 'percentage_discount',
-    discountValue: 15,
-  },
-  {
-    id: 'discount-25',
-    label: '25% Win-Back Discount',
-    description: 'Bigger discount reserved for high-risk, high-value customers.',
-    recommendedFor: ['High Churn Risk'],
-    offerType: 'percentage_discount',
-    discountValue: 25,
-  },
-  {
-    id: 'quick-service',
-    label: 'Quick-Service Special Offer',
-    description: 'Priority scheduling + minor perks for loyal customers.',
-    recommendedFor: ['Loyal Customer'],
-    offerType: 'loyalty_reward',
-    discountValue: 0,
-  },
-  {
-    id: 'welcome-promo',
-    label: 'Welcome New Customer Promo',
-    description: 'Intro discount for customers on their first visit.',
-    recommendedFor: ['New Customer'],
-    offerType: 'percentage_discount',
-    discountValue: 10,
-  },
-  {
-    id: 'loyalty-points',
-    label: 'Bonus Loyalty Points',
-    description: 'Extra points added to the customer’s rewards balance.',
-    recommendedFor: ['Loyal Customer', 'Medium Churn Risk'],
-    offerType: 'loyalty_reward',
-    discountValue: 100,
-  },
-  {
-    id: 'custom',
-    label: 'Custom Offer',
-    description: 'Write your own offer text for this customer.',
-    recommendedFor: [],
-    offerType: 'fixed_discount',
-    discountValue: 0,
-  },
-] as const
+  { id: 'OILFREE', recommendedFor: ['High Churn Risk'] },
+  { id: 'PMS10', recommendedFor: ['Medium Churn Risk'] },
+  { id: 'BRAKE200', recommendedFor: ['Loyal Customer'] },
+  { id: 'SCAN10', recommendedFor: ['New Customer'] },
+].map((o) => ({ ...o, label: VOUCHER_RULES[o.id as keyof typeof VOUCHER_RULES].label, description: VOUCHER_RULES[o.id as keyof typeof VOUCHER_RULES].description }))
 
 type ChartType = 'donut' | 'bar' | 'stacked'
 
@@ -565,7 +512,6 @@ export default function Page() {
   // Offer modal state
   const [offerTarget, setOfferTarget] = useState<any | null>(null)
   const [selectedOfferId, setSelectedOfferId] = useState<string>('')
-  const [customOfferText, setCustomOfferText] = useState('')
   const [isSubmittingOffer, setIsSubmittingOffer] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
@@ -685,27 +631,19 @@ export default function Page() {
 
   function openOfferModal(c: any) {
     setOfferTarget(c)
-    const recommended = OFFER_CATALOG.find((o) => (o.recommendedFor as readonly string[]).includes(c.churnStatus))
+    const recommended = OFFER_CATALOG.find((o) => o.recommendedFor.includes(c.churnStatus))
     setSelectedOfferId(recommended?.id ?? OFFER_CATALOG[0].id)
-    setCustomOfferText('')
   }
 
   function closeOfferModal() {
     setOfferTarget(null)
     setSelectedOfferId('')
-    setCustomOfferText('')
   }
 
   async function confirmGiveOffer() {
     if (!offerTarget) return
     const chosen = OFFER_CATALOG.find((o) => o.id === selectedOfferId)
-    const offerText =
-      selectedOfferId === 'custom' ? customOfferText.trim() : chosen?.label ?? 'Promotional Offer'
-
-    if (selectedOfferId === 'custom' && offerText === '') {
-      showToast('Please write the custom offer text first.')
-      return
-    }
+    const offerText = chosen?.label ?? 'Offer'
 
     const rawUserId = offerTarget.id ?? parseInt(String(offerTarget.customerId).replace(/\D/g, ''), 10)
     setIsSubmittingOffer(true)
@@ -714,13 +652,7 @@ export default function Page() {
       const res = await fetch('/api/admin/retention-offers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: rawUserId,
-          offerType: chosen?.offerType ?? 'percentage_discount',
-          discountValue: chosen?.discountValue ?? 0,
-          description: offerText,
-          expirationDays: 30,
-        }),
+        body: JSON.stringify({ userId: rawUserId, ruleKey: selectedOfferId }),
       })
       const json = await res.json()
       if (json.success && json.offer) {
@@ -1299,7 +1231,7 @@ export default function Page() {
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Choose an offer</p>
               <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
                 {OFFER_CATALOG.map((offer) => {
-                  const isRecommended = (offer.recommendedFor as readonly string[]).includes(
+                  const isRecommended = offer.recommendedFor.includes(
                     offerTarget.churnStatus
                   )
                   const isSelected = selectedOfferId === offer.id
@@ -1333,16 +1265,6 @@ export default function Page() {
                   )
                 })}
               </div>
-
-              {selectedOfferId === 'custom' && (
-                <textarea
-                  value={customOfferText}
-                  onChange={(e) => setCustomOfferText(e.target.value)}
-                  placeholder="e.g. 20% off next brake service, valid until end of month"
-                  rows={3}
-                  className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-sm text-slate-700 outline-none focus:border-slate-400"
-                />
-              )}
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-3">
