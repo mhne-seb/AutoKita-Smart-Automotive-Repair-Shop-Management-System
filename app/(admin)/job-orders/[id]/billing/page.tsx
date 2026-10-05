@@ -161,6 +161,14 @@ export default function BillingPage() {
                         <p className="text-xs text-slate-400">{cashIntent ? `Chose cash on ${fmt(p.payment_date)} — nothing received yet` : `${fmt(p.payment_date)}${p.reference_number ? ` · Ref ${p.reference_number}` : ''}`}</p>
                       </div>
                       <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${cashIntent ? 'bg-sky-100 text-sky-700' : STATUS_PILL[p.verification_status]}`}>{cashIntent ? 'Awaiting cash' : p.verification_status}</span>
+                      {p.voucher_applied && (
+                        <span
+                          title={data.voucher ? `${data.voucher.promo_code}: ₱${data.voucher.discount_applied.toLocaleString('en-PH', { minimumFractionDigits: 2 })} off` : undefined}
+                          className="shrink-0 rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-semibold text-violet-700"
+                        >
+                          Voucher applied
+                        </span>
+                      )}
                       {p.verification_status === 'pending' && (
                         <div className="flex shrink-0 gap-2">
                           <button onClick={() => setRejectingPayment(p)} disabled={busy} className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"><XCircle size={13} /> {cashIntent ? "Didn't pay" : 'Reject'}</button>

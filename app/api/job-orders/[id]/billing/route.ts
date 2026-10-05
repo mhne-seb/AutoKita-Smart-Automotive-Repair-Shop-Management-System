@@ -15,7 +15,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const { id } = await params
   const jobOrderId = Number(id)
   try {
-    const [jo, bill, payments, services, parts] = await Promise.all([
+    const [jo, bill, payments, services, parts, voucherRes] = await Promise.all([
       db.query(
         `SELECT jo.status::text, jo.completed_at::text, jo.released_at::text,
                 u.first_name, u.last_name, u.contact_number
@@ -24,9 +24,20 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       ),
       getJobOrderBill(jobOrderId),
       db.query(
-        `SELECT id, payment_method::text, payment_channel, reference_number, proof_of_payment_image,
-                amount_paid, payment_date::text, verification_status::text
-         FROM payments WHERE job_order_id = $1 ORDER BY payment_date DESC, id DESC`,
+        `SELECT p.id, p.payment_method::text, p.payment_channel, p.reference_number, p.proof_of_payment_image,
+                p.amount_paid, p.payment_date::text, p.verification_status::text,
+                COALESCE(p.payment_date >= (
+                  SELECT MAX(sal.action_date) AT TIME ZONE 'Asia/Manila'
+                    FROM system_audit_logs sal
+                    JOIN retention_offers ro ON ro.id = sal.entity_id
+                   WHERE sal.entity_type = 'retention_offers'
+                     AND sal.new_values LIKE '{"event":"voucher_applied"%'
+                     AND ro.claimed_on_job_order_id = p.job_order_id
+                     AND ro.is_claimed = true
+                ), false) AS voucher_applied
+           FROM payments p
+          WHERE p.job_order_id = $1
+          ORDER BY p.payment_date DESC, p.id DESC`,
         [jobOrderId],
       ),
       db.query(
@@ -38,6 +49,13 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       db.query(
         `SELECT id, description AS name, part_number, quantity, retail_unit_price, total_retail_amount, is_warranty_replacement, warranty_months
          FROM job_order_parts WHERE job_order_id = $1 ORDER BY id`,
+        [jobOrderId],
+      ),
+      db.query(
+        `SELECT promo_code, discount_applied::float AS discount_applied
+           FROM retention_offers
+          WHERE claimed_on_job_order_id = $1 AND is_claimed = true
+          ORDER BY id DESC LIMIT 1`,
         [jobOrderId],
       ),
     ])
@@ -54,13 +72,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       releasedAt: h.released_at,
       customer: { name: [h.first_name, h.last_name].filter(Boolean).join(' '), phone: h.contact_number ?? '' },
       bill: { total: bill.total, paid: bill.paid, balance: bill.balance },
-      payments: payments.rows.map((p) => ({ ...p, amount_paid: Number(p.amount_paid) })),
+      payments: payments.rows.map((p) => ({ ...p, amount_paid: Number(p.amount_paid), voucher_applied: Boolean(p.voucher_applied) })),
       services: services.rows.map((s) => ({ name: s.name, amount: Number(s.amount ?? 0), addedMidService: s.finding_id != null })),
       parts: parts.rows.map((p) => ({
         id: p.id, name: p.name, partNo: p.part_number, qty: Number(p.quantity ?? 1),
         unitPrice: Number(p.retail_unit_price ?? 0), amount: Number(p.total_retail_amount ?? 0),
         warranty: Boolean(p.is_warranty_replacement), warranty_months: p.warranty_months,
       })),
+      voucher: voucherRes.rows[0] ?? null,
     })
   } catch (error) {
     console.error('Billing GET error:', error)
