@@ -26,8 +26,8 @@ function LoginPage() {
   }, [])
 
   const router = useRouter()
-  const [email, setEmail] = useState(demoAccounts[0]?.email ?? '')
-  const [password, setPassword] = useState(demoAccounts[0]?.password ?? '')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   // Off by default: the shop PC is shared, and the next person shouldn't land in your account.
   const [remember, setRemember] = useState(false)

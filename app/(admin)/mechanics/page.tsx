@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import {
   Search,
   Plus,
@@ -566,8 +566,16 @@ function MechanicFormModal({
   onClose: () => void
   onSubmit: (data: MechanicInput) => void
 }) {
-  const [form, setForm] = useState<FormState>(initial ? fromInput(initial) : emptyForm())
+  const initialFormState = useMemo(() => initial ? fromInput(initial) : emptyForm(), [initial])
+  const [form, setForm] = useState<FormState>(initialFormState)
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
+  const [showConfirm, setShowConfirm] = useState(false)
+
+  const hasChanges = useMemo(() => {
+    return Object.keys(initialFormState).some(
+      (k) => initialFormState[k as keyof FormState] !== form[k as keyof FormState]
+    )
+  }, [form, initialFormState])
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -611,6 +619,16 @@ function MechanicFormModal({
 
     setErrors(next)
     if (Object.keys(next).length > 0) return
+
+    if (mode === 'edit') {
+      setShowConfirm(true)
+      return
+    }
+
+    submitData()
+  }
+
+  const submitData = () => {
     onSubmit({
       name: form.name.trim(),
       email: form.email.trim(),
@@ -751,7 +769,7 @@ function MechanicFormModal({
             </button>
             <button
               type="submit"
-              disabled={busy}
+              disabled={busy || (mode === 'edit' && !hasChanges)}
               className={`flex items-center gap-2 rounded-lg ${GRADIENT} px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md hover:opacity-90 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-60`}
             >
               {busy ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
@@ -760,6 +778,43 @@ function MechanicFormModal({
           </div>
         </form>
       </div>
+
+      {showConfirm && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-border animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600">
+                <AlertCircle size={22} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Confirm Changes</h3>
+                <p className="text-xs text-slate-500">Update mechanic records</p>
+              </div>
+            </div>
+
+            <p className="mt-4 text-sm text-slate-600 leading-relaxed">
+              Are you sure you want to save these changes to the employee details? This will update their profile across the system.
+            </p>
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setShowConfirm(false)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowConfirm(false); submitData(); }}
+                className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
+              >
+                <CheckCircle2 size={15} /> Yes, Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

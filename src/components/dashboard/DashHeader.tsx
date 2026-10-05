@@ -200,13 +200,13 @@ export function DashHeader() {
               <div className="mt-5 flex justify-end gap-2">
                 <button
                   onClick={() => setLogoutConfirmOpen(false)}
-                  className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent"
+                  className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmLogout}
-                  className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+                  className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-white hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                 >
                   Log Out
                 </button>

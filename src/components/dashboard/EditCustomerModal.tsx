@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Loader2, User, X } from 'lucide-react'
+import { Loader2, User, X, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { InspectionData } from '@/data/types'
 import { isValidPlateNumber } from '@/lib/plate'
@@ -48,6 +48,7 @@ export function EditCustomerModal({
   const [saving, setSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const markTouched = (field: string) => setTouched((prev) => ({ ...prev, [field]: true }))
 
@@ -108,6 +109,12 @@ export function EditCustomerModal({
       }
       return
     }
+    
+    setShowConfirm(true)
+  }
+
+  async function confirmSave() {
+    setShowConfirm(false)
     setErrorMsg('')
     setSaving(true)
     
@@ -229,12 +236,49 @@ export function EditCustomerModal({
         </div>
 
         <div className="mt-6 flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-          <button type="button" onClick={save} disabled={saving || locked || !hasChanges || hasErrors} className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:hover:bg-slate-200">
+          <button type="button" onClick={onClose} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm">Cancel</button>
+          <button type="button" onClick={save} disabled={saving || locked || !hasChanges || hasErrors} className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none">
             {saving ? <Loader2 size={14} className="animate-spin" /> : null} Save Details
           </button>
         </div>
       </div>
+
+      {showConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600">
+                <AlertCircle size={22} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Confirm Changes</h3>
+                <p className="text-xs text-slate-500">Update customer records</p>
+              </div>
+            </div>
+
+            <p className="mt-4 text-sm text-slate-600 leading-relaxed">
+              Are you sure you want to save these changes to the customer and vehicle details? This will reflect on their active job orders.
+            </p>
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setShowConfirm(false)}
+                className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => { void confirmSave(); }}
+                className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-emerald-700 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
+              >
+                <CheckCircle2 size={13} /> Yes, Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

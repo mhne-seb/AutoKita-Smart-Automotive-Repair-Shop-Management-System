@@ -205,13 +205,13 @@ export function Sidebar() {
               <div className="mt-6 flex justify-end gap-3">
                 <button
                   onClick={() => setLogoutConfirmOpen(false)}
-                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
+                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+                  className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-white hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                 >
                   Log Out
                 </button>

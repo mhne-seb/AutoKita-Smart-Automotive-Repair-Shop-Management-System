@@ -86,9 +86,6 @@ export default function CompletedPage() {
             <button onClick={() => setShowGenerate(true)} disabled={!canGenerate} title={canGenerate ? undefined : 'Available once the job is completed'} className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50 ${released ? 'bg-white text-slate-900 hover:bg-slate-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
               <FileText size={14} /> Generate Job Order
             </button>
-            <button onClick={downloadPdf} disabled={!canGenerate || downloading} title={canGenerate ? undefined : 'Available once the job is completed'} className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50 ${released ? 'bg-white text-slate-900 hover:bg-slate-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
-              {downloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />} Download PDF
-            </button>
           </div>
         </div>
       </div>

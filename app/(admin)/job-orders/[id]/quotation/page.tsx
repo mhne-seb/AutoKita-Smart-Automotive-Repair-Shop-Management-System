@@ -807,7 +807,7 @@ export default function page() {
             const editing = editingServiceId === s.id
             return (
               <div key={`${s.id}-${sIdx}`} className="rounded-2xl border border-slate-200 bg-white p-5">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-4">
                   <div className="flex gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100">🔧</div>
                     <div>
