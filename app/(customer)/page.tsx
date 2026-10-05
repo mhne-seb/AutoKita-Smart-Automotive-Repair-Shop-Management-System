@@ -3,6 +3,8 @@
 // Route: / — public marketing home page (hero, service highlights, testimonials).
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signedInHome } from "@/controllers/authController";
 import { Wrench, Cog, ShieldCheck, ChevronRight, ArrowRight, Star, Quote, CalendarCheck, Radar } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -541,6 +543,13 @@ const testimonials = [
 ];
 
 function Home() {
+  const router = useRouter();
+  // Already signed in (this tab, or remembered by "Keep me signed in")? Go straight to the dashboard.
+  useEffect(() => {
+    const dest = signedInHome();
+    if (dest) router.replace(dest);
+  }, [router]);
+
   useEffect(() => { document.title = "AutoKita — Expert Care for Your Vehicle"; }, []);
 
   const bgIndex = useRotatingBackground(heroImages, 5000);

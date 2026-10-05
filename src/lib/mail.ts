@@ -283,3 +283,43 @@ export async function sendReviewReadyEmail(opts: {
         `,
     })
 }
+
+export async function sendOfferEmail(opts: {
+    to: string
+    name: string
+    offerText: string
+    promoCode: string
+    validUntil: string | null   // already formatted, e.g. "Nov 4, 2026"
+}) {
+    const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const url = `${base}/dashboard`
+    const escapeHtml = (s: string) => (s || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;')
+
+    const validUntilText = opts.validUntil ? `\nValid until ${opts.validUntil}.` : ''
+    const validUntilHtml = opts.validUntil ? `<p style="font-size:16px">Valid until ${escapeHtml(opts.validUntil)}.</p>` : ''
+
+    await transporter.sendMail({
+        from: FROM,
+        to: opts.to,
+        subject: 'AutoKita: You have a new offer',
+        text:
+            `Hi ${opts.name},\n\n` +
+            `${opts.offerText}\n\n` +
+            `Promo code: ${opts.promoCode}` +
+            validUntilText + `\n\n` +
+            `Show this code at the shop on your next visit, or mention it when you book.\n\n` +
+            `Open my dashboard: ${url}\n\n— AutoKita` + FOOTER_TEXT,
+        html: `
+          <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
+            <h2 style="color:#1e3a5f;font-size:26px">You have a new offer</h2>
+            <p style="font-size:16px">Hi ${escapeHtml(opts.name)},</p>
+            <p style="font-size:16px">${escapeHtml(opts.offerText)}</p>
+            <p style="font-size:16px">Promo code: <b>${escapeHtml(opts.promoCode)}</b></p>
+            ${validUntilHtml}
+            <p style="font-size:16px">Show this code at the shop on your next visit, or mention it when you book.</p>
+            <a href="${url}" style="display:inline-block;background:#1e3a5f;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-size:16px">Open my dashboard</a>
+            ${FOOTER_HTML}
+          </div>
+        `,
+    })
+}

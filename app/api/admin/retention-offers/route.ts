@@ -4,6 +4,7 @@ import { requireStaff } from '@/lib/authGuard'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { sendOfferEmail, isMailConfigured } from '@/lib/mail'
 
 function generatePromoCode(offerType: string): string {
   const prefixMap: Record<string, string> = {
@@ -116,6 +117,12 @@ export async function POST(request: NextRequest) {
 
     const promoCode = body.promoCode?.trim() || generatePromoCode(sanitizedOfferType)
 
+    const custRes = await db.query(`SELECT id, email, first_name, nickname FROM users WHERE id = $1`, [parseInt(userId, 10)])
+    const customer = custRes.rows[0]
+    if (!customer) {
+      return NextResponse.json({ success: false, error: 'Customer not found.' }, { status: 404 })
+    }
+
     // Insert into retention_offers
     const { rows } = await db.query(
       `INSERT INTO retention_offers (
@@ -183,7 +190,52 @@ export async function POST(request: NextRequest) {
       console.warn('Could not record system_audit_log for retention offer:', auditErr)
     }
 
-    return NextResponse.json({ success: true, offer: createdOffer })
+    // "Valid until Nov 4, 2026" - expiration_date comes back as 'YYYY-MM-DD'.
+    const validUntil = createdOffer.expiration_date
+      ? new Date(`${String(createdOffer.expiration_date).slice(0, 10)}T00:00:00+08:00`)
+          .toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Manila' })
+      : null
+
+    // 1. Notification in the customer's bell and notification list.
+    let notified = false
+    try {
+      const payload = JSON.stringify({
+        notify: true,
+        event: 'promo_offer',
+        title: 'You have a new offer',
+        message:
+          `${description} Promo code: ${createdOffer.promo_code}.` +
+          (validUntil ? ` Valid until ${validUntil}.` : '') +
+          ' Show the code at the shop on your next visit.',
+      })
+      await db.query(
+        `INSERT INTO system_audit_logs (user_id, employees_id, action_performed, entity_type, entity_id, new_values, action_date)
+         VALUES ($1, $2, 'status_changed'::audit_action_enum, 'retention_offers', $3, $4, NOW())`,
+        [customer.id, auth.session.userId, createdOffer.id, payload],
+      )
+      notified = true
+    } catch (notifyErr) {
+      console.error('Could not save the offer notification:', notifyErr)
+    }
+
+    // 2. Email. Waited for (so the admin is told the truth), but a mail failure never undoes the offer.
+    let emailed = false
+    if (customer.email && isMailConfigured()) {
+      try {
+        await sendOfferEmail({
+          to: customer.email,
+          name: customer.first_name || customer.nickname || 'there',
+          offerText: String(description),
+          promoCode: createdOffer.promo_code,
+          validUntil,
+        })
+        emailed = true
+      } catch (mailErr) {
+        console.error('Offer email failed:', mailErr)
+      }
+    }
+
+    return NextResponse.json({ success: true, offer: createdOffer, notified, emailed })
   } catch (err: unknown) {
     console.error('[/api/admin/retention-offers] POST error:', err)
     return NextResponse.json(

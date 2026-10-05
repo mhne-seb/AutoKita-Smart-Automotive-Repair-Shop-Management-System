@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { Sidebar } from '@/components/Sidebar'
 import { MechanicAIAssistant } from '@/components/dashboard/MechanicAIAssistant'
+import { forgetRememberedLogin } from '@/controllers/authController'
 
 // NOTE: this is a client-side mock guard only (sessionStorage), since there is
 // no real backend/auth yet
@@ -22,6 +23,7 @@ export default function AdminGroupLayout({ children }: { children: ReactNode }) 
       .then(r => r.json())
       .then(data => {
         if (!data.success || data.session?.role !== 'staff') {
+          forgetRememberedLogin('autokita_admin')
           sessionStorage.removeItem('autokita_admin')
           sessionStorage.removeItem('autokita_user_title')
           router.replace('/login')
