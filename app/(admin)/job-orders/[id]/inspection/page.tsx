@@ -1181,9 +1181,6 @@ export default function page() {
                                 {findingStatusMeta[s].label}
                               </button>
                             ))}
-                            <button onClick={() => cancelEditingFinding(f)} className="ml-1 rounded-lg border border-slate-200 p-1.5 text-slate-400 hover:bg-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
-                              <X size={14} />
-                            </button>
                           </div>
                         ) : (
                           <button

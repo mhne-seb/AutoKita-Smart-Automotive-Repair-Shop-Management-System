@@ -812,7 +812,7 @@ function ContactShopModal({ shop, onClose }: { shop: DashboardShop | null; onClo
 
           <a
             href={`tel:${shop?.contact_number ?? ""}`}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-transform duration-150 hover:opacity-90 active:scale-[0.98]"
+            className="mt-6 lg:hidden flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-transform duration-150 hover:opacity-90 active:scale-[0.98]"
           >
             <Phone className="h-4 w-4" /> Call Shop Now
           </a>
