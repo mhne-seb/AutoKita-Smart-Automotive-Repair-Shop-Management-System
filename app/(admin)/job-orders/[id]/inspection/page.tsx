@@ -21,6 +21,9 @@ import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, Insp
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ShopLoading } from '@/components/ShopLoading'
 
+// How many stored scanner reports the picker shows at a time.
+const REPORTS_PER_PAGE = 5
+
 export default function page() {
   const jobOrderId = String(useParams().id)
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)
@@ -163,6 +166,7 @@ export default function page() {
   const [showPicker, setShowPicker] = useState(false)
   const [unlinkedReports, setUnlinkedReports] = useState<UnlinkedReport[]>([])
   const [pickerLoading, setPickerLoading] = useState(false)
+  const [reportPage, setReportPage] = useState(1)
   const [linkingId, setLinkingId] = useState<number | null>(null)
   const [uploadingPdf, setUploadingPdf] = useState(false)
   const [syncingGmail, setSyncingGmail] = useState(false)
@@ -174,6 +178,15 @@ export default function page() {
   const [deleteFindingTarget, setDeleteFindingTarget] = useState<string | null>(null)
   const [deletePhotoTarget, setDeletePhotoTarget] = useState<InspectionPhotoSlot | null>(null)
   const pdfInputRef = useRef<HTMLInputElement | null>(null)
+
+  // The picker shows REPORTS_PER_PAGE reports at a time. If the list gets shorter (a report was
+  // attached or removed), fall back to the last page that still exists.
+  const reportPageCount = Math.max(1, Math.ceil(unlinkedReports.length / REPORTS_PER_PAGE))
+  const currentReportPage = Math.min(reportPage, reportPageCount)
+  const visibleReports = unlinkedReports.slice(
+    (currentReportPage - 1) * REPORTS_PER_PAGE,
+    currentReportPage * REPORTS_PER_PAGE,
+  )
 
   // Fetch the linked OBD-II report for this job order
   useEffect(() => {
@@ -193,6 +206,7 @@ export default function page() {
 
   async function openPicker() {
     setShowPicker(true)
+    setReportPage(1)
     setPickerLoading(true)
     try {
       const res = await fetch('/api/diagnostics/unlinked')
@@ -1318,15 +1332,6 @@ export default function page() {
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-xs font-semibold text-slate-500">Select a stored report to attach:</p>
                   <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={handleSyncGmail}
-                      disabled={syncingGmail}
-                      className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0"
-                    >
-                      {syncingGmail ? <Loader2 size={12} className="animate-spin" /> : <Mail size={12} className="text-rose-500" />}
-                      {syncingGmail ? 'Checking Gmail…' : 'Check Gmail'}
-                    </button>
                     <button onClick={() => setShowPicker(false)} className="text-xs text-slate-400 hover:text-slate-600 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Cancel</button>
                   </div>
                 </div>
@@ -1338,17 +1343,8 @@ export default function page() {
                 {!pickerLoading && unlinkedReports.length === 0 && (
                   <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center">
                     <p className="text-sm text-slate-400">No unlinked diagnostic reports found.</p>
-                    <p className="mt-1 text-xs text-slate-400">Check Gmail for newly emailed reports or upload a PDF below.</p>
+                    <p className="mt-1 text-xs text-slate-400">Click Check Gmail above for newly emailed reports, or upload a PDF below.</p>
                     <div className="mt-3 flex items-center justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={handleSyncGmail}
-                        disabled={syncingGmail}
-                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                      >
-                        {syncingGmail ? <Loader2 size={13} className="animate-spin text-indigo-600" /> : <Mail size={13} className="text-rose-500" />}
-                        {syncingGmail ? 'Checking Gmail…' : 'Check Gmail'}
-                      </button>
                       <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
                         {uploadingPdf ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
                         {uploadingPdf ? 'Uploading…' : 'Upload PDF'}
@@ -1362,7 +1358,7 @@ export default function page() {
                 )}
                 {!pickerLoading && unlinkedReports.length > 0 && (
                   <div className="space-y-2">
-                    {unlinkedReports.map((r) => {
+                    {visibleReports.map((r) => {
                       const vehicleName = [r.reported_make, r.reported_model].filter(Boolean).join(' ')
                       const title = vehicleName
                         ? `${vehicleName}${r.reported_year ? ` (${r.reported_year})` : ''}`
@@ -1418,6 +1414,46 @@ export default function page() {
                         </div>
                       )
                     })}
+                    {unlinkedReports.length > REPORTS_PER_PAGE && (
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
+                        <p className="text-xs text-slate-500">
+                          Showing {(currentReportPage - 1) * REPORTS_PER_PAGE + 1} to{' '}
+                          {Math.min(currentReportPage * REPORTS_PER_PAGE, unlinkedReports.length)} of {unlinkedReports.length} reports
+                        </p>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setReportPage(currentReportPage - 1)}
+                            disabled={currentReportPage === 1}
+                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            Previous
+                          </button>
+                          {Array.from({ length: reportPageCount }, (_, i) => i + 1).map((n) => (
+                            <button
+                              key={n}
+                              type="button"
+                              onClick={() => setReportPage(n)}
+                              aria-current={n === currentReportPage ? 'page' : undefined}
+                              className={`h-8 min-w-8 rounded-lg border px-2 text-xs font-semibold cursor-pointer ${n === currentReportPage
+                                ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                }`}
+                            >
+                              {n}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => setReportPage(currentReportPage + 1)}
+                            disabled={currentReportPage === reportPageCount}
+                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
