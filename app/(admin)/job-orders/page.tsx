@@ -100,8 +100,9 @@ export default function page() {
     () => Array.from(new Set(jobOrders.map((j) => j.vehicle).filter(Boolean))).sort(),
     [jobOrders]
   )
+  // A job order's `service` is its services joined with ", ". Split it so each service is listed once.
   const serviceOptions = useMemo(
-    () => Array.from(new Set(jobOrders.map((j) => j.service).filter(Boolean))).sort(),
+    () => Array.from(new Set(jobOrders.flatMap((j) => j.service.split(', ')).filter(Boolean))).sort(),
     [jobOrders]
   )
   const mechanicOptions = useMemo(
@@ -178,7 +179,10 @@ export default function page() {
         c.id.toLowerCase().includes(q)
 
       const matchesVehicle = selectedVehicle === 'all' || c.vehicle.toLowerCase() === selectedVehicle.toLowerCase()
-      const matchesService = selectedService === 'all' || c.service.toLowerCase() === selectedService.toLowerCase()
+      // Matches when the chosen service is ONE OF the job order's services.
+      const matchesService =
+        selectedService === 'all' ||
+        c.service.toLowerCase().split(', ').includes(selectedService.toLowerCase())
       const matchesMechanic = selectedMechanic === 'all' || c.mechanic.toLowerCase() === selectedMechanic.toLowerCase()
       const matchesPayment =
         selectedPayment === 'all' ||
