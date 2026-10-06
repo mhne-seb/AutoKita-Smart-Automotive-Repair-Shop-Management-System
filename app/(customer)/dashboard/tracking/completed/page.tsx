@@ -7,9 +7,10 @@ import { toast } from "sonner";
 import { PaymentModal, type PaymentMethod } from "@/components/dashboard/PaymentModal";
 import type { PaymentProof } from "@/controllers/quotationController";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
-import { getCompletedData, submitBalancePayment } from "@/controllers/serviceProgressController";
+import { getCompletedData, submitBalancePayment, applyVoucher } from "@/controllers/serviceProgressController";
 import { fetchJobOrderPdfData, generateJobOrderPdf } from "@/lib/jobOrderPdf";
 import { ShopLoading } from "@/components/ShopLoading";
+import { VOUCHER_CODE_PATTERN } from "@/data/voucherRules";
 
 function formatMoney(v: string | number | null | undefined) {
   const n = Number(v ?? 0);
@@ -50,6 +51,9 @@ function Completed() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showPay, setShowPay] = useState(false);
+  const [voucherCode, setVoucherCode] = useState("");
+  const [voucherError, setVoucherError] = useState<string | null>(null);
+  const [applyingVoucher, setApplyingVoucher] = useState(false);
 
   const load = () => {
     const userId = Number(sessionStorage.getItem("autokita_user_id"));
@@ -97,6 +101,27 @@ function Completed() {
     }
     void load();
     return true;
+  };
+
+  const handleApplyVoucher = async () => {
+    if (!data?.jobOrder) return;
+    const code = voucherCode.trim();
+    if (!VOUCHER_CODE_PATTERN.test(code)) {
+      setVoucherError("Enter the code exactly as shown in your offer.");
+      return;
+    }
+    setApplyingVoucher(true);
+    setVoucherError(null);
+    const userId = Number(sessionStorage.getItem("autokita_user_id"));
+    const res = await applyVoucher(data.jobOrder.job_order_id, userId, code);
+    setApplyingVoucher(false);
+    if (!res.success) {
+      setVoucherError(res.error ?? "Could not apply the voucher.");
+      return;
+    }
+    setVoucherCode("");
+    toast.success(`Voucher applied: ₱${formatMoney(res.discount)} off ${res.service}.`);
+    void load();
   };
 
   if (loading) {
@@ -263,6 +288,11 @@ function Completed() {
                 <span className="font-semibold">Balance Due</span>
                 <span className={`text-2xl font-bold ${balanceDue <= 0 ? "text-success" : "text-teal"}`}>{formatMoney(balanceDue)}</span>
               </div>
+              {data.voucher && (
+                <div className="text-xs text-success text-right mt-1">
+                  Voucher {data.voucher.promo_code} applied: ₱{formatMoney(data.voucher.discount_applied)} off.
+                </div>
+              )}
             </div>
 
             {/* What happens next depends on where the money is. */}
@@ -318,6 +348,39 @@ function Completed() {
           amount={balanceDue}
           onClose={() => setShowPay(false)}
           onSubmitted={handleBalanceSubmitted}
+          extraBusy={applyingVoucher}
+          extra={
+            jobOrder.status === "completed" && !paymentPending ? (
+              data.voucher ? (
+                <p className="text-xs text-success">
+                  Voucher {data.voucher.promo_code} applied: ₱{formatMoney(data.voucher.discount_applied)} off.
+                </p>
+              ) : (
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-muted-foreground">Have a voucher code?</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={voucherCode}
+                      onChange={(e) => { setVoucherCode(e.target.value.toUpperCase()); setVoucherError(null); }}
+                      maxLength={30}
+                      placeholder="e.g. SCAN10-123-ABCD"
+                      className="flex-1 rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyVoucher}
+                      disabled={applyingVoucher || !voucherCode.trim()}
+                      className="rounded-md border px-4 py-2 text-sm font-semibold hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {applyingVoucher ? "Applying…" : "Apply"}
+                    </button>
+                  </div>
+                  {voucherError && <p className="mt-1 text-xs text-destructive">{voucherError}</p>}
+                </div>
+              )
+            ) : undefined
+          }
         />
       )}
     </div>

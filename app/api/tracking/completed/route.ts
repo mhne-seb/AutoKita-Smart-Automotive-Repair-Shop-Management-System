@@ -35,20 +35,24 @@ export async function GET(request: NextRequest) {
     }
 
     if (!jobOrder) {
-      return NextResponse.json({ jobOrder: null, logs: [], warranties: [], services: [], parts: [], bill: null })
+      return NextResponse.json({ jobOrder: null, logs: [], warranties: [], services: [], parts: [], bill: null, voucher: null })
     }
 
     // get_job_order_by_id() doesn't return the two hand-over timestamps.
     const stamps = await db.query(`SELECT completed_at::text, released_at::text FROM job_orders WHERE id = $1`, [jobOrder.job_order_id])
     jobOrder = { ...jobOrder, ...stamps.rows[0] }
 
-    const [logsRes, warrantiesRes, servicesRes, partsRes, bill] = await Promise.all([
+    const [logsRes, warrantiesRes, servicesRes, partsRes, bill, voucherRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_repair_logs($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_warranties($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_invoice_services($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_invoice_parts($1)`, [jobOrder.job_order_id]),
       // Live money: job_orders.balance is never written, so don't read it.
       getJobOrderBill(jobOrder.job_order_id),
+      db.query(`SELECT promo_code, description, discount_applied::float AS discount_applied
+  FROM retention_offers
+ WHERE claimed_on_job_order_id = $1 AND is_claimed = true
+ ORDER BY id DESC LIMIT 1`, [jobOrder.job_order_id]),
     ])
 
     return NextResponse.json({
@@ -58,6 +62,7 @@ export async function GET(request: NextRequest) {
       services: servicesRes.rows,
       parts: partsRes.rows,
       bill,
+      voucher: voucherRes?.rows?.[0] ?? null,
     })
   } catch (err) {
     console.error('[/api/tracking/completed] error:', err)

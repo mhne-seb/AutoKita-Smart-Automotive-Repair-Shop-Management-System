@@ -157,6 +157,14 @@ export default function BillingPage() {
                         <div className="flex h-14 w-20 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-400"><Banknote size={18} /></div>
                       )}
                       <div className="min-w-0 flex-1">
+                        {p.voucher_applied && (
+                          <span
+                            title={data.voucher ? `${data.voucher.label} · ${data.voucher.promo_code} · ${currency(data.voucher.discount_applied)} off` : 'Voucher applied'}
+                            className="mb-1 inline-block max-w-full truncate rounded-full bg-violet-100 px-2.5 py-0.5 align-bottom text-xs font-semibold text-violet-700"
+                          >
+                            Voucher: {data.voucher?.label ?? 'applied'}
+                          </span>
+                        )}
                         <p className="font-semibold text-slate-900">{currency(p.amount_paid)} <span className="font-normal text-slate-500">· {cashIntent ? 'will pay at the counter' : p.payment_channel || p.payment_method.replace('_', ' ')}</span></p>
                         <p className="text-xs text-slate-400">{cashIntent ? `Chose cash on ${fmt(p.payment_date)} — nothing received yet` : `${fmt(p.payment_date)}${p.reference_number ? ` · Ref ${p.reference_number}` : ''}`}</p>
                       </div>
