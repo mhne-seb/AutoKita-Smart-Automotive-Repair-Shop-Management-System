@@ -1,6 +1,7 @@
 
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
+import { staffMayUseAdminSite } from '@/lib/staffAccess'
 
 export const SESSION_COOKIE = 'autokita_session'
 export const STAFF_SESSION_COOKIE = 'autokita_staff_session'
@@ -48,12 +49,18 @@ export async function getStaffSession(): Promise<Session | null> {
   const cookieStore = await cookies()
   const staffCookie = cookieStore.get(STAFF_SESSION_COOKIE)?.value
   const staffSession = await readSessionToken(staffCookie)
-  if (staffSession && staffSession.role === 'staff') return staffSession
+  if (staffSession && staffSession.role === 'staff') {
+    if (!(await staffMayUseAdminSite(staffSession.userId))) return null
+    return staffSession
+  }
 
   // Fallback to shared cookie
   const sharedCookie = cookieStore.get(SESSION_COOKIE)?.value
   const sharedSession = await readSessionToken(sharedCookie)
-  if (sharedSession && sharedSession.role === 'staff') return sharedSession
+  if (sharedSession && sharedSession.role === 'staff') {
+    if (!(await staffMayUseAdminSite(sharedSession.userId))) return null
+    return sharedSession
+  }
 
   return null
 }
@@ -76,7 +83,7 @@ export async function getCustomerSession(): Promise<Session | null> {
 // For general route handlers: checks staff first, then customer, then shared cookie
 export async function getSession(): Promise<Session | null> {
   const staff = await getStaffSession()
-  if (staff) return staff
+  if (staff) return staff // getStaffSession already checked staffMayUseAdminSite
   const customer = await getCustomerSession()
   if (customer) return customer
   return null
