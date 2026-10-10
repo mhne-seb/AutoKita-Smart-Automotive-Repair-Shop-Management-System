@@ -120,6 +120,7 @@ function Dashboard() {
   const [contactOpen, setContactOpen] = useState(false);
   const [notificationsModalOpen, setNotificationsModalOpen] = useState(false);
   const [bookServiceOpen, setBookServiceOpen] = useState(false);
+  const [initialVehicleId, setInitialVehicleId] = useState<string | undefined>();
   const [reportJobId, setReportJobId] = useState<number | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalData | null>(null);
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -129,7 +130,12 @@ function Dashboard() {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('book') === '1') {
         setBookServiceOpen(true);
+        const vehicleParam = urlParams.get('vehicle');
+        if (vehicleParam && /^\d+$/.test(vehicleParam)) {
+          setInitialVehicleId(vehicleParam);
+        }
         urlParams.delete('book');
+        urlParams.delete('vehicle');
         const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
         window.history.replaceState({}, '', newUrl);
       }
@@ -575,17 +581,19 @@ function Dashboard() {
 
 
           <div className="rounded-xl border bg-card p-5">
-            <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <Car className="h-3.5 w-3.5" /> Your Vehicles
+            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <span className="flex items-center gap-1.5"><Car className="h-3.5 w-3.5" /> Your Vehicles</span>
+              <Link href="/dashboard/vehicles" className="text-brand hover:underline normal-case">View all</Link>
             </div>
             <div className="mt-4 space-y-3">
               {vehicles.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No vehicles registered yet.</p>
+                <p className="text-sm text-muted-foreground">
+                  No vehicles yet. <Link href="/dashboard/vehicles/new" className="text-brand hover:underline">Register your first vehicle.</Link>
+                </p>
               ) : (
                 vehicles.map((v) => {
-                  const inService = activeJobOrders.some(
-                    (job) => job.vehicle_year === v.vehicle_year && job.vehicle_model === v.vehicle_model,
-                  );
+                  // The server says which cars are in the shop (by vehicle id), the same answer My Vehicles uses.
+                  const inService = v.in_service;
                   return (
                     <VehicleRow
                       key={v.id}
@@ -593,6 +601,10 @@ function Dashboard() {
                       plate={v.plate_number}
                       type={v.vehicle_type}
                       inService={inService}
+                      onBook={() => {
+                        setInitialVehicleId(String(v.id));
+                        setBookServiceOpen(true);
+                      }}
                     />
                   );
                 })
@@ -649,7 +661,8 @@ function Dashboard() {
       )}
       {bookServiceOpen && (
         <BookServiceModal
-          onClose={() => setBookServiceOpen(false)}
+          initialVehicleId={initialVehicleId}
+          onClose={() => { setBookServiceOpen(false); setInitialVehicleId(undefined); }}
           onBooked={() => fetchDashboard(true)}
         />
       )}
@@ -857,7 +870,7 @@ const BOOK_YEARS = Array.from({ length: 20 }, (_, i) => String(new Date().getFul
 // onBooked fires once a booking succeeds so the dashboard behind the modal
 // refetches — the new Pending Request should be there when the modal closes,
 // not after a manual refresh.
-function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked: () => void }) {
+function BookServiceModal({ initialVehicleId, onClose, onBooked }: { initialVehicleId?: string; onClose: () => void; onBooked: () => void }) {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -899,9 +912,21 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
       .then((res) => res.json())
       .then((data) => {
         if (data.user) setUser(data.user);
-        if (data.vehicles) setVehicles(data.vehicles);
-        if (data.activeJobOrders) setActiveJobOrders(data.activeJobOrders);
-        if (!data.vehicles || data.vehicles.length === 0) setSelectedVehicleId("new");
+        
+        const activeJo = data.activeJobOrders || [];
+        if (data.activeJobOrders) setActiveJobOrders(activeJo);
+
+        if (data.vehicles && data.vehicles.length > 0) {
+          setVehicles(data.vehicles);
+          if (initialVehicleId) {
+            const v = data.vehicles.find((v: any) => v.id.toString() === initialVehicleId);
+            if (v && !v.in_service) {
+              setSelectedVehicleId(initialVehicleId);
+            }
+          }
+        } else {
+          setSelectedVehicleId("new");
+        }
         setLoading(false);
       })
       .catch((err) => {
@@ -942,7 +967,8 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
     };
   }, []);
 
-  const isVehicleActive = (plate: string) => activeJobOrders.some((jo) => jo.plate_number === plate);
+  const isVehicleActive = (plate: string) =>
+    vehicles.some((v) => v.in_service && String(v.plate_number).toUpperCase() === String(plate).toUpperCase());
 
   const handleConfirm = async () => {
     if (isSubmitting) return;
@@ -1071,7 +1097,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="flex max-h-[90vh] w-full max-w-4xl flex-col rounded-xl border bg-card shadow-2xl">
+      <div className="flex max-h-[90vh] w-full max-w-6xl flex-col rounded-xl border bg-card shadow-2xl">
         <div className="flex shrink-0 items-start justify-between border-b p-6 md:px-8">
           <div>
             <h1 className="text-2xl font-bold">Book New Service</h1>
@@ -1129,7 +1155,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                       {" "}Select a vehicle...
                     </option>
                     {vehicles.map((v) => {
-                      const isActive = activeJobOrders.some((jo) => jo.plate_number === v.plate_number);
+                      const isActive = !!v.in_service;
                       return (
                         <option key={v.id} value={v.id.toString()} disabled={isActive}>
                           {v.vehicle_model} ({v.plate_number}) {isActive ? " - Currently in Job Order" : ""}
@@ -1335,7 +1361,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
               </BookModalCard>
             </div>
 
-            <aside className="space-y-4">
+            <aside className="space-y-4 lg:sticky lg:top-0 lg:self-start">
               <div className="rounded-xl border bg-card p-5">
                 <div className="flex items-center gap-2">
                   <ClipboardCheck className="h-4 w-4 text-brand" />
@@ -1352,28 +1378,6 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                       value={new Date(toManilaIso(toDateValue(preferredDate), preferredTime)).toLocaleString("en-PH", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
                     />
                   )}
-                </div>
-              </div>
-
-              <div className="rounded-xl bg-brand p-4 text-brand-foreground">
-                <div className="flex items-center gap-2 text-xs font-semibold">
-                  <AlertCircle className="h-4 w-4" /> NOTE TO CUSTOMER
-                </div>
-                <p className="mt-2 text-xs text-white/85">
-                  Please ensure you have the vehicle's registration documents ready for the mechanic's verification.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl border bg-card p-4 text-center">
-                  <Calendar className="mx-auto h-4 w-4 text-brand" />
-                  <div className="mt-2 text-[10px] font-semibold uppercase text-muted-foreground">Availability</div>
-                  <div className="text-sm font-bold">24h Response</div>
-                </div>
-                <div className="rounded-xl border bg-card p-4 text-center">
-                  <ShieldCheck className="mx-auto h-4 w-4 text-brand" />
-                  <div className="mt-2 text-[10px] font-semibold uppercase text-muted-foreground">Warranty</div>
-                  <div className="text-sm font-bold">6 Months</div>
                 </div>
               </div>
             </aside>
@@ -2087,11 +2091,13 @@ function VehicleRow({
   plate,
   type,
   inService = false,
+  onBook,
 }: {
   model: string;
   plate: string;
   type: string;
   inService?: boolean;
+  onBook?: () => void;
 }) {
   return (
     <div className="group flex items-center gap-3 rounded-md border bg-muted/30 p-2.5 transition-colors hover:bg-muted/60">
@@ -2109,6 +2115,15 @@ function VehicleRow({
         </div>
         <div className="text-xs text-muted-foreground">{plate} · {type}</div>
       </div>
+      {!inService && onBook && (
+        <button
+          type="button"
+          onClick={onBook}
+          className="flex-shrink-0 rounded-md bg-brand px-2.5 py-1.5 text-xs font-semibold text-brand-foreground transition-opacity hover:opacity-90"
+        >
+          Book a service
+        </button>
+      )}
     </div>
   );
 }

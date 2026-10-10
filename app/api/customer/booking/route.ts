@@ -100,6 +100,19 @@ export async function POST(req: NextRequest) {
       if (ownVeh.rows.length === 0) {
         return NextResponse.json({ success: false, message: 'Forbidden: not your vehicle' }, { status: 403 })
       }
+
+      // A car that is already in the shop cannot be booked again until its job is released
+      // or cancelled. The screens hide the button; this is the real check.
+      const openJob = await db.query(
+        `SELECT 1 FROM job_orders WHERE vehicle_id = $1 AND status NOT IN ('released', 'cancelled') LIMIT 1`,
+        [finalVehicleId],
+      )
+      if (openJob.rows.length > 0) {
+        return NextResponse.json(
+          { success: false, code: 'VEHICLE_IN_SERVICE', message: 'This car is already in the shop. You can book again after this job is done.' },
+          { status: 409 },
+        )
+      }
     }
 
     let newVehicle: { make: string | null; model: string; year: number; plate: string; type: string; mileage: number } | null = null

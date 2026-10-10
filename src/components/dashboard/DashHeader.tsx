@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { logout } from "@/controllers/authController";
 import { useEffect, useRef, useState } from "react";
-import { LayoutDashboard, History, User, LogOut, Settings, X, ChevronDown } from "lucide-react";
+import { LayoutDashboard, History, User, LogOut, Settings, X, ChevronDown, Car } from "lucide-react";
 import { Logo } from "@/components/site/Logo";
 import { useScrolled } from "@/hooks/use-scrolled";
 import { NotificationBell, type NotificationItem } from '@/components/NotificationBell'
@@ -16,6 +16,7 @@ const BRAND_GRADIENT = "linear-gradient(90deg, #0b1730 0%, #1d3a68 55%, #3b6cb4 
 // Booking now happens from the "Book New Service" action on that page itself.
 const TABS = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/dashboard/vehicles", label: "My Vehicles", icon: Car },
   { to: "/dashboard/history", label: "Service History", icon: History },
 ] as const;
 
@@ -102,7 +103,7 @@ export function DashHeader() {
 
           <nav className="flex items-center gap-1.5 rounded-full border bg-muted/40 p-1">
             {TABS.map((t) => {
-              const active = pathname === t.to;
+              const active = pathname === t.to || (t.to === '/dashboard/vehicles' && pathname.startsWith('/dashboard/vehicles'));
               return (
                 <Link
                   key={t.to}

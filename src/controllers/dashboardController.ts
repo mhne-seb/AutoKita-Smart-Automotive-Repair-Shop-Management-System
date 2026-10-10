@@ -24,6 +24,8 @@ export interface DashboardVehicle {
   plate_number: string
   vehicle_type: string
   mileage: number | null
+  // True while the car has a job order that is not yet released or cancelled.
+  in_service: boolean
 }
 
 export interface DashboardJobOrder {
@@ -143,7 +145,16 @@ export async function getDashboardVehicles(userId: number): Promise<DashboardVeh
     `SELECT * FROM get_dashboard_vehicles($1)`,
     [userId],
   )
-  return rows
+  // Which cars are in the shop right now. Asked here by vehicle id (not from the
+  // active job order list, which is capped at 6 and includes cancelled jobs), so the
+  // dashboard and "My Vehicles" always agree.
+  const open = await db.query(
+    `SELECT DISTINCT vehicle_id FROM job_orders
+      WHERE user_id = $1 AND status NOT IN ('released', 'cancelled')`,
+    [userId],
+  )
+  const busy = new Set<number>(open.rows.map((r: { vehicle_id: number }) => Number(r.vehicle_id)))
+  return rows.map((r: DashboardVehicle) => ({ ...r, in_service: busy.has(Number(r.id)) }))
 }
 
 export async function getDashboardActiveJobOrders(userId: number): Promise<DashboardJobOrder[]> {
