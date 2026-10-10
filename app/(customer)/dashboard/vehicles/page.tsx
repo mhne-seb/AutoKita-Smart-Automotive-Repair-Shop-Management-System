@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Loader2, Plus, Car, X, Calendar, Info } from 'lucide-react'
+import { Loader2, Plus, Car, X, Calendar, Info, ChevronRight } from 'lucide-react'
+import { BookServiceModal } from '@/components/dashboard/BookServiceModal'
+import { ServiceReportModal } from '@/components/dashboard/ServiceReportModal'
+import { FINISHED_STATUSES, trackingHref } from '@/data/trackingStages'
 
 type Vehicle = {
   id: number
@@ -37,7 +40,7 @@ function StatusPill({ inService }: { inService: boolean }) {
       }`}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${inService ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-      {inService ? 'In service now' : 'Ready'}
+      {inService ? 'In service' : 'Ready'}
     </span>
   )
 }
@@ -55,6 +58,9 @@ export default function MyVehiclesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [historyFor, setHistoryFor] = useState<Vehicle | null>(null)
+  // The booking and the service summary open as pop-ups over this page, so the customer keeps their place.
+  const [bookForId, setBookForId] = useState<number | null>(null)
+  const [reportJobId, setReportJobId] = useState<number | null>(null)
   const router = useRouter()
 
   const load = () => {
@@ -84,7 +90,10 @@ export default function MyVehiclesPage() {
     load()
   }, [])
 
-  const book = (id: number) => router.push(`/dashboard?book=1&vehicle=${id}`)
+  const book = (id: number) => {
+    setHistoryFor(null)
+    setBookForId(id)
+  }
 
   if (loading) {
     return (
@@ -214,14 +223,40 @@ export default function MyVehiclesPage() {
           vehicle={historyFor}
           onClose={() => setHistoryFor(null)}
           onBook={() => book(historyFor.id)}
+          onOpenReport={(jobId) => setReportJobId(jobId)}
+          onTrack={(status, jobId) => router.push(trackingHref(status, jobId))}
         />
+      )}
+
+      {bookForId !== null && (
+        <BookServiceModal
+          initialVehicleId={String(bookForId)}
+          onClose={() => setBookForId(null)}
+          onBooked={load}
+        />
+      )}
+
+      {reportJobId !== null && (
+        <ServiceReportModal jobId={reportJobId} onClose={() => setReportJobId(null)} />
       )}
     </div>
   )
 }
 
 // Service history of one car, shown over the table so the customer keeps their place.
-function VehicleHistoryModal({ vehicle, onClose, onBook }: { vehicle: Vehicle; onClose: () => void; onBook: () => void }) {
+function VehicleHistoryModal({
+  vehicle,
+  onClose,
+  onBook,
+  onOpenReport,
+  onTrack,
+}: {
+  vehicle: Vehicle
+  onClose: () => void
+  onBook: () => void
+  onOpenReport: (jobOrderId: number) => void
+  onTrack: (status: string, jobOrderId: number) => void
+}) {
   const [history, setHistory] = useState<HistoryRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -319,8 +354,24 @@ function VehicleHistoryModal({ vehicle, onClose, onBook }: { vehicle: Vehicle; o
                 const dateText = jo.date
                   ? new Date(jo.date).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
                   : 'Unknown date'
+                // Finished jobs open a summary here; open jobs go to their tracking page.
+                const finished = FINISHED_STATUSES.has(jo.status)
+                const open = () => (finished ? onOpenReport(jo.id) : onTrack(jo.status, jo.id))
                 return (
-                  <div key={jo.id} className="flex flex-col gap-2 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div
+                    key={jo.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={open}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        open()
+                      }
+                    }}
+                    title={finished ? 'View service summary' : 'Track this job'}
+                    className="flex cursor-pointer flex-col gap-2 rounded-lg border p-4 transition-colors hover:border-brand/50 hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:flex-row sm:items-center sm:justify-between"
+                  >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Calendar className="h-3.5 w-3.5" />
@@ -347,6 +398,10 @@ function VehicleHistoryModal({ vehicle, onClose, onBook }: { vehicle: Vehicle; o
                           PHP {jo.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       )}
+                      <span className="inline-flex items-center gap-0.5 whitespace-nowrap text-xs font-semibold text-brand">
+                        {finished ? 'View summary' : 'Track job'}
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </span>
                     </div>
                   </div>
                 )
