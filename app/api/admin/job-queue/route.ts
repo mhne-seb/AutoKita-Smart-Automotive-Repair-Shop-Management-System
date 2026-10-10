@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { signFileUrls } from '@/lib/storage'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
+import { STAFF_ACCESS_SQL } from '@/lib/staffAccess'
 
 export async function GET(req: NextRequest) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
@@ -107,7 +108,7 @@ export async function POST(req: NextRequest) {
           employeeName = empLookup.rows[0].full_name
         }
       } else {
-        const fallbackEmp = await db.query(`SELECT id, full_name FROM employees WHERE role = 'owner' LIMIT 1`)
+        const fallbackEmp = await db.query(`SELECT id, full_name FROM employees WHERE role::text IN ('operations_manager', 'owner') AND ${STAFF_ACCESS_SQL} ORDER BY id LIMIT 1`)
         if (fallbackEmp.rows.length > 0) {
           actingEmpId = fallbackEmp.rows[0].id
           employeeName = fallbackEmp.rows[0].full_name
