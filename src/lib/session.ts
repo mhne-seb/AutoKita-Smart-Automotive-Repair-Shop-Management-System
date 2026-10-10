@@ -1,6 +1,7 @@
 
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
 import { staffMayUseAdminSite } from '@/lib/staffAccess'
 
 export const SESSION_COOKIE = 'autokita_session'
@@ -97,4 +98,19 @@ export const sessionCookieOptions = {
   secure: process.env.NODE_ENV === 'production',
   path: '/',
   maxAge: MAX_AGE_SECONDS,
+}
+
+export async function setSessionCookies(res: NextResponse, session: Session, remember: boolean) {
+  if (!sessionSecretConfigured()) return
+  const token = await createSessionToken(session, remember ? REMEMBER_MAX_AGE_SECONDS : undefined)
+  const roleCookieName = session.role === 'customer' ? CUSTOMER_SESSION_COOKIE : STAFF_SESSION_COOKIE
+  
+  if (remember) {
+    res.cookies.set(roleCookieName, token, { ...sessionCookieOptions, maxAge: REMEMBER_MAX_AGE_SECONDS })
+    res.cookies.set(SESSION_COOKIE, token, { ...sessionCookieOptions, maxAge: REMEMBER_MAX_AGE_SECONDS })
+  } else {
+    const { maxAge: _unused, ...untilBrowserCloses } = sessionCookieOptions
+    res.cookies.set(roleCookieName, token, untilBrowserCloses)
+    res.cookies.set(SESSION_COOKIE, token, untilBrowserCloses)
+  }
 }
