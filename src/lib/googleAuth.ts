@@ -97,8 +97,8 @@ function secretKey(): Uint8Array {
   return new TextEncoder().encode(secret)
 }
 
-export type GoogleOauthCookie = { state: string, nonce: string, verifier: string, remember: boolean }
-export type GoogleSignupCookie = { sub: string, email: string, firstName: string, lastName: string, remember: boolean }
+export type GoogleOauthCookie = { state: string, nonce: string, verifier: string, remember: boolean, returnTo?: 'login' | 'book' }
+export type GoogleSignupCookie = { sub: string, email: string, firstName: string, lastName: string, remember: boolean, returnTo?: 'login' | 'book' }
 
 const OAUTH_COOKIE = 'autokita_google_oauth'
 const SIGNUP_COOKIE = 'autokita_google_signup'
@@ -116,7 +116,9 @@ export async function readOauthCookie(token: string | undefined): Promise<Google
   try {
     const { payload } = await jwtVerify(token, secretKey())
     if (payload.purpose !== 'google-oauth') return null
-    return payload as unknown as GoogleOauthCookie
+    const cookie = payload as unknown as GoogleOauthCookie
+    if (!cookie.returnTo) cookie.returnTo = 'login'
+    return cookie
   } catch {
     return null
   }
@@ -135,7 +137,9 @@ export async function readSignupCookie(token: string | undefined): Promise<Googl
   try {
     const { payload } = await jwtVerify(token, secretKey())
     if (payload.purpose !== 'google-signup') return null
-    return payload as unknown as GoogleSignupCookie
+    const cookie = payload as unknown as GoogleSignupCookie
+    if (!cookie.returnTo) cookie.returnTo = 'login'
+    return cookie
   } catch {
     return null
   }

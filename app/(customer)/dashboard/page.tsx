@@ -120,9 +120,27 @@ function Dashboard() {
   const [contactOpen, setContactOpen] = useState(false);
   const [notificationsModalOpen, setNotificationsModalOpen] = useState(false);
   const [bookServiceOpen, setBookServiceOpen] = useState(false);
+  const [initialVehicleId, setInitialVehicleId] = useState<string | undefined>();
   const [reportJobId, setReportJobId] = useState<number | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalData | null>(null);
   const [sessionExpired, setSessionExpired] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('book') === '1') {
+        setBookServiceOpen(true);
+        const vehicleParam = urlParams.get('vehicle');
+        if (vehicleParam && /^\d+$/.test(vehicleParam)) {
+          setInitialVehicleId(vehicleParam);
+        }
+        urlParams.delete('book');
+        urlParams.delete('vehicle');
+        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+      }
+    }
+  }, []);
 
   // Dynamic data from PostgreSQL
   const [data, setData] = useState<DashboardData | null>(null);
@@ -563,17 +581,19 @@ function Dashboard() {
 
 
           <div className="rounded-xl border bg-card p-5">
-            <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <Car className="h-3.5 w-3.5" /> Your Vehicles
+            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <span className="flex items-center gap-1.5"><Car className="h-3.5 w-3.5" /> Your Vehicles</span>
+              <Link href="/dashboard/vehicles" className="text-brand hover:underline normal-case">View all</Link>
             </div>
             <div className="mt-4 space-y-3">
               {vehicles.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No vehicles registered yet.</p>
+                <p className="text-sm text-muted-foreground">
+                  No vehicles yet. <Link href="/dashboard/vehicles/new" className="text-brand hover:underline">Register your first vehicle.</Link>
+                </p>
               ) : (
                 vehicles.map((v) => {
-                  const inService = activeJobOrders.some(
-                    (job) => job.vehicle_year === v.vehicle_year && job.vehicle_model === v.vehicle_model,
-                  );
+                  // The server says which cars are in the shop (by vehicle id), the same answer My Vehicles uses.
+                  const inService = v.in_service;
                   return (
                     <VehicleRow
                       key={v.id}
@@ -581,6 +601,10 @@ function Dashboard() {
                       plate={v.plate_number}
                       type={v.vehicle_type}
                       inService={inService}
+                      onBook={() => {
+                        setInitialVehicleId(String(v.id));
+                        setBookServiceOpen(true);
+                      }}
                     />
                   );
                 })
@@ -637,7 +661,8 @@ function Dashboard() {
       )}
       {bookServiceOpen && (
         <BookServiceModal
-          onClose={() => setBookServiceOpen(false)}
+          initialVehicleId={initialVehicleId}
+          onClose={() => { setBookServiceOpen(false); setInitialVehicleId(undefined); }}
           onBooked={() => fetchDashboard(true)}
         />
       )}
@@ -845,7 +870,7 @@ const BOOK_YEARS = Array.from({ length: 20 }, (_, i) => String(new Date().getFul
 // onBooked fires once a booking succeeds so the dashboard behind the modal
 // refetches — the new Pending Request should be there when the modal closes,
 // not after a manual refresh.
-function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked: () => void }) {
+function BookServiceModal({ initialVehicleId, onClose, onBooked }: { initialVehicleId?: string; onClose: () => void; onBooked: () => void }) {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -869,6 +894,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
   const [pickup, setPickup] = useState<"shop" | "home">("shop");
   const [preferredDate, setPreferredDate] = useState<Date>(startOfToday());
   const [preferredTime, setPreferredTime] = useState<string>("08:00 AM");
+  const [homeAddress, setHomeAddress] = useState("");
   const [serviceCategory, setServiceCategory] = useState("");
   const [serviceCategoryOther, setServiceCategoryOther] = useState("");
   const [notes, setNotes] = useState("");
@@ -886,18 +912,63 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
       .then((res) => res.json())
       .then((data) => {
         if (data.user) setUser(data.user);
-        if (data.vehicles) setVehicles(data.vehicles);
-        if (data.activeJobOrders) setActiveJobOrders(data.activeJobOrders);
-        if (!data.vehicles || data.vehicles.length === 0) setSelectedVehicleId("new");
+        
+        const activeJo = data.activeJobOrders || [];
+        if (data.activeJobOrders) setActiveJobOrders(activeJo);
+
+        if (data.vehicles && data.vehicles.length > 0) {
+          setVehicles(data.vehicles);
+          if (initialVehicleId) {
+            const v = data.vehicles.find((v: any) => v.id.toString() === initialVehicleId);
+            if (v && !v.in_service) {
+              setSelectedVehicleId(initialVehicleId);
+            }
+          }
+        } else {
+          setSelectedVehicleId("new");
+        }
         setLoading(false);
       })
       .catch((err) => {
         console.error("Failed to load dashboard data", err);
         setLoading(false);
       });
+      
+    try {
+      const draftStr = sessionStorage.getItem("autokita_booking_draft");
+      if (draftStr) {
+        const draft = JSON.parse(draftStr);
+        if (draft.date && /^\d{4}-\d{2}-\d{2}$/.test(draft.date)) {
+          const [y, m, d] = draft.date.split("-").map(Number);
+          const parsed = new Date(y, m - 1, d);
+          parsed.setHours(0, 0, 0, 0);
+          if (parsed >= startOfToday()) {
+            setPreferredDate(parsed);
+          }
+        }
+        if (draft.time) {
+          // Assume time is one of the valid TimeslotPicker options
+          setPreferredTime(draft.time);
+        }
+      }
+    } catch {
+      // ignore
+    } finally {
+      sessionStorage.removeItem("autokita_booking_draft");
+    }
   }, []);
 
-  const isVehicleActive = (plate: string) => activeJobOrders.some((jo) => jo.plate_number === plate);
+  // Keep the page behind the modal still while the form scrolls inside it.
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
+
+  const isVehicleActive = (plate: string) =>
+    vehicles.some((v) => v.in_service && String(v.plate_number).toUpperCase() === String(plate).toUpperCase());
 
   const handleConfirm = async () => {
     if (isSubmitting) return;
@@ -939,6 +1010,10 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
       errs.serviceCategoryOther = "Please describe the service you need.";
     }
 
+    if (pickup === "home" && !user?.address && !homeAddress.trim()) {
+      errs.homeAddress = "Home address is required.";
+    }
+
     if (needsScan && !scanAcknowledged) {
       toast.error("Please agree to the diagnostic scan fee to continue.");
       return;
@@ -955,7 +1030,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
       userId: parseInt(userId, 10),
       serviceMode: pickup === "shop" ? "Shop Visit" : "Home Service",
       customerConcern: `Category: ${category || "Not specified"}. Notes: ${notes || "None"}`,
-      homeAddress: user?.address || "None",
+      homeAddress: pickup === "home" ? (user?.address || homeAddress.trim().substring(0, 200)) : (user?.address || "None"),
       diagnosticScanAuthorized: needsScan && scanAcknowledged,
       preferredDatetime: preferredDate && preferredTime ? toManilaIso(toDateValue(preferredDate), preferredTime) : null,
     };
@@ -1021,9 +1096,9 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
   const userEmail = user?.email || "—";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 py-8">
-      <div className="w-full max-w-4xl rounded-xl border bg-card p-6 shadow-2xl md:p-8">
-        <div className="flex items-start justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="flex max-h-[90vh] w-full max-w-6xl flex-col rounded-xl border bg-card shadow-2xl">
+        <div className="flex shrink-0 items-start justify-between border-b p-6 md:px-8">
           <div>
             <h1 className="text-2xl font-bold">Book New Service</h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -1035,12 +1110,13 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
           </button>
         </div>
 
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6 md:px-8">
         {loading ? (
           <div className="flex items-center justify-center gap-2 py-20 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> Loading...
           </div>
         ) : (
-          <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+          <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
             <div className="space-y-5 min-w-0">
               <BookModalCard icon={User} title="Customer Details" subtitle="Review your contact details for this booking.">
                 <div>
@@ -1079,7 +1155,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                       {" "}Select a vehicle...
                     </option>
                     {vehicles.map((v) => {
-                      const isActive = activeJobOrders.some((jo) => jo.plate_number === v.plate_number);
+                      const isActive = !!v.in_service;
                       return (
                         <option key={v.id} value={v.id.toString()} disabled={isActive}>
                           {v.vehicle_model} ({v.plate_number}) {isActive ? " - Currently in Job Order" : ""}
@@ -1169,6 +1245,20 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                   <BookRadioTile icon={MapPin} label="Shop Visit" active={pickup === "shop"} onClick={() => setPickup("shop")} />
                   <BookRadioTile icon={Car} label="Home Service" active={pickup === "home"} onClick={() => setPickup("home")} />
                 </div>
+                {pickup === "home" && !user?.address && (
+                  <div className="mt-4">
+                    <BookModalInput
+                      label="Home Address"
+                      placeholder="Enter your full home address"
+                      value={homeAddress}
+                      onChange={(e) => {
+                        setHomeAddress(e.target.value);
+                        if (fieldErrors.homeAddress) setFieldErrors((p) => ({ ...p, homeAddress: "" }));
+                      }}
+                      error={fieldErrors.homeAddress}
+                    />
+                  </div>
+                )}
                 <div className="mt-4">
                   <div className="mt-2">
                     <TimeslotPicker
@@ -1271,7 +1361,7 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
               </BookModalCard>
             </div>
 
-            <aside className="space-y-4">
+            <aside className="space-y-4 lg:sticky lg:top-0 lg:self-start">
               <div className="rounded-xl border bg-card p-5">
                 <div className="flex items-center gap-2">
                   <ClipboardCheck className="h-4 w-4 text-brand" />
@@ -1290,34 +1380,13 @@ function BookServiceModal({ onClose, onBooked }: { onClose: () => void; onBooked
                   )}
                 </div>
               </div>
-
-              <div className="rounded-xl bg-brand p-4 text-brand-foreground">
-                <div className="flex items-center gap-2 text-xs font-semibold">
-                  <AlertCircle className="h-4 w-4" /> NOTE TO CUSTOMER
-                </div>
-                <p className="mt-2 text-xs text-white/85">
-                  Please ensure you have the vehicle's registration documents ready for the mechanic's verification.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl border bg-card p-4 text-center">
-                  <Calendar className="mx-auto h-4 w-4 text-brand" />
-                  <div className="mt-2 text-[10px] font-semibold uppercase text-muted-foreground">Availability</div>
-                  <div className="text-sm font-bold">24h Response</div>
-                </div>
-                <div className="rounded-xl border bg-card p-4 text-center">
-                  <ShieldCheck className="mx-auto h-4 w-4 text-brand" />
-                  <div className="mt-2 text-[10px] font-semibold uppercase text-muted-foreground">Warranty</div>
-                  <div className="text-sm font-bold">6 Months</div>
-                </div>
-              </div>
             </aside>
           </div>
         )}
+        </div>
 
         {!loading && (
-          <div className="mt-8 flex justify-end gap-3 border-t pt-6">
+          <div className="flex shrink-0 justify-end gap-3 border-t p-4 md:px-8">
             <button onClick={onClose} className="rounded-md border px-5 py-2 text-sm hover:bg-accent">
               Cancel
             </button>
@@ -2022,11 +2091,13 @@ function VehicleRow({
   plate,
   type,
   inService = false,
+  onBook,
 }: {
   model: string;
   plate: string;
   type: string;
   inService?: boolean;
+  onBook?: () => void;
 }) {
   return (
     <div className="group flex items-center gap-3 rounded-md border bg-muted/30 p-2.5 transition-colors hover:bg-muted/60">
@@ -2044,6 +2115,15 @@ function VehicleRow({
         </div>
         <div className="text-xs text-muted-foreground">{plate} · {type}</div>
       </div>
+      {!inService && onBook && (
+        <button
+          type="button"
+          onClick={onBook}
+          className="flex-shrink-0 rounded-md bg-brand px-2.5 py-1.5 text-xs font-semibold text-brand-foreground transition-opacity hover:opacity-90"
+        >
+          Book a service
+        </button>
+      )}
     </div>
   );
 }

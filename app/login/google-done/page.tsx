@@ -27,7 +27,12 @@ export default function GoogleDonePage() {
           return
         }
         startSession(data.role, data.userId, remember, { name: data.name, title: data.title })
-        router.replace(data.role === 'customer' ? '/dashboard' : '/overview')
+        const next = searchParams.get('next')
+        if (data.role === 'customer' && next === 'book') {
+          router.replace('/dashboard?book=1')
+        } else {
+          router.replace(data.role === 'customer' ? '/dashboard' : '/overview')
+        }
       })
       .catch(() => {
         router.replace('/login?google=failed')
