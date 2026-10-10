@@ -111,13 +111,17 @@ export async function POST(req: NextRequest) {
       [data.sub, userId, email]
     )
 
-    const res = NextResponse.json({
+    const resJson: any = {
       success: true,
       role: 'customer',
       userId,
       name: nameToReturn,
       remember: data.remember === true,
-    })
+    }
+    if (data.returnTo === 'book') {
+      resJson.next = 'book'
+    }
+    const res = NextResponse.json(resJson)
 
     await setSessionCookies(res, { userId, role: 'customer' }, data.remember)
     res.cookies.delete('autokita_google_signup')

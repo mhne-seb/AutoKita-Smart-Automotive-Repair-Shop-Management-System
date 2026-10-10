@@ -60,7 +60,7 @@ export default function GoogleSignupPage() {
       }
 
       startSession('customer', data.userId, data.remember === true, { name: data.name, title: null })
-      router.replace('/dashboard')
+      router.replace(data.next === 'book' ? '/dashboard?book=1' : '/dashboard')
     } catch {
       setError('Network error. Please try again.')
       setSubmitting(false)

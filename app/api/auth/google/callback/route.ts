@@ -136,7 +136,11 @@ export async function GET(req: NextRequest) {
       )
 
       // 6. Sign in
-      const res = NextResponse.redirect(new URL(`/login/google-done?role=${accountRole}&remember=${cookieData.remember ? '1' : '0'}`, req.url))
+      let doneUrl = `/login/google-done?role=${accountRole}&remember=${cookieData.remember ? '1' : '0'}`
+      if (accountRole === 'customer' && cookieData.returnTo === 'book') {
+        doneUrl += '&next=book'
+      }
+      const res = NextResponse.redirect(new URL(doneUrl, req.url))
       await setSessionCookies(res, { userId: accountId, role: accountRole }, cookieData.remember)
       clearOauthCookie(res)
       return res
@@ -147,7 +151,8 @@ export async function GET(req: NextRequest) {
         email,
         firstName: givenName || name.split(' ')[0] || '',
         lastName: familyName || name.split(' ').slice(1).join(' ') || '',
-        remember: cookieData.remember
+        remember: cookieData.remember,
+        returnTo: cookieData.returnTo
       })
       const res = NextResponse.redirect(new URL('/login/google-signup', req.url))
       res.cookies.set('autokita_google_signup', signupToken, signupCookieOptions)

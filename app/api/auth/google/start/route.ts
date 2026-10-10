@@ -16,13 +16,15 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url)
   const remember = searchParams.get('remember') === '1'
+  const returnParam = searchParams.get('return')
+  const returnTo = returnParam === 'book' ? 'book' : 'login'
 
   const state = randomToken()
   const nonce = randomToken()
   const verifier = randomToken(64)
   const challenge = pkceChallenge(verifier)
 
-  const token = await signOauthCookie({ state, nonce, verifier, remember })
+  const token = await signOauthCookie({ state, nonce, verifier, remember, returnTo })
   const res = NextResponse.redirect(buildAuthUrl({ state, nonce, challenge }))
   res.cookies.set('autokita_google_oauth', token, oauthCookieOptions)
 
