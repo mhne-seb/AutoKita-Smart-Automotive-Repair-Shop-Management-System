@@ -45,7 +45,8 @@ import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceMo
 import { NotificationsModal } from "@/components/NotificationsModal";
 import { loadCustomerNotifications } from "@/lib/notificationFeeds";
 import { ShopLoading } from "@/components/ShopLoading";
-import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
+import { bookingNeedsScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
+import { buildCategoryLabel } from "@/lib/bookingServices";
 import type {
   DashboardData,
   DashboardActivity,
@@ -80,11 +81,9 @@ function toDateValue(d: Date) {
 
 // Book New Service modal — single-page form matching the /dashboard/register-vehicle layout.
 
-const BOOK_CATEGORIES = [
-  "Oil Change", "Brake Service", "Engine Diagnostics", "Tire Replacement",
-  "Aircon Repair", "General Maintenance", "Car Wash & Detailing",
-];
-const BOOK_OTHERS = "Others";
+type ServiceOption = { id: number; name: string; type: 'maintenance' | 'repair' | 'diagnostics'; description: string | null };
+type PackageOption = { id: number; name: string; description: string | null; intervalKm: number | null; intervalMonths: number | null; serviceIds: number[] };
+
 const BOOK_VEHICLE_MAKES = [
   "Toyota", "Honda", "Mitsubishi", "Ford", "Nissan", "Hyundai", "Kia",
   "Suzuki", "Isuzu", "Mazda", "Chevrolet", "Subaru", "Volkswagen",
@@ -120,12 +119,74 @@ export function BookServiceModal({ initialVehicleId, onClose, onBooked }: { init
   const [preferredDate, setPreferredDate] = useState<Date>(startOfToday());
   const [preferredTime, setPreferredTime] = useState<string>("08:00 AM");
   const [homeAddress, setHomeAddress] = useState("");
-  const [serviceCategory, setServiceCategory] = useState("");
-  const [serviceCategoryOther, setServiceCategoryOther] = useState("");
+  const [options, setOptions] = useState<{ services: ServiceOption[]; packages: PackageOption[] } | null>(null);
+  const [optionsError, setOptionsError] = useState(false);
+  const [tile, setTile] = useState<'maintenance' | 'repair' | 'notsure'>('maintenance');
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [packageId, setPackageId] = useState<number | null>(null);
+  const [serviceSearch, setServiceSearch] = useState('');
+  const notSure = tile === 'notsure';
+
   const [notes, setNotes] = useState("");
   // Explicit agreement to the OBD-II scan fee when the category needs it.
   const [scanAcknowledged, setScanAcknowledged] = useState(false);
-  const needsScan = requiresDiagnosticScan(serviceCategory);
+
+  const selectedServices = options ? options.services.filter((s) => selectedIds.includes(s.id)) : [];
+  const candidatePackage = options?.packages.find((p) => p.id === packageId) || null;
+  const activePackage =
+    candidatePackage && candidatePackage.serviceIds.some((id) => selectedIds.includes(id))
+      ? candidatePackage
+      : null;
+  const needsScan = bookingNeedsScan(notSure, selectedServices.map((s) => s.name));
+  // Every service that is inside some package. The Maintenance list shows these too, so a
+  // package item that is not labelled "maintenance" (like the check-up) can still be unticked there.
+  const packageServiceIds = new Set<number>((options?.packages ?? []).flatMap((p) => p.serviceIds));
+
+  useEffect(() => {
+    if (!needsScan) {
+      setScanAcknowledged(false);
+    }
+  }, [needsScan]);
+
+  const loadOptions = () => {
+    setOptionsError(false);
+    fetch('/api/customer/service-options')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.services) && Array.isArray(data.packages)) {
+          setOptions({ services: data.services, packages: data.packages });
+        } else {
+          setOptionsError(true);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load service options', err);
+        setOptionsError(true);
+      });
+  };
+
+  useEffect(() => {
+    loadOptions();
+  }, []);
+
+  const togglePackage = (p: PackageOption) => {
+    const allTicked = p.serviceIds.length > 0 && p.serviceIds.every((id) => selectedIds.includes(id));
+    if (allTicked) {
+      setSelectedIds((prev) => prev.filter((id) => !p.serviceIds.includes(id)));
+      setPackageId(null);
+    } else {
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...p.serviceIds])));
+      setPackageId(p.id);
+    }
+    if (fieldErrors.service) setFieldErrors((prev) => ({ ...prev, service: '' }));
+  };
+
+  const toggleService = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+    if (fieldErrors.service) setFieldErrors((prev) => ({ ...prev, service: '' }));
+  };
 
   useEffect(() => {
     const userId = sessionStorage.getItem("autokita_user_id");
@@ -229,10 +290,11 @@ export function BookServiceModal({ initialVehicleId, onClose, onBooked }: { init
       }
     }
 
-    if (!serviceCategory) {
-      errs.serviceCategory = "Please select a service category.";
-    } else if (serviceCategory === BOOK_OTHERS && !serviceCategoryOther.trim()) {
-      errs.serviceCategoryOther = "Please describe the service you need.";
+    const noteText = notes.trim();
+    if (!notSure && selectedIds.length === 0 && noteText.length < 5) {
+      errs.service = optionsError
+        ? "Describe what you need in the notes box."
+        : "Pick at least one service, choose \"Not sure\", or describe the problem in the notes.";
     }
 
     if (pickup === "home" && !user?.address && !homeAddress.trim()) {
@@ -250,11 +312,13 @@ export function BookServiceModal({ initialVehicleId, onClose, onBooked }: { init
       return;
     }
 
-    const category = serviceCategory === BOOK_OTHERS ? serviceCategoryOther.trim() : serviceCategory;
     const reqBody: any = {
       userId: parseInt(userId, 10),
       serviceMode: pickup === "shop" ? "Shop Visit" : "Home Service",
-      customerConcern: `Category: ${category || "Not specified"}. Notes: ${notes || "None"}`,
+      serviceIds: selectedIds,
+      packageId: activePackage ? activePackage.id : null,
+      notSure,
+      customerNote: notes.trim(),
       homeAddress: pickup === "home" ? (user?.address || homeAddress.trim().substring(0, 200)) : (user?.address || "None"),
       diagnosticScanAuthorized: needsScan && scanAcknowledged,
       preferredDatetime: preferredDate && preferredTime ? toManilaIso(toDateValue(preferredDate), preferredTime) : null,
@@ -494,59 +558,301 @@ export function BookServiceModal({ initialVehicleId, onClose, onBooked }: { init
                     />
                   </div>
                 </div>
-                <div className="mt-4">
-                  <label className="text-sm font-medium">Service Category</label>
-                  <select
-                    value={serviceCategory}
-                    onChange={(e) => {
-                      setServiceCategory(e.target.value);
-                      setScanAcknowledged(false);
-                      if (fieldErrors.serviceCategory) setFieldErrors((p) => ({ ...p, serviceCategory: "" }));
+              </BookModalCard>
+
+              <BookModalCard
+                icon={ClipboardCheck}
+                title="What do you need?"
+                subtitle="Pick what applies. The shop confirms the final list and price."
+              >
+                {fieldErrors.service && (
+                  <p className="mb-4 text-xs font-medium text-rose-500">{fieldErrors.service}</p>
+                )}
+
+                {/* 1. Three tiles */}
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTile("maintenance");
+                      if (fieldErrors.service) setFieldErrors((p) => ({ ...p, service: "" }));
                     }}
                     className={cn(
-                      "mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground focus:outline-none transition-colors",
-                      fieldErrors.serviceCategory
-                        ? "border-rose-500 focus:border-rose-500 ring-1 ring-rose-500"
-                        : "border-input focus:border-brand"
+                      "flex items-start gap-3 rounded-md border p-3 text-left transition",
+                      tile === "maintenance" ? "border-brand bg-brand-soft/40" : "hover:bg-accent"
                     )}
                   >
-                    <option value="">Select a Service</option>
-                    {BOOK_CATEGORIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                    <option value={BOOK_OTHERS}>Others (type your own)</option>
-                  </select>
-                  {fieldErrors.serviceCategory && (
-                    <p className="mt-1 text-xs text-rose-500 font-medium">{fieldErrors.serviceCategory}</p>
-                  )}
-                  {serviceCategory === BOOK_OTHERS && (
-                    <>
-                      <input
-                        value={serviceCategoryOther}
-                        onChange={(e) => {
-                          setServiceCategoryOther(e.target.value);
-                          if (fieldErrors.serviceCategoryOther) setFieldErrors((p) => ({ ...p, serviceCategoryOther: "" }));
-                        }}
-                        placeholder="Please describe the service you need"
-                        autoFocus
-                        className={cn(
-                          "mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none transition-colors",
-                          fieldErrors.serviceCategoryOther
-                            ? "border-rose-500 focus:border-rose-500 ring-1 ring-rose-500"
-                            : "border-brand/50 focus:border-brand"
-                        )}
-                      />
-                      {fieldErrors.serviceCategoryOther && (
-                        <p className="mt-1 text-xs text-rose-500 font-medium">{fieldErrors.serviceCategoryOther}</p>
+                    <span
+                      className={cn(
+                        "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2",
+                        tile === "maintenance" ? "border-brand" : "border-muted-foreground"
                       )}
-                    </>
-                  )}
+                    >
+                      {tile === "maintenance" && <span className="h-2 w-2 rounded-full bg-brand" />}
+                    </span>
+                    <div>
+                      <p className="font-semibold text-sm text-foreground">Regular maintenance</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">Nothing is broken. It is time for service.</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTile("repair");
+                      if (fieldErrors.service) setFieldErrors((p) => ({ ...p, service: "" }));
+                    }}
+                    className={cn(
+                      "flex items-start gap-3 rounded-md border p-3 text-left transition",
+                      tile === "repair" ? "border-brand bg-brand-soft/40" : "hover:bg-accent"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2",
+                        tile === "repair" ? "border-brand" : "border-muted-foreground"
+                      )}
+                    >
+                      {tile === "repair" && <span className="h-2 w-2 rounded-full bg-brand" />}
+                    </span>
+                    <div>
+                      <p className="font-semibold text-sm text-foreground">Something is wrong</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">A noise, leak, warning light or worn part.</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTile("notsure");
+                      if (fieldErrors.service) setFieldErrors((p) => ({ ...p, service: "" }));
+                    }}
+                    className={cn(
+                      "flex items-start gap-3 rounded-md border p-3 text-left transition",
+                      tile === "notsure" ? "border-brand bg-brand-soft/40" : "hover:bg-accent"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2",
+                        tile === "notsure" ? "border-brand" : "border-muted-foreground"
+                      )}
+                    >
+                      {tile === "notsure" && <span className="h-2 w-2 rounded-full bg-brand" />}
+                    </span>
+                    <div>
+                      <p className="font-semibold text-sm text-foreground">Not sure</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">We will check your car and tell you what it needs.</p>
+                    </div>
+                  </button>
                 </div>
 
-                {/* Scanner-fee disclosure — same rule and wording as the public
-                    booking page. Confirm is blocked until it's agreed to. */}
+                {/* 2. Loading state */}
+                {!options && !optionsError && (
+                  <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Loading services...</span>
+                  </div>
+                )}
+
+                {/* 3. Options error */}
+                {optionsError && (
+                  <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50/50 p-3 text-xs text-rose-950 dark:bg-rose-950/20 dark:text-rose-200">
+                    <div className="flex items-center justify-between">
+                      <span>We couldn&apos;t load the service list.</span>
+                      <button
+                        type="button"
+                        onClick={loadOptions}
+                        className="inline-flex items-center gap-1 font-semibold text-brand hover:underline"
+                      >
+                        <RefreshCw className="h-3 w-3" /> Try again
+                      </button>
+                    </div>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      You can also describe what you need in the notes box.
+                    </p>
+                  </div>
+                )}
+
+                {/* 4. Tile maintenance */}
+                {options && tile === "maintenance" && (
+                  <div className="mt-5 space-y-5">
+                    {options.packages.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-semibold">Maintenance packages</h4>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          Tap a package to tick everything in it. You can untick what you don&apos;t need.
+                        </p>
+                        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                          {options.packages.map((pkg) => {
+                            const allTicked =
+                              pkg.serviceIds.length > 0 &&
+                              pkg.serviceIds.every((id) => selectedIds.includes(id));
+                            const someTicked =
+                              !allTicked &&
+                              pkg.serviceIds.some((id) => selectedIds.includes(id));
+
+                            const intervalParts: string[] = [];
+                            if (pkg.intervalKm) {
+                              intervalParts.push(`${pkg.intervalKm.toLocaleString("en-PH")} km`);
+                            }
+                            if (pkg.intervalMonths) {
+                              intervalParts.push(`${pkg.intervalMonths} months`);
+                            }
+                            const intervalText =
+                              intervalParts.length > 0 ? `Every ${intervalParts.join(" or ")}` : null;
+
+                            return (
+                              <button
+                                key={pkg.id}
+                                type="button"
+                                onClick={() => togglePackage(pkg)}
+                                className={cn(
+                                  "flex flex-col justify-between rounded-lg border p-3.5 text-left transition",
+                                  allTicked
+                                    ? "border-brand bg-brand-soft/40"
+                                    : someTicked
+                                    ? "border-brand/60 bg-brand-soft/20"
+                                    : "hover:bg-accent"
+                                )}
+                              >
+                                <div>
+                                  <div className="flex items-start justify-between gap-2">
+                                    <h5 className="font-semibold text-sm text-foreground">{pkg.name}</h5>
+                                    {allTicked ? (
+                                      <span className="rounded bg-brand/15 px-1.5 py-0.5 text-[10px] font-semibold text-brand">
+                                        Selected
+                                      </span>
+                                    ) : someTicked ? (
+                                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                        Some selected
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                  {pkg.description && (
+                                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                                      {pkg.description}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+                                  {intervalText && <span>{intervalText} · </span>}
+                                  <span>{pkg.serviceIds.length} services</span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <h4 className="text-sm font-semibold">Maintenance services</h4>
+                      <div className="mt-2 divide-y rounded-md border">
+                        {options.services
+                          .filter((s) => s.type === "maintenance" || packageServiceIds.has(s.id))
+                          .map((s) => {
+                            const checked = selectedIds.includes(s.id);
+                            return (
+                              <label
+                                key={s.id}
+                                className={cn(
+                                  "flex cursor-pointer items-start gap-3 p-3 transition hover:bg-muted/30",
+                                  checked && "bg-brand-soft/20"
+                                )}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() => toggleService(s.id)}
+                                  className="mt-0.5 h-4 w-4 rounded border-input accent-brand"
+                                />
+                                <div className="flex-1">
+                                  <span className="text-sm font-medium leading-snug">{s.name}</span>
+                                  {s.description && (
+                                    <p className="mt-0.5 text-xs text-muted-foreground">{s.description}</p>
+                                  )}
+                                </div>
+                              </label>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. Tile repair */}
+                {options && tile === "repair" && (
+                  <div className="mt-5 space-y-3">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <h4 className="text-sm font-semibold">Repair services</h4>
+                      <div className="relative w-full sm:w-64">
+                        <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                        <input
+                          type="text"
+                          placeholder="Search services"
+                          value={serviceSearch}
+                          onChange={(e) => setServiceSearch(e.target.value)}
+                          className="w-full rounded-md border bg-background py-1.5 pl-8 pr-3 text-xs focus:border-brand focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="divide-y rounded-md border">
+                      {options.services
+                        .filter(
+                          (s) =>
+                            (s.type === "repair" || s.type === "diagnostics") &&
+                            s.name.toLowerCase().includes(serviceSearch.trim().toLowerCase())
+                        )
+                        .map((s) => {
+                          const checked = selectedIds.includes(s.id);
+                          return (
+                            <label
+                              key={s.id}
+                              className={cn(
+                                "flex cursor-pointer items-start gap-3 p-3 transition hover:bg-muted/30",
+                                checked && "bg-brand-soft/20"
+                              )}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggleService(s.id)}
+                                className="mt-0.5 h-4 w-4 rounded border-input accent-brand"
+                              />
+                              <div className="flex-1">
+                                <span className="text-sm font-medium leading-snug">{s.name}</span>
+                                {s.description && (
+                                  <p className="mt-0.5 text-xs text-muted-foreground">{s.description}</p>
+                                )}
+                              </div>
+                            </label>
+                          );
+                        })}
+                      {options.services.filter(
+                        (s) =>
+                          (s.type === "repair" || s.type === "diagnostics") &&
+                          s.name.toLowerCase().includes(serviceSearch.trim().toLowerCase())
+                      ).length === 0 && (
+                        <p className="p-4 text-center text-xs text-muted-foreground">
+                          No services match your search.
+                        </p>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Not in the list? Describe it in the notes below.
+                    </p>
+                  </div>
+                )}
+
+                {/* 6. Tile notsure */}
+                {tile === "notsure" && (
+                  <p className="mt-4 rounded-md border bg-muted/20 p-3.5 text-xs text-muted-foreground">
+                    Tell us what you notice in the notes below. We will inspect the car and tell you what it needs.
+                  </p>
+                )}
+
+                {/* 7. Scan fee box */}
                 {needsScan && (
                   <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4">
                     <div className="flex items-start gap-3">
@@ -573,12 +879,20 @@ export function BookServiceModal({ initialVehicleId, onClose, onBooked }: { init
                     </div>
                   </div>
                 )}
+
+                {/* 8. Notes box */}
                 <div className="mt-4">
-                  <label className="text-sm font-medium">Additional Notes or Concerns</label>
+                  <label className="text-sm font-medium">
+                    {!notSure && selectedIds.length === 0 ? "Describe the problem" : "Notes for the shop (optional)"}
+                  </label>
                   <textarea
                     rows={4}
+                    maxLength={500}
                     value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
+                    onChange={(e) => {
+                      setNotes(e.target.value);
+                      if (fieldErrors.service) setFieldErrors((p) => ({ ...p, service: "" }));
+                    }}
                     placeholder="Describe any specific issues (e.g., strange noises, warning lights)..."
                     className="mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
                   />
@@ -596,7 +910,37 @@ export function BookServiceModal({ initialVehicleId, onClose, onBooked }: { init
                   <BookSumRow label="Customer Name" value={userFullName} />
                   <BookSumRow label="Vehicle" value={displayVehicle} />
                   <BookSumRow label="Service Option" value={pickup === "shop" ? "Shop Visit" : "Home Service"} />
-                  <BookSumRow label="Service Needed" value={serviceCategory || "—"} />
+                  <BookSumRow
+                    label="Service Needed"
+                    value={
+                      selectedServices.length === 0 && !notSure
+                        ? "—"
+                        : notSure && selectedServices.length === 0
+                        ? "Not sure"
+                        : buildCategoryLabel({
+                            packageName: activePackage ? activePackage.name : null,
+                            packageServiceNames: activePackage
+                              ? options?.services
+                                  .filter((s) => activePackage.serviceIds.includes(s.id))
+                                  .map((s) => s.name) ?? []
+                              : [],
+                            selectedNames: selectedServices.map((s) => s.name),
+                            notSure: false,
+                          })
+                    }
+                  />
+                  {selectedServices.length > 0 && (
+                    <div className="flex items-start justify-between border-b pb-2 last:border-0">
+                      <span className="text-muted-foreground">Services</span>
+                      <div className="text-right max-w-[60%] space-y-1">
+                        {selectedServices.map((s) => (
+                          <p key={s.id} className="text-xs font-medium text-foreground leading-snug">
+                            {s.name}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   {preferredDate && preferredTime && (
                     <BookSumRow
                       label="Preferred Date"

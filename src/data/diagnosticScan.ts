@@ -5,14 +5,15 @@ export const DIAGNOSTIC_SCAN_FEE = 1500
 // sql/Other/migration_add_obd2_scan_service.sql.
 export const DIAGNOSTIC_SCAN_SERVICE_NAME = 'OBD-II Diagnostic Scan'
 
-// Must match the labels in the booking form's CATEGORIES list exactly.
-export const DIAGNOSTIC_SCAN_CATEGORIES: ReadonlySet<string> = new Set([
-  'Engine Diagnostics',
-  'General Maintenance',
+// Ticking one of these services at booking needs the scan fee agreement, and so does
+// choosing "Not sure". "General Mechanical Inspection & Check-Up" is deliberately NOT here:
+// it is part of the PMS packages.
+export const SCAN_TRIGGER_SERVICE_NAMES: ReadonlySet<string> = new Set([
+  'Engine Diagnostics & Electrical Scan',
 ])
 
-export function requiresDiagnosticScan(category: string | null | undefined): boolean {
-  return Boolean(category) && DIAGNOSTIC_SCAN_CATEGORIES.has(category as string)
+export function bookingNeedsScan(notSure: boolean, selectedNames: string[]): boolean {
+  return notSure || selectedNames.some((n) => SCAN_TRIGGER_SERVICE_NAMES.has(n))
 }
 
 // The scan itself happens during inspection, before the repair stage even

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
-import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
+import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE, bookingNeedsScan } from '@/data/diagnosticScan'
+import { ROAD_TEST_TITLE } from '@/data/roadTest'
+import { buildConcernText, MAX_SELECTED_SERVICES, NOTES_MAX_LENGTH, NOTE_MIN_WHEN_NO_SERVICE } from '@/lib/bookingServices'
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
 import { getOccupiedBookingSlots, isSlotOccupiedInDb } from '@/lib/bookingSlots'
 import { CUSTOMER_SESSION_COOKIE, createSessionToken, sessionCookieOptions, sessionSecretConfigured } from '@/lib/session'
@@ -43,12 +45,95 @@ export async function POST(req: NextRequest) {
       customerConcern,
       diagnosticScanAuthorized,
       preferredDatetime,
+      serviceIds,
+      packageId,
+      notSure,
+      customerNote,
     } = body
 
     const bad =(message: string, code?: string) =>
       NextResponse.json({ success: false, message, ...(code ? { code } : {}) }, { status: 400 })
 
     if (!vehicleId && !newVehicleDetails) return bad('Missing vehicle information')
+
+    let finalConcern = ''
+    if (Array.isArray(serviceIds)) {
+      const ids: number[] = Array.from(
+        new Set(
+          serviceIds
+            .map((id: unknown) => Number(id))
+            .filter((id: number) => Number.isInteger(id) && id > 0)
+        )
+      )
+      if (ids.length > MAX_SELECTED_SERVICES) {
+        return bad('Too many services selected.')
+      }
+
+      let selectedNames: string[] = []
+      if (ids.length > 0) {
+        const sRes = await db.query(
+          `SELECT id, service_name FROM services WHERE id = ANY($1::int[]) AND is_active = true`,
+          [ids]
+        )
+        if (sRes.rows.length !== ids.length) {
+          return bad('One of the selected services is no longer available. Please reload and pick again.')
+        }
+        for (const row of sRes.rows) {
+          if (row.service_name === DIAGNOSTIC_SCAN_SERVICE_NAME || row.service_name === ROAD_TEST_TITLE) {
+            return bad('One of the selected services is no longer available. Please reload and pick again.')
+          }
+        }
+        const nameById = new Map<number, string>(sRes.rows.map((r: any) => [Number(r.id), String(r.service_name)]))
+        selectedNames = ids.map((id) => nameById.get(id)!).filter(Boolean)
+      }
+
+      let packageName: string | null = null
+      let packageServiceNames: string[] = []
+      if (packageId !== undefined && packageId !== null) {
+        const parsedPkgId = Number(packageId)
+        if (!Number.isInteger(parsedPkgId) || parsedPkgId <= 0) {
+          return bad('That package is no longer available. Please reload and pick again.')
+        }
+        const pkgRes = await db.query(
+          `SELECT p.package_name, s.service_name
+           FROM service_packages p
+           JOIN service_package_items i ON i.package_id = p.id
+           JOIN services s ON s.id = i.service_id
+           WHERE p.id = $1 AND p.is_active = true
+           ORDER BY i.sort_order`,
+          [parsedPkgId]
+        )
+        if (pkgRes.rows.length === 0) {
+          return bad('That package is no longer available. Please reload and pick again.')
+        }
+        packageName = pkgRes.rows[0].package_name
+        packageServiceNames = pkgRes.rows.map((r: any) => r.service_name)
+      }
+
+      const note = String(customerNote ?? '').trim()
+      if (note.length > NOTES_MAX_LENGTH) {
+        return bad('Notes are too long (500 characters at most).')
+      }
+
+      const isNotSure = notSure === true
+      if (!(ids.length >= 1 || isNotSure || note.length >= NOTE_MIN_WHEN_NO_SERVICE)) {
+        return bad('Pick at least one service, choose "Not sure", or describe the problem in the notes.')
+      }
+
+      if (bookingNeedsScan(isNotSure, selectedNames) && diagnosticScanAuthorized !== true) {
+        return bad('Please agree to the diagnostic scan fee to continue.', 'SCAN_FEE_NOT_AGREED')
+      }
+
+      finalConcern = buildConcernText({
+        packageName,
+        packageServiceNames,
+        selectedNames,
+        notSure: isNotSure,
+        customerNote: note,
+      })
+    } else {
+      finalConcern = String(customerConcern ?? '').slice(0, 1500)
+    }
 
     let finalVehicleId = vehicleId
     if (finalVehicleId) {
@@ -136,7 +221,7 @@ export async function POST(req: NextRequest) {
         finalVehicleId,
         mappedServiceMode,
         address,
-        customerConcern || 'No specific concerns',
+        finalConcern || 'No specific concerns',
         preferredDatetime || null,
       ])
       ticket = ticketResult.rows[0]
