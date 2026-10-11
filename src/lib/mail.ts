@@ -12,10 +12,16 @@ const transporter = useResend
           port: 465,
           secure: true,
           auth: { user: 'resend', pass: process.env.RESEND_API_KEY },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 15000,
       })
     : nodemailer.createTransport({
           service: 'gmail',
           auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 15000,
       })
 
 // Sender shown to customers. With Resend it must be an address on the verified domain.
@@ -318,6 +324,32 @@ export async function sendOfferEmail(opts: {
             ${validUntilHtml}
             <p style="font-size:16px">Enter this code on your Billing page when your service is done.</p>
             <a href="${url}" style="display:inline-block;background:#1e3a5f;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-size:16px">Open my dashboard</a>
+            ${FOOTER_HTML}
+          </div>
+        `,
+    })
+}
+
+export async function sendSignupCodeEmail(opts: {
+    to: string
+    name: string
+    code: string
+    minutes: number
+}) {
+    await transporter.sendMail({
+        from: FROM,
+        to: opts.to,
+        subject: `Your AutoKita code: ${opts.code}`,
+        text:
+            `Hi ${opts.name},\n\n` +
+            `Your code is: ${opts.code}\n\n` +
+            `It works for ${opts.minutes} minutes. If you did not ask for it, you can ignore this email.\n\n— AutoKita` + FOOTER_TEXT,
+        html: `
+          <div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
+            <h2 style="color:#1e3a5f;font-size:26px">Your verification code</h2>
+            <p style="font-size:16px">Hi ${opts.name},</p>
+            <p style="font-size:40px;font-weight:700;letter-spacing:8px;font-family:monospace;color:#1e3a5f;margin:20px 0">${opts.code}</p>
+            <p style="font-size:16px">It works for ${opts.minutes} minutes. If you did not ask for it, you can ignore this email.</p>
             ${FOOTER_HTML}
           </div>
         `,

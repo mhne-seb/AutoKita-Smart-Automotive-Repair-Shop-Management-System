@@ -10,14 +10,15 @@ import {
 import { sessionSecretConfigured } from '@/lib/session'
 
 export async function GET(req: NextRequest) {
-  if (!googleConfigured() || !sessionSecretConfigured()) {
-    return NextResponse.redirect(new URL('/login?google=unavailable', req.url))
-  }
-
   const { searchParams } = new URL(req.url)
   const remember = searchParams.get('remember') === '1'
   const returnParam = searchParams.get('return')
-  const returnTo = returnParam === 'book' ? 'book' : 'login'
+  const returnTo = (returnParam === 'book' || returnParam === 'vehicles') ? returnParam : 'login'
+
+  if (!googleConfigured() || !sessionSecretConfigured()) {
+    const dest = returnTo === 'login' ? '/login' : '/book'
+    return NextResponse.redirect(new URL(`${dest}?google=unavailable`, req.url))
+  }
 
   const state = randomToken()
   const nonce = randomToken()

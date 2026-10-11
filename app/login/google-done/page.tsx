@@ -28,10 +28,16 @@ export default function GoogleDonePage() {
         }
         startSession(data.role, data.userId, remember, { name: data.name, title: data.title })
         const next = searchParams.get('next')
-        if (data.role === 'customer' && next === 'book') {
-          router.replace('/dashboard?book=1')
+        if (data.role === 'customer') {
+          if (next === 'book') {
+            router.replace('/dashboard?book=1')
+          } else if (next === 'vehicles') {
+            router.replace('/dashboard/vehicles')
+          } else {
+            router.replace('/dashboard')
+          }
         } else {
-          router.replace(data.role === 'customer' ? '/dashboard' : '/overview')
+          router.replace('/overview')
         }
       })
       .catch(() => {

@@ -97,11 +97,9 @@ function secretKey(): Uint8Array {
   return new TextEncoder().encode(secret)
 }
 
-export type GoogleOauthCookie = { state: string, nonce: string, verifier: string, remember: boolean, returnTo?: 'login' | 'book' }
-export type GoogleSignupCookie = { sub: string, email: string, firstName: string, lastName: string, remember: boolean, returnTo?: 'login' | 'book' }
+export type GoogleOauthCookie = { state: string, nonce: string, verifier: string, remember: boolean, returnTo?: 'login' | 'book' | 'vehicles' }
 
 const OAUTH_COOKIE = 'autokita_google_oauth'
-const SIGNUP_COOKIE = 'autokita_google_signup'
 
 export async function signOauthCookie(data: GoogleOauthCookie): Promise<string> {
   return new SignJWT({ ...data, purpose: 'google-oauth' } as any)
@@ -124,27 +122,6 @@ export async function readOauthCookie(token: string | undefined): Promise<Google
   }
 }
 
-export async function signSignupCookie(data: GoogleSignupCookie): Promise<string> {
-  return new SignJWT({ ...data, purpose: 'google-signup' } as any)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('15m')
-    .sign(secretKey())
-}
-
-export async function readSignupCookie(token: string | undefined): Promise<GoogleSignupCookie | null> {
-  if (!token) return null
-  try {
-    const { payload } = await jwtVerify(token, secretKey())
-    if (payload.purpose !== 'google-signup') return null
-    const cookie = payload as unknown as GoogleSignupCookie
-    if (!cookie.returnTo) cookie.returnTo = 'login'
-    return cookie
-  } catch {
-    return null
-  }
-}
-
 export const oauthCookieOptions = {
   httpOnly: true,
   sameSite: 'lax' as const,
@@ -152,9 +129,3 @@ export const oauthCookieOptions = {
   path: '/api/auth/google',
 }
 
-export const signupCookieOptions = {
-  httpOnly: true,
-  sameSite: 'lax' as const,
-  secure: process.env.NODE_ENV === 'production',
-  path: '/',
-}

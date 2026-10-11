@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
-import { sendTempPasswordEmail } from '@/lib/mail'
-import { hashPassword } from '@/lib/password'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
-import { EMAIL_RE, PHONE_RE } from '@/lib/bookingRules'
 import { getOccupiedBookingSlots, isSlotOccupiedInDb } from '@/lib/bookingSlots'
 import { CUSTOMER_SESSION_COOKIE, createSessionToken, sessionCookieOptions, sessionSecretConfigured } from '@/lib/session'
 
@@ -33,10 +30,12 @@ export async function GET(_req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const guard = await requireCustomer()
+    if (!guard.ok) return NextResponse.json({ success: false, message: 'Please log in to book a service.' }, { status: 401 })
+    const finalUserId = guard.session.userId
+
     const body = await req.json()
     const {
-      userId,
-      customer,          // { name, email, phone } — used when nobody is logged in
       vehicleId,
       newVehicleDetails,
       serviceMode,
@@ -51,51 +50,8 @@ export async function POST(req: NextRequest) {
 
     if (!vehicleId && !newVehicleDetails) return bad('Missing vehicle information')
 
-    // Resolve the customer: use the logged-in id when we have one, otherwise
-    // find them by email or create the account — same as the admin booking route.
-    let finalUserId = userId
-
-    if (finalUserId) {
-      const guard = await requireCustomer(finalUserId)
-      if (!guard.ok) return guard.response
-      finalUserId = guard.session.userId
-    }
-
-    // ---- 1. Check everything BEFORE writing anything --------------------------
-    // (The forms check these too; this is the real check, on the server.)
-    let guest: { email: string; firstName: string; lastName: string; nickname: string; phone: string; address: string | null } | null = null
-    if (!finalUserId) {
-      const email = String(customer?.email ?? '').trim().toLowerCase()
-      if (!EMAIL_RE.test(email)) return bad('Enter a valid email address.')
-      const firstName = String(customer?.firstName ?? '').trim()
-      const lastName = String(customer?.lastName ?? '').trim()
-      if (!firstName || firstName.length > 50) return bad('Enter your first name (up to 50 characters).')
-      if (!lastName || lastName.length > 50) return bad('Enter your last name (up to 50 characters).')
-      const phone = String(customer?.phone ?? '').replace(/[\s-]/g, '')
-      if (!PHONE_RE.test(phone)) return bad('Enter a valid mobile number, like 09171234567.')
-      const nickname = String(customer?.nickname ?? '').trim().slice(0, 50) || firstName
-      const address = customer?.address ? String(customer.address).trim().slice(0, 200) : null
-
-      const found = await db.query(`SELECT id FROM users WHERE LOWER(email) = $1`, [email])
-      if (found.rows.length > 0) {
-        return NextResponse.json(
-          { success: false, code: 'EMAIL_REGISTERED', message: 'This email already has an account. Please log in to book.' },
-          { status: 409 },
-        )
-      }
-
-      const foundEmp = await db.query(`SELECT id FROM employees WHERE LOWER(email) = $1`, [email])
-      if (foundEmp.rows.length > 0) {
-        return NextResponse.json(
-          { success: false, code: 'EMAIL_REGISTERED', message: 'This email belongs to a staff account. Please use a customer email.' },
-          { status: 409 },
-        )
-      }
-      guest = { email, firstName, lastName, nickname, phone, address }
-    }
-
     let finalVehicleId = vehicleId
-    if (finalUserId && finalVehicleId) {
+    if (finalVehicleId) {
       const ownVeh = await db.query(`SELECT 1 FROM vehicles WHERE id = $1 AND user_id = $2`, [finalVehicleId, finalUserId])
       if (ownVeh.rows.length === 0) {
         return NextResponse.json({ success: false, message: 'Forbidden: not your vehicle' }, { status: 403 })
@@ -142,33 +98,13 @@ export async function POST(req: NextRequest) {
     const mappedServiceMode = serviceMode === 'Home Service' ? 'home_service' : 'walk_in'
     const address = mappedServiceMode === 'home_service' ? (homeAddress || 'None') : 'None'
 
-    // Readable copy stays in tempPassword for the welcome email below;
-    // only the hash goes into the database. (Hashing is slow, so do it before
-    // opening the transaction.)
-    let tempPassword: string | null = null
-    let passwordHash: string | null = null
-    if (guest) {
-      tempPassword = `temp-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString().slice(-6)}`
-      passwordHash = await hashPassword(tempPassword)
-    }
-
     // ---- 2. Write everything in ONE transaction -------------------------------
-    // Account, vehicle, ticket and the scan consent are saved together or not
-    // at all, so a failure can never leave an account nobody was told about.
-    let accountEmailed = false
+    // Vehicle, ticket and the scan consent are saved together or not at all, so a
+    // failure can never leave a half-made booking.
     let ticket: any
     const client = await db.connect()
     try {
       await client.query('BEGIN')
-
-      if (guest) {
-        const created = await client.query(
-          `INSERT INTO users (first_name, last_name, nickname, contact_number, email, address, password, registration_date)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING id`,
-          [guest.firstName, guest.lastName, guest.nickname, guest.phone, guest.email, guest.address, passwordHash],
-        )
-        finalUserId = created.rows[0].id
-      }
 
       if (newVehicle) {
         const vehicleResult = await client.query(
@@ -221,33 +157,9 @@ export async function POST(req: NextRequest) {
       client.release()
     }
 
-    // New guest customer — email the temp password together with a booking copy.
-    // Only after the save went through.
-    if (tempPassword && guest) {
-      try {
-        await sendTempPasswordEmail({
-          to: guest.email,
-          name: guest.firstName,
-          tempPassword,
-          booking: {
-            reference: `AC-${ticket.id}-${new Date().getFullYear()}`,
-            vehicle: newVehicleDetails
-              ? `${newVehicleDetails.make || ''} ${newVehicleDetails.model || ''} ${newVehicleDetails.year || ''} — ${newVehicleDetails.plate || ''}`.trim()
-              : '—',
-            serviceMode: serviceMode || '—',
-            details: customerConcern || 'No specific concerns',
-          },
-        })
-        accountEmailed = true
-      } catch (mailErr) {
-        console.error('Temp password email failed:', mailErr)
-      }
-    }
-
     const res = NextResponse.json({
       success: true,
       ticket,
-      accountEmailed,
       userId: finalUserId,
     })
 

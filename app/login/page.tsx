@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import {
   Mail, Lock, Eye, EyeOff, ArrowRight, X, KeyRound,
   Loader2, AlertCircle,
@@ -206,6 +207,10 @@ function LoginPage() {
                 </>
               )}
             </form>
+
+            <div className="mt-4 text-center text-sm">
+              New here? <Link href="/signup" className="text-brand hover:underline font-medium">Create an account</Link>
+            </div>
 
             {demoAccounts.length > 0 && (
             <>
