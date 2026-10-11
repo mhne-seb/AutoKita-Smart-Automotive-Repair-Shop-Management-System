@@ -23,7 +23,7 @@ import { currency } from '@/data/mockData'
 import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, PartsPurchase, Supplier, ServiceFinding, PullOutRequest, partIsReady } from '@/data/types'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ShopLoading } from '@/components/ShopLoading'
-import { AutoScheduleModal } from '@/components/admin/AutoScheduleModal'
+import { ScheduleJobModal } from '@/components/admin/ScheduleJobModal'
 
 const sectionColors: Record<string, string> = {
   received: 'text-emerald-600',
@@ -167,7 +167,7 @@ export default function page() {
   }, [allTasks])
   const partsToBuy = allParts.filter((p) => p.status === 'to_order')
   const completedCount = serviceTasks.filter((t) => t.status === 'completed').length
-  const [showAutoScheduleModal, setShowAutoScheduleModal] = useState(false)
+  const [showScheduleJobModal, setShowScheduleJobModal] = useState(false)
   const hasUnscheduledTasks = useMemo(() => {
     return serviceTasks.some(
       (t) =>
@@ -438,11 +438,11 @@ export default function page() {
         {section.id === 'in-progress' && hasUnscheduledTasks && (
           <button
             type="button"
-            onClick={() => setShowAutoScheduleModal(true)}
-            title="Automatically suggest mechanic and time for pending tasks"
+            onClick={() => setShowScheduleJobModal(true)}
+            title="Choose a start, the mechanics and the times for the pending tasks"
             className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-indigo-700 active:translate-y-0"
           >
-            <CalendarDays size={13} /> Auto-schedule
+            <CalendarDays size={13} /> Schedule job
           </button>
         )}
       </div>
@@ -1495,12 +1495,12 @@ export default function page() {
           }}
         />
       )}
-      {showAutoScheduleModal && (
-        <AutoScheduleModal
+      {showScheduleJobModal && (
+        <ScheduleJobModal
           jobOrderId={jobOrderId}
-          onClose={() => setShowAutoScheduleModal(false)}
+          onClose={() => setShowScheduleJobModal(false)}
           onApplied={async () => {
-            setShowAutoScheduleModal(false)
+            setShowScheduleJobModal(false)
             await refreshTasks()
           }}
         />

@@ -8,6 +8,7 @@ import {
   suggestSchedule,
   normalizeShopHours,
   parseNaiveTimestamp,
+  formatNaiveIso,
   type Interval,
   type MechanicInput,
   type TaskInput,
@@ -34,7 +35,8 @@ export async function GET(
   try {
     // 1. Load job order
     const joResult = await db.query(
-      `SELECT id, status::text, date_arrived::text, assigned_mechanic_id, date_promised::text
+      `SELECT id, status::text, date_arrived::text, assigned_mechanic_id,
+              (date_promised AT TIME ZONE 'Asia/Manila')::text AS date_promised
        FROM job_orders
        WHERE id = $1`,
       [jobOrderId],
@@ -67,10 +69,11 @@ export async function GET(
       `SELECT 
          spt.id,
          spt.task_title,
-         COALESCE(jos.estimated_hours, $2)::numeric AS estimated_hours
+         COALESCE(jos.estimated_hours, $2)::numeric AS estimated_hours,
+         jos.service_type
        FROM service_progress_tasks spt
        LEFT JOIN LATERAL (
-         SELECT jos.estimated_hours
+         SELECT jos.estimated_hours, s.service_type::text AS service_type
          FROM services s
          JOIN job_order_services jos ON jos.service_id = s.id AND jos.job_order_id = spt.job_order_id
          WHERE s.service_name = spt.task_title
@@ -138,6 +141,10 @@ export async function GET(
         partExpected,
       }
     })
+
+    const serviceTypeByTaskId = new Map<number, string | null>(
+      tasksResult.rows.map((row: any) => [Number(row.id), row.service_type ?? null]),
+    )
 
     // 4. Load carBusy: other tasks of this car that are scheduled and not completed/cancelled
     const carBusyResult = await db.query(
@@ -246,6 +253,13 @@ export async function GET(
            AND (spt.scheduled_date IS NULL OR spt.mechanic_id IS NULL)
            AND spt.task_title != $3
            AND spt.task_title != $4
+           AND NOT EXISTS (
+             SELECT 1 FROM job_order_parts jp
+             JOIN job_order_services jos2 ON jos2.id = jp.job_order_service_id
+             JOIN services s2 ON s2.id = jos2.service_id
+             WHERE jp.job_order_id = jo.id AND s2.service_name = spt.task_title
+               AND jp.status::text IN ('to_order', 'ordered', 'in_transit')
+           )
          ORDER BY jo.date_arrived::text ASC
          LIMIT 5`,
         [
@@ -276,6 +290,34 @@ export async function GET(
         : null,
     })
 
+    const planning = {
+      nowIso: formatNaiveIso(now),
+      shopHours: shopHours as Record<string, string>,
+      preferredMechanicId: jobOrder.assigned_mechanic_id
+        ? Number(jobOrder.assigned_mechanic_id)
+        : null,
+      mechanics: mechanics.map((m) => ({
+        id: m.id,
+        name: m.name,
+        busy: m.busy.map((b) => ({
+          start: formatNaiveIso(b.start),
+          end: formatNaiveIso(b.end),
+        })),
+      })),
+      carBusy: carBusy.map((b) => ({
+        start: formatNaiveIso(b.start),
+        end: formatNaiveIso(b.end),
+      })),
+      tasks: tasks.map((t) => ({
+        id: t.id,
+        title: t.title,
+        hours: t.hours,
+        blockedBy: t.blockedBy,
+        partExpected: t.partExpected,
+        serviceType: serviceTypeByTaskId.get(t.id) ?? null,
+      })),
+    }
+
     return NextResponse.json({
       success: true,
       suggestions,
@@ -283,6 +325,7 @@ export async function GET(
       alreadyPromised: jobOrder.date_promised || null,
       earlier,
       nothingToSchedule: tasks.length === 0,
+      planning,
     })
   } catch (error) {
     console.error('Suggest schedule error:', error)

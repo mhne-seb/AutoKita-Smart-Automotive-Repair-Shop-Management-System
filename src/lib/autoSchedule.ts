@@ -29,6 +29,20 @@ export type Suggestion =
     }
   | { taskId: number; title: string; ok: false; reason: string }
 
+export type Placement =
+  | {
+      taskId: number
+      title: string
+      ok: true
+      mechanicId: number
+      mechanicName: string
+      start: string
+      end: string
+      hours: number
+      pinned: boolean
+    }
+  | { taskId: number; title: string; ok: false; reason: string }
+
 // Parse naive timestamp "YYYY-MM-DD HH:mm:ss" or "YYYY-MM-DDTHH:mm:00" into UTC milliseconds
 export function parseNaiveTimestamp(str: string): number {
   const m = str.trim().match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/)
@@ -61,10 +75,11 @@ function getUtcDayStart(ms: number): number {
 }
 
 // Round naive timestamp UP to next SLOT_STEP_MINUTES
-function roundUpToStep(ms: number): number {
+export function roundUpToStepMs(ms: number): number {
   const stepMs = SLOT_STEP_MINUTES * 60 * 1000
   return Math.ceil(ms / stepMs) * stepMs
 }
+const roundUpToStep = roundUpToStepMs
 
 // Ensure shop hours are a valid object; default open on Mon-Sat and closed on Sun
 export function normalizeShopHours(raw: unknown): ShopHours {
@@ -148,7 +163,7 @@ function computeWorkingEnd(startMs: number, hoursToAdd: number, shopHours: ShopH
 }
 
 // Find the earliest valid start and end time for a specific mechanic
-function findEarliestSlotForMechanic(
+export function findEarliestSlotForMechanic(
   earliestAllowed: number,
   taskHours: number,
   mechanicBusy: Interval[],
@@ -386,4 +401,232 @@ export function suggestSchedule(input: {
   const promisedDate = formatNaiveIso(promisedMs)
 
   return { suggestions, promisedDate }
+}
+
+export function layoutJob(input: {
+  now: number
+  start: number
+  hours: ShopHours
+  mechanics: MechanicInput[]
+  carBusy: Interval[]
+  tasks: TaskInput[]
+  assignments: Record<number, number | null>
+  pinned: Record<number, number>
+}): { placements: Placement[]; promisedDate: string | null } {
+  const mechanics = input.mechanics.map((m) => ({
+    id: m.id,
+    name: m.name,
+    busy: [...m.busy],
+  }))
+  const carBusy = [...input.carBusy]
+  const gapMs = TASK_GAP_MINUTES * 60 * 1000
+  const roundedNow = roundUpToStepMs(input.now)
+  const placements: Placement[] = []
+
+  for (const task of input.tasks) {
+    // 1. blockedBy is set
+    if (task.blockedBy) {
+      let reason = `Waiting for a part: ${task.blockedBy}.`
+      if (task.partExpected) {
+        const expectedMs = parseNaiveTimestamp(task.partExpected)
+        if (!Number.isNaN(expectedMs)) {
+          const expDate = new Date(expectedMs)
+          const monD = expDate.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            timeZone: 'UTC',
+          })
+          reason += ` Expected ${monD}.`
+        }
+      }
+      placements.push({
+        taskId: task.id,
+        title: task.title,
+        ok: false,
+        reason,
+      })
+      continue
+    }
+
+    // 2. No mechanic chosen, or chosen id not in mechanics
+    const chosenMechId = input.assignments[task.id]
+    const chosenMech =
+      chosenMechId != null ? mechanics.find((m) => m.id === chosenMechId) : null
+    if (!chosenMech) {
+      placements.push({
+        taskId: task.id,
+        title: task.title,
+        ok: false,
+        reason: 'Choose a mechanic.',
+      })
+      continue
+    }
+
+    // 3. Pinned: place exactly at that time
+    if (input.pinned[task.id] !== undefined) {
+      const pinMs = input.pinned[task.id]
+
+      if (pinMs < roundedNow) {
+        placements.push({
+          taskId: task.id,
+          title: task.title,
+          ok: false,
+          reason: 'That time has already passed.',
+        })
+        continue
+      }
+
+      const dayStart = getUtcDayStart(pinMs)
+      const weekday = new Date(pinMs).getUTCDay()
+      const dayHours = hoursForWeekday(input.hours, weekday)
+      if (!dayHours) {
+        placements.push({
+          taskId: task.id,
+          title: task.title,
+          ok: false,
+          reason: 'Outside shop hours.',
+        })
+        continue
+      }
+
+      const dayOpenMs = dayStart + Math.round(dayHours.open * 60) * 60 * 1000
+      const dayCloseMs = dayStart + Math.round(dayHours.close * 60) * 60 * 1000
+      if (pinMs < dayOpenMs || pinMs >= dayCloseMs) {
+        placements.push({
+          taskId: task.id,
+          title: task.title,
+          ok: false,
+          reason: 'Outside shop hours.',
+        })
+        continue
+      }
+
+      const { chunks, endMs } = getWorkingChunks(pinMs, task.hours, input.hours)
+
+      let mechConflict = false
+      for (const chunk of chunks) {
+        for (const b of chosenMech.busy) {
+          const bStart = b.start - gapMs
+          const bEnd = b.end + gapMs
+          if (Math.max(chunk.start, bStart) < Math.min(chunk.end, bEnd)) {
+            mechConflict = true
+            break
+          }
+        }
+        if (mechConflict) break
+      }
+      if (mechConflict) {
+        placements.push({
+          taskId: task.id,
+          title: task.title,
+          ok: false,
+          reason: `${chosenMech.name} is busy then.`,
+        })
+        continue
+      }
+
+      let carConflict = false
+      for (const chunk of chunks) {
+        for (const c of carBusy) {
+          const cStart = c.start - gapMs
+          const cEnd = c.end + gapMs
+          if (Math.max(chunk.start, cStart) < Math.min(chunk.end, cEnd)) {
+            carConflict = true
+            break
+          }
+        }
+        if (carConflict) break
+      }
+      if (carConflict) {
+        placements.push({
+          taskId: task.id,
+          title: task.title,
+          ok: false,
+          reason: 'This car is busy then.',
+        })
+        continue
+      }
+
+      const assignedInterval: Interval = { start: pinMs, end: endMs }
+      chosenMech.busy.push(assignedInterval)
+      carBusy.push(assignedInterval)
+
+      placements.push({
+        taskId: task.id,
+        title: task.title,
+        ok: true,
+        mechanicId: chosenMech.id,
+        mechanicName: chosenMech.name,
+        start: formatNaiveIso(pinMs),
+        end: formatNaiveIso(endMs),
+        hours: task.hours,
+        pinned: true,
+      })
+      continue
+    }
+
+    // 4. Not pinned: earliest allowed = max(roundUp(max(now, start)), latest end of carBusy + gap)
+    const baseStart = roundUpToStepMs(Math.max(input.now, input.start))
+    const carLatestEnd =
+      carBusy.length > 0 ? Math.max(...carBusy.map((b) => b.end)) + gapMs : 0
+    const earliestAllowed = Math.max(baseStart, carLatestEnd)
+
+    const slot = findEarliestSlotForMechanic(
+      earliestAllowed,
+      task.hours,
+      chosenMech.busy,
+      carBusy,
+      input.hours,
+    )
+
+    if (!slot) {
+      placements.push({
+        taskId: task.id,
+        title: task.title,
+        ok: false,
+        reason: 'No time found.',
+      })
+      continue
+    }
+
+    // 5. On success add the interval to that mechanic's busy list and to carBusy
+    const assignedInterval: Interval = { start: slot.start, end: slot.end }
+    chosenMech.busy.push(assignedInterval)
+    carBusy.push(assignedInterval)
+
+    placements.push({
+      taskId: task.id,
+      title: task.title,
+      ok: true,
+      mechanicId: chosenMech.id,
+      mechanicName: chosenMech.name,
+      start: formatNaiveIso(slot.start),
+      end: formatNaiveIso(slot.end),
+      hours: task.hours,
+      pinned: false,
+    })
+  }
+
+  // promisedDate: null unless EVERY task is ok
+  const hasFailedTask = placements.some((p) => !p.ok)
+  if (hasFailedTask || input.tasks.length === 0) {
+    return { placements, promisedDate: null }
+  }
+
+  const okPlacements = placements.filter(
+    (p): p is Extract<Placement, { ok: true }> => p.ok,
+  )
+  const totalHours = okPlacements.reduce((sum, p) => sum + p.hours, 0)
+  const marginHours = withMargin(totalHours) - totalHours
+
+  const allEnds = [
+    ...okPlacements.map((p) => parseNaiveTimestamp(p.end)),
+    ...input.carBusy.map((b) => b.end),
+  ]
+  const latestEndMs = Math.max(...allEnds)
+
+  const promisedMs = computeWorkingEnd(latestEndMs, marginHours, input.hours)
+  const promisedDate = formatNaiveIso(promisedMs)
+
+  return { placements, promisedDate }
 }

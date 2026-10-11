@@ -36,9 +36,9 @@ export async function PATCH(
   try {
     const updateRes = await db.query(
       `UPDATE job_orders
-       SET date_promised = $1::timestamp
+       SET date_promised = ($1::timestamp AT TIME ZONE 'Asia/Manila')
        WHERE id = $2 AND date_promised IS NULL
-       RETURNING date_promised::text`,
+       RETURNING (date_promised AT TIME ZONE 'Asia/Manila')::text AS date_promised`,
       [promisedDate, jobOrderId],
     )
 
@@ -51,7 +51,7 @@ export async function PATCH(
     } else {
       changed = false
       const existingRes = await db.query(
-        `SELECT date_promised::text FROM job_orders WHERE id = $1`,
+        `SELECT (date_promised AT TIME ZONE 'Asia/Manila')::text AS date_promised FROM job_orders WHERE id = $1`,
         [jobOrderId],
       )
       if (existingRes.rows.length === 0) {
