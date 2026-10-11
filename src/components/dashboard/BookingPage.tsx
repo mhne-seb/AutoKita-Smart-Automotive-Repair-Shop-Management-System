@@ -17,11 +17,11 @@ import {
   Car,
   Calendar,
   Clock,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceModal";
 import { bookingNeedsScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
-import { buildCategoryLabel } from "@/lib/bookingServices";
 import { formatStamp, cn } from "@/lib/utils";
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from "@/lib/plate";
 import { TimeslotPicker } from "@/components/TimeslotPicker";
@@ -44,6 +44,29 @@ function toDateValue(d: Date) {
 function formatHours(h: number): string {
   return Number(h.toFixed(1)).toString()
 }
+
+// One service's time, exact: "45 min", "1 h", "3 h 45 min". (One decimal of an hour
+// would show 0.75 h as "0.8 h".)
+function formatDuration(h: number): string {
+  const totalMinutes = Math.round(h * 60)
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  if (hours === 0) return `${minutes} min`
+  return minutes === 0 ? `${hours} h` : `${hours} h ${minutes} min`
+}
+
+// Many services carry a placeholder description that only repeats the name
+// ("Standard automotive service: Change Oil"). Show a description only when it adds something.
+function usefulDescription(name: string, description: string | null): string | null {
+  const text = (description ?? '').trim()
+  if (!text) return null
+  const lower = text.toLowerCase()
+  if (lower === name.trim().toLowerCase() || lower.startsWith('standard automotive service')) return null
+  return text
+}
+
+// A long list shows this many first; the rest is behind "Show all".
+const SERVICES_SHOWN_FIRST = 8
 
 function formatDecimalTime(dec: number): string {
   const totalMinutes = Math.round(dec * 60)
@@ -109,9 +132,8 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
   const [shopHours, setShopHours] = useState<ShopHours>(null);
   const [optionsError, setOptionsError] = useState(false);
 
-  // Three independent cards under "What do you need?"
-  const [needMaintenance, setNeedMaintenance] = useState(false);
-  const [needRepair, setNeedRepair] = useState(false);
+  // Section 2: Category panels
+  const [openCategory, setOpenCategory] = useState<"maintenance" | "repair" | "diagnostics" | null>(null);
   const [notSure, setNotSure] = useState(false);
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -122,6 +144,14 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
   const [notes, setNotes] = useState("");
   const [scanAcknowledged, setScanAcknowledged] = useState(false);
   const [overnightOk, setOvernightOk] = useState(false);
+
+  const handleOpenCategory = (cat: "maintenance" | "repair" | "diagnostics" | null) => {
+    if (cat !== null) {
+      setMaintenanceSearch("");
+      setRepairSearch("");
+    }
+    setOpenCategory(cat);
+  };
 
   const loadOptions = () => {
     setOptionsError(false);
@@ -182,6 +212,12 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
       ? candidatePackage
       : null;
 
+  const packageIds = new Set(activePackage ? activePackage.serviceIds : []);
+  const packageTicked = selectedServices.filter((s) => packageIds.has(s.id));
+  const otherMaintenance = selectedServices.filter((s) => !packageIds.has(s.id) && s.type === "maintenance");
+  const otherRepair = selectedServices.filter((s) => !packageIds.has(s.id) && s.type === "repair");
+  const otherDiagnostics = selectedServices.filter((s) => !packageIds.has(s.id) && s.type === "diagnostics");
+
   const needsScan = bookingNeedsScan(notSure, selectedServices.map((s) => s.name));
 
   useEffect(() => {
@@ -232,6 +268,23 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
     }
   }, [noticeShowing]);
 
+  // Step progress completion
+  const vehicleOk =
+    (selectedVehicleId !== "" && selectedVehicleId !== "new") ||
+    (selectedVehicleId === "new" && vehicleModel.trim() !== "" && isValidPlateNumber(normalizePlateNumber(vehiclePlate)));
+
+  const servicesOk =
+    (notSure || selectedIds.length > 0 || notes.trim().length >= 5) &&
+    (!needsScan || scanAcknowledged);
+
+  const dateOk =
+    Boolean(preferredDate && preferredTime) &&
+    (pickup !== "home" || Boolean(user?.address) || homeAddress.trim() !== "") &&
+    (!noticeShowing || overnightOk);
+
+  const stepDone = [vehicleOk, vehicleOk && servicesOk, vehicleOk && servicesOk && dateOk];
+  const currentStep = stepDone.indexOf(false);
+
   const togglePackage = (pkg: PackageOption) => {
     if (packageId === pkg.id) {
       // Turn off
@@ -250,9 +303,14 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
   };
 
   const toggleService = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+    const next = selectedIds.includes(id) ? selectedIds.filter((item) => item !== id) : [...selectedIds, id];
+    setSelectedIds(next);
+    // Unticking the last service of the chosen package turns the package off, so its card
+    // does not stay "chosen" with every box empty.
+    const chosen = options?.packages.find((p) => p.id === packageId);
+    if (chosen && !chosen.serviceIds.some((serviceId) => next.includes(serviceId))) {
+      setPackageId(null);
+    }
     if (fieldErrors.service) setFieldErrors((p) => ({ ...p, service: "" }));
   };
 
@@ -297,7 +355,7 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
     if (!notSure && selectedIds.length === 0 && noteText.length < 5) {
       errs.service = optionsError
         ? "Describe what you need in the notes box."
-        : "Pick at least one service, choose \"Not sure\", or describe the problem in the notes.";
+        : "Add at least one service, or describe the problem in the notes.";
     }
 
     if (pickup === "home" && !user?.address && !homeAddress.trim()) {
@@ -306,6 +364,7 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
 
     if (needsScan && !scanAcknowledged) {
       toast.error("Please agree to the diagnostic scan fee to continue.");
+      document.getElementById("book-step-services")?.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
 
@@ -316,6 +375,14 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
     if (Object.keys(errs).length > 0) {
       setFieldErrors(errs);
       toast.error("Please check the form for errors.");
+
+      if (errs.selectedVehicleId || errs.vehicleModel || errs.vehiclePlate || errs.vehicleMake || errs.vehicleMileage) {
+        document.getElementById("book-step-vehicle")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if (errs.service) {
+        document.getElementById("book-step-services")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if (errs.homeAddress || errs.overnight) {
+        document.getElementById("book-step-date")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
       return;
     }
 
@@ -398,23 +465,31 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
   const userContact = user?.contact_number || "—";
   const userEmail = user?.email || "—";
 
-  const allPackageServiceIds = new Set(options?.packages.flatMap((p) => p.serviceIds) || []);
-  const maintenanceServices = options
-    ? options.services.filter((s) => s.type === "maintenance" || allPackageServiceIds.has(s.id))
-    : [];
-  const repairServices = options ? options.services.filter((s) => s.type === "repair") : [];
-  const diagnosticServices = options ? options.services.filter((s) => s.type === "diagnostics") : [];
-
-  const tickedMaintenance = selectedServices.filter((s) => s.type === "maintenance");
-  const tickedRepair = selectedServices.filter((s) => s.type === "repair");
-  const tickedDiagnostics = selectedServices.filter((s) => s.type === "diagnostics");
-
   const totalHoursEstimate =
     selectedServices.length > 0 && knownHours > 0
       ? hasUnknownHour
         ? `At least ${formatHours(knownHours)} hours`
         : `About ${formatHours(knownHours)} hours in total`
       : null;
+
+  // Counts & hours for "What has been added"
+  const maintCount = packageTicked.length + otherMaintenance.length;
+  const maintAll = [...packageTicked, ...otherMaintenance];
+  const maintAllKnown = maintAll.length > 0 && maintAll.every((s) => s.baseDurationHours != null && s.baseDurationHours > 0);
+  const maintHours = maintAllKnown ? maintAll.reduce((sum, s) => sum + (s.baseDurationHours || 0), 0) : 0;
+  const maintText = `${activePackage ? `${activePackage.name}, ` : ""}${maintCount === 1 ? "1 item" : `${maintCount} items`}${maintHours > 0 ? `, about ${formatDuration(maintHours)}` : ""}`;
+
+  const repairCount = otherRepair.length;
+  const repairAllKnown = repairCount > 0 && otherRepair.every((s) => s.baseDurationHours != null && s.baseDurationHours > 0);
+  const repairHours = repairAllKnown ? otherRepair.reduce((sum, s) => sum + (s.baseDurationHours || 0), 0) : 0;
+  const repairText = `${repairCount === 1 ? "1 item" : `${repairCount} items`}${repairHours > 0 ? `, about ${formatDuration(repairHours)}` : ""}`;
+
+  const diagCount = otherDiagnostics.length + (notSure ? 1 : 0);
+  const diagAllKnown = !notSure && otherDiagnostics.length > 0 && otherDiagnostics.every((s) => s.baseDurationHours != null && s.baseDurationHours > 0);
+  const diagHours = diagAllKnown ? otherDiagnostics.reduce((sum, s) => sum + (s.baseDurationHours || 0), 0) : 0;
+  const diagText = `${diagCount === 1 ? "1 item" : `${diagCount} items`}${diagHours > 0 ? `, about ${formatDuration(diagHours)}` : ""}`;
+
+  const hasAnyAdded = maintCount > 0 || repairCount > 0 || diagCount > 0;
 
   if (loading) {
     return (
@@ -443,13 +518,40 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
             </div>
             <div>
               <span className="text-[10px] font-semibold uppercase text-muted-foreground">Services</span>
-              <div className="mt-1 space-y-1">
-                {selectedServices.map((s) => (
-                  <p key={s.id} className="text-xs text-foreground">
-                    • {s.name}
-                  </p>
-                ))}
-                {notSure && <p className="text-xs text-foreground">• Check my car</p>}
+              <div className="mt-2 space-y-2">
+                {packageTicked.length > 0 && activePackage && (
+                  <div>
+                    <p className="text-[11px] font-semibold text-muted-foreground">{activePackage.name}</p>
+                    {packageTicked.map((s) => (
+                      <p key={s.id} className="text-xs text-foreground">• {s.name}</p>
+                    ))}
+                  </div>
+                )}
+                {otherMaintenance.length > 0 && (
+                  <div>
+                    <p className="text-[11px] font-semibold text-muted-foreground">Maintenance</p>
+                    {otherMaintenance.map((s) => (
+                      <p key={s.id} className="text-xs text-foreground">• {s.name}</p>
+                    ))}
+                  </div>
+                )}
+                {otherRepair.length > 0 && (
+                  <div>
+                    <p className="text-[11px] font-semibold text-muted-foreground">Repair</p>
+                    {otherRepair.map((s) => (
+                      <p key={s.id} className="text-xs text-foreground">• {s.name}</p>
+                    ))}
+                  </div>
+                )}
+                {(otherDiagnostics.length > 0 || notSure) && (
+                  <div>
+                    <p className="text-[11px] font-semibold text-muted-foreground">Diagnostics</p>
+                    {otherDiagnostics.map((s) => (
+                      <p key={s.id} className="text-xs text-foreground">• {s.name}</p>
+                    ))}
+                    {notSure && <p className="text-xs text-foreground">• Check my car</p>}
+                  </div>
+                )}
               </div>
             </div>
             <div>
@@ -471,14 +573,14 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
             <button
               type="button"
               onClick={() => router.push('/dashboard')}
-              className="flex-1 rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 transition-opacity"
+              className="flex-1 rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 transition-opacity cursor-pointer"
             >
               Track this booking
             </button>
             <button
               type="button"
               onClick={() => router.push('/dashboard/vehicles')}
-              className="flex-1 rounded-md border px-4 py-2.5 text-sm font-medium hover:bg-accent transition-colors"
+              className="flex-1 rounded-md border px-4 py-2.5 text-sm font-medium hover:bg-accent transition-colors cursor-pointer"
             >
               Back to My Vehicles
             </button>
@@ -489,7 +591,7 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto max-w-7xl px-6 py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Book a service</h1>
         <p className="text-sm text-muted-foreground">
@@ -497,7 +599,9 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+      <BookingSteps stepDone={stepDone} currentStep={currentStep} />
+
+      <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)] xl:grid-cols-[400px_minmax(0,1fr)]">
         {/* Left Column: Booking Summary */}
         <aside className="order-2 lg:order-1 space-y-4 lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-xl border bg-card p-5 shadow-sm">
@@ -509,110 +613,64 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
             <div className="mt-4 space-y-3 text-sm">
               <BookSumRow label="Vehicle" value={displayVehicle} />
 
-              {activePackage && (
-                <BookSumRow
-                  label="Package"
-                  value={buildCategoryLabel({
-                    packageName: activePackage.name,
-                    packageServiceNames: options?.services
-                      .filter((s) => activePackage.serviceIds.includes(s.id))
-                      .map((s) => s.name) ?? [],
-                    selectedNames: selectedServices.map((s) => s.name),
-                    notSure: false,
-                  })}
-                />
-              )}
-
               {/* Grouped Services */}
-              {tickedMaintenance.length > 0 && (
-                <div className="space-y-1.5 border-b pb-2.5">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Maintenance
-                  </p>
-                  {tickedMaintenance.map((s) => (
-                    <div key={s.id} className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-foreground">{s.name}</span>
-                      <div className="flex items-center gap-1.5">
-                        {s.baseDurationHours != null && s.baseDurationHours > 0 && (
-                          <span className="text-[11px] text-muted-foreground">{s.baseDurationHours} h</span>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => toggleService(s.id)}
-                          className="text-muted-foreground hover:text-foreground p-0.5"
-                          aria-label={`Remove ${s.name}`}
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                    </div>
+              {packageTicked.length > 0 && activePackage && (
+                <SummaryGroup title={activePackage.name}>
+                  {packageTicked.map((s) => (
+                    <SummaryServiceRow
+                      key={s.id}
+                      name={s.name}
+                      hours={s.baseDurationHours}
+                      onRemove={() => toggleService(s.id)}
+                    />
                   ))}
-                </div>
+                </SummaryGroup>
               )}
 
-              {tickedRepair.length > 0 && (
-                <div className="space-y-1.5 border-b pb-2.5">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Repair
-                  </p>
-                  {tickedRepair.map((s) => (
-                    <div key={s.id} className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-foreground">{s.name}</span>
-                      <div className="flex items-center gap-1.5">
-                        {s.baseDurationHours != null && s.baseDurationHours > 0 && (
-                          <span className="text-[11px] text-muted-foreground">{s.baseDurationHours} h</span>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => toggleService(s.id)}
-                          className="text-muted-foreground hover:text-foreground p-0.5"
-                          aria-label={`Remove ${s.name}`}
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                    </div>
+              {otherMaintenance.length > 0 && (
+                <SummaryGroup title="Maintenance">
+                  {otherMaintenance.map((s) => (
+                    <SummaryServiceRow
+                      key={s.id}
+                      name={s.name}
+                      hours={s.baseDurationHours}
+                      onRemove={() => toggleService(s.id)}
+                    />
                   ))}
-                </div>
+                </SummaryGroup>
               )}
 
-              {(tickedDiagnostics.length > 0 || notSure) && (
-                <div className="space-y-1.5 border-b pb-2.5">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Diagnostics
-                  </p>
-                  {tickedDiagnostics.map((s) => (
-                    <div key={s.id} className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-foreground">{s.name}</span>
-                      <div className="flex items-center gap-1.5">
-                        {s.baseDurationHours != null && s.baseDurationHours > 0 && (
-                          <span className="text-[11px] text-muted-foreground">{s.baseDurationHours} h</span>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => toggleService(s.id)}
-                          className="text-muted-foreground hover:text-foreground p-0.5"
-                          aria-label={`Remove ${s.name}`}
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                    </div>
+              {otherRepair.length > 0 && (
+                <SummaryGroup title="Repair">
+                  {otherRepair.map((s) => (
+                    <SummaryServiceRow
+                      key={s.id}
+                      name={s.name}
+                      hours={s.baseDurationHours}
+                      onRemove={() => toggleService(s.id)}
+                    />
+                  ))}
+                </SummaryGroup>
+              )}
+
+              {(otherDiagnostics.length > 0 || notSure) && (
+                <SummaryGroup title="Diagnostics">
+                  {otherDiagnostics.map((s) => (
+                    <SummaryServiceRow
+                      key={s.id}
+                      name={s.name}
+                      hours={s.baseDurationHours}
+                      onRemove={() => toggleService(s.id)}
+                    />
                   ))}
                   {notSure && (
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-foreground">Check my car</span>
-                      <button
-                        type="button"
-                        onClick={() => setNotSure(false)}
-                        className="text-muted-foreground hover:text-foreground p-0.5"
-                        aria-label="Remove Check my car"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
+                    <SummaryServiceRow
+                      name="Check my car"
+                      hours={null}
+                      onRemove={() => setNotSure(false)}
+                    />
                   )}
-                </div>
+                </SummaryGroup>
               )}
 
               {totalHoursEstimate && (
@@ -648,7 +706,7 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
                   type="button"
                   onClick={handleConfirm}
                   disabled={isSubmitting}
-                  className="w-full rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  className="w-full rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-50 transition-opacity cursor-pointer"
                 >
                   {isSubmitting ? "Confirming..." : "Confirm booking"}
                 </button>
@@ -659,578 +717,583 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
 
         {/* Right Column: The Form */}
         <div className="order-1 lg:order-2 space-y-5 min-w-0">
-          {/* 1. Vehicle */}
-          <BookModalCard icon={Car} title="Vehicle" subtitle="Select an existing vehicle or register a new one.">
-            <div className="mb-4">
-              <label className="text-[10px] font-semibold uppercase text-muted-foreground">Select Vehicle</label>
-              <select
-                value={selectedVehicleId}
-                onChange={(e) => {
-                  setSelectedVehicleId(e.target.value);
-                  if (fieldErrors.selectedVehicleId) setFieldErrors((p) => ({ ...p, selectedVehicleId: "" }));
-                }}
-                className={cn(
-                  "mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground focus:outline-none transition-colors",
-                  fieldErrors.selectedVehicleId
-                    ? "border-rose-500 focus:border-rose-500 ring-1 ring-rose-500"
-                    : "border-input focus:border-brand"
-                )}
-              >
-                <option value="" disabled>Select a vehicle...</option>
-                {vehicles.map((v) => {
-                  const isActive = !!v.in_service;
-                  return (
-                    <option key={v.id} value={v.id.toString()} disabled={isActive}>
-                      {v.vehicle_model} ({v.plate_number}) {isActive ? " - Currently in Job Order" : ""}
-                    </option>
-                  );
-                })}
-                <option value="new">+ Register New Vehicle</option>
-              </select>
-              {fieldErrors.selectedVehicleId ? (
-                <p className="mt-1 text-xs text-rose-500 font-medium">{fieldErrors.selectedVehicleId}</p>
-              ) : selectedVehicleId === "" ? (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Choose one of your saved vehicles, or register a new one.
-                </p>
-              ) : null}
-            </div>
-
-            {selectedVehicleId === "new" && (
-              <>
-                <div className="mb-4 h-px bg-border" />
-                <div className="grid gap-3 md:grid-cols-2">
-                  <BookModalSelect
-                    label="Vehicle Make (Brand)"
-                    placeholder="Select Brand"
-                    value={vehicleMake}
-                    onChange={(e) => {
-                      setVehicleMake(e.target.value);
-                      if (fieldErrors.vehicleMake) setFieldErrors((p) => ({ ...p, vehicleMake: "" }));
-                    }}
-                    options={BOOK_VEHICLE_MAKES}
-                    error={fieldErrors.vehicleMake}
-                  />
-                  <BookModalInput
-                    label="Vehicle Model"
-                    placeholder="e.g., Vios, Civic, Montero"
-                    value={vehicleModel}
-                    onChange={(e) => {
-                      setVehicleModel(e.target.value);
-                      if (fieldErrors.vehicleModel) setFieldErrors((p) => ({ ...p, vehicleModel: "" }));
-                    }}
-                    error={fieldErrors.vehicleModel}
-                  />
-                  <BookModalSelect
-                    label="Year"
-                    placeholder="Select Year"
-                    value={vehicleYear}
-                    onChange={(e) => setVehicleYear(e.target.value)}
-                    options={BOOK_YEARS}
-                  />
-                  <BookModalSelect
-                    label="Transmission"
-                    placeholder="Select Transmission"
-                    value={vehicleTransmission}
-                    onChange={(e) => setVehicleTransmission(e.target.value)}
-                    options={["Automatic", "Manual"]}
-                  />
-                  <BookModalInput
-                    label="Mileage"
-                    placeholder="e.g., 50000"
-                    type="number"
-                    value={vehicleMileage}
-                    onChange={(e) => {
-                      setVehicleMileage(e.target.value);
-                      if (fieldErrors.vehicleMileage) setFieldErrors((p) => ({ ...p, vehicleMileage: "" }));
-                    }}
-                    error={fieldErrors.vehicleMileage}
-                  />
-                  <BookModalInput
-                    label="License Plate"
-                    placeholder="e.g., ABC-1234"
-                    wide
-                    value={vehiclePlate}
-                    onChange={(e) => {
-                      setVehiclePlate(e.target.value);
-                      if (fieldErrors.vehiclePlate) setFieldErrors((p) => ({ ...p, vehiclePlate: "" }));
-                    }}
-                    error={fieldErrors.vehiclePlate}
-                  />
-                </div>
-              </>
-            )}
-          </BookModalCard>
-
-          {/* 2. What do you need? */}
-          <BookModalCard
-            icon={ClipboardCheck}
-            title="What do you need?"
-            subtitle="Pick what applies. The shop confirms the final list and time."
-          >
-            {fieldErrors.service && (
-              <p className="mb-4 text-xs font-medium text-rose-500">{fieldErrors.service}</p>
-            )}
-
-            {/* Three cards with tick boxes */}
-            <div className="grid gap-3 sm:grid-cols-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setNeedMaintenance((p) => !p);
-                  if (fieldErrors.service) setFieldErrors((p) => ({ ...p, service: "" }));
-                }}
-                className={cn(
-                  "flex items-start gap-3 rounded-lg border p-3.5 text-left transition",
-                  needMaintenance ? "border-brand bg-brand-soft/40" : "hover:bg-accent border-border"
-                )}
-              >
-                <span
+          {/* 1. Pick a vehicle */}
+          <div id="book-step-vehicle" className="scroll-mt-24">
+            <BookModalCard icon={Car} title="1. Pick a vehicle" subtitle="Select an existing vehicle or register a new one.">
+              <div className="mb-4">
+                <label className="text-[10px] font-semibold uppercase text-muted-foreground">Select Vehicle</label>
+                <select
+                  value={selectedVehicleId}
+                  onChange={(e) => {
+                    setSelectedVehicleId(e.target.value);
+                    if (fieldErrors.selectedVehicleId) setFieldErrors((p) => ({ ...p, selectedVehicleId: "" }));
+                  }}
                   className={cn(
-                    "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors",
-                    needMaintenance ? "border-brand bg-brand text-brand-foreground" : "border-muted-foreground"
+                    "mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground focus:outline-none transition-colors",
+                    fieldErrors.selectedVehicleId
+                      ? "border-rose-500 focus:border-rose-500 ring-1 ring-rose-500"
+                      : "border-input focus:border-brand"
                   )}
                 >
-                  {needMaintenance && <Check className="h-3 w-3 stroke-[3]" />}
-                </span>
-                <div>
-                  <p className="font-semibold text-sm text-foreground">Regular maintenance</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Nothing is broken. It is time for service.</p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setNeedRepair((p) => !p);
-                  if (fieldErrors.service) setFieldErrors((p) => ({ ...p, service: "" }));
-                }}
-                className={cn(
-                  "flex items-start gap-3 rounded-lg border p-3.5 text-left transition",
-                  needRepair ? "border-brand bg-brand-soft/40" : "hover:bg-accent border-border"
-                )}
-              >
-                <span
-                  className={cn(
-                    "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors",
-                    needRepair ? "border-brand bg-brand text-brand-foreground" : "border-muted-foreground"
-                  )}
-                >
-                  {needRepair && <Check className="h-3 w-3 stroke-[3]" />}
-                </span>
-                <div>
-                  <p className="font-semibold text-sm text-foreground">Something is wrong</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">A noise, leak, warning light or worn part.</p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setNotSure((p) => !p);
-                  if (fieldErrors.service) setFieldErrors((p) => ({ ...p, service: "" }));
-                }}
-                className={cn(
-                  "flex items-start gap-3 rounded-lg border p-3.5 text-left transition",
-                  notSure ? "border-brand bg-brand-soft/40" : "hover:bg-accent border-border"
-                )}
-              >
-                <span
-                  className={cn(
-                    "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors",
-                    notSure ? "border-brand bg-brand text-brand-foreground" : "border-muted-foreground"
-                  )}
-                >
-                  {notSure && <Check className="h-3 w-3 stroke-[3]" />}
-                </span>
-                <div>
-                  <p className="font-semibold text-sm text-foreground">Not sure</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">We will check your car and tell you what it needs.</p>
-                </div>
-              </button>
-            </div>
-
-            {!options && !optionsError && (
-              <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                <span>Loading services...</span>
+                  <option value="" disabled>Select a vehicle...</option>
+                  {vehicles.map((v) => {
+                    const isActive = !!v.in_service;
+                    return (
+                      <option key={v.id} value={v.id.toString()} disabled={isActive}>
+                        {v.vehicle_model} ({v.plate_number}) {isActive ? " - Currently in Job Order" : ""}
+                      </option>
+                    );
+                  })}
+                  <option value="new">+ Register New Vehicle</option>
+                </select>
+                {fieldErrors.selectedVehicleId ? (
+                  <p className="mt-1 text-xs text-rose-500 font-medium">{fieldErrors.selectedVehicleId}</p>
+                ) : selectedVehicleId === "" ? (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Choose one of your saved vehicles, or register a new one.
+                  </p>
+                ) : null}
               </div>
-            )}
 
-            {optionsError && (
-              <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50/50 p-3 text-xs text-rose-950 dark:bg-rose-950/20 dark:text-rose-200">
-                <div className="flex items-center justify-between">
-                  <span>We couldn&apos;t load the service list.</span>
-                  <button
-                    type="button"
-                    onClick={loadOptions}
-                    className="inline-flex items-center gap-1 font-semibold text-brand hover:underline"
-                  >
-                    <RefreshCw className="h-3 w-3" /> Try again
-                  </button>
-                </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  You can also describe what you need in the notes box.
-                </p>
-              </div>
-            )}
-
-            {/* Stacked sections in order: maintenance, repair, not sure */}
-            {options && needMaintenance && (
-              <div className="mt-5 space-y-5 rounded-xl border border-border/70 bg-muted/10 p-4">
-                {options.packages.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold">Maintenance packages</h4>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      Choose one. It ticks its services below, and you can untick what you do not need.
-                    </p>
-                    <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                      {options.packages.map((pkg) => {
-                        const isChosen = packageId === pkg.id;
-                        const intervalParts: string[] = [];
-                        if (pkg.intervalKm) intervalParts.push(`${pkg.intervalKm.toLocaleString("en-PH")} km`);
-                        if (pkg.intervalMonths) intervalParts.push(`${pkg.intervalMonths} months`);
-                        const intervalText = intervalParts.length > 0 ? `Every ${intervalParts.join(" or ")}` : null;
-
-                        const pkgServices = options.services.filter((s) => pkg.serviceIds.includes(s.id));
-                        const allKnown = pkgServices.every((s) => s.baseDurationHours != null && s.baseDurationHours > 0);
-                        const totalPkgHours = pkgServices.reduce((sum, s) => sum + (s.baseDurationHours || 0), 0);
-                        const durationText = allKnown
-                          ? `${pkg.serviceIds.length} services, about ${formatHours(totalPkgHours)} hours`
-                          : `${pkg.serviceIds.length} services`;
-
-                        return (
-                          <button
-                            key={pkg.id}
-                            type="button"
-                            onClick={() => togglePackage(pkg)}
-                            className={cn(
-                              "flex flex-col justify-between rounded-lg border p-3.5 text-left transition",
-                              isChosen
-                                ? "border-brand bg-brand-soft/40 ring-1 ring-brand"
-                                : "border-border hover:bg-accent"
-                            )}
-                          >
-                            <div>
-                              <div className="flex items-start justify-between gap-2">
-                                <h5 className="font-semibold text-sm text-foreground">{pkg.name}</h5>
-                                <span
-                                  className={cn(
-                                    "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2",
-                                    isChosen ? "border-brand" : "border-muted-foreground"
-                                  )}
-                                >
-                                  {isChosen && <span className="h-2 w-2 rounded-full bg-brand" />}
-                                </span>
-                              </div>
-                              {pkg.description && (
-                                <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
-                                  {pkg.description}
-                                </p>
-                              )}
-                            </div>
-                            <div className="mt-3 text-[11px] text-muted-foreground space-y-0.5">
-                              {intervalText && <p>{intervalText}</p>}
-                              <p>{durationText}</p>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                <div>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <h4 className="text-sm font-semibold">Maintenance services</h4>
-                    <div className="relative w-full sm:w-64">
-                      <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                      <input
-                        type="text"
-                        placeholder="Search services"
-                        value={maintenanceSearch}
-                        onChange={(e) => setMaintenanceSearch(e.target.value)}
-                        className="w-full rounded-md border bg-background py-1.5 pl-8 pr-3 text-xs focus:border-brand focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-2.5 divide-y rounded-md border bg-background">
-                    {maintenanceServices
-                      .filter((s) => s.name.toLowerCase().includes(maintenanceSearch.trim().toLowerCase()))
-                      .map((s) => {
-                        const checked = selectedIds.includes(s.id);
-                        return (
-                          <label
-                            key={s.id}
-                            className={cn(
-                              "flex cursor-pointer items-start justify-between gap-3 p-3 transition hover:bg-muted/30",
-                              checked && "bg-brand-soft/20"
-                            )}
-                          >
-                            <div className="flex items-start gap-3">
-                              <input
-                                type="checkbox"
-                                checked={checked}
-                                onChange={() => toggleService(s.id)}
-                                className="mt-0.5 h-4 w-4 rounded border-input accent-brand"
-                              />
-                              <div>
-                                <span className="text-sm font-medium leading-snug">{s.name}</span>
-                                {s.description && (
-                                  <p className="mt-0.5 text-xs text-muted-foreground">{s.description}</p>
-                                )}
-                              </div>
-                            </div>
-                            {s.baseDurationHours != null && s.baseDurationHours > 0 && (
-                              <span className="text-xs text-muted-foreground whitespace-nowrap pt-0.5">
-                                {formatHours(s.baseDurationHours)} h
-                              </span>
-                            )}
-                          </label>
-                        );
-                      })}
-                    {maintenanceServices.filter((s) =>
-                      s.name.toLowerCase().includes(maintenanceSearch.trim().toLowerCase())
-                    ).length === 0 && (
-                      <p className="p-4 text-center text-xs text-muted-foreground">
-                        No services match your search.
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {options && needRepair && (
-              <div className="mt-5 space-y-4 rounded-xl border border-border/70 bg-muted/10 p-4">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <h4 className="text-sm font-semibold">Repair services</h4>
-                  <div className="relative w-full sm:w-64">
-                    <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                    <input
-                      type="text"
-                      placeholder="Search services"
-                      value={repairSearch}
-                      onChange={(e) => setRepairSearch(e.target.value)}
-                      className="w-full rounded-md border bg-background py-1.5 pl-8 pr-3 text-xs focus:border-brand focus:outline-none"
+              {selectedVehicleId === "new" && (
+                <>
+                  <div className="mb-4 h-px bg-border" />
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <BookModalSelect
+                      label="Vehicle Make (Brand)"
+                      placeholder="Select Brand"
+                      value={vehicleMake}
+                      onChange={(e) => {
+                        setVehicleMake(e.target.value);
+                        if (fieldErrors.vehicleMake) setFieldErrors((p) => ({ ...p, vehicleMake: "" }));
+                      }}
+                      options={BOOK_VEHICLE_MAKES}
+                      error={fieldErrors.vehicleMake}
+                    />
+                    <BookModalInput
+                      label="Vehicle Model"
+                      placeholder="e.g., Vios, Civic, Montero"
+                      value={vehicleModel}
+                      onChange={(e) => {
+                        setVehicleModel(e.target.value);
+                        if (fieldErrors.vehicleModel) setFieldErrors((p) => ({ ...p, vehicleModel: "" }));
+                      }}
+                      error={fieldErrors.vehicleModel}
+                    />
+                    <BookModalSelect
+                      label="Year"
+                      placeholder="Select Year"
+                      value={vehicleYear}
+                      onChange={(e) => setVehicleYear(e.target.value)}
+                      options={BOOK_YEARS}
+                    />
+                    <BookModalSelect
+                      label="Transmission"
+                      placeholder="Select Transmission"
+                      value={vehicleTransmission}
+                      onChange={(e) => setVehicleTransmission(e.target.value)}
+                      options={["Automatic", "Manual"]}
+                    />
+                    <BookModalInput
+                      label="Mileage"
+                      placeholder="e.g., 50000"
+                      type="number"
+                      value={vehicleMileage}
+                      onChange={(e) => {
+                        setVehicleMileage(e.target.value);
+                        if (fieldErrors.vehicleMileage) setFieldErrors((p) => ({ ...p, vehicleMileage: "" }));
+                      }}
+                      error={fieldErrors.vehicleMileage}
+                    />
+                    <BookModalInput
+                      label="License Plate"
+                      placeholder="e.g., ABC-1234"
+                      wide
+                      value={vehiclePlate}
+                      onChange={(e) => {
+                        setVehiclePlate(e.target.value);
+                        if (fieldErrors.vehiclePlate) setFieldErrors((p) => ({ ...p, vehiclePlate: "" }));
+                      }}
+                      error={fieldErrors.vehiclePlate}
                     />
                   </div>
-                </div>
+                </>
+              )}
+            </BookModalCard>
+          </div>
 
-                <div className="divide-y rounded-md border bg-background">
-                  {repairServices
-                    .filter((s) => s.name.toLowerCase().includes(repairSearch.trim().toLowerCase()))
-                    .map((s) => {
-                      const checked = selectedIds.includes(s.id);
-                      return (
-                        <label
-                          key={s.id}
-                          className={cn(
-                            "flex cursor-pointer items-start justify-between gap-3 p-3 transition hover:bg-muted/30",
-                            checked && "bg-brand-soft/20"
-                          )}
-                        >
-                          <div className="flex items-start gap-3">
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() => toggleService(s.id)}
-                              className="mt-0.5 h-4 w-4 rounded border-input accent-brand"
-                            />
-                            <div>
-                              <span className="text-sm font-medium leading-snug">{s.name}</span>
-                              {s.description && (
-                                <p className="mt-0.5 text-xs text-muted-foreground">{s.description}</p>
-                              )}
-                            </div>
-                          </div>
-                          {s.baseDurationHours != null && s.baseDurationHours > 0 && (
-                            <span className="text-xs text-muted-foreground whitespace-nowrap pt-0.5">
-                              {formatHours(s.baseDurationHours)} h
-                            </span>
-                          )}
-                        </label>
-                      );
-                    })}
-                </div>
+          {/* 2. Pick services */}
+          <div id="book-step-services" className="scroll-mt-24">
+            <BookModalCard
+              icon={ClipboardCheck}
+              title="2. Pick services"
+              subtitle="Add one kind of service at a time. The shop confirms the final list and time."
+            >
+              {fieldErrors.service && (
+                <p className="mb-4 text-xs font-medium text-rose-500">{fieldErrors.service}</p>
+              )}
 
-                {/* Subheading: Check-ups and diagnostics */}
-                {diagnosticServices.length > 0 && (
-                  <div className="pt-2">
-                    <h5 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                      Check-ups and diagnostics
-                    </h5>
-                    <div className="divide-y rounded-md border bg-background">
-                      {diagnosticServices
-                        .filter((s) => s.name.toLowerCase().includes(repairSearch.trim().toLowerCase()))
-                        .map((s) => {
-                          const checked = selectedIds.includes(s.id);
-                          return (
-                            <label
-                              key={s.id}
-                              className={cn(
-                                "flex cursor-pointer items-start justify-between gap-3 p-3 transition hover:bg-muted/30",
-                                checked && "bg-brand-soft/20"
-                              )}
-                            >
-                              <div className="flex items-start gap-3">
-                                <input
-                                  type="checkbox"
-                                  checked={checked}
-                                  onChange={() => toggleService(s.id)}
-                                  className="mt-0.5 h-4 w-4 rounded border-input accent-brand"
-                                />
-                                <div>
-                                  <span className="text-sm font-medium leading-snug">{s.name}</span>
-                                  {s.description && (
-                                    <p className="mt-0.5 text-xs text-muted-foreground">{s.description}</p>
-                                  )}
-                                </div>
-                              </div>
-                              {s.baseDurationHours != null && s.baseDurationHours > 0 && (
-                                <span className="text-xs text-muted-foreground whitespace-nowrap pt-0.5">
-                                  {formatHours(s.baseDurationHours)} h
-                                </span>
-                              )}
-                            </label>
-                          );
-                        })}
-                    </div>
+              {!options && !optionsError && (
+                <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>Loading services...</span>
+                </div>
+              )}
+
+              {optionsError && (
+                <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50/50 p-3 text-xs text-rose-950 dark:bg-rose-950/20 dark:text-rose-200">
+                  <div className="flex items-center justify-between">
+                    <span>We couldn&apos;t load the service list.</span>
+                    <button
+                      type="button"
+                      onClick={loadOptions}
+                      className="inline-flex items-center gap-1 font-semibold text-brand hover:underline cursor-pointer"
+                    >
+                      <RefreshCw className="h-3 w-3" /> Try again
+                    </button>
                   </div>
-                )}
-
-                <p className="text-xs text-muted-foreground">
-                  Not in the list? Describe it in the notes below.
-                </p>
-              </div>
-            )}
-
-            {notSure && (
-              <p className="mt-4 rounded-md border bg-muted/20 p-3.5 text-xs text-muted-foreground">
-                Tell us what you notice in the notes below. We will inspect the car and tell you what it needs.
-              </p>
-            )}
-
-            {/* Scan fee box if needed */}
-            {needsScan && (
-              <div className="mt-5 rounded-xl border border-amber-300 bg-amber-50 p-4">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
-                  <div className="flex-1">
-                    <p className="font-semibold text-amber-950">
-                      Scan fee: {formatPeso(DIAGNOSTIC_SCAN_FEE)}
-                    </p>
-                    <p className="mt-1 text-sm text-amber-900">
-                      To find the problem, we will plug a scanner into your car. You will pay this fee{" "}
-                      <b>even if you decide not to push through with the repair</b>. Repairs are priced
-                      separately, and we&apos;ll ask you first.
-                    </p>
-                    <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-sm text-amber-950">
-                      <input
-                        type="checkbox"
-                        checked={scanAcknowledged}
-                        onChange={(e) => setScanAcknowledged(e.target.checked)}
-                        className="mt-0.5 h-4 w-4 rounded border-amber-400 accent-amber-600"
-                      />
-                      <span>I agree to pay the {formatPeso(DIAGNOSTIC_SCAN_FEE)} scan fee.</span>
-                    </label>
-                  </div>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    You can also describe what you need in the notes box.
+                  </p>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Estimated time bottom line */}
-            {selectedServices.length > 0 && knownHours > 0 && (
-              <p className="mt-4 text-xs text-muted-foreground border-t pt-3">
-                Estimated time: {hasUnknownHour ? `at least ${formatHours(knownHours)} hours` : `about ${formatHours(knownHours)} hours`}. It is an estimate, and the shop confirms it.
-              </p>
-            )}
-          </BookModalCard>
-
-          {/* 3. Date and place */}
-          <BookModalCard icon={Wrench} title="Date and place" subtitle="Choose your service option and schedule.">
-            <label className="text-sm font-medium">Type of service</label>
-            <div className="mt-2 grid gap-3 md:grid-cols-2">
-              <BookRadioTile icon={MapPin} label="Shop Visit" active={pickup === "shop"} onClick={() => setPickup("shop")} />
-              <BookRadioTile icon={Car} label="Home Service" active={pickup === "home"} onClick={() => setPickup("home")} />
-            </div>
-
-            {pickup === "home" && !user?.address && (
-              <div className="mt-4">
-                <BookModalInput
-                  label="Home Address"
-                  placeholder="Enter your full home address"
-                  value={homeAddress}
-                  onChange={(e) => {
-                    setHomeAddress(e.target.value);
-                    if (fieldErrors.homeAddress) setFieldErrors((p) => ({ ...p, homeAddress: "" }));
-                  }}
-                  error={fieldErrors.homeAddress}
-                />
-              </div>
-            )}
-
-            <div className="mt-4">
-              <TimeslotPicker
-                date={preferredDate}
-                time={preferredTime}
-                onChangeDate={setPreferredDate}
-                onChangeTime={setPreferredTime}
-                onAvailableSlots={setAvailableSlots}
-              />
-            </div>
-
-            {/* Overnight Notice */}
-            {noticeShowing && (
-              <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
-                  <div className="flex-1 space-y-2.5">
-                    {takesMoreThanOneDay ? (
-                      <p className="text-sm font-medium">This job takes more than one day.</p>
-                    ) : (
-                      <p className="text-sm">
-                        <span className="font-semibold">
-                          {activePackage ? activePackage.name : "Your selected services"}
-                        </span>{" "}
-                        takes about {formatHours(knownHours)} hours. Starting at {preferredTime} it may finish around{" "}
-                        {formatDecimalTime(finishHour)}, after we close at {formatDecimalTime(shopDayHours!.close)}.
-                      </p>
-                    )}
-
-                    <div className="flex flex-wrap items-center gap-3 pt-1">
-                      <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-                        <input
-                          type="checkbox"
-                          checked={overnightOk}
-                          onChange={(e) => {
-                            setOvernightOk(e.target.checked);
-                            if (fieldErrors.overnight) setFieldErrors((p) => ({ ...p, overnight: "" }));
-                          }}
-                          className="h-4 w-4 rounded border-amber-400 accent-amber-600"
-                        />
-                        <span>It is OK to leave my vehicle overnight</span>
-                      </label>
-
-                      {!takesMoreThanOneDay && recommendedSlot && (
+              {/* What has been added */}
+              <div className="space-y-2">
+                {!hasAnyAdded ? (
+                  <p className="text-xs text-muted-foreground">Nothing added yet.</p>
+                ) : (
+                  <>
+                    {maintCount > 0 && (
+                      <div className="flex items-center justify-between rounded-lg border bg-card px-3.5 py-2.5">
+                        <div className="min-w-0 pr-2">
+                          <p className="text-xs font-semibold text-foreground">Maintenance</p>
+                          <p className="text-xs text-muted-foreground break-words">{maintText}</p>
+                        </div>
                         <button
                           type="button"
-                          onClick={() => setPreferredTime(recommendedSlot)}
-                          className="rounded-md border border-amber-400 bg-amber-100/60 px-2.5 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-200"
+                          onClick={() => handleOpenCategory("maintenance")}
+                          className="shrink-0 rounded border border-input bg-background px-2.5 py-1 text-xs font-semibold hover:bg-accent cursor-pointer"
                         >
-                          Use {recommendedSlot}
+                          Edit
                         </button>
-                      )}
-                    </div>
-
-                    {fieldErrors.overnight && (
-                      <p className="text-xs font-medium text-rose-600 pt-1">{fieldErrors.overnight}</p>
+                      </div>
                     )}
+                    {repairCount > 0 && (
+                      <div className="flex items-center justify-between rounded-lg border bg-card px-3.5 py-2.5">
+                        <div className="min-w-0 pr-2">
+                          <p className="text-xs font-semibold text-foreground">Repair</p>
+                          <p className="text-xs text-muted-foreground break-words">{repairText}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenCategory("repair")}
+                          className="shrink-0 rounded border border-input bg-background px-2.5 py-1 text-xs font-semibold hover:bg-accent cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                    {diagCount > 0 && (
+                      <div className="flex items-center justify-between rounded-lg border bg-card px-3.5 py-2.5">
+                        <div className="min-w-0 pr-2">
+                          <p className="text-xs font-semibold text-foreground">Diagnostics</p>
+                          <p className="text-xs text-muted-foreground break-words">{diagText}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenCategory("diagnostics")}
+                          className="shrink-0 rounded border border-input bg-background px-2.5 py-1 text-xs font-semibold hover:bg-accent cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Scan fee box if needed */}
+              {needsScan && (
+                <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+                    <div className="flex-1">
+                      <p className="font-semibold text-amber-950">
+                        Scan fee: {formatPeso(DIAGNOSTIC_SCAN_FEE)}
+                      </p>
+                      <p className="mt-1 text-sm text-amber-900">
+                        To find the problem, we will plug a scanner into your car. You will pay this fee{" "}
+                        <b>even if you decide not to push through with the repair</b>. Repairs are priced
+                        separately, and we&apos;ll ask you first.
+                      </p>
+                      <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-sm text-amber-950">
+                        <input
+                          type="checkbox"
+                          checked={scanAcknowledged}
+                          onChange={(e) => setScanAcknowledged(e.target.checked)}
+                          className="mt-0.5 h-4 w-4 rounded border-amber-400 accent-amber-600"
+                        />
+                        <span>I agree to pay the {formatPeso(DIAGNOSTIC_SCAN_FEE)} scan fee.</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
+              )}
+
+              {/* When no category is open */}
+              {openCategory === null ? (
+                <div className="mt-5 space-y-3 pt-3 border-t">
+                  <p className="text-xs font-medium text-foreground">
+                    {!hasAnyAdded ? "What would you like to add?" : "Anything else?"}
+                  </p>
+                  <div className="flex flex-wrap gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCategory("maintenance")}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-2 text-xs font-semibold hover:bg-accent cursor-pointer"
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Maintenance
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCategory("repair")}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-2 text-xs font-semibold hover:bg-accent cursor-pointer"
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Repair
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCategory("diagnostics")}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-2 text-xs font-semibold hover:bg-accent cursor-pointer"
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Diagnostics
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Maintenance: time for service. Repair: something is wrong. Diagnostics: find out what is wrong.
+                  </p>
+                </div>
+              ) : (
+                /* When a category is open */
+                <div className="mt-5 rounded-xl border-2 border-brand p-4 space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b">
+                    <h4 className="font-semibold text-base capitalize">{openCategory}</h4>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCategory(null)}
+                      className="rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground hover:opacity-90 cursor-pointer"
+                    >
+                      Done
+                    </button>
+                  </div>
+
+                  {/* Maintenance Panel */}
+                  {openCategory === "maintenance" && options && (
+                    <div className="space-y-5">
+                      <p className="text-xs text-muted-foreground">
+                        Choose a package if you like. Untick anything you do not need.
+                      </p>
+
+                      {options.packages.length > 0 && (
+                        <div className="grid gap-3 sm:grid-cols-3">
+                          {options.packages.map((pkg) => {
+                            const isChosen = packageId === pkg.id;
+                            const intervalParts: string[] = [];
+                            if (pkg.intervalKm) intervalParts.push(`${pkg.intervalKm.toLocaleString("en-PH")} km`);
+                            if (pkg.intervalMonths) intervalParts.push(`${pkg.intervalMonths} months`);
+                            const intervalText = intervalParts.length > 0 ? `Every ${intervalParts.join(" or ")}` : null;
+
+                            const pkgServices = pkg.serviceIds
+                              .map((id) => options.services.find((s) => s.id === id))
+                              .filter((s): s is ServiceOption => Boolean(s));
+                            const allKnown = pkgServices.length > 0 && pkgServices.every((s) => s.baseDurationHours != null && s.baseDurationHours > 0);
+                            const totalPkgHours = pkgServices.reduce((sum, s) => sum + (s.baseDurationHours || 0), 0);
+                            const durationText = allKnown
+                              ? `${pkg.serviceIds.length} services, about ${formatHours(totalPkgHours)} hours`
+                              : `${pkg.serviceIds.length} services`;
+
+                            return (
+                              <div
+                                key={pkg.id}
+                                className={cn(
+                                  "flex flex-col justify-between rounded-lg border p-3.5 transition",
+                                  isChosen
+                                    ? "border-brand bg-brand-soft/40 ring-1 ring-brand"
+                                    : "border-border hover:bg-accent/40"
+                                )}
+                              >
+                                <div>
+                                  <button
+                                    type="button"
+                                    onClick={() => togglePackage(pkg)}
+                                    className="flex w-full items-start justify-between gap-2 text-left cursor-pointer"
+                                  >
+                                    <h5 className="font-semibold text-sm text-foreground">{pkg.name}</h5>
+                                    <span
+                                      className={cn(
+                                        "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2",
+                                        isChosen ? "border-brand" : "border-muted-foreground"
+                                      )}
+                                    >
+                                      {isChosen && <span className="h-2 w-2 rounded-full bg-brand" />}
+                                    </span>
+                                  </button>
+                                  {pkg.description && (
+                                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                                      {pkg.description}
+                                    </p>
+                                  )}
+                                  <div className="mt-2 text-[11px] text-muted-foreground space-y-0.5">
+                                    {intervalText && <p>{intervalText}</p>}
+                                    <p>{durationText}</p>
+                                  </div>
+                                </div>
+
+                                <div className="mt-3 border-t pt-2.5 space-y-1">
+                                  {pkgServices.map((s) => {
+                                    if (isChosen) {
+                                      const isChecked = selectedIds.includes(s.id);
+                                      return (
+                                        <label
+                                          key={s.id}
+                                          className="flex items-start gap-2 cursor-pointer text-xs py-0.5 text-foreground hover:text-brand"
+                                        >
+                                          <input
+                                            type="checkbox"
+                                            checked={isChecked}
+                                            onChange={() => toggleService(s.id)}
+                                            className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded border-input accent-brand"
+                                          />
+                                          {/* Long names wrap; the customer asked to see what is in each package. */}
+                                          <span className="min-w-0 break-words leading-snug">{s.name}</span>
+                                        </label>
+                                      );
+                                    }
+                                    return (
+                                      <p key={s.id} className="break-words py-0.5 text-[11px] leading-snug text-muted-foreground">
+                                        • {s.name}
+                                      </p>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      <div className="space-y-3 pt-2">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                          <h4 className="text-sm font-semibold">
+                            {activePackage ? "Add other maintenance services" : "Or pick services one by one"}
+                            {otherMaintenance.length > 0 && (
+                              <span className="ml-2 text-xs font-normal text-muted-foreground">{otherMaintenance.length} selected</span>
+                            )}
+                          </h4>
+                          <div className="relative w-full sm:w-64">
+                            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                            <input
+                              type="text"
+                              placeholder="Search services"
+                              value={maintenanceSearch}
+                              onChange={(e) => setMaintenanceSearch(e.target.value)}
+                              className="w-full rounded-md border bg-background py-1.5 pl-8 pr-3 text-xs focus:border-brand focus:outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        <ServiceChecklist
+                          services={options.services.filter((s) => s.type === "maintenance" && !packageIds.has(s.id))}
+                          search={maintenanceSearch}
+                          selectedIds={selectedIds}
+                          onToggle={toggleService}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Repair Panel */}
+                  {openCategory === "repair" && options && (
+                    <div className="space-y-4">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <h4 className="text-sm font-semibold">
+                          Repair services
+                          {otherRepair.length > 0 && (
+                            <span className="ml-2 text-xs font-normal text-muted-foreground">{otherRepair.length} selected</span>
+                          )}
+                        </h4>
+                        <div className="relative w-full sm:w-64">
+                          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                          <input
+                            type="text"
+                            placeholder="Search services"
+                            value={repairSearch}
+                            onChange={(e) => setRepairSearch(e.target.value)}
+                            className="w-full rounded-md border bg-background py-1.5 pl-8 pr-3 text-xs focus:border-brand focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <ServiceChecklist
+                        services={options.services.filter((s) => s.type === "repair")}
+                        search={repairSearch}
+                        selectedIds={selectedIds}
+                        onToggle={toggleService}
+                      />
+
+                      <p className="text-xs text-muted-foreground">
+                        Not in the list? Describe it in the notes below.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Diagnostics Panel */}
+                  {openCategory === "diagnostics" && options && (
+                    <div className="space-y-4">
+                      {/* I am not sure what is wrong card */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNotSure((p) => !p);
+                          if (fieldErrors.service) setFieldErrors((p) => ({ ...p, service: "" }));
+                        }}
+                        className={cn(
+                          "flex w-full items-start gap-3 rounded-lg border p-3.5 text-left transition cursor-pointer",
+                          notSure ? "border-brand bg-brand-soft/40" : "hover:bg-accent border-border"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors",
+                            notSure ? "border-brand bg-brand text-brand-foreground" : "border-muted-foreground"
+                          )}
+                        >
+                          {notSure && <Check className="h-3 w-3 stroke-[3]" />}
+                        </span>
+                        <div>
+                          <p className="font-semibold text-sm text-foreground">I am not sure what is wrong</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">We will check your car and tell you what it needs.</p>
+                        </div>
+                      </button>
+
+                      {/* Diagnostic services list */}
+                      <ServiceChecklist
+                        services={options.services.filter((s) => s.type === "diagnostics" && !packageIds.has(s.id))}
+                        search=""
+                        selectedIds={selectedIds}
+                        onToggle={toggleService}
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex justify-end pt-3 border-t">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCategory(null)}
+                      className="rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground hover:opacity-90 cursor-pointer"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Estimated time bottom line */}
+              {selectedServices.length > 0 && knownHours > 0 && (
+                <p className="mt-4 text-xs text-muted-foreground border-t pt-3">
+                  Estimated time: {hasUnknownHour ? `at least ${formatHours(knownHours)} hours` : `about ${formatHours(knownHours)} hours`}. It is an estimate, and the shop confirms it.
+                </p>
+              )}
+            </BookModalCard>
+          </div>
+
+          {/* 3. Pick date and place */}
+          <div id="book-step-date" className="scroll-mt-24">
+            <BookModalCard icon={Wrench} title="3. Pick date and place" subtitle="Choose your service option and schedule.">
+              <label className="text-sm font-medium">Type of service</label>
+              <div className="mt-2 grid gap-3 md:grid-cols-2">
+                <BookRadioTile icon={MapPin} label="Shop Visit" active={pickup === "shop"} onClick={() => setPickup("shop")} />
+                <BookRadioTile icon={Car} label="Home Service" active={pickup === "home"} onClick={() => setPickup("home")} />
               </div>
-            )}
-          </BookModalCard>
+
+              {pickup === "home" && !user?.address && (
+                <div className="mt-4">
+                  <BookModalInput
+                    label="Home Address"
+                    placeholder="Enter your full home address"
+                    value={homeAddress}
+                    onChange={(e) => {
+                      setHomeAddress(e.target.value);
+                      if (fieldErrors.homeAddress) setFieldErrors((p) => ({ ...p, homeAddress: "" }));
+                    }}
+                    error={fieldErrors.homeAddress}
+                  />
+                </div>
+              )}
+
+              <div className="mt-4">
+                <TimeslotPicker
+                  date={preferredDate}
+                  time={preferredTime}
+                  onChangeDate={setPreferredDate}
+                  onChangeTime={setPreferredTime}
+                  onAvailableSlots={setAvailableSlots}
+                />
+              </div>
+
+              {/* Overnight Notice */}
+              {noticeShowing && (
+                <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+                    <div className="flex-1 space-y-2.5">
+                      {takesMoreThanOneDay ? (
+                        <p className="text-sm font-medium">This job takes more than one day.</p>
+                      ) : (
+                        <p className="text-sm">
+                          <span className="font-semibold">
+                            {activePackage ? activePackage.name : "Your selected services"}
+                          </span>{" "}
+                          takes about {formatHours(knownHours)} hours. Starting at {preferredTime} it may finish around{" "}
+                          {formatDecimalTime(finishHour)}, after we close at {formatDecimalTime(shopDayHours!.close)}.
+                        </p>
+                      )}
+
+                      <div className="flex flex-wrap items-center gap-3 pt-1">
+                        <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
+                          <input
+                            type="checkbox"
+                            checked={overnightOk}
+                            onChange={(e) => {
+                              setOvernightOk(e.target.checked);
+                              if (fieldErrors.overnight) setFieldErrors((p) => ({ ...p, overnight: "" }));
+                            }}
+                            className="h-4 w-4 rounded border-amber-400 accent-amber-600"
+                          />
+                          <span>It is OK to leave my vehicle overnight</span>
+                        </label>
+
+                        {!takesMoreThanOneDay && recommendedSlot && (
+                          <button
+                            type="button"
+                            onClick={() => setPreferredTime(recommendedSlot)}
+                            className="rounded-md border border-amber-400 bg-amber-100/60 px-2.5 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-200 cursor-pointer"
+                          >
+                            Use {recommendedSlot}
+                          </button>
+                        )}
+                      </div>
+
+                      {fieldErrors.overnight && (
+                        <p className="text-xs font-medium text-rose-600 pt-1">{fieldErrors.overnight}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </BookModalCard>
+          </div>
 
           {/* 4. Notes */}
           <BookModalCard icon={ClipboardCheck} title="Notes for the shop" subtitle="Add any specific details or symptoms.">
@@ -1262,6 +1325,118 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
   );
 }
 
+function BookingSteps({
+  stepDone,
+  currentStep,
+}: {
+  stepDone: boolean[];
+  currentStep: number;
+}) {
+  const steps = [
+    { id: "book-step-vehicle", label: "Pick a vehicle" },
+    { id: "book-step-services", label: "Pick services" },
+    { id: "book-step-date", label: "Pick date and place" },
+  ];
+
+  return (
+    <div className="mb-8 rounded-xl border bg-card p-4 shadow-sm">
+      <div className="flex items-start">
+        {steps.map((s, idx) => {
+          const isDone = stepDone[idx];
+          const isCurrent = currentStep === idx;
+          const isLast = idx === steps.length - 1;
+
+          return (
+            <div key={s.id} className="relative flex flex-1 flex-col items-center">
+              {!isLast && (
+                <div
+                  className={cn(
+                    "absolute left-1/2 top-4 w-full h-0.5 transition-colors",
+                    isDone ? "bg-emerald-600" : "bg-border"
+                  )}
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  document.getElementById(s.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                aria-current={isCurrent ? "step" : undefined}
+                className="relative z-10 flex flex-col items-center text-center cursor-pointer focus:outline-none"
+              >
+                <span
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-colors",
+                    isDone
+                      ? "bg-emerald-600 text-white"
+                      : isCurrent
+                      ? "border-2 border-brand bg-brand/10 font-bold text-brand"
+                      : "border border-border bg-card text-muted-foreground"
+                  )}
+                >
+                  {isDone ? <Check className="h-4 w-4 stroke-[2.5]" /> : idx + 1}
+                </span>
+                <span
+                  className={cn(
+                    "mt-1.5 text-[11px] sm:text-xs transition-colors whitespace-nowrap",
+                    isCurrent
+                      ? "font-bold text-foreground"
+                      : isDone
+                      ? "font-medium text-foreground"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  {s.label}
+                </span>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SummaryGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5 border-b pb-2.5">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </p>
+      {children}
+    </div>
+  );
+}
+
+function SummaryServiceRow({
+  name,
+  hours,
+  onRemove,
+}: {
+  name: string;
+  hours: number | null;
+  onRemove: () => void;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-2 text-xs">
+      <span className="min-w-0 break-words font-medium text-foreground">{name}</span>
+      <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
+        {hours != null && hours > 0 && (
+          <span className="text-[11px] text-muted-foreground">{formatDuration(hours)}</span>
+        )}
+        <button
+          type="button"
+          onClick={onRemove}
+          className="text-muted-foreground hover:text-foreground p-0.5 cursor-pointer"
+          aria-label={`Remove ${name}`}
+        >
+          <X className="h-3 w-3" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function BookModalCard({
   icon: Icon,
   title,
@@ -1285,6 +1460,86 @@ function BookModalCard({
         </div>
       </div>
       <div className="mt-4">{children}</div>
+    </div>
+  );
+}
+
+// One checklist for all three categories, so they behave the same: two columns on wide
+// screens, the first few services shown, and the rest behind "Show all".
+function ServiceChecklist({
+  services,
+  search,
+  selectedIds,
+  onToggle,
+}: {
+  services: ServiceOption[];
+  search: string;
+  selectedIds: number[];
+  onToggle: (id: number) => void;
+}) {
+  const [showAll, setShowAll] = useState(false);
+  const term = search.trim().toLowerCase();
+  const matching = term ? services.filter((s) => s.name.toLowerCase().includes(term)) : services;
+  // While collapsed, a ticked service stays visible even if it is past the first few,
+  // so nothing the customer chose is ever out of sight.
+  const visible =
+    term || showAll
+      ? matching
+      : matching.filter((s, index) => index < SERVICES_SHOWN_FIRST || selectedIds.includes(s.id));
+
+  if (matching.length === 0) {
+    return (
+      <p className="rounded-md border p-4 text-center text-xs text-muted-foreground">
+        {term ? "No services match your search." : "No other services to add here."}
+      </p>
+    );
+  }
+
+  return (
+    <div>
+      {/* auto-rows-fr: every card gets the same height, even when one name wraps. */}
+      <div className="grid auto-rows-fr gap-2 sm:grid-cols-2">
+        {visible.map((s) => {
+          const checked = selectedIds.includes(s.id);
+          const description = usefulDescription(s.name, s.description);
+          return (
+            <label
+              key={s.id}
+              className={cn(
+                // Slim rows: a little taller on phones (py-2.5) so they stay easy to tap.
+                "flex cursor-pointer items-start gap-2.5 rounded-md border px-3 py-2.5 transition hover:bg-muted/30 sm:py-2",
+                checked ? "border-brand bg-brand-soft/20" : "bg-background"
+              )}
+            >
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => onToggle(s.id)}
+                className="mt-px h-4 w-4 shrink-0 rounded border-input accent-brand"
+              />
+              <div className="min-w-0 flex-1">
+                <span className="break-words text-[13px] font-medium leading-snug">{s.name}</span>
+                {description && <p className="mt-0.5 text-[11px] text-muted-foreground">{description}</p>}
+              </div>
+              {s.baseDurationHours != null && s.baseDurationHours > 0 && (
+                <span className="whitespace-nowrap pt-px text-[11px] text-muted-foreground">
+                  {formatDuration(s.baseDurationHours)}
+                </span>
+              )}
+            </label>
+          );
+        })}
+      </div>
+      {/* Searching already looks through the whole list, so the link is only for browsing. */}
+      {!term && matching.length > SERVICES_SHOWN_FIRST && (
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          className="mt-3 cursor-pointer text-xs font-semibold text-brand hover:underline"
+        >
+          {showAll ? "Show fewer" : `Show all ${matching.length} services`}
+        </button>
+      )}
     </div>
   );
 }
@@ -1352,7 +1607,7 @@ function BookRadioTile({ icon: Icon, label, active, onClick }: { icon: any; labe
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-md border p-3 text-sm transition ${
+      className={`flex items-center gap-3 rounded-md border p-3 text-sm transition cursor-pointer ${
         active ? "border-brand bg-brand-soft/40" : "hover:bg-accent"
       }`}
     >
