@@ -203,7 +203,24 @@ function Dashboard() {
     }
   };
 
-  useEffect(() => { fetchDashboard(); }, []);
+  const [setupNotice, setSetupNotice] = useState<{percent: number} | null>(null);
+
+  const fetchSetup = async () => {
+    try {
+      const res = await fetch('/api/customer/setup');
+      const j = await res.json();
+      if (j.success && j.setupCompleted && j.percent < 100) {
+        setSetupNotice({ percent: j.percent });
+      }
+    } catch {
+      // Ignore
+    }
+  };
+
+  useEffect(() => { 
+    fetchDashboard(); 
+    fetchSetup();
+  }, []);
 
   // Keep the page live: alerts, recent activity and service status re-fetch
   // every 10 s in the background, so what the shop does shows up here
@@ -263,6 +280,16 @@ function Dashboard() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
+      {setupNotice && (
+        <div className="mb-6 rounded-md bg-amber-50 p-3 text-sm text-amber-800 border border-amber-200 flex items-center justify-between">
+          <span>
+            Your profile is {setupNotice.percent}% complete. Add your address to reach 100%. It is needed for home service.
+          </span>
+          <Link href="/dashboard/profile" className="font-semibold text-brand hover:underline shrink-0 ml-4">
+            Add address
+          </Link>
+        </div>
+      )}
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-6">
 
