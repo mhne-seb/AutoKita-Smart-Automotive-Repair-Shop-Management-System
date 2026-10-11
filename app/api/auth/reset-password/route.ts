@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { hashPassword } from '@/lib/password'
 import { checkResetToken } from '@/lib/passwordReset'
+import { passwordProblem } from '@/lib/passwordPolicy'
 import { sendPasswordChangedEmail } from '@/lib/mail'
 
 const LINK_PROBLEM = {
@@ -18,8 +19,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const { token, password } = await req.json().catch(() => ({}))
-  if (typeof password !== 'string' || password.length < 8) {
-    return NextResponse.json({ success: false, message: 'Your new password needs at least 8 characters.' }, { status: 400 })
+  if (typeof password !== 'string') {
+    return NextResponse.json({ success: false, message: 'Enter your new password.' }, { status: 400 })
   }
 
   try {
@@ -29,6 +30,11 @@ export async function POST(req: NextRequest) {
     }
 
     const { account } = result
+    // Same rule as sign-up and "change password" (src/lib/passwordPolicy.ts).
+    const problem = passwordProblem(password, account.email)
+    if (problem) {
+      return NextResponse.json({ success: false, message: problem }, { status: 400 })
+    }
     const table = account.kind === 'customer' ? 'users' : 'employees'
     await db.query(`UPDATE ${table} SET password = $1 WHERE id = $2`, [await hashPassword(password), account.id])
 

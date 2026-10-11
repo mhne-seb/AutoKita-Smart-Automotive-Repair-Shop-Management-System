@@ -44,7 +44,7 @@ import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceMo
 import { NotificationsModal } from "@/components/NotificationsModal";
 import { loadCustomerNotifications } from "@/lib/notificationFeeds";
 import { ShopLoading } from "@/components/ShopLoading";
-import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
+import { DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
 import type {
   DashboardData,
   DashboardActivity,
@@ -308,7 +308,7 @@ function Dashboard() {
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-widest text-white/60">Welcome back</div>
                   <h1 className="mt-0.5 text-2xl font-bold leading-tight md:text-3xl">
-                    {user ? (user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.nickname) : "Customer"} 👋
+                    {user ? (user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.nickname) : "Customer"}
                   </h1>
                   <p className="mt-1.5 max-w-sm text-sm text-white/75">
                     Your vehicles are being looked after. Here&apos;s what&apos;s happening today.
@@ -601,7 +601,7 @@ function Dashboard() {
 
           <div className="rounded-xl border bg-card p-5">
             <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <span className="flex items-center gap-1.5"><Car className="h-3.5 w-3.5" /> Your Vehicles</span>
+              <span className="flex items-center gap-1.5"><Car className="h-3.5 w-3.5" /> My Vehicles</span>
               <Link href="/dashboard/vehicles" className="text-brand hover:underline normal-case">View all</Link>
             </div>
             <div className="mt-4 space-y-3">

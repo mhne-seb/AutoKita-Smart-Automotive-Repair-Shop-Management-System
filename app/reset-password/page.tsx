@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import { Lock, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { Logo } from '@/components/site/Logo'
 import { Header } from '@/components/site/Header'
+import { PASSWORD_RULE_TEXT, passwordProblem } from '@/lib/passwordPolicy'
 
 // Opened from the "Reset your password" email. The link's token is checked
 // first, so a dead link says so before the customer types anything.
@@ -37,7 +38,8 @@ function ResetPasswordForm() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (pw.length < 8) { setErr('Your new password needs at least 8 characters.'); return }
+    const problem = passwordProblem(pw)
+    if (problem) { setErr(problem); return }
     if (pw !== pw2) { setErr("The two passwords don't match."); return }
     setErr('')
     setSaving(true)
@@ -89,11 +91,12 @@ function ResetPasswordForm() {
     <form onSubmit={submit} className="space-y-4">
       <h2 className="text-center text-xl font-bold">Set a new password</h2>
       <div>
-        <label className="text-xs font-medium">New password (at least 8 characters)</label>
+        <label className="text-xs font-medium">New password</label>
         <div className="mt-1.5 relative">
           <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input type="password" autoComplete="new-password" value={pw} onChange={(e) => { setPw(e.target.value); if (err) setErr('') }} className={inputClass} />
         </div>
+        <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{PASSWORD_RULE_TEXT}</p>
       </div>
       <div>
         <label className="text-xs font-medium">Type it again</label>

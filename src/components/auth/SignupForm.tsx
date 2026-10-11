@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Mail, Lock, Eye, EyeOff, User, Loader2, AlertCircle, ArrowLeft, ArrowRight } from 'lucide-react'
 import { startSession } from '@/controllers/authController'
 import { EMAIL_RE } from '@/lib/bookingRules'
+import { PASSWORD_RULE_TEXT, passwordProblem } from '@/lib/passwordPolicy'
 
 // The whole email sign-up, used on /book (inside the booking gate) and on /signup.
 // Step 1: Google button, then name / email / password. Step 2: the 6-digit code.
@@ -73,8 +74,10 @@ export function SignupForm({ heading, intro }: SignupFormProps) {
     if (!em) errs.email = 'Enter your email address.'
     else if (em.length > 80 || !EMAIL_RE.test(em)) errs.email = 'Enter a valid email address.'
     if (!password) errs.password = 'Enter a password.'
-    else if (password.length < 8 || password.length > 72) errs.password = 'Password must be between 8 and 72 characters.'
-    else if (password === em) errs.password = 'Password cannot be your email address.'
+    else {
+      const problem = passwordProblem(password, em)
+      if (problem) errs.password = problem
+    }
     if (!confirmPassword) errs.confirmPassword = 'Type your password again.'
     else if (password !== confirmPassword) errs.confirmPassword = 'Passwords do not match.'
 
@@ -194,9 +197,7 @@ export function SignupForm({ heading, intro }: SignupFormProps) {
     setStep(1)
   }
 
-  const passwordRuleBroken =
-    password.length > 0 &&
-    (password.length < 8 || password.length > 72 || password === email.trim().toLowerCase())
+  const passwordRuleBroken = password.length > 0 && passwordProblem(password, email) !== null
 
   if (step === 2) {
     return (
@@ -367,7 +368,7 @@ export function SignupForm({ heading, intro }: SignupFormProps) {
           <p
             className={`mt-2 text-[11px] leading-relaxed ${passwordRuleBroken ? 'text-destructive' : 'text-muted-foreground'}`}
           >
-            Your password must be 8 to 72 characters long and can&apos;t be the same as your email address.
+            {PASSWORD_RULE_TEXT}
           </p>
           {/* A broken rule is already shown in red above, so say it only once. */}
           {errors.password && !passwordRuleBroken && <p className="mt-1 text-[10px] text-destructive">{errors.password}</p>}
