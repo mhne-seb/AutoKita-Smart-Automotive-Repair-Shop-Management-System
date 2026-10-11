@@ -2,11 +2,14 @@ export const NOTES_MAX_LENGTH = 500
 export const MAX_SELECTED_SERVICES = 40
 export const NOTE_MIN_WHEN_NO_SERVICE = 5
 
+export type ServiceType = 'maintenance' | 'repair' | 'diagnostics'
+
 export type DescribeInput = {
   packageName: string | null        // the package shortcut the customer used, if any
   packageServiceNames: string[]     // every service name in that package
-  selectedNames: string[]           // every ticked service name (package ones included)
+  selected: Array<{ name: string; type: ServiceType }>   // replaces selectedNames
   notSure: boolean
+  overnightOk: boolean
   customerNote: string
 }
 
@@ -51,20 +54,39 @@ export function buildCategoryLabel(input: {
 
 // Returns the whole text saved in service_tickets.customer_concern.
 export function buildConcernText(input: DescribeInput): string {
+  const selectedNames = input.selected.map((s) => s.name)
   const label = buildCategoryLabel({
     packageName: input.packageName,
     packageServiceNames: input.packageServiceNames,
-    selectedNames: input.selectedNames,
+    selectedNames,
     notSure: input.notSure,
   })
 
   const bodyLines: string[] = []
-  if (input.selectedNames.length > 0) {
-    bodyLines.push(`Services: ${input.selectedNames.join('; ')}`)
+
+  const maintenanceNames = input.selected.filter((s) => s.type === 'maintenance').map((s) => s.name)
+  if (maintenanceNames.length > 0) {
+    bodyLines.push(`Maintenance: ${maintenanceNames.join('; ')}`)
   }
+
+  const repairNames = input.selected.filter((s) => s.type === 'repair').map((s) => s.name)
+  if (repairNames.length > 0) {
+    bodyLines.push(`Repair: ${repairNames.join('; ')}`)
+  }
+
+  const diagnosticsNames = input.selected.filter((s) => s.type === 'diagnostics').map((s) => s.name)
+  if (diagnosticsNames.length > 0) {
+    bodyLines.push(`Diagnostics: ${diagnosticsNames.join('; ')}`)
+  }
+
   if (input.notSure) {
     bodyLines.push('Please check the car and tell me what it needs.')
   }
+
+  if (input.overnightOk) {
+    bodyLines.push('Overnight stay: OK, the customer agrees to leave the vehicle overnight.')
+  }
+
   const trimmedNote = input.customerNote.trim().slice(0, NOTES_MAX_LENGTH)
   bodyLines.push(`Customer note: ${trimmedNote || 'None'}`)
 

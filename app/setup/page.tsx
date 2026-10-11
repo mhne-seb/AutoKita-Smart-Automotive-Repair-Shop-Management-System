@@ -466,7 +466,7 @@ export default function SetupPage() {
             
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link
-                href={`/dashboard?book=1&vehicle=${data.vehicles[data.vehicles.length - 1]?.id}`}
+                href={`/dashboard/book?vehicle=${data.vehicles[data.vehicles.length - 1]?.id}`}
                 className="flex items-center justify-center rounded-md bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground hover:bg-brand/90"
               >
                 Book a service now

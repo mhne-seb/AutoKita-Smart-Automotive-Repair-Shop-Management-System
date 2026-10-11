@@ -3,9 +3,11 @@ import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE, bookingNeedsScan } from '@/data/diagnosticScan'
 import { ROAD_TEST_TITLE } from '@/data/roadTest'
-import { buildConcernText, MAX_SELECTED_SERVICES, NOTES_MAX_LENGTH, NOTE_MIN_WHEN_NO_SERVICE } from '@/lib/bookingServices'
+import { buildConcernText, MAX_SELECTED_SERVICES, NOTES_MAX_LENGTH, NOTE_MIN_WHEN_NO_SERVICE, ServiceType } from '@/lib/bookingServices'
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
 import { getOccupiedBookingSlots, isSlotOccupiedInDb } from '@/lib/bookingSlots'
+import { formatManilaDate, formatManilaTime } from '@/lib/bookingSlotsShared'
+import { slotStartHour, hoursForWeekday, withMargin } from '@/lib/bookingTiming'
 import { CUSTOMER_SESSION_COOKIE, createSessionToken, sessionCookieOptions, sessionSecretConfigured } from '@/lib/session'
 
 export const dynamic = 'force-dynamic'
@@ -49,6 +51,7 @@ export async function POST(req: NextRequest) {
       packageId,
       notSure,
       customerNote,
+      overnightOk,
     } = body
 
     const bad =(message: string, code?: string) =>
@@ -69,10 +72,11 @@ export async function POST(req: NextRequest) {
         return bad('Too many services selected.')
       }
 
-      let selectedNames: string[] = []
+      let selected: Array<{ name: string; type: ServiceType }> = []
+      let totalHours = 0
       if (ids.length > 0) {
         const sRes = await db.query(
-          `SELECT id, service_name FROM services WHERE id = ANY($1::int[]) AND is_active = true`,
+          `SELECT id, service_name, service_type, base_duration_hours FROM services WHERE id = ANY($1::int[]) AND is_active = true`,
           [ids]
         )
         if (sRes.rows.length !== ids.length) {
@@ -83,8 +87,20 @@ export async function POST(req: NextRequest) {
             return bad('One of the selected services is no longer available. Please reload and pick again.')
           }
         }
-        const nameById = new Map<number, string>(sRes.rows.map((r: any) => [Number(r.id), String(r.service_name)]))
-        selectedNames = ids.map((id) => nameById.get(id)!).filter(Boolean)
+        const rowById = new Map<number, any>(sRes.rows.map((r: any) => [Number(r.id), r]))
+        selected = ids.map((id) => {
+          const r = rowById.get(id)!
+          return {
+            name: String(r.service_name),
+            type: (r.service_type || 'repair') as ServiceType,
+          }
+        })
+        for (const row of sRes.rows) {
+          const h = Number(row.base_duration_hours)
+          if (row.base_duration_hours != null && Number.isFinite(h) && h > 0) {
+            totalHours += h
+          }
+        }
       }
 
       let packageName: string | null = null
@@ -120,6 +136,37 @@ export async function POST(req: NextRequest) {
         return bad('Pick at least one service, choose "Not sure", or describe the problem in the notes.')
       }
 
+      let overnightNeeded = false
+      if (preferredDatetime && totalHours > 0) {
+        let shopHours = null
+        try {
+          const sHRes = await db.query('SELECT operating_hours FROM shops ORDER BY id ASC LIMIT 1')
+          if (sHRes.rows.length > 0 && sHRes.rows[0].operating_hours != null) {
+            const raw = sHRes.rows[0].operating_hours
+            shopHours = typeof raw === 'string' ? JSON.parse(raw) : raw
+          }
+        } catch (shErr) {
+          console.error('Failed to load shop operating hours for overnight check:', shErr)
+        }
+
+        const manilaDateStr = formatManilaDate(preferredDatetime)
+        const manilaWeekday = new Date(`${manilaDateStr}T12:00:00+08:00`).getDay()
+        const manilaTimeStr = formatManilaTime(preferredDatetime)
+        const startHour = slotStartHour(manilaTimeStr)
+        const shopDayHours = hoursForWeekday(shopHours, manilaWeekday)
+
+        if (shopDayHours !== null && !Number.isNaN(startHour)) {
+          overnightNeeded = startHour + withMargin(totalHours) > shopDayHours.close
+          if (overnightNeeded && overnightOk !== true) {
+            return bad(
+              'This job may finish after we close. Choose an earlier time or allow an overnight stay.',
+              'OVERNIGHT_NOT_AGREED'
+            )
+          }
+        }
+      }
+
+      const selectedNames = selected.map((s) => s.name)
       if (bookingNeedsScan(isNotSure, selectedNames) && diagnosticScanAuthorized !== true) {
         return bad('Please agree to the diagnostic scan fee to continue.', 'SCAN_FEE_NOT_AGREED')
       }
@@ -127,8 +174,9 @@ export async function POST(req: NextRequest) {
       finalConcern = buildConcernText({
         packageName,
         packageServiceNames,
-        selectedNames,
+        selected,
         notSure: isNotSure,
+        overnightOk: overnightOk === true && overnightNeeded,
         customerNote: note,
       })
     } else {

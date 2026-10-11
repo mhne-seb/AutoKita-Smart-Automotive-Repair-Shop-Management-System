@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Loader2, Plus, Car, X, Calendar, Info, ChevronRight } from 'lucide-react'
-import { BookServiceModal } from '@/components/dashboard/BookServiceModal'
 import { ServiceReportModal } from '@/components/dashboard/ServiceReportModal'
 import { FINISHED_STATUSES, trackingHref } from '@/data/trackingStages'
 
@@ -58,8 +57,6 @@ export default function MyVehiclesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [historyFor, setHistoryFor] = useState<Vehicle | null>(null)
-  // The booking and the service summary open as pop-ups over this page, so the customer keeps their place.
-  const [bookForId, setBookForId] = useState<number | null>(null)
   const [reportJobId, setReportJobId] = useState<number | null>(null)
   const router = useRouter()
 
@@ -92,7 +89,7 @@ export default function MyVehiclesPage() {
 
   const book = (id: number) => {
     setHistoryFor(null)
-    setBookForId(id)
+    router.push('/dashboard/book?vehicle=' + id)
   }
 
   if (loading) {
@@ -228,13 +225,7 @@ export default function MyVehiclesPage() {
         />
       )}
 
-      {bookForId !== null && (
-        <BookServiceModal
-          initialVehicleId={String(bookForId)}
-          onClose={() => setBookForId(null)}
-          onBooked={load}
-        />
-      )}
+
 
       {reportJobId !== null && (
         <ServiceReportModal jobId={reportJobId} onClose={() => setReportJobId(null)} />

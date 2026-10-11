@@ -30,7 +30,7 @@ export default function GoogleDonePage() {
         const next = searchParams.get('next')
         if (data.role === 'customer') {
           if (next === 'book') {
-            router.replace('/dashboard?book=1')
+            router.replace('/dashboard/book')
           } else if (next === 'vehicles') {
             router.replace('/dashboard/vehicles')
           } else {

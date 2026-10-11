@@ -12,7 +12,7 @@ export async function GET() {
 
   try {
     const servicesRes = await db.query(
-      `SELECT DISTINCT ON (s.service_name) s.id, s.service_name, s.description, s.service_type
+      `SELECT DISTINCT ON (s.service_name) s.id, s.service_name, s.description, s.service_type, s.base_duration_hours
        FROM services s
        WHERE s.is_active = true
          AND s.service_name <> $1
@@ -26,6 +26,10 @@ export async function GET() {
       name: String(row.service_name),
       type: (row.service_type || 'repair') as 'maintenance' | 'repair' | 'diagnostics',
       description: row.description ? String(row.description) : null,
+      baseDurationHours:
+        row.base_duration_hours != null && Number.isFinite(Number(row.base_duration_hours))
+          ? Number(row.base_duration_hours)
+          : null,
     }))
 
     const serviceIdByName = new Map<string, number>()
@@ -76,11 +80,23 @@ export async function GET() {
 
     const packages = Array.from(packageMap.values()).filter((p) => p.serviceIds.length > 0)
 
+    let shopHours = null
+    try {
+      const shopRes = await db.query('SELECT operating_hours FROM shops ORDER BY id ASC LIMIT 1')
+      if (shopRes.rows.length > 0 && shopRes.rows[0].operating_hours != null) {
+        const raw = shopRes.rows[0].operating_hours
+        shopHours = typeof raw === 'string' ? JSON.parse(raw) : raw
+      }
+    } catch (shopErr) {
+      console.error('[/api/customer/service-options GET] failed to load shopHours:', shopErr)
+    }
+
     return NextResponse.json(
       {
         success: true,
         packages,
         services,
+        shopHours,
       },
       {
         headers: {
