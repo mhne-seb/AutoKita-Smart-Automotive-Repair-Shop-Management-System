@@ -45,7 +45,7 @@ import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceMo
 import { NotificationsModal } from "@/components/NotificationsModal";
 import { loadCustomerNotifications } from "@/lib/notificationFeeds";
 import { ShopLoading } from "@/components/ShopLoading";
-import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
+import { DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
 import type {
   DashboardData,
   DashboardActivity,

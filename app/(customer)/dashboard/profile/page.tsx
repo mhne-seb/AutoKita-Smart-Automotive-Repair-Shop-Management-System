@@ -22,6 +22,7 @@ import {
   Trash2,
 } from "lucide-react";
 import phAddress from "@/data/ph-address.json";
+import { PASSWORD_RULE_TEXT, passwordProblem } from "@/lib/passwordPolicy";
 
 const BRAND_GRADIENT = "linear-gradient(90deg, #0b1730 0%, #1d3a68 55%, #3b6cb4 100%)";
 
@@ -250,7 +251,8 @@ function Profile() {
   };
 
   const savePassword = async () => {
-    if (pwd.next.length < 8) return toast.error("New password must be at least 8 characters.");
+    const pwdProblem = passwordProblem(pwd.next, form?.email);
+    if (pwdProblem) return toast.error(pwdProblem);
     if (pwd.next !== pwd.confirm) return toast.error("New passwords don't match.");
     setSavingPwd(true);
     try {
@@ -365,7 +367,7 @@ function Profile() {
             <Field label="Last name" value={form.last_name} onChange={(e) => set("last_name", e.target.value)} />
             <Field label="Nickname" value={form.nickname} onChange={(e) => set("nickname", e.target.value)} wide />
             <div className="sm:col-span-2">
-              <label className="text-sm font-medium">Home address</label>
+              <label className="text-sm font-medium">Address</label>
               <div className="mt-1.5 space-y-4 rounded-lg border p-4">
                 <AddressInput
                   label="House No. / Street / Subdivision"
@@ -459,7 +461,7 @@ function Profile() {
             <PasswordField label="Current password" value={pwd.current} onChange={(v) => setPwd((p) => ({ ...p, current: v }))} />
             <div>
               <PasswordField label="New password" value={pwd.next} onChange={(v) => setPwd((p) => ({ ...p, next: v }))} />
-              <p className="mt-1 text-xs text-muted-foreground">Must be at least 8 characters.</p>
+              <p className="mt-1 text-xs text-muted-foreground">{PASSWORD_RULE_TEXT}</p>
             </div>
             <PasswordField label="Confirm new password" value={pwd.confirm} onChange={(v) => setPwd((p) => ({ ...p, confirm: v }))} />
           </div>

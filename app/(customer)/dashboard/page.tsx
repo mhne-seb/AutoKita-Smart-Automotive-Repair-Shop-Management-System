@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Phone,
   Mail,
@@ -44,7 +45,7 @@ import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceMo
 import { NotificationsModal } from "@/components/NotificationsModal";
 import { loadCustomerNotifications } from "@/lib/notificationFeeds";
 import { ShopLoading } from "@/components/ShopLoading";
-import { requiresDiagnosticScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
+import { DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
 import type {
   DashboardData,
   DashboardActivity,
@@ -60,7 +61,6 @@ import { TimeslotPicker } from "@/components/TimeslotPicker";
 import { toManilaIso } from "@/lib/bookingSlotsShared";
 import { Modal } from "@/components/dashboard/Modal";
 import { STATUS_TO_STEP } from "@/data/trackingStages";
-import { BookServiceModal } from "@/components/dashboard/BookServiceModal";
 import { ServiceReportModal } from "@/components/dashboard/ServiceReportModal";
 
 function startOfToday() {
@@ -107,12 +107,11 @@ function formatMoney(v: string | number | null | undefined) {
 }
 
 function Dashboard() {
+  const router = useRouter();
   useEffect(() => { document.title = "Dashboard — AutoKita"; }, []);
 
   const [contactOpen, setContactOpen] = useState(false);
   const [notificationsModalOpen, setNotificationsModalOpen] = useState(false);
-  const [bookServiceOpen, setBookServiceOpen] = useState(false);
-  const [initialVehicleId, setInitialVehicleId] = useState<string | undefined>();
   const [reportJobId, setReportJobId] = useState<number | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalData | null>(null);
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -121,18 +120,11 @@ function Dashboard() {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('book') === '1') {
-        setBookServiceOpen(true);
         const vehicleParam = urlParams.get('vehicle');
-        if (vehicleParam && /^\d+$/.test(vehicleParam)) {
-          setInitialVehicleId(vehicleParam);
-        }
-        urlParams.delete('book');
-        urlParams.delete('vehicle');
-        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
-        window.history.replaceState({}, '', newUrl);
+        router.replace('/dashboard/book' + (vehicleParam && /^\d+$/.test(vehicleParam) ? '?vehicle=' + vehicleParam : ''));
       }
     }
-  }, []);
+  }, [router]);
 
   // Dynamic data from PostgreSQL
   const [data, setData] = useState<DashboardData | null>(null);
@@ -308,7 +300,7 @@ function Dashboard() {
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-widest text-white/60">Welcome back</div>
                   <h1 className="mt-0.5 text-2xl font-bold leading-tight md:text-3xl">
-                    {user ? (user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.nickname) : "Customer"} 👋
+                    {user ? (user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.nickname) : "Customer"}
                   </h1>
                   <p className="mt-1.5 max-w-sm text-sm text-white/75">
                     Your vehicles are being looked after. Here&apos;s what&apos;s happening today.
@@ -584,7 +576,7 @@ function Dashboard() {
             </div>
             <div className="mt-4 space-y-2">
               <button
-                onClick={() => setBookServiceOpen(true)}
+                onClick={() => router.push('/dashboard/book')}
                 className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:opacity-90 active:translate-y-0"
               >
                 <Plus className="h-4 w-4" /> Book New Service
@@ -601,7 +593,7 @@ function Dashboard() {
 
           <div className="rounded-xl border bg-card p-5">
             <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <span className="flex items-center gap-1.5"><Car className="h-3.5 w-3.5" /> Your Vehicles</span>
+              <span className="flex items-center gap-1.5"><Car className="h-3.5 w-3.5" /> My Vehicles</span>
               <Link href="/dashboard/vehicles" className="text-brand hover:underline normal-case">View all</Link>
             </div>
             <div className="mt-4 space-y-3">
@@ -621,8 +613,7 @@ function Dashboard() {
                       type={v.vehicle_type}
                       inService={inService}
                       onBook={() => {
-                        setInitialVehicleId(String(v.id));
-                        setBookServiceOpen(true);
+                        router.push('/dashboard/book?vehicle=' + v.id);
                       }}
                     />
                   );
@@ -678,13 +669,7 @@ function Dashboard() {
           onClose={() => setNotificationsModalOpen(false)}
         />
       )}
-      {bookServiceOpen && (
-        <BookServiceModal
-          initialVehicleId={initialVehicleId}
-          onClose={() => { setBookServiceOpen(false); setInitialVehicleId(undefined); }}
-          onBooked={() => fetchDashboard(true)}
-        />
-      )}
+
       {reportJobId !== null && (
         <ServiceReportModal jobId={reportJobId} onClose={() => setReportJobId(null)} />
       )}

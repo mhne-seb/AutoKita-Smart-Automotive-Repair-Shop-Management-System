@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { EMAIL_RE } from './bookingRules'
+import { passwordProblem } from './passwordPolicy'
 
 export const CODE_TTL_MINUTES = 10
 export const MAX_ATTEMPTS = 5
@@ -53,8 +54,8 @@ export function validateSignupFields({ firstName, lastName, email, password }: a
   if (!fName || fName.length > 40) return { field: 'firstName', message: 'Enter your first name (up to 40 characters).' }
   if (!lName || lName.length > 40) return { field: 'lastName', message: 'Enter your last name (up to 40 characters).' }
   if (!em || em.length > 80 || !EMAIL_RE.test(em)) return { field: 'email', message: 'Enter a valid email address.' }
-  if (pass.length < 8 || pass.length > 72) return { field: 'password', message: 'Password must be between 8 and 72 characters.' }
-  if (pass === em) return { field: 'password', message: 'Password cannot be your email address.' }
+  const passProblem = passwordProblem(pass, em)
+  if (passProblem) return { field: 'password', message: passProblem }
 
   return {
     success: true,

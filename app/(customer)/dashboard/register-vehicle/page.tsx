@@ -9,8 +9,6 @@ import {
   Wrench,
   ClipboardList,
   Info,
-  Calendar,
-  ShieldCheck,
   CheckCircle2,
   X,
   MapPin,
@@ -404,23 +402,6 @@ function RegisterVehicle() {
             <p className="mt-2 text-xs text-white/85">
               Please ensure you have the vehicle's registration documents ready for the mechanic's verification.
             </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl border bg-card p-4 text-center transition-shadow hover:shadow-sm">
-              <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-brand-soft text-brand">
-                <Calendar className="h-4 w-4" />
-              </div>
-              <div className="mt-2 text-[10px] font-semibold uppercase text-muted-foreground">Availability</div>
-              <div className="text-sm font-bold">24h Response</div>
-            </div>
-            <div className="rounded-xl border bg-card p-4 text-center transition-shadow hover:shadow-sm">
-              <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-brand-soft text-brand">
-                <ShieldCheck className="h-4 w-4" />
-              </div>
-              <div className="mt-2 text-[10px] font-semibold uppercase text-muted-foreground">Warranty</div>
-              <div className="text-sm font-bold">6 Months</div>
-            </div>
           </div>
         </aside>
       </div>

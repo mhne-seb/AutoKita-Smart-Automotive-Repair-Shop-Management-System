@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
 import { hashPassword, verifyPassword } from '@/lib/password'
+import { passwordProblem } from '@/lib/passwordPolicy'
 import { signFileUrl } from '@/lib/storage'
 import { logCustomerAccountChange } from '@/lib/audit'
 
@@ -44,12 +45,14 @@ export async function PATCH(req: NextRequest) {
 
     // Password change — only runs when a newPassword is supplied.
     if (newPassword) {
-      if (String(newPassword).length < 8) {
-        return NextResponse.json({ success: false, message: 'New password must be at least 8 characters.' }, { status: 400 })
-      }
-      const check = await db.query(`SELECT password FROM users WHERE id = $1`, [userId])
+      const check = await db.query(`SELECT password, email FROM users WHERE id = $1`, [userId])
       if (check.rows.length === 0) {
         return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
+      }
+      // Same rule as sign-up and reset (src/lib/passwordPolicy.ts).
+      const problem = passwordProblem(String(newPassword), check.rows[0].email)
+      if (problem) {
+        return NextResponse.json({ success: false, message: problem }, { status: 400 })
       }
       if (!(await verifyPassword(String(currentPassword ?? ''), check.rows[0].password))) {
         return NextResponse.json({ success: false, code: 'BAD_PASSWORD', message: 'Current password is incorrect.' }, { status: 400 })

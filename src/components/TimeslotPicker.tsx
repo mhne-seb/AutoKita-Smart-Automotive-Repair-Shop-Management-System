@@ -92,9 +92,10 @@ export interface TimeslotPickerProps {
   time: string
   onChangeDate: (d: Date) => void
   onChangeTime: (t: string) => void
+  onAvailableSlots?: (available: string[]) => void
 }
 
-export function TimeslotPicker({ date, time, onChangeDate, onChangeTime }: TimeslotPickerProps) {
+export function TimeslotPicker({ date, time, onChangeDate, onChangeTime, onAvailableSlots }: TimeslotPickerProps) {
   const [occupiedByDate, setOccupiedByDate] = useState<Record<string, string[]>>({})
   
   useEffect(() => {
@@ -119,6 +120,15 @@ export function TimeslotPicker({ date, time, onChangeDate, onChangeTime }: Times
       }
     }
   }, [date, time, occupiedByDate, onChangeTime])
+
+  useEffect(() => {
+    if (onAvailableSlots) {
+      const available = BOOKING_TIMES.filter(
+        (t) => !isPastSlot(date, t) && !isOccupiedSlot(date, t, occupiedByDate)
+      )
+      onAvailableSlots(available)
+    }
+  }, [date, occupiedByDate, onAvailableSlots])
 
   const visibleDays = useMemo(() => {
     let base = startOfToday()
