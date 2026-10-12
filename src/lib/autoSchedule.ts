@@ -5,9 +5,32 @@ import {
   DEFAULT_CLOSE_HOUR,
   type ShopHours,
 } from '@/lib/bookingTiming'
-import { TASK_GAP_MINUTES, SLOT_STEP_MINUTES } from '@/data/shopPolicy'
+import { TASK_GAP_MINUTES, SLOT_STEP_MINUTES, MAX_MECHANICS_ON_CAR } from '@/data/shopPolicy'
 
 export type Interval = { start: number; end: number } // naive milliseconds
+
+// Highest number of intervals that are active at the same time inside `window`.
+export function maxConcurrent(window: Interval, intervals: Interval[]): number {
+  const events: Array<[number, number]> = []
+  for (const iv of intervals) {
+    const s = Math.max(iv.start, window.start)
+    const e = Math.min(iv.end, window.end)
+    if (s < e) {
+      events.push([s, 1])
+      events.push([e, -1])
+    }
+  }
+  // At the same moment, process ends (-1) before starts (+1)
+  events.sort((a, b) => a[0] - b[0] || a[1] - b[1])
+  let current = 0
+  let peak = 0
+  for (const [, delta] of events) {
+    current += delta
+    if (current > peak) peak = current
+  }
+  return peak
+}
+
 export type MechanicInput = { id: number; name: string; busy: Interval[] }
 export type TaskInput = {
   id: number
@@ -169,6 +192,7 @@ export function findEarliestSlotForMechanic(
   mechanicBusy: Interval[],
   carBusy: Interval[],
   shopHours: ShopHours,
+  maxOnCar?: number,
 ): { start: number; end: number } | null {
   const gapMs = TASK_GAP_MINUTES * 60 * 1000
   const taskMs = Math.round(taskHours * 3600 * 1000)
@@ -221,12 +245,24 @@ export function findEarliestSlotForMechanic(
           if (bEnd > conflictEnd) conflictEnd = bEnd
         }
       }
-      for (const c of carBusy) {
-        const cStart = c.start - gapMs
-        const cEnd = c.end + gapMs
-        if (Math.max(chunk.start, cStart) < Math.min(chunk.end, cEnd)) {
-          if (cEnd > conflictEnd) conflictEnd = cEnd
+      if (maxOnCar === undefined) {
+        for (const c of carBusy) {
+          const cStart = c.start - gapMs
+          const cEnd = c.end + gapMs
+          if (Math.max(chunk.start, cStart) < Math.min(chunk.end, cEnd)) {
+            if (cEnd > conflictEnd) conflictEnd = cEnd
+          }
         }
+      } else if (maxConcurrent(chunk, carBusy) >= maxOnCar) {
+        // The car already has the most mechanics it may have in this part of the day.
+        // Jump to the earliest end among the car's intervals that overlap this chunk.
+        let soonest = Infinity
+        for (const c of carBusy) {
+          if (Math.max(chunk.start, c.start) < Math.min(chunk.end, c.end) && c.end < soonest) {
+            soonest = c.end
+          }
+        }
+        if (soonest !== Infinity && soonest > conflictEnd) conflictEnd = soonest
       }
     }
 
@@ -262,9 +298,16 @@ export function suggestSchedule(input: {
   carBusy: Interval[]
   tasks: TaskInput[]
   preferredMechanicId: number | null
+  poolIds?: number[] | null
+  share?: boolean
 }): { suggestions: Suggestion[]; promisedDate: string | null } {
   const { now, hours, preferredMechanicId } = input
-  const mechanics = input.mechanics.map((m) => ({
+  let workingMechanics = input.mechanics
+  if (input.poolIds && input.poolIds.length > 0) {
+    const poolSet = new Set(input.poolIds)
+    workingMechanics = input.mechanics.filter((m) => poolSet.has(m.id))
+  }
+  const mechanics = workingMechanics.map((m) => ({
     id: m.id,
     name: m.name,
     busy: [...m.busy],
@@ -275,7 +318,14 @@ export function suggestSchedule(input: {
   const gapMs = TASK_GAP_MINUTES * 60 * 1000
   const roundedNow = roundUpToStep(now)
 
-  for (const task of input.tasks) {
+  const tasksToProcess = input.share
+    ? [...input.tasks].sort((a, b) => {
+        if (b.hours !== a.hours) return b.hours - a.hours
+        return input.tasks.indexOf(a) - input.tasks.indexOf(b)
+      })
+    : input.tasks
+
+  for (const task of tasksToProcess) {
     // If blocked by a part, do not schedule
     if (task.blockedBy) {
       let reason = `Waiting for a part: ${task.blockedBy}.`
@@ -312,7 +362,7 @@ export function suggestSchedule(input: {
 
     // Earliest start cannot be before now or before the car's last scheduled task ends plus gap
     const carLatestEnd = carBusy.length > 0 ? Math.max(...carBusy.map((b) => b.end)) + gapMs : 0
-    const earliestAllowed = Math.max(roundedNow, carLatestEnd)
+    const earliestAllowed = input.share ? roundedNow : Math.max(roundedNow, carLatestEnd)
 
     // Evaluate candidates across all mechanics
     type Candidate = {
@@ -325,7 +375,14 @@ export function suggestSchedule(input: {
     const candidates: Candidate[] = []
 
     for (const mech of mechanics) {
-      const slot = findEarliestSlotForMechanic(earliestAllowed, task.hours, mech.busy, carBusy, hours)
+      const slot = findEarliestSlotForMechanic(
+        earliestAllowed,
+        task.hours,
+        mech.busy,
+        carBusy,
+        hours,
+        input.share ? MAX_MECHANICS_ON_CAR : undefined,
+      )
       if (slot) {
         candidates.push({
           mechanic: mech,
@@ -380,6 +437,14 @@ export function suggestSchedule(input: {
     })
   }
 
+  // Return suggestions in the original task order
+  if (input.share) {
+    const taskIndexMap = new Map(input.tasks.map((t, idx) => [t.id, idx]))
+    suggestions.sort(
+      (a, b) => (taskIndexMap.get(a.taskId) ?? 0) - (taskIndexMap.get(b.taskId) ?? 0),
+    )
+  }
+
   // Compute promisedDate
   // null when any task is blocked by a part or could not be scheduled, or if there are no tasks
   const hasFailedTask = suggestions.some((s) => !s.ok)
@@ -412,6 +477,7 @@ export function layoutJob(input: {
   tasks: TaskInput[]
   assignments: Record<number, number | null>
   pinned: Record<number, number>
+  share?: boolean
 }): { placements: Placement[]; promisedDate: string | null } {
   const mechanics = input.mechanics.map((m) => ({
     id: m.id,
@@ -526,23 +592,36 @@ export function layoutJob(input: {
       }
 
       let carConflict = false
-      for (const chunk of chunks) {
-        for (const c of carBusy) {
-          const cStart = c.start - gapMs
-          const cEnd = c.end + gapMs
-          if (Math.max(chunk.start, cStart) < Math.min(chunk.end, cEnd)) {
+      let carConflictReason = 'This car is busy then.'
+
+      if (input.share) {
+        for (const chunk of chunks) {
+          if (maxConcurrent(chunk, carBusy) >= MAX_MECHANICS_ON_CAR) {
             carConflict = true
+            carConflictReason = `Already ${MAX_MECHANICS_ON_CAR} mechanics on this car then.`
             break
           }
         }
-        if (carConflict) break
+      } else {
+        for (const chunk of chunks) {
+          for (const c of carBusy) {
+            const cStart = c.start - gapMs
+            const cEnd = c.end + gapMs
+            if (Math.max(chunk.start, cStart) < Math.min(chunk.end, cEnd)) {
+              carConflict = true
+              break
+            }
+          }
+          if (carConflict) break
+        }
       }
+
       if (carConflict) {
         placements.push({
           taskId: task.id,
           title: task.title,
           ok: false,
-          reason: 'This car is busy then.',
+          reason: carConflictReason,
         })
         continue
       }
@@ -569,7 +648,7 @@ export function layoutJob(input: {
     const baseStart = roundUpToStepMs(Math.max(input.now, input.start))
     const carLatestEnd =
       carBusy.length > 0 ? Math.max(...carBusy.map((b) => b.end)) + gapMs : 0
-    const earliestAllowed = Math.max(baseStart, carLatestEnd)
+    const earliestAllowed = input.share ? baseStart : Math.max(baseStart, carLatestEnd)
 
     const slot = findEarliestSlotForMechanic(
       earliestAllowed,
@@ -577,6 +656,7 @@ export function layoutJob(input: {
       chosenMech.busy,
       carBusy,
       input.hours,
+      input.share ? MAX_MECHANICS_ON_CAR : undefined,
     )
 
     if (!slot) {

@@ -5,6 +5,8 @@ import { DEFAULT_MECHANIC_CAPACITY } from '@/data/mechanicPolicy'
 import { notifyCustomer } from '@/lib/customerNotify'
 import { ROAD_TEST_TITLE } from '@/data/roadTest'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
+import { MAX_MECHANICS_ON_CAR } from '@/data/shopPolicy'
+import { maxConcurrent } from '@/lib/autoSchedule'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
@@ -163,6 +165,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         const overlaps = (proposedStart < tFinish) && (proposedFinish > tStart)
         const tooClose = (proposedStart < tFinish + BUFFER_MS) && (proposedFinish + BUFFER_MS > tStart)
 
+        const isSameMechanicRow = Boolean(mechanicId) && Number(row.mechanic_id) === Number(mechanicId)
+        const sameJobOrder = Number(row.job_order_id) === Number(jobOrderId)
+        // Different mechanics may work on one car at the same time. A task of the same job order only
+        // conflicts when the same mechanic holds it, or when either side has no mechanic yet.
+        const vehicleConflict = sameJobOrder && (!mechanicId || !row.mechanic_id)
+        if (!isSameMechanicRow && !vehicleConflict) continue
+
         if (tooClose) {
           const isSameMechanic = mechanicId && Number(row.mechanic_id) === Number(mechanicId)
           const startStr = new Date(tStart).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
@@ -177,6 +186,36 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
               message: `Scheduling conflict: ${subject} ${relation} "${row.task_title}" (${startStr} – ${finishStr}). Services cannot overlap and require at least 15 minutes buffer between tasks.`,
             },
             { status: 409 }
+          )
+        }
+      }
+
+      // At most MAX_MECHANICS_ON_CAR different mechanics on this car at the same time.
+      if (mechanicId) {
+        const otherMechanicsOnCar = conflicts.rows
+          .filter(
+            (row: any) =>
+              Number(row.job_order_id) === Number(jobOrderId) &&
+              row.mechanic_id &&
+              Number(row.mechanic_id) !== Number(mechanicId),
+          )
+          .map((row: any) => {
+            const start = new Date(row.scheduled_date).getTime()
+            const finish = row.estimated_finish
+              ? new Date(row.estimated_finish).getTime()
+              : start + Number(row.estimated_hours || 1.5) * 3600 * 1000
+            return { start, end: finish }
+          })
+        const peak =
+          maxConcurrent({ start: proposedStart, end: proposedFinish }, otherMechanicsOnCar) + 1
+        if (peak > MAX_MECHANICS_ON_CAR) {
+          return NextResponse.json(
+            {
+              success: false,
+              code: 'TOO_MANY_MECHANICS',
+              message: `Only ${MAX_MECHANICS_ON_CAR} mechanics can work on one car at the same time.`,
+            },
+            { status: 409 },
           )
         }
       }

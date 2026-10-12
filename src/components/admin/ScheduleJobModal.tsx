@@ -22,6 +22,7 @@ import {
   type Suggestion,
 } from '@/lib/autoSchedule'
 import { hoursForWeekday } from '@/lib/bookingTiming'
+import { MAX_MECHANICS_ON_CAR } from '@/data/shopPolicy'
 
 interface PlanningMechanic {
   id: number
@@ -161,6 +162,8 @@ export function ScheduleJobModal({
   })
   const [assignments, setAssignments] = useState<Record<number, number | null>>({})
   const [pinned, setPinned] = useState<Record<number, { date: string; time: string }>>({})
+  const [pool, setPool] = useState<number[]>([])
+  const [share, setShare] = useState(false)
 
   const loadSuggestion = () => {
     setLoading(true)
@@ -235,6 +238,27 @@ export function ScheduleJobModal({
         setAssignments(initialAssignments)
         setPinned({})
 
+        // Initial pool and share
+        const okMechs = Array.from(
+          new Set(
+            json.suggestions
+              .filter((s): s is Extract<Suggestion, { ok: true }> => s.ok)
+              .map((s) => s.mechanicId),
+          ),
+        )
+        let initialPool: number[] = okMechs
+        if (initialPool.length === 0) {
+          if (json.planning.preferredMechanicId != null) {
+            initialPool = [json.planning.preferredMechanicId]
+          } else if (json.planning.mechanics.length > 0) {
+            initialPool = [json.planning.mechanics[0].id]
+          } else {
+            initialPool = []
+          }
+        }
+        setPool(initialPool)
+        setShare(false)
+
         setLoading(false)
       })
       .catch((err) => {
@@ -246,6 +270,72 @@ export function ScheduleJobModal({
   useEffect(() => {
     loadSuggestion()
   }, [jobOrderId])
+
+  // Single shared auto-schedule function
+  const runAuto = (nextPool: number[], nextShare: boolean) => {
+    if (!data?.planning || !start.date || !start.time) return
+    const now = parseNaiveTimestamp(data.planning.nowIso)
+    const startMs = parseNaiveTimestamp(`${start.date}T${start.time}:00`)
+    const effectiveNow = Math.max(now, Number.isNaN(startMs) ? now : startMs)
+
+    const mechanics: MechanicInput[] = data.planning.mechanics.map((m) => ({
+      id: m.id,
+      name: m.name,
+      busy: m.busy.map((b) => ({
+        start: parseNaiveTimestamp(b.start),
+        end: parseNaiveTimestamp(b.end),
+      })),
+    }))
+
+    const carBusy: Interval[] = data.planning.carBusy.map((b) => ({
+      start: parseNaiveTimestamp(b.start),
+      end: parseNaiveTimestamp(b.end),
+    }))
+
+    const res = suggestSchedule({
+      now: effectiveNow,
+      hours: data.planning.shopHours,
+      mechanics,
+      carBusy,
+      tasks: data.planning.tasks,
+      preferredMechanicId: data.planning.preferredMechanicId,
+      poolIds: nextPool,
+      share: nextShare,
+    })
+
+    const nextAssignments: Record<number, number | null> = {}
+    for (const t of data.planning.tasks) {
+      const s = res.suggestions.find((sug) => sug.taskId === t.id)
+      nextAssignments[t.id] = s && s.ok ? s.mechanicId : null
+    }
+    setAssignments(nextAssignments)
+    setPinned({})
+  }
+
+  const handleSuggestForMe = () => {
+    runAuto(pool, share)
+  }
+
+  const handleRemoveFromPool = (mechId: number) => {
+    if (pool.length <= 1) return
+    const nextPool = pool.filter((id) => id !== mechId)
+    const nextShare = nextPool.length < 2 ? false : share
+    setPool(nextPool)
+    if (nextPool.length < 2) setShare(false)
+    runAuto(nextPool, nextShare)
+  }
+
+  const handleAddToPool = (mechId: number) => {
+    if (pool.includes(mechId)) return
+    const nextPool = [...pool, mechId]
+    setPool(nextPool)
+    runAuto(nextPool, share)
+  }
+
+  const handleToggleShare = (nextShare: boolean) => {
+    setShare(nextShare)
+    runAuto(pool, nextShare)
+  }
 
   // Recompute preview with layoutJob
   const { placements, promisedDate } = useMemo(() => {
@@ -288,12 +378,15 @@ export function ScheduleJobModal({
       tasks: data.planning.tasks,
       assignments,
       pinned: pinnedMs,
+      share,
     })
-  }, [data?.planning, start.date, start.time, assignments, pinned])
+  }, [data?.planning, start.date, start.time, assignments, pinned, share])
 
-  // Suggest for me
-  const handleSuggestForMe = () => {
-    if (!data?.planning || !start.date || !start.time) return
+  // Comparison plans (shared vs single mechanic)
+  const { sharedReady, singleReady } = useMemo(() => {
+    if (!data?.planning || !start.date || !start.time) {
+      return { sharedReady: null, singleReady: null }
+    }
     const now = parseNaiveTimestamp(data.planning.nowIso)
     const startMs = parseNaiveTimestamp(`${start.date}T${start.time}:00`)
     const effectiveNow = Math.max(now, Number.isNaN(startMs) ? now : startMs)
@@ -312,27 +405,65 @@ export function ScheduleJobModal({
       end: parseNaiveTimestamp(b.end),
     }))
 
-    const res = suggestSchedule({
-      now: effectiveNow,
-      hours: data.planning.shopHours,
-      mechanics,
-      carBusy,
-      tasks: data.planning.tasks,
-      preferredMechanicId: data.planning.preferredMechanicId,
-    })
+    const sharedReady =
+      pool.length >= 2
+        ? suggestSchedule({
+            now: effectiveNow,
+            hours: data.planning.shopHours,
+            mechanics,
+            carBusy,
+            tasks: data.planning.tasks,
+            preferredMechanicId: data.planning.preferredMechanicId,
+            poolIds: pool,
+            share: true,
+          }).promisedDate
+        : null
 
-    const nextAssignments: Record<number, number | null> = {}
-    for (const t of data.planning.tasks) {
-      const s = res.suggestions.find((sug) => sug.taskId === t.id)
-      nextAssignments[t.id] = s && s.ok ? s.mechanicId : null
+    let bestSingleMs = Infinity
+    let singleReady: string | null = null
+
+    for (const mechId of pool) {
+      const res = suggestSchedule({
+        now: effectiveNow,
+        hours: data.planning.shopHours,
+        mechanics,
+        carBusy,
+        tasks: data.planning.tasks,
+        preferredMechanicId: data.planning.preferredMechanicId,
+        poolIds: [mechId],
+        share: false,
+      })
+      if (res.promisedDate) {
+        const ms = parseNaiveTimestamp(res.promisedDate)
+        if (!Number.isNaN(ms) && ms < bestSingleMs) {
+          bestSingleMs = ms
+          singleReady = res.promisedDate
+        }
+      }
     }
-    setAssignments(nextAssignments)
-    setPinned({})
-  }
+
+    return { sharedReady, singleReady }
+  }, [data?.planning, start.date, start.time, pool])
 
   const okPlacements = placements.filter(
     (p): p is Extract<Placement, { ok: true }> => p.ok,
   )
+
+  const mechanicTotals = useMemo(() => {
+    if (!data?.planning) return []
+    const map = new Map<number, number>()
+    for (const p of okPlacements) {
+      map.set(p.mechanicId, (map.get(p.mechanicId) ?? 0) + p.hours)
+    }
+    const result: Array<{ id: number; name: string; hours: number }> = []
+    for (const [id, totalHours] of map.entries()) {
+      const mech = data.planning.mechanics.find((m) => m.id === id)
+      if (mech) {
+        result.push({ id, name: mech.name, hours: totalHours })
+      }
+    }
+    return result
+  }, [data?.planning, okPlacements])
 
   const handleSave = async () => {
     if (okPlacements.length === 0) return
@@ -394,10 +525,10 @@ export function ScheduleJobModal({
     return `Shop closes at ${formatTime(closeH, closeM)}.`
   }, [data?.planning, start.date])
 
-  const mechanicGroups = useMemo(() => {
+  const availableToAdd = useMemo(() => {
     if (!data?.planning) return []
-    return [{ label: 'Mechanics', options: data.planning.mechanics }]
-  }, [data?.planning])
+    return data.planning.mechanics.filter((m) => !pool.includes(m.id))
+  }, [data?.planning, pool])
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
@@ -478,9 +609,10 @@ export function ScheduleJobModal({
               </div>
             )}
 
-            {/* Start controls row */}
-            <div className="space-y-1.5">
-              <div className="flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+            {/* Controls block */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 space-y-3">
+              {/* Row 1: Start date, Start time, Auto-schedule button */}
+              <div className="flex flex-wrap items-end gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Start date
@@ -517,7 +649,76 @@ export function ScheduleJobModal({
                   <WandSparkles size={14} /> Auto-schedule
                 </button>
               </div>
-              <p className="text-[11px] text-slate-500 px-1">
+
+              {/* Row 2: Mechanics chips */}
+              <div className="space-y-1.5 pt-2 border-t border-slate-200/60">
+                <span className="block text-xs font-semibold text-slate-700">Mechanics</span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {pool.map((mechId) => {
+                    const mech = data.planning.mechanics.find((m) => m.id === mechId)
+                    if (!mech) return null
+                    return (
+                      <span
+                        key={mechId}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700"
+                      >
+                        {mech.name}
+                        {pool.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFromPool(mechId)}
+                            className="hover:text-indigo-900 font-bold ml-0.5 leading-none"
+                            aria-label={`Remove ${mech.name}`}
+                          >
+                            ×
+                          </button>
+                        )}
+                      </span>
+                    )
+                  })}
+                  {availableToAdd.length > 0 && (
+                    <select
+                      value=""
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          handleAddToPool(Number(e.target.value))
+                        }
+                      }}
+                      className="rounded-full border border-dashed border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-600 hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                      aria-label="Add mechanic to job"
+                    >
+                      <option value="">+ Add mechanic</option>
+                      {availableToAdd.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              </div>
+
+              {/* Row 3: Share the work checkbox */}
+              {pool.length >= 2 && (
+                <div className="space-y-1 pt-1">
+                  <label className="flex items-center gap-2 text-xs font-medium text-slate-800 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={share}
+                      onChange={(e) => handleToggleShare(e.target.checked)}
+                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span>Share the work between them</span>
+                  </label>
+                  <p className="text-[11px] text-slate-500 pl-5">
+                    Longest service first, to whoever finishes it earliest. At most{' '}
+                    {MAX_MECHANICS_ON_CAR} mechanics work on one car at the same time.
+                  </p>
+                </div>
+              )}
+
+              {/* Row 4: Hint line */}
+              <p className="text-[11px] text-slate-500 pt-1 border-t border-slate-200/40">
                 Auto-schedule replaces your mechanic and time choices.
               </p>
             </div>
@@ -538,6 +739,14 @@ export function ScheduleJobModal({
                 const isBlocked = Boolean(task.blockedBy)
 
                 const typePill = serviceTypeLabel(task.serviceType)
+
+                const onJobMechs = data.planning.mechanics.filter((m) =>
+                  pool.includes(m.id),
+                )
+                const otherMechs = data.planning.mechanics.filter(
+                  (m) => !pool.includes(m.id),
+                )
+                const useGroups = onJobMechs.length > 0 && otherMechs.length > 0
 
                 return (
                   <div
@@ -589,34 +798,46 @@ export function ScheduleJobModal({
                           value={assignments[task.id] ?? ''}
                           onChange={(e) => {
                             const val = e.target.value ? Number(e.target.value) : null
-                            setAssignments((prev) => ({ ...prev, [task.id]: val }))
+                            if (val != null) {
+                              setAssignments((prev) => ({ ...prev, [task.id]: val }))
+                              if (!pool.includes(val)) {
+                                setPool((prev) => [...prev, val])
+                              }
+                            }
                           }}
                           disabled={isBlocked}
                           aria-label={`Mechanic for ${task.title}`}
                           className="w-full min-w-0 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-800 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50 disabled:bg-slate-100"
                         >
-                          {/* The empty entry only shows while nobody is assigned yet. */}
                           {assignments[task.id] == null && (
                             <option value="" disabled>
                               Not assigned
                             </option>
                           )}
-                          {/* One group is just a plain list of names; group headings return when there are several. */}
-                          {mechanicGroups.length === 1
-                            ? mechanicGroups[0].options.map((m) => (
-                                <option key={m.id} value={m.id}>
-                                  {m.name}
-                                </option>
-                              ))
-                            : mechanicGroups.map((group) => (
-                                <optgroup key={group.label} label={group.label}>
-                                  {group.options.map((m) => (
-                                    <option key={m.id} value={m.id}>
-                                      {m.name}
-                                    </option>
-                                  ))}
-                                </optgroup>
-                              ))}
+                          {useGroups ? (
+                            <>
+                              <optgroup label="On this job">
+                                {onJobMechs.map((m) => (
+                                  <option key={m.id} value={m.id}>
+                                    {m.name}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="Other mechanics">
+                                {otherMechs.map((m) => (
+                                  <option key={m.id} value={m.id}>
+                                    {m.name}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            </>
+                          ) : (
+                            data.planning.mechanics.map((m) => (
+                              <option key={m.id} value={m.id}>
+                                {m.name}
+                              </option>
+                            ))
+                          )}
                         </select>
                       </div>
 
@@ -742,10 +963,18 @@ export function ScheduleJobModal({
               })}
             </div>
 
+            {/* Per mechanic totals under table */}
+            {pool.length >= 2 && mechanicTotals.length > 0 && (
+              <p className="text-[11px] text-slate-500 px-1">
+                Work per mechanic:{' '}
+                {mechanicTotals.map((m) => `${m.name} ${formatHours(m.hours)}`).join(', ')}
+              </p>
+            )}
+
             {/* Target completion */}
             <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
               <Clock size={18} className="text-slate-400 shrink-0" />
-              <div>
+              <div className="space-y-0.5">
                 <p className="text-[11px] text-slate-500">Target completion</p>
                 <p className="text-sm font-semibold text-slate-900">
                   {data.alreadyPromised
@@ -754,6 +983,21 @@ export function ScheduleJobModal({
                     ? `Ready by ${formatPromisedDate(promisedDate)}`
                     : 'Ready-by date will be set when every task has a time.'}
                 </p>
+                {/* Comparison lines: compare automatic plans from the same start; ignore row edits */}
+                {!data.alreadyPromised && (
+                  <>
+                    {share && singleReady && singleReady !== promisedDate && (
+                      <p className="text-[11px] text-slate-500">
+                        One mechanic alone: Ready by {formatPromisedDate(singleReady)}
+                      </p>
+                    )}
+                    {!share && pool.length >= 2 && sharedReady && sharedReady !== promisedDate && (
+                      <p className="text-[11px] text-slate-500">
+                        If shared: Ready by {formatPromisedDate(sharedReady)}
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
             </div>
 
