@@ -6,6 +6,7 @@ import { Car, FileText, Clock, AlertCircle, CreditCard, Mail, ShieldCheck, Check
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { TwoFAModal } from "@/components/dashboard/TwoFAModal";
 import { toast } from "sonner";
+import { serviceModeFromDb } from "@/lib/serviceMode";
 import {
   getQuotationData,
   requestQuotationOtp,
@@ -38,6 +39,7 @@ type JobOrder = {
   vehicle_model: string;
   vehicle_year: number;
   plate_number: string;
+  service_mode?: string | null;
 };
 
 type PaymentStatus = "none" | "pending" | "confirmed" | "rejected";
@@ -221,7 +223,12 @@ function Quotation() {
   if (quotationStatus === 'preparing' && !locked) {
     return (
       <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-        <StageStepper active={stageForStatus(jobOrder.status)} viewing="quotation" jobOrderId={jobOrder.job_order_id} />
+        <StageStepper
+          active={stageForStatus(jobOrder.status)}
+          viewing="quotation"
+          jobOrderId={jobOrder.job_order_id}
+          serviceMode={serviceModeFromDb(jobOrder.service_mode)}
+        />
         <div className="rounded-xl border bg-card p-12 text-center text-muted-foreground">
           <Wrench className="mx-auto mb-4 h-12 w-12 text-brand/50" />
           <h2 className="text-lg font-bold text-foreground">Preparing Quotation</h2>
@@ -233,7 +240,12 @@ function Quotation() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active={stageForStatus(jobOrder.status)} viewing="quotation" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper
+        active={stageForStatus(jobOrder.status)}
+        viewing="quotation"
+        jobOrderId={jobOrder.job_order_id}
+        serviceMode={serviceModeFromDb(jobOrder.service_mode)}
+      />
 
       {locked && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">

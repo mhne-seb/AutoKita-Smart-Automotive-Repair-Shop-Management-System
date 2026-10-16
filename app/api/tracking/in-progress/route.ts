@@ -5,6 +5,7 @@ import { getFindingsForJobOrder } from '@/lib/findings'
 import { getJobOrderBill } from '@/lib/jobOrderBill'
 import { getLatestPullOut } from '@/lib/pullOut'
 import { signFileUrls } from '@/lib/storage'
+import { getServiceModeValue } from '@/lib/jobOrderMode'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -34,6 +35,8 @@ export async function GET(request: NextRequest) {
       const { rows } = await db.query(`SELECT * FROM get_customer_active_job_order($1)`, [userId])
       jobOrder = rows[0] ?? null
     }
+
+    if (jobOrder) jobOrder.service_mode = await getServiceModeValue(jobOrder.job_order_id)
 
     const tasks = jobOrder
       ? await (async () => {

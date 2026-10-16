@@ -268,6 +268,7 @@ export async function getReceivedData(userId: number, jobOrderId?: number) {
       vehicle_model: string
       vehicle_year: number
       plate_number: string
+      service_mode?: string | null
     } | null
     services: {
       id: number
@@ -311,6 +312,7 @@ export async function getInspectingData(userId: number, jobOrderId?: number) {
       vehicle_model: string
       vehicle_year: number
       plate_number: string
+      service_mode?: string | null
     } | null
     preDiagnostic: { 
       mechanic_notes: string | null
@@ -501,6 +503,7 @@ export async function getTestingData(userId: number, jobOrderId?: number) {
       vehicle_model: string
       vehicle_year: number
       plate_number: string
+      service_mode?: string | null
     } | null
     history: RoadTestAttempt[]
     current: RoadTestAttempt | null
@@ -528,6 +531,7 @@ export async function getCompletedData(userId: number, jobOrderId?: number) {
       vehicle_model: string
       vehicle_year: number
       plate_number: string
+      service_mode?: string | null
     } | null
     logs: { id: number; activity_description: string; log_time: string }[]
     warranties: {

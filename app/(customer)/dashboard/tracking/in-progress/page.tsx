@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getInProgressData } from "@/controllers/serviceProgressController";
+import { serviceModeFromDb } from "@/lib/serviceMode";
 import { Lightbox } from "@/components/Lightbox";
 import { isRoadTest } from "@/data/roadTest";
 import type { ServiceFinding } from "@/data/types";
@@ -79,6 +80,7 @@ type JobOrder = {
   downpayment_received_at?: string;
   released_at?: string;
   release_photo_url?: string;
+  service_mode?: string | null;
 };
 
 type TimelineEntry = {
@@ -201,12 +203,16 @@ function InProgress() {
       )
     : 0;
 
+  const isHome = serviceModeFromDb(jobOrder?.service_mode) === 'home';
+
   const timeline: TimelineEntry[] = jobOrder
     ? [
         {
           key: "received",
-          label: "Vehicle Received",
-          detail: `${jobOrder.vehicle_year} ${jobOrder.vehicle_model} checked in at the shop.`,
+          label: isHome ? "Mechanic Arrived" : "Vehicle Received",
+          detail: isHome
+            ? `The mechanic arrived at your address for the ${jobOrder.vehicle_year} ${jobOrder.vehicle_model}.`
+            : `${jobOrder.vehicle_year} ${jobOrder.vehicle_model} checked in at the shop.`,
           time: fmtWhen(jobOrder.date_arrived),
           status: "completed",
         },
@@ -289,7 +295,12 @@ function InProgress() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active={stageForStatus(jobOrder.status)} viewing="in-progress" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper
+        active={stageForStatus(jobOrder.status)}
+        viewing="in-progress"
+        jobOrderId={jobOrder.job_order_id}
+        serviceMode={serviceModeFromDb(jobOrder.service_mode)}
+      />
 
       {isHistorical && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">

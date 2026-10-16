@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Car, Clock, ShieldCheck, AlertCircle, Store } from "lucide-react";
+import { Car, Clock, ShieldCheck, AlertCircle, Store, Home } from "lucide-react";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getReceivedData } from "@/controllers/serviceProgressController";
 import { ShopLoading } from "@/components/ShopLoading";
+import { serviceModeFromDb } from "@/lib/serviceMode";
 
 function Received() {
   useEffect(() => { document.title = "Vehicle Received — AutoKita"; }, []);
@@ -36,6 +37,13 @@ function Received() {
   }, [jobOrderIdParam]);
 
   const jobOrder = data?.jobOrder ?? null;
+  const isHome = serviceModeFromDb(jobOrder?.service_mode) === 'home';
+
+  useEffect(() => {
+    if (jobOrder && isHome) {
+      document.title = "Home Visit — AutoKita";
+    }
+  }, [jobOrder, isHome]);
 
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
   const isArrived = Boolean(jobOrder?.date_arrived);
@@ -66,7 +74,12 @@ function Received() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active={stageForStatus(jobOrder.status, jobOrder.date_arrived)} viewing="received" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper
+        active={stageForStatus(jobOrder.status, jobOrder.date_arrived)}
+        viewing="received"
+        jobOrderId={jobOrder.job_order_id}
+        serviceMode={serviceModeFromDb(jobOrder.service_mode)}
+      />
 
       {isHistorical && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
@@ -81,17 +94,19 @@ function Received() {
               <div className="flex items-start gap-5">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-brand-foreground"><Car className="h-6 w-6" /></div>
                 <div>
-                  <h2 className="text-2xl font-bold">Your Vehicle is Checked In</h2>
+                  <h2 className="text-2xl font-bold">{isHome ? 'The Mechanic Has Arrived' : 'Your Vehicle is Checked In'}</h2>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Vehicle: {jobOrder.vehicle_year} {jobOrder.vehicle_model} ({jobOrder.plate_number})
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs">
-                      <Clock className="h-3 w-3" /> Checked in {arrivedAt}
+                      <Clock className="h-3 w-3" /> {isHome ? `Arrived ${arrivedAt}` : `Checked in ${arrivedAt}`}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs">
-                      <ShieldCheck className="h-3 w-3" /> Security Verified
-                    </span>
+                    {!isHome && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs">
+                        <ShieldCheck className="h-3 w-3" /> Security Verified
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -100,18 +115,20 @@ function Received() {
             <div className="rounded-2xl border-2 border-amber-200 bg-amber-50/70 p-6 shadow-xs">
               <div className="flex items-start gap-5">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-600 text-white shadow-sm">
-                  <Store className="h-6 w-6" />
+                  {isHome ? <Home className="h-6 w-6" /> : <Store className="h-6 w-6" />}
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <h2 className="text-2xl font-bold text-amber-950">Booking Confirmed — Awaiting Vehicle Drop-off</h2>
+                    <h2 className="text-2xl font-bold text-amber-950">
+                      {isHome ? 'Booking Confirmed — Awaiting Mechanic Arrival' : 'Booking Confirmed — Awaiting Vehicle Drop-off'}
+                    </h2>
                     <p className="mt-1 text-sm text-amber-900/80">
                       Vehicle: {jobOrder.vehicle_year} {jobOrder.vehicle_model} ({jobOrder.plate_number})
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-semibold text-amber-900">
-                      <Store className="h-3.5 w-3.5 text-amber-600" /> Awaiting Arrival at Shop
+                      {isHome ? <Home className="h-3.5 w-3.5 text-amber-600" /> : <Store className="h-3.5 w-3.5 text-amber-600" />} {isHome ? 'Mechanic Not Arrived Yet' : 'Awaiting Arrival at Shop'}
                     </span>
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-white px-3 py-1 text-xs text-amber-800">
                       <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Booking Confirmed
@@ -119,10 +136,12 @@ function Received() {
                   </div>
                   <div className="rounded-xl border border-amber-200 bg-white/90 p-4 text-xs text-amber-900 leading-relaxed">
                     <p className="font-semibold text-amber-950 flex items-center gap-1.5">
-                      <Store className="h-4 w-4 text-amber-600" /> Next Step: Drop off your vehicle
+                      {isHome ? <Home className="h-4 w-4 text-amber-600" /> : <Store className="h-4 w-4 text-amber-600" />} {isHome ? 'Next Step: Be at your address' : 'Next Step: Drop off your vehicle'}
                     </p>
                     <p className="mt-1">
-                      Your booking has been approved by our team! Please bring your vehicle to AutoKita Repair Shop. Once our shop staff receives and securely stores your vehicle in our shop, check-in will be confirmed and the pre-diagnostic inspection will begin.
+                      {isHome
+                        ? "Your booking has been approved by our team! Our mechanic will come to your address at the time you chose. Please make sure someone is there to meet the mechanic. The inspection starts once the mechanic arrives."
+                        : "Your booking has been approved by our team! Please bring your vehicle to AutoKita Repair Shop. Once our shop staff receives and securely stores your vehicle in our shop, check-in will be confirmed and the pre-diagnostic inspection will begin."}
                     </p>
                   </div>
                 </div>
@@ -137,6 +156,8 @@ function Received() {
             <p className="mt-2 text-xs text-muted-foreground">
               {isArrived
                 ? "A certified AutoKita technician has been assigned to your vehicle and will begin the pre-diagnostic shortly."
+                : isHome
+                ? "A certified AutoKita technician has been reserved for your vehicle. They will come to your address for the inspection."
                 : "A certified AutoKita technician has been reserved for your vehicle. Drop off your vehicle at the shop to initiate check-in and inspection."}
             </p>
           </div>

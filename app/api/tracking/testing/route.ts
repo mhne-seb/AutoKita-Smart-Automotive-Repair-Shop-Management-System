@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
 import { getRoadTestHistory, currentAttempt } from '@/lib/roadTest'
+import { getServiceModeValue } from '@/lib/jobOrderMode'
 
 // Customer view of the Testing stage: the job order plus every road-test
 // attempt (get_road_test_history), read-only. Same userId / jobOrderId
@@ -26,6 +27,8 @@ export async function GET(request: NextRequest) {
       const { rows } = await db.query(`SELECT * FROM get_customer_active_job_order($1)`, [userId])
       jobOrder = rows[0] ?? null
     }
+
+    if (jobOrder) jobOrder.service_mode = await getServiceModeValue(jobOrder.job_order_id)
 
     const history = jobOrder ? await getRoadTestHistory(jobOrder.job_order_id) : []
     // Whether every service is done — tells the customer "waiting for the

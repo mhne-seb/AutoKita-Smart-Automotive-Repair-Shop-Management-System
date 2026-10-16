@@ -11,6 +11,7 @@ import { getCompletedData, submitBalancePayment, applyVoucher } from "@/controll
 import { fetchJobOrderPdfData, generateJobOrderPdf } from "@/lib/jobOrderPdf";
 import { ShopLoading } from "@/components/ShopLoading";
 import { VOUCHER_CODE_PATTERN } from "@/data/voucherRules";
+import { serviceModeFromDb } from "@/lib/serviceMode";
 
 function formatMoney(v: string | number | null | undefined) {
   const n = Number(v ?? 0);
@@ -156,7 +157,12 @@ function Completed() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active={stageForStatus(jobOrder.status)} viewing={jobOrder.status === "completed" ? "billing" : "completed"} jobOrderId={jobOrder.job_order_id} />
+      <StageStepper
+        active={stageForStatus(jobOrder.status)}
+        viewing={jobOrder.status === "completed" ? "billing" : "completed"}
+        jobOrderId={jobOrder.job_order_id}
+        serviceMode={serviceModeFromDb(jobOrder.service_mode)}
+      />
 
       <div className="relative overflow-hidden rounded-2xl bg-brand-soft/60 p-8">
         {/* Decoration only — it sits over the Download button, so it must not take the click. */}
