@@ -11,6 +11,9 @@ import { getJobOrders, checkInJobOrder, getJobOrderDetails, type JobOrderDetails
 import { arrivalWording } from '@/lib/serviceMode'
 import { JobOrderCard, Stage, stageOrder, stageLabels } from '@/data/types'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
+import { RequestedServices } from '@/components/admin/RequestedServices'
+import { parseConcernText } from '@/lib/concernText'
+import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 
 type TabKey = 'all' | Stage
 
@@ -502,8 +505,15 @@ export default function page() {
                   const StageIcon = stageIcons[c.stage]
                   const w = arrivalWording(c.serviceMode ?? 'shop')
                   const servicesList = c.service.split(', ').filter(Boolean)
-                  const firstService = servicesList[0] || 'No services listed'
-                  const moreCount = servicesList.length - 1
+                  // The job order's services fill in as the quotation is built. Until then it holds only the scan
+                  // fee (if any), so the customer's own request is the better thing to show.
+                  const quotedList = servicesList.filter((n) => n !== DIAGNOSTIC_SCAN_SERVICE_NAME)
+                  const request = parseConcernText(c.request)
+                  const requestLabel = request.plain ?? request.category ?? request.groups[0]?.items[0] ?? null
+                  const showRequest = quotedList.length === 0 && requestLabel !== null
+                  const shownList = quotedList.length > 0 ? quotedList : servicesList
+                  const firstService = shownList[0] || 'No services listed'
+                  const moreCount = shownList.length - 1
                   const isOpen = openId === c.id
 
                   return (
@@ -548,7 +558,19 @@ export default function page() {
                           </div>
                         </td>
                         <td className="px-4 py-4 text-sm">
-                          {c.service === 'No services listed' ? (
+                          {showRequest ? (
+                            <div>
+                              <p className="max-w-[16rem] break-words font-semibold text-foreground line-clamp-2">{requestLabel}</p>
+                              <p className="text-xs text-muted-foreground">Customer&apos;s request</p>
+                              {c.serviceMode === 'home' && (
+                                <div className="mt-1">
+                                  <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand">
+                                    Home service
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          ) : c.service === 'No services listed' ? (
                             <span className="text-muted-foreground">No services listed</span>
                           ) : (
                             <div>
@@ -665,35 +687,42 @@ export default function page() {
                                 return (
                                   <div className="space-y-5">
                                     <div className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
-                                      {/* Services (spans the full row) */}
-                                      <div className="col-span-full">
-                                        <p className="text-xs text-muted-foreground">
-                                          Services ({d.services.length})
-                                        </p>
-                                        <div className="mt-1.5 flex flex-wrap gap-1.5">
-                                          {d.services.length > 0 ? (
-                                            d.services.map((s, idx) => (
-                                              <span
-                                                key={idx}
-                                                className="rounded-lg border border-border bg-card px-2 py-1 text-xs text-foreground"
-                                              >
-                                                {s}
-                                              </span>
-                                            ))
-                                          ) : (
-                                            <span className="text-xs text-muted-foreground">No services listed</span>
-                                          )}
+                                      {/* What the customer asked for at booking */}
+                                      {d.request && (
+                                        <div className="col-span-full">
+                                          <p className="text-xs text-muted-foreground">Customer&apos;s request</p>
+                                          <RequestedServices raw={d.request} />
                                         </div>
-                                      </div>
+                                      )}
+
+                                      {/* Services on the job order: only once the quotation has services (the scan fee alone is not shown) */}
+                                      {d.services.some((n) => n !== DIAGNOSTIC_SCAN_SERVICE_NAME) && (
+                                        <div className="col-span-full">
+                                          <p className="text-xs text-muted-foreground">
+                                            On the job order ({d.services.length})
+                                          </p>
+                                          <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                            {d.services.length > 0 ? (
+                                              d.services.map((s, idx) => (
+                                                <span
+                                                  key={idx}
+                                                  className="rounded-lg border border-border bg-card px-2 py-1 text-xs text-foreground"
+                                                >
+                                                  {s}
+                                                </span>
+                                              ))
+                                            ) : (
+                                              <span className="text-xs text-muted-foreground">No services listed</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      )}
 
                                       {/* Customer */}
                                       <div>
                                         <p className="text-xs text-muted-foreground">Customer</p>
                                         <div className="mt-1 space-y-0.5 text-sm text-foreground">
                                           <p className="font-medium">{c.customer}</p>
-                                          {d.customerId && (
-                                            <p className="text-xs text-muted-foreground">{d.customerId}</p>
-                                          )}
                                           {d.phone && (
                                             <p className="text-xs text-muted-foreground">{d.phone}</p>
                                           )}

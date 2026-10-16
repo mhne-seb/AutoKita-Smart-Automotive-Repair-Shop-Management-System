@@ -8,6 +8,7 @@ async function loadExtras(jobOrderId: string) {
     `SELECT
        st.service_mode::text AS service_mode,
        st.home_service_address,
+       st.customer_concern,
        (st.preferred_datetime AT TIME ZONE 'Asia/Manila')::text AS preferred_datetime,
        COALESCE(
          (jo.date_promised AT TIME ZONE 'Asia/Manila')::text,

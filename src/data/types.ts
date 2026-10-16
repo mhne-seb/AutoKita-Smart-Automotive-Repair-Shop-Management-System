@@ -45,6 +45,9 @@ export interface JobOrderCard {
   // Place in line (1 = served first). null when the job order is not waiting
   // for or receiving work (finished, released or cancelled).
   queueNo?: number | null
+  // What the customer asked for at booking (service_tickets.customer_concern). The job order's own
+  // services only fill in as the quotation is built, so before that this is the real request.
+  request?: string | null
 }
 
 export type FindingStatus = 'ok' | 'needs-attention' | 'urgent'

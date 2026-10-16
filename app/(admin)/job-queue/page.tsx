@@ -39,6 +39,7 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { PROVINCES, SERVICE_CATEGORIES, YEARS } from '@/data/ticketFormOptions'
 import { isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
 import { formatVisitWindow } from '@/lib/bookingSlotsShared'
+import { RequestedServices } from '@/components/admin/RequestedServices'
 import { MAX_EMAIL, MAX_MODEL, MAX_NAME, parseMileage, splitFullName } from '@/lib/bookingRules'
 
 export type JobStatus = 'Pending' | 'In Progress' | 'Approved' | 'Cancelled' | 'Completed'
@@ -614,9 +615,6 @@ export default function page() {
                       <div>
                         <p className="font-semibold text-foreground">{c.name}</p>
                         <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Hash size={11} className="shrink-0" /> {c.customerId}
-                        </p>
-                        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
                           <Phone size={11} className="shrink-0" /> {c.phone}
                         </p>
                       </div>
@@ -775,76 +773,110 @@ export default function page() {
 
 function ApproveModal({ job, busy, onClose, onConfirm }: { job: Job; busy: boolean; onClose: () => void; onConfirm: (checkInNow: boolean) => void }) {
   const [checkInNow, setCheckInNow] = useState(false)
+  const isHome = job.serviceMode === 'Home Service'
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-xl bg-background p-6 shadow-2xl">
-        <div className="flex items-start justify-between">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand/10 text-brand">
-            <CheckCircle2 size={20} />
+      <div className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-background shadow-2xl">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand/10 text-brand">
+              <CheckCircle2 size={20} />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold leading-tight text-foreground">Approve this booking?</h3>
+              <p className="text-xs text-muted-foreground">Booking #{job.ticketId}. A job order is created when you approve.</p>
+            </div>
           </div>
           <button onClick={onClose} className="rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0" aria-label="Close">
             <X size={18} />
           </button>
         </div>
 
-        <h3 className="mt-4 text-lg font-bold text-foreground">Approve job order?</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Review the details before approving this ticket.</p>
-
-        <dl className="mt-4 space-y-2 rounded-lg bg-accent/50 p-4 text-sm">
-          <div className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">Customer</dt>
-            <dd className="font-medium text-foreground">{job.name}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">Vehicle</dt>
-            <dd className="font-medium text-foreground">
-              {job.vehicle} — {job.plate}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">Services</dt>
-            <dd className="text-right font-medium text-foreground">{job.servicesNeeded.join(', ')}</dd>
-          </div>
-          {job.preferredDate && (
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">{job.serviceMode === 'Home Service' ? 'Arrival' : 'Drop-off'}</dt>
-              <dd className="text-right font-medium text-foreground">{job.preferredDate}</dd>
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
+          <div className="rounded-lg border border-border p-4">
+            <div className="flex items-center gap-3">
+              <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white ${avatarColorClass(job.rawUserId)}`}>
+                {job.name.charAt(0)}
+                {job.avatarUrl && (
+                  <img
+                    src={job.avatarUrl}
+                    alt={job.name}
+                    className="absolute inset-0 h-10 w-10 rounded-full object-cover"
+                    onError={(e) => { e.currentTarget.style.display = 'none' }}
+                  />
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate font-semibold text-foreground">{job.name}</p>
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Phone size={11} className="shrink-0" /> {job.phone}
+                </p>
+              </div>
             </div>
-          )}
+
+            <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-3 border-t border-border pt-4 text-sm sm:grid-cols-2">
+              <div>
+                <p className="text-xs text-muted-foreground">Vehicle</p>
+                <p className="mt-0.5 flex items-center gap-1.5 font-medium text-foreground">
+                  <Car size={13} className="shrink-0 text-muted-foreground" /> {job.vehicle}
+                </p>
+                <p className="text-xs text-muted-foreground">{job.plate}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">{isHome ? 'Arrival' : 'Drop-off'}</p>
+                <p className="mt-0.5 flex items-start gap-1.5 font-medium text-foreground">
+                  <Calendar size={13} className="mt-0.5 shrink-0 text-muted-foreground" /> {job.preferredDate ?? 'No date chosen'}
+                </p>
+                <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                  {isHome ? <Home size={11} /> : <Store size={11} />} {job.serviceMode}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Services requested</p>
+            <RequestedServices raw={job.servicesNeeded.join(', ')} />
+          </div>
+
           {job.diagnosticScanAuthorized && (
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Diagnostic scan</dt>
-              <dd className="text-right font-medium text-amber-700">
-                Authorized — PHP {DIAGNOSTIC_SCAN_FEE.toLocaleString()} attaches on approval
-              </dd>
+            <div className="flex items-start gap-2.5 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+              <ScanLine size={15} className="mt-0.5 shrink-0 text-amber-600" />
+              <span>
+                <span className="font-semibold">OBD-II scan authorized.</span> The customer agreed to the PHP{' '}
+                {DIAGNOSTIC_SCAN_FEE.toLocaleString()} scan fee. It is added to the job order when you approve.
+              </span>
             </div>
           )}
-        </dl>
 
-        <div className="mt-4 rounded-lg border border-border bg-accent/30 p-3.5 flex items-start gap-3">
-          <input
-            id="modalCheckInNow"
-            type="checkbox"
-            checked={checkInNow}
-            onChange={(e) => setCheckInNow(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-border text-brand focus:ring-brand cursor-pointer"
-          />
-          <label htmlFor="modalCheckInNow" className="text-xs text-foreground cursor-pointer select-none">
-            <span className="font-semibold block text-sm">
-              {job.serviceMode === 'Home Service'
-                ? 'Mechanic has arrived at the customer’s address'
-                : 'Vehicle has been dropped off at the shop'}
-            </span>
-            <span className="text-muted-foreground mt-0.5 block leading-normal">
-              {job.serviceMode === 'Home Service'
-                ? 'Mark as arrived now. If unchecked, the ticket will be approved and wait until the mechanic confirms arrival.'
-                : 'Check in now. If unchecked, the ticket will be approved and wait until the vehicle is physically dropped off.'}
+          <label
+            htmlFor="modalCheckInNow"
+            className={`flex cursor-pointer select-none items-start gap-3 rounded-lg border p-3.5 transition-colors ${
+              checkInNow ? 'border-brand bg-brand-soft/40' : 'border-border hover:bg-accent/40'
+            }`}
+          >
+            <input
+              id="modalCheckInNow"
+              type="checkbox"
+              checked={checkInNow}
+              onChange={(e) => setCheckInNow(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-border text-brand focus:ring-brand cursor-pointer"
+            />
+            <span className="text-xs text-foreground">
+              <span className="block text-sm font-semibold">
+                {isHome ? 'Mechanic has arrived at the customer’s address' : 'Vehicle has been dropped off at the shop'}
+              </span>
+              <span className="mt-0.5 block leading-normal text-muted-foreground">
+                {isHome
+                  ? 'Mark as arrived now. If unchecked, the ticket will be approved and wait until the mechanic confirms arrival.'
+                  : 'Check in now. If unchecked, the ticket will be approved and wait until the vehicle is physically dropped off.'}
+              </span>
             </span>
           </label>
         </div>
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="flex shrink-0 justify-end gap-3 border-t border-border px-6 py-4">
           <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm">
             Cancel
           </button>
@@ -864,7 +896,7 @@ function ApproveModal({ job, busy, onClose, onConfirm }: { job: Job; busy: boole
 function ViewModal({ job, onClose }: { job: Job; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-xl bg-background p-6 shadow-2xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-background p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -886,12 +918,6 @@ function ViewModal({ job, onClose }: { job: Job; onClose: () => void }) {
               Customer Information
             </p>
             <dl className="mt-2 space-y-2 rounded-lg border border-border p-4 text-sm">
-              <div className="flex justify-between gap-4">
-                <dt className="flex items-center gap-1.5 text-muted-foreground">
-                  <Hash size={12} /> Customer ID
-                </dt>
-                <dd className="font-medium text-foreground">{job.customerId}</dd>
-              </div>
               <div className="flex justify-between gap-4">
                 <dt className="flex items-center gap-1.5 text-muted-foreground">
                   <User size={12} /> Full Name
@@ -936,13 +962,14 @@ function ViewModal({ job, onClose }: { job: Job; onClose: () => void }) {
                 </dt>
                 <dd className="font-medium text-foreground">{job.serviceMode}</dd>
               </div>
-              <div className="flex justify-between gap-4">
-                <dt className="flex items-center gap-1.5 text-muted-foreground">
-                  <Wrench size={12} /> Service(s) Requested
-                </dt>
-                <dd className="text-right font-medium text-foreground">{job.servicesNeeded.join(', ')}</dd>
-              </div>
             </dl>
+          </section>
+
+          <section>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Services Requested
+            </p>
+            <RequestedServices raw={job.servicesNeeded.join(', ')} />
           </section>
 
           <section>

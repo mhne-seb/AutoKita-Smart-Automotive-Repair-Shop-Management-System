@@ -107,6 +107,7 @@ function toJobOrderCard(row: any): JobOrderCard {
       row.home_service_address && row.home_service_address !== 'None' ? row.home_service_address : null,
     readyBy: row.ready_by ?? null,
     queueNo: row.queue_no != null ? Number(row.queue_no) : null,
+    request: row.customer_concern ?? null,
   }
 }
 
@@ -175,6 +176,7 @@ export interface JobOrderDetails {
   serviceMode: 'shop' | 'home'
   homeAddress: string | null
   visitTime: string | null
+  request: string | null
 }
 
 // Naive Manila text ("2026-10-12 10:30:00") or an ISO string -> "Oct 12, 10:30 AM"
@@ -208,6 +210,7 @@ export async function getJobOrderDetails(id: string): Promise<JobOrderDetails | 
     homeAddress:
       r.home_service_address && r.home_service_address !== 'None' ? r.home_service_address : null,
     visitTime: formatVisitWindow(r.preferred_datetime),
+    request: r.customer_concern ?? null,
   }
 }
 

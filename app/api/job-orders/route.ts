@@ -45,6 +45,7 @@ export async function GET(request: Request) {
         gol.mechanic_name,
         gol.assigned_mechanic_id,
         st.service_mode::text AS service_mode,
+        st.customer_concern,
         q.queue_no
       FROM get_job_orders_list() gol
       JOIN job_orders jo ON jo.id = gol.id
@@ -56,7 +57,7 @@ export async function GET(request: Request) {
       LEFT JOIN services s ON s.id = jos.service_id
       GROUP BY gol.id, jo.date_arrived, gol.status, gol.actual_grand_total, jo.balance,
                jo.user_id, u.avatar_url, gol.first_name, gol.last_name, gol.vehicle_model,
-               v.vehicle_year, gol.plate_number, gol.mechanic_name, gol.assigned_mechanic_id, st.service_mode,
+               v.vehicle_year, gol.plate_number, gol.mechanic_name, gol.assigned_mechanic_id, st.service_mode, st.customer_concern,
                q.queue_no
       ORDER BY (q.queue_no IS NULL), q.queue_no ASC, gol.id DESC
       LIMIT $1 OFFSET $2

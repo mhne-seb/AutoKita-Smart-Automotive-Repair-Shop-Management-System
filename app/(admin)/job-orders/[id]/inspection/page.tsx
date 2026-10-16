@@ -21,6 +21,7 @@ import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, Insp
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ShopLoading } from '@/components/ShopLoading'
 import { arrivalWording } from '@/lib/serviceMode'
+import { RequestedServices } from '@/components/admin/RequestedServices'
 
 // How many stored scanner reports the picker shows at a time.
 const REPORTS_PER_PAGE = 5
@@ -833,50 +834,6 @@ export default function page() {
               </button>
             </div>
 
-            {/* The mechanic's go-ahead for the scanner. Without this the
-                customer never agreed to the fee, so don't plug it in. */}
-            {initial.diagnosticScanAuthorized ? (
-              <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                <ScanLine size={16} className="flex-shrink-0" />
-                <span>
-                  <b>OBD-II scan authorized.</b> The customer agreed to the{' '}
-                  {formatPeso(DIAGNOSTIC_SCAN_FEE)} diagnostic fee at booking — it&apos;s already on
-                  this job order.
-                </span>
-              </div>
-            ) : initial.scanAuthorization?.decision === 'pending' ? (
-              <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                <Loader2 size={16} className="flex-shrink-0 animate-spin" />
-                <span>
-                  <b>Waiting on the customer.</b> They were notified to approve the{' '}
-                  {formatPeso(DIAGNOSTIC_SCAN_FEE)} scan fee. You can attach a report once they approve.
-                </span>
-              </div>
-            ) : (
-              <div className="mb-5 flex flex-col gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 sm:flex-row sm:items-center sm:justify-between">
-                <span className="flex items-start gap-2.5">
-                  <Info size={16} className="mt-0.5 flex-shrink-0" />
-                  <span>
-                    {initial.scanAuthorization?.decision === 'disputed' ? (
-                      <><b>Customer declined</b> the scan request. You can ask again.</>
-                    ) : (
-                      <><b>Heads up:</b> the customer wasn&apos;t told about the {formatPeso(DIAGNOSTIC_SCAN_FEE)} scanner fee when they booked.</>
-                    )}{' '}
-                    Using the scanner needs their approval first.
-                  </span>
-                </span>
-                <button
-                  type="button"
-                  onClick={askToUseScanner}
-                  disabled={requestingScan || reportLocked}
-                  className="flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                >
-                  {requestingScan ? <Loader2 size={13} className="animate-spin" /> : <ScanLine size={13} />}
-                  {initial.scanAuthorization?.decision === 'disputed' ? 'Ask Again' : 'Use Scanner'}
-                </button>
-              </div>
-            )}
-
             {inspectionStatus === 'pending' && (
               <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                 <Clock size={16} className="mt-0.5 flex-shrink-0" />
@@ -1276,6 +1233,50 @@ export default function page() {
               )}
             </div>
 
+            {/* The mechanic's go-ahead for the scanner. Without this the
+                customer never agreed to the fee, so don't plug it in. */}
+            {initial.diagnosticScanAuthorized ? (
+              <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <ScanLine size={16} className="flex-shrink-0" />
+                <span>
+                  <b>OBD-II scan authorized.</b> The customer agreed to the{' '}
+                  {formatPeso(DIAGNOSTIC_SCAN_FEE)} diagnostic fee at booking — it&apos;s already on
+                  this job order.
+                </span>
+              </div>
+            ) : initial.scanAuthorization?.decision === 'pending' ? (
+              <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <Loader2 size={16} className="flex-shrink-0 animate-spin" />
+                <span>
+                  <b>Waiting on the customer.</b> They were notified to approve the{' '}
+                  {formatPeso(DIAGNOSTIC_SCAN_FEE)} scan fee. You can attach a report once they approve.
+                </span>
+              </div>
+            ) : (
+              <div className="mb-5 flex flex-col gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 sm:flex-row sm:items-center sm:justify-between">
+                <span className="flex items-start gap-2.5">
+                  <Info size={16} className="mt-0.5 flex-shrink-0" />
+                  <span>
+                    {initial.scanAuthorization?.decision === 'disputed' ? (
+                      <><b>Customer declined</b> the scan request. You can ask again.</>
+                    ) : (
+                      <><b>Heads up:</b> the customer wasn&apos;t told about the {formatPeso(DIAGNOSTIC_SCAN_FEE)} scanner fee when they booked.</>
+                    )}{' '}
+                    Using the scanner needs their approval first.
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={askToUseScanner}
+                  disabled={requestingScan || reportLocked}
+                  className="flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                >
+                  {requestingScan ? <Loader2 size={13} className="animate-spin" /> : <ScanLine size={13} />}
+                  {initial.scanAuthorization?.decision === 'disputed' ? 'Ask Again' : 'Use Scanner'}
+                </button>
+              </div>
+            )}
+
             {/* Loading state */}
             {obd2Report === undefined && (
               <div className="flex items-center gap-2 py-6 text-sm text-slate-400">
@@ -1604,19 +1605,9 @@ export default function page() {
                   </div>
 
                   <div className="mt-4">
-                    <p className="text-xs text-slate-400">Customer&apos;s notes</p>
-                    {initial.request.notes ? (
-                      <p className="mt-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-                        &ldquo;{initial.request.notes}&rdquo;
-                      </p>
-                    ) : !initial.request.category && initial.request.raw ? (
-                      // Unrecognised format — show the ticket text as-is rather than hide it.
-                      <p className="mt-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-                        {initial.request.raw}
-                      </p>
-                    ) : (
-                      <p className="mt-1 text-sm text-slate-400">No specific concerns given.</p>
-                    )}
+                    <p className="text-xs text-slate-400">Services Requested</p>
+                    {/* The booking text is one long string; show it as groups, notices and the customer's note. */}
+                    <RequestedServices raw={initial.request.raw} hideCategory />
                   </div>
                 </div>
               )}
