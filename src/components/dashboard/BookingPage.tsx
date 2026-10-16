@@ -752,19 +752,6 @@ export function BookingPage({
                     : preferredDate.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })
                 }
               />
-              {(selectedServices.length > 0 || notSure) && (
-                <div>
-                  <BookSumRow
-                    stacked
-                    label="Possible completion time based on your services:"
-                    value={
-                      completionText ??
-                      "Pick a visit date and time to see the estimate."
-                    }
-                  />
-                </div>
-              )}
-
               {/* Grouped Services */}
               {packageTicked.length > 0 && activePackage && (
                 <SummaryGroup title={activePackage.name}>
@@ -825,11 +812,18 @@ export function BookingPage({
                 </SummaryGroup>
               )}
 
-              {/* Work time and the warning go right under the services they describe. */}
-              {totalHoursEstimate && (
-                <div>
-                  <p className="text-xs font-semibold text-brand">{totalHoursEstimate}</p>
-                  <EstimateWarning />
+              {/* Work time, the completion estimate, then the warning, right under the services they describe. */}
+              {(totalHoursEstimate || selectedServices.length > 0 || notSure) && (
+                <div className="space-y-2">
+                  {totalHoursEstimate && <p className="text-xs font-semibold text-brand">{totalHoursEstimate}</p>}
+                  {(selectedServices.length > 0 || notSure) && (
+                    <BookSumRow
+                      stacked
+                      label="Possible completion time based on your services:"
+                      value={completionText ?? "Pick a visit date and time to see the estimate."}
+                    />
+                  )}
+                  {totalHoursEstimate && <EstimateWarning />}
                 </div>
               )}
 
