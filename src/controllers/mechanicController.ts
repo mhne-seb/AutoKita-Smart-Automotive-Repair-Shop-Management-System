@@ -174,3 +174,53 @@ export async function getMechanicHistory(id: number): Promise<MechanicHistoryRow
     customer: [h.first_name, h.last_name].filter(Boolean).join(' ') || 'Customer',
   }))
 }
+
+export interface ScheduleTask {
+  id: number
+  job_order_id: number
+  title: string
+  note: string | null
+  price: number
+  scheduled_date: string | null
+  estimated_finish: string | null
+  estimated_hours: number
+  status: string
+  started_at: string | null
+  completed_at: string | null
+  mechanic_id: number | null
+  mechanic_name: string
+  vehicle_id: number | null
+  job_order_status: string | null
+  vehicle_model: string | null
+  vehicle_year: number | null
+  plate_number: string | null
+  customer_name: string | null
+  customer_phone: string | null
+  customer_email: string | null
+}
+
+export interface ScheduleResponse {
+  success: boolean
+  tasks: ScheduleTask[]
+  mechanics: {
+    id: number
+    full_name: string
+    email: string
+    contact_number: string
+    status: string
+    rank: string
+    branch: string
+    capacity: number
+    open_tasks: number
+  }[]
+}
+
+export async function getMechanicSchedule(mechanicId?: number): Promise<ScheduleResponse> {
+  const q = new URLSearchParams({ all: 'true' })
+  if (mechanicId) q.set('mechanicId', String(mechanicId))
+  const res = await fetch(`/api/admin/schedule?${q.toString()}`, { cache: 'no-store' })
+  const json = await res.json().catch(() => null)
+  if (!res.ok || !json?.success) return { success: false, tasks: [], mechanics: [] }
+  return json
+}
+
