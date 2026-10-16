@@ -39,6 +39,12 @@ export interface JobOrderCard {
   cancelled?: boolean
   dateArrived?: string | null
   arrived?: boolean
+  serviceMode?: 'shop' | 'home'
+  homeAddress?: string | null
+  readyBy?: string | null
+  // Place in line (1 = served first). null when the job order is not waiting
+  // for or receiving work (finished, released or cancelled).
+  queueNo?: number | null
 }
 
 export type FindingStatus = 'ok' | 'needs-attention' | 'urgent'

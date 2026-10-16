@@ -1,13 +1,14 @@
 'use client'
 
 // Admin "Job Orders" board — lists every job order across all stages (inspecting/quotation/in-progress/completed), searchable and filterable by stage tab.
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { Fragment, useEffect, useMemo, useState, useRef } from 'react'
 import Link from "next/link";
-import { ClipboardList, Search, FileText, Wrench, CheckCircle2, Eye, ChevronLeft, ChevronRight, Car, Hash, Calendar, UserCog, Gauge, Receipt, SlidersHorizontal, X, Store } from 'lucide-react'
+import { ClipboardList, Search, FileText, Wrench, CheckCircle2, ChevronLeft, ChevronRight, Car, Gauge, Receipt, SlidersHorizontal, X, Store, ChevronDown, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import { TopBar } from '@/components/TopBar'
 import { avatarColorClass } from '@/lib/avatarColor'
-import { getJobOrders, checkInJobOrder } from '@/controllers/jobOrderController'
+import { getJobOrders, checkInJobOrder, getJobOrderDetails, type JobOrderDetails } from '@/controllers/jobOrderController'
+import { arrivalWording } from '@/lib/serviceMode'
 import { JobOrderCard, Stage, stageOrder, stageLabels } from '@/data/types'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 
@@ -20,6 +21,15 @@ const stageIcons: Record<Stage, typeof Search> = {
   testing: Gauge,
   completed: Receipt,
   released: CheckCircle2,
+}
+
+const stagePillClasses: Record<Stage, string> = {
+  inspecting: 'bg-accent text-muted-foreground',
+  quotation: 'bg-violet-100 text-violet-700',
+  'in-progress': 'bg-amber-100 text-amber-800',
+  testing: 'bg-sky-100 text-sky-700',
+  completed: 'bg-emerald-100 text-emerald-700',
+  released: 'bg-slate-100 text-slate-600',
 }
 
 const PAGE_SIZE = 12
@@ -56,6 +66,23 @@ export default function page() {
 
   // Local pagination state
   const [page, setPage] = useState(1)
+
+  const [openId, setOpenId] = useState<string | null>(null)
+  const [detailsById, setDetailsById] = useState<Record<string, JobOrderDetails | 'error'>>({})
+  const [loadingDetailsId, setLoadingDetailsId] = useState<string | null>(null)
+
+  const toggleRow = async (id: string) => {
+    if (openId === id) {
+      setOpenId(null)
+      return
+    }
+    setOpenId(id)
+    if (detailsById[id] && detailsById[id] !== 'error') return
+    setLoadingDetailsId(id)
+    const details = await getJobOrderDetails(id)
+    setDetailsById((prev) => ({ ...prev, [id]: details ?? 'error' }))
+    setLoadingDetailsId((cur) => (cur === id ? null : cur))
+  }
 
   useEffect(() => {
     let active = true
@@ -94,6 +121,7 @@ export default function page() {
 
   useEffect(() => {
     setPage(1)
+    setOpenId(null)
   }, [query, activeTab, selectedVehicle, selectedService, selectedMechanic, selectedPayment])
 
   const vehicleOptions = useMemo(
@@ -122,6 +150,7 @@ export default function page() {
     setSelectedMechanic('all')
     setSelectedPayment('all')
     setPage(1)
+    setOpenId(null)
   }
 
   const [checkingInId, setCheckingInId] = useState<string | null>(null)
@@ -133,7 +162,7 @@ export default function page() {
       const activeEmpId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
       const res = await checkInJobOrder(card.id, activeEmpId ? Number(activeEmpId) : undefined)
       if (res.success) {
-        toast.success(`Vehicle for ${card.customer} marked as stored in shop! Moved to Inspecting.`)
+        toast.success(arrivalWording(card.serviceMode ?? 'shop').toast)
         setJobOrders((prev) =>
           prev.map((j) =>
             j.id === card.id
@@ -374,14 +403,20 @@ export default function page() {
           {/* Prev / Next Pagination */}
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => {
+                setOpenId(null)
+                setPage((p) => Math.max(1, p - 1))
+              }}
               disabled={page === 1}
               className="flex items-center gap-1 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground shadow-sm transition-all hover:bg-accent disabled:opacity-40"
             >
               <ChevronLeft size={14} /> Prev
             </button>
             <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              onClick={() => {
+                setOpenId(null)
+                setPage((p) => Math.min(totalPages, p + 1))
+              }}
               disabled={page === totalPages}
               className="flex items-center gap-1 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground shadow-sm transition-all hover:bg-accent disabled:opacity-40"
             >
@@ -452,132 +487,328 @@ export default function page() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
-                  <th className="px-4 py-3 font-semibold">Customer</th>
-                  <th className="px-4 py-3 font-semibold">Stage</th>
-                  <th className="px-4 py-3 font-semibold">Service</th>
-                  <th className="px-4 py-3 font-semibold">Plate</th>
-                  <th className="px-4 py-3 font-semibold">Time</th>
-                  <th className="px-4 py-3 font-semibold">Payment</th>
-                  <th className="px-4 py-3 font-semibold">Mechanic</th>
-                  <th className="px-4 py-3 font-semibold">Progress</th>
-                  <th className="px-4 py-3 font-semibold text-right"></th>
+                <tr className="border-b border-border text-xs font-semibold text-muted-foreground">
+                  <th className="px-4 py-3">Priority</th>
+                  <th className="px-4 py-3">Customer</th>
+                  <th className="px-4 py-3">Services</th>
+                  <th className="px-4 py-3">Arrived</th>
+                  <th className="px-4 py-3">Payment</th>
+                  <th className="px-4 py-3">Mechanic</th>
+                  <th className="px-4 py-3 text-right">Stage</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedCards.map((c) => {
                   const StageIcon = stageIcons[c.stage]
+                  const w = arrivalWording(c.serviceMode ?? 'shop')
+                  const servicesList = c.service.split(', ').filter(Boolean)
+                  const firstService = servicesList[0] || 'No services listed'
+                  const moreCount = servicesList.length - 1
+                  const isOpen = openId === c.id
+
                   return (
-                    <tr key={c.id} className="border-b border-border/60 align-top last:border-0">
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ${avatarColorClass(c.rawUserId || c.customerId)}`}>
-                            {c.customer.charAt(0)}
-                            {c.avatarUrl && (
-                              <img
-                                src={c.avatarUrl}
-                                alt={c.customer}
-                                className="absolute inset-0 h-9 w-9 rounded-full object-cover"
-                                onError={(e) => { e.currentTarget.style.display = 'none' }}
-                              />
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-foreground">{c.customer}</p>
-                            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <Car size={11} className="shrink-0" /> {c.vehicle}
-                            </p>
-                            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <Hash size={11} className="shrink-0" /> {c.customerId}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        {c.cancelled ? (
-                          <span className="flex w-fit items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive">
-                            Cancelled by customer
-                          </span>
-                        ) : (
-                          <span className="flex w-fit items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-muted-foreground">
-                            <StageIcon size={12} />
-                            {stageLabels[c.stage]}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-4 text-foreground/80">
-                        <span className="flex items-center gap-1.5">
-                          <Wrench size={12} className="shrink-0 text-muted-foreground" /> {c.service}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-foreground/80">
-                        <span className="flex items-center gap-1.5">
-                          <Hash size={12} className="shrink-0 text-muted-foreground" /> {c.plate}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-foreground/80">
-                        <span className="flex items-center gap-1.5">
-                          <Calendar size={12} className="shrink-0 text-muted-foreground" />
-                          {c.stage === 'inspecting' && !c.arrived ? (
-                            <span className="italic text-muted-foreground">Not checked in</span>
+                    <Fragment key={c.id}>
+                      <tr
+                        onClick={() => toggleRow(c.id)}
+                        className="cursor-pointer border-b border-border/60 hover:bg-accent/40 transition-colors align-middle"
+                      >
+                        <td className="px-4 py-4">
+                          {c.queueNo != null ? (
+                            <span className="inline-flex min-w-8 items-center justify-center rounded-full bg-brand/10 px-2.5 py-1 text-xs font-bold text-brand">
+                              #{c.queueNo}
+                            </span>
                           ) : (
-                            c.time
+                            <span className="text-muted-foreground">—</span>
                           )}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span
-                          className={`font-semibold ${
-                            c.paymentStatus === 'Paid'
-                              ? 'text-emerald-600'
-                              : c.paymentStatus === 'Unpaid'
-                              ? 'text-rose-600'
-                              : 'text-amber-500'
-                          }`}
-                        >
-                          {c.paymentStatus || (c.paid ? 'Paid' : 'Unpaid')}
-                        </span>
-                        <p className="text-xs text-muted-foreground">{c.payment}</p>
-                      </td>
-                      <td className="px-4 py-4 text-foreground/80">
-                        <span className="flex items-center gap-1.5">
-                          <UserCog size={12} className="shrink-0 text-muted-foreground" /> {c.mechanic}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <p className="text-xs text-muted-foreground">
-                          {`${c.stepsDone}/${c.stepsTotal} steps`}
-                        </p>
-                        <div className="mt-1.5 h-1.5 w-24 overflow-hidden rounded-full bg-accent">
-                          <div
-                            className="h-full rounded-full bg-brand"
-                            style={{ width: `${(c.stepsDone / c.stepsTotal) * 100}%` }}
-                          />
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {c.stage === 'inspecting' && !c.arrived && (
-                            <button
-                              onClick={() => setConfirmCheckIn(c)}
-                              disabled={checkingInId === c.id}
-                              title="Check In Vehicle (Mark Stored in Shop)"
-                              className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 shadow-2xs hover:bg-amber-100 disabled:opacity-50 active:translate-y-0"
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ${avatarColorClass(
+                                c.rawUserId || c.customerId
+                              )}`}
                             >
-                              <Store size={13} />
-                              {checkingInId === c.id ? 'Checking In…' : 'Check In'}
-                            </button>
+                              {c.customer.charAt(0)}
+                              {c.avatarUrl && (
+                                <img
+                                  src={c.avatarUrl}
+                                  alt={c.customer}
+                                  className="absolute inset-0 h-9 w-9 rounded-full object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none'
+                                  }}
+                                />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-foreground">{c.customer}</p>
+                              <p className="mt-0.5 text-xs text-muted-foreground">{c.vehicle}</p>
+                              <p className="mt-0.5 text-xs font-medium text-foreground/80">{c.plate}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          {c.service === 'No services listed' ? (
+                            <span className="text-muted-foreground">No services listed</span>
+                          ) : (
+                            <div>
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className="font-semibold text-foreground">{firstService}</span>
+                                {moreCount > 0 && (
+                                  <span className="rounded-full bg-accent px-2 py-0.5 text-xs text-muted-foreground">
+                                    +{moreCount} more
+                                  </span>
+                                )}
+                              </div>
+                              {c.serviceMode === 'home' && (
+                                <div className="mt-1">
+                                  <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand">
+                                    Home service
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           )}
-                          <Link
-                            href={`/job-orders/${c.id}/${stageToRoute[c.stage]}`}
-                            title="View Full Job Order"
-                            className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm inline-flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent active:translate-y-0"
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          {c.arrived ? (
+                            <span className="text-foreground">{c.time}</span>
+                          ) : c.stage === 'inspecting' ? (
+                            <div className="flex flex-col items-start gap-1">
+                              <span className="italic text-muted-foreground">{w.notDone}</span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setConfirmCheckIn(c)
+                                }}
+                                disabled={checkingInId === c.id}
+                                title={w.button}
+                                className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800 shadow-2xs hover:bg-amber-100 disabled:opacity-50 active:translate-y-0"
+                              >
+                                {checkingInId === c.id ? w.busy : w.button}
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span
+                            className={`font-semibold ${
+                              c.paymentStatus === 'Paid'
+                                ? 'text-emerald-600'
+                                : c.paymentStatus === 'Unpaid'
+                                ? 'text-rose-600'
+                                : 'text-amber-500'
+                            }`}
                           >
-                            <Eye size={15} />
-                          </Link>
-                        </div>
-                      </td>
-                    </tr>
+                            {c.paymentStatus || (c.paid ? 'Paid' : 'Unpaid')}
+                          </span>
+                          <p className="text-xs text-muted-foreground">{c.payment}</p>
+                        </td>
+                        <td className="px-4 py-4 text-foreground/80">
+                          <span>{c.mechanic}</span>
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          <div className="inline-flex items-center justify-end gap-2">
+                            {c.cancelled ? (
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive">
+                                Cancelled by customer
+                              </span>
+                            ) : (
+                              <span
+                                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                                  stagePillClasses[c.stage]
+                                }`}
+                              >
+                                <StageIcon size={12} />
+                                {stageLabels[c.stage]}
+                              </span>
+                            )}
+                            <ChevronDown
+                              size={15}
+                              className={`text-muted-foreground transition-transform duration-200 ${
+                                isOpen ? 'rotate-180' : ''
+                              }`}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                      {isOpen && (
+                        <tr className="border-b border-border/60">
+                          <td colSpan={7} className="bg-accent/30 px-6 py-5">
+                            {loadingDetailsId === c.id ? (
+                              <p className="text-sm text-muted-foreground">Loading details…</p>
+                            ) : detailsById[c.id] === 'error' ? (
+                              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                <span>Could not load the details.</span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setDetailsById((prev) => {
+                                      const next = { ...prev }
+                                      delete next[c.id]
+                                      return next
+                                    })
+                                    setOpenId(null)
+                                    setTimeout(() => toggleRow(c.id), 0)
+                                  }}
+                                  className="text-xs font-semibold text-brand hover:underline cursor-pointer"
+                                >
+                                  Try again
+                                </button>
+                              </div>
+                            ) : detailsById[c.id] ? (
+                              (() => {
+                                const d = detailsById[c.id] as JobOrderDetails
+                                const timelineW = arrivalWording(d.serviceMode)
+                                return (
+                                  <div className="space-y-5">
+                                    <div className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+                                      {/* Services (spans the full row) */}
+                                      <div className="col-span-full">
+                                        <p className="text-xs text-muted-foreground">
+                                          Services ({d.services.length})
+                                        </p>
+                                        <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                          {d.services.length > 0 ? (
+                                            d.services.map((s, idx) => (
+                                              <span
+                                                key={idx}
+                                                className="rounded-lg border border-border bg-card px-2 py-1 text-xs text-foreground"
+                                              >
+                                                {s}
+                                              </span>
+                                            ))
+                                          ) : (
+                                            <span className="text-xs text-muted-foreground">No services listed</span>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      {/* Customer */}
+                                      <div>
+                                        <p className="text-xs text-muted-foreground">Customer</p>
+                                        <div className="mt-1 space-y-0.5 text-sm text-foreground">
+                                          <p className="font-medium">{c.customer}</p>
+                                          {d.customerId && (
+                                            <p className="text-xs text-muted-foreground">{d.customerId}</p>
+                                          )}
+                                          {d.phone && (
+                                            <p className="text-xs text-muted-foreground">{d.phone}</p>
+                                          )}
+                                          {d.email && (
+                                            <p className="text-xs text-muted-foreground">{d.email}</p>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      {/* Vehicle */}
+                                      <div>
+                                        <p className="text-xs text-muted-foreground">Vehicle</p>
+                                        <div className="mt-1 space-y-0.5 text-sm text-foreground">
+                                          <p className="font-medium">{d.vehicle}</p>
+                                          <p className="text-xs text-muted-foreground">Plate: {d.plate}</p>
+                                          <p className="text-xs text-muted-foreground">Mileage: {d.mileage}</p>
+                                        </div>
+                                      </div>
+
+                                      {/* Timeline */}
+                                      <div>
+                                        <p className="text-xs text-muted-foreground">Timeline</p>
+                                        <div className="mt-1 space-y-1 text-sm text-foreground">
+                                          <p className="text-xs">
+                                            <span className="text-muted-foreground">{timelineW.done}: </span>
+                                            {d.arrivedAt ?? timelineW.notDone}
+                                          </p>
+                                          <div className="flex flex-wrap items-center gap-2 text-xs">
+                                            <span>
+                                              <span className="text-muted-foreground">Ready by: </span>
+                                              {d.readyBy || 'Not scheduled yet'}
+                                            </span>
+                                            {!d.readyBy && c.stage === 'in-progress' && (
+                                              <Link
+                                                href={`/job-orders/${c.id}/progress`}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="font-medium text-brand hover:underline cursor-pointer"
+                                              >
+                                                Schedule job
+                                              </Link>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Payment */}
+                                      <div>
+                                        <p className="text-xs text-muted-foreground">Payment</p>
+                                        <div className="mt-1 space-y-0.5 text-sm text-foreground">
+                                          <p className="text-xs">Total {d.total}</p>
+                                          <p className="text-xs">Balance {d.balance}</p>
+                                          <p className="text-xs font-semibold">
+                                            Status:{' '}
+                                            <span
+                                              className={
+                                                c.paymentStatus === 'Paid'
+                                                  ? 'text-emerald-600'
+                                                  : c.paymentStatus === 'Unpaid'
+                                                  ? 'text-rose-600'
+                                                  : 'text-amber-500'
+                                              }
+                                            >
+                                              {c.paymentStatus || (c.paid ? 'Paid' : 'Unpaid')}
+                                            </span>
+                                          </p>
+                                        </div>
+                                      </div>
+
+                                      {/* Mechanic */}
+                                      <div>
+                                        <p className="text-xs text-muted-foreground">Mechanic</p>
+                                        <div className="mt-1 text-sm font-medium text-foreground">
+                                          {c.mechanic}
+                                        </div>
+                                      </div>
+
+                                      {/* Home service (only when d.serviceMode === 'home') */}
+                                      {d.serviceMode === 'home' && (
+                                        <div>
+                                          <p className="text-xs text-muted-foreground">Home service</p>
+                                          <div className="mt-1 space-y-1 text-sm text-foreground">
+                                            {d.homeAddress && (
+                                              <p className="flex items-start gap-1 text-xs">
+                                                <MapPin size={13} className="mt-0.5 shrink-0 text-brand" />
+                                                <span>{d.homeAddress}</span>
+                                              </p>
+                                            )}
+                                            {d.visitTime && (
+                                              <p className="text-xs text-muted-foreground">
+                                                Arrival: {d.visitTime}
+                                              </p>
+                                            )}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {/* Bottom right: Open job order button */}
+                                    <div className="flex justify-end pt-2">
+                                      <Link
+                                        href={`/job-orders/${c.id}/${stageToRoute[c.stage]}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-xs font-semibold text-brand-foreground shadow hover:opacity-95 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
+                                      >
+                                        Open job order
+                                      </Link>
+                                    </div>
+                                  </div>
+                                )
+                              })()
+                            ) : null}
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   )
                 })}
               </tbody>
@@ -589,9 +820,13 @@ export default function page() {
       {confirmCheckIn && (
         <ConfirmActionModal
           tone="brand"
-          title="Confirm vehicle arrival?"
-          description={`Confirm that ${confirmCheckIn.customer}'s ${confirmCheckIn.vehicle} (${confirmCheckIn.plate}) has arrived and is stored in the shop. This unlocks the inspection.`}
-          confirmLabel="Store in shop & check in"
+          title={arrivalWording(confirmCheckIn.serviceMode ?? 'shop').confirmTitle}
+          description={arrivalWording(confirmCheckIn.serviceMode ?? 'shop').confirmText(
+            confirmCheckIn.customer,
+            confirmCheckIn.vehicle,
+            confirmCheckIn.plate
+          )}
+          confirmLabel={arrivalWording(confirmCheckIn.serviceMode ?? 'shop').confirmLabel}
           busy={checkingInId === confirmCheckIn.id}
           onClose={() => setConfirmCheckIn(null)}
           onConfirm={async () => {

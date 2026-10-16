@@ -20,6 +20,7 @@ import { EditCustomerModal } from '@/components/dashboard/EditCustomerModal'
 import { FindingStatus, MechanicalFinding, findingStatusMeta, JobOrderCard, InspectionData, InspectionPhotoSlot } from '@/data/types'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ShopLoading } from '@/components/ShopLoading'
+import { arrivalWording } from '@/lib/serviceMode'
 
 // How many stored scanner reports the picker shows at a time.
 const REPORTS_PER_PAGE = 5
@@ -27,6 +28,7 @@ const REPORTS_PER_PAGE = 5
 export default function page() {
   const jobOrderId = String(useParams().id)
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)
+  const w = arrivalWording(jobOrder?.serviceMode ?? 'shop')
 
   // Inspection data now comes from the real database, which is an async
   // call — loaded via useEffect/state, same as jobOrder, instead of being
@@ -80,7 +82,7 @@ export default function page() {
       })
       const data = await res.json()
       if (data.success) {
-        toast.success('Vehicle marked as arrived and stored in the shop!')
+        toast.success(w.toast)
         setJobOrder((prev) => (prev ? { ...prev, arrived: true, dateArrived: data.date_arrived } : prev))
       } else {
         toast.error(data.message || 'Check-in failed')
@@ -688,10 +690,9 @@ export default function page() {
                 <Store size={22} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-amber-950">Vehicle Not Checked In Yet</h3>
+                <h3 className="text-base font-bold text-amber-950">{w.bannerTitle}</h3>
                 <p className="mt-1 text-xs text-amber-800 leading-relaxed">
-                  This job order is approved, but the vehicle has not yet been marked as arrived and stored in the shop.
-                  Click the button below once the vehicle is on-site to mark it as stored in the shop.
+                  {w.bannerText}
                 </p>
               </div>
             </div>
@@ -701,7 +702,7 @@ export default function page() {
               className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:opacity-95 active:scale-[0.99] disabled:opacity-50 transition-all duration-200 cursor-pointer hover:-translate-y-0.5 active:translate-y-0 hover:shadow-lg disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
             >
               <Store size={15} />
-              {checkingInVehicle ? 'Checking In…' : 'Mark Vehicle Stored in Shop'}
+              {checkingInVehicle ? w.busy : w.button}
             </button>
           </div>
         </div>
@@ -721,17 +722,17 @@ export default function page() {
                   jobOrder.arrived ? (
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
                       <CheckCircle2 size={13} className="text-emerald-600" />
-                      Vehicle Checked In
+                      {w.pill}
                     </span>
                   ) : (
                     <button
                       onClick={() => setConfirmCheckInVehicle(true)}
                       disabled={checkingInVehicle}
-                      title="Click to check in vehicle (mark stored in shop)"
+                      title={w.button}
                       className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900 shadow-2xs hover:bg-amber-100 disabled:opacity-50 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                     >
                       <Store size={13} className="text-amber-700" />
-                      {checkingInVehicle ? 'Checking In…' : 'Check In Vehicle (Store in Shop)'}
+                      {checkingInVehicle ? w.busy : w.button}
                     </button>
                   )
                 )}
@@ -1850,9 +1851,9 @@ export default function page() {
       {confirmCheckInVehicle && jobOrder && (
         <ConfirmActionModal
           tone="brand"
-          title="Confirm vehicle arrival?"
-          description={`Confirm that ${jobOrder.customer}'s ${jobOrder.vehicle} (${jobOrder.plate}) has arrived and is stored in the shop. This unlocks the inspection.`}
-          confirmLabel="Store in shop & check in"
+          title={w.confirmTitle}
+          description={w.confirmText(jobOrder.customer, jobOrder.vehicle, jobOrder.plate)}
+          confirmLabel={w.confirmLabel}
           busy={checkingInVehicle}
           onClose={() => setConfirmCheckInVehicle(false)}
           onConfirm={async () => {

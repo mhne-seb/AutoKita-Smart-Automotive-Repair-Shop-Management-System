@@ -19,6 +19,15 @@ export async function GET(request: Request) {
 
     const result = await db.query(
       `
+      WITH queue AS (
+        SELECT id, ROW_NUMBER() OVER (ORDER BY date_arrived ASC, id ASC) AS queue_no
+        FROM job_orders
+        WHERE date_arrived IS NOT NULL
+          AND status::text IN (
+          'inspecting', 'pending_customer_approval', 'revision_pending',
+          'in_progress', 'waiting_on_parts', 'testing'
+        )
+      )
       SELECT
         gol.id,
         jo.date_arrived,
@@ -34,17 +43,22 @@ export async function GET(request: Request) {
         gol.plate_number,
         STRING_AGG(DISTINCT s.service_name, ', ') AS service_names,
         gol.mechanic_name,
-        gol.assigned_mechanic_id
+        gol.assigned_mechanic_id,
+        st.service_mode::text AS service_mode,
+        q.queue_no
       FROM get_job_orders_list() gol
       JOIN job_orders jo ON jo.id = gol.id
+      LEFT JOIN queue q ON q.id = gol.id
+      LEFT JOIN service_tickets st ON st.id = jo.ticket_id
       LEFT JOIN users u ON u.id = jo.user_id
       LEFT JOIN vehicles v ON v.id = jo.vehicle_id
       LEFT JOIN job_order_services jos ON jos.job_order_id = gol.id
       LEFT JOIN services s ON s.id = jos.service_id
       GROUP BY gol.id, jo.date_arrived, gol.status, gol.actual_grand_total, jo.balance,
                jo.user_id, u.avatar_url, gol.first_name, gol.last_name, gol.vehicle_model,
-               v.vehicle_year, gol.plate_number, gol.mechanic_name, gol.assigned_mechanic_id
-      ORDER BY gol.id DESC
+               v.vehicle_year, gol.plate_number, gol.mechanic_name, gol.assigned_mechanic_id, st.service_mode,
+               q.queue_no
+      ORDER BY (q.queue_no IS NULL), q.queue_no ASC, gol.id DESC
       LIMIT $1 OFFSET $2
       `,
       [pageSize, offset]
