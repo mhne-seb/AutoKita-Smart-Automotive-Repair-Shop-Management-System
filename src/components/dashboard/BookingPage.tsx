@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Wrench,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
   Check,
   ClipboardCheck,
   User,
@@ -24,7 +25,7 @@ import { VehicleInServiceModal } from "@/components/dashboard/VehicleInServiceMo
 import { bookingNeedsScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagnosticScan";
 import { formatStamp, cn } from "@/lib/utils";
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from "@/lib/plate";
-import { TimeslotPicker } from "@/components/TimeslotPicker";
+import { VisitDatePicker } from "@/components/VisitDatePicker";
 import { toManilaIso } from "@/lib/bookingSlotsShared";
 import { hoursForWeekday, slotStartHour, withMargin, ShopHours } from "@/lib/bookingTiming";
 
@@ -103,10 +104,24 @@ const BOOK_VEHICLE_MAKES = [
 ];
 const BOOK_YEARS = Array.from({ length: 20 }, (_, i) => String(new Date().getFullYear() - i));
 
-export function BookingPage({ initialVehicleId }: { initialVehicleId?: string }) {
+export function BookingPage({
+  initialVehicleId,
+  mode = 'page',
+  onClose,
+  onBooked,
+  onDirtyChange,
+}: {
+  initialVehicleId?: string
+  mode?: 'page' | 'modal'
+  onClose?: () => void
+  onBooked?: () => void
+  onDirtyChange?: (dirty: boolean) => void
+}) {
   const router = useRouter()
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // "Are you sure?" step before the booking is really sent.
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [isBooked, setIsBooked] = useState(false);
   const [inServicePlate, setInServicePlate] = useState<string | null>(null);
 
@@ -122,11 +137,21 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
   const [vehiclePlate, setVehiclePlate] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  const [step, setStep] = useState<0 | 1 | 2>(0);
   const [pickup, setPickup] = useState<"shop" | "home">("shop");
   const [preferredDate, setPreferredDate] = useState<Date>(startOfToday());
-  const [preferredTime, setPreferredTime] = useState<string>("08:00 AM");
-  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [preferredTime, setPreferredTime] = useState<string>("");
+  const [dateChosen, setDateChosen] = useState(false);
   const [homeAddress, setHomeAddress] = useState("");
+
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    document.getElementById("booking-top")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [step]);
 
   const [options, setOptions] = useState<{ services: ServiceOption[]; packages: PackageOption[] } | null>(null);
   const [shopHours, setShopHours] = useState<ShopHours>(null);
@@ -191,6 +216,7 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
           if (initialVehicleId) {
             const v = data.vehicles.find((veh: any) => veh.id.toString() === initialVehicleId);
             if (v && !v.in_service) {
+              // The wizard still starts at step 1 so the customer sees the service type choice.
               setSelectedVehicleId(initialVehicleId);
             }
           }
@@ -242,7 +268,11 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
   const durationWithMargin = withMargin(knownHours);
   const finishHour = startHour + durationWithMargin;
 
+  const timeChosen = preferredTime !== "";
+
   const noticeShowing =
+    dateChosen &&
+    timeChosen &&
     shopDayHours !== null &&
     knownHours > 0 &&
     !Number.isNaN(startHour) &&
@@ -253,20 +283,27 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
     knownHours > 0 &&
     durationWithMargin > (shopDayHours.close - shopDayHours.open);
 
-  const fittingSlots =
-    shopDayHours !== null && !takesMoreThanOneDay
-      ? availableSlots.filter(
-          (slot) => slotStartHour(slot) + durationWithMargin <= shopDayHours.close
-        )
-      : [];
-  const recommendedSlot = fittingSlots.length > 0 ? fittingSlots[fittingSlots.length - 1] : null;
+
+  // What the summary says under "Possible completion time based on your services".
+  const completionText: string | null = (() => {
+    if (!dateChosen || !timeChosen) return null;
+    if (knownHours <= 0) return 'The shop will tell you after checking your car.';
+    if (!shopDayHours || Number.isNaN(startHour)) return null;
+    const dayText = preferredDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
+    if (finishHour > shopDayHours.close) {
+      return pickup === "home"
+        ? 'Est. after our closing time, or the next working day (our mechanic continues at your place).'
+        : 'Est. the next working day or later (your vehicle stays overnight).';
+    }
+    return `Est. ${dayText}, ${formatDecimalTime(finishHour)}${hasUnknownHour ? ' or later' : ''}`;
+  })();
 
   useEffect(() => {
-    if (!noticeShowing) {
+    if (!noticeShowing || pickup === "home") {
       setOvernightOk(false);
       if (fieldErrors.overnight) setFieldErrors((p) => ({ ...p, overnight: "" }));
     }
-  }, [noticeShowing]);
+  }, [noticeShowing, pickup]);
 
   // Step progress completion
   const vehicleOk =
@@ -277,13 +314,23 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
     (notSure || selectedIds.length > 0 || notes.trim().length >= 5) &&
     (!needsScan || scanAcknowledged);
 
-  const dateOk =
-    Boolean(preferredDate && preferredTime) &&
-    (pickup !== "home" || Boolean(user?.address) || homeAddress.trim() !== "") &&
-    (!noticeShowing || overnightOk);
+  // Step 1 also holds the service type: a home service needs an address before moving on.
+  const placeOk = pickup !== "home" || Boolean(user?.address) || homeAddress.trim() !== "";
 
-  const stepDone = [vehicleOk, vehicleOk && servicesOk, vehicleOk && servicesOk && dateOk];
-  const currentStep = stepDone.indexOf(false);
+  // A home service needs no overnight agreement: the mechanic goes to the customer.
+  const dateOk =
+    dateChosen &&
+    timeChosen &&
+    Boolean(preferredDate && preferredTime) &&
+    (!noticeShowing || pickup === "home" || overnightOk);
+
+  useEffect(() => {
+    if (!onDirtyChange) return
+    const dirty =
+      !isBooked &&
+      (selectedIds.length > 0 || notSure || notes.trim() !== "" || dateChosen || homeAddress.trim() !== "")
+    onDirtyChange(dirty)
+  }, [onDirtyChange, isBooked, selectedIds, notSure, notes, dateChosen, homeAddress])
 
   const togglePackage = (pkg: PackageOption) => {
     if (packageId === pkg.id) {
@@ -364,11 +411,12 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
 
     if (needsScan && !scanAcknowledged) {
       toast.error("Please agree to the diagnostic scan fee to continue.");
-      document.getElementById("book-step-services")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setStep(1);
       return;
     }
 
-    if (noticeShowing && !overnightOk) {
+    // Only a shop visit needs the overnight agreement. A home service has none.
+    if (pickup === "shop" && noticeShowing && !overnightOk) {
       errs.overnight = "Choose an earlier time or allow an overnight stay.";
     }
 
@@ -376,12 +424,12 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
       setFieldErrors(errs);
       toast.error("Please check the form for errors.");
 
-      if (errs.selectedVehicleId || errs.vehicleModel || errs.vehiclePlate || errs.vehicleMake || errs.vehicleMileage) {
-        document.getElementById("book-step-vehicle")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (errs.selectedVehicleId || errs.vehicleModel || errs.vehiclePlate || errs.vehicleMake || errs.vehicleMileage || errs.homeAddress) {
+        setStep(0);
       } else if (errs.service) {
-        document.getElementById("book-step-services")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else if (errs.homeAddress || errs.overnight) {
-        document.getElementById("book-step-date")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        setStep(1);
+      } else if (errs.overnight) {
+        setStep(2);
       }
       return;
     }
@@ -396,7 +444,7 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
       homeAddress: pickup === "home" ? (user?.address || homeAddress.trim().substring(0, 200)) : (user?.address || "None"),
       diagnosticScanAuthorized: needsScan && scanAcknowledged,
       preferredDatetime: preferredDate && preferredTime ? toManilaIso(toDateValue(preferredDate), preferredTime) : null,
-      overnightOk: overnightOk && noticeShowing,
+      overnightOk: pickup === "shop" && overnightOk && noticeShowing,
     };
 
     if (selectedVehicleId === "new") {
@@ -423,7 +471,7 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
       const data = await res.json();
       if (data.success) {
         setIsBooked(true);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        document.getElementById("booking-top")?.scrollIntoView({ behavior: "smooth", block: "start" });
       } else if (data.code === 'INVALID_PLATE_FORMAT') {
         setFieldErrors((prev) => ({
           ...prev,
@@ -468,8 +516,8 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
   const totalHoursEstimate =
     selectedServices.length > 0 && knownHours > 0
       ? hasUnknownHour
-        ? `At least ${formatHours(knownHours)} hours`
-        : `About ${formatHours(knownHours)} hours in total`
+        ? `Est. work time: at least ${formatHours(knownHours)} hours`
+        : `Est. work time: about ${formatHours(knownHours)} hours`
       : null;
 
   // Counts & hours for "What has been added"
@@ -501,7 +549,7 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
 
   if (isBooked) {
     return (
-      <div className="mx-auto max-w-xl px-6 py-12">
+      <div id="booking-top" className="mx-auto max-w-xl px-6 py-12">
         <div className="rounded-xl border bg-card p-6 md:p-8 text-center shadow-lg">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-soft text-brand">
             <CheckCircle2 className="h-8 w-8" />
@@ -555,7 +603,11 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
               </div>
             </div>
             <div>
-              <span className="text-[10px] font-semibold uppercase text-muted-foreground">Date and Time</span>
+              <span className="text-[10px] font-semibold uppercase text-muted-foreground">
+                {pickup === "home"
+                  ? "Your visit date (our mechanic comes to your place):"
+                  : "Your visit date (you drop off your vehicle):"}
+              </span>
               <p className="text-xs text-foreground">
                 {new Date(toManilaIso(toDateValue(preferredDate), preferredTime)).toLocaleString("en-PH", {
                   month: "short",
@@ -567,22 +619,49 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
                 ({pickup === "shop" ? "Shop Visit" : "Home Service"})
               </p>
             </div>
+            {(selectedServices.length > 0 || notSure) && (
+              <div>
+                <span className="text-[10px] font-semibold uppercase text-muted-foreground">
+                  Possible completion time based on your services:
+                </span>
+                <p className="text-xs text-foreground">
+                  {completionText ?? "Pick your visit date and time to see this"}
+                </p>
+                <EstimateWarning />
+
+              </div>
+            )}
           </div>
 
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
             <button
               type="button"
-              onClick={() => router.push('/dashboard')}
+              onClick={() => {
+                if (mode === 'modal') {
+                  onBooked?.();
+                  onClose?.();
+                  router.push('/dashboard');
+                } else {
+                  router.push('/dashboard');
+                }
+              }}
               className="flex-1 rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 transition-opacity cursor-pointer"
             >
               Track this booking
             </button>
             <button
               type="button"
-              onClick={() => router.push('/dashboard/vehicles')}
+              onClick={() => {
+                if (mode === 'modal') {
+                  onBooked?.();
+                  onClose?.();
+                } else {
+                  router.push('/dashboard/vehicles');
+                }
+              }}
               className="flex-1 rounded-md border px-4 py-2.5 text-sm font-medium hover:bg-accent transition-colors cursor-pointer"
             >
-              Back to My Vehicles
+              {mode === 'modal' ? 'Close' : 'Back to My Vehicles'}
             </button>
           </div>
         </div>
@@ -591,19 +670,25 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8">
+    <div
+      id="booking-top"
+      className={mode === 'modal' ? 'mx-auto max-w-[88rem] px-4 py-6 sm:px-6' : 'mx-auto max-w-[88rem] px-6 py-8'}
+    >
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Book a service</h1>
         <p className="text-sm text-muted-foreground">
-          Register a vehicle or pick an existing one to schedule your visit.
+          Register a vehicle or pick an existing one to schedule your concern.
         </p>
       </div>
 
-      <BookingSteps stepDone={stepDone} currentStep={currentStep} />
-
-      <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)] xl:grid-cols-[400px_minmax(0,1fr)]">
+      <div className="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)] xl:grid-cols-[440px_minmax(0,1fr)]">
         {/* Left Column: Booking Summary */}
-        <aside className="order-2 lg:order-1 space-y-4 lg:sticky lg:top-24 lg:self-start">
+        <aside
+          className={cn(
+            "order-2 lg:order-1 space-y-4 lg:sticky lg:self-start",
+            mode === 'modal' ? "lg:top-4" : "lg:top-24"
+          )}
+        >
           <div className="rounded-xl border bg-card p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <ClipboardCheck className="h-4 w-4 text-brand" />
@@ -612,6 +697,40 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
 
             <div className="mt-4 space-y-3 text-sm">
               <BookSumRow label="Vehicle" value={displayVehicle} />
+
+              {/* When and where comes first, so the customer sees it without scrolling past the services. */}
+              <BookSumRow
+                label="Service option"
+                value={pickup === "shop" ? "Shop Visit" : "Home Service"}
+              />
+
+              <BookSumRow
+                stacked
+                label={pickup === "home"
+                  ? "Your visit date (our mechanic comes to your place):"
+                  : "Your visit date (you drop off your vehicle):"}
+                value={
+                  !dateChosen
+                    ? "Not picked yet"
+                    : timeChosen
+                    ? new Date(toManilaIso(toDateValue(preferredDate), preferredTime)).toLocaleString("en-PH", {
+                        month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit",
+                      })
+                    : preferredDate.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })
+                }
+              />
+              {(selectedServices.length > 0 || notSure) && (
+                <div>
+                  <BookSumRow
+                    stacked
+                    label="Possible completion time based on your services:"
+                    value={
+                      completionText ??
+                      "Pick a visit date and time to see the estimate."
+                    }
+                  />
+                </div>
+              )}
 
               {/* Grouped Services */}
               {packageTicked.length > 0 && activePackage && (
@@ -673,27 +792,13 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
                 </SummaryGroup>
               )}
 
+              {/* Work time and the warning go right under the services they describe. */}
               {totalHoursEstimate && (
-                <p className="text-xs font-semibold text-brand">{totalHoursEstimate}</p>
+                <div>
+                  <p className="text-xs font-semibold text-brand">{totalHoursEstimate}</p>
+                  <EstimateWarning />
+                </div>
               )}
-
-              {preferredDate && preferredTime && (
-                <BookSumRow
-                  label="Date & Time"
-                  value={new Date(toManilaIso(toDateValue(preferredDate), preferredTime)).toLocaleString("en-PH", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}
-                />
-              )}
-
-              <BookSumRow
-                label="Service option"
-                value={pickup === "shop" ? "Shop Visit" : "Home Service"}
-              />
 
               <div className="border-t pt-2 text-[11px] text-muted-foreground space-y-0.5">
                 <p className="font-medium text-foreground">{userFullName}</p>
@@ -701,15 +806,16 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
                 <p>{userEmail}</p>
               </div>
 
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={handleConfirm}
-                  disabled={isSubmitting}
-                  className="w-full rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:opacity-50 transition-opacity cursor-pointer"
-                >
-                  {isSubmitting ? "Confirming..." : "Confirm booking"}
-                </button>
+              {/* The customer's own words, last, so the shop's reading order matches the booking. */}
+              <div className="border-t pt-2">
+                <span className="text-[10px] font-semibold uppercase text-muted-foreground">Notes for the shop</span>
+                {notes.trim() ? (
+                  <p className="mt-1 max-h-28 overflow-y-auto whitespace-pre-wrap break-words text-xs text-foreground">
+                    {notes.trim()}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-muted-foreground">No notes added.</p>
+                )}
               </div>
             </div>
           </div>
@@ -718,8 +824,35 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
         {/* Right Column: The Form */}
         <div className="order-1 lg:order-2 space-y-5 min-w-0">
           {/* 1. Pick a vehicle */}
-          <div id="book-step-vehicle" className="scroll-mt-24">
+          {step === 0 && (
             <BookModalCard icon={Car} title="1. Pick a vehicle" subtitle="Select an existing vehicle or register a new one.">
+              {/* The service type comes first: everything after it follows this choice. */}
+              <div className="mb-5 border-b pb-5">
+                <label className="text-sm font-medium">Where should we serve your vehicle?</label>
+                <div className="mt-2 grid gap-3 md:grid-cols-2">
+                  <BookRadioTile icon={MapPin} label="Shop Visit" active={pickup === "shop"} onClick={() => setPickup("shop")} />
+                  <BookRadioTile icon={Car} label="Home Service" active={pickup === "home"} onClick={() => setPickup("home")} />
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {pickup === "home" ? "Our mechanic comes to your address." : "You bring your vehicle to our shop."}
+                </p>
+
+                {pickup === "home" && !user?.address && (
+                  <div className="mt-4">
+                    <BookModalInput
+                      label="Home Address"
+                      placeholder="Enter your full home address"
+                      value={homeAddress}
+                      onChange={(e) => {
+                        setHomeAddress(e.target.value);
+                        if (fieldErrors.homeAddress) setFieldErrors((p) => ({ ...p, homeAddress: "" }));
+                      }}
+                      error={fieldErrors.homeAddress}
+                    />
+                  </div>
+                )}
+              </div>
+
               <div className="mb-4">
                 <label className="text-[10px] font-semibold uppercase text-muted-foreground">Select Vehicle</label>
                 <select
@@ -820,10 +953,10 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
                 </>
               )}
             </BookModalCard>
-          </div>
+          )}
 
           {/* 2. Pick services */}
-          <div id="book-step-services" className="scroll-mt-24">
+          {step === 1 && (
             <BookModalCard
               icon={ClipboardCheck}
               title="2. Pick services"
@@ -1201,44 +1334,62 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
 
               {/* Estimated time bottom line */}
               {selectedServices.length > 0 && knownHours > 0 && (
-                <p className="mt-4 text-xs text-muted-foreground border-t pt-3">
-                  Estimated time: {hasUnknownHour ? `at least ${formatHours(knownHours)} hours` : `about ${formatHours(knownHours)} hours`}. It is an estimate, and the shop confirms it.
-                </p>
-              )}
-            </BookModalCard>
-          </div>
-
-          {/* 3. Pick date and place */}
-          <div id="book-step-date" className="scroll-mt-24">
-            <BookModalCard icon={Wrench} title="3. Pick date and place" subtitle="Choose your service option and schedule.">
-              <label className="text-sm font-medium">Type of service</label>
-              <div className="mt-2 grid gap-3 md:grid-cols-2">
-                <BookRadioTile icon={MapPin} label="Shop Visit" active={pickup === "shop"} onClick={() => setPickup("shop")} />
-                <BookRadioTile icon={Car} label="Home Service" active={pickup === "home"} onClick={() => setPickup("home")} />
-              </div>
-
-              {pickup === "home" && !user?.address && (
-                <div className="mt-4">
-                  <BookModalInput
-                    label="Home Address"
-                    placeholder="Enter your full home address"
-                    value={homeAddress}
-                    onChange={(e) => {
-                      setHomeAddress(e.target.value);
-                      if (fieldErrors.homeAddress) setFieldErrors((p) => ({ ...p, homeAddress: "" }));
-                    }}
-                    error={fieldErrors.homeAddress}
-                  />
+                <div className="mt-4 border-t pt-3">
+                  <p className="text-xs font-medium text-foreground">
+                    Estimated time: {hasUnknownHour ? `at least ${formatHours(knownHours)} hours` : `about ${formatHours(knownHours)} hours`}
+                  </p>
+                  <EstimateWarning />
                 </div>
               )}
 
-              <div className="mt-4">
-                <TimeslotPicker
+              {/* Notes for the shop */}
+              <div className="mt-5 border-t pt-4">
+                <label className="text-sm font-medium">
+                  {!notSure && selectedIds.length === 0 ? "Describe the problem" : "Notes for the shop (optional)"}
+                </label>
+                <textarea
+                  rows={4}
+                  maxLength={500}
+                  value={notes}
+                  onChange={(e) => {
+                    setNotes(e.target.value);
+                    if (fieldErrors.service) setFieldErrors((p) => ({ ...p, service: "" }));
+                  }}
+                  placeholder="Describe any specific issues (e.g., strange noises, warning lights)..."
+                  className="mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
+                />
+                <div className="mt-1 flex justify-end text-[10px] text-muted-foreground">
+                  {notes.length}/500
+                </div>
+              </div>
+            </BookModalCard>
+          )}
+
+          {/* 3. Pick visit date */}
+          {step === 2 && (
+            <BookModalCard
+              icon={Wrench}
+              title={pickup === "home" ? "3. Home service visit" : "3. Vehicle drop-off"}
+              subtitle={
+                pickup === "home"
+                  ? "Choose the day and time our mechanic will come to your address."
+                  : "Choose the day and time you will bring your vehicle to the shop."
+              }
+            >
+              <div>
+                <VisitDatePicker
                   date={preferredDate}
                   time={preferredTime}
-                  onChangeDate={setPreferredDate}
+                  dateChosen={dateChosen}
+                  shopHours={shopHours}
+                  dateHeading={pickup === "home" ? "Home visit date" : "Drop-off date"}
+                  timeHeading={pickup === "home" ? "Preferred time of service" : "Drop-off time"}
+                  onChangeDate={(d) => {
+                    setPreferredDate(d);
+                    setDateChosen(true);
+                    setPreferredTime("");
+                  }}
                   onChangeTime={setPreferredTime}
-                  onAvailableSlots={setAvailableSlots}
                 />
               </div>
 
@@ -1249,7 +1400,20 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
                     <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
                     <div className="flex-1 space-y-2.5">
                       {takesMoreThanOneDay ? (
-                        <p className="text-sm font-medium">This job takes more than one day.</p>
+                        <p className="text-sm font-medium">
+                          {pickup === "home"
+                            ? "This job takes more than one day. Our mechanic will come back the next working day until it is done."
+                            : "This job takes more than one day."}
+                        </p>
+                      ) : pickup === "home" ? (
+                        <p className="text-sm">
+                          <span className="font-semibold">
+                            {activePackage ? activePackage.name : "Your selected services"}
+                          </span>{" "}
+                          takes about {formatHours(knownHours)} hours. Starting at {preferredTime}, our mechanic may finish
+                          around {formatDecimalTime(finishHour)}, after our usual closing time of{" "}
+                          {formatDecimalTime(shopDayHours!.close)}.
+                        </p>
                       ) : (
                         <p className="text-sm">
                           <span className="font-semibold">
@@ -1261,27 +1425,21 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
                       )}
 
                       <div className="flex flex-wrap items-center gap-3 pt-1">
-                        <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-                          <input
-                            type="checkbox"
-                            checked={overnightOk}
-                            onChange={(e) => {
-                              setOvernightOk(e.target.checked);
-                              if (fieldErrors.overnight) setFieldErrors((p) => ({ ...p, overnight: "" }));
-                            }}
-                            className="h-4 w-4 rounded border-amber-400 accent-amber-600"
-                          />
-                          <span>It is OK to leave my vehicle overnight</span>
-                        </label>
-
-                        {!takesMoreThanOneDay && recommendedSlot && (
-                          <button
-                            type="button"
-                            onClick={() => setPreferredTime(recommendedSlot)}
-                            className="rounded-md border border-amber-400 bg-amber-100/60 px-2.5 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-200 cursor-pointer"
-                          >
-                            Use {recommendedSlot}
-                          </button>
+                        {/* Shop visit: the customer agrees to leave the vehicle overnight.
+                            Home service: nothing is left at the shop, so there is no agreement. */}
+                        {pickup === "shop" && (
+                          <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
+                            <input
+                              type="checkbox"
+                              checked={overnightOk}
+                              onChange={(e) => {
+                                setOvernightOk(e.target.checked);
+                                if (fieldErrors.overnight) setFieldErrors((p) => ({ ...p, overnight: "" }));
+                              }}
+                              className="h-4 w-4 rounded border-amber-400 accent-amber-600"
+                            />
+                            <span>It is OK to leave my vehicle overnight</span>
+                          </label>
                         )}
                       </div>
 
@@ -1293,30 +1451,139 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
                 </div>
               )}
             </BookModalCard>
-          </div>
+          )}
 
-          {/* 4. Notes */}
-          <BookModalCard icon={ClipboardCheck} title="Notes for the shop" subtitle="Add any specific details or symptoms.">
-            <label className="text-sm font-medium">
-              {!notSure && selectedIds.length === 0 ? "Describe the problem" : "Notes for the shop (optional)"}
-            </label>
-            <textarea
-              rows={4}
-              maxLength={500}
-              value={notes}
-              onChange={(e) => {
-                setNotes(e.target.value);
-                if (fieldErrors.service) setFieldErrors((p) => ({ ...p, service: "" }));
-              }}
-              placeholder="Describe any specific issues (e.g., strange noises, warning lights)..."
-              className="mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
-            />
-            <div className="mt-1 flex justify-end text-[10px] text-muted-foreground">
-              {notes.length}/500
+          {/* Wizard Navigation Footer */}
+          <div className="mt-5 flex items-center justify-between gap-3 border-t pt-4">
+            <div>
+              {step > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setStep((s) => (s - 1) as 0 | 1 | 2)}
+                  className="cursor-pointer rounded-md border px-5 py-2.5 text-sm font-medium hover:bg-accent"
+                >
+                  Back
+                </button>
+              )}
             </div>
-          </BookModalCard>
+            <div className="flex flex-col items-end gap-1">
+              {step < 2 ? (
+                <button
+                  type="button"
+                  disabled={step === 0 ? !(vehicleOk && placeOk) : !servicesOk}
+                  onClick={() => {
+                    if (step === 0) {
+                      if (!vehicleOk) {
+                        setFieldErrors((p) => ({
+                          ...p,
+                          selectedVehicleId:
+                            p.selectedVehicleId || "Pick or register a vehicle.",
+                        }));
+                        return;
+                      }
+                      if (!placeOk) {
+                        setFieldErrors((p) => ({ ...p, homeAddress: p.homeAddress || "Home address is required." }));
+                        return;
+                      }
+                      setStep(1);
+                    } else if (step === 1) {
+                      if (!servicesOk) {
+                        setFieldErrors((p) => ({
+                          ...p,
+                          service:
+                            p.service ||
+                            "Pick at least one service, or tick 'I am not sure what is wrong', or describe your concern in the notes.",
+                        }));
+                        return;
+                      }
+                      setStep(2);
+                    }
+                  }}
+                  className="cursor-pointer rounded-md bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmOpen(true)}
+                  disabled={isSubmitting || !dateOk}
+                  className="cursor-pointer rounded-md bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSubmitting ? "Confirming..." : "Confirm booking"}
+                </button>
+              )}
+              {step === 0 && !(vehicleOk && placeOk) && (
+                <p className="text-[11px] text-muted-foreground">
+                  {!vehicleOk ? "Pick a vehicle to continue." : "Enter your home address to continue."}
+                </p>
+              )}
+              {step === 1 && !servicesOk && (
+                <p className="text-[11px] text-muted-foreground">
+                  {needsScan && !scanAcknowledged && (notSure || selectedIds.length > 0)
+                    ? "Agree to the scan fee to continue."
+                    : "Pick a service or describe the problem to continue."}
+                </p>
+              )}
+              {step === 2 && !dateOk && (
+                <p className="text-[11px] text-muted-foreground">Pick a date and a time to confirm.</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
+
+      {confirmOpen && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 p-4">
+          <div role="dialog" aria-modal="true" aria-label="Confirm this booking" className="w-full max-w-md rounded-xl bg-background p-6 shadow-2xl">
+            <h3 className="text-lg font-bold text-foreground">Confirm this booking?</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Please check your details. The shop will review your booking and contact you.
+            </p>
+
+            <dl className="mt-4 space-y-2 rounded-lg bg-accent/50 p-4 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">Vehicle</dt>
+                <dd className="text-right font-medium text-foreground">{displayVehicle}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">Service option</dt>
+                <dd className="text-right font-medium text-foreground">{pickup === "shop" ? "Shop Visit" : "Home Service"}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">Visit date</dt>
+                <dd className="text-right font-medium text-foreground">
+                  {dateChosen && timeChosen
+                    ? new Date(toManilaIso(toDateValue(preferredDate), preferredTime)).toLocaleString("en-PH", {
+                        month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit",
+                      })
+                    : "—"}
+                </dd>
+              </div>
+            </dl>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmOpen(false)}
+                className="cursor-pointer rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
+              >
+                Go back
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmOpen(false);
+                  handleConfirm();
+                }}
+                className="cursor-pointer rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90"
+              >
+                Yes, confirm booking
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {inServicePlate && (
         <VehicleInServiceModal plate={inServicePlate} onClose={() => setInServicePlate(null)} />
@@ -1325,74 +1592,18 @@ export function BookingPage({ initialVehicleId }: { initialVehicleId?: string })
   );
 }
 
-function BookingSteps({
-  stepDone,
-  currentStep,
-}: {
-  stepDone: boolean[];
-  currentStep: number;
-}) {
-  const steps = [
-    { id: "book-step-vehicle", label: "Pick a vehicle" },
-    { id: "book-step-services", label: "Pick services" },
-    { id: "book-step-date", label: "Pick date and place" },
-  ];
-
+// The estimate is only a guess. It is shown as a red warning card so the customer cannot miss it.
+function EstimateWarning() {
   return (
-    <div className="mb-8 rounded-xl border bg-card p-4 shadow-sm">
-      <div className="flex items-start">
-        {steps.map((s, idx) => {
-          const isDone = stepDone[idx];
-          const isCurrent = currentStep === idx;
-          const isLast = idx === steps.length - 1;
-
-          return (
-            <div key={s.id} className="relative flex flex-1 flex-col items-center">
-              {!isLast && (
-                <div
-                  className={cn(
-                    "absolute left-1/2 top-4 w-full h-0.5 transition-colors",
-                    isDone ? "bg-emerald-600" : "bg-border"
-                  )}
-                />
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  document.getElementById(s.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-                aria-current={isCurrent ? "step" : undefined}
-                className="relative z-10 flex flex-col items-center text-center cursor-pointer focus:outline-none"
-              >
-                <span
-                  className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-colors",
-                    isDone
-                      ? "bg-emerald-600 text-white"
-                      : isCurrent
-                      ? "border-2 border-brand bg-brand/10 font-bold text-brand"
-                      : "border border-border bg-card text-muted-foreground"
-                  )}
-                >
-                  {isDone ? <Check className="h-4 w-4 stroke-[2.5]" /> : idx + 1}
-                </span>
-                <span
-                  className={cn(
-                    "mt-1.5 text-[11px] sm:text-xs transition-colors whitespace-nowrap",
-                    isCurrent
-                      ? "font-bold text-foreground"
-                      : isDone
-                      ? "font-medium text-foreground"
-                      : "text-muted-foreground"
-                  )}
-                >
-                  {s.label}
-                </span>
-              </button>
-            </div>
-          );
-        })}
-      </div>
+    <div
+      role="note"
+      className="mt-2 flex items-start gap-2 rounded-lg border border-rose-300/70 bg-rose-500/10 p-2.5 text-rose-900 dark:border-rose-900/60 dark:bg-rose-500/15 dark:text-rose-200"
+    >
+      <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-600 dark:text-rose-400" aria-hidden="true" />
+      <p className="text-[11px] font-medium leading-snug">
+        This is only an estimate and assumes no additional issues are found. The shop will contact you to confirm
+        the final schedule.
+      </p>
     </div>
   );
 }
@@ -1619,7 +1830,16 @@ function BookRadioTile({ icon: Icon, label, active, onClick }: { icon: any; labe
   );
 }
 
-function BookSumRow({ label, value }: { label: string; value: string }) {
+// `stacked` puts the value under a long label instead of squeezing both on one line.
+function BookSumRow({ label, value, stacked = false }: { label: string; value: string; stacked?: boolean }) {
+  if (stacked) {
+    return (
+      <div className="border-b pb-2 last:border-0 text-xs">
+        <span className="block text-muted-foreground">{label}</span>
+        <span className="mt-0.5 block font-medium text-foreground">{value || "—"}</span>
+      </div>
+    );
+  }
   return (
     <div className="flex items-center justify-between border-b pb-2 last:border-0 text-xs">
       <span className="text-muted-foreground">{label}</span>

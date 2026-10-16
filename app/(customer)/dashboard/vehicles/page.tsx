@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Loader2, Plus, Car, X, Calendar, Info, ChevronRight } from 'lucide-react'
 import { ServiceReportModal } from '@/components/dashboard/ServiceReportModal'
+import { BookingModal } from '@/components/dashboard/BookingModal'
 import { FINISHED_STATUSES, trackingHref } from '@/data/trackingStages'
 
 type Vehicle = {
@@ -58,6 +59,7 @@ export default function MyVehiclesPage() {
   const [error, setError] = useState(false)
   const [historyFor, setHistoryFor] = useState<Vehicle | null>(null)
   const [reportJobId, setReportJobId] = useState<number | null>(null)
+  const [bookingVehicleId, setBookingVehicleId] = useState<string | null>(null)
   const router = useRouter()
 
   const load = () => {
@@ -89,7 +91,7 @@ export default function MyVehiclesPage() {
 
   const book = (id: number) => {
     setHistoryFor(null)
-    router.push('/dashboard/book?vehicle=' + id)
+    setBookingVehicleId(String(id))
   }
 
   if (loading) {
@@ -229,6 +231,14 @@ export default function MyVehiclesPage() {
 
       {reportJobId !== null && (
         <ServiceReportModal jobId={reportJobId} onClose={() => setReportJobId(null)} />
+      )}
+
+      {bookingVehicleId && (
+        <BookingModal
+          initialVehicleId={bookingVehicleId}
+          onClose={() => setBookingVehicleId(null)}
+          onBooked={() => load()}
+        />
       )}
     </div>
   )

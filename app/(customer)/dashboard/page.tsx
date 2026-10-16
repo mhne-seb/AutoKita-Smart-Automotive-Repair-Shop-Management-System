@@ -62,6 +62,7 @@ import { toManilaIso } from "@/lib/bookingSlotsShared";
 import { Modal } from "@/components/dashboard/Modal";
 import { STATUS_TO_STEP } from "@/data/trackingStages";
 import { ServiceReportModal } from "@/components/dashboard/ServiceReportModal";
+import { BookingModal } from "@/components/dashboard/BookingModal";
 
 function startOfToday() {
   const d = new Date()
@@ -115,13 +116,15 @@ function Dashboard() {
   const [reportJobId, setReportJobId] = useState<number | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalData | null>(null);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [bookingFor, setBookingFor] = useState<{ vehicleId?: string } | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('book') === '1') {
         const vehicleParam = urlParams.get('vehicle');
-        router.replace('/dashboard/book' + (vehicleParam && /^\d+$/.test(vehicleParam) ? '?vehicle=' + vehicleParam : ''));
+        setBookingFor({ vehicleId: vehicleParam && /^\d+$/.test(vehicleParam) ? vehicleParam : undefined });
+        router.replace('/dashboard');
       }
     }
   }, [router]);
@@ -576,7 +579,7 @@ function Dashboard() {
             </div>
             <div className="mt-4 space-y-2">
               <button
-                onClick={() => router.push('/dashboard/book')}
+                onClick={() => setBookingFor({})}
                 className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:opacity-90 active:translate-y-0"
               >
                 <Plus className="h-4 w-4" /> Book New Service
@@ -613,7 +616,7 @@ function Dashboard() {
                       type={v.vehicle_type}
                       inService={inService}
                       onBook={() => {
-                        router.push('/dashboard/book?vehicle=' + v.id);
+                        setBookingFor({ vehicleId: String(v.id) });
                       }}
                     />
                   );
@@ -675,6 +678,13 @@ function Dashboard() {
       )}
       {confirmModal && (
         <ConfirmModal data={confirmModal} onClose={() => setConfirmModal(null)} />
+      )}
+      {bookingFor && (
+        <BookingModal
+          initialVehicleId={bookingFor.vehicleId}
+          onClose={() => setBookingFor(null)}
+          onBooked={() => fetchDashboard(true)}
+        />
       )}
 
       {sessionExpired && (

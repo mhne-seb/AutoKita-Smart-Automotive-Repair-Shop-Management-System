@@ -23,6 +23,7 @@ import { currency } from '@/data/mockData'
 import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, PartsPurchase, Supplier, ServiceFinding, PullOutRequest, partIsReady } from '@/data/types'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ShopLoading } from '@/components/ShopLoading'
+import { ScheduleJobModal } from '@/components/admin/ScheduleJobModal'
 
 const sectionColors: Record<string, string> = {
   received: 'text-emerald-600',
@@ -166,6 +167,16 @@ export default function page() {
   }, [allTasks])
   const partsToBuy = allParts.filter((p) => p.status === 'to_order')
   const completedCount = serviceTasks.filter((t) => t.status === 'completed').length
+  const [showScheduleJobModal, setShowScheduleJobModal] = useState(false)
+  const hasUnscheduledTasks = useMemo(() => {
+    return serviceTasks.some(
+      (t) =>
+        t.status === 'pending' &&
+        !isRoadTest(t) &&
+        !isDiagnosticScanTask(t) &&
+        (!t.scheduledDate || !t.mechanicId),
+    )
+  }, [serviceTasks])
 
   // For display only: finished services get their own section under the
   // open ones, so the mechanic's "what's left" list isn't padded with done
@@ -419,9 +430,22 @@ export default function page() {
   // test can be drawn in the sidebar with exactly the same card as the rest.
   const renderSection = (section: ServiceSection) => (
     <div key={section.id} className="space-y-3">
-      <p className={`text-sm font-bold uppercase tracking-wide ${sectionColors[section.id] ?? 'text-slate-500'}`}>
-        {section.title}
-      </p>
+      <div className="flex items-center justify-between">
+        <p className={`text-sm font-bold uppercase tracking-wide ${sectionColors[section.id] ?? 'text-slate-500'}`}>
+          {section.title}
+        </p>
+        {/* No quotationConfirmed check here: the suggestion route checks the real rule (job order status). */}
+        {section.id === 'in-progress' && hasUnscheduledTasks && (
+          <button
+            type="button"
+            onClick={() => setShowScheduleJobModal(true)}
+            title="Choose a start, the mechanics and the times for the pending tasks"
+            className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-indigo-700 active:translate-y-0"
+          >
+            <CalendarDays size={13} /> Schedule job
+          </button>
+        )}
+      </div>
       {section.tasks.map((task) => (
           <Fragment key={task.id}>
           <div
@@ -1468,6 +1492,16 @@ export default function page() {
           onConfirm={async () => {
             await onDecidePullOut('deny')
             setConfirmPullOutAction(null)
+          }}
+        />
+      )}
+      {showScheduleJobModal && (
+        <ScheduleJobModal
+          jobOrderId={jobOrderId}
+          onClose={() => setShowScheduleJobModal(false)}
+          onApplied={async () => {
+            setShowScheduleJobModal(false)
+            await refreshTasks()
           }}
         />
       )}
