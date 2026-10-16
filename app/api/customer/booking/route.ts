@@ -57,6 +57,10 @@ export async function POST(req: NextRequest) {
     const bad =(message: string, code?: string) =>
       NextResponse.json({ success: false, message, ...(code ? { code } : {}) }, { status: 400 })
 
+    // A home service never leaves a vehicle at the shop overnight: the mechanic goes to the customer,
+    // so the overnight agreement below does not apply to it.
+    const isHomeService = serviceMode === 'Home Service'
+
     if (!vehicleId && !newVehicleDetails) return bad('Missing vehicle information')
 
     let finalConcern = ''
@@ -137,7 +141,7 @@ export async function POST(req: NextRequest) {
       }
 
       let overnightNeeded = false
-      if (preferredDatetime && totalHours > 0) {
+      if (!isHomeService && preferredDatetime && totalHours > 0) {
         let shopHours = null
         try {
           const sHRes = await db.query('SELECT operating_hours FROM shops ORDER BY id ASC LIMIT 1')

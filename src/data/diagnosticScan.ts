@@ -9,6 +9,8 @@ export const DIAGNOSTIC_SCAN_SERVICE_NAME = 'OBD-II Diagnostic Scan'
 // choosing "Not sure". "General Mechanical Inspection & Check-Up" is deliberately NOT here:
 // it is part of the PMS packages.
 export const SCAN_TRIGGER_SERVICE_NAMES: ReadonlySet<string> = new Set([
+  'Diagnostics',
+  // Old name: kept so the fee rule still works before the database rename runs.
   'Engine Diagnostics & Electrical Scan',
 ])
 
