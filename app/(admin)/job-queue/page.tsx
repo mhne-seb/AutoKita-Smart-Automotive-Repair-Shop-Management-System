@@ -587,7 +587,7 @@ export default function page() {
               <th className="px-4 py-3 font-semibold">Vehicle</th>
               <th className="px-4 py-3 font-semibold">Mode</th>
               <th className="px-4 py-3 font-semibold">Service Needed</th>
-              <th className="px-4 py-3 font-semibold">Preferred Date</th>
+              <th className="px-4 py-3 font-semibold">Drop-off / Arrival</th>
               <th className="px-4 py-3 font-semibold">Status</th>
               <th className="px-4 py-3 text-right font-semibold">Actions</th>
             </tr>
@@ -807,7 +807,7 @@ function ApproveModal({ job, busy, onClose, onConfirm }: { job: Job; busy: boole
           </div>
           {job.preferredDate && (
             <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Preferred Date</dt>
+              <dt className="text-muted-foreground">{job.serviceMode === 'Home Service' ? 'Arrival' : 'Drop-off'}</dt>
               <dd className="text-right font-medium text-foreground">{job.preferredDate}</dd>
             </div>
           )}
@@ -958,7 +958,7 @@ function ViewModal({ job, onClose }: { job: Job; onClose: () => void }) {
               {job.preferredDate && (
                 <div className="flex justify-between gap-4">
                   <dt className="flex items-center gap-1.5 text-muted-foreground">
-                    <Calendar size={12} /> Customer's Preferred Date
+                    <Calendar size={12} /> {job.serviceMode === 'Home Service' ? 'Customer’s chosen arrival' : 'Customer’s chosen drop-off'}
                   </dt>
                   <dd className="font-medium text-foreground">{job.preferredDate}</dd>
                 </div>
