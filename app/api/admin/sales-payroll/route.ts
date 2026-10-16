@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
           COALESCE(ep.color, '#3b82f6') AS color
         FROM employees e
         LEFT JOIN employee_profiles ep ON ep.employee_id = e.id
-        WHERE e.role = 'mechanic' OR e.role = 'owner'
+        WHERE e.role::text IN ('mechanic', 'operations_manager', 'owner')
         ORDER BY e.id ASC
       `),
 

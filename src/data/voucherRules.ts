@@ -21,7 +21,7 @@ export const VOUCHER_RULES: Record<VoucherRuleKey, VoucherRule> = {
     key: 'SCAN10',
     label: '10% off the diagnostic scan',
     description: 'Takes 10% off one diagnostic scan.',
-    services: ['OBD-II Diagnostic Scan', 'Engine Diagnostics & Electrical Scan'],
+    services: ['OBD-II Diagnostic Scan', 'Engine Diagnostics & Electrical Scan', 'Diagnostics'],
     kind: 'percent', value: 10, cap: null,
     offerType: 'percentage_discount',
   },

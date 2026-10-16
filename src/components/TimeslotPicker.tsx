@@ -92,9 +92,22 @@ export interface TimeslotPickerProps {
   time: string
   onChangeDate: (d: Date) => void
   onChangeTime: (t: string) => void
+  onAvailableSlots?: (available: string[]) => void
+  dateLabel?: string
+  timeLabel?: string
+  onUserPick?: () => void
 }
 
-export function TimeslotPicker({ date, time, onChangeDate, onChangeTime }: TimeslotPickerProps) {
+export function TimeslotPicker({
+  date,
+  time,
+  onChangeDate,
+  onChangeTime,
+  onAvailableSlots,
+  dateLabel,
+  timeLabel,
+  onUserPick,
+}: TimeslotPickerProps) {
   const [occupiedByDate, setOccupiedByDate] = useState<Record<string, string[]>>({})
   
   useEffect(() => {
@@ -119,6 +132,15 @@ export function TimeslotPicker({ date, time, onChangeDate, onChangeTime }: Times
       }
     }
   }, [date, time, occupiedByDate, onChangeTime])
+
+  useEffect(() => {
+    if (onAvailableSlots) {
+      const available = BOOKING_TIMES.filter(
+        (t) => !isPastSlot(date, t) && !isOccupiedSlot(date, t, occupiedByDate)
+      )
+      onAvailableSlots(available)
+    }
+  }, [date, occupiedByDate, onAvailableSlots])
 
   const visibleDays = useMemo(() => {
     let base = startOfToday()
@@ -146,13 +168,18 @@ export function TimeslotPicker({ date, time, onChangeDate, onChangeTime }: Times
       {/* Pick any date */}
       <div className="mb-3">
         <label className="text-[10px] font-semibold uppercase text-muted-foreground">
-          Pick a date
+          {dateLabel ?? 'Pick a date'}
         </label>
         <input
           type="date"
           min={toDateValue(startOfToday())}
           value={toDateValue(date)}
-          onChange={(e) => e.target.value && onChangeDate(fromDateValue(e.target.value))}
+          onChange={(e) => {
+            if (e.target.value) {
+              onUserPick?.()
+              onChangeDate(fromDateValue(e.target.value))
+            }
+          }}
           className="mt-1.5 block rounded-md border bg-background px-3 py-2 text-sm focus:border-brand focus:outline-none"
         />
       </div>
@@ -171,7 +198,10 @@ export function TimeslotPicker({ date, time, onChangeDate, onChangeTime }: Times
             <button
               key={day.toISOString()}
               type="button"
-              onClick={() => onChangeDate(day)}
+              onClick={() => {
+                onUserPick?.()
+                onChangeDate(day)
+              }}
               className={`relative w-[4.5rem] flex-shrink-0 cursor-pointer rounded-lg border p-3 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 ${
                 sel ? 'border-brand bg-brand text-brand-foreground shadow-lg' : 'hover:bg-accent'
               }`}
@@ -199,7 +229,10 @@ export function TimeslotPicker({ date, time, onChangeDate, onChangeTime }: Times
       </div>
 
       {/* Preset time slots */}
-      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+      {timeLabel && (
+        <p className="mt-4 text-[10px] font-semibold uppercase text-muted-foreground">{timeLabel}</p>
+      )}
+      <div className={`${timeLabel ? 'mt-2' : 'mt-4'} grid grid-cols-2 gap-2 sm:grid-cols-3`}>
         {BOOKING_TIMES.map((t) => {
           const sel = time === t
           const past = isPastSlot(date, t)
@@ -209,7 +242,12 @@ export function TimeslotPicker({ date, time, onChangeDate, onChangeTime }: Times
             <button
               key={t}
               type="button"
-              onClick={() => !disabled && onChangeTime(t)}
+              onClick={() => {
+                if (!disabled) {
+                  onUserPick?.()
+                  onChangeTime(t)
+                }
+              }}
               disabled={disabled}
               title={
                 past

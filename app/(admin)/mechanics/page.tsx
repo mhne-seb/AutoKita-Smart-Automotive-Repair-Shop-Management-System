@@ -23,11 +23,14 @@ import {
   UserMinus,
   UserCheck,
   History,
+  Calendar as CalendarIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { StatusBadge } from '@/components/StatusBadge'
+import { MechanicCalendar } from '@/components/mechanics/MechanicCalendar'
 import {
   getMechanicsData,
+  getMechanicSchedule,
   addMechanic,
   updateMechanic,
   removeMechanic,
@@ -36,6 +39,7 @@ import {
   type MechanicInput,
   type MechanicHistoryRow,
   type MechanicAuditLog,
+  type ScheduleTask,
 } from '@/controllers/mechanicController'
 import { DEFAULT_MECHANIC_CAPACITY } from '@/data/mechanicPolicy'
 
@@ -57,12 +61,29 @@ function avatarUrl(name: string) {
 
 export default function page() {
   const [mechanicsList, setMechanicsList] = useState<Mechanic[]>([])
+  const [scheduleTasks, setScheduleTasks] = useState<ScheduleTask[]>([])
   const [loading, setLoading] = useState(true)
 
+  // Show calendar already by default as requested
+  const [viewMode, setViewMode] = useState<'calendar' | 'roster'>('calendar')
+  const [selectedMechanicIds, setSelectedMechanicIds] = useState<number[]>([])
+
   async function refresh() {
-    const data = await getMechanicsData()
-    setMechanicsList(data.mechanics)
-    setLoading(false)
+    try {
+      const [data, sched] = await Promise.all([
+        getMechanicsData(),
+        getMechanicSchedule(),
+      ])
+      setMechanicsList(data.mechanics)
+      setScheduleTasks(sched.tasks || [])
+      if (data.mechanics.length > 0 && selectedMechanicIds.length === 0) {
+        setSelectedMechanicIds(data.mechanics.map((m) => m.id))
+      }
+    } catch (e) {
+      console.error('Failed to refresh mechanics/schedule:', e)
+    } finally {
+      setLoading(false)
+    }
   }
   useEffect(() => {
     void refresh()
@@ -145,9 +166,36 @@ export default function page() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Mechanic Management</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Manage workshop resources and optimize service throughput.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage workshop resources, view mechanic service schedules, and optimize service throughput.
+          </p>
         </div>
+
         <div className="flex items-center gap-3">
+          {/* View Toggle */}
+          <div className="flex items-center rounded-full border border-border bg-card p-1 shadow-2xs">
+            <button
+              onClick={() => setViewMode('calendar')}
+              className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
+                viewMode === 'calendar'
+                  ? `${GRADIENT} text-white shadow-sm`
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <CalendarIcon size={14} /> Service Calendar
+            </button>
+            <button
+              onClick={() => setViewMode('roster')}
+              className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
+                viewMode === 'roster'
+                  ? `${GRADIENT} text-white shadow-sm`
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Users size={14} /> Roster Cards ({mechanicsList.length})
+            </button>
+          </div>
+
           <button
             onClick={() => setShowAdd(true)}
             className={`flex items-center gap-2 rounded-full ${GRADIENT} px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:opacity-90 active:scale-95 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
@@ -157,40 +205,51 @@ export default function page() {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative min-w-[240px] flex-1">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email, or branch..."
-            className="w-full rounded-full border border-border bg-card py-2.5 pl-9 pr-4 text-sm placeholder:text-muted-foreground focus:border-brand focus:outline-none"
-          />
-        </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-full border border-border bg-card px-4 py-2.5 text-sm text-foreground"
-        >
-          {STATUS_OPTIONS.map((s) => (
-            <option key={s}>{s}</option>
-          ))}
-        </select>
-        <span className="ml-auto flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
-          <Users size={15} /> {filtered.length} of {mechanicsList.length} Mechanics
-        </span>
-      </div>
-
       {loading ? (
         <div className="flex items-center justify-center rounded-2xl border border-border bg-card p-12 text-sm text-muted-foreground">
-          <Loader2 size={16} className="mr-2 animate-spin" /> Loading mechanics...
+          <Loader2 size={16} className="mr-2 animate-spin" /> Loading mechanics & schedules...
         </div>
-      ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center text-sm text-muted-foreground">
-          {mechanicsList.length === 0 ? 'No mechanics on the roster yet. Add one to get started.' : 'No mechanics match your search or filters.'}
-        </div>
+      ) : viewMode === 'calendar' ? (
+        <MechanicCalendar
+          tasks={scheduleTasks}
+          mechanics={mechanicsList}
+          selectedMechanicIds={selectedMechanicIds}
+          onSelectMechanics={setSelectedMechanicIds}
+          onOpenMechanicProfile={setProfileTarget}
+        />
       ) : (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+        /* Roster View */
+        <div className="space-y-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative min-w-[240px] flex-1">
+              <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name, email, or branch..."
+                className="w-full rounded-full border border-border bg-card py-2.5 pl-9 pr-4 text-sm placeholder:text-muted-foreground focus:border-brand focus:outline-none"
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="rounded-full border border-border bg-card px-4 py-2.5 text-sm text-foreground"
+            >
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s}>{s}</option>
+              ))}
+            </select>
+            <span className="ml-auto flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+              <Users size={15} /> {filtered.length} of {mechanicsList.length} Mechanics
+            </span>
+          </div>
+
+          {filtered.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center text-sm text-muted-foreground">
+              {mechanicsList.length === 0 ? 'No mechanics on the roster yet. Add one to get started.' : 'No mechanics match your search or filters.'}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((m) => {
             const full = m.openTasks >= m.jobsCapacity
             const onLeave = m.employeeStatus === 'on_leave'
@@ -316,6 +375,8 @@ export default function page() {
               </div>
             )
           })}
+            </div>
+          )}
         </div>
       )}
 
@@ -649,7 +710,7 @@ function MechanicFormModal({
           <div>
             <p className="text-lg font-bold text-white">{mode === 'add' ? 'Add Mechanic' : 'Edit Mechanic'}</p>
             <p className="text-sm text-white/70">
-              {mode === 'add' ? 'Add a new technician to the roster.' : 'Update this technician’s details.'}
+              {mode === 'add' ? 'Add a new mechanic to the roster.' : 'Update this mechanic’s details.'}
             </p>
           </div>
           <button onClick={onClose} className="text-white/70 hover:text-white cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md" aria-label="Close">

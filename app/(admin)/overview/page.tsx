@@ -321,7 +321,10 @@ export default function page() {
                       {b.vehicle} - {b.plate}
                     </td>
                     <td className="px-4 py-4 text-muted-foreground">{b.serviceMode}</td>
-                    <td className="px-4 py-4 text-muted-foreground">{b.concern}</td>
+                    <td className="px-4 py-4 text-muted-foreground">
+                      {/* A booking note can now list many services, so keep the row two lines tall. */}
+                      <div className="line-clamp-2 max-w-xs" title={b.concern}>{b.concern}</div>
+                    </td>
                     <td className="px-4 py-4 text-muted-foreground">{b.date}</td>
                     <td className="px-4 py-4">
                       <StatusBadge status="Pending" />

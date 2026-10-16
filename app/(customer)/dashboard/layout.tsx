@@ -28,7 +28,18 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           sessionStorage.removeItem('autokita_user_name')
           router.replace('/login')
         } else {
-          setChecked(true)
+          fetch('/api/customer/setup')
+            .then(res => res.json())
+            .then(setupData => {
+              if (setupData.setupCompleted === false) {
+                router.replace('/setup')
+              } else {
+                setChecked(true)
+              }
+            })
+            .catch(() => {
+              setChecked(true)
+            })
         }
       })
       .catch(() => {
