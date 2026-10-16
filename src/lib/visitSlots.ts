@@ -48,7 +48,9 @@ export function isPastSlot(date: Date, time: string): boolean {
 export function isOccupiedSlot(date: Date, time: string, occupiedByDate: Record<string, string[]>): boolean {
   const taken = occupiedByDate[toDateValue(date)] || []
   if (taken.length === 0) return false
-  return taken.map(normalizeTimeSlot).includes(normalizeTimeSlot(time))
+  // One booking per one-hour window: a booking saved at 9:30 also fills the 9 - 10 window.
+  const slotHour = parseTime(time).h
+  return taken.some((t) => parseTime(normalizeTimeSlot(t)).h === slotHour)
 }
 
 // 'open' = at least one free time, 'full' = every time is booked or passed.

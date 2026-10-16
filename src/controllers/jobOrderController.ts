@@ -3,6 +3,7 @@
 import type { JobOrderCard, Stage, PaymentStatus } from '@/data/types'
 import { stageOrder } from '@/data/types'
 import { serviceModeFromDb } from '@/lib/serviceMode'
+import { formatVisitWindow } from '@/lib/bookingSlotsShared'
 
 function simulateDelay<T>(value: T, ms = 250): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), ms))
@@ -206,7 +207,7 @@ export async function getJobOrderDetails(id: string): Promise<JobOrderDetails | 
     serviceMode: serviceModeFromDb(r.service_mode),
     homeAddress:
       r.home_service_address && r.home_service_address !== 'None' ? r.home_service_address : null,
-    visitTime: formatWhen(r.preferred_datetime),
+    visitTime: formatVisitWindow(r.preferred_datetime),
   }
 }
 

@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { BOOKING_TIMES } from '@/lib/bookingSlotsShared'
+import { ChevronLeft, ChevronRight, Lock } from 'lucide-react'
+import { BOOKING_TIMES, formatSlotRange } from '@/lib/bookingSlotsShared'
 import { ShopHours, hoursForWeekday } from '@/lib/bookingTiming'
 import {
   startOfToday,
@@ -284,7 +284,7 @@ export function VisitDatePicker({
             <div
               role="radiogroup"
               aria-label={timeHeading}
-              className="mt-3 space-y-1.5 max-h-[340px] overflow-y-auto pr-1"
+              className="mt-3 max-w-[17rem] space-y-1"
             >
               {BOOKING_TIMES.map((t) => {
                 const past = isPastSlot(date, t)
@@ -301,8 +301,10 @@ export function VisitDatePicker({
                     disabled={disabled}
                     onClick={() => !disabled && onChangeTime(t)}
                     className={cn(
-                      'flex w-full items-center justify-between rounded-lg border px-3 py-2 text-sm transition-colors text-left',
-                      disabled
+                      'flex w-full items-center justify-between gap-4 rounded-md border px-3 py-1.5 text-[13px] transition-colors text-left',
+                      occupied
+                        ? 'cursor-not-allowed border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300'
+                        : disabled
                         ? 'cursor-not-allowed border-dashed border-border/60 bg-muted/20 text-muted-foreground/50'
                         : isSelected
                         ? 'cursor-pointer border-brand bg-brand-soft/40 ring-1 ring-brand text-foreground font-medium'
@@ -313,16 +315,18 @@ export function VisitDatePicker({
                       <span
                         className={cn(
                           'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2',
-                          isSelected ? 'border-brand' : 'border-muted-foreground/40'
+                          occupied ? 'border-rose-300 opacity-60 dark:border-rose-800' : isSelected ? 'border-brand' : 'border-muted-foreground/40'
                         )}
                       >
                         {isSelected && <span className="h-2 w-2 rounded-full bg-brand" />}
                       </span>
-                      <span className={cn(occupied ? 'line-through opacity-75' : '')}>{t}</span>
+                      <span className={cn(occupied ? 'line-through' : '')}>{formatSlotRange(t)}</span>
                     </div>
                     <div>
                       {occupied ? (
-                        <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-400">Fully booked</span>
+                        <span className="flex items-center gap-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400">
+                          <Lock className="h-3 w-3" aria-hidden="true" /> Taken
+                        </span>
                       ) : past ? (
                         <span className="text-[11px] text-muted-foreground/60">Passed</span>
                       ) : (

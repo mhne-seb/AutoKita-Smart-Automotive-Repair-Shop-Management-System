@@ -35,6 +35,7 @@ import { JobOrderCard } from '@/data/types'
 import { getRevenueTrend, getServiceMix } from '@/controllers/reportController'
 import { currency, type RevenuePoint, type ServiceMixSlice } from '@/data/mockData'
 import { arrivalWording } from '@/lib/serviceMode'
+import { formatVisitRange } from '@/lib/bookingSlotsShared'
 const heroImage = "/assets/ac/a1.jpg"; // static asset path
 
 type PendingBooking = {
@@ -146,7 +147,7 @@ export default function page() {
                 const approved = t.ticket_status === 'approved'
                 return {
                   ticketId: t.ticket_id,
-                  time: when.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Manila' }),
+                  time: formatVisitRange(t.preferred_datetime) ?? '',
                   sortKey: when.getTime(),
                   name: `${t.first_name} ${t.last_name}`,
                   vehicle: `${t.vehicle_model} ${t.vehicle_year}`,
@@ -258,7 +259,7 @@ export default function page() {
               const w = arrivalWording(a.isHome ? 'home' : 'shop')
               return (
                 <div key={a.ticketId} className="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
-                  <div className="w-24 shrink-0">
+                  <div className="w-32 shrink-0">
                     <p className="text-sm font-semibold text-foreground">{a.time}</p>
                     <p className="text-xs text-muted-foreground">{a.isHome ? 'Arrival' : 'Drop-off'}</p>
                   </div>

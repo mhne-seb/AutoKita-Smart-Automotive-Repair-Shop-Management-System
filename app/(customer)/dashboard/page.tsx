@@ -58,7 +58,7 @@ import { fetchJobOrderPdfData, generateJobOrderPdf } from "@/lib/jobOrderPdf";
 import { formatStamp, cn } from "@/lib/utils";
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from "@/lib/plate";
 import { TimeslotPicker } from "@/components/TimeslotPicker";
-import { toManilaIso } from "@/lib/bookingSlotsShared";
+import { toManilaIso, formatVisitWindow } from "@/lib/bookingSlotsShared";
 import { Modal } from "@/components/dashboard/Modal";
 import { STATUS_TO_STEP } from "@/data/trackingStages";
 import { ServiceReportModal } from "@/components/dashboard/ServiceReportModal";
@@ -469,13 +469,7 @@ function Dashboard() {
                         <div className="flex items-start gap-1.5 text-xs font-medium text-brand">
                           <Calendar className="mt-0.5 h-3 w-3 flex-shrink-0" />
                           <span>
-                            Schedule: {new Date(t.preferred_datetime).toLocaleString("en-PH", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                              hour: "numeric",
-                              minute: "2-digit",
-                            })}
+                            {t.service_mode === "home_service" ? "Arrival" : "Drop-off"}: {formatVisitWindow(t.preferred_datetime)}
                           </span>
                         </div>
                       )}

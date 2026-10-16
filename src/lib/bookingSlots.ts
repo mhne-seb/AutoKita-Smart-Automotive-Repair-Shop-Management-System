@@ -82,8 +82,9 @@ export async function getOccupiedBookingSlots() {
 
 /**
  * Checks whether a requested preferred_datetime conflicts with an existing active booking.
- * A conflict occurs if another active booking is at the exact time or within 30 minutes.
- * Returns true if the slot is occupied, false otherwise.
+ * Bookings are one-hour windows, one booking per window: a conflict is another active booking in the
+ * same Manila hour (this also catches older bookings saved at 9:30 or 10:30).
+ * Returns true if the window is occupied, false otherwise.
  */
 export async function isSlotOccupiedInDb(preferredDatetime: string, client?: any): Promise<boolean> {
   const executor = client || db
@@ -92,7 +93,8 @@ export async function isSlotOccupiedInDb(preferredDatetime: string, client?: any
      FROM service_tickets st
      LEFT JOIN job_orders jo ON jo.ticket_id = st.id
      WHERE st.preferred_datetime IS NOT NULL
-       AND ABS(EXTRACT(EPOCH FROM (st.preferred_datetime - $1::timestamptz))) < 1800
+       AND date_trunc('hour', st.preferred_datetime AT TIME ZONE 'Asia/Manila')
+         = date_trunc('hour', $1::timestamptz AT TIME ZONE 'Asia/Manila')
        AND st.ticket_status NOT IN ('cancelled', 'declined')
        AND (jo.status IS NULL OR jo.status NOT IN ('completed', 'released', 'cancelled'))
      LIMIT 1`,

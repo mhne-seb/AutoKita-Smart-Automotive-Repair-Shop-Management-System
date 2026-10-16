@@ -38,6 +38,7 @@ import { ShopLoading } from '@/components/ShopLoading'
 import { StatusBadge } from '@/components/StatusBadge'
 import { PROVINCES, SERVICE_CATEGORIES, YEARS } from '@/data/ticketFormOptions'
 import { isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
+import { formatVisitWindow } from '@/lib/bookingSlotsShared'
 import { MAX_EMAIL, MAX_MODEL, MAX_NAME, parseMileage, splitFullName } from '@/lib/bookingRules'
 
 export type JobStatus = 'Pending' | 'In Progress' | 'Approved' | 'Cancelled' | 'Completed'
@@ -117,7 +118,7 @@ export default function page() {
               status,
               date: new Date(t.request_date).toLocaleDateString(),
               preferredDate: t.preferred_datetime
-                ? new Date(t.preferred_datetime).toLocaleString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
+                ? formatVisitWindow(t.preferred_datetime)
                 : null,
             }
           })
