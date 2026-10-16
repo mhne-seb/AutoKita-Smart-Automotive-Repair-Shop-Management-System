@@ -16,6 +16,8 @@ import {
   suggestSchedule,
   layoutJob,
   parseNaiveTimestamp,
+  sortLongestFirst,
+  sortMaintenanceShortFirst,
   type Interval,
   type MechanicInput,
   type Placement,
@@ -164,6 +166,10 @@ export function ScheduleJobModal({
   const [pinned, setPinned] = useState<Record<number, { date: string; time: string }>>({})
   const [pool, setPool] = useState<number[]>([])
   const [share, setShare] = useState(false)
+  const [order, setOrder] = useState<number[]>([])
+  const [dragId, setDragId] = useState<number | null>(null)
+  const [overId, setOverId] = useState<number | null>(null)
+  const [dragReadyId, setDragReadyId] = useState<number | null>(null)
 
   const loadSuggestion = () => {
     setLoading(true)
@@ -237,6 +243,7 @@ export function ScheduleJobModal({
         }
         setAssignments(initialAssignments)
         setPinned({})
+        setOrder(json.planning.tasks.map((t) => t.id))
 
         // Initial pool and share
         const okMechs = Array.from(
@@ -271,8 +278,21 @@ export function ScheduleJobModal({
     loadSuggestion()
   }, [jobOrderId])
 
+  const orderedTasks = useMemo(() => {
+    if (!data?.planning) return []
+    const byId = new Map(data.planning.tasks.map((t) => [t.id, t]))
+    const inOrder = order.map((id) => byId.get(id)).filter((t): t is PlanningTask => Boolean(t))
+    // Safety: never lose a task that is missing from order
+    const missing = data.planning.tasks.filter((t) => !order.includes(t.id))
+    return [...inOrder, ...missing]
+  }, [data?.planning, order])
+
   // Single shared auto-schedule function
-  const runAuto = (nextPool: number[], nextShare: boolean) => {
+  const runAuto = (
+    nextPool: number[],
+    nextShare: boolean,
+    nextOrder: number[] = order,
+  ) => {
     if (!data?.planning || !start.date || !start.time) return
     const now = parseNaiveTimestamp(data.planning.nowIso)
     const startMs = parseNaiveTimestamp(`${start.date}T${start.time}:00`)
@@ -292,12 +312,17 @@ export function ScheduleJobModal({
       end: parseNaiveTimestamp(b.end),
     }))
 
+    const byId = new Map(data.planning.tasks.map((t) => [t.id, t]))
+    const tasksInOrder = nextOrder
+      .map((id) => byId.get(id))
+      .filter((t): t is PlanningTask => Boolean(t))
+
     const res = suggestSchedule({
       now: effectiveNow,
       hours: data.planning.shopHours,
       mechanics,
       carBusy,
-      tasks: data.planning.tasks,
+      tasks: tasksInOrder,
       preferredMechanicId: data.planning.preferredMechanicId,
       poolIds: nextPool,
       share: nextShare,
@@ -333,8 +358,35 @@ export function ScheduleJobModal({
   }
 
   const handleToggleShare = (nextShare: boolean) => {
-    setShare(nextShare)
-    runAuto(pool, nextShare)
+    if (nextShare) {
+      const nextOrder = sortLongestFirst(data?.planning?.tasks || []).map((t) => t.id)
+      setOrder(nextOrder)
+      setShare(true)
+      runAuto(pool, true, nextOrder)
+    } else {
+      setShare(false)
+      runAuto(pool, false)
+    }
+  }
+
+  const moveTask = (taskId: number, toIndex: number) => {
+    setOrder((prev) => {
+      const ids = orderedTasks.map((t) => t.id)
+      const from = ids.indexOf(taskId)
+      if (from === -1 || toIndex < 0 || toIndex >= ids.length || from === toIndex) return prev
+      const next = [...ids]
+      next.splice(from, 1)
+      next.splice(toIndex, 0, taskId)
+      return next
+    })
+    if (pinned[taskId] !== undefined) {
+      setPinned((prev) => {
+        const copy = { ...prev }
+        delete copy[taskId]
+        return copy
+      })
+      toast.info('Time now follows the order.')
+    }
   }
 
   // Recompute preview with layoutJob
@@ -375,12 +427,12 @@ export function ScheduleJobModal({
       hours: data.planning.shopHours,
       mechanics,
       carBusy,
-      tasks: data.planning.tasks,
+      tasks: orderedTasks,
       assignments,
       pinned: pinnedMs,
       share,
     })
-  }, [data?.planning, start.date, start.time, assignments, pinned, share])
+  }, [data?.planning, start.date, start.time, assignments, pinned, share, orderedTasks])
 
   // Comparison plans (shared vs single mechanic)
   const { sharedReady, singleReady } = useMemo(() => {
@@ -405,6 +457,7 @@ export function ScheduleJobModal({
       end: parseNaiveTimestamp(b.end),
     }))
 
+    // sharedReady uses longest-first as ticking the box would; singleReady uses admin's orderedTasks
     const sharedReady =
       pool.length >= 2
         ? suggestSchedule({
@@ -412,7 +465,7 @@ export function ScheduleJobModal({
             hours: data.planning.shopHours,
             mechanics,
             carBusy,
-            tasks: data.planning.tasks,
+            tasks: sortLongestFirst(data.planning.tasks),
             preferredMechanicId: data.planning.preferredMechanicId,
             poolIds: pool,
             share: true,
@@ -428,7 +481,7 @@ export function ScheduleJobModal({
         hours: data.planning.shopHours,
         mechanics,
         carBusy,
-        tasks: data.planning.tasks,
+        tasks: orderedTasks,
         preferredMechanicId: data.planning.preferredMechanicId,
         poolIds: [mechId],
         share: false,
@@ -443,7 +496,7 @@ export function ScheduleJobModal({
     }
 
     return { sharedReady, singleReady }
-  }, [data?.planning, start.date, start.time, pool])
+  }, [data?.planning, start.date, start.time, pool, orderedTasks])
 
   const okPlacements = placements.filter(
     (p): p is Extract<Placement, { ok: true }> => p.ok,
@@ -711,7 +764,7 @@ export function ScheduleJobModal({
                     <span>Share the work between them</span>
                   </label>
                   <p className="text-[11px] text-slate-500 pl-5">
-                    Longest service first, to whoever finishes it earliest. At most{' '}
+                    Ticking this puts the longest service first. You can drag to change the order. At most{' '}
                     {MAX_MECHANICS_ON_CAR} mechanics work on one car at the same time.
                   </p>
                 </div>
@@ -719,8 +772,48 @@ export function ScheduleJobModal({
 
               {/* Row 4: Hint line */}
               <p className="text-[11px] text-slate-500 pt-1 border-t border-slate-200/40">
-                Auto-schedule replaces your mechanic and time choices.
+                Auto-schedule keeps your order and replaces your mechanic and time choices.
               </p>
+            </div>
+
+            {/* Order presets */}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-[11px] text-slate-500">Drag a card to change the order.</p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (data?.planning) {
+                      setOrder(data.planning.tasks.map((t) => t.id))
+                    }
+                  }}
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+                >
+                  Original order
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (data?.planning) {
+                      setOrder(sortLongestFirst(data.planning.tasks).map((t) => t.id))
+                    }
+                  }}
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+                >
+                  Longest first
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (data?.planning) {
+                      setOrder(sortMaintenanceShortFirst(data.planning.tasks).map((t) => t.id))
+                    }
+                  }}
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+                >
+                  Maintenance / short first
+                </button>
+              </div>
             </div>
 
             {/* Table Header (hidden on mobile) */}
@@ -733,7 +826,7 @@ export function ScheduleJobModal({
 
             {/* Table rows */}
             <div className="max-h-[50vh] overflow-y-auto space-y-2 pr-1">
-              {data.planning.tasks.map((task) => {
+              {orderedTasks.map((task, index) => {
                 const placement = placements.find((p) => p.taskId === task.id)
                 const isPinned = pinned[task.id] !== undefined
                 const isBlocked = Boolean(task.blockedBy)
@@ -751,30 +844,73 @@ export function ScheduleJobModal({
                 return (
                   <div
                     key={task.id}
-                    className="rounded-xl border border-slate-200 bg-white p-3 text-xs"
+                    // The whole card is the drag handle, except the controls inside it
+                    // (dropdown, time inputs, buttons), so those keep working normally.
+                    onMouseDown={(e) => {
+                      const onControl = (e.target as HTMLElement).closest(
+                        'select, input, button, a, label, textarea',
+                      )
+                      setDragReadyId(onControl ? null : task.id)
+                    }}
+                    onMouseUp={() => setDragReadyId(null)}
+                    draggable={dragReadyId === task.id}
+                    onDragStart={(e) => {
+                      setDragId(task.id)
+                      e.dataTransfer.effectAllowed = 'move'
+                      e.dataTransfer.setData('text/plain', String(task.id))
+                    }}
+                    onDragOver={(e) => {
+                      if (dragId === null) return
+                      e.preventDefault()
+                      setOverId(task.id)
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      if (dragId !== null) moveTask(dragId, index)
+                      setDragId(null)
+                      setOverId(null)
+                      setDragReadyId(null)
+                    }}
+                    onDragEnd={() => {
+                      setDragId(null)
+                      setOverId(null)
+                      setDragReadyId(null)
+                    }}
+                    className={`cursor-grab rounded-xl border bg-white p-3 text-xs transition-colors active:cursor-grabbing ${
+                      dragId === task.id ? 'opacity-60' : ''
+                    } ${
+                      overId === task.id && dragId !== null && dragId !== task.id
+                        ? 'border-indigo-400 ring-1 ring-indigo-300'
+                        : 'border-slate-200'
+                    }`}
                   >
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,2fr)_96px_minmax(0,1.5fr)_minmax(0,1.7fr)] md:items-center">
                       {/* 1. Service */}
-                      <div className="space-y-1">
-                        <p className="font-semibold text-slate-900 text-sm">
-                          {task.title}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          {typePill && (
-                            <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700">
-                              {typePill}
+                      <div className="flex items-start gap-2">
+                        <div className="space-y-1 min-w-0">
+                          <p className="font-semibold text-slate-900 text-sm">
+                            <span className="text-[11px] font-semibold text-slate-400 mr-1.5">
+                              {index + 1}.
                             </span>
-                          )}
-                          {isPinned && (
-                            <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-medium text-indigo-700">
-                              Set by you
-                            </span>
-                          )}
-                          {isBlocked && (
-                            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">
-                              Waiting for part
-                            </span>
-                          )}
+                            {task.title}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {typePill && (
+                              <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700">
+                                {typePill}
+                              </span>
+                            )}
+                            {isPinned && (
+                              <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-medium text-indigo-700">
+                                Set by you
+                              </span>
+                            )}
+                            {isBlocked && (
+                              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+                                Waiting for part
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -884,7 +1020,7 @@ export function ScheduleJobModal({
                                       return next
                                     })
                                   }}
-                                  className="text-xs font-medium text-indigo-600 hover:text-indigo-800 underline"
+                                  className="whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
                                 >
                                   Use automatic time
                                 </button>
@@ -908,7 +1044,7 @@ export function ScheduleJobModal({
                                       },
                                     }))
                                   }}
-                                  className="text-xs font-medium text-indigo-600 hover:text-indigo-800 underline"
+                                  className="whitespace-nowrap rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 shadow-sm transition-colors hover:border-indigo-300 hover:bg-indigo-100"
                                 >
                                   Change time
                                 </button>

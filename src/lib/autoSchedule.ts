@@ -31,6 +31,29 @@ export function maxConcurrent(window: Interval, intervals: Interval[]): number {
   return peak
 }
 
+// Longest service first. Equal lengths keep their original order.
+export function sortLongestFirst<T extends { hours: number }>(tasks: T[]): T[] {
+  return tasks
+    .map((task, index) => ({ task, index }))
+    .sort((a, b) => b.task.hours - a.task.hours || a.index - b.index)
+    .map((entry) => entry.task)
+}
+
+// Maintenance services first, then everything else. Inside each group the shorter service goes
+// first, and equal lengths keep their original order.
+export function sortMaintenanceShortFirst<
+  T extends { hours: number; serviceType?: string | null },
+>(tasks: T[]): T[] {
+  return tasks
+    .map((task, index) => ({ task, index }))
+    .sort((a, b) => {
+      const rankA = a.task.serviceType === 'maintenance' ? 0 : 1
+      const rankB = b.task.serviceType === 'maintenance' ? 0 : 1
+      return rankA - rankB || a.task.hours - b.task.hours || a.index - b.index
+    })
+    .map((entry) => entry.task)
+}
+
 export type MechanicInput = { id: number; name: string; busy: Interval[] }
 export type TaskInput = {
   id: number
@@ -318,12 +341,8 @@ export function suggestSchedule(input: {
   const gapMs = TASK_GAP_MINUTES * 60 * 1000
   const roundedNow = roundUpToStep(now)
 
-  const tasksToProcess = input.share
-    ? [...input.tasks].sort((a, b) => {
-        if (b.hours !== a.hours) return b.hours - a.hours
-        return input.tasks.indexOf(a) - input.tasks.indexOf(b)
-      })
-    : input.tasks
+  // Tasks are handled in the order given. The caller decides it (for example longest first).
+  const tasksToProcess = input.tasks
 
   for (const task of tasksToProcess) {
     // If blocked by a part, do not schedule
@@ -435,14 +454,6 @@ export function suggestSchedule(input: {
       end: formatNaiveIso(chosen.end),
       hours: task.hours,
     })
-  }
-
-  // Return suggestions in the original task order
-  if (input.share) {
-    const taskIndexMap = new Map(input.tasks.map((t, idx) => [t.id, idx]))
-    suggestions.sort(
-      (a, b) => (taskIndexMap.get(a.taskId) ?? 0) - (taskIndexMap.get(b.taskId) ?? 0),
-    )
   }
 
   // Compute promisedDate
