@@ -22,7 +22,6 @@ import {
   Calendar,
   SlidersHorizontal,
   Hash,
-  UserCog,
   AlertCircle,
   CheckCircle2,
   ChevronLeft,
@@ -61,7 +60,6 @@ export interface Job {
   // the booking itself was submitted.
   preferredDate: string | null
   servicesNeeded: string[]
-  assignedMechanic?: string
   total?: number
   // Customer agreed to the OBD-II scan fee at booking — the mechanic may scan,
   // and the fee attaches to the job order on approval.
@@ -70,10 +68,9 @@ export interface Job {
   // not a fresh booking — see warranty_claims.
   isWarrantyClaim: boolean
   jobOrderId?: number
-  dateArrived?: string | null
 }
 
-type Tab = 'Tickets' | 'Pending' | 'Approved' | 'Cancelled'
+type Tab = 'Pending' | 'Approved' | 'Cancelled' | 'All'
 
 const validEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 const validPhone = (v: string) => /^(09\d{9}|\+639\d{9})$/.test(v.replace(/\s|-/g, ''))
@@ -89,7 +86,6 @@ const getServiceLabel = (raw: string): string => {
 
 export default function page() {
   const [jobs, setJobs] = useState<Job[]>([])
-  const [mechanics, setMechanics] = useState<any[]>([])
   // Show the loading scene instead of empty cards ("0 Tickets", "No tickets
   // found") while the first fetch is still on its way.
   const [loading, setLoading] = useState(true)
@@ -118,8 +114,6 @@ export default function page() {
               diagnosticScanAuthorized: Boolean(t.diagnostic_scan_authorized),
               isWarrantyClaim: Boolean(t.is_warranty_claim),
               jobOrderId: t.job_order_id ? Number(t.job_order_id) : undefined,
-              dateArrived: t.date_arrived ? new Date(t.date_arrived).toISOString() : null,
-              assignedMechanic: t.mechanic_id ? t.mechanic_id.toString() : undefined,
               status,
               date: new Date(t.request_date).toLocaleDateString(),
               preferredDate: t.preferred_datetime
@@ -128,7 +122,6 @@ export default function page() {
             }
           })
           setJobs(mappedJobs)
-          setMechanics(data.mechanics || [])
         }
       })
       .catch(console.error)
@@ -139,7 +132,7 @@ export default function page() {
     fetchJobs()
   }, [])
 
-  const [tab, setTab] = useState<Tab>('Tickets')
+  const [tab, setTab] = useState<Tab>('Pending')
   // Independent of tab (status) — a warranty claim can be pending, approved,
   // or cancelled just like any ticket, so this is a separate toggle, not a
   // fifth status tab.
@@ -151,7 +144,6 @@ export default function page() {
   // Filter criteria states
   const [selectedVehicle, setSelectedVehicle] = useState('all')
   const [selectedMode, setSelectedMode] = useState('all') // 'all' | 'Shop Visit' | 'Home Service'
-  const [selectedMechanic, setSelectedMechanic] = useState('all') // 'all' | 'unassigned' | mechanicId
   const [showFilterMenu, setShowFilterMenu] = useState(false)
   const filterMenuRef = useRef<HTMLDivElement>(null)
 
@@ -172,7 +164,7 @@ export default function page() {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, tab, warrantyOnly, selectedVehicle, selectedMode, selectedMechanic])
+  }, [searchQuery, tab, warrantyOnly, selectedVehicle, selectedMode])
 
   const vehicleOptions = useMemo(() => {
     const set = new Set<string>()
@@ -182,23 +174,13 @@ export default function page() {
     return Array.from(set).sort()
   }, [jobs])
 
-  const mechanicOptions = useMemo(() => {
-    return mechanics.map((m) => ({
-      id: m.id?.toString(),
-      name: m.full_name || `${m.first_name || ''} ${m.last_name || ''}`.trim() || `Mechanic #${m.id}`,
-      status: m.status,
-    }))
-  }, [mechanics])
-
   const activeFilterCount =
     (selectedVehicle !== 'all' ? 1 : 0) +
-    (selectedMode !== 'all' ? 1 : 0) +
-    (selectedMechanic !== 'all' ? 1 : 0)
+    (selectedMode !== 'all' ? 1 : 0)
 
   const resetFilters = () => {
     setSelectedVehicle('all')
     setSelectedMode('all')
-    setSelectedMechanic('all')
     setCurrentPage(1)
   }
 
@@ -236,7 +218,7 @@ export default function page() {
       )
 
     const matchesTab =
-      tab === 'Tickets' ||
+      tab === 'All' ||
       (tab === 'Pending' && c.status === 'Pending') ||
       (tab === 'Approved' &&
         (c.status === 'Approved' || c.status === 'In Progress')) ||
@@ -250,49 +232,22 @@ export default function page() {
     const matchesMode =
       selectedMode === 'all' || c.serviceMode.toLowerCase() === selectedMode.toLowerCase()
 
-    const matchesMechanic =
-      selectedMechanic === 'all' ||
-      (selectedMechanic === 'unassigned' && (!c.assignedMechanic || c.assignedMechanic === 'Unassigned')) ||
-      c.assignedMechanic === selectedMechanic
-
-    return matchesSearch && matchesTab && matchesWarranty && matchesVehicle && matchesMode && matchesMechanic
+    return matchesSearch && matchesTab && matchesWarranty && matchesVehicle && matchesMode
   })
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage))
   const paginatedJobs = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   const tabs: { label: Tab; count: number; icon: typeof Wrench }[] = [
-    { label: 'Tickets', count: counts.all, icon: Wrench },
     { label: 'Pending', count: counts.pending, icon: ShieldAlert },
     { label: 'Approved', count: counts.approved, icon: Package },
     { label: 'Cancelled', count: counts.cancelled, icon: XCircle },
+    { label: 'All', count: counts.all, icon: Wrench },
   ]
   const warrantyClaimCount = jobs.filter((j) => j.isWarrantyClaim).length
 
-  const updateMechanic = (ticketId: number, mechanicIdStr: string) => {
-    if (mechanicIdStr !== 'Unassigned') {
-      const selected = mechanics.find((m) => m.id?.toString() === mechanicIdStr)
-      if (selected && selected.status !== 'active') {
-        toast.error(`${selected.full_name || 'This mechanic'} is currently on leave and cannot be assigned.`)
-        return
-      }
-    }
-    setJobs((prev) =>
-      prev.map((j) => (j.ticketId === ticketId ? { ...j, assignedMechanic: mechanicIdStr === 'Unassigned' ? undefined : mechanicIdStr } : j)),
-    )
-  }
-
   const confirmApprove = async (job: Job, checkInNow = false) => {
     if (approving) return;
-    if (!job.assignedMechanic || job.assignedMechanic === 'Unassigned') {
-      toast.error("Please assign a mechanic first");
-      return;
-    }
-    const assignedMech = mechanics.find((m) => m.id?.toString() === job.assignedMechanic)
-    if (assignedMech && assignedMech.status !== 'active') {
-      toast.error(`${assignedMech.full_name || 'This mechanic'} is currently on leave and cannot be assigned.`);
-      return;
-    }
     setApproving(true);
     try {
       const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
@@ -302,18 +257,13 @@ export default function page() {
         body: JSON.stringify({
           action: 'approve',
           ticketId: job.ticketId,
-          mechanicId: job.assignedMechanic,
           employeeId: activeEmployeeId ? Number(activeEmployeeId) : null,
           checkInNow: Boolean(checkInNow),
         })
       });
       const data = await res.json();
       if (data.success) {
-        toast.success(
-          checkInNow
-            ? `Ticket approved & vehicle marked as stored in shop! Inspection is ready.`
-            : `Ticket approved! Awaiting vehicle arrival at the shop.`
-        );
+        toast.success('Ticket approved!');
         setApproveTarget(null);
         fetchJobs();
       } else {
@@ -328,7 +278,7 @@ export default function page() {
 
   const [rejecting, setRejecting] = useState(false);
 
-  const confirmReject = async (job: Job) => {
+  const confirmReject = async (job: Job, reason: string) => {
     setRejecting(true);
     try {
       const res = await fetch('/api/admin/job-queue', {
@@ -337,6 +287,7 @@ export default function page() {
         body: JSON.stringify({
           action: 'reject',
           ticketId: job.ticketId,
+          reason,
         })
       });
       const json = await res.json();
@@ -356,7 +307,7 @@ export default function page() {
     }
   }
 
-  const confirmDelete = async (job: Job) => {
+  const confirmDelete = async (job: Job, reason: string) => {
     setRejecting(true);
     try {
       const res = await fetch('/api/admin/job-queue', {
@@ -365,6 +316,7 @@ export default function page() {
         body: JSON.stringify({
           action: 'reject',
           ticketId: job.ticketId,
+          reason,
         })
       });
       const json = await res.json();
@@ -568,24 +520,6 @@ export default function page() {
                       <option value="Home Service">Home Service</option>
                     </select>
                   </div>
-
-                  {/* Mechanic */}
-                  <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Mechanic Assignment</label>
-                    <select
-                      value={selectedMechanic}
-                      onChange={(e) => setSelectedMechanic(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
-                    >
-                      <option value="all">All</option>
-                      <option value="unassigned">Unassigned Only</option>
-                      {mechanicOptions.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.name}{m.status === 'on_leave' ? ' (On Leave)' : m.status && m.status !== 'active' ? ` (${m.status})` : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
                 </div>
 
                 <div className="mt-4 flex justify-end border-t border-border pt-3">
@@ -636,12 +570,6 @@ export default function page() {
               <button onClick={() => setSelectedMode('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
             </span>
           )}
-          {selectedMechanic !== 'all' && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
-              Mechanic: {selectedMechanic === 'unassigned' ? 'Unassigned' : (mechanicOptions.find(m => m.id === selectedMechanic)?.name || selectedMechanic)}
-              <button onClick={() => setSelectedMechanic('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
-            </span>
-          )}
           <button onClick={resetFilters} className="text-xs text-muted-foreground hover:text-rose-500 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
             Clear all
           </button>
@@ -660,7 +588,6 @@ export default function page() {
               <th className="px-4 py-3 font-semibold">Mode</th>
               <th className="px-4 py-3 font-semibold">Service Needed</th>
               <th className="px-4 py-3 font-semibold">Preferred Date</th>
-              <th className="px-4 py-3 font-semibold">Mechanic</th>
               <th className="px-4 py-3 font-semibold">Status</th>
               <th className="px-4 py-3 text-right font-semibold">Actions</th>
             </tr>
@@ -668,7 +595,6 @@ export default function page() {
           <tbody>
             {paginatedJobs.map((c) => {
               const approvedLike = c.status === 'Approved' || c.status === 'In Progress'
-              const unassigned = !c.assignedMechanic || c.assignedMechanic === 'Unassigned'
               return (
                 <tr key={c.ticketId} className="border-b border-border/60 align-top last:border-0">
                   <td className="px-4 py-4">
@@ -741,46 +667,7 @@ export default function page() {
                     )}
                   </td>
                   <td className="px-4 py-4">
-                    <div className="relative">
-                      <UserCog className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                      <select
-                        value={c.assignedMechanic ?? 'Unassigned'}
-                        onChange={(e) => updateMechanic(c.ticketId, e.target.value)}
-                        className={`cursor-pointer transition-all w-full min-w-[150px] rounded-md border py-1 pl-8 pr-2 text-sm text-foreground ${unassigned ? 'border-amber-300 bg-amber-50 hover:bg-amber-100/80' : 'border-border hover:bg-accent'
-                          }`}
-                      >
-                        <option value="Unassigned">Unassigned</option>
-                        {mechanics.map(m => {
-                          const isLeave = m.status === 'on_leave'
-                          const isUnavailable = m.status !== 'active'
-                          const isCurrent = c.assignedMechanic === m.id.toString()
-                          return (
-                            <option
-                              key={m.id}
-                              value={m.id.toString()}
-                              disabled={isUnavailable && !isCurrent}
-                            >
-                              {m.full_name} {isLeave ? '(On Leave)' : isUnavailable ? `(${m.status})` : ''}
-                            </option>
-                          )
-                        })}
-                      </select>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    {c.status === 'Approved' ? (
-                      !c.dateArrived ? (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
-                          <Store size={12} /> Awaiting Arrival
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                          <CheckCircle2 size={12} /> Stored in Shop
-                        </span>
-                      )
-                    ) : (
-                      <StatusBadge status={c.status === 'In Progress' ? 'Approved' : c.status} />
-                    )}
+                    <StatusBadge status={c.status === 'In Progress' ? 'Approved' : c.status} />
                   </td>
                   <td className="px-4 py-4 text-right">
                     <div className="flex justify-end gap-2 items-center">
@@ -794,7 +681,7 @@ export default function page() {
                       {c.status !== 'Cancelled' && (
                         approvedLike ? (
                           <>
-                            {c.dateArrived && c.jobOrderId && (
+                            {c.jobOrderId && (
                               <a
                                 href={`/job-orders/${c.jobOrderId}/inspection`}
                                 title="Go to Inspection"
@@ -837,7 +724,7 @@ export default function page() {
             })}
             {paginatedJobs.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                <td colSpan={6} className="px-4 py-10 text-center text-sm text-muted-foreground">
                   No tickets found.
                 </td>
               </tr>
@@ -854,61 +741,38 @@ export default function page() {
       {approveTarget && (
         <ApproveModal
           job={approveTarget}
-          mechanics={mechanics}
           busy={approving}
           onClose={() => setApproveTarget(null)}
           onConfirm={(checkInNow) => confirmApprove(approveTarget, checkInNow)}
         />
       )}
 
-
-
       {rejectTarget && (
-        <ConfirmModal
-          tone="danger"
-          title="Reject this ticket?"
-          description={`${rejectTarget.name}'s job order for ${rejectTarget.vehicle} will be marked as cancelled.`}
-          confirmLabel={rejecting ? "Rejecting..." : "Reject Ticket"}
+        <CancelModal
+          job={rejectTarget}
+          busy={rejecting}
           onClose={() => setRejectTarget(null)}
-          onConfirm={() => confirmReject(rejectTarget)}
-          disabled={rejecting}
+          onConfirm={(reason) => confirmReject(rejectTarget, reason)}
         />
       )}
 
       {viewTarget && (
-        <ViewModal job={viewTarget} mechanics={mechanics} onClose={() => setViewTarget(null)} />
+        <ViewModal job={viewTarget} onClose={() => setViewTarget(null)} />
       )}
 
       {deleteTarget && (
-        <ConfirmModal
-          tone="danger"
-          title="Decline this ticket?"
-          description="This ticket will be marked as declined and moved to Cancelled. It is not erased."
-          confirmLabel={rejecting ? "Declining..." : "Decline"}
+        <CancelModal
+          job={deleteTarget}
+          busy={rejecting}
           onClose={() => setDeleteTarget(null)}
-          onConfirm={() => confirmDelete(deleteTarget)}
-          disabled={rejecting}
+          onConfirm={(reason) => confirmDelete(deleteTarget, reason)}
         />
       )}
     </div>
   )
 }
 
-// Approve modal — shows the job details and blocks approval until a
-// mechanic is assigned.
-
-function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; mechanics: any[]; busy: boolean; onClose: () => void; onConfirm: (checkInNow: boolean) => void }) {
-  const unassigned = !job.assignedMechanic || job.assignedMechanic === 'Unassigned'
-  const assignedMech = unassigned ? null : mechanics.find((m) => m.id?.toString() === job.assignedMechanic)
-  const isMechanicOnLeave = assignedMech ? assignedMech.status !== 'active' : false
-  const mechanicName = unassigned
-    ? 'Unassigned'
-    : (assignedMech?.full_name ?? job.assignedMechanic) +
-      (assignedMech?.status === 'on_leave'
-        ? ' (On Leave)'
-        : assignedMech?.status && assignedMech.status !== 'active'
-        ? ` (${assignedMech.status})`
-        : '')
+function ApproveModal({ job, busy, onClose, onConfirm }: { job: Job; busy: boolean; onClose: () => void; onConfirm: (checkInNow: boolean) => void }) {
   const [checkInNow, setCheckInNow] = useState(false)
 
   return (
@@ -955,12 +819,6 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
               </dd>
             </div>
           )}
-          <div className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">Assigned Mechanic</dt>
-            <dd className={`font-medium ${unassigned ? 'text-amber-600' : isMechanicOnLeave ? 'text-rose-600' : 'text-foreground'}`}>
-              {mechanicName}
-            </dd>
-          </div>
         </dl>
 
         <div className="mt-4 rounded-lg border border-border bg-accent/30 p-3.5 flex items-start gap-3">
@@ -972,27 +830,18 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
             className="mt-0.5 h-4 w-4 rounded border-border text-brand focus:ring-brand cursor-pointer"
           />
           <label htmlFor="modalCheckInNow" className="text-xs text-foreground cursor-pointer select-none">
-            <span className="font-semibold block text-sm">Vehicle has already arrived & is stored in shop now</span>
+            <span className="font-semibold block text-sm">
+              {job.serviceMode === 'Home Service'
+                ? 'Mechanic has arrived at the customer’s address'
+                : 'Vehicle has been dropped off at the shop'}
+            </span>
             <span className="text-muted-foreground mt-0.5 block leading-normal">
-              Check in immediately. If unchecked, the ticket will be approved as &ldquo;Awaiting Arrival&rdquo; until the vehicle is physically dropped off.
+              {job.serviceMode === 'Home Service'
+                ? 'Mark as arrived now. If unchecked, the ticket will be approved and wait until the mechanic confirms arrival.'
+                : 'Check in now. If unchecked, the ticket will be approved and wait until the vehicle is physically dropped off.'}
             </span>
           </label>
         </div>
-
-        {unassigned && (
-          <div className="mt-3 flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2.5 text-xs text-amber-700">
-            <AlertCircle size={14} className="mt-0.5 shrink-0" />
-            You must assign a mechanic to this job before it can be approved. Close this dialog and pick one from the
-            table, then try again.
-          </div>
-        )}
-
-        {isMechanicOnLeave && (
-          <div className="mt-3 flex items-start gap-2 rounded-lg bg-rose-50 px-3 py-2.5 text-xs text-rose-700">
-            <AlertCircle size={14} className="mt-0.5 shrink-0" />
-            The assigned mechanic ({assignedMech?.full_name}) is currently on leave and cannot take new job orders. Please reassign this ticket to an available mechanic before approving.
-          </div>
-        )}
 
         <div className="mt-6 flex justify-end gap-3">
           <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm">
@@ -1000,7 +849,7 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
           </button>
           <button
             onClick={() => onConfirm(checkInNow)}
-            disabled={unassigned || isMechanicOnLeave || busy}
+            disabled={busy}
             className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
             {busy ? 'Approving...' : 'Confirm Approval'}
@@ -1011,18 +860,7 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
   )
 }
 
-// Hold modal — requires a reason before putting a job on hold.
-
-function ViewModal({ job, mechanics, onClose }: { job: Job; mechanics: any[]; onClose: () => void }) {
-  const assignedMech = !job.assignedMechanic ? null : mechanics.find((m) => m.id?.toString() === job.assignedMechanic)
-  const mechanicName = !job.assignedMechanic
-    ? 'Not yet assigned'
-    : (assignedMech?.full_name ?? job.assignedMechanic) +
-      (assignedMech?.status === 'on_leave'
-        ? ' (On Leave)'
-        : assignedMech?.status && assignedMech.status !== 'active'
-        ? ` (${assignedMech.status})`
-        : '')
+function ViewModal({ job, onClose }: { job: Job; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg rounded-xl bg-background p-6 shadow-2xl">
@@ -1125,12 +963,6 @@ function ViewModal({ job, mechanics, onClose }: { job: Job; mechanics: any[]; on
                   <dd className="font-medium text-foreground">{job.preferredDate}</dd>
                 </div>
               )}
-              <div className="flex justify-between gap-4">
-                <dt className="flex items-center gap-1.5 text-muted-foreground">
-                  <UserCog size={12} /> Assigned Mechanic
-                </dt>
-                <dd className="font-medium text-foreground">{mechanicName}</dd>
-              </div>
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-muted-foreground">Current Status</dt>
                 <dd>
@@ -1151,71 +983,61 @@ function ViewModal({ job, mechanics, onClose }: { job: Job; mechanics: any[]; on
   )
 }
 
-// Generic confirm modal — used for reject + delete.
-
-function ConfirmModal({
-  tone,
-  title,
-  description,
-  confirmLabel,
-  onClose,
-  onConfirm,
-  disabled,
-}: {
-  tone: 'danger' | 'default' | 'brand'
-  title: string
-  description: string
-  confirmLabel: string
-  onClose: () => void
-  onConfirm: () => void
-  disabled?: boolean
+function CancelModal({ job, busy, onClose, onConfirm }: {
+  job: Job; busy: boolean; onClose: () => void; onConfirm: (reason: string) => void
 }) {
-  const isDanger = tone === 'danger'
-  const isBrand = tone === 'brand'
+  const [reason, setReason] = useState('')
+  const trimmed = reason.trim()
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-sm rounded-xl bg-background p-6 shadow-2xl">
+      <div className="w-full max-w-md rounded-xl bg-background p-6 shadow-2xl">
         <div className="flex items-start justify-between">
-          <div
-            className={`flex h-11 w-11 items-center justify-center rounded-full ${
-              isDanger
-                ? 'bg-destructive/10 text-destructive'
-                : isBrand
-                ? 'bg-brand/10 text-brand'
-                : 'bg-accent text-foreground'
-            }`}
-          >
-            {isDanger ? <Trash2 size={20} /> : isBrand ? <Store size={20} /> : <AlertCircle size={20} />}
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+            <XCircle size={20} />
           </div>
-          <button onClick={onClose} className="rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0" aria-label="Close">
+          <button onClick={onClose} disabled={busy} className="rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50" aria-label="Close">
             <X size={18} />
           </button>
         </div>
 
-        <h3 className="mt-4 text-lg font-bold text-foreground">{title}</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        <h3 className="mt-4 text-lg font-bold text-foreground">Cancel this ticket?</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {job.name}&apos;s booking for {job.vehicle} will be marked as cancelled.
+        </p>
+
+        <div className="mt-4">
+          <label htmlFor="cancelReason" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Reason for cancellation
+          </label>
+          <textarea
+            id="cancelReason"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="e.g., Parts unavailable for this vehicle model."
+            rows={3}
+            maxLength={500}
+            className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand resize-none"
+          />
+          {trimmed.length === 0 && (
+            <p className="mt-1 text-xs text-muted-foreground">A reason is required before cancelling.</p>
+          )}
+        </div>
 
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={onClose}
-            disabled={disabled}
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+            disabled={busy}
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Cancel
+            Keep it
           </button>
           <button
-            onClick={onConfirm}
-            disabled={disabled}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none ${
-              isDanger
-                ? 'bg-destructive text-destructive-foreground hover:opacity-90'
-                : isBrand
-                ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white hover:opacity-90'
-                : 'bg-primary text-primary-foreground hover:opacity-90'
-            }`}
+            onClick={() => onConfirm(trimmed)}
+            disabled={!trimmed || busy}
+            className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
-            {confirmLabel}
+            {busy ? 'Cancelling...' : 'Cancel ticket'}
           </button>
         </div>
       </div>

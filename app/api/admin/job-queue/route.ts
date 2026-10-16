@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const { action, ticketId, mechanicId, holdReason } = body
+    const { action, ticketId, mechanicId, holdReason, reason } = body
 
     if (!action) {
       return NextResponse.json({ success: false, message: 'Missing action parameter' }, { status: 400 })
@@ -351,6 +351,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, jobOrder: updateRes.rows[0] })
     }
     else if (action === 'reject') {
+      const cancelReason = typeof reason === 'string' ? reason.trim() : ''
+      if (!cancelReason) {
+        return NextResponse.json({ success: false, message: 'Enter a reason for the cancellation.' }, { status: 400 })
+      }
+      if (cancelReason.length > 500) {
+        return NextResponse.json({ success: false, message: 'The reason is too long. Keep it under 500 characters.' }, { status: 400 })
+      }
+
       const rejectQuery = `SELECT update_ticket_status($1, 'declined')`
       await db.query(rejectQuery, [ticketId])
 
@@ -372,7 +380,8 @@ export async function POST(req: NextRequest) {
             JSON.stringify({
               ticket_status: 'declined',
               rejected_by_employee_id: actingEmpId,
-              rejected_by: employeeName
+              rejected_by: employeeName,
+              cancellation_reason: cancelReason,
             })
           ]
         )
