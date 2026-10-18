@@ -14,6 +14,7 @@ function toQuotationData(row: any): QuotationData {
       unitPrice: Number(part.retail_unit_price ?? 0),
       status: part.status === 'in_stock' ? 'in-stock' : 'to-order',
       warranty_months: part.warranty_months ?? null,
+      estimated_delivery_date: part.estimated_delivery_date ? String(part.estimated_delivery_date).slice(0, 10) : null,
     })
     return acc
   }, {})
@@ -39,6 +40,8 @@ function toQuotationData(row: any): QuotationData {
     notes: row.quotation_notes || '',
     sentToCustomer: Boolean(row.sent_to_customer),
     quotationApproved: Boolean(row.quotation_approved),
+    datePromised: row.date_promised ? new Date(row.date_promised).toISOString() : null,
+    assignedMechanicName: row.assigned_mechanic_name || null,
   }
 }
 
@@ -75,6 +78,8 @@ export async function getQuotationData(userId: number, jobOrderId?: number) {
       vehicle_model: string
       vehicle_year: number
       plate_number: string
+      date_promised?: string | null
+      assigned_mechanic_name?: string | null
     } | null
     quotationStatus: 'preparing' | 'ready'
     services: {

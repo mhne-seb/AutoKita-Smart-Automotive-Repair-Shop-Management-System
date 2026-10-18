@@ -1609,6 +1609,7 @@ function ModernTimelineView({
             {/* Time Ruler (Sticky Top) */}
             <div className="sticky top-0 z-20 flex h-11 border-b border-slate-800 bg-[#12161f]">
               {timelineHours.map((hour) => {
+                const isLunch = hour === 12
                 const label =
                   hour === 24 || hour === 0
                     ? '12 AM'
@@ -1621,15 +1622,33 @@ function ModernTimelineView({
                   <div
                     key={hour}
                     style={{ width: `${hourWidth}px` }}
-                    className="shrink-0 border-r border-slate-800/60 px-2 py-3 text-[11px] font-semibold text-slate-400 flex items-center justify-between"
+                    className={`shrink-0 border-r border-slate-800/60 px-2 py-3 text-[11px] font-semibold flex items-center justify-between ${
+                      isLunch ? 'bg-amber-500/10 text-amber-300 border-amber-500/30' : 'text-slate-400'
+                    }`}
                   >
                     <span>{label}</span>
+                    {isLunch && (
+                      <span className="text-[9px] text-amber-400 font-bold">🍽️ Lunch</span>
+                    )}
                     {hour === 24 && (
                       <span className="text-[9px] text-slate-500 font-normal">Midnight</span>
                     )}
                   </div>
                 )
               })}
+            </div>
+
+            {/* 12:00 PM – 1:00 PM Mandatory Lunch Break Column */}
+            <div
+              className="absolute top-0 bottom-0 z-10 pointer-events-none border-x border-amber-500/20 bg-amber-500/[0.04]"
+              style={{
+                left: `${(12 - 7) * hourWidth}px`,
+                width: `${hourWidth}px`,
+              }}
+            >
+              <div className="sticky top-11 flex items-center justify-center gap-1 py-1 bg-amber-500/10 text-[9px] font-bold uppercase tracking-wider text-amber-400/80 border-b border-amber-500/20 backdrop-blur-xs">
+                <span>🍽️</span> Lunch Break
+              </div>
             </div>
 
             {/* Grid Background Lines */}

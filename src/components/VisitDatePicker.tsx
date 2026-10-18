@@ -23,6 +23,10 @@ export interface VisitDatePickerProps {
   onChangeDate: (d: Date) => void
   onChangeTime: (t: string) => void
   onAvailableSlots?: (slots: string[]) => void
+  onBusyDatesLoaded?: (
+    busyDates: string[],
+    earliestAvailableByDate: Record<string, { availableFrom: string; mechanicName: string }>
+  ) => void
 }
 
 const WEEKDAY_NAMES = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
@@ -37,8 +41,13 @@ export function VisitDatePicker({
   onChangeDate,
   onChangeTime,
   onAvailableSlots,
+  onBusyDatesLoaded,
 }: VisitDatePickerProps) {
   const [occupiedByDate, setOccupiedByDate] = useState<Record<string, string[]>>({})
+  const [busyDates, setBusyDates] = useState<string[]>([])
+  const [earliestAvailableByDate, setEarliestAvailableByDate] = useState<
+    Record<string, { availableFrom: string; mechanicName: string }>
+  >({})
   const today = useMemo(() => startOfToday(), [])
 
   const [currentMonth, setCurrentMonth] = useState(() => {
@@ -50,14 +59,19 @@ export function VisitDatePicker({
     fetch('/api/customer/booking/occupied-slots')
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && data.occupiedByDate) {
-          setOccupiedByDate(data.occupiedByDate)
+        if (data.success) {
+          if (data.occupiedByDate) setOccupiedByDate(data.occupiedByDate)
+          if (Array.isArray(data.busyDates)) setBusyDates(data.busyDates)
+          if (data.earliestAvailableByDate) setEarliestAvailableByDate(data.earliestAvailableByDate)
+          if (onBusyDatesLoaded) {
+            onBusyDatesLoaded(data.busyDates || [], data.earliestAvailableByDate || {})
+          }
         }
       })
       .catch((err) => {
         console.error('Failed to load occupied slots:', err)
       })
-  }, [])
+  }, [onBusyDatesLoaded])
 
   useEffect(() => {
     if (!onAvailableSlots) return
@@ -75,7 +89,8 @@ export function VisitDatePicker({
       d.setDate(today.getDate() + i)
       const weekday = d.getDay()
       if (hoursForWeekday(shopHours, weekday) === null) continue
-      if (dayStatus(d, BOOKING_TIMES, occupiedByDate) === 'open') {
+      const status = dayStatus(d, BOOKING_TIMES, occupiedByDate, busyDates)
+      if (status === 'open' || status === 'busy') {
         return d.toLocaleDateString('en-PH', {
           weekday: 'short',
           month: 'short',
@@ -173,14 +188,16 @@ export function VisitDatePicker({
               const isCurrentMonth = cellDate.getMonth() === currentMonth.getMonth()
               const isPast = cellDate < today && !isSameDay(cellDate, today)
               const isClosed = hoursForWeekday(shopHours, cellDate.getDay()) === null
-              const status = isCurrentMonth && !isPast && !isClosed ? dayStatus(cellDate, BOOKING_TIMES, occupiedByDate) : null
+              const status = isCurrentMonth && !isPast && !isClosed ? dayStatus(cellDate, BOOKING_TIMES, occupiedByDate, busyDates) : null
               const isFull = status === 'full'
+              const isBusy = status === 'busy'
               const isOpen = status === 'open'
               const isSelected = dateChosen && isSameDay(cellDate, date)
 
               let labelSuffix = ', unavailable'
               if (isClosed) labelSuffix = ', closed'
               else if (isFull) labelSuffix = ', fully booked'
+              else if (isBusy) labelSuffix = ', mechanics busy (work starts later)'
               else if (isSelected) labelSuffix = ', selected'
               else if (isOpen) labelSuffix = ', available'
 
@@ -240,10 +257,15 @@ export function VisitDatePicker({
                   type="button"
                   onClick={() => onChangeDate(cellDate)}
                   aria-label={ariaLabel}
+                  title={isBusy ? 'All mechanics full with other job orders — work will start when mechanic is available' : 'Available'}
                   className={cn(
                     'flex h-8 w-full items-center justify-center rounded text-xs font-bold transition-colors cursor-pointer',
                     isSelected
-                      ? 'bg-brand text-brand-foreground shadow-sm'
+                      ? isBusy
+                        ? 'bg-amber-600 text-white shadow-sm ring-2 ring-amber-400'
+                        : 'bg-brand text-brand-foreground shadow-sm'
+                      : isBusy
+                      ? 'border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-300'
                       : 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-400'
                   )}
                 >
@@ -254,10 +276,14 @@ export function VisitDatePicker({
           </div>
 
           {/* Legend */}
-          <div className="mt-3 flex items-center gap-4 border-t pt-2 text-[11px]">
+          <div className="mt-3 flex items-center gap-3 border-t pt-2 text-[11px] flex-wrap">
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
               <span className="text-muted-foreground font-medium">Available</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span className="text-muted-foreground font-medium">Mechanics busy (Starts later)</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />

@@ -71,10 +71,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         [resolvedMechanicId]
       )
       if (mechCheck.rows.length === 0 || mechCheck.rows[0].status !== 'active') {
+        const status = mechCheck.rows[0]?.status
+        const reason = status === 'on_leave' ? 'is currently on leave and cannot be assigned.' : 'is no longer active and cannot be assigned.'
         return NextResponse.json({
           success: false,
           code: 'MECHANIC_UNAVAILABLE',
-          message: `${mechCheck.rows[0]?.full_name || 'This mechanic'} is currently on leave and cannot be assigned.`
+          message: `${mechCheck.rows[0]?.full_name || 'This mechanic'} ${reason}`
         }, { status: 400 })
       }
       await db.query(`SELECT assign_mechanic_to_job_order($1, $2)`, [id, resolvedMechanicId])

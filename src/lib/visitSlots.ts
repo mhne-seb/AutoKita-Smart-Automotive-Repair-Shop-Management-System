@@ -51,8 +51,21 @@ export function isOccupiedSlot(date: Date, time: string, occupiedByDate: Record<
   return taken.map(normalizeTimeSlot).includes(normalizeTimeSlot(time))
 }
 
-// 'open' = at least one free time, 'full' = every time is booked or passed.
-export function dayStatus(date: Date, times: string[], occupiedByDate: Record<string, string[]>): 'open' | 'full' {
+// 'open' = at least one free drop-off time and mechanics have capacity,
+// 'busy' = drop-off available, but all mechanics are full handling other job orders (yellow),
+// 'full' = every appointment time is booked or passed (red).
+export function dayStatus(
+  date: Date,
+  times: string[],
+  occupiedByDate: Record<string, string[]>,
+  busyDates?: string[]
+): 'open' | 'busy' | 'full' {
   const anyFree = times.some((t) => !isPastSlot(date, t) && !isOccupiedSlot(date, t, occupiedByDate))
-  return anyFree ? 'open' : 'full'
+  if (!anyFree) return 'full'
+  const dateStr = toDateValue(date)
+  if (busyDates && busyDates.includes(dateStr)) {
+    return 'busy'
+  }
+  return 'open'
 }
+

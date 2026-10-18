@@ -20,6 +20,7 @@ export interface JobOrderCard {
   customer: string
   vehicle: string
   customerId: string
+  contactNumber?: string | null
   avatarUrl?: string | null
   rawUserId?: number
   stage: Stage
@@ -39,6 +40,7 @@ export interface JobOrderCard {
   cancelled?: boolean
   dateArrived?: string | null
   arrived?: boolean
+  datePromised?: string | null
 }
 
 export type FindingStatus = 'ok' | 'needs-attention' | 'urgent'
@@ -153,6 +155,7 @@ export interface QuotationPart {
   unitPrice: number
   status: PartStatus
   warranty_months?: number | null
+  estimated_delivery_date?: string | null
 }
 
 export interface QuotationService {
@@ -174,6 +177,8 @@ export interface QuotationData {
   notes: string
   sentToCustomer: boolean
   quotationApproved: boolean
+  datePromised?: string | null
+  assignedMechanicName?: string | null
 }
 
 export type TaskStatus = 'completed' | 'active' | 'pending' | 'cancelled' // cancelled = dropped by an approved pull-out

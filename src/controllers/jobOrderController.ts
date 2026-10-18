@@ -79,6 +79,7 @@ function toJobOrderCard(row: any): JobOrderCard {
   return {
     id: String(row.id),
     customer: `${row.first_name ?? ''} ${row.last_name ?? ''}`.trim() || row.nickname || 'Unknown Customer',
+    contactNumber: row.contact_number || row.contactNumber || null,
     vehicle: row.vehicle_model ? `${row.vehicle_year ?? ''} ${row.vehicle_model}`.trim() : 'Unknown Vehicle',
     customerId: `CUST-${row.user_id ?? '0000'}`,
     avatarUrl: row.avatar_url || null,
@@ -100,6 +101,7 @@ function toJobOrderCard(row: any): JobOrderCard {
     vehicleYear: row.vehicle_year ? Number(row.vehicle_year) : undefined,
     dateArrived: row.date_arrived ? new Date(row.date_arrived).toISOString() : null,
     arrived: Boolean(row.date_arrived),
+    datePromised: row.date_promised ? new Date(row.date_promised).toISOString() : null,
   }
 }
 

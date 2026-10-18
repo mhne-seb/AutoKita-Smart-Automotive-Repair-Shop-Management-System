@@ -34,18 +34,14 @@ export async function GET(req: NextRequest) {
           COALESCE(
             spt.scheduled_date,
             spt.started_at,
-            spt.completed_at,
-            jo.started_at,
-            jo.date_arrived,
-            jo.jo_date::timestamp
+            spt.completed_at
           )::text AS scheduled_date,
           COALESCE(
             spt.scheduled_date + (jos.estimated_hours * INTERVAL '1 hour'),
             spt.started_at + (jos.estimated_hours * INTERVAL '1 hour'),
             spt.completed_at,
             spt.scheduled_date + INTERVAL '1.5 hours',
-            spt.started_at + INTERVAL '1.5 hours',
-            COALESCE(spt.scheduled_date, spt.started_at, spt.completed_at, jo.started_at, jo.date_arrived, jo.jo_date::timestamp) + INTERVAL '1.5 hours'
+            spt.started_at + INTERVAL '1.5 hours'
           )::text AS estimated_finish,
           COALESCE(jos.estimated_hours, 1.5)::numeric AS estimated_hours,
           spt.task_status as status,
@@ -78,59 +74,9 @@ export async function GET(req: NextRequest) {
           AND (
             spt.scheduled_date IS NOT NULL 
             OR spt.started_at IS NOT NULL 
-            OR spt.completed_at IS NOT NULL 
-            OR jo.started_at IS NOT NULL 
-            OR jo.date_arrived IS NOT NULL 
-            OR jo.jo_date IS NOT NULL
+            OR spt.completed_at IS NOT NULL
           )
           ${whereMechanic}
-
-        UNION ALL
-
-        SELECT 
-          (100000 + jos.id) as id,
-          jo.id as job_order_id,
-          s.service_name as title,
-          jos.description_of_work as note,
-          COALESCE(jos.actual_amount, jos.estimated_amount, 0)::numeric as price,
-          COALESCE(jo.started_at, jo.date_arrived, jo.jo_date::timestamp)::text as scheduled_date,
-          COALESCE(
-            jo.started_at + (COALESCE(jos.estimated_hours, 1.5) * INTERVAL '1 hour'),
-            jo.date_arrived + (COALESCE(jos.estimated_hours, 1.5) * INTERVAL '1 hour'),
-            jo.jo_date::timestamp + (COALESCE(jos.estimated_hours, 1.5) * INTERVAL '1 hour')
-          )::text as estimated_finish,
-          COALESCE(jos.estimated_hours, 1.5)::numeric as estimated_hours,
-          CASE 
-            WHEN jo.status IN ('completed', 'released') THEN 'completed'
-            WHEN jo.status IN ('in_progress', 'testing', 'waiting_on_parts') THEN 'in_progress'
-            ELSE 'pending'
-          END as status,
-          jo.started_at::text as started_at,
-          jo.completed_at::text as completed_at,
-          COALESCE(jos.assigned_mechanic_id, jo.assigned_mechanic_id) as mechanic_id,
-          COALESCE(e.full_name, jo_m.full_name, 'Unassigned') as mechanic_name,
-          jo.vehicle_id,
-          jo.status as job_order_status,
-          v.vehicle_model,
-          v.vehicle_year,
-          v.plate_number,
-          COALESCE(CONCAT_WS(' ', u.first_name, u.last_name), 'Customer') as customer_name,
-          u.contact_number as customer_phone,
-          u.email as customer_email
-        FROM job_order_services jos
-        JOIN services s ON s.id = jos.service_id
-        JOIN job_orders jo ON jo.id = jos.job_order_id
-        LEFT JOIN employees e ON e.id = jos.assigned_mechanic_id
-        LEFT JOIN employees jo_m ON jo_m.id = jo.assigned_mechanic_id
-        LEFT JOIN vehicles v ON v.id = jo.vehicle_id
-        LEFT JOIN users u ON u.id = jo.user_id
-        WHERE NOT EXISTS (
-          SELECT 1 FROM service_progress_tasks spt 
-          WHERE spt.job_order_id = jo.id AND spt.task_title = s.service_name
-        )
-        AND COALESCE(jos.assigned_mechanic_id, jo.assigned_mechanic_id) IS NOT NULL
-        ${josWhereMechanic}
-
         ORDER BY scheduled_date ASC
       `
     } else {
@@ -139,15 +85,17 @@ export async function GET(req: NextRequest) {
           spt.id,
           spt.job_order_id,
           spt.task_title as title,
-          spt.scheduled_date::text,
+          COALESCE(spt.scheduled_date, spt.started_at)::text AS scheduled_date,
           COALESCE(
             spt.scheduled_date + (jos.estimated_hours * INTERVAL '1 hour'),
-            spt.scheduled_date + INTERVAL '1.5 hours'
+            spt.started_at + (jos.estimated_hours * INTERVAL '1 hour'),
+            spt.scheduled_date + INTERVAL '1.5 hours',
+            spt.started_at + INTERVAL '1.5 hours'
           )::text AS estimated_finish,
           COALESCE(jos.estimated_hours, 1.5)::numeric AS estimated_hours,
           spt.task_status as status,
           COALESCE(spt.mechanic_id, jo.assigned_mechanic_id) AS mechanic_id,
-          COALESCE(e.full_name, jo_m.full_name) as mechanic_name,
+          COALESCE(e.full_name, jo_m.full_name, 'Unassigned') as mechanic_name,
           jo.vehicle_id,
           v.vehicle_model,
           v.plate_number
@@ -163,9 +111,9 @@ export async function GET(req: NextRequest) {
           WHERE s.service_name = spt.task_title
           LIMIT 1
         ) jos ON true
-        WHERE spt.scheduled_date IS NOT NULL 
+        WHERE COALESCE(spt.scheduled_date, spt.started_at) IS NOT NULL 
           AND spt.task_status NOT IN ('completed', 'cancelled')
-        ORDER BY spt.scheduled_date ASC
+        ORDER BY COALESCE(spt.scheduled_date, spt.started_at) ASC
       `
     }
 

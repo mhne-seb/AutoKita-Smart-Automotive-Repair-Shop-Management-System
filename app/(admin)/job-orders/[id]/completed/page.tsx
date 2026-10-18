@@ -63,6 +63,7 @@ export default function CompletedPage() {
   const partsTotal = billing.parts.reduce((t, p) => t + p.amount, 0)
   const verified = billing.payments.filter((p) => p.verification_status === 'verified')
   const passedTest = roadTest?.history.find((a) => a.result === 'pass') ?? null
+  const customerPhone = billing.customer.phone || jobOrder.contactNumber
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-8">
@@ -78,7 +79,7 @@ export default function CompletedPage() {
             </p>
             <p className={`mt-1 text-sm ${released ? 'text-slate-300' : 'text-amber-800'}`}>
               {released
-                ? `${jobOrder.vehicle} (${jobOrder.plate}) · ${billing.customer.name} · released ${fmt(billing.releasedAt)}`
+                ? `${jobOrder.vehicle} (${jobOrder.plate}) · ${billing.customer.name}${customerPhone ? ` (${customerPhone})` : ''} · released ${fmt(billing.releasedAt)}`
                 : 'The summary fills in as the job closes. Release the vehicle from the Billing page once the balance is settled.'}
             </p>
           </div>
@@ -170,7 +171,7 @@ export default function CompletedPage() {
           <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm">
             <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400"><Car size={13} /> Vehicle</p>
             <p className="font-semibold text-slate-800">{jobOrder.vehicle}</p>
-            <p className="text-xs text-slate-500">{jobOrder.plate} · {billing.customer.name}{billing.customer.phone ? ` · ${billing.customer.phone}` : ''}</p>
+            <p className="text-xs text-slate-500">{jobOrder.plate} · {billing.customer.name}{customerPhone ? ` · ${customerPhone}` : ''}</p>
           </div>
         </div>
       </div>

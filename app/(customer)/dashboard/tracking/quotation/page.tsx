@@ -38,9 +38,29 @@ type JobOrder = {
   vehicle_model: string;
   vehicle_year: number;
   plate_number: string;
+  date_promised?: string | null;
+  assigned_mechanic_name?: string | null;
 };
 
 type PaymentStatus = "none" | "pending" | "confirmed" | "rejected";
+
+function formatPromisedDate(iso?: string | null) {
+  if (!iso) return null
+  try {
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return null
+    return d.toLocaleString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    })
+  } catch {
+    return null
+  }
+}
 
 function Quotation() {
   useEffect(() => { document.title = "Quotation — AutoKita"; }, []);
@@ -241,15 +261,29 @@ function Quotation() {
         </div>
       )}
 
-      <div className="rounded-xl border bg-card p-5">
-        <div className="grid grid-cols-4 items-center gap-4">
+      <div className="rounded-xl border bg-card p-5 shadow-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-5 items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted"><Car className="h-4 w-4 text-brand" /></div>
             <div><div className="text-xs text-muted-foreground">Vehicle</div><div className="font-bold">{jobOrder.vehicle_year} {jobOrder.vehicle_model}</div></div>
           </div>
           <div><div className="text-xs text-muted-foreground">Plate No.</div><div className="font-bold">{jobOrder.plate_number}</div></div>
-          <div><div className="text-xs text-muted-foreground">Customer</div><div className="font-bold">Juan Dela Cruz</div></div>
-          <div className="text-right"><span className="text-xs text-muted-foreground">Job Order </span><span className="ml-2 rounded-md bg-brand px-3 py-1 text-xs font-bold text-brand-foreground">JO-{jobOrder.job_order_id}</span></div>
+          <div>
+            <div className="text-xs text-muted-foreground">Assigned Mechanic</div>
+            <div className="font-bold flex items-center gap-1">
+              <span>🔧</span> {jobOrder.assigned_mechanic_name || 'Assigned Mechanic'}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Estimated Finish</div>
+            <div className="font-bold text-teal">
+              {formatPromisedDate(jobOrder.date_promised) || 'Calculating...'}
+            </div>
+          </div>
+          <div className="text-right sm:text-right col-span-2 sm:col-span-1">
+            <span className="text-xs text-muted-foreground">Job Order </span>
+            <span className="ml-2 rounded-md bg-brand px-3 py-1 text-xs font-bold text-brand-foreground">JO-{jobOrder.job_order_id}</span>
+          </div>
         </div>
       </div>
 
@@ -321,22 +355,39 @@ function Quotation() {
                       {s.parts && s.parts.length > 0 && (
                         <div className="mt-2 pl-2 border-l-2 border-muted text-xs text-muted-foreground">
                           <div className="font-semibold text-[10px] uppercase tracking-wider mb-1">Required Parts</div>
-                          <ul className="space-y-1">
-                            {s.parts.map((p: any, idx: number) => (
-                              <li key={idx} className="flex justify-between items-start">
-                                <div>
-                                  <div>{p.quantity}x {p.description || p.part_number}</div>
-                                  <div className="text-[10px] opacity-80 mt-0.5">
-                                    {p.warranty_months === null || p.warranty_months === undefined
-                                      ? ""
-                                      : p.warranty_months === 0
-                                      ? "No warranty"
-                                      : `Warranty: ${p.warranty_months} month${p.warranty_months === 1 ? '' : 's'}`}
+                          <ul className="space-y-1.5">
+                            {s.parts.map((p: any, idx: number) => {
+                              const isToOrder = p.status === 'to_order' || p.status === 'to-order'
+                              return (
+                                <li key={idx} className="flex justify-between items-start gap-2">
+                                  <div>
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span>{p.quantity}x {p.description || p.part_number}</span>
+                                      {isToOrder ? (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 font-medium">
+                                          <span>📦 To Order</span>
+                                          {p.estimated_delivery_date && (
+                                            <span>• Est. {new Date(p.estimated_delivery_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                          )}
+                                        </span>
+                                      ) : (
+                                        <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 font-medium">
+                                          In Stock
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="text-[10px] opacity-80 mt-0.5">
+                                      {p.warranty_months === null || p.warranty_months === undefined
+                                        ? ""
+                                        : p.warranty_months === 0
+                                        ? "No warranty"
+                                        : `Warranty: ${p.warranty_months} month${p.warranty_months === 1 ? '' : 's'}`}
+                                    </div>
                                   </div>
-                                </div>
-                                <span>₱{Number(p.total_retail_amount).toLocaleString()}</span>
-                              </li>
-                            ))}
+                                  <span className="font-medium text-foreground">₱{Number(p.total_retail_amount).toLocaleString()}</span>
+                                </li>
+                              )
+                            })}
                           </ul>
                         </div>
                       )}
@@ -355,6 +406,41 @@ function Quotation() {
         </div>
 
         <aside className="space-y-4">
+          {/* Estimated Completion Schedule Card */}
+          <div className="overflow-hidden rounded-xl border border-teal/30 bg-card shadow-xs">
+            <div className="bg-gradient-to-r from-teal to-teal/80 p-4 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <Clock className="h-4 w-4" /> Estimated Ready Date & Time
+                </div>
+                <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                  Scheduled
+                </span>
+              </div>
+            </div>
+            <div className="p-4 space-y-2.5">
+              <div className="text-lg font-black text-foreground">
+                {formatPromisedDate(jobOrder.date_promised) || 'Calculating completion time...'}
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Wrench className="h-3.5 w-3.5 text-teal" />
+                <span>Assigned Mechanic:</span>
+                <span className="font-semibold text-foreground">
+                  {jobOrder.assigned_mechanic_name || 'Shop Mechanic'}
+                </span>
+              </div>
+              <div className="border-t pt-2 text-[11px] leading-relaxed text-muted-foreground space-y-1">
+                <div>⏱️ Schedule is calculated start-to-finish based on active shop hours (8:00 AM – 5:00 PM) with lunch break (12:00 PM – 1:00 PM) observed.</div>
+                {services.some((s) => s.parts?.some((p: any) => (p.status === 'to_order' || p.status === 'to-order') && p.estimated_delivery_date)) && (
+                  <div className="text-amber-700 font-medium flex items-center gap-1.5 pt-0.5">
+                    <span>📦</span>
+                    <span>Includes supplier delivery lead time for ordered parts.</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="overflow-hidden rounded-xl border">
             <div className="bg-brand p-5 text-brand-foreground">
               <div className="flex items-center gap-2 font-semibold"><FileText className="h-4 w-4" /> Your Quotation</div>

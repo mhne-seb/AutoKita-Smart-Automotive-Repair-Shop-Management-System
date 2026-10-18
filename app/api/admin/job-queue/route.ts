@@ -4,6 +4,15 @@ import { db } from '@/lib/db'
 import { signFileUrls } from '@/lib/storage'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 import { STAFF_ACCESS_SQL } from '@/lib/staffAccess'
+import { syncBookedServicesToJobOrder, getServicesForTicket } from '@/lib/syncBookedServices'
+import {
+  findEarliestSlotForMechanic,
+  formatNaiveIso,
+  normalizeShopHours,
+  parseNaiveTimestamp,
+  type Interval,
+} from '@/lib/autoSchedule'
+import { TASK_GAP_MINUTES } from '@/data/shopPolicy'
 
 export async function GET(req: NextRequest) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
@@ -188,10 +197,12 @@ export async function POST(req: NextRequest) {
           )
           if (mechCheck.rows.length === 0 || mechCheck.rows[0].status !== 'active') {
             await client.query('ROLLBACK')
+            const status = mechCheck.rows[0]?.status
+            const reason = status === 'on_leave' ? 'is currently on leave and cannot be assigned.' : 'is no longer active and cannot be assigned.'
             return NextResponse.json({
               success: false,
               code: 'MECHANIC_UNAVAILABLE',
-              message: `${mechCheck.rows[0]?.full_name || 'This mechanic'} is currently on leave and cannot be assigned.`
+              message: `${mechCheck.rows[0]?.full_name || 'This mechanic'} ${reason}`
             }, { status: 400 })
           }
         }
@@ -267,6 +278,119 @@ export async function POST(req: NextRequest) {
                VALUES ($1, 'in_progress', $2, $3, 'completed', 0, true)`,
               [newJo.id, DIAGNOSTIC_SCAN_SERVICE_NAME, 'Performed during inspection.'],
             )
+          }
+
+          // Populate the job order with all services requested by the customer at booking
+          await syncBookedServicesToJobOrder(newJo.id, ticketId, client)
+
+          // Auto-schedule booked services into service_progress_tasks for the assigned mechanic
+          if (mechanicId) {
+            const bookedServices = await getServicesForTicket(ticketId, client)
+            if (bookedServices.length > 0) {
+              const shopHours = normalizeShopHours(null)
+
+              // Determine start time (adjusted start time from modal or ticket preferred datetime)
+              let startMs: number
+              if (body.adjustedStartTime) {
+                const parsed = parseNaiveTimestamp(String(body.adjustedStartTime))
+                startMs = !isNaN(parsed) ? parsed : Date.now()
+              } else {
+                const tRes = await client.query(`SELECT preferred_datetime::text AS preferred_datetime FROM service_tickets WHERE id = $1`, [ticketId])
+                const pDt = tRes.rows[0]?.preferred_datetime
+                if (pDt) {
+                  const parsed = parseNaiveTimestamp(String(pDt))
+                  startMs = !isNaN(parsed) ? parsed : Date.now()
+                } else {
+                  startMs = Date.now()
+                }
+              }
+
+              // Load mechanic's existing busy intervals from service_progress_tasks
+              const busyRes = await client.query(
+                `SELECT 
+                   COALESCE(spt.scheduled_date, spt.started_at)::text AS scheduled_date,
+                   COALESCE(
+                     spt.estimated_finish,
+                     spt.scheduled_date + (COALESCE(jos.estimated_hours, 1.5) * INTERVAL '1 hour')
+                   )::text AS estimated_finish
+                 FROM service_progress_tasks spt
+                 JOIN job_orders jo ON jo.id = spt.job_order_id
+                 LEFT JOIN LATERAL (
+                   SELECT jos.estimated_hours
+                   FROM services s
+                   JOIN job_order_services jos ON jos.service_id = s.id AND jos.job_order_id = spt.job_order_id
+                   WHERE s.service_name = spt.task_title
+                   LIMIT 1
+                 ) jos ON true
+                 WHERE spt.task_status <> 'cancelled'
+                   AND jo.status NOT IN ('completed', 'released', 'cancelled')
+                   AND COALESCE(spt.mechanic_id, jo.assigned_mechanic_id) = $1
+                   AND (spt.scheduled_date IS NOT NULL OR spt.started_at IS NOT NULL)
+                   AND COALESCE(spt.scheduled_date, spt.started_at) >= (NOW() - INTERVAL '2 days')
+                 ORDER BY scheduled_date ASC`,
+                [mechanicId]
+              )
+
+              const mechBusy: Interval[] = []
+              for (const row of busyRes.rows) {
+                const s = parseNaiveTimestamp(String(row.scheduled_date))
+                const finishDateStr = String(row.estimated_finish || row.scheduled_date)
+                const e = parseNaiveTimestamp(finishDateStr)
+                if (!isNaN(s) && !isNaN(e) && e > s) {
+                  mechBusy.push({ start: s, end: e })
+                }
+              }
+
+              let cursorMs = startMs
+              let finalTaskEndMs = cursorMs
+
+              for (const svc of bookedServices) {
+                const hours = Number(svc.base_duration_hours) || 1
+                const slot = findEarliestSlotForMechanic(cursorMs, hours, mechBusy, [], shopHours)
+                if (slot) {
+                  const taskStartIso = formatNaiveIso(slot.start)
+                  const taskEndIso = formatNaiveIso(slot.end)
+
+                  await client.query(
+                    `INSERT INTO service_progress_tasks (
+                       job_order_id,
+                       section_id,
+                       task_title,
+                       note,
+                       task_status,
+                       price,
+                       billable,
+                       mechanic_id,
+                       scheduled_date,
+                       estimated_finish
+                     ) VALUES ($1, 'in_progress', $2, $3, 'pending', $4, true, $5, $6, $7)`,
+                    [
+                      newJo.id,
+                      svc.service_name,
+                      'Requested by customer at booking.',
+                      Number(svc.base_price) || 0,
+                      mechanicId,
+                      taskStartIso,
+                      taskEndIso,
+                    ]
+                  )
+
+                  mechBusy.push({ start: slot.start, end: slot.end })
+                  cursorMs = slot.end + TASK_GAP_MINUTES * 60 * 1000
+                  finalTaskEndMs = slot.end
+                }
+              }
+
+              // Update date_promised on the job order to the final scheduled task's estimated finish
+              if (finalTaskEndMs > startMs) {
+                const datePromisedIso = formatNaiveIso(finalTaskEndMs)
+                await client.query(
+                  `UPDATE job_orders SET date_promised = $1 WHERE id = $2`,
+                  [datePromisedIso, newJo.id]
+                )
+                newJo.date_promised = datePromisedIso
+              }
+            }
           }
         }
 

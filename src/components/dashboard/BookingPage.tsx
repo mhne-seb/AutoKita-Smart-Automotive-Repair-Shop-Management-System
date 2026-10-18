@@ -143,6 +143,10 @@ export function BookingPage({
   const [preferredTime, setPreferredTime] = useState<string>("");
   const [dateChosen, setDateChosen] = useState(false);
   const [homeAddress, setHomeAddress] = useState("");
+  const [busyDates, setBusyDates] = useState<string[]>([]);
+  const [earliestAvailableByDate, setEarliestAvailableByDate] = useState<
+    Record<string, { availableFrom: string; mechanicName: string }>
+  >({});
 
   const isFirstRender = useRef(true);
   useEffect(() => {
@@ -283,12 +287,26 @@ export function BookingPage({
     knownHours > 0 &&
     durationWithMargin > (shopDayHours.close - shopDayHours.open);
 
+  const selectedDateStr = `${preferredDate.getFullYear()}-${String(preferredDate.getMonth() + 1).padStart(2, '0')}-${String(preferredDate.getDate()).padStart(2, '0')}`;
+  const isBusyDay = busyDates.includes(selectedDateStr);
+  const busyInfo = earliestAvailableByDate[selectedDateStr];
 
   // What the summary says under "Possible completion time based on your services".
   const completionText: string | null = (() => {
     if (!dateChosen || !timeChosen) return null;
     if (knownHours <= 0) return 'The shop will tell you after checking your car.';
     if (!shopDayHours || Number.isNaN(startHour)) return null;
+
+    if (isBusyDay && busyInfo) {
+      const availDate = new Date(busyInfo.availableFrom);
+      const availText = !isNaN(availDate.getTime())
+        ? availDate.toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+        : null;
+      return availText
+        ? `All mechanics busy on this day: Est. work starts ${availText} (${busyInfo.mechanicName}), finishing the next working day or later.`
+        : 'All mechanics busy on this day: work will begin once a mechanic is available, finishing the next working day or later.';
+    }
+
     const dayText = preferredDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
     if (finishHour > shopDayHours.close) {
       return pickup === "home"
@@ -1390,8 +1408,43 @@ export function BookingPage({
                     setPreferredTime("");
                   }}
                   onChangeTime={setPreferredTime}
+                  onBusyDatesLoaded={(b, e) => {
+                    setBusyDates(b);
+                    setEarliestAvailableByDate(e);
+                  }}
                 />
               </div>
+
+              {/* Mechanics Busy Alert Banner on Yellow Dates */}
+              {dateChosen && isBusyDay && (
+                <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950">
+                  <div className="flex items-start gap-3">
+                    <Clock className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+                    <div className="flex-1 space-y-1.5 text-xs text-amber-900">
+                      <p className="font-bold text-sm text-amber-950">Mechanics Busy on this Date</p>
+                      <p>
+                        All shop mechanics are fully occupied handling existing job orders on this date. You may still book
+                        your drop-off, but work on your vehicle will begin when a mechanic becomes available:
+                      </p>
+                      {busyInfo && (
+                        <p className="font-semibold text-amber-900 pt-1">
+                          ⏱️ Earliest estimated work start:{" "}
+                          <span className="font-bold text-amber-950">
+                            {new Date(busyInfo.availableFrom).toLocaleString("en-PH", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              hour: "numeric",
+                              minute: "2-digit",
+                            })}
+                          </span>{" "}
+                          ({busyInfo.mechanicName})
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Overnight Notice */}
               {noticeShowing && (

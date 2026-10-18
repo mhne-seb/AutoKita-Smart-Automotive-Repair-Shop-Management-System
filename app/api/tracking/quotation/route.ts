@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ jobOrder: null, services: [], paymentStatus: null })
     }
 
-    const [servicesRes, paymentRes, partsRes, preDiagRes, scanAuthRes] = await Promise.all([
+    const [servicesRes, paymentRes, partsRes, preDiagRes, scanAuthRes, mechanicRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_quotation_services($1)`, [jobOrder.job_order_id]),
       db.query(
         `SELECT id, payment_method, amount_paid, verification_status, payment_date, rejection_reason 
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
         [jobOrder.job_order_id]
       ),
       db.query(
-        `SELECT p.*, wp.warranty_months 
+        `SELECT p.*, wp.warranty_months, wp.estimated_delivery_date::text AS estimated_delivery_date 
          FROM get_job_order_parts($1) p
          LEFT JOIN job_order_parts wp ON wp.id = p.id`,
         [jobOrder.job_order_id]
@@ -67,6 +67,13 @@ export async function GET(request: NextRequest) {
              AND sal.user_id IS NOT NULL
          ) AS authorized`,
         [jobOrder.job_order_id],
+      ),
+      db.query(
+        `SELECT jo.date_promised, e.full_name AS assigned_mechanic_name
+         FROM job_orders jo
+         LEFT JOIN employees e ON e.id = jo.assigned_mechanic_id
+         WHERE jo.id = $1`,
+        [jobOrder.job_order_id]
       ),
     ])
 
@@ -98,7 +105,12 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      jobOrder: { ...jobOrder, diagnostic_scan_authorized: Boolean(scanAuthRes.rows[0]?.authorized) },
+      jobOrder: {
+        ...jobOrder,
+        date_promised: mechanicRes.rows[0]?.date_promised ?? jobOrder.date_promised ?? null,
+        assigned_mechanic_name: mechanicRes.rows[0]?.assigned_mechanic_name ?? null,
+        diagnostic_scan_authorized: Boolean(scanAuthRes.rows[0]?.authorized),
+      },
       services,
       quotationStatus: isReady ? 'ready' : 'preparing',
       paymentStatus: paymentRes.rows[0] ?? null,

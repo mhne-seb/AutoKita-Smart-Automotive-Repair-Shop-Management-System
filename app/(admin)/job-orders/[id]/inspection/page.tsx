@@ -701,7 +701,7 @@ export default function page() {
               className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:opacity-95 active:scale-[0.99] disabled:opacity-50 transition-all duration-200 cursor-pointer hover:-translate-y-0.5 active:translate-y-0 hover:shadow-lg disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
             >
               <Store size={15} />
-              {checkingInVehicle ? 'Checking In…' : 'Mark Vehicle Stored in Shop'}
+              {checkingInVehicle ? 'Checking In…' : 'Check In Vehicle'}
             </button>
           </div>
         </div>
@@ -727,11 +727,11 @@ export default function page() {
                     <button
                       onClick={() => setConfirmCheckInVehicle(true)}
                       disabled={checkingInVehicle}
-                      title="Click to check in vehicle (mark stored in shop)"
+                      title="Click to check in vehicle"
                       className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900 shadow-2xs hover:bg-amber-100 disabled:opacity-50 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                     >
                       <Store size={13} className="text-amber-700" />
-                      {checkingInVehicle ? 'Checking In…' : 'Check In Vehicle (Store in Shop)'}
+                      {checkingInVehicle ? 'Checking In…' : 'Check In Vehicle'}
                     </button>
                   )
                 )}
@@ -811,7 +811,7 @@ export default function page() {
                 </div>
                 <div>
                   <p className="text-slate-400">Phone Number</p>
-                  <p className="font-bold text-slate-900">{initial.contactNumber || '—'}</p>
+                  <p className="font-bold text-slate-900">{initial.contactNumber || jobOrder?.contactNumber || '—'}</p>
                 </div>
                 <div>
                   <p className="text-slate-400">Job Order</p>

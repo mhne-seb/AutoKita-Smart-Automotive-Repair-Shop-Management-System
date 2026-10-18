@@ -635,7 +635,7 @@ export function ScheduleJobModal({
         {!loading && !error && data && data.nothingToSchedule && (
           <div className="space-y-4 py-6 text-center">
             <p className="text-sm font-medium text-slate-600">
-              Every task is already scheduled.
+              There are no pending tasks to schedule or reschedule.
             </p>
             <button
               type="button"
