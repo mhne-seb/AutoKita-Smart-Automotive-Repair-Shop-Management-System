@@ -12,6 +12,7 @@ import { fetchJobOrderPdfData, generateJobOrderPdf } from "@/lib/jobOrderPdf";
 import { ShopLoading } from "@/components/ShopLoading";
 import { VOUCHER_CODE_PATTERN } from "@/data/voucherRules";
 import { serviceModeFromDb } from "@/lib/serviceMode";
+import { formatHours } from "@/lib/formatHours";
 
 function formatMoney(v: string | number | null | undefined) {
   const n = Number(v ?? 0);
@@ -265,7 +266,7 @@ function Completed() {
               {services.length === 0 && <p className="text-xs text-muted-foreground">No labor charges.</p>}
               {services.map((s) => (
                 <div key={s.id} className="flex justify-between text-muted-foreground">
-                  <span>{s.service_name} ({s.actual_hours ?? s.estimated_hours} hrs)</span>
+                  <span>{s.service_name} ({formatHours(s.actual_hours ?? s.estimated_hours)})</span>
                   <span>{formatMoney(s.actual_amount)}</span>
                 </div>
               ))}

@@ -24,6 +24,7 @@ import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, Quotatio
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ShopLoading } from '@/components/ShopLoading'
 import { ScheduleJobModal } from '@/components/admin/ScheduleJobModal'
+import { formatHours } from '@/lib/formatHours'
 
 const sectionColors: Record<string, string> = {
   received: 'text-emerald-600',
@@ -529,10 +530,10 @@ export default function page() {
                     // Est. Finish is scheduled start + predicted duration, so the
                     // duration is just the gap between the two.
                     const estHrs = task.scheduledDate ? (est.getTime() - new Date(task.scheduledDate.replace(' ', 'T')).getTime()) / 3600000 : 0
-                    const hrsLabel = estHrs > 0 ? ` (${estHrs % 1 === 0 ? estHrs : estHrs.toFixed(1)} hrs)` : ''
+                    const hrsLabel = estHrs > 0 ? ` (${formatHours(estHrs)})` : ''
                     return overdueHrs > 0 ? (
                       <span className="flex items-center gap-1 font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
-                        Overdue by {overdueHrs < 1 ? `${Math.round(overdueHrs * 60)} min` : `${overdueHrs.toFixed(1)} hrs`} (est. {label})
+                        Overdue by {formatHours(overdueHrs)} (est. {label})
                       </span>
                     ) : (
                       <span className="flex items-center gap-1 font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
@@ -1029,14 +1030,14 @@ export default function page() {
           <div className="space-y-2 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-slate-400">Labor Hours (Est.)</span>
-              <span className="font-semibold text-slate-800">{laborHoursEstimate} hrs</span>
+              <span className="font-semibold text-slate-800">{formatHours(laborHoursEstimate)}</span>
             </div>
             <div className="flex items-center justify-between">
               {/* Wall-clock since the job hit the floor (overnight included), so comparing
                   it to labor hours is meaningless — no red here. Overdue lives on the task cards. */}
               <span className="text-slate-400">{initial.timer.completedAtIso ? 'Total Time in Shop' : 'Time in Shop'}</span>
               <span className="font-semibold text-slate-800">
-                {currentDurationHours} hrs
+                {formatHours(currentDurationHours)}
               </span>
             </div>
           </div>
@@ -1921,7 +1922,7 @@ function ScheduleModal({
             <div className="flex items-center justify-between">
               <p className="font-semibold text-slate-900 text-sm">{task.title}</p>
               <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full">
-                Est: {taskDurationHours} {taskDurationHours === 1 ? 'hr' : 'hrs'}
+                Est: {formatHours(taskDurationHours)}
               </span>
             </div>
             {note.trim() && note.trim() !== 'Describe the service...' && (
@@ -2137,7 +2138,7 @@ function ScheduleModal({
                               {t.startStr} – {t.finishStr}
                             </div>
                             <span className="text-[10px] text-slate-400">
-                              {t.tEstHours} {t.tEstHours === 1 ? 'hr' : 'hrs'}
+                              {formatHours(t.tEstHours)}
                             </span>
                           </div>
                         </div>

@@ -34,9 +34,10 @@ import {
   Columns,
   AlignJustify,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
 } from 'lucide-react'
 import type { ScheduleTask, Mechanic } from '@/controllers/mechanicController'
+import { formatHours } from '@/lib/formatHours'
 
 const GRADIENT = 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]'
 
@@ -1334,7 +1335,7 @@ function ModernDayView({
                                   <span className="truncate">
                                     {jo.customer_name ? `Cust: ${jo.customer_name}` : ''}
                                   </span>
-                                  <span className="shrink-0">~{jo.total_hours.toFixed(1)}h</span>
+                                  <span className="shrink-0">~{formatHours(jo.total_hours)}</span>
                                 </div>
                               )}
                             </div>
@@ -2707,7 +2708,7 @@ function ModernAgendaView({
                                 <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
                                   {jo.plate_number && <span>Plate: {jo.plate_number}</span>}
                                   {jo.customer_name && <span>Customer: {jo.customer_name}</span>}
-                                  <span>~{jo.total_hours.toFixed(1)}h total</span>
+                                  <span>~{formatHours(jo.total_hours)} total</span>
                                 </div>
                               </div>
                             </div>
@@ -2802,7 +2803,7 @@ function ModernAgendaView({
                                 )}
                                 {task.estimated_hours && (
                                   <span className="text-[11px] text-slate-400">
-                                    {task.estimated_hours}h duration
+                                    {formatHours(task.estimated_hours)} duration
                                   </span>
                                 )}
                               </div>
@@ -2928,7 +2929,7 @@ function JobOrderDetailModal({
                 <Briefcase size={12} className="text-amber-400 shrink-0" />
                 {jobOrder.tasks.length} {jobOrder.tasks.length === 1 ? 'Service' : 'Services'}
               </p>
-              <p className="text-[10px] text-slate-400 mt-0.5">~{jobOrder.total_hours.toFixed(1)} hrs total</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">~{formatHours(jobOrder.total_hours)} total</p>
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
@@ -3015,7 +3016,7 @@ function JobOrderDetailModal({
                               {sTime} {fTime ? `– ${fTime}` : ''}
                             </span>
                           )}
-                          <span>• {task.estimated_hours || 1.5}h duration</span>
+                          <span>• {formatHours(task.estimated_hours || 1.5)} duration</span>
                           {task.status && (
                             <span className="rounded bg-slate-800 px-1.5 py-0.2 text-[9.5px] text-slate-300">
                               {task.status}
@@ -3130,7 +3131,7 @@ function ServiceDetailModal({
               <Clock size={13} /> {startStr ? `${startStr} – ${finishStr || 'End'}` : 'Time unscheduled'}
             </p>
             <p className="text-xs text-slate-400 pt-1 border-t border-slate-800">
-              Estimated Duration: {task.estimated_hours || 1.5} hours {task.price > 0 && `• ${currency(task.price)}`}
+              Estimated Duration: {formatHours(task.estimated_hours || 1.5)} {task.price > 0 && `• ${currency(task.price)}`}
             </p>
           </div>
 

@@ -19,6 +19,7 @@ import {
   Wrench,
   Check,
 } from 'lucide-react'
+import { formatHours } from '@/lib/formatHours'
 
 export interface Job {
   ticketId: number
@@ -245,7 +246,7 @@ export function MechanicScheduleModal({ job, onClose, onConfirm }: MechanicSched
                     <Clock size={13} />
                     <span>
                       {data.ticket.services.length} {data.ticket.services.length === 1 ? 'Service' : 'Services'} •{' '}
-                      {data.ticket.totalLaborHours} hrs labor
+                      {formatHours(data.ticket.totalLaborHours)} labor
                     </span>
                   </div>
                 </div>
@@ -260,7 +261,7 @@ export function MechanicScheduleModal({ job, onClose, onConfirm }: MechanicSched
                       >
                         <Wrench size={10} className="text-brand" />
                         {svc.name}
-                        <span className="text-[10px] text-muted-foreground font-mono">({svc.durationHours}h)</span>
+                        <span className="text-[10px] text-muted-foreground font-mono">({formatHours(svc.durationHours)})</span>
                       </span>
                     ))}
                   </div>
@@ -449,7 +450,7 @@ export function MechanicScheduleModal({ job, onClose, onConfirm }: MechanicSched
                                       <span className="h-1.5 w-1.5 rounded-full bg-brand" />
                                       <span className="font-semibold text-foreground">{slot.serviceName}</span>
                                       <span className="text-[10px] text-muted-foreground font-mono">
-                                        ({slot.durationHours}h)
+                                        ({formatHours(slot.durationHours)})
                                       </span>
                                     </div>
                                     <div className="text-right text-muted-foreground font-mono text-[11px]">

@@ -30,6 +30,7 @@ import { ShopLoading } from "@/components/ShopLoading";
 import type { PullOutRequest } from "@/data/types";
 import { toast } from "sonner";
 import { formatStamp } from "@/lib/utils";
+import { formatHours } from "@/lib/formatHours";
 
 // A part one of the services is waiting on. Only "still to order" vs "here"
 // matters to the shop (no inventory system), so that's all we show.
@@ -497,7 +498,7 @@ function InProgress() {
             <div className="mt-4 border-t border-white/20 pt-3 text-xs">
               <div className="flex items-center justify-between">
                 <span>Labor Hours (Est.)</span>
-                <b>{Math.round(Number(data?.timing?.labor_hours_estimate ?? 0) * 10) / 10} hrs</b>
+                <b>{formatHours(data?.timing?.labor_hours_estimate ?? 0)}</b>
               </div>
               <div className="mt-1 flex items-center justify-between">
                 <span>Time in Shop</span>
@@ -507,7 +508,7 @@ function InProgress() {
                     const start = data?.timing?.started_at;
                     if (!start) return '—';
                     const end = data?.timing?.completed_at ? new Date(data.timing.completed_at).getTime() : Date.now();
-                    return `${Math.max(0, Math.round(((end - new Date(start).getTime()) / 36e5) * 10) / 10)} hrs`;
+                    return formatHours(Math.max(0, (end - new Date(start).getTime()) / 36e5));
                   })()}
                 </b>
               </div>

@@ -24,6 +24,7 @@ import {
   type Suggestion,
 } from '@/lib/autoSchedule'
 import { hoursForWeekday } from '@/lib/bookingTiming'
+import { formatHours } from '@/lib/formatHours'
 import { MAX_MECHANICS_ON_CAR } from '@/data/shopPolicy'
 
 interface PlanningMechanic {
@@ -128,14 +129,6 @@ function formatPromisedDate(iso: string) {
   return `${dateLabel}, ${timeLabel}`
 }
 
-function formatHours(h: number) {
-  const totalMin = Math.round(h * 60)
-  const hrs = Math.floor(totalMin / 60)
-  const mins = totalMin % 60
-  if (hrs > 0 && mins > 0) return `${hrs} h ${mins} min`
-  if (hrs > 0) return `${hrs} h`
-  return `${mins} min`
-}
 
 function serviceTypeLabel(value: string | null | undefined) {
   if (value === 'maintenance') return 'Maintenance'

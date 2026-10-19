@@ -18,6 +18,7 @@ import { RejectPaymentModal } from '@/components/dashboard/RejectPaymentModal'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ShopLoading } from '@/components/ShopLoading'
 import { RequestedServices } from '@/components/admin/RequestedServices'
+import { formatHours } from '@/lib/formatHours'
 
 function formatPromisedDate(iso?: string | null) {
   if (!iso) return null
@@ -899,9 +900,9 @@ export default function page() {
                         ) : aiPredictions[s.id] && aiPredictions[s.id].predicted_duration_mins && (
                           <span
                             className="inline-flex cursor-help items-center gap-1 rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-700 hover:bg-purple-200"
-                            title={`${aiPredictions[s.id].is_mock ? 'ai' : 'AI'} suggests ${Math.round(aiPredictions[s.id].predicted_duration_mins! / 60 * 10) / 10} hrs`}
+                            title={`${aiPredictions[s.id].is_mock ? 'ai' : 'AI'} suggests ${formatHours(aiPredictions[s.id].predicted_duration_mins! / 60)}`}
                           >
-                            🤖 {Math.round(aiPredictions[s.id].predicted_duration_mins! / 60 * 10) / 10} hrs
+                            🤖 {formatHours(aiPredictions[s.id].predicted_duration_mins! / 60)}
                           </span>
                         )}
                       </p>
@@ -916,7 +917,7 @@ export default function page() {
                           className="w-20 rounded border border-slate-300 px-2 py-1 text-sm focus:border-emerald-500 focus:outline-none"
                         />
                       ) : (
-                        <p className="font-semibold text-slate-800">{s.laborHours} hrs</p>
+                        <p className="font-semibold text-slate-800">{formatHours(s.laborHours)}</p>
                       )}
                     </div>
                     <div>
@@ -1331,7 +1332,7 @@ export default function page() {
                     </span>
                   </div>
                   <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
-                    <span>Labor · {s.laborHours} hr{s.laborHours === 1 ? '' : 's'}</span>
+                    <span>Labor · {formatHours(s.laborHours)}</span>
                     <span>{currency(s.laborCost)}</span>
                   </div>
                   {s.parts.length > 0 ? (

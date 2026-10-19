@@ -20,6 +20,7 @@ import { PAYMENT_CHANNELS } from "@/data/paymentChannels";
 import { PaymentModal, type PaymentMethod } from "@/components/dashboard/PaymentModal";
 import { ShopLoading } from "@/components/ShopLoading";
 import { WarrantyTermsCard } from "@/components/dashboard/WarrantyTermsCard";
+import { formatHours } from "@/lib/formatHours";
 
 type FetchedService = {
   id: number;
@@ -359,8 +360,7 @@ function Quotation() {
                     <div className="mt-3 flex flex-col gap-2">
                       <div className="flex flex-wrap gap-2 text-xs">
                         <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1">
-                          <Clock className="h-3 w-3" /> {Number(s.estimated_hours).toFixed(2)} hrs
-
+                          <Clock className="h-3 w-3" /> {formatHours(s.estimated_hours)}
                         </span>
                       </div>
                       
