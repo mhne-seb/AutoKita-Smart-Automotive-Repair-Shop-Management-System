@@ -38,6 +38,7 @@ export async function GET(request: Request) {
         u.avatar_url,
         gol.first_name,
         gol.last_name,
+        u.contact_number,
         gol.vehicle_model,
         v.vehicle_year,
         gol.plate_number,
@@ -56,7 +57,7 @@ export async function GET(request: Request) {
       LEFT JOIN job_order_services jos ON jos.job_order_id = gol.id
       LEFT JOIN services s ON s.id = jos.service_id
       GROUP BY gol.id, jo.date_arrived, gol.status, gol.actual_grand_total, jo.balance,
-               jo.user_id, u.avatar_url, gol.first_name, gol.last_name, gol.vehicle_model,
+               jo.user_id, u.avatar_url, gol.first_name, gol.last_name, u.contact_number, gol.vehicle_model,
                v.vehicle_year, gol.plate_number, gol.mechanic_name, gol.assigned_mechanic_id, st.service_mode, st.customer_concern,
                q.queue_no
       ORDER BY (q.queue_no IS NULL), q.queue_no ASC, gol.id DESC

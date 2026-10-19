@@ -5,9 +5,9 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(_req: NextRequest) {
   try {
-    const { occupiedByDate, slots } = await getOccupiedBookingSlots()
+    const { occupiedByDate, slots, busyDates, earliestAvailableByDate } = await getOccupiedBookingSlots()
     return NextResponse.json(
-      { success: true, occupiedByDate, slots },
+      { success: true, occupiedByDate, slots, busyDates, earliestAvailableByDate },
       {
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',

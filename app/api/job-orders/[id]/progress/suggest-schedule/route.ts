@@ -64,7 +64,7 @@ export async function GET(
       )
     }
 
-    // 2. Load tasks to schedule: section in_progress, pending, unscheduled/unassigned, not road test/scan
+    // 2. Load tasks to schedule: section in_progress, pending, not road test/scan
     const tasksResult = await db.query(
       `SELECT 
          spt.id,
@@ -82,7 +82,6 @@ export async function GET(
        WHERE spt.job_order_id = $1
          AND spt.section_id = 'in_progress'
          AND spt.task_status = 'pending'
-         AND (spt.scheduled_date IS NULL OR spt.mechanic_id IS NULL)
          AND spt.task_title != $3
          AND spt.task_title != $4
        ORDER BY spt.id ASC`,
@@ -101,7 +100,7 @@ export async function GET(
          p.description,
          p.status::text,
          s.service_name,
-         po.expected_delivery_date::text AS expected_delivery_date
+         COALESCE(po.expected_delivery_date, p.estimated_delivery_date)::text AS expected_delivery_date
        FROM job_order_parts p
        JOIN job_order_services jos ON jos.id = p.job_order_service_id
        JOIN services s ON s.id = jos.service_id
@@ -142,6 +141,8 @@ export async function GET(
       }
     })
 
+    const currentTaskIds = tasksResult.rows.map((row: any) => Number(row.id))
+
     const serviceTypeByTaskId = new Map<number, string | null>(
       tasksResult.rows.map((row: any) => [Number(row.id), row.service_type ?? null]),
     )
@@ -150,7 +151,7 @@ export async function GET(
     const carBusyResult = await db.query(
       `SELECT 
          spt.id,
-         spt.scheduled_date::text,
+         COALESCE(spt.scheduled_date, spt.started_at)::text AS scheduled_date,
          COALESCE(jos.estimated_hours, $2)::numeric AS estimated_hours
        FROM service_progress_tasks spt
        LEFT JOIN LATERAL (
@@ -161,10 +162,11 @@ export async function GET(
          LIMIT 1
        ) jos ON true
        WHERE spt.job_order_id = $1
-         AND spt.scheduled_date IS NOT NULL
+         AND NOT (spt.id = ANY($3::int[]))
+         AND COALESCE(spt.scheduled_date, spt.started_at) IS NOT NULL
          AND spt.task_status NOT IN ('completed', 'cancelled')
-       ORDER BY spt.scheduled_date ASC`,
-      [jobOrderId, DEFAULT_TASK_HOURS],
+       ORDER BY COALESCE(spt.scheduled_date, spt.started_at) ASC`,
+      [jobOrderId, DEFAULT_TASK_HOURS, currentTaskIds],
     )
 
     const carBusy: Interval[] = []
@@ -187,11 +189,12 @@ export async function GET(
 
     const mechanicBusyResult = await db.query(
       `SELECT 
-         spt.mechanic_id,
-         spt.scheduled_date::text,
+         COALESCE(spt.mechanic_id, jo.assigned_mechanic_id) AS mechanic_id,
+         COALESCE(spt.scheduled_date, spt.started_at)::text AS scheduled_date,
          COALESCE(jos.estimated_hours, $1)::numeric AS estimated_hours
        FROM service_progress_tasks spt
-       JOIN employees e ON e.id = spt.mechanic_id
+       JOIN job_orders jo ON jo.id = spt.job_order_id
+       JOIN employees e ON e.id = COALESCE(spt.mechanic_id, jo.assigned_mechanic_id)
        LEFT JOIN LATERAL (
          SELECT jos.estimated_hours
          FROM services s
@@ -200,9 +203,10 @@ export async function GET(
          LIMIT 1
        ) jos ON true
        WHERE e.role = 'mechanic' AND e.status = 'active'
-         AND spt.scheduled_date IS NOT NULL
+         AND NOT (spt.id = ANY($2::int[]))
+         AND COALESCE(spt.scheduled_date, spt.started_at) IS NOT NULL
          AND spt.task_status NOT IN ('completed', 'cancelled')`,
-      [DEFAULT_TASK_HOURS],
+      [DEFAULT_TASK_HOURS, currentTaskIds],
     )
 
     const busyMap = new Map<number, Interval[]>()

@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
     if (!vehicleId && !newVehicleDetails) return bad('Missing vehicle information')
 
     let finalConcern = ''
+    let validServiceIds: number[] = []
     if (Array.isArray(serviceIds)) {
       const ids: number[] = Array.from(
         new Set(
@@ -72,6 +73,7 @@ export async function POST(req: NextRequest) {
             .filter((id: number) => Number.isInteger(id) && id > 0)
         )
       )
+      validServiceIds = ids
       if (ids.length > MAX_SELECTED_SERVICES) {
         return bad('Too many services selected.')
       }
@@ -277,6 +279,13 @@ export async function POST(req: NextRequest) {
         preferredDatetime || null,
       ])
       ticket = ticketResult.rows[0]
+
+      if (validServiceIds.length > 0 && ticket?.id) {
+        await client.query(
+          `UPDATE service_tickets SET booked_service_ids = $1::int[] WHERE id = $2`,
+          [validServiceIds, ticket.id]
+        )
+      }
 
       if (diagnosticScanAuthorized === true) {
         await client.query(

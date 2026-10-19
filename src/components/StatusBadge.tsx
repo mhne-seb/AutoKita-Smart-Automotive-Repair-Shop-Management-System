@@ -1,6 +1,6 @@
 const styles: Record<string, string> = {
   Pending: 'bg-violet-100 text-violet-700',
-  Approved: 'bg-amber-100 text-amber-700',
+  Approved: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
   'In Progress': 'bg-blue-100 text-blue-700',
   Completed: 'bg-emerald-100 text-emerald-700',
   Cancelled: 'bg-rose-100 text-rose-700',
@@ -13,6 +13,8 @@ const styles: Record<string, string> = {
   'Medium Churn Risk': 'bg-amber-100 text-amber-700',
   'Loyal Customer': 'bg-emerald-100 text-emerald-700',
   'New Customer': 'bg-sky-100 text-sky-700 border border-sky-200',
+  'Awaiting Arrival': 'bg-amber-100 text-amber-800 border border-amber-200',
+  'Stored in Shop': 'bg-emerald-100 text-emerald-800 border border-emerald-200',
 }
 
 export function StatusBadge({ status }: { status: string }) {

@@ -20,6 +20,7 @@ export interface JobOrderCard {
   customer: string
   vehicle: string
   customerId: string
+  contactNumber?: string | null
   avatarUrl?: string | null
   rawUserId?: number
   stage: Stage
@@ -39,14 +40,11 @@ export interface JobOrderCard {
   cancelled?: boolean
   dateArrived?: string | null
   arrived?: boolean
+  datePromised?: string | null
   serviceMode?: 'shop' | 'home'
   homeAddress?: string | null
   readyBy?: string | null
-  // Place in line (1 = served first). null when the job order is not waiting
-  // for or receiving work (finished, released or cancelled).
   queueNo?: number | null
-  // What the customer asked for at booking (service_tickets.customer_concern). The job order's own
-  // services only fill in as the quotation is built, so before that this is the real request.
   request?: string | null
 }
 
@@ -162,6 +160,7 @@ export interface QuotationPart {
   unitPrice: number
   status: PartStatus
   warranty_months?: number | null
+  estimated_delivery_date?: string | null
 }
 
 export interface QuotationService {
@@ -183,6 +182,8 @@ export interface QuotationData {
   notes: string
   sentToCustomer: boolean
   quotationApproved: boolean
+  datePromised?: string | null
+  assignedMechanicName?: string | null
 }
 
 export type TaskStatus = 'completed' | 'active' | 'pending' | 'cancelled' // cancelled = dropped by an approved pull-out

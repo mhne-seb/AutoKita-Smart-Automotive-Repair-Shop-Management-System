@@ -5,7 +5,13 @@ import {
   DEFAULT_CLOSE_HOUR,
   type ShopHours,
 } from '@/lib/bookingTiming'
-import { TASK_GAP_MINUTES, SLOT_STEP_MINUTES, MAX_MECHANICS_ON_CAR } from '@/data/shopPolicy'
+import {
+  TASK_GAP_MINUTES,
+  SLOT_STEP_MINUTES,
+  MAX_MECHANICS_ON_CAR,
+  SHOP_LUNCH_START_HOUR,
+  SHOP_LUNCH_END_HOUR,
+} from '@/data/shopPolicy'
 
 export type Interval = { start: number; end: number } // naive milliseconds
 
@@ -152,7 +158,8 @@ export function normalizeShopHours(raw: unknown): ShopHours {
   return obj as ShopHours
 }
 
-// Compute the working intervals and final end time for a given task duration across shop hours
+// Compute the working intervals and final end time for a given task duration across shop hours,
+// strictly pausing work during the mandatory 12:00 PM - 1:00 PM lunch break.
 function getWorkingChunks(
   startMs: number,
   taskHours: number,
@@ -176,6 +183,8 @@ function getWorkingChunks(
 
     const dayOpenMs = dayStart + Math.round(dayHours.open * 60) * 60 * 1000
     const dayCloseMs = dayStart + Math.round(dayHours.close * 60) * 60 * 1000
+    const lunchStartMs = dayStart + SHOP_LUNCH_START_HOUR * 3600 * 1000
+    const lunchEndMs = dayStart + SHOP_LUNCH_END_HOUR * 3600 * 1000
 
     if (currentMs < dayOpenMs) {
       currentMs = dayOpenMs
@@ -186,16 +195,42 @@ function getWorkingChunks(
       continue
     }
 
-    const availableToday = dayCloseMs - currentMs
-    if (remainingMs <= availableToday) {
-      const endChunk = currentMs + remainingMs
-      chunks.push({ start: currentMs, end: endChunk })
-      return { chunks, endMs: endChunk }
+    // If starting inside lunch break, snap to post-lunch opening
+    if (currentMs >= lunchStartMs && currentMs < lunchEndMs) {
+      currentMs = lunchEndMs
     }
 
-    chunks.push({ start: currentMs, end: dayCloseMs })
-    remainingMs -= availableToday
-    currentMs = dayStart + 24 * 3600 * 1000
+    // Morning Block: before lunch
+    if (currentMs < lunchStartMs) {
+      const morningCapacity = Math.min(dayCloseMs, lunchStartMs) - currentMs
+      if (morningCapacity > 0) {
+        if (remainingMs <= morningCapacity) {
+          const endChunk = currentMs + remainingMs
+          chunks.push({ start: currentMs, end: endChunk })
+          return { chunks, endMs: endChunk }
+        }
+        chunks.push({ start: currentMs, end: lunchStartMs })
+        remainingMs -= morningCapacity
+        currentMs = lunchEndMs // Jump past mandatory lunch break
+      }
+    }
+
+    // Afternoon Block: after lunch
+    if (currentMs < dayCloseMs) {
+      const afternoonCapacity = dayCloseMs - currentMs
+      if (afternoonCapacity > 0) {
+        if (remainingMs <= afternoonCapacity) {
+          const endChunk = currentMs + remainingMs
+          chunks.push({ start: currentMs, end: endChunk })
+          return { chunks, endMs: endChunk }
+        }
+        chunks.push({ start: currentMs, end: dayCloseMs })
+        remainingMs -= afternoonCapacity
+        currentMs = dayStart + 24 * 3600 * 1000 // Go to next day
+      }
+    } else {
+      currentMs = dayStart + 24 * 3600 * 1000
+    }
   }
 
   return { chunks, endMs: currentMs }
@@ -235,6 +270,8 @@ export function findEarliestSlotForMechanic(
 
     const dayOpenMs = dayStart + Math.round(dayHours.open * 60) * 60 * 1000
     const dayCloseMs = dayStart + Math.round(dayHours.close * 60) * 60 * 1000
+    const lunchStartMs = dayStart + SHOP_LUNCH_START_HOUR * 3600 * 1000
+    const lunchEndMs = dayStart + SHOP_LUNCH_END_HOUR * 3600 * 1000
 
     // If before opening, snap to open
     if (t < dayOpenMs) {
@@ -247,16 +284,21 @@ export function findEarliestSlotForMechanic(
       continue
     }
 
-    // Rule 4: If task is shorter than or equal to day's opening hours and cannot finish before closing,
-    // it starts at the next open day's opening time.
-    const dayCapacityMs = dayCloseMs - dayOpenMs
-    if (taskMs <= dayCapacityMs && t + taskMs > dayCloseMs) {
-      t = roundUpToStep(dayStart + 24 * 3600 * 1000)
-      continue
+    // If falling within lunch break [12 PM, 1 PM], snap to 1:00 PM
+    if (t >= lunchStartMs && t < lunchEndMs) {
+      t = lunchEndMs
     }
 
     // Compute working chunks and finish time
     const { chunks, endMs } = getWorkingChunks(t, taskHours, shopHours)
+
+    // Rule 4: If task fits within a full day's active working capacity (excluding lunch)
+    // but cannot finish before closing on this day, it starts at the next open day's opening time.
+    const dayCapacityMs = Math.max(0, (dayCloseMs - dayOpenMs) - (lunchEndMs - lunchStartMs))
+    if (taskMs <= dayCapacityMs && endMs > dayCloseMs) {
+      t = roundUpToStep(dayStart + 24 * 3600 * 1000)
+      continue
+    }
 
     // Check conflict with mechanic busy intervals (widened by TASK_GAP_MINUTES)
     let conflictEnd = 0

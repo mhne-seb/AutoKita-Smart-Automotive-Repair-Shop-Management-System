@@ -168,6 +168,14 @@ export default function page() {
   const partsToBuy = allParts.filter((p) => p.status === 'to_order')
   const completedCount = serviceTasks.filter((t) => t.status === 'completed').length
   const [showScheduleJobModal, setShowScheduleJobModal] = useState(false)
+  const hasPendingTasks = useMemo(() => {
+    return serviceTasks.some(
+      (t) =>
+        t.status === 'pending' &&
+        !isRoadTest(t) &&
+        !isDiagnosticScanTask(t),
+    )
+  }, [serviceTasks])
   const hasUnscheduledTasks = useMemo(() => {
     return serviceTasks.some(
       (t) =>
@@ -434,15 +442,23 @@ export default function page() {
         <p className={`text-sm font-bold uppercase tracking-wide ${sectionColors[section.id] ?? 'text-slate-500'}`}>
           {section.title}
         </p>
-        {/* No quotationConfirmed check here: the suggestion route checks the real rule (job order status). */}
-        {section.id === 'in-progress' && hasUnscheduledTasks && (
+        {/* Allows auto-scheduling unscheduled jobs or re-running the scheduler to re-balance/re-time pending services. */}
+        {section.id === 'in-progress' && hasPendingTasks && (
           <button
             type="button"
             onClick={() => setShowScheduleJobModal(true)}
-            title="Choose a start, the mechanics and the times for the pending tasks"
+            title={hasUnscheduledTasks ? "Choose a start date, mechanics and times for pending tasks" : "Reschedule or run auto-scheduler for pending tasks"}
             className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-indigo-700 active:translate-y-0"
           >
-            <CalendarDays size={13} /> Schedule job
+            {hasUnscheduledTasks ? (
+              <>
+                <CalendarDays size={13} /> Schedule job
+              </>
+            ) : (
+              <>
+                <RotateCcw size={13} /> Reschedule job
+              </>
+            )}
           </button>
         )}
       </div>
@@ -797,7 +813,7 @@ export default function page() {
       <JobOrderBreadcrumb jobOrderId={jobOrderId} current="progress" stage={jobOrder.stage} />
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4 sm:gap-6">
+        <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-5 sm:gap-6">
           <div>
             <p className="text-slate-400">Vehicle</p>
             <p className="font-bold text-slate-900">{jobOrder.vehicle}</p>
@@ -809,6 +825,10 @@ export default function page() {
           <div>
             <p className="text-slate-400">Customer</p>
             <p className="font-bold text-slate-900">{jobOrder.customer}</p>
+          </div>
+          <div>
+            <p className="text-slate-400">Phone Number</p>
+            <p className="font-bold text-slate-900">{jobOrder.contactNumber || '—'}</p>
           </div>
           <div className="sm:text-right">
             <p className="text-slate-400">Job Order</p>

@@ -109,11 +109,12 @@ export default function TestingPage() {
       <JobOrderBreadcrumb jobOrderId={jobOrderId} current="testing" stage={jobOrder.stage} />
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4 sm:gap-6">
+        <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-5 sm:gap-6">
           <div><p className="text-slate-400">Vehicle</p><p className="font-bold text-slate-900">{jobOrder.vehicle}</p></div>
           <div><p className="text-slate-400">Plate No.</p><p className="font-bold text-slate-900">{jobOrder.plate}</p></div>
           <div><p className="text-slate-400">Customer</p><p className="font-bold text-slate-900">{jobOrder.customer}</p></div>
-          <div className="sm:text-right"><p className="text-slate-400">Job Order</p><span className="inline-block rounded bg-slate-900 px-2 py-1 text-xs font-bold text-white">JO-{jobOrderId}</span></div>
+          <div><p className="text-slate-400">Phone Number</p><p className="font-bold text-slate-900">{jobOrder.contactNumber || '—'}</p></div>
+          <div className="sm:text-right"><p className="text-slate-400">Job Order</p><span className="inline-block rounded bg-slate-900 px-2 py-1 text-xs font-bold text-white">JO-{jobOrderId.toUpperCase()}</span></div>
         </div>
       </div>
 

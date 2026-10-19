@@ -25,7 +25,10 @@ export async function GET(request: NextRequest) {
       servicesDoneRes,
       finishedTotalsRes,
       kpiRes,
-      auditRes
+      auditRes,
+      partsSummaryRes,
+      partsDoneRes,
+      partsAggRes
     ] = await Promise.all([
       // 1. Payment records with itemized parts & services (both actual payments and unpaid job orders)
       db.query(`
@@ -172,6 +175,7 @@ export async function GET(request: NextRequest) {
         FROM employees e
         LEFT JOIN employee_profiles ep ON ep.employee_id = e.id
         WHERE e.role::text IN ('mechanic', 'operations_manager', 'owner')
+          AND e.status != 'terminated'
         ORDER BY e.id ASC
       `),
 
@@ -263,7 +267,75 @@ export async function GET(request: NextRequest) {
         WHERE sal.entity_type IN ('employee_profiles', 'payroll_summaries', 'payments')
         ORDER BY sal.action_date DESC
         LIMIT 25
-      `)
+      `),
+
+      // 8. Parts financial summary for the cycle (total customer paid vs total admin supplier cost)
+      db.query(`
+        SELECT 
+          COUNT(jop.id)::int AS "partsCount",
+          COALESCE(SUM(jop.quantity), 0)::int AS "totalUnits",
+          ROUND(COALESCE(SUM(jop.total_retail_amount), 0))::float AS "totalCustomerPaid",
+          ROUND(COALESCE(SUM(jop.quantity * COALESCE(jop.supplier_unit_cost, 0)), 0))::float AS "totalAdminCost",
+          ROUND(COALESCE(SUM(jop.total_retail_amount), 0) - COALESCE(SUM(jop.quantity * COALESCE(jop.supplier_unit_cost, 0)), 0))::float AS "totalPartsProfit"
+        FROM job_order_parts jop
+        JOIN job_orders jo ON jo.id = jop.job_order_id
+        WHERE jo.status IN ('completed', 'released')
+          AND (COALESCE(jo.completed_at, jo.jo_date) >= NOW() - $1::interval OR ($1::text = '100 years'))
+      `, [intervalStr]),
+
+      // 9. Detailed itemized log of all parts used during the cycle
+      db.query(`
+        SELECT 
+          jop.id,
+          jo.id AS "jobOrderId",
+          COALESCE(u.first_name || ' ' || u.last_name, u.nickname, 'Customer #' || u.id) AS "customerName",
+          COALESCE(v.vehicle_model, 'Vehicle') AS "vehicleModel",
+          COALESCE(v.plate_number, 'N/A') AS "plateNumber",
+          COALESCE(jop.part_number, 'N/A') AS "partNumber",
+          jop.description AS "partName",
+          jop.quantity AS qty,
+          COALESCE(jop.supplier_unit_cost, 0)::float AS "supplierUnitCost",
+          ROUND(COALESCE(jop.quantity * jop.supplier_unit_cost, 0))::float AS "adminTotalCost",
+          COALESCE(jop.retail_unit_price, 0)::float AS "retailUnitPrice",
+          ROUND(COALESCE(jop.total_retail_amount, jop.quantity * jop.retail_unit_price, 0))::float AS "customerTotalPaid",
+          ROUND(COALESCE(jop.total_retail_amount, jop.quantity * jop.retail_unit_price, 0) - COALESCE(jop.quantity * jop.supplier_unit_cost, 0))::float AS profit,
+          ROUND(
+            CASE 
+              WHEN COALESCE(jop.total_retail_amount, jop.quantity * jop.retail_unit_price, 0) > 0 
+              THEN ((COALESCE(jop.total_retail_amount, jop.quantity * jop.retail_unit_price, 0) - COALESCE(jop.quantity * jop.supplier_unit_cost, 0)) / COALESCE(jop.total_retail_amount, jop.quantity * jop.retail_unit_price, 0) * 100)
+              ELSE 0 
+            END
+          )::float AS "marginPercent",
+          COALESCE(jo.completed_at, jo.jo_date) AS "completedAt"
+        FROM job_order_parts jop
+        JOIN job_orders jo ON jo.id = jop.job_order_id
+        LEFT JOIN users u ON u.id = jo.user_id
+        LEFT JOIN vehicles v ON v.id = jo.vehicle_id
+        WHERE jo.status IN ('completed', 'released')
+          AND (COALESCE(jo.completed_at, jo.jo_date) >= NOW() - $1::interval OR ($1::text = '100 years'))
+        ORDER BY COALESCE(jo.completed_at, jo.jo_date) DESC, jop.id DESC
+        LIMIT 250
+      `, [intervalStr]),
+
+      // 10. Aggregated parts profit summary grouped by part name
+      db.query(`
+        SELECT 
+          jop.description AS name,
+          COALESCE(jop.part_number, 'N/A') AS "partNumber",
+          SUM(jop.quantity)::int AS qty,
+          ROUND(AVG(jop.supplier_unit_cost))::float AS "avgSupplierCost",
+          ROUND(AVG(jop.retail_unit_price))::float AS "avgRetailPrice",
+          ROUND(SUM(jop.quantity * COALESCE(jop.supplier_unit_cost, 0)))::float AS "totalAdminCost",
+          ROUND(SUM(jop.total_retail_amount))::float AS "totalCustomerPaid",
+          ROUND(SUM(jop.total_retail_amount) - SUM(jop.quantity * COALESCE(jop.supplier_unit_cost, 0)))::float AS profit
+        FROM job_order_parts jop
+        JOIN job_orders jo ON jo.id = jop.job_order_id
+        WHERE jo.status IN ('completed', 'released')
+          AND (COALESCE(jo.completed_at, jo.jo_date) >= NOW() - $1::interval OR ($1::text = '100 years'))
+        GROUP BY jop.description, jop.part_number
+        ORDER BY profit DESC
+        LIMIT 50
+      `, [intervalStr])
     ])
 
     const mechanicsRaw = mechanicsRes.rows
@@ -271,6 +343,22 @@ export async function GET(request: NextRequest) {
     const weeklyServices = servicesSummaryRes.rows
     const servicesDone = servicesDoneRes.rows
     const auditLogs = auditRes.rows
+
+    const partsTotalsRaw = partsSummaryRes.rows[0] || {
+      partsCount: 0,
+      totalUnits: 0,
+      totalCustomerPaid: 0,
+      totalAdminCost: 0,
+      totalPartsProfit: 0,
+    }
+    const partsCount = Number(partsTotalsRaw.partsCount || 0)
+    const partsUnits = Number(partsTotalsRaw.totalUnits || 0)
+    const partsCustomerPaid = Number(partsTotalsRaw.totalCustomerPaid || 0)
+    const partsAdminCost = Number(partsTotalsRaw.totalAdminCost || 0)
+    const partsProfit = Number(partsTotalsRaw.totalPartsProfit || 0)
+
+    const partsDone = partsDoneRes.rows
+    const partsSummary = partsAggRes.rows
 
     const finishedTotals = finishedTotalsRes.rows[0] || {
       servicesCount: 0,
@@ -312,7 +400,9 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    const netProfit = Math.max(0, Math.round(grossSales - totalCommissionPool))
+    // Services Profit + Parts Profit = Net Profit
+    const servicesProfit = Math.max(0, Math.round(finishedServicesTotal - totalCommissionPool))
+    const netProfit = Math.max(0, Math.round(servicesProfit + partsProfit))
 
     return NextResponse.json({
       success: true,
@@ -329,6 +419,12 @@ export async function GET(request: NextRequest) {
         prevWeeklyGrossSales: prevGrossSales,
         salesGrowthPct,
         totalCommissions: totalCommissionPool,
+        servicesProfit,
+        partsCustomerPaid,
+        partsAdminCost,
+        partsProfit,
+        partsCount,
+        partsUnits,
         netProfit,
         activeMechanicsCount,
       },
@@ -336,6 +432,15 @@ export async function GET(request: NextRequest) {
       mechanics,
       weeklyServices,
       servicesDone,
+      partsDone,
+      partsSummary,
+      partsTotals: {
+        partsCount,
+        totalUnits: partsUnits,
+        totalCustomerPaid: partsCustomerPaid,
+        totalAdminCost: partsAdminCost,
+        totalPartsProfit: partsProfit,
+      },
       auditLogs,
     })
   } catch (error) {

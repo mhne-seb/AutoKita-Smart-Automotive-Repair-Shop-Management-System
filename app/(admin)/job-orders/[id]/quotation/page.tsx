@@ -18,6 +18,25 @@ import { RejectPaymentModal } from '@/components/dashboard/RejectPaymentModal'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ShopLoading } from '@/components/ShopLoading'
 
+function formatPromisedDate(iso?: string | null) {
+  if (!iso) return null
+  try {
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return null
+    return d.toLocaleString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    })
+  } catch {
+    return null
+  }
+}
+
 export default function page() {
   const jobOrderId = String(useParams().id)
   const router = useRouter()
@@ -315,6 +334,7 @@ export default function page() {
   const [partStatus, setPartStatus] = useState<'in-stock' | 'to-order'>('to-order')
   const [partWarranty, setPartWarranty] = useState<number | string>('')
   const [partWarrantyError, setPartWarrantyError] = useState(false)
+  const [partEstimatedDelivery, setPartEstimatedDelivery] = useState('')
 
   useEffect(() => {
     let active = true
@@ -428,6 +448,7 @@ export default function page() {
     setPartQty('1')
     setPartUnitPrice('')
     setPartStatus('to-order')
+    setPartEstimatedDelivery('')
     setPartWarranty('')
     setPartWarrantyError(false)
     setShowPartModal(true)
@@ -442,6 +463,7 @@ export default function page() {
     setPartQty(String(part.qty))
     setPartUnitPrice(String(part.unitPrice))
     setPartStatus(part.status)
+    setPartEstimatedDelivery(part.estimated_delivery_date ? String(part.estimated_delivery_date).slice(0, 10) : '')
     setPartWarranty(part.warranty_months === null || part.warranty_months === undefined ? '' : part.warranty_months)
     setPartWarrantyError(false)
     setShowPartModal(true)
@@ -469,6 +491,7 @@ export default function page() {
       unitPrice: Math.max(0, Number(partUnitPrice) || 0),
       status: partStatus,
       warranty_months: Number(partWarranty),
+      estimated_delivery_date: partStatus === 'to-order' && partEstimatedDelivery ? partEstimatedDelivery : null,
     }
     setServices((prev) =>
       prev.map((s) => {
@@ -509,6 +532,10 @@ export default function page() {
         body: JSON.stringify({ notes, services: servicesWithEstimates, estimated_grand_total, actual_grand_total }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const resJson = await res.json().catch(() => null)
+      if (resJson?.date_promised) {
+        setInitial((prev) => (prev ? { ...prev, datePromised: resJson.date_promised } : prev))
+      }
       setHasUnsavedChanges(false)
       setSaveState('saved')
       return true
@@ -655,8 +682,8 @@ export default function page() {
       <TopBar title="Vehicle Inspection" subtitle="Inspection workflow & time tracking." showSearch={false} />
       <JobOrderBreadcrumb jobOrderId={jobOrderId} current="quotation" stage={jobOrder.stage} />
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <div className="grid grid-cols-4 gap-6 text-sm">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+        <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-6 sm:gap-6">
           <div>
             <p className="text-slate-400">Vehicle</p>
             <p className="font-bold text-slate-900">{jobOrder.vehicle}</p>
@@ -669,7 +696,34 @@ export default function page() {
             <p className="text-slate-400">Customer</p>
             <p className="font-bold text-slate-900">{jobOrder.customer}</p>
           </div>
-          <div className="text-right">
+          <div>
+            <p className="text-slate-400">Phone Number</p>
+            <p className="font-bold text-slate-900">{jobOrder.contactNumber || '—'}</p>
+          </div>
+          <div>
+            <p className="text-slate-400">Assigned Mechanic</p>
+            <p className="font-bold text-slate-900 flex items-center gap-1.5">
+              <span>🔧</span>
+              {initial?.assignedMechanicName || jobOrder.mechanic || 'Unassigned'}
+            </p>
+          </div>
+          <div>
+            <p className="text-slate-400">Estimated Ready</p>
+            <p className="font-bold text-slate-900 flex items-center gap-1.5">
+              <span>⏱️</span>
+              {initial?.datePromised
+                ? new Date(initial.datePromised).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                  })
+                : 'Pending calculation'}
+            </p>
+          </div>
+          <div className="sm:text-right">
             <p className="text-slate-400">Job Order</p>
             <span className="inline-block rounded bg-slate-900 px-2 py-1 text-xs font-bold text-white">
               JO-{jobOrderId.toUpperCase()}
@@ -958,6 +1012,12 @@ export default function page() {
                             >
                               {p.status === 'in-stock' ? 'In Stock' : 'To Order'}
                             </span>
+                            {p.status !== 'in-stock' && p.estimated_delivery_date && (
+                              <div className="mt-1 flex items-center gap-1 text-[11px] font-medium text-amber-700 whitespace-nowrap">
+                                <span>📦</span>
+                                <span>Est. {new Date(p.estimated_delivery_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                              </div>
+                            )}
                           </td>
                           <td className="px-3 py-2">
                              <select
@@ -1029,6 +1089,30 @@ export default function page() {
         </div>
 
         <div className="space-y-6">
+          {/* Estimated Completion Schedule Card */}
+          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50/50 p-5 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                <span>⏱️</span> Estimated Ready
+              </span>
+              <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
+                Scheduled
+              </span>
+            </div>
+            <p className="mt-2 text-lg font-black text-slate-900">
+              {formatPromisedDate(initial?.datePromised || jobOrder.datePromised) || 'Pending schedule'}
+            </p>
+            <p className="mt-1 text-xs text-slate-600 flex items-center gap-1.5">
+              <span>👨‍🔧 Mechanic:</span>
+              <span className="font-semibold text-slate-800">
+                {initial?.assignedMechanicName || jobOrder.mechanic || 'Unassigned'}
+              </span>
+            </p>
+            <p className="mt-2.5 border-t border-emerald-200/60 pt-2 text-[11px] leading-relaxed text-slate-500">
+              Calculated start-to-finish based on active shop hours (8:00 AM – 5:00 PM) with 12:00 PM – 1:00 PM lunch pause observed.
+            </p>
+          </div>
+
           <div className="rounded-2xl bg-slate-900 p-5 text-white">
             <p className="mb-3 font-bold">📄 Quotation Summary</p>
             <div className="space-y-2 text-sm text-slate-300">
@@ -1458,6 +1542,24 @@ export default function page() {
                   </button>
                 </div>
               </div>
+
+              {partStatus === 'to-order' && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3 space-y-1.5">
+                  <label className="block text-sm font-semibold text-slate-800">
+                    Estimated Arrival Date <span className="font-normal text-slate-500">(optional)</span>
+                  </label>
+                  <input
+                    type="date"
+                    min={new Date().toISOString().slice(0, 10)}
+                    value={partEstimatedDelivery}
+                    onChange={(e) => setPartEstimatedDelivery(e.target.value)}
+                    className="w-full rounded-lg border border-amber-300 bg-white p-2.5 text-sm text-slate-800 outline-none focus:border-amber-500 shadow-sm"
+                  />
+                  <p className="text-xs text-amber-800">
+                    Services requiring this part will be scheduled to start after this date.
+                  </p>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Warranty</label>
