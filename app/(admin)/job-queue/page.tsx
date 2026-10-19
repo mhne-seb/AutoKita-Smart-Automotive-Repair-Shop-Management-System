@@ -22,16 +22,13 @@ import {
   Calendar,
   SlidersHorizontal,
   Hash,
-  UserCog,
   AlertCircle,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   ShieldCheck,
   Search,
 } from 'lucide-react'
-import { MechanicScheduleModal } from '@/components/admin/MechanicScheduleModal'
 import { RequestedServices } from '@/components/admin/RequestedServices'
 import { DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 import { TopBar } from '@/components/TopBar'
@@ -63,7 +60,6 @@ export interface Job {
   // the booking itself was submitted.
   preferredDate: string | null
   servicesNeeded: string[]
-  assignedMechanic?: string
   total?: number
   // Customer agreed to the OBD-II scan fee at booking — the mechanic may scan,
   // and the fee attaches to the job order on approval.
@@ -91,8 +87,6 @@ const getServiceLabel = (raw: string): string => {
 
 export default function page() {
   const [jobs, setJobs] = useState<Job[]>([])
-  const [mechanics, setMechanics] = useState<any[]>([])
-  const [scheduleModalTarget, setScheduleModalTarget] = useState<Job | null>(null)
   // Show the loading scene instead of empty cards ("0 Tickets", "No tickets
   // found") while the first fetch is still on its way.
   const [loading, setLoading] = useState(true)
@@ -122,7 +116,6 @@ export default function page() {
               isWarrantyClaim: Boolean(t.is_warranty_claim),
               jobOrderId: t.job_order_id ? Number(t.job_order_id) : undefined,
               dateArrived: t.date_arrived ? new Date(t.date_arrived).toISOString() : null,
-              assignedMechanic: t.mechanic_id ? t.mechanic_id.toString() : undefined,
               status,
               date: new Date(t.request_date).toLocaleDateString(),
               preferredDate: t.preferred_datetime
@@ -131,7 +124,6 @@ export default function page() {
             }
           })
           setJobs(mappedJobs)
-          setMechanics(data.mechanics || [])
         }
       })
       .catch(console.error)
@@ -154,7 +146,6 @@ export default function page() {
   // Filter criteria states
   const [selectedVehicle, setSelectedVehicle] = useState('all')
   const [selectedMode, setSelectedMode] = useState('all') // 'all' | 'Shop Visit' | 'Home Service'
-  const [selectedMechanic, setSelectedMechanic] = useState('all') // 'all' | 'unassigned' | mechanicId
   const [selectedStatus, setSelectedStatus] = useState('all') // 'all' | 'Pending' | 'Awaiting Arrival' | 'Approved' | 'Cancelled'
   const [showFilterMenu, setShowFilterMenu] = useState(false)
   const filterMenuRef = useRef<HTMLDivElement>(null)
@@ -176,7 +167,7 @@ export default function page() {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, tab, warrantyOnly, selectedVehicle, selectedMode, selectedMechanic, selectedStatus])
+  }, [searchQuery, tab, warrantyOnly, selectedVehicle, selectedMode, selectedStatus])
 
   const vehicleOptions = useMemo(() => {
     const set = new Set<string>()
@@ -186,24 +177,14 @@ export default function page() {
     return Array.from(set).sort()
   }, [jobs])
 
-  const mechanicOptions = useMemo(() => {
-    return mechanics.map((m) => ({
-      id: m.id?.toString(),
-      name: m.full_name || `${m.first_name || ''} ${m.last_name || ''}`.trim() || `Mechanic #${m.id}`,
-      status: m.status,
-    }))
-  }, [mechanics])
-
   const activeFilterCount =
     (selectedVehicle !== 'all' ? 1 : 0) +
     (selectedMode !== 'all' ? 1 : 0) +
-    (selectedMechanic !== 'all' ? 1 : 0) +
     (selectedStatus !== 'all' ? 1 : 0)
 
   const resetFilters = () => {
     setSelectedVehicle('all')
     setSelectedMode('all')
-    setSelectedMechanic('all')
     setSelectedStatus('all')
     setCurrentPage(1)
   }
@@ -263,11 +244,6 @@ export default function page() {
     const matchesMode =
       selectedMode === 'all' || c.serviceMode.toLowerCase() === selectedMode.toLowerCase()
 
-    const matchesMechanic =
-      selectedMechanic === 'all' ||
-      (selectedMechanic === 'unassigned' && (!c.assignedMechanic || c.assignedMechanic === 'Unassigned')) ||
-      c.assignedMechanic === selectedMechanic
-
     const matchesStatus =
       selectedStatus === 'all' ||
       (selectedStatus === 'Pending' && c.status === 'Pending') ||
@@ -279,7 +255,7 @@ export default function page() {
         Boolean(c.dateArrived)) ||
       (selectedStatus === 'Cancelled' && c.status === 'Cancelled')
 
-    return matchesSearch && matchesTab && matchesWarranty && matchesVehicle && matchesMode && matchesMechanic && matchesStatus
+    return matchesSearch && matchesTab && matchesWarranty && matchesVehicle && matchesMode && matchesStatus
   })
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage))
@@ -294,55 +270,8 @@ export default function page() {
   ]
   const warrantyClaimCount = jobs.filter((j) => j.isWarrantyClaim).length
 
-  const updateMechanic = (ticketId: number, mechanicIdStr: string) => {
-    if (mechanicIdStr !== 'Unassigned') {
-      const selected = mechanics.find((m) => m.id?.toString() === mechanicIdStr)
-      if (selected && selected.status !== 'active') {
-        toast.error(`${selected.full_name || 'This mechanic'} is currently on leave and cannot be assigned.`)
-        return
-      }
-    }
-    setJobs((prev) =>
-      prev.map((j) => (j.ticketId === ticketId ? { ...j, assignedMechanic: mechanicIdStr === 'Unassigned' ? undefined : mechanicIdStr } : j)),
-    )
-  }
-
-  const handleMechanicModalConfirm = (mechanicId: string, adjustedStartTime?: string) => {
-    if (!scheduleModalTarget) return
-    updateMechanic(scheduleModalTarget.ticketId, mechanicId)
-    if (adjustedStartTime) {
-      setJobs((prev) =>
-        prev.map((j) =>
-          j.ticketId === scheduleModalTarget.ticketId
-            ? {
-                ...j,
-                preferredDate: new Date(adjustedStartTime).toLocaleString('en-PH', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                  hour: 'numeric',
-                  minute: '2-digit',
-                }),
-              }
-            : j
-        )
-      )
-    }
-    toast.success('Mechanic assigned and schedule confirmed!')
-    setScheduleModalTarget(null)
-  }
-
   const confirmApprove = async (job: Job, checkInNow = false) => {
     if (approving) return;
-    if (!job.assignedMechanic || job.assignedMechanic === 'Unassigned') {
-      toast.error("Please assign a mechanic first");
-      return;
-    }
-    const assignedMech = mechanics.find((m) => m.id?.toString() === job.assignedMechanic)
-    if (assignedMech && assignedMech.status !== 'active') {
-      toast.error(`${assignedMech.full_name || 'This mechanic'} is currently on leave and cannot be assigned.`);
-      return;
-    }
     setApproving(true);
     try {
       const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
@@ -352,7 +281,6 @@ export default function page() {
         body: JSON.stringify({
           action: 'approve',
           ticketId: job.ticketId,
-          mechanicId: job.assignedMechanic,
           employeeId: activeEmployeeId ? Number(activeEmployeeId) : null,
           checkInNow: Boolean(checkInNow),
         })
@@ -649,23 +577,6 @@ export default function page() {
                     </select>
                   </div>
 
-                  {/* Mechanic */}
-                  <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Mechanic Assignment</label>
-                    <select
-                      value={selectedMechanic}
-                      onChange={(e) => setSelectedMechanic(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
-                    >
-                      <option value="all">All</option>
-                      <option value="unassigned">Unassigned Only</option>
-                      {mechanicOptions.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.name}{m.status === 'on_leave' ? ' (On Leave)' : m.status && m.status !== 'active' ? ` (${m.status})` : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
                   {/* Status */}
                   <div>
                     <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Status</label>
@@ -731,12 +642,6 @@ export default function page() {
               <button onClick={() => setSelectedMode('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
             </span>
           )}
-          {selectedMechanic !== 'all' && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
-              Mechanic: {selectedMechanic === 'unassigned' ? 'Unassigned' : (mechanicOptions.find(m => m.id === selectedMechanic)?.name || selectedMechanic)}
-              <button onClick={() => setSelectedMechanic('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
-            </span>
-          )}
           {selectedStatus !== 'all' && (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
               Status: {selectedStatus}
@@ -761,7 +666,6 @@ export default function page() {
               <th className="px-4 py-3 font-semibold">Mode</th>
               <th className="px-4 py-3 font-semibold">Service Needed</th>
               <th className="px-4 py-3 font-semibold">Preferred Date</th>
-              <th className="px-4 py-3 font-semibold">Mechanic</th>
               <th className="px-4 py-3 font-semibold">Status</th>
               <th className="px-4 py-3 text-right font-semibold">Actions</th>
             </tr>
@@ -769,7 +673,6 @@ export default function page() {
           <tbody>
             {paginatedJobs.map((c) => {
               const approvedLike = c.status === 'Approved' || c.status === 'In Progress'
-              const unassigned = !c.assignedMechanic || c.assignedMechanic === 'Unassigned'
               return (
                 <tr key={c.ticketId} className="border-b border-border/60 align-top last:border-0">
                   <td className="px-4 py-4">
@@ -832,57 +735,6 @@ export default function page() {
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
-                  </td>
-                  <td className="px-4 py-4">
-                    {(() => {
-                      const assignedMechObj = mechanics.find((m) => m.id?.toString() === c.assignedMechanic)
-                      const isLeave = assignedMechObj?.status === 'on_leave'
-                      const isUnavailable = assignedMechObj && assignedMechObj.status !== 'active'
-                      const mechName = assignedMechObj ? assignedMechObj.full_name : c.assignedMechanic
-
-                      if (unassigned) {
-                        return (
-                          <button
-                            type="button"
-                            onClick={() => setScheduleModalTarget(c)}
-                            className="flex items-center justify-between w-full min-w-[155px] gap-2 rounded-lg border border-amber-300 bg-amber-50/90 hover:bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-800 shadow-2xs transition-all cursor-pointer group"
-                            title="Check mechanic schedule feasibility"
-                          >
-                            <span className="flex items-center gap-1.5">
-                              <UserCog size={13} className="text-amber-600" />
-                              <span>Assign Mechanic</span>
-                            </span>
-                            <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
-                          </button>
-                        )
-                      }
-
-                      return (
-                        <button
-                          type="button"
-                          onClick={() => setScheduleModalTarget(c)}
-                          className={`flex items-center justify-between w-full min-w-[155px] gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold shadow-2xs transition-all cursor-pointer group ${
-                            isLeave
-                              ? 'border-rose-300 bg-rose-50 text-rose-800'
-                              : isUnavailable
-                              ? 'border-amber-300 bg-amber-50 text-amber-800'
-                              : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 text-foreground'
-                          }`}
-                          title="Click to view schedule feasibility or reassign"
-                        >
-                          <span className="flex items-center gap-1.5 truncate">
-                            <span
-                              className={`h-2 w-2 rounded-full shrink-0 ${
-                                isLeave ? 'bg-rose-500' : isUnavailable ? 'bg-amber-500' : 'bg-emerald-500'
-                              }`}
-                            />
-                            <span className="truncate">{mechName}</span>
-                            {isLeave && <span className="text-[10px] text-rose-600 font-bold">(Leave)</span>}
-                          </span>
-                          <ChevronDown size={12} className="text-muted-foreground group-hover:text-foreground shrink-0" />
-                        </button>
-                      )
-                    })()}
                   </td>
                   <td className="px-4 py-4">
                     {c.status === 'Approved' || c.status === 'In Progress' ? (
@@ -980,7 +832,6 @@ export default function page() {
       {approveTarget && (
         <ApproveModal
           job={approveTarget}
-          mechanics={mechanics}
           busy={approving}
           onClose={() => setApproveTarget(null)}
           onConfirm={(checkInNow) => confirmApprove(approveTarget, checkInNow)}
@@ -1016,7 +867,6 @@ export default function page() {
       {viewTarget && (
         <ViewModal
           job={viewTarget}
-          mechanics={mechanics}
           onClose={() => setViewTarget(null)}
           onCheckIn={() => setCheckingInTarget(viewTarget)}
         />
@@ -1033,33 +883,14 @@ export default function page() {
           disabled={rejecting}
         />
       )}
-
-      {scheduleModalTarget && (
-        <MechanicScheduleModal
-          job={scheduleModalTarget}
-          onClose={() => setScheduleModalTarget(null)}
-          onConfirm={handleMechanicModalConfirm}
-        />
-      )}
     </div>
   )
 }
 
-// Approve modal — shows the job details and blocks approval until a
-// mechanic is assigned.
+// Approve modal — shows the job details. The mechanic is chosen later when
+// scheduling the job on the job order progress page.
 
-function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; mechanics: any[]; busy: boolean; onClose: () => void; onConfirm: (checkInNow: boolean) => void }) {
-  const unassigned = !job.assignedMechanic || job.assignedMechanic === 'Unassigned'
-  const assignedMech = unassigned ? null : mechanics.find((m) => m.id?.toString() === job.assignedMechanic)
-  const isMechanicOnLeave = assignedMech ? assignedMech.status !== 'active' : false
-  const mechanicName = unassigned
-    ? 'Unassigned'
-    : (assignedMech?.full_name ?? job.assignedMechanic) +
-      (assignedMech?.status === 'on_leave'
-        ? ' (On Leave)'
-        : assignedMech?.status && assignedMech.status !== 'active'
-        ? ` (${assignedMech.status})`
-        : '')
+function ApproveModal({ job, busy, onClose, onConfirm }: { job: Job; busy: boolean; onClose: () => void; onConfirm: (checkInNow: boolean) => void }) {
   const [checkInNow, setCheckInNow] = useState(false)
 
   return (
@@ -1075,7 +906,7 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
         </div>
 
         <h3 className="mt-4 text-lg font-bold text-foreground">Approve job order?</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Review the details before approving this ticket.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Review the details before approving this ticket. The mechanic is chosen later when you schedule the job.</p>
 
         <dl className="mt-4 space-y-2 rounded-lg bg-accent/50 p-4 text-sm">
           <div className="flex justify-between gap-4">
@@ -1108,12 +939,6 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
               </dd>
             </div>
           )}
-          <div className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">Assigned Mechanic</dt>
-            <dd className={`font-medium ${unassigned ? 'text-amber-600' : isMechanicOnLeave ? 'text-rose-600' : 'text-foreground'}`}>
-              {mechanicName}
-            </dd>
-          </div>
         </dl>
 
         <div className="mt-4 rounded-lg border border-border bg-accent/30 p-3.5 flex items-start gap-3">
@@ -1132,28 +957,13 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
           </label>
         </div>
 
-        {unassigned && (
-          <div className="mt-3 flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2.5 text-xs text-amber-700">
-            <AlertCircle size={14} className="mt-0.5 shrink-0" />
-            You must assign a mechanic to this job before it can be approved. Close this dialog and pick one from the
-            table, then try again.
-          </div>
-        )}
-
-        {isMechanicOnLeave && (
-          <div className="mt-3 flex items-start gap-2 rounded-lg bg-rose-50 px-3 py-2.5 text-xs text-rose-700">
-            <AlertCircle size={14} className="mt-0.5 shrink-0" />
-            The assigned mechanic ({assignedMech?.full_name}) is currently on leave and cannot take new job orders. Please reassign this ticket to an available mechanic before approving.
-          </div>
-        )}
-
         <div className="mt-6 flex justify-end gap-3">
           <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm">
             Cancel
           </button>
           <button
             onClick={() => onConfirm(checkInNow)}
-            disabled={unassigned || isMechanicOnLeave || busy}
+            disabled={busy}
             className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
             {busy ? 'Approving...' : 'Confirm Approval'}
@@ -1166,16 +976,7 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
 
 // Hold modal — requires a reason before putting a job on hold.
 
-function ViewModal({ job, mechanics, onClose, onCheckIn }: { job: Job; mechanics: any[]; onClose: () => void; onCheckIn?: () => void }) {
-  const assignedMech = !job.assignedMechanic ? null : mechanics.find((m) => m.id?.toString() === job.assignedMechanic)
-  const mechanicName = !job.assignedMechanic
-    ? 'Not yet assigned'
-    : (assignedMech?.full_name ?? job.assignedMechanic) +
-      (assignedMech?.status === 'on_leave'
-        ? ' (On Leave)'
-        : assignedMech?.status && assignedMech.status !== 'active'
-        ? ` (${assignedMech.status})`
-        : '')
+function ViewModal({ job, onClose, onCheckIn }: { job: Job; onClose: () => void; onCheckIn?: () => void }) {
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
       <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-background p-6 shadow-2xl">
@@ -1276,12 +1077,6 @@ function ViewModal({ job, mechanics, onClose, onCheckIn }: { job: Job; mechanics
                   <dd className="font-medium text-foreground">{job.preferredDate}</dd>
                 </div>
               )}
-              <div className="flex justify-between gap-4">
-                <dt className="flex items-center gap-1.5 text-muted-foreground">
-                  <UserCog size={12} /> Assigned Mechanic
-                </dt>
-                <dd className="font-medium text-foreground">{mechanicName}</dd>
-              </div>
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-muted-foreground">Current Status</dt>
                 <dd>

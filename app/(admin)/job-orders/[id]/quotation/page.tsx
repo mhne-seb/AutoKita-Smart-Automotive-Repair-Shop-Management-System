@@ -703,13 +703,6 @@ export default function page() {
             <p className="font-bold text-slate-900">{jobOrder.contactNumber || '—'}</p>
           </div>
           <div>
-            <p className="text-slate-400">Assigned Mechanic</p>
-            <p className="font-bold text-slate-900 flex items-center gap-1.5">
-              <span>🔧</span>
-              {initial?.assignedMechanicName || jobOrder.mechanic || 'Unassigned'}
-            </p>
-          </div>
-          <div>
             <p className="text-slate-400">Estimated Ready</p>
             <p className="font-bold text-slate-900 flex items-center gap-1.5">
               <span>⏱️</span>
@@ -1110,12 +1103,6 @@ export default function page() {
             </div>
             <p className="mt-2 text-lg font-black text-slate-900">
               {formatPromisedDate(initial?.datePromised || jobOrder.datePromised) || 'Pending schedule'}
-            </p>
-            <p className="mt-1 text-xs text-slate-600 flex items-center gap-1.5">
-              <span>👨‍🔧 Mechanic:</span>
-              <span className="font-semibold text-slate-800">
-                {initial?.assignedMechanicName || jobOrder.mechanic || 'Unassigned'}
-              </span>
             </p>
             <p className="mt-2.5 border-t border-emerald-200/60 pt-2 text-[11px] leading-relaxed text-slate-500">
               Calculated start-to-finish based on active shop hours (8:00 AM – 5:00 PM) with 12:00 PM – 1:00 PM lunch pause observed.

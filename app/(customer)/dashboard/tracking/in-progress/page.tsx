@@ -532,15 +532,6 @@ function InProgress() {
           )}
 
           <div className="rounded-xl border bg-card p-4">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Wrench className="h-4 w-4 text-teal" /> Assigned Team
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Your vehicle is being serviced by a certified AutoKita technician.
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card p-4">
             <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
               Vehicle Actions
             </div>

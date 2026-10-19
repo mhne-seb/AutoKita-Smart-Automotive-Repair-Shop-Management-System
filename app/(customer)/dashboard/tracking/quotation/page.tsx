@@ -275,18 +275,12 @@ function Quotation() {
       )}
 
       <div className="rounded-xl border bg-card p-5 shadow-xs">
-        <div className="grid grid-cols-2 sm:grid-cols-5 items-center gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted"><Car className="h-4 w-4 text-brand" /></div>
             <div><div className="text-xs text-muted-foreground">Vehicle</div><div className="font-bold">{jobOrder.vehicle_year} {jobOrder.vehicle_model}</div></div>
           </div>
           <div><div className="text-xs text-muted-foreground">Plate No.</div><div className="font-bold">{jobOrder.plate_number}</div></div>
-          <div>
-            <div className="text-xs text-muted-foreground">Assigned Mechanic</div>
-            <div className="font-bold flex items-center gap-1">
-              <span>🔧</span> {jobOrder.assigned_mechanic_name || 'Assigned Mechanic'}
-            </div>
-          </div>
           <div>
             <div className="text-xs text-muted-foreground">Estimated Finish</div>
             <div className="font-bold text-teal">
@@ -378,9 +372,6 @@ function Quotation() {
                                       {isToOrder ? (
                                         <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 font-medium">
                                           <span>📦 To Order</span>
-                                          {p.estimated_delivery_date && (
-                                            <span>• Est. {new Date(p.estimated_delivery_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                          )}
                                         </span>
                                       ) : (
                                         <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 font-medium">
@@ -388,6 +379,11 @@ function Quotation() {
                                         </span>
                                       )}
                                     </div>
+                                    {isToOrder && p.estimated_delivery_date && (
+                                      <div className="text-[10px] text-amber-800 mt-0.5">
+                                        • Estimated Time of Arrival on Shop: {new Date(p.estimated_delivery_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                      </div>
+                                    )}
                                     <div className="text-[10px] opacity-80 mt-0.5">
                                       {p.warranty_months === null || p.warranty_months === undefined
                                         ? ""
@@ -433,13 +429,6 @@ function Quotation() {
             <div className="p-4 space-y-2.5">
               <div className="text-lg font-black text-foreground">
                 {formatPromisedDate(jobOrder.date_promised) || 'Calculating completion time...'}
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Wrench className="h-3.5 w-3.5 text-teal" />
-                <span>Assigned Mechanic:</span>
-                <span className="font-semibold text-foreground">
-                  {jobOrder.assigned_mechanic_name || 'Shop Mechanic'}
-                </span>
               </div>
               <div className="border-t pt-2 text-[11px] leading-relaxed text-muted-foreground space-y-1">
                 <div>⏱️ Schedule is calculated start-to-finish based on active shop hours (8:00 AM – 5:00 PM) with lunch break (12:00 PM – 1:00 PM) observed.</div>
