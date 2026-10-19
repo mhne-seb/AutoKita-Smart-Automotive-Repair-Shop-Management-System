@@ -61,6 +61,7 @@ interface ScheduleResponse {
   suggestions: Suggestion[]
   promisedDate: string | null
   alreadyPromised: string | null
+  hasScheduledTasks: boolean
   earlier: Array<{ jobOrderId: number; plate: string; arrived: string }>
   nothingToSchedule: boolean
   planning: PlanningData
@@ -544,7 +545,7 @@ export function ScheduleJobModal({
         await fetch(`/api/job-orders/${jobOrderId}/progress/promised-date`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ promisedDate }),
+          body: JSON.stringify({ promisedDate, replaceEstimate: !data?.hasScheduledTasks }),
         })
       } catch (err) {
         console.error('Failed to set promised date:', err)
@@ -578,8 +579,8 @@ export function ScheduleJobModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-4xl rounded-2xl bg-white p-6 shadow-xl space-y-5">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-6 pb-3 pt-6">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
               <CalendarDays size={18} />
@@ -603,6 +604,7 @@ export function ScheduleJobModal({
           </button>
         </div>
 
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
         {loading && (
           <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-2">
             <Loader2 size={24} className="animate-spin text-indigo-600" />
@@ -818,7 +820,7 @@ export function ScheduleJobModal({
             </div>
 
             {/* Table rows */}
-            <div className="max-h-[50vh] overflow-y-auto space-y-2 pr-1">
+            <div className="space-y-2">
               {orderedTasks.map((task, index) => {
                 const placement = placements.find((p) => p.taskId === task.id)
                 const isPinned = pinned[task.id] !== undefined
@@ -900,7 +902,7 @@ export function ScheduleJobModal({
                             )}
                             {isBlocked && (
                               <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">
-                                Waiting for part
+                                Part not here yet
                               </span>
                             )}
                           </div>
@@ -934,9 +936,8 @@ export function ScheduleJobModal({
                               }
                             }
                           }}
-                          disabled={isBlocked}
                           aria-label={`Mechanic for ${task.title}`}
-                          className="w-full min-w-0 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-800 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50 disabled:bg-slate-100"
+                          className="w-full min-w-0 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-800 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                         >
                           {assignments[task.id] == null && (
                             <option value="" disabled>
@@ -1001,8 +1002,7 @@ export function ScheduleJobModal({
                             )}
                           </div>
 
-                          {!isBlocked && (
-                            <div className="shrink-0">
+                          <div className="shrink-0">
                               {isPinned ? (
                                 <button
                                   type="button"
@@ -1043,7 +1043,6 @@ export function ScheduleJobModal({
                                 </button>
                               )}
                             </div>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -1100,6 +1099,12 @@ export function ScheduleJobModal({
               </p>
             )}
 
+          </div>
+        )}
+        </div>
+
+        {!loading && !error && data && !data.nothingToSchedule && (
+          <div className="shrink-0 space-y-3 border-t border-slate-100 px-6 py-4">
             {/* Target completion */}
             <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
               <Clock size={18} className="text-slate-400 shrink-0" />
@@ -1131,7 +1136,7 @@ export function ScheduleJobModal({
             </div>
 
             {/* Modal actions */}
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={onClose}

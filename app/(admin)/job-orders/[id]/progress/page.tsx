@@ -169,14 +169,6 @@ export default function page() {
   const partsToBuy = allParts.filter((p) => p.status === 'to_order')
   const completedCount = serviceTasks.filter((t) => t.status === 'completed').length
   const [showScheduleJobModal, setShowScheduleJobModal] = useState(false)
-  const hasPendingTasks = useMemo(() => {
-    return serviceTasks.some(
-      (t) =>
-        t.status === 'pending' &&
-        !isRoadTest(t) &&
-        !isDiagnosticScanTask(t),
-    )
-  }, [serviceTasks])
   const hasUnscheduledTasks = useMemo(() => {
     return serviceTasks.some(
       (t) =>
@@ -269,13 +261,24 @@ export default function page() {
     return { year, type, mileage }
   }, [jobOrder])
 
+  // Latest finish across tasks. A task still waiting on a part cannot finish before the part
+  // arrives (8:00 AM shop opening on its date) plus the task's own hours, scheduled or not.
   const estimatedFinish = useMemo(() => {
-    const withEstimate = serviceTasks.filter((t) => t.estimatedFinish)
-    if (withEstimate.length === 0) return null
-    return withEstimate.reduce<Date | null>((latest, t) => {
-      const d = new Date(t.estimatedFinish!)
-      return !latest || d > latest ? d : latest
-    }, null)
+    let latest: Date | null = null
+    for (const t of serviceTasks) {
+      if (t.status === 'completed') continue
+      const candidates: Date[] = []
+      if (t.estimatedFinish) candidates.push(new Date(t.estimatedFinish))
+      const etas = (t.parts ?? []).filter((p) => !partIsReady(p) && p.estimatedDelivery).map((p) => p.estimatedDelivery!).sort()
+      if (etas.length > 0) {
+        const arrival = new Date(`${etas[etas.length - 1]}T08:00:00`)
+        candidates.push(new Date(arrival.getTime() + (t.estimatedHours ?? 1) * 3600000))
+      }
+      for (const d of candidates) {
+        if (!isNaN(d.getTime()) && (!latest || d > latest)) latest = d
+      }
+    }
+    return latest
   }, [serviceTasks])
 
   const quotationTotal = useMemo(() => {
@@ -443,23 +446,15 @@ export default function page() {
         <p className={`text-sm font-bold uppercase tracking-wide ${sectionColors[section.id] ?? 'text-slate-500'}`}>
           {section.title}
         </p>
-        {/* Allows auto-scheduling unscheduled jobs or re-running the scheduler to re-balance/re-time pending services. */}
-        {section.id === 'in-progress' && hasPendingTasks && (
+        {/* No quotationConfirmed check here: the suggestion route checks the real rule (job order status). */}
+        {section.id === 'in-progress' && hasUnscheduledTasks && (
           <button
             type="button"
             onClick={() => setShowScheduleJobModal(true)}
-            title={hasUnscheduledTasks ? "Choose a start date, mechanics and times for pending tasks" : "Reschedule or run auto-scheduler for pending tasks"}
+            title="Choose a start, the mechanics and the times for the pending tasks"
             className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-indigo-700 active:translate-y-0"
           >
-            {hasUnscheduledTasks ? (
-              <>
-                <CalendarDays size={13} /> Schedule job
-              </>
-            ) : (
-              <>
-                <RotateCcw size={13} /> Reschedule job
-              </>
-            )}
+            <CalendarDays size={13} /> Schedule job
           </button>
         )}
       </div>
@@ -583,9 +578,8 @@ export default function page() {
                     </span>
                   )}
 
-                  {/* Start is blocked until the task is scheduled to a mechanic
-                      and every part for it has arrived — work doesn't begin on
-                      a car missing parts, or with no one assigned to do it. */}
+                  {/* Start needs a mechanic and a time. A missing part is only a
+                      warning: the shop may start the job before the part arrives. */}
                   {task.status === 'pending' && unscheduled && (
                     <button
                       onClick={() => setSchedulingTask(task)}
@@ -598,10 +592,10 @@ export default function page() {
                   {task.status === 'pending' && !unscheduled && (
                     <button
                       onClick={() => setTaskStatus(task, 'active')}
-                      disabled={busy || missing.length > 0}
+                      disabled={busy}
                       title={
                         missing.length > 0
-                          ? `Waiting for parts (${parts.length - missing.length} of ${parts.length} received)`
+                          ? `Part not here yet (${parts.length - missing.length} of ${parts.length} received). You can still start.`
                           : undefined
                       }
                       className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-indigo-700 active:translate-y-0 disabled:hover:-translate-y-0 disabled:hover:shadow-none disabled:cursor-not-allowed disabled:opacity-40"
@@ -675,6 +669,9 @@ export default function page() {
                             <div className="font-semibold text-slate-800">{p.name}</div>
                             {p.purchaseOrderId && (
                               <div className="text-[11px] text-slate-400">PO-{p.purchaseOrderId} · {p.supplierName} · {p.purchasedOn}</div>
+                            )}
+                            {!ready && p.estimatedDelivery && (
+                              <div className="text-[11px] text-amber-700">Estimated Time of Arrival on Shop: {fmtEta(p.estimatedDelivery)}</div>
                             )}
                           </td>
                           <td className="py-2 pr-3 text-xs text-slate-400">{p.partNo}</td>
@@ -1645,6 +1642,10 @@ function getTaskLocalDate(dateStr: string | null | undefined): string {
     return toLocalDateValue(new Date(trimmed))
   }
   return trimmed.slice(0, 10)
+}
+
+function fmtEta(dateStr: string): string {
+  return new Date(`${dateStr.slice(0, 10)}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function parseLocalTimestamp(dateStr: string | null | undefined): number {
