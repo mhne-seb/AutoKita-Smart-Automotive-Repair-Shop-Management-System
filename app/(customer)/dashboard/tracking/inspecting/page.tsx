@@ -291,7 +291,7 @@ function Inspecting() {
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-success/30 bg-success/5 px-4 py-3 text-sm">
           <span className="flex items-center gap-2">
             <Check className="h-4 w-4 flex-shrink-0 text-success" />
-            {movedOn ? "You approved this inspection. Your quotation is ready for review." : "You approved this inspection. We’re preparing your quotation."}
+            {movedOn ? "You approved this inspection." : "You approved this inspection. We’re preparing your quotation."}
           </span>
           {movedOn && (
             <Link
