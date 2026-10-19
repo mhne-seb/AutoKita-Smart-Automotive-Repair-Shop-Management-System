@@ -21,6 +21,15 @@ function toneClass(status: string | null) {
   return "bg-success/15 text-[color:oklch(0.5_0.16_145)]";
 }
 
+// The database stores 'ok' / 'needs_attention' / 'urgent'; customers see plain labels.
+function findingLabel(status: string | null) {
+  const s = (status ?? "").toLowerCase().replace(/[\s-]+/g, "_");
+  if (s === "ok") return "Good Condition";
+  if (s === "needs_attention") return "Needs Attention";
+  if (s === "urgent" || s.includes("replace")) return "Replacement Required";
+  return status ?? "";
+}
+
 function Inspecting() {
   useEffect(() => { document.title = "Inspecting — AutoKita"; }, []);
 
@@ -426,7 +435,7 @@ function Inspecting() {
                     </div>
                     {f.status && (
                       <span className={`shrink-0 rounded-md px-2.5 py-1 text-[11px] font-semibold ${toneClass(f.status)}`}>
-                        {f.status}
+                        {findingLabel(f.status)}
                       </span>
                     )}
                   </div>

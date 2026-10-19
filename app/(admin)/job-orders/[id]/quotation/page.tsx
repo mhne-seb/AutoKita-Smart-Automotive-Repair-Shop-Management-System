@@ -17,6 +17,7 @@ import { QuotationService, JobOrderCard, QuotationData, MechanicalFinding, findi
 import { RejectPaymentModal } from '@/components/dashboard/RejectPaymentModal'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ShopLoading } from '@/components/ShopLoading'
+import { RequestedServices } from '@/components/admin/RequestedServices'
 
 function formatPromisedDate(iso?: string | null) {
   if (!iso) return null
@@ -1089,6 +1090,13 @@ export default function page() {
         </div>
 
         <div className="space-y-6">
+          {jobOrder.request && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="font-bold text-slate-900">Customer&apos;s Request</p>
+              <RequestedServices raw={jobOrder.request} hideCategory />
+            </div>
+          )}
+
           {/* Estimated Completion Schedule Card */}
           <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50/50 p-5 shadow-xs">
             <div className="flex items-center justify-between">

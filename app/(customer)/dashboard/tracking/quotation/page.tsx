@@ -450,6 +450,13 @@ function Quotation() {
                   </div>
                 )}
               </div>
+              <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-800">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>
+                  Just a heads up: this date and time are our best estimate. Sometimes things shift a little,
+                  like when parts or orders arrive late. Don&apos;t worry, we&apos;ll let you know right away if anything changes.
+                </span>
+              </div>
             </div>
           </div>
 

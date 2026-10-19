@@ -293,8 +293,8 @@ export function BookingPage({
 
   // What the summary says under "Possible completion time based on your services".
   const completionText: string | null = (() => {
+    if (knownHours <= 0) return 'Confirmed after the shop checks your car.';
     if (!dateChosen || !timeChosen) return null;
-    if (knownHours <= 0) return 'The shop will tell you after checking your car.';
     if (!shopDayHours || Number.isNaN(startHour)) return null;
 
     if (isBusyDay && busyInfo) {
@@ -723,23 +723,29 @@ export function BookingPage({
   }
 
   return (
-    <div
-      id="booking-top"
-      className={mode === 'modal' ? 'mx-auto max-w-[88rem] px-4 py-6 sm:px-6' : 'mx-auto max-w-[88rem] px-6 py-8'}
-    >
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Book a service</h1>
-        <p className="text-sm text-muted-foreground">
-          Register a vehicle or pick an existing one to schedule your concern.
-        </p>
+    <div id="booking-top">
+      {/* Full-width top that stays while scrolling. On the page it sits under the fixed 64px site header. */}
+      <div
+        className={cn(
+          "sticky z-[5] bg-background",
+          mode === 'modal' ? "top-0" : "top-16"
+        )}
+      >
+        <div className={cn("mx-auto max-w-[88rem] py-3", mode === 'modal' ? "px-4 pr-16 sm:px-6 sm:pr-16" : "px-6")}>
+          <h1 className="text-2xl font-bold">Book a service</h1>
+          <p className="text-sm text-muted-foreground">
+            Register a vehicle or pick an existing one to schedule your concern.
+          </p>
+        </div>
       </div>
 
+      <div className={mode === 'modal' ? 'mx-auto max-w-[88rem] px-4 py-6 sm:px-6' : 'mx-auto max-w-[88rem] px-6 py-8'}>
       <div className="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)] xl:grid-cols-[440px_minmax(0,1fr)]">
         {/* Left Column: Booking Summary */}
         <aside
           className={cn(
             "order-2 lg:order-1 space-y-4 lg:sticky lg:self-start",
-            mode === 'modal' ? "lg:top-4" : "lg:top-24"
+            mode === 'modal' ? "lg:top-24" : "lg:top-40"
           )}
         >
           <div className="rounded-xl border bg-card p-5 shadow-sm">
@@ -811,7 +817,10 @@ export function BookingPage({
               )}
 
               {(otherDiagnostics.length > 0 || notSure) && (
-                <SummaryGroup title="Diagnostics">
+                <SummaryGroup
+                  title="Diagnostics"
+                  showTime={otherDiagnostics.some((s) => s.baseDurationHours != null && s.baseDurationHours > 0)}
+                >
                   {otherDiagnostics.map((s) => (
                     <SummaryServiceRow
                       key={s.id}
@@ -824,8 +833,14 @@ export function BookingPage({
                     <SummaryServiceRow
                       name="Check my car"
                       hours={null}
+                      timeNote={otherDiagnostics.some((s) => s.baseDurationHours != null && s.baseDurationHours > 0) ? "After check" : undefined}
                       onRemove={() => setNotSure(false)}
                     />
+                  )}
+                  {notSure && (
+                    <p className="rounded-md bg-brand-soft/60 px-2 py-1.5 text-[11px] leading-snug text-foreground">
+                      We check your car first, then tell you how long the work takes.
+                    </p>
                   )}
                 </SummaryGroup>
               )}
@@ -1601,6 +1616,7 @@ export function BookingPage({
       {inServicePlate && (
         <VehicleInServiceModal plate={inServicePlate} onClose={() => setInServicePlate(null)} />
       )}
+      </div>
     </div>
   );
 }
@@ -1621,14 +1637,16 @@ function EstimateWarning() {
   );
 }
 
-function SummaryGroup({ title, children }: { title: string; children: React.ReactNode }) {
+function SummaryGroup({ title, showTime = true, children }: { title: string; showTime?: boolean; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5 border-b pb-2.5">
       <div className="flex items-center justify-between gap-2">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
         </p>
-        <span className="pr-5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Est. time</span>
+        {showTime && (
+          <span className="pr-5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Est. time</span>
+        )}
       </div>
       {children}
     </div>
@@ -1638,10 +1656,12 @@ function SummaryGroup({ title, children }: { title: string; children: React.Reac
 function SummaryServiceRow({
   name,
   hours,
+  timeNote,
   onRemove,
 }: {
   name: string;
   hours: number | null;
+  timeNote?: string;
   onRemove: () => void;
 }) {
   return (
@@ -1651,6 +1671,7 @@ function SummaryServiceRow({
         {hours != null && hours > 0 && (
           <span className="text-[11px] text-muted-foreground">{formatDuration(hours)}</span>
         )}
+        {timeNote && <span className="text-[11px] text-muted-foreground">{timeNote}</span>}
         <button
           type="button"
           onClick={onRemove}

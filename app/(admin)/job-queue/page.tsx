@@ -28,11 +28,11 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  ScanLine,
   ShieldCheck,
   Search,
 } from 'lucide-react'
 import { MechanicScheduleModal } from '@/components/admin/MechanicScheduleModal'
+import { RequestedServices } from '@/components/admin/RequestedServices'
 import { DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 import { TopBar } from '@/components/TopBar'
 import { avatarColorClass } from '@/lib/avatarColor'
@@ -142,7 +142,7 @@ export default function page() {
     fetchJobs()
   }, [])
 
-  const [tab, setTab] = useState<Tab>('Tickets')
+  const [tab, setTab] = useState<Tab>('Pending')
   // Independent of tab (status) — a warranty claim can be pending, approved,
   // or cancelled just like any ticket, so this is a separate toggle, not a
   // fifth status tab.
@@ -286,11 +286,11 @@ export default function page() {
   const paginatedJobs = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   const tabs: { label: Tab; count: number; icon: typeof Wrench }[] = [
-    { label: 'Tickets', count: counts.all, icon: Wrench },
     { label: 'Pending', count: counts.pending, icon: ShieldAlert },
     { label: 'Awaiting Arrival', count: counts.awaitingArrival, icon: Store },
     { label: 'Approved', count: counts.approved, icon: Package },
     { label: 'Cancelled', count: counts.cancelled, icon: XCircle },
+    { label: 'Tickets', count: counts.all, icon: Wrench },
   ]
   const warrantyClaimCount = jobs.filter((j) => j.isWarrantyClaim).length
 
@@ -530,7 +530,7 @@ export default function page() {
               }`}
           >
             <Icon size={14} />
-            {label}
+            {label === 'Tickets' ? 'All Tickets' : label}
             <span
               className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs ${tab === label ? 'bg-white/20 text-brand-foreground' : 'bg-accent text-muted-foreground'
                 }`}
@@ -815,14 +815,6 @@ export default function page() {
                       <Wrench size={12} className="shrink-0 text-muted-foreground" />
                       {c.servicesNeeded.map(getServiceLabel).join(', ')}
                     </span>
-                    {c.diagnosticScanAuthorized && (
-                      <span
-                        title={`Customer agreed to the PHP ${DIAGNOSTIC_SCAN_FEE.toLocaleString()} OBD-II scan fee at booking`}
-                        className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800"
-                      >
-                        <ScanLine size={11} /> OBD-II scan authorized
-                      </span>
-                    )}
                     {c.isWarrantyClaim && (
                       <span
                         title="Started from a customer's warranty claim, not a fresh booking"
@@ -1096,9 +1088,11 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
               {job.vehicle} — {job.plate}
             </dd>
           </div>
-          <div className="flex justify-between gap-4">
+          <div>
             <dt className="text-muted-foreground">Services</dt>
-            <dd className="text-right font-medium text-foreground">{job.servicesNeeded.join(', ')}</dd>
+            <dd className="mt-1 max-h-48 overflow-y-auto text-foreground">
+              <RequestedServices raw={job.servicesNeeded.join('\n')} />
+            </dd>
           </div>
           {job.preferredDate && (
             <div className="flex justify-between gap-4">
@@ -1184,7 +1178,7 @@ function ViewModal({ job, mechanics, onClose, onCheckIn }: { job: Job; mechanics
         : '')
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-xl bg-background p-6 shadow-2xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-background p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -1256,13 +1250,11 @@ function ViewModal({ job, mechanics, onClose, onCheckIn }: { job: Job; mechanics
                 </dt>
                 <dd className="font-medium text-foreground">{job.serviceMode}</dd>
               </div>
-              <div className="flex justify-between gap-4">
-                <dt className="flex items-center gap-1.5 text-muted-foreground">
-                  <Wrench size={12} /> Service(s) Requested
-                </dt>
-                <dd className="text-right font-medium text-foreground">{job.servicesNeeded.join(', ')}</dd>
-              </div>
             </dl>
+            <p className="mt-4 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <Wrench size={12} /> Service(s) Requested
+            </p>
+            <RequestedServices raw={job.servicesNeeded.join('\n')} />
           </section>
 
           <section>
@@ -1279,7 +1271,7 @@ function ViewModal({ job, mechanics, onClose, onCheckIn }: { job: Job; mechanics
               {job.preferredDate && (
                 <div className="flex justify-between gap-4">
                   <dt className="flex items-center gap-1.5 text-muted-foreground">
-                    <Calendar size={12} /> Customer's Preferred Date
+                    <Calendar size={12} /> Customer's Shop Visit
                   </dt>
                   <dd className="font-medium text-foreground">{job.preferredDate}</dd>
                 </div>
