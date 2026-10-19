@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
 import { getJobOrderBill } from '@/lib/jobOrderBill'
+import { getServiceModeValue } from '@/lib/jobOrderMode'
 
 import { effectiveWarrantyStatus } from '@/lib/warranty'
 
@@ -41,6 +42,8 @@ export async function GET(request: NextRequest) {
     // get_job_order_by_id() doesn't return the two hand-over timestamps.
     const stamps = await db.query(`SELECT completed_at::text, released_at::text FROM job_orders WHERE id = $1`, [jobOrder.job_order_id])
     jobOrder = { ...jobOrder, ...stamps.rows[0] }
+
+    if (jobOrder) jobOrder.service_mode = await getServiceModeValue(jobOrder.job_order_id)
 
     const [logsRes, warrantiesRes, servicesRes, partsRes, bill, voucherRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_repair_logs($1)`, [jobOrder.job_order_id]),

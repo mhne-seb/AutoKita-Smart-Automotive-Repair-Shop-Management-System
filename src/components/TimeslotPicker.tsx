@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { AlertCircle } from 'lucide-react'
-import { BOOKING_TIMES } from '@/lib/bookingSlotsShared'
+import { BOOKING_TIMES, formatSlotRange } from '@/lib/bookingSlotsShared'
 
 function startOfToday() {
   const d = new Date()
@@ -58,11 +58,9 @@ function isOccupiedSlot(date: Date, time: string, occupiedByDate: Record<string,
   const occupiedTimes = occupiedByDate[dateKey] || []
   if (occupiedTimes.length === 0) return false
 
-  const normalizedTarget = normalizeTimeSlot(time)
-  if (occupiedTimes.map(normalizeTimeSlot).includes(normalizedTarget)) {
-    return true
-  }
-  return false
+  // One booking per one-hour window: a booking saved at 9:30 also fills the 9 - 10 window.
+  const slotHour = parseTime(time).h
+  return occupiedTimes.some((t) => parseTime(normalizeTimeSlot(t)).h === slotHour)
 }
 
 function formatDayLabel(d: Date) {
@@ -266,7 +264,7 @@ export function TimeslotPicker({
                   : 'hover:border-brand hover:bg-brand-soft cursor-pointer hover:-translate-y-0.5 active:translate-y-0'
               }`}
             >
-              <span className={occupied ? 'line-through opacity-75' : ''}>{t}</span>
+              <span className={occupied ? 'line-through opacity-75' : ''}>{formatSlotRange(t)}</span>
               {occupied && (
                 <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400">
                   Booked

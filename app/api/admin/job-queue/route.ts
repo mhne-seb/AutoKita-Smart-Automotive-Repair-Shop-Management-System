@@ -4,15 +4,7 @@ import { db } from '@/lib/db'
 import { signFileUrls } from '@/lib/storage'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
 import { STAFF_ACCESS_SQL } from '@/lib/staffAccess'
-import { syncBookedServicesToJobOrder, getServicesForTicket } from '@/lib/syncBookedServices'
-import {
-  findEarliestSlotForMechanic,
-  formatNaiveIso,
-  normalizeShopHours,
-  parseNaiveTimestamp,
-  type Interval,
-} from '@/lib/autoSchedule'
-import { TASK_GAP_MINUTES } from '@/data/shopPolicy'
+import { syncBookedServicesToJobOrder } from '@/lib/syncBookedServices'
 
 export async function GET(req: NextRequest) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
@@ -46,7 +38,6 @@ export async function GET(req: NextRequest) {
                 AND c.user_id IS NOT NULL
           ) AS diagnostic_scan_authorized,
           la.last_activity,
-          COALESCE(st.assigned_mechanic_id, jo.assigned_mechanic_id) as mechanic_id,
           wc.id IS NOT NULL AS is_warranty_claim,
           jo.id as job_order_id,
           jo.date_arrived,
@@ -73,14 +64,9 @@ export async function GET(req: NextRequest) {
       result.rows[i].avatar_url = signedAvatars[i]
     }
 
-    const mechanicsQuery = `SELECT id, full_name, email, status FROM employees WHERE role = 'mechanic' AND status = 'active' ORDER BY full_name ASC`
-    const mechanicsResult = await db.query(mechanicsQuery)
-    const mechanics = mechanicsResult.rows
-
     return NextResponse.json({
       success: true,
       tickets: result.rows,
-      mechanics
     })
   } catch (err: any) {
     console.error('Job queue GET error:', err)
@@ -96,7 +82,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const { action, ticketId, mechanicId, holdReason } = body
+    const { action, ticketId, holdReason, reason } = body
 
     if (!action) {
       return NextResponse.json({ success: false, message: 'Missing action parameter' }, { status: 400 })
@@ -190,32 +176,8 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ success: false, message: 'This ticket can no longer be changed.' }, { status: 409 })
         }
 
-        if (mechanicId) {
-          const mechCheck = await client.query(
-            `SELECT full_name, status FROM employees WHERE id = $1 AND role = 'mechanic'`,
-            [mechanicId]
-          )
-          if (mechCheck.rows.length === 0 || mechCheck.rows[0].status !== 'active') {
-            await client.query('ROLLBACK')
-            const status = mechCheck.rows[0]?.status
-            const reason = status === 'on_leave' ? 'is currently on leave and cannot be assigned.' : 'is no longer active and cannot be assigned.'
-            return NextResponse.json({
-              success: false,
-              code: 'MECHANIC_UNAVAILABLE',
-              message: `${mechCheck.rows[0]?.full_name || 'This mechanic'} ${reason}`
-            }, { status: 400 })
-          }
-        }
-
-        const joResult = await client.query(`SELECT * FROM create_job_order_from_ticket($1, $2)`, [ticketId, mechanicId || null])
+        const joResult = await client.query(`SELECT * FROM create_job_order_from_ticket($1, $2)`, [ticketId, null])
         const newJo = joResult.rows[0]
-
-        let mechanicName = 'Unassigned'
-        if (mechanicId && newJo) {
-          await client.query(`SELECT assign_mechanic_to_job_order($1, $2)`, [newJo.id, mechanicId])
-          const mRes = await client.query(`SELECT full_name FROM employees WHERE id = $1`, [mechanicId])
-          if (mRes.rows.length > 0) mechanicName = mRes.rows[0].full_name
-        }
 
         // Record ticket acceptance in system_audit_logs. It is part of the
         // transaction: an approval without its audit row is not allowed.
@@ -237,10 +199,8 @@ export async function POST(req: NextRequest) {
               ticket_status: 'approved',
               accepted_by_employee_id: actingEmpId,
               accepted_by: employeeName,
-              assigned_mechanic_id: mechanicId || null,
-              assigned_mechanic: mechanicName,
               job_order_id: newJo?.id || null,
-              description: `Ticket #${ticketId} accepted by ${employeeName} and assigned to ${mechanicName}`
+              description: `Ticket #${ticketId} accepted by ${employeeName}`
             })
           ]
         )
@@ -262,12 +222,12 @@ export async function POST(req: NextRequest) {
             const fee = await client.query(
               `INSERT INTO job_order_services
                  (job_order_id, service_id, assigned_mechanic_id, description_of_work, estimated_hours, estimated_amount, actual_amount)
-               SELECT $1, s.id, $2, $3, s.base_duration_hours, s.base_price, s.base_price
+               SELECT $1, s.id, NULL, $2, s.base_duration_hours, s.base_price, s.base_price
                FROM services s
-               WHERE s.service_name = $4 AND s.is_active
+               WHERE s.service_name = $3 AND s.is_active
                LIMIT 1
                RETURNING id`,
-              [newJo.id, mechanicId || null, 'OBD-II diagnostic scan — authorized by customer at booking. Payable even if repairs are declined.', DIAGNOSTIC_SCAN_SERVICE_NAME],
+              [newJo.id, 'OBD-II diagnostic scan — authorized by customer at booking. Payable even if repairs are declined.', DIAGNOSTIC_SCAN_SERVICE_NAME],
             )
             // The customer agreed to this fee. If the service row is missing
             // or switched off, stop instead of silently dropping the charge.
@@ -282,116 +242,6 @@ export async function POST(req: NextRequest) {
 
           // Populate the job order with all services requested by the customer at booking
           await syncBookedServicesToJobOrder(newJo.id, ticketId, client)
-
-          // Auto-schedule booked services into service_progress_tasks for the assigned mechanic
-          if (mechanicId) {
-            const bookedServices = await getServicesForTicket(ticketId, client)
-            if (bookedServices.length > 0) {
-              const shopHours = normalizeShopHours(null)
-
-              // Determine start time (adjusted start time from modal or ticket preferred datetime)
-              let startMs: number
-              if (body.adjustedStartTime) {
-                const parsed = parseNaiveTimestamp(String(body.adjustedStartTime))
-                startMs = !isNaN(parsed) ? parsed : Date.now()
-              } else {
-                const tRes = await client.query(`SELECT preferred_datetime::text AS preferred_datetime FROM service_tickets WHERE id = $1`, [ticketId])
-                const pDt = tRes.rows[0]?.preferred_datetime
-                if (pDt) {
-                  const parsed = parseNaiveTimestamp(String(pDt))
-                  startMs = !isNaN(parsed) ? parsed : Date.now()
-                } else {
-                  startMs = Date.now()
-                }
-              }
-
-              // Load mechanic's existing busy intervals from service_progress_tasks
-              const busyRes = await client.query(
-                `SELECT 
-                   COALESCE(spt.scheduled_date, spt.started_at)::text AS scheduled_date,
-                   COALESCE(
-                     spt.estimated_finish,
-                     spt.scheduled_date + (COALESCE(jos.estimated_hours, 1.5) * INTERVAL '1 hour')
-                   )::text AS estimated_finish
-                 FROM service_progress_tasks spt
-                 JOIN job_orders jo ON jo.id = spt.job_order_id
-                 LEFT JOIN LATERAL (
-                   SELECT jos.estimated_hours
-                   FROM services s
-                   JOIN job_order_services jos ON jos.service_id = s.id AND jos.job_order_id = spt.job_order_id
-                   WHERE s.service_name = spt.task_title
-                   LIMIT 1
-                 ) jos ON true
-                 WHERE spt.task_status <> 'cancelled'
-                   AND jo.status NOT IN ('completed', 'released', 'cancelled')
-                   AND COALESCE(spt.mechanic_id, jo.assigned_mechanic_id) = $1
-                   AND (spt.scheduled_date IS NOT NULL OR spt.started_at IS NOT NULL)
-                   AND COALESCE(spt.scheduled_date, spt.started_at) >= (NOW() - INTERVAL '2 days')
-                 ORDER BY scheduled_date ASC`,
-                [mechanicId]
-              )
-
-              const mechBusy: Interval[] = []
-              for (const row of busyRes.rows) {
-                const s = parseNaiveTimestamp(String(row.scheduled_date))
-                const finishDateStr = String(row.estimated_finish || row.scheduled_date)
-                const e = parseNaiveTimestamp(finishDateStr)
-                if (!isNaN(s) && !isNaN(e) && e > s) {
-                  mechBusy.push({ start: s, end: e })
-                }
-              }
-
-              let cursorMs = startMs
-              let finalTaskEndMs = cursorMs
-
-              for (const svc of bookedServices) {
-                const hours = Number(svc.base_duration_hours) || 1
-                const slot = findEarliestSlotForMechanic(cursorMs, hours, mechBusy, [], shopHours)
-                if (slot) {
-                  const taskStartIso = formatNaiveIso(slot.start)
-                  const taskEndIso = formatNaiveIso(slot.end)
-
-                  await client.query(
-                    `INSERT INTO service_progress_tasks (
-                       job_order_id,
-                       section_id,
-                       task_title,
-                       note,
-                       task_status,
-                       price,
-                       billable,
-                       mechanic_id,
-                       scheduled_date,
-                       estimated_finish
-                     ) VALUES ($1, 'in_progress', $2, $3, 'pending', $4, true, $5, $6, $7)`,
-                    [
-                      newJo.id,
-                      svc.service_name,
-                      'Requested by customer at booking.',
-                      Number(svc.base_price) || 0,
-                      mechanicId,
-                      taskStartIso,
-                      taskEndIso,
-                    ]
-                  )
-
-                  mechBusy.push({ start: slot.start, end: slot.end })
-                  cursorMs = slot.end + TASK_GAP_MINUTES * 60 * 1000
-                  finalTaskEndMs = slot.end
-                }
-              }
-
-              // Update date_promised on the job order to the final scheduled task's estimated finish
-              if (finalTaskEndMs > startMs) {
-                const datePromisedIso = formatNaiveIso(finalTaskEndMs)
-                await client.query(
-                  `UPDATE job_orders SET date_promised = $1 WHERE id = $2`,
-                  [datePromisedIso, newJo.id]
-                )
-                newJo.date_promised = datePromisedIso
-              }
-            }
-          }
         }
 
         const checkInNow = Boolean(body.checkInNow)
@@ -475,6 +325,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, jobOrder: updateRes.rows[0] })
     }
     else if (action === 'reject') {
+      const cancelReason = typeof reason === 'string' ? reason.trim() : ''
+      if (!cancelReason) {
+        return NextResponse.json({ success: false, message: 'Enter a reason for the cancellation.' }, { status: 400 })
+      }
+      if (cancelReason.length > 500) {
+        return NextResponse.json({ success: false, message: 'The reason is too long. Keep it under 500 characters.' }, { status: 400 })
+      }
+
       const rejectQuery = `SELECT update_ticket_status($1, 'declined')`
       await db.query(rejectQuery, [ticketId])
 
@@ -496,7 +354,8 @@ export async function POST(req: NextRequest) {
             JSON.stringify({
               ticket_status: 'declined',
               rejected_by_employee_id: actingEmpId,
-              rejected_by: employeeName
+              rejected_by: employeeName,
+              cancellation_reason: cancelReason,
             })
           ]
         )

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { FileText, ChevronRight, Loader2, Camera, AlertCircle, Check, ScanLine, Store } from "lucide-react";
+import { FileText, ChevronRight, Loader2, Camera, AlertCircle, Check, ScanLine, Store, Home } from "lucide-react";
 import { toast } from "sonner";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { Lightbox } from "@/components/Lightbox";
@@ -11,6 +11,7 @@ import { getInspectingData, respondToInspection, cancelJobOrder } from "@/contro
 import { ShopLoading } from "@/components/ShopLoading";
 import { formatStamp } from "@/lib/utils";
 import { ScanAuthorizationCard } from "@/components/dashboard/ScanAuthorizationCard";
+import { serviceModeFromDb } from "@/lib/serviceMode";
 
 function toneClass(status: string | null) {
   if (!status) return "bg-muted text-muted-foreground";
@@ -18,6 +19,15 @@ function toneClass(status: string | null) {
   if (s.includes("urgent") || s.includes("replace")) return "bg-destructive text-white";
   if (s.includes("attention") || s.includes("monitor")) return "bg-warning/20 text-[color:oklch(0.55_0.15_50)]";
   return "bg-success/15 text-[color:oklch(0.5_0.16_145)]";
+}
+
+// The database stores 'ok' / 'needs_attention' / 'urgent'; customers see plain labels.
+function findingLabel(status: string | null) {
+  const s = (status ?? "").toLowerCase().replace(/[\s-]+/g, "_");
+  if (s === "ok") return "Good Condition";
+  if (s === "needs_attention") return "Needs Attention";
+  if (s === "urgent" || s.includes("replace")) return "Replacement Required";
+  return status ?? "";
 }
 
 function Inspecting() {
@@ -152,24 +162,34 @@ function Inspecting() {
   }
 
   if (!jobOrder.date_arrived) {
+    const isHome = serviceModeFromDb(jobOrder.service_mode) === 'home';
     return (
       <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-        <StageStepper active={stageForStatus(jobOrder.status, jobOrder.date_arrived)} viewing="inspecting" jobOrderId={jobOrder.job_order_id} />
+        <StageStepper
+          active={stageForStatus(jobOrder.status, jobOrder.date_arrived)}
+          viewing="inspecting"
+          jobOrderId={jobOrder.job_order_id}
+          serviceMode={serviceModeFromDb(jobOrder.service_mode)}
+        />
         <div className="rounded-2xl border-2 border-amber-200 bg-amber-50/70 p-8 text-center shadow-xs">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-600 text-white shadow-sm mb-4">
-            <Store className="h-6 w-6" />
+            {isHome ? <Home className="h-6 w-6" /> : <Store className="h-6 w-6" />}
           </div>
-          <h2 className="text-2xl font-bold text-amber-950">Awaiting Vehicle Drop-off</h2>
+          <h2 className="text-2xl font-bold text-amber-950">
+            {isHome ? "Awaiting Mechanic Arrival" : "Awaiting Vehicle Drop-off"}
+          </h2>
           <p className="mt-2 text-sm text-amber-900/80 max-w-lg mx-auto">
-            Your booking has been approved, but your vehicle has not been stored in the shop yet. The inspection stage will begin once your vehicle is dropped off and marked as checked in by our shop staff.
+            {isHome
+              ? "Your booking has been approved. The inspection starts once our mechanic arrives at your address and our shop staff marks the visit as started."
+              : "Your booking has been approved, but your vehicle has not been stored in the shop yet. The inspection stage will begin once your vehicle is dropped off and marked as checked in by our shop staff."}
           </p>
           <div className="mt-6">
             <Link
               href={`/dashboard/tracking/received?jobOrderId=${jobOrder.job_order_id}`}
               className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition-all"
             >
-              <Store className="h-4 w-4" />
-              View Drop-off & Check-In Details
+              {isHome ? <Home className="h-4 w-4" /> : <Store className="h-4 w-4" />}
+              {isHome ? "View Arrival Details" : "View Drop-off & Check-In Details"}
             </Link>
           </div>
         </div>
@@ -179,7 +199,12 @@ function Inspecting() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active={stageForStatus(jobOrder.status, jobOrder.date_arrived)} viewing="inspecting" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper
+        active={stageForStatus(jobOrder.status, jobOrder.date_arrived)}
+        viewing="inspecting"
+        jobOrderId={jobOrder.job_order_id}
+        serviceMode={serviceModeFromDb(jobOrder.service_mode)}
+      />
 
       {scanAuthorization?.decision === "pending" && !isHistorical && (
         <ScanAuthorizationCard
@@ -410,7 +435,7 @@ function Inspecting() {
                     </div>
                     {f.status && (
                       <span className={`shrink-0 rounded-md px-2.5 py-1 text-[11px] font-semibold ${toneClass(f.status)}`}>
-                        {f.status}
+                        {findingLabel(f.status)}
                       </span>
                     )}
                   </div>

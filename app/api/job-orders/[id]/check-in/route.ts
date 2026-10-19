@@ -44,13 +44,22 @@ export async function POST(
 
     const jo = existing.rows[0]
 
+    // Home service: the mechanic goes to the customer, so nothing is "stored in the shop".
+    const modeRes = await db.query(
+      `SELECT st.service_mode::text AS service_mode
+       FROM job_orders jo LEFT JOIN service_tickets st ON st.id = jo.ticket_id
+       WHERE jo.id = $1`,
+      [jobOrderId],
+    )
+    const isHome = modeRes.rows[0]?.service_mode === 'home_service'
+
     // 2. If already checked in, return current info
     if (jo.date_arrived) {
       return NextResponse.json({
         success: true,
         alreadyCheckedIn: true,
         date_arrived: jo.date_arrived,
-        message: 'Vehicle is already checked in.',
+        message: isHome ? 'The home visit has already started.' : 'Vehicle is already checked in.',
       })
     }
 
@@ -106,7 +115,9 @@ export async function POST(
           JSON.stringify({
             date_arrived: updated.date_arrived,
             checked_in_by: employeeName,
-            description: `Vehicle arrived and physically stored in the shop by ${employeeName}. Inspection unlocked.`
+            description: isHome
+              ? `Home visit started by ${employeeName}. The mechanic arrived at the customer's address. Inspection unlocked.`
+              : `Vehicle arrived and physically stored in the shop by ${employeeName}. Inspection unlocked.`
           })
         ]
       )
@@ -116,7 +127,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: 'Vehicle marked as arrived and stored in the shop.',
+      message: isHome ? 'Home visit started.' : 'Vehicle marked as arrived and stored in the shop.',
       jobOrder: updated,
     })
   } catch (error) {

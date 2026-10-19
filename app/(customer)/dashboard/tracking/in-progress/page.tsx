@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { getInProgressData } from "@/controllers/serviceProgressController";
+import { serviceModeFromDb } from "@/lib/serviceMode";
 import { Lightbox } from "@/components/Lightbox";
 import { isRoadTest } from "@/data/roadTest";
 import type { ServiceFinding } from "@/data/types";
@@ -29,6 +30,7 @@ import { ShopLoading } from "@/components/ShopLoading";
 import type { PullOutRequest } from "@/data/types";
 import { toast } from "sonner";
 import { formatStamp } from "@/lib/utils";
+import { formatHours } from "@/lib/formatHours";
 
 // A part one of the services is waiting on. Only "still to order" vs "here"
 // matters to the shop (no inventory system), so that's all we show.
@@ -39,6 +41,8 @@ type Part = {
   description: string;
   quantity: number;
   status: string;
+  labor_hours?: number | null;
+  estimated_delivery_date?: string | null;
 };
 const partIsReady = (p: Part) => p.status !== "to_order" && p.status !== "ordered" && p.status !== "in_transit";
 
@@ -79,6 +83,7 @@ type JobOrder = {
   downpayment_received_at?: string;
   released_at?: string;
   release_photo_url?: string;
+  service_mode?: string | null;
 };
 
 type TimelineEntry = {
@@ -154,6 +159,21 @@ function InProgress() {
   // Parts still to be ordered, grouped by the service (task title) they belong to.
   const missingPartsFor = (taskTitle: string) => parts.filter((p) => p.service_name === taskTitle && !partIsReady(p));
   const partsFor = (taskTitle: string) => parts.filter((p) => p.service_name === taskTitle);
+  const fmtEta = (d: string) => new Date(`${d.slice(0, 10)}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const latestEta = (list: Part[]) => list.map((p) => p.estimated_delivery_date).filter((d): d is string => Boolean(d)).sort().pop();
+  // Estimated finish: the scheduled finish, or later if a part is still on its way
+  // (it arrives 8:00 AM on its date, then the service still needs its own hours).
+  const estimatedFinishDate = (() => {
+    let latest: Date | null = null;
+    const sched = data?.timing?.estimated_finish ? new Date(String(data.timing.estimated_finish).replace(" ", "T")) : null;
+    if (sched && !isNaN(sched.getTime())) latest = sched;
+    for (const p of parts) {
+      if (partIsReady(p) || !p.estimated_delivery_date) continue;
+      const d = new Date(new Date(`${p.estimated_delivery_date.slice(0, 10)}T08:00:00`).getTime() + (Number(p.labor_hours) || 1) * 3600000);
+      if (!isNaN(d.getTime()) && (!latest || d > latest)) latest = d;
+    }
+    return latest;
+  })();
   const jobOrder = data?.jobOrder ?? null;
 
   // Locked once the job order has moved past active servicing — the
@@ -201,12 +221,16 @@ function InProgress() {
       )
     : 0;
 
+  const isHome = serviceModeFromDb(jobOrder?.service_mode) === 'home';
+
   const timeline: TimelineEntry[] = jobOrder
     ? [
         {
           key: "received",
-          label: "Vehicle Received",
-          detail: `${jobOrder.vehicle_year} ${jobOrder.vehicle_model} checked in at the shop.`,
+          label: isHome ? "Mechanic Arrived" : "Vehicle Received",
+          detail: isHome
+            ? `The mechanic arrived at your address for the ${jobOrder.vehicle_year} ${jobOrder.vehicle_model}.`
+            : `${jobOrder.vehicle_year} ${jobOrder.vehicle_model} checked in at the shop.`,
           time: fmtWhen(jobOrder.date_arrived),
           status: "completed",
         },
@@ -253,7 +277,7 @@ function InProgress() {
             time: t.completed_at
               ? `Finished ${fmtWhen(t.completed_at)}`
               : missing.length > 0
-              ? `Waiting for parts (${all.length - missing.length} of ${all.length} received)`
+              ? `Waiting for parts (${all.length - missing.length} of ${all.length} received)${latestEta(missing) ? ` · Estimated Time of Arrival on Shop: ${fmtEta(latestEta(missing)!)}` : ""}`
               : t.scheduled_date
               ? `Scheduled ${fmtWhen(t.scheduled_date)}`
               : null,
@@ -289,7 +313,12 @@ function InProgress() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active={stageForStatus(jobOrder.status)} viewing="in-progress" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper
+        active={stageForStatus(jobOrder.status)}
+        viewing="in-progress"
+        jobOrderId={jobOrder.job_order_id}
+        serviceMode={serviceModeFromDb(jobOrder.service_mode)}
+      />
 
       {isHistorical && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
@@ -479,14 +508,14 @@ function InProgress() {
                 <b>
                   {/* Latest (scheduled start + quoted hours) across the tasks —
                       the same number the shop's own panel shows. */}
-                  {fmtWhen(data?.timing?.estimated_finish) ?? 'Not scheduled'}
+                  {estimatedFinishDate ? formatStamp(estimatedFinishDate) : 'Not scheduled'}
                 </b>
               </div>
             </div>
             <div className="mt-4 border-t border-white/20 pt-3 text-xs">
               <div className="flex items-center justify-between">
                 <span>Labor Hours (Est.)</span>
-                <b>{Math.round(Number(data?.timing?.labor_hours_estimate ?? 0) * 10) / 10} hrs</b>
+                <b>{formatHours(data?.timing?.labor_hours_estimate ?? 0)}</b>
               </div>
               <div className="mt-1 flex items-center justify-between">
                 <span>Time in Shop</span>
@@ -496,7 +525,7 @@ function InProgress() {
                     const start = data?.timing?.started_at;
                     if (!start) return '—';
                     const end = data?.timing?.completed_at ? new Date(data.timing.completed_at).getTime() : Date.now();
-                    return `${Math.max(0, Math.round(((end - new Date(start).getTime()) / 36e5) * 10) / 10)} hrs`;
+                    return formatHours(Math.max(0, (end - new Date(start).getTime()) / 36e5));
                   })()}
                 </b>
               </div>
@@ -518,15 +547,6 @@ function InProgress() {
               <p className="mt-2 text-xs text-muted-foreground">Updates as work is added. You'll settle this once the service is completed.</p>
             </div>
           )}
-
-          <div className="rounded-xl border bg-card p-4">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Wrench className="h-4 w-4 text-teal" /> Assigned Team
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Your vehicle is being serviced by a certified AutoKita technician.
-            </p>
-          </div>
 
           <div className="rounded-xl border bg-card p-4">
             <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">

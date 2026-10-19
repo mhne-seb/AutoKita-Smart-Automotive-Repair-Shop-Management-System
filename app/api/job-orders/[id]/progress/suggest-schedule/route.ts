@@ -64,7 +64,7 @@ export async function GET(
       )
     }
 
-    // 2. Load tasks to schedule: section in_progress, pending, not road test/scan
+    // 2. Load tasks to schedule: section in_progress, pending, unscheduled/unassigned, not road test/scan
     const tasksResult = await db.query(
       `SELECT 
          spt.id,
@@ -82,6 +82,7 @@ export async function GET(
        WHERE spt.job_order_id = $1
          AND spt.section_id = 'in_progress'
          AND spt.task_status = 'pending'
+         AND (spt.scheduled_date IS NULL OR spt.mechanic_id IS NULL)
          AND spt.task_title != $3
          AND spt.task_title != $4
        ORDER BY spt.id ASC`,
@@ -257,13 +258,6 @@ export async function GET(
            AND (spt.scheduled_date IS NULL OR spt.mechanic_id IS NULL)
            AND spt.task_title != $3
            AND spt.task_title != $4
-           AND NOT EXISTS (
-             SELECT 1 FROM job_order_parts jp
-             JOIN job_order_services jos2 ON jos2.id = jp.job_order_service_id
-             JOIN services s2 ON s2.id = jos2.service_id
-             WHERE jp.job_order_id = jo.id AND s2.service_name = spt.task_title
-               AND jp.status::text IN ('to_order', 'ordered', 'in_transit')
-           )
          ORDER BY jo.date_arrived::text ASC
          LIMIT 5`,
         [
@@ -293,6 +287,22 @@ export async function GET(
         ? Number(jobOrder.assigned_mechanic_id)
         : null,
     })
+
+    // A promised date saved before any service is scheduled is only the estimate the quotation showed the
+    // customer. The first schedule the admin saves replaces it; after that the promise is kept.
+    const scheduledRes = await db.query(
+      `SELECT EXISTS (
+         SELECT 1 FROM service_progress_tasks spt
+         WHERE spt.job_order_id = $1
+           AND spt.section_id = 'in_progress'
+           AND spt.scheduled_date IS NOT NULL
+           AND spt.task_status <> 'cancelled'
+           AND spt.task_title != $2
+           AND spt.task_title != $3
+       ) AS has_scheduled`,
+      [jobOrderId, ROAD_TEST_TITLE, DIAGNOSTIC_SCAN_SERVICE_NAME],
+    )
+    const hasScheduledTasks = Boolean(scheduledRes.rows[0]?.has_scheduled)
 
     const planning = {
       nowIso: formatNaiveIso(now),
@@ -326,7 +336,8 @@ export async function GET(
       success: true,
       suggestions,
       promisedDate,
-      alreadyPromised: jobOrder.date_promised || null,
+      alreadyPromised: hasScheduledTasks ? jobOrder.date_promised || null : null,
+      hasScheduledTasks,
       earlier,
       nothingToSchedule: tasks.length === 0,
       planning,

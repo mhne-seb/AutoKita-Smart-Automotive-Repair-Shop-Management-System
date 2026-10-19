@@ -81,7 +81,7 @@ When the customer asks about any automotive repair or maintenance service, prici
 🔧 **[Exact Service Name]**
 
 - **Estimated Labor Range**: ₱[Min] – ₱[Max]
-- **Estimated Duration**: [Time Range based on data, e.g. 45 mins / 1 – 1.5 hours / 2 – 3 hours]
+- **Estimated Duration**: [Time Range based on data, written in hours and minutes with no decimals, e.g. 45 mins / 1 hour – 1 h 30 min / 2 – 3 hours]
 - **Scope**: [1 concise sentence on the procedure performed]
 - **Parts / Fluids**: [Quoted separately based on vehicle make, model, engine displacement, and oil/part grade]
 - **Next Step**: Go to **Book Appointment** on AutoKita to reserve your service slot.

@@ -134,7 +134,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // 2. Fetch existing services and parts for this job order so we can update in-place
     //    and preserve primary keys rather than churning IDs on every save.
     const existingServicesRes = await client!.query(
-      `SELECT id, service_id FROM job_order_services WHERE job_order_id = $1::int`,
+      `SELECT jos.id, jos.service_id, s.service_name
+         FROM job_order_services jos
+         LEFT JOIN services s ON s.id = jos.service_id
+        WHERE jos.job_order_id = $1::int`,
       [id],
     )
     const existingServicesMap = new Map<number, any>(existingServicesRes.rows.map((r) => [r.id, r]))
@@ -183,6 +186,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             : typeof s.id === 'number'
             ? s.id
             : null
+
+        // The OBD-II scan fee is added only when the customer agrees to it (at booking or mid-inspection).
+        // A save may update the line that is already there, but never adds one: an old tab or a quick
+        // auto-save could otherwise bring back a fee that staff just removed.
+        const isScanFee = String(s.name ?? '').trim().toLowerCase() === DIAGNOSTIC_SCAN_SERVICE_NAME.toLowerCase()
+        if (isScanFee && !(parsedId && existingServicesMap.has(parsedId))) continue
 
         let jobOrderServiceId: number
         if (parsedId && existingServicesMap.has(parsedId)) {
@@ -268,7 +277,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       await client!.query(`DELETE FROM job_order_parts WHERE id = ANY($1::int[])`, [partsToDelete])
     }
 
-    const servicesToDelete = [...existingServicesMap.keys()].filter((srvId) => !retainedServiceIds.has(srvId))
+    // The OBD-II scan fee is never deleted by a normal save. Staff remove it with
+    // DELETE /api/job-orders/[id]/scan-authorization, which checks the rules and tells the customer.
+    const servicesToDelete = [...existingServicesMap.keys()].filter(
+      (srvId) =>
+        !retainedServiceIds.has(srvId) &&
+        existingServicesMap.get(srvId)?.service_name !== DIAGNOSTIC_SCAN_SERVICE_NAME,
+    )
     if (servicesToDelete.length > 0) {
       await client!.query(`DELETE FROM job_order_parts WHERE job_order_service_id = ANY($1::int[])`, [servicesToDelete])
       await client!.query(`DELETE FROM job_order_services WHERE id = ANY($1::int[])`, [servicesToDelete])

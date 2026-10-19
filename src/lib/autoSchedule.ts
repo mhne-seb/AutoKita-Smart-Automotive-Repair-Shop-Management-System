@@ -387,30 +387,6 @@ export function suggestSchedule(input: {
   const tasksToProcess = input.tasks
 
   for (const task of tasksToProcess) {
-    // If blocked by a part, do not schedule
-    if (task.blockedBy) {
-      let reason = `Waiting for a part: ${task.blockedBy}.`
-      if (task.partExpected) {
-        const expectedMs = parseNaiveTimestamp(task.partExpected)
-        if (!Number.isNaN(expectedMs)) {
-          const expDate = new Date(expectedMs)
-          const monD = expDate.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            timeZone: 'UTC',
-          })
-          reason += ` Expected ${monD}.`
-        }
-      }
-      suggestions.push({
-        taskId: task.id,
-        title: task.title,
-        ok: false,
-        reason,
-      })
-      continue
-    }
-
     if (mechanics.length === 0) {
       suggestions.push({
         taskId: task.id,
@@ -543,29 +519,6 @@ export function layoutJob(input: {
   const placements: Placement[] = []
 
   for (const task of input.tasks) {
-    // 1. blockedBy is set
-    if (task.blockedBy) {
-      let reason = `Waiting for a part: ${task.blockedBy}.`
-      if (task.partExpected) {
-        const expectedMs = parseNaiveTimestamp(task.partExpected)
-        if (!Number.isNaN(expectedMs)) {
-          const expDate = new Date(expectedMs)
-          const monD = expDate.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            timeZone: 'UTC',
-          })
-          reason += ` Expected ${monD}.`
-        }
-      }
-      placements.push({
-        taskId: task.id,
-        title: task.title,
-        ok: false,
-        reason,
-      })
-      continue
-    }
 
     // 2. No mechanic chosen, or chosen id not in mechanics
     const chosenMechId = input.assignments[task.id]

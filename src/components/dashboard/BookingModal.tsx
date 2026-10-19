@@ -61,7 +61,7 @@ export function BookingModal({
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="-mt-12">
+        <div className="-mt-14">
           <BookingPage
             mode="modal"
             initialVehicleId={initialVehicleId}

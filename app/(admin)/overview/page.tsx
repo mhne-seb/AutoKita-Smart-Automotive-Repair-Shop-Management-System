@@ -10,6 +10,8 @@ import {
   Users,
   Wallet,
   ChevronRight,
+  Home,
+  Store,
 } from 'lucide-react'
 import { ShopLoading } from '@/components/ShopLoading'
 import {
@@ -32,6 +34,8 @@ import { getDisplayProfile } from '@/controllers/authController'
 import { JobOrderCard } from '@/data/types'
 import { getRevenueTrend, getServiceMix } from '@/controllers/reportController'
 import { currency, type RevenuePoint, type ServiceMixSlice } from '@/data/mockData'
+import { arrivalWording } from '@/lib/serviceMode'
+import { formatVisitRange } from '@/lib/bookingSlotsShared'
 const heroImage = "/assets/ac/a1.jpg"; // static asset path
 
 type PendingBooking = {
@@ -44,6 +48,18 @@ type PendingBooking = {
   date: string
 }
 
+type TodayAppointment = {
+  ticketId: number
+  time: string
+  sortKey: number
+  name: string
+  vehicle: string
+  plate: string
+  isHome: boolean
+  concern: string
+  stage: 'needs-approval' | 'waiting' | 'arrived'
+}
+
 export default function page() {
   const router = useRouter()
   const [jobOrders, setJobOrders] = useState<JobOrderCard[]>([])
@@ -52,6 +68,7 @@ export default function page() {
   const [pendingTicketsCount, setPendingTicketsCount] = useState<number>(0)
   const [techniciansCount, setTechniciansCount] = useState<number>(0)
   const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([])
+  const [todayAppointments, setTodayAppointments] = useState<TodayAppointment[]>([])
   // Show "loading" instead of zeros until every fetch below has settled —
   // otherwise a reload flashes "0 pending / ₱0" before the real numbers land.
   const [loading, setLoading] = useState(true)
@@ -111,6 +128,36 @@ export default function page() {
               concern: t.customer_concern || 'N/A',
               date: new Date(t.request_date).toLocaleDateString(),
             }))
+          )
+
+          const manilaDay = (d: Date) => d.toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' })
+          const todayKey = manilaDay(new Date())
+
+          setTodayAppointments(
+            data.tickets
+              .filter(
+                (t: any) =>
+                  t.preferred_datetime &&
+                  t.ticket_status !== 'declined' &&
+                  t.ticket_status !== 'cancelled' &&
+                  manilaDay(new Date(t.preferred_datetime)) === todayKey,
+              )
+              .map((t: any): TodayAppointment => {
+                const when = new Date(t.preferred_datetime)
+                const approved = t.ticket_status === 'approved'
+                return {
+                  ticketId: t.ticket_id,
+                  time: formatVisitRange(t.preferred_datetime) ?? '',
+                  sortKey: when.getTime(),
+                  name: `${t.first_name} ${t.last_name}`,
+                  vehicle: `${t.vehicle_model} ${t.vehicle_year}`,
+                  plate: t.plate_number,
+                  isHome: t.service_mode === 'home_service',
+                  concern: t.customer_concern || 'N/A',
+                  stage: !approved ? 'needs-approval' : t.date_arrived ? 'arrived' : 'waiting',
+                }
+              })
+              .sort((a: TodayAppointment, b: TodayAppointment) => a.sortKey - b.sortKey),
           )
         }
 
@@ -187,6 +234,60 @@ export default function page() {
             iconColor="text-violet-600"
           />
         </Link>
+      </div>
+
+      {/* Today's appointments */}
+      <div className="rounded-2xl border border-border bg-card p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-foreground">Today&apos;s appointments</h3>
+            <p className="text-sm text-muted-foreground">
+              {new Date().toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'Asia/Manila' })}
+              {' · '}
+              {todayAppointments.length} {todayAppointments.length === 1 ? 'customer' : 'customers'} expected
+            </p>
+          </div>
+        </div>
+
+        {todayAppointments.length === 0 ? (
+          <p className="mt-4 rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
+            No appointments for today.
+          </p>
+        ) : (
+          <div className="mt-4 divide-y divide-border/60 overflow-hidden rounded-xl border border-border">
+            {todayAppointments.map((a) => {
+              const w = arrivalWording(a.isHome ? 'home' : 'shop')
+              return (
+                <div key={a.ticketId} className="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
+                  <div className="w-32 shrink-0">
+                    <p className="text-sm font-semibold text-foreground">{a.time}</p>
+                    <p className="text-xs text-muted-foreground">{a.isHome ? 'Arrival' : 'Drop-off'}</p>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-foreground">{a.name}</p>
+                    <p className="text-xs text-muted-foreground">{a.vehicle} - {a.plate}</p>
+                    <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground" title={a.concern}>{a.concern}</p>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-muted-foreground">
+                    {a.isHome ? <Home size={12} /> : <Store size={12} />}
+                    {a.isHome ? 'Home service' : 'Shop visit'}
+                  </span>
+                  <span
+                    className={`inline-flex min-w-36 justify-center rounded-full px-3 py-1 text-xs font-semibold ${
+                      a.stage === 'arrived'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : a.stage === 'waiting'
+                        ? 'bg-amber-100 text-amber-800'
+                        : 'bg-violet-100 text-violet-700'
+                    }`}
+                  >
+                    {a.stage === 'arrived' ? w.done : a.stage === 'waiting' ? w.notDone : 'Needs approval'}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Charts */}

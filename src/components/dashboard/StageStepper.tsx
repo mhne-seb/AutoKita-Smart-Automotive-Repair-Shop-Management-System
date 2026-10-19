@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, Search, FileText, Wrench, CheckCircle2, Check, Gauge, CreditCard, type LucideIcon } from "lucide-react";
+import { Package, Search, FileText, Wrench, CheckCircle2, Check, Gauge, CreditCard, Home, type LucideIcon } from "lucide-react";
 
 const BRAND_GRADIENT = "linear-gradient(90deg, #0b1730 0%, #1d3a68 55%, #3b6cb4 100%)";
 
@@ -12,6 +12,17 @@ const STAGES: { key: string; label: string; icon: LucideIcon; to: string }[] = [
   { key: "billing", label: "BILLING", icon: CreditCard, to: "/dashboard/tracking/billing" },
   { key: "completed", label: "COMPLETED", icon: CheckCircle2, to: "/dashboard/tracking/completed" },
 ];
+
+// The first stage is named for how the customer is served.
+function stagesFor(mode: "shop" | "home") {
+  return STAGES.map((s) =>
+    s.key === "received"
+      ? mode === "home"
+        ? { ...s, label: "ARRIVAL", icon: Home }
+        : { ...s, label: "VEHICLE DROP-OFF" }
+      : s,
+  );
+}
 
 export type StageKey = (typeof STAGES)[number]["key"];
 
@@ -48,6 +59,7 @@ export function StageStepper({
   viewing,
   jobOrderId,
   stageTimes,
+  serviceMode = "shop",
 }: {
   // Where the job order actually is (drives done / current / future).
   active: (typeof STAGES)[number]["key"];
@@ -60,15 +72,17 @@ export function StageStepper({
   // A stage with no entry here simply shows no time line — pass whatever
   // your job order data has wired up so far.
   stageTimes?: Partial<Record<(typeof STAGES)[number]["key"], string>>;
+  serviceMode?: "shop" | "home";
 }) {
-  const activeIdx = STAGES.findIndex((s) => s.key === active);
+  const stages = stagesFor(serviceMode ?? "shop");
+  const activeIdx = stages.findIndex((s) => s.key === active);
   // The last stage (COMPLETED) has nothing after it — once it's reached,
   // treat it as a finished/done step rather than an in-progress "current"
   // one, so it stops pulsing and gets the green check like the others.
-  const isFinalStage = activeIdx === STAGES.length - 1;
+  const isFinalStage = activeIdx === stages.length - 1;
   // Fraction of the track to fill — from the center of the first dot to the
   // center of the current one, so the gradient line always ends exactly under it.
-  const fillPct = (activeIdx / (STAGES.length - 1)) * 100;
+  const fillPct = (activeIdx / (stages.length - 1)) * 100;
 
   return (
     <div className="mx-auto max-w-4xl overflow-x-auto rounded-2xl border bg-card px-4 py-7 shadow-sm sm:px-8">
@@ -76,7 +90,7 @@ export function StageStepper({
         {/* Continuous track, sitting behind the icon row */}
         <div
           className="absolute left-0 right-0 top-5 h-1 rounded-full bg-muted-foreground/25"
-          style={{ marginLeft: `${100 / STAGES.length / 2}%`, marginRight: `${100 / STAGES.length / 2}%` }}
+          style={{ marginLeft: `${100 / stages.length / 2}%`, marginRight: `${100 / stages.length / 2}%` }}
         >
           <div
             className="h-full rounded-full transition-all duration-500 ease-out"
@@ -84,7 +98,7 @@ export function StageStepper({
           />
         </div>
 
-        {STAGES.map((s, i) => {
+        {stages.map((s, i) => {
           const Icon = s.icon;
           const isDone = i < activeIdx || (isFinalStage && i === activeIdx);
           const isCurrent = i === activeIdx && !isFinalStage;

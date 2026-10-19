@@ -2,6 +2,8 @@
 
 import type { JobOrderCard, Stage, PaymentStatus } from '@/data/types'
 import { stageOrder } from '@/data/types'
+import { serviceModeFromDb } from '@/lib/serviceMode'
+import { formatVisitWindow } from '@/lib/bookingSlotsShared'
 
 function simulateDelay<T>(value: T, ms = 250): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), ms))
@@ -102,6 +104,12 @@ function toJobOrderCard(row: any): JobOrderCard {
     dateArrived: row.date_arrived ? new Date(row.date_arrived).toISOString() : null,
     arrived: Boolean(row.date_arrived),
     datePromised: row.date_promised ? new Date(row.date_promised).toISOString() : null,
+    serviceMode: serviceModeFromDb(row.service_mode),
+    homeAddress:
+      row.home_service_address && row.home_service_address !== 'None' ? row.home_service_address : null,
+    readyBy: row.ready_by ?? null,
+    queueNo: row.queue_no != null ? Number(row.queue_no) : null,
+    request: row.customer_concern ?? null,
   }
 }
 
@@ -153,6 +161,59 @@ export async function getJobOrderById(id: string): Promise<JobOrderCard | null> 
   if (!json.success) return null
 
   return toJobOrderCard(json.data)
+}
+
+export interface JobOrderDetails {
+  phone: string
+  email: string
+  customerId: string
+  vehicle: string
+  plate: string
+  mileage: string
+  total: string
+  balance: string
+  arrivedAt: string | null
+  readyBy: string | null
+  services: string[]
+  serviceMode: 'shop' | 'home'
+  homeAddress: string | null
+  visitTime: string | null
+  request: string | null
+}
+
+// Naive Manila text ("2026-10-12 10:30:00") or an ISO string -> "Oct 12, 10:30 AM"
+function formatWhen(value: string | null | undefined): string | null {
+  if (!value) return null
+  const d = new Date(String(value).replace(' ', 'T'))
+  if (Number.isNaN(d.getTime())) return null
+  return d.toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+}
+
+/** Loads what the Job Orders details panel shows for one row (called when a row is opened). */
+export async function getJobOrderDetails(id: string): Promise<JobOrderDetails | null> {
+  const res = await fetch(`/api/job-orders/${id}`)
+  if (!res.ok) return null
+  const json = await res.json()
+  if (!json.success) return null
+  const r = json.data
+  return {
+    phone: r.contact_number ?? '',
+    email: r.email ?? '',
+    customerId: `CUST-${r.user_id ?? '0000'}`,
+    vehicle: r.vehicle_model ? `${r.vehicle_year ?? ''} ${r.vehicle_model}`.trim() : 'Unknown Vehicle',
+    plate: r.plate_number || '—',
+    mileage: r.mileage ? `${Number(r.mileage).toLocaleString('en-PH')} km` : '—',
+    total: currency(r.actual_grand_total),
+    balance: r.balance !== null && r.balance !== undefined ? currency(r.balance) : '—',
+    arrivedAt: formatWhen(r.date_arrived),
+    readyBy: formatWhen(r.ready_by),
+    services: String(r.service_names || '').split(', ').filter(Boolean),
+    serviceMode: serviceModeFromDb(r.service_mode),
+    homeAddress:
+      r.home_service_address && r.home_service_address !== 'None' ? r.home_service_address : null,
+    visitTime: formatVisitWindow(r.preferred_datetime),
+    request: r.customer_concern ?? null,
+  }
 }
 
 /**

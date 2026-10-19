@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
+import { getServiceModeValue } from '@/lib/jobOrderMode'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -31,6 +32,8 @@ export async function GET(request: NextRequest) {
     if (!jobOrder) {
       return NextResponse.json({ jobOrder: null, services: [], paymentStatus: null })
     }
+
+    if (jobOrder) jobOrder.service_mode = await getServiceModeValue(jobOrder.job_order_id)
 
     const [servicesRes, paymentRes, partsRes, preDiagRes, scanAuthRes, mechanicRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_quotation_services($1)`, [jobOrder.job_order_id]),

@@ -26,7 +26,7 @@ import { bookingNeedsScan, DIAGNOSTIC_SCAN_FEE, formatPeso } from "@/data/diagno
 import { formatStamp, cn } from "@/lib/utils";
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from "@/lib/plate";
 import { VisitDatePicker } from "@/components/VisitDatePicker";
-import { toManilaIso } from "@/lib/bookingSlotsShared";
+import { toManilaIso, formatVisitWindow } from "@/lib/bookingSlotsShared";
 import { hoursForWeekday, slotStartHour, withMargin, ShopHours } from "@/lib/bookingTiming";
 
 function startOfToday() {
@@ -42,8 +42,15 @@ function toDateValue(d: Date) {
   return `${y}-${m}-${dy}`
 }
 
-function formatHours(h: number): string {
-  return Number(h.toFixed(1)).toString()
+// A total in words, never with decimals: 5.5 -> "5 hours and 30 minutes", 1 -> "1 hour", 0.75 -> "45 minutes".
+function formatHoursLong(h: number): string {
+  const totalMinutes = Math.round(h * 60)
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  const parts: string[] = []
+  if (hours > 0) parts.push(`${hours} ${hours === 1 ? 'hour' : 'hours'}`)
+  if (minutes > 0) parts.push(`${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`)
+  return parts.length > 0 ? parts.join(' and ') : '0 minutes'
 }
 
 // One service's time, exact: "45 min", "1 h", "3 h 45 min". (One decimal of an hour
@@ -171,7 +178,6 @@ export function BookingPage({
   const [repairSearch, setRepairSearch] = useState('');
 
   const [notes, setNotes] = useState("");
-  const [scanAcknowledged, setScanAcknowledged] = useState(false);
   const [overnightOk, setOvernightOk] = useState(false);
 
   const handleOpenCategory = (cat: "maintenance" | "repair" | "diagnostics" | null) => {
@@ -250,12 +256,6 @@ export function BookingPage({
 
   const needsScan = bookingNeedsScan(notSure, selectedServices.map((s) => s.name));
 
-  useEffect(() => {
-    if (!needsScan) {
-      setScanAcknowledged(false);
-    }
-  }, [needsScan]);
-
   // Overnight calculation
   let knownHours = 0;
   let hasUnknownHour = false;
@@ -293,8 +293,8 @@ export function BookingPage({
 
   // What the summary says under "Possible completion time based on your services".
   const completionText: string | null = (() => {
+    if (knownHours <= 0) return 'Confirmed after the shop checks your car.';
     if (!dateChosen || !timeChosen) return null;
-    if (knownHours <= 0) return 'The shop will tell you after checking your car.';
     if (!shopDayHours || Number.isNaN(startHour)) return null;
 
     if (isBusyDay && busyInfo) {
@@ -328,9 +328,7 @@ export function BookingPage({
     (selectedVehicleId !== "" && selectedVehicleId !== "new") ||
     (selectedVehicleId === "new" && vehicleModel.trim() !== "" && isValidPlateNumber(normalizePlateNumber(vehiclePlate)));
 
-  const servicesOk =
-    (notSure || selectedIds.length > 0 || notes.trim().length >= 5) &&
-    (!needsScan || scanAcknowledged);
+  const servicesOk = notSure || selectedIds.length > 0 || notes.trim().length >= 5;
 
   // Step 1 also holds the service type: a home service needs an address before moving on.
   const placeOk = pickup !== "home" || Boolean(user?.address) || homeAddress.trim() !== "";
@@ -427,12 +425,6 @@ export function BookingPage({
       errs.homeAddress = "Home address is required.";
     }
 
-    if (needsScan && !scanAcknowledged) {
-      toast.error("Please agree to the diagnostic scan fee to continue.");
-      setStep(1);
-      return;
-    }
-
     // Only a shop visit needs the overnight agreement. A home service has none.
     if (pickup === "shop" && noticeShowing && !overnightOk) {
       errs.overnight = "Choose an earlier time or allow an overnight stay.";
@@ -460,7 +452,7 @@ export function BookingPage({
       notSure,
       customerNote: notes.trim(),
       homeAddress: pickup === "home" ? (user?.address || homeAddress.trim().substring(0, 200)) : (user?.address || "None"),
-      diagnosticScanAuthorized: needsScan && scanAcknowledged,
+      diagnosticScanAuthorized: needsScan,
       preferredDatetime: preferredDate && preferredTime ? toManilaIso(toDateValue(preferredDate), preferredTime) : null,
       overnightOk: pickup === "shop" && overnightOk && noticeShowing,
     };
@@ -531,11 +523,60 @@ export function BookingPage({
   const userContact = user?.contact_number || "—";
   const userEmail = user?.email || "—";
 
+  // Choosing "I am not sure" is the customer's agreement: the notice sits right under the choice, and the
+  // server still receives diagnosticScanAuthorized = true, which is what attaches the fee on approval.
+  const scanNotice = (
+    <p className="text-xs leading-relaxed text-muted-foreground">
+      To find the problem, we will plug an OBD-II scanner into your car. By choosing this, you agree to pay the scan
+      fee of <b className="text-foreground">{formatPeso(DIAGNOSTIC_SCAN_FEE)}</b>,{" "}
+      <b className="text-foreground">even if you decide not to push through with the repair</b>. Repairs are priced
+      separately, and we&apos;ll ask you first. If your car has no scanner port, this fee is removed.
+    </p>
+  );
+
+  // Only for the rare case a scan fee is needed without "I am not sure" (a service that needs the scan).
+  const scanFeeBox = needsScan && !notSure ? (
+    <div className="rounded-xl border border-amber-300 bg-amber-50 p-4">{scanNotice}</div>
+  ) : null;
+
+  // "I am not sure what is wrong" and its OBD-II notice are one card: the notice opens inside it once ticked.
+  const notSureCard = (
+    <div
+      className={cn(
+        "rounded-lg border p-3.5 transition",
+        notSure ? "border-brand bg-brand-soft/40" : "border-border"
+      )}
+    >
+      <button
+        type="button"
+        onClick={() => {
+          setNotSure((p) => !p);
+          if (fieldErrors.service) setFieldErrors((p) => ({ ...p, service: "" }));
+        }}
+        className="flex w-full items-start gap-3 text-left cursor-pointer"
+      >
+        <span
+          className={cn(
+            "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors",
+            notSure ? "border-brand bg-brand text-brand-foreground" : "border-muted-foreground"
+          )}
+        >
+          {notSure && <Check className="h-3 w-3 stroke-[3]" />}
+        </span>
+        <div>
+          <p className="font-semibold text-sm text-foreground">I am not sure what is wrong</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">We will check your car and tell you what it needs.</p>
+        </div>
+      </button>
+      <div className="mt-3 pl-7">{scanNotice}</div>
+    </div>
+  );
+
   const totalHoursEstimate =
     selectedServices.length > 0 && knownHours > 0
       ? hasUnknownHour
-        ? `Est. work time: at least ${formatHours(knownHours)} hours`
-        : `Est. work time: about ${formatHours(knownHours)} hours`
+        ? `Est. work time: at least ${formatHoursLong(knownHours)}`
+        : `Est. work time: about ${formatHoursLong(knownHours)}`
       : null;
 
   // Counts & hours for "What has been added"
@@ -595,7 +636,7 @@ export function BookingPage({
                 )}
                 {otherMaintenance.length > 0 && (
                   <div>
-                    <p className="text-[11px] font-semibold text-muted-foreground">Maintenance</p>
+                    <p className="text-[11px] font-semibold text-muted-foreground">{activePackage ? "Other Maintenance" : "Maintenance"}</p>
                     {otherMaintenance.map((s) => (
                       <p key={s.id} className="text-xs text-foreground">• {s.name}</p>
                     ))}
@@ -627,13 +668,7 @@ export function BookingPage({
                   : "Your visit date (you drop off your vehicle):"}
               </span>
               <p className="text-xs text-foreground">
-                {new Date(toManilaIso(toDateValue(preferredDate), preferredTime)).toLocaleString("en-PH", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}{" "}
+                {formatVisitWindow(toManilaIso(toDateValue(preferredDate), preferredTime))}{" "}
                 ({pickup === "shop" ? "Shop Visit" : "Home Service"})
               </p>
             </div>
@@ -688,23 +723,29 @@ export function BookingPage({
   }
 
   return (
-    <div
-      id="booking-top"
-      className={mode === 'modal' ? 'mx-auto max-w-[88rem] px-4 py-6 sm:px-6' : 'mx-auto max-w-[88rem] px-6 py-8'}
-    >
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Book a service</h1>
-        <p className="text-sm text-muted-foreground">
-          Register a vehicle or pick an existing one to schedule your concern.
-        </p>
+    <div id="booking-top">
+      {/* Full-width top that stays while scrolling. On the page it sits under the fixed 64px site header. */}
+      <div
+        className={cn(
+          "sticky z-[5] bg-background",
+          mode === 'modal' ? "top-0" : "top-16"
+        )}
+      >
+        <div className={cn("mx-auto max-w-[88rem] py-3", mode === 'modal' ? "px-4 pr-16 sm:px-6 sm:pr-16" : "px-6")}>
+          <h1 className="text-2xl font-bold">Book a service</h1>
+          <p className="text-sm text-muted-foreground">
+            Register a vehicle or pick an existing one to schedule your concern.
+          </p>
+        </div>
       </div>
 
+      <div className={mode === 'modal' ? 'mx-auto max-w-[88rem] px-4 py-6 sm:px-6' : 'mx-auto max-w-[88rem] px-6 py-8'}>
       <div className="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)] xl:grid-cols-[440px_minmax(0,1fr)]">
         {/* Left Column: Booking Summary */}
         <aside
           className={cn(
             "order-2 lg:order-1 space-y-4 lg:sticky lg:self-start",
-            mode === 'modal' ? "lg:top-4" : "lg:top-24"
+            mode === 'modal' ? "lg:top-24" : "lg:top-40"
           )}
         >
           <div className="rounded-xl border bg-card p-5 shadow-sm">
@@ -731,25 +772,10 @@ export function BookingPage({
                   !dateChosen
                     ? "Not picked yet"
                     : timeChosen
-                    ? new Date(toManilaIso(toDateValue(preferredDate), preferredTime)).toLocaleString("en-PH", {
-                        month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit",
-                      })
+                    ? formatVisitWindow(toManilaIso(toDateValue(preferredDate), preferredTime)) ?? "—"
                     : preferredDate.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })
                 }
               />
-              {(selectedServices.length > 0 || notSure) && (
-                <div>
-                  <BookSumRow
-                    stacked
-                    label="Possible completion time based on your services:"
-                    value={
-                      completionText ??
-                      "Pick a visit date and time to see the estimate."
-                    }
-                  />
-                </div>
-              )}
-
               {/* Grouped Services */}
               {packageTicked.length > 0 && activePackage && (
                 <SummaryGroup title={activePackage.name}>
@@ -765,7 +791,7 @@ export function BookingPage({
               )}
 
               {otherMaintenance.length > 0 && (
-                <SummaryGroup title="Maintenance">
+                <SummaryGroup title={activePackage ? "Other Maintenance" : "Maintenance"}>
                   {otherMaintenance.map((s) => (
                     <SummaryServiceRow
                       key={s.id}
@@ -791,7 +817,10 @@ export function BookingPage({
               )}
 
               {(otherDiagnostics.length > 0 || notSure) && (
-                <SummaryGroup title="Diagnostics">
+                <SummaryGroup
+                  title="Diagnostics"
+                  showTime={otherDiagnostics.some((s) => s.baseDurationHours != null && s.baseDurationHours > 0)}
+                >
                   {otherDiagnostics.map((s) => (
                     <SummaryServiceRow
                       key={s.id}
@@ -804,17 +833,30 @@ export function BookingPage({
                     <SummaryServiceRow
                       name="Check my car"
                       hours={null}
+                      timeNote={otherDiagnostics.some((s) => s.baseDurationHours != null && s.baseDurationHours > 0) ? "After check" : undefined}
                       onRemove={() => setNotSure(false)}
                     />
+                  )}
+                  {notSure && (
+                    <p className="rounded-md bg-brand-soft/60 px-2 py-1.5 text-[11px] leading-snug text-foreground">
+                      We check your car first, then tell you how long the work takes.
+                    </p>
                   )}
                 </SummaryGroup>
               )}
 
-              {/* Work time and the warning go right under the services they describe. */}
-              {totalHoursEstimate && (
-                <div>
-                  <p className="text-xs font-semibold text-brand">{totalHoursEstimate}</p>
-                  <EstimateWarning />
+              {/* Work time, the completion estimate, then the warning, right under the services they describe. */}
+              {(totalHoursEstimate || selectedServices.length > 0 || notSure) && (
+                <div className="space-y-2">
+                  {totalHoursEstimate && <p className="text-xs font-semibold text-brand">{totalHoursEstimate}</p>}
+                  {(selectedServices.length > 0 || notSure) && (
+                    <BookSumRow
+                      stacked
+                      label="Possible completion time based on your services:"
+                      value={completionText ?? "Pick a visit date and time to see the estimate."}
+                    />
+                  )}
+                  {totalHoursEstimate && <EstimateWarning />}
                 </div>
               )}
 
@@ -1064,33 +1106,9 @@ export function BookingPage({
                 )}
               </div>
 
-              {/* Scan fee box if needed */}
-              {needsScan && (
-                <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
-                    <div className="flex-1">
-                      <p className="font-semibold text-amber-950">
-                        Scan fee: {formatPeso(DIAGNOSTIC_SCAN_FEE)}
-                      </p>
-                      <p className="mt-1 text-sm text-amber-900">
-                        To find the problem, we will plug a scanner into your car. You will pay this fee{" "}
-                        <b>even if you decide not to push through with the repair</b>. Repairs are priced
-                        separately, and we&apos;ll ask you first.
-                      </p>
-                      <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-sm text-amber-950">
-                        <input
-                          type="checkbox"
-                          checked={scanAcknowledged}
-                          onChange={(e) => setScanAcknowledged(e.target.checked)}
-                          className="mt-0.5 h-4 w-4 rounded border-amber-400 accent-amber-600"
-                        />
-                        <span>I agree to pay the {formatPeso(DIAGNOSTIC_SCAN_FEE)} scan fee.</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Scan fee agreement when the Diagnostics panel is closed */}
+              {openCategory !== "diagnostics" && notSure && <div className="mt-4">{notSureCard}</div>}
+              {openCategory !== "diagnostics" && scanFeeBox && <div className="mt-4">{scanFeeBox}</div>}
 
               {/* When no category is open */}
               {openCategory === null ? (
@@ -1130,13 +1148,6 @@ export function BookingPage({
                 <div className="mt-5 rounded-xl border-2 border-brand p-4 space-y-4">
                   <div className="flex items-center justify-between pb-3 border-b">
                     <h4 className="font-semibold text-base capitalize">{openCategory}</h4>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenCategory(null)}
-                      className="rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground hover:opacity-90 cursor-pointer"
-                    >
-                      Done
-                    </button>
                   </div>
 
                   {/* Maintenance Panel */}
@@ -1161,7 +1172,7 @@ export function BookingPage({
                             const allKnown = pkgServices.length > 0 && pkgServices.every((s) => s.baseDurationHours != null && s.baseDurationHours > 0);
                             const totalPkgHours = pkgServices.reduce((sum, s) => sum + (s.baseDurationHours || 0), 0);
                             const durationText = allKnown
-                              ? `${pkg.serviceIds.length} services, about ${formatHours(totalPkgHours)} hours`
+                              ? `${pkg.serviceIds.length} services, about ${formatHoursLong(totalPkgHours)}`
                               : `${pkg.serviceIds.length} services`;
 
                             return (
@@ -1302,39 +1313,7 @@ export function BookingPage({
                   {/* Diagnostics Panel */}
                   {openCategory === "diagnostics" && options && (
                     <div className="space-y-4">
-                      {/* I am not sure what is wrong card */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setNotSure((p) => !p);
-                          if (fieldErrors.service) setFieldErrors((p) => ({ ...p, service: "" }));
-                        }}
-                        className={cn(
-                          "flex w-full items-start gap-3 rounded-lg border p-3.5 text-left transition cursor-pointer",
-                          notSure ? "border-brand bg-brand-soft/40" : "hover:bg-accent border-border"
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors",
-                            notSure ? "border-brand bg-brand text-brand-foreground" : "border-muted-foreground"
-                          )}
-                        >
-                          {notSure && <Check className="h-3 w-3 stroke-[3]" />}
-                        </span>
-                        <div>
-                          <p className="font-semibold text-sm text-foreground">I am not sure what is wrong</p>
-                          <p className="mt-0.5 text-xs text-muted-foreground">We will check your car and tell you what it needs.</p>
-                        </div>
-                      </button>
-
-                      {/* Diagnostic services list */}
-                      <ServiceChecklist
-                        services={options.services.filter((s) => s.type === "diagnostics" && !packageIds.has(s.id))}
-                        search=""
-                        selectedIds={selectedIds}
-                        onToggle={toggleService}
-                      />
+                      {notSureCard}
                     </div>
                   )}
 
@@ -1354,7 +1333,7 @@ export function BookingPage({
               {selectedServices.length > 0 && knownHours > 0 && (
                 <div className="mt-4 border-t pt-3">
                   <p className="text-xs font-medium text-foreground">
-                    Estimated time: {hasUnknownHour ? `at least ${formatHours(knownHours)} hours` : `about ${formatHours(knownHours)} hours`}
+                    Estimated time: {hasUnknownHour ? `at least ${formatHoursLong(knownHours)}` : `about ${formatHoursLong(knownHours)}`}
                   </p>
                   <EstimateWarning />
                 </div>
@@ -1463,7 +1442,7 @@ export function BookingPage({
                           <span className="font-semibold">
                             {activePackage ? activePackage.name : "Your selected services"}
                           </span>{" "}
-                          takes about {formatHours(knownHours)} hours. Starting at {preferredTime}, our mechanic may finish
+                          takes about {formatHoursLong(knownHours)}. Starting at {preferredTime}, our mechanic may finish
                           around {formatDecimalTime(finishHour)}, after our usual closing time of{" "}
                           {formatDecimalTime(shopDayHours!.close)}.
                         </p>
@@ -1472,7 +1451,7 @@ export function BookingPage({
                           <span className="font-semibold">
                             {activePackage ? activePackage.name : "Your selected services"}
                           </span>{" "}
-                          takes about {formatHours(knownHours)} hours. Starting at {preferredTime} it may finish around{" "}
+                          takes about {formatHoursLong(knownHours)}. Starting at {preferredTime} it may finish around{" "}
                           {formatDecimalTime(finishHour)}, after we close at {formatDecimalTime(shopDayHours!.close)}.
                         </p>
                       )}
@@ -1573,9 +1552,7 @@ export function BookingPage({
               )}
               {step === 1 && !servicesOk && (
                 <p className="text-[11px] text-muted-foreground">
-                  {needsScan && !scanAcknowledged && (notSure || selectedIds.length > 0)
-                    ? "Agree to the scan fee to continue."
-                    : "Pick a service or describe the problem to continue."}
+                  Pick a service or describe the problem to continue.
                 </p>
               )}
               {step === 2 && !dateOk && (
@@ -1607,9 +1584,7 @@ export function BookingPage({
                 <dt className="text-muted-foreground">Visit date</dt>
                 <dd className="text-right font-medium text-foreground">
                   {dateChosen && timeChosen
-                    ? new Date(toManilaIso(toDateValue(preferredDate), preferredTime)).toLocaleString("en-PH", {
-                        month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit",
-                      })
+                    ? formatVisitWindow(toManilaIso(toDateValue(preferredDate), preferredTime))
                     : "—"}
                 </dd>
               </div>
@@ -1641,6 +1616,7 @@ export function BookingPage({
       {inServicePlate && (
         <VehicleInServiceModal plate={inServicePlate} onClose={() => setInServicePlate(null)} />
       )}
+      </div>
     </div>
   );
 }
@@ -1654,19 +1630,24 @@ function EstimateWarning() {
     >
       <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-600 dark:text-rose-400" aria-hidden="true" />
       <p className="text-[11px] font-medium leading-snug">
-        This is only an estimate and assumes no additional issues are found. The shop will contact you to confirm
-        the final schedule.
+        This is only an estimate and assumes no additional issues are found. The shop will tell you the confirmed
+        finish time after checking your car.
       </p>
     </div>
   );
 }
 
-function SummaryGroup({ title, children }: { title: string; children: React.ReactNode }) {
+function SummaryGroup({ title, showTime = true, children }: { title: string; showTime?: boolean; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5 border-b pb-2.5">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        {title}
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {title}
+        </p>
+        {showTime && (
+          <span className="pr-5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Est. time</span>
+        )}
+      </div>
       {children}
     </div>
   );
@@ -1675,10 +1656,12 @@ function SummaryGroup({ title, children }: { title: string; children: React.Reac
 function SummaryServiceRow({
   name,
   hours,
+  timeNote,
   onRemove,
 }: {
   name: string;
   hours: number | null;
+  timeNote?: string;
   onRemove: () => void;
 }) {
   return (
@@ -1688,6 +1671,7 @@ function SummaryServiceRow({
         {hours != null && hours > 0 && (
           <span className="text-[11px] text-muted-foreground">{formatDuration(hours)}</span>
         )}
+        {timeNote && <span className="text-[11px] text-muted-foreground">{timeNote}</span>}
         <button
           type="button"
           onClick={onRemove}

@@ -20,6 +20,8 @@ export async function PATCH(
 
   const body = await request.json().catch(() => null)
   const promisedDate = body?.promisedDate
+  // True only for the first schedule of a job order: the date already there is just the quotation's estimate.
+  const replaceEstimate = body?.replaceEstimate === true
 
   // Validate format and valid date
   if (
@@ -37,9 +39,9 @@ export async function PATCH(
     const updateRes = await db.query(
       `UPDATE job_orders
        SET date_promised = ($1::timestamp AT TIME ZONE 'Asia/Manila')
-       WHERE id = $2 AND date_promised IS NULL
+       WHERE id = $2 AND (date_promised IS NULL OR $3::boolean)
        RETURNING (date_promised AT TIME ZONE 'Asia/Manila')::text AS date_promised`,
-      [promisedDate, jobOrderId],
+      [promisedDate, jobOrderId, replaceEstimate],
     )
 
     let changed = false
