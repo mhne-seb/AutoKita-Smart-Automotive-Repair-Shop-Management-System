@@ -530,7 +530,7 @@ export function BookingPage({
       To find the problem, we will plug an OBD-II scanner into your car. By choosing this, you agree to pay the scan
       fee of <b className="text-foreground">{formatPeso(DIAGNOSTIC_SCAN_FEE)}</b>,{" "}
       <b className="text-foreground">even if you decide not to push through with the repair</b>. Repairs are priced
-      separately, and we&apos;ll ask you first.
+      separately, and we&apos;ll ask you first. If your car has no scanner port, this fee is removed.
     </p>
   );
 

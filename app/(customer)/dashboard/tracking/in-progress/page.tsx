@@ -41,6 +41,8 @@ type Part = {
   description: string;
   quantity: number;
   status: string;
+  labor_hours?: number | null;
+  estimated_delivery_date?: string | null;
 };
 const partIsReady = (p: Part) => p.status !== "to_order" && p.status !== "ordered" && p.status !== "in_transit";
 
@@ -157,6 +159,21 @@ function InProgress() {
   // Parts still to be ordered, grouped by the service (task title) they belong to.
   const missingPartsFor = (taskTitle: string) => parts.filter((p) => p.service_name === taskTitle && !partIsReady(p));
   const partsFor = (taskTitle: string) => parts.filter((p) => p.service_name === taskTitle);
+  const fmtEta = (d: string) => new Date(`${d.slice(0, 10)}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const latestEta = (list: Part[]) => list.map((p) => p.estimated_delivery_date).filter((d): d is string => Boolean(d)).sort().pop();
+  // Estimated finish: the scheduled finish, or later if a part is still on its way
+  // (it arrives 8:00 AM on its date, then the service still needs its own hours).
+  const estimatedFinishDate = (() => {
+    let latest: Date | null = null;
+    const sched = data?.timing?.estimated_finish ? new Date(String(data.timing.estimated_finish).replace(" ", "T")) : null;
+    if (sched && !isNaN(sched.getTime())) latest = sched;
+    for (const p of parts) {
+      if (partIsReady(p) || !p.estimated_delivery_date) continue;
+      const d = new Date(new Date(`${p.estimated_delivery_date.slice(0, 10)}T08:00:00`).getTime() + (Number(p.labor_hours) || 1) * 3600000);
+      if (!isNaN(d.getTime()) && (!latest || d > latest)) latest = d;
+    }
+    return latest;
+  })();
   const jobOrder = data?.jobOrder ?? null;
 
   // Locked once the job order has moved past active servicing — the
@@ -260,7 +277,7 @@ function InProgress() {
             time: t.completed_at
               ? `Finished ${fmtWhen(t.completed_at)}`
               : missing.length > 0
-              ? `Waiting for parts (${all.length - missing.length} of ${all.length} received)`
+              ? `Waiting for parts (${all.length - missing.length} of ${all.length} received)${latestEta(missing) ? ` · Estimated Time of Arrival on Shop: ${fmtEta(latestEta(missing)!)}` : ""}`
               : t.scheduled_date
               ? `Scheduled ${fmtWhen(t.scheduled_date)}`
               : null,
@@ -491,7 +508,7 @@ function InProgress() {
                 <b>
                   {/* Latest (scheduled start + quoted hours) across the tasks —
                       the same number the shop's own panel shows. */}
-                  {fmtWhen(data?.timing?.estimated_finish) ?? 'Not scheduled'}
+                  {estimatedFinishDate ? formatStamp(estimatedFinishDate) : 'Not scheduled'}
                 </b>
               </div>
             </div>

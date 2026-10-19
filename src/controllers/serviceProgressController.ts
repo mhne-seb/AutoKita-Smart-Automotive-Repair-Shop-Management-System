@@ -92,6 +92,7 @@ export async function getServiceProgressById(jobOrderId: string): Promise<Servic
       purchasedOn: r.purchased_on ? formatDate(r.purchased_on) : undefined,
       unitCost: r.purchase_order_id ? Number(r.supplier_unit_cost ?? 0) : undefined,
       retailPrice: r.retail_unit_price != null ? Number(r.retail_unit_price) : undefined,
+      estimatedDelivery: r.estimated_delivery_date ? String(r.estimated_delivery_date).slice(0, 10) : undefined,
     })
     partsByService.set(partsKey(r.service_name, r.finding_id), list)
   }

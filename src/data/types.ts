@@ -202,6 +202,8 @@ export interface TaskPart {
   purchasedOn?: string
   unitCost?: number // what the shop paid per unit (supplier_unit_cost)
   retailPrice?: number // what the customer is charged per unit (retail_unit_price, from the quotation)
+  // Date (YYYY-MM-DD) the part is expected at the shop, declared on the quotation or the purchase.
+  estimatedDelivery?: string
 }
 
 // One "Record purchase" save — a purchase_orders row and the parts it covered.

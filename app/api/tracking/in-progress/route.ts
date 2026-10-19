@@ -57,8 +57,11 @@ export async function GET(request: NextRequest) {
     // of a task just sitting at Not Yet with no explanation.
     const parts = jobOrder
       ? (await db.query(
-          `SELECT p.id, p.job_order_service_id, p.description, p.part_number, p.quantity, p.status::text, p.total_retail_amount, s.service_name
+          `SELECT p.id, p.job_order_service_id, p.description, p.part_number, p.quantity, p.status::text, p.total_retail_amount, s.service_name,
+              jos.estimated_hours::float AS labor_hours,
+              COALESCE(po.expected_delivery_date, p.estimated_delivery_date)::text AS estimated_delivery_date
        FROM job_order_parts p
+       LEFT JOIN purchase_orders po ON po.id = p.purchase_order_id
        JOIN job_order_services jos ON jos.id = p.job_order_service_id
        JOIN services s ON s.id = jos.service_id
        WHERE p.job_order_id = $1
