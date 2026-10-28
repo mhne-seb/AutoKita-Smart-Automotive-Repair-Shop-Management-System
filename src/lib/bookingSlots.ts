@@ -7,6 +7,7 @@ import {
   formatManilaTime,
   toManilaIso,
 } from './bookingSlotsShared'
+import { parseNaiveTimestamp } from './autoSchedule'
 
 export {
   BOOKING_TIMES,
@@ -15,6 +16,13 @@ export {
   formatManilaDate,
   formatManilaTime,
   toManilaIso,
+}
+
+// Database text like "2026-10-23 17:00:00" is Manila wall-clock time. Returns the real instant in
+// milliseconds, the same on any server time zone (Manila is UTC+8, no daylight saving).
+const MANILA_OFFSET_MS = 8 * 60 * 60 * 1000
+function manilaTextToMs(text: string): number {
+  return parseNaiveTimestamp(text) - MANILA_OFFSET_MS
 }
 
 /**
@@ -120,8 +128,9 @@ export async function getOccupiedBookingSlots() {
     const tasksByDate: Record<string, typeof tasksRes.rows> = {}
     for (const t of tasksRes.rows) {
       if (!t.scheduled_date) continue
-      const dt = new Date(t.scheduled_date)
-      const dStr = formatManilaDate(dt)
+      const ms = manilaTextToMs(t.scheduled_date)
+      if (Number.isNaN(ms)) continue
+      const dStr = formatManilaDate(new Date(ms))
       if (!tasksByDate[dStr]) tasksByDate[dStr] = []
       tasksByDate[dStr].push(t)
     }
@@ -138,7 +147,7 @@ export async function getOccupiedBookingSlots() {
         const mId = Number(t.mechanic_id)
         if (mechHours[mId] !== undefined) {
           mechHours[mId] += Number(t.estimated_hours || 1.5)
-          const finishMs = t.estimated_finish ? new Date(t.estimated_finish).getTime() : 0
+          const finishMs = t.estimated_finish ? manilaTextToMs(t.estimated_finish) : 0
           if (finishMs > mechLatestFinish[mId]) {
             mechLatestFinish[mId] = finishMs
           }
