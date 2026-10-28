@@ -36,6 +36,14 @@ const stageToRoute: Record<Stage, string> = {
   released: 'completed',
 }
 
+function parseServices(serviceStr: string): string[] {
+  if (!serviceStr || serviceStr === 'No services listed') return []
+  return serviceStr
+    .split(', ')
+    .map((s) => s.trim())
+    .filter(Boolean)
+}
+
 export default function page() {
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [query, setQuery] = useState('')
@@ -53,6 +61,8 @@ export default function page() {
   const [error, setError] = useState<string | null>(null)
   
   const [confirmCheckIn, setConfirmCheckIn] = useState<JobOrderCard | null>(null)
+  const [servicesModalCard, setServicesModalCard] = useState<JobOrderCard | null>(null)
+  const [servicesSearchQuery, setServicesSearchQuery] = useState('')
 
   // Local pagination state
   const [page, setPage] = useState(1)
@@ -133,7 +143,7 @@ export default function page() {
       const activeEmpId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
       const res = await checkInJobOrder(card.id, activeEmpId ? Number(activeEmpId) : undefined)
       if (res.success) {
-        toast.success(`Vehicle for ${card.customer} marked as stored in shop! Moved to Inspecting.`)
+        toast.success(`Vehicle for ${card.customer} checked in! Moved to Inspecting.`)
         setJobOrders((prev) =>
           prev.map((j) =>
             j.id === card.id
@@ -455,7 +465,7 @@ export default function page() {
                 <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
                   <th className="px-4 py-3 font-semibold">Customer</th>
                   <th className="px-4 py-3 font-semibold">Stage</th>
-                  <th className="px-4 py-3 font-semibold">Service</th>
+                  <th className="px-4 py-3 font-semibold w-[260px] min-w-[220px]">Service</th>
                   <th className="px-4 py-3 font-semibold">Plate</th>
                   <th className="px-4 py-3 font-semibold">Time</th>
                   <th className="px-4 py-3 font-semibold">Payment</th>
@@ -505,10 +515,86 @@ export default function page() {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-4 text-foreground/80">
-                        <span className="flex items-center gap-1.5">
-                          <Wrench size={12} className="shrink-0 text-muted-foreground" /> {c.service}
-                        </span>
+                      <td className="px-4 py-4 text-foreground/80 w-[260px] min-w-[220px]">
+                        {(() => {
+                          const services = parseServices(c.service)
+                          if (services.length === 0) {
+                            return (
+                              <span className="flex items-center gap-1.5 text-xs italic text-muted-foreground">
+                                <Wrench size={12} className="shrink-0" /> No services listed
+                              </span>
+                            )
+                          }
+
+                          const firstService = services[0]
+                          const secondService = services.length > 1 ? services[1] : null
+                          const extraCount = services.length - 2
+
+                          if (services.length === 1) {
+                            return (
+                              <div
+                                className="flex items-center gap-1.5 max-w-[250px]"
+                                title={firstService}
+                              >
+                                <Wrench size={12} className="shrink-0 text-muted-foreground" />
+                                <span className="truncate text-xs font-semibold text-foreground">
+                                  {firstService}
+                                </span>
+                              </div>
+                            )
+                          }
+
+                          if (services.length === 2) {
+                            return (
+                              <div
+                                className="flex flex-col gap-0.5 max-w-[250px]"
+                                title={services.join('\n')}
+                              >
+                                <div className="flex items-center gap-1.5 truncate">
+                                  <Wrench size={12} className="shrink-0 text-muted-foreground" />
+                                  <span className="truncate text-xs font-semibold text-foreground">
+                                    {firstService}
+                                  </span>
+                                </div>
+                                <div className="pl-4.5 truncate text-[11px] text-muted-foreground">
+                                  {secondService}
+                                </div>
+                              </div>
+                            )
+                          }
+
+                          // 3 or more services: show first service, second service + interactive "+X more" badge
+                          return (
+                            <div
+                              className="flex flex-col gap-0.5 max-w-[250px]"
+                              title={`All ${services.length} services:\n${services.map((s, idx) => `${idx + 1}. ${s}`).join('\n')}`}
+                            >
+                              <div className="flex items-center gap-1.5 truncate">
+                                <Wrench size={12} className="shrink-0 text-muted-foreground" />
+                                <span className="truncate text-xs font-semibold text-foreground">
+                                  {firstService}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 pl-4.5">
+                                <span className="truncate text-[11px] text-muted-foreground max-w-[125px]">
+                                  {secondService}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setServicesSearchQuery('')
+                                    setServicesModalCard(c)
+                                  }}
+                                  title={`Click to view all ${services.length} services`}
+                                  className="cursor-pointer shrink-0 inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700 shadow-2xs hover:bg-indigo-100 hover:border-indigo-300 transition-all hover:scale-105 active:scale-95 select-none"
+                                >
+                                  <span>+{extraCount} more</span>
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        })()}
                       </td>
                       <td className="px-4 py-4 text-foreground/80">
                         <span className="flex items-center gap-1.5">
@@ -561,7 +647,7 @@ export default function page() {
                             <button
                               onClick={() => setConfirmCheckIn(c)}
                               disabled={checkingInId === c.id}
-                              title="Check In Vehicle (Mark Stored in Shop)"
+                              title="Check In Vehicle"
                               className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 shadow-2xs hover:bg-amber-100 disabled:opacity-50 active:translate-y-0"
                             >
                               <Store size={13} />
@@ -599,6 +685,120 @@ export default function page() {
             setConfirmCheckIn(null)
           }}
         />
+      )}
+
+      {/* Services breakdown modal */}
+      {servicesModalCard && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm animate-in fade-in"
+          onClick={() => setServicesModalCard(null)}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between border-b border-border/80 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
+                  <Wrench size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-foreground">
+                    Job Order Services
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    #{servicesModalCard.id} · {servicesModalCard.customer} · {servicesModalCard.vehicle} ({servicesModalCard.plate})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setServicesModalCard(null)}
+                className="cursor-pointer rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {(() => {
+              const allServices = parseServices(servicesModalCard.service)
+              const filteredServices = servicesSearchQuery.trim()
+                ? allServices.filter((s) =>
+                    s.toLowerCase().includes(servicesSearchQuery.trim().toLowerCase())
+                  )
+                : allServices
+
+              return (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-semibold text-muted-foreground">
+                      Total: {allServices.length} {allServices.length === 1 ? 'service' : 'services'}
+                    </span>
+                    {allServices.length > 5 && (
+                      <div className="relative w-48">
+                        <Search
+                          size={13}
+                          className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Search services..."
+                          value={servicesSearchQuery}
+                          onChange={(e) => setServicesSearchQuery(e.target.value)}
+                          className="w-full rounded-lg border border-border bg-background pl-8 pr-2.5 py-1 text-xs text-foreground focus:border-brand focus:outline-none"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="max-h-80 overflow-y-auto rounded-xl border border-border/80 bg-accent/20 p-2 space-y-1.5">
+                    {filteredServices.length === 0 ? (
+                      <p className="py-6 text-center text-xs text-muted-foreground">
+                        No services match &ldquo;{servicesSearchQuery}&rdquo;
+                      </p>
+                    ) : (
+                      filteredServices.map((serviceName, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2.5 rounded-lg bg-card px-3 py-2 text-xs border border-border/60 shadow-2xs hover:border-border transition-colors"
+                        >
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-[10px] font-bold text-indigo-700 dark:text-indigo-300 font-mono">
+                            {idx + 1}
+                          </span>
+                          <span className="font-medium text-foreground leading-snug">
+                            {serviceName}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-border/80">
+                    <p className="text-[11px] text-muted-foreground">
+                      Stage: <span className="font-semibold text-foreground capitalize">{stageLabels[servicesModalCard.stage]}</span>
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setServicesModalCard(null)}
+                        className="cursor-pointer rounded-lg border border-border px-3.5 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                      >
+                        Close
+                      </button>
+                      <Link
+                        href={`/job-orders/${servicesModalCard.id}/${stageToRoute[servicesModalCard.stage]}`}
+                        className="cursor-pointer inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-95 transition-all"
+                      >
+                        <span>Open Job Order</span>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
+          </div>
+        </div>
       )}
     </div>
   )

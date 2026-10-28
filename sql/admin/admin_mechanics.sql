@@ -33,7 +33,7 @@ AS $$
         ) AS active_jobs
     FROM employees e
     LEFT JOIN employee_profiles ep ON ep.employee_id = e.id
-    WHERE e.role = 'mechanic'
+    WHERE e.role = 'mechanic' AND e.status != 'terminated'
     ORDER BY e.full_name ASC;
 $$;
 

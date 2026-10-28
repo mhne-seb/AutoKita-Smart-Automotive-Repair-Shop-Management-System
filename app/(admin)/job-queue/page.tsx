@@ -22,15 +22,14 @@ import {
   Calendar,
   SlidersHorizontal,
   Hash,
-  UserCog,
   AlertCircle,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  ScanLine,
   ShieldCheck,
   Search,
 } from 'lucide-react'
+import { RequestedServices } from '@/components/admin/RequestedServices'
 import { DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
 import { TopBar } from '@/components/TopBar'
 import { avatarColorClass } from '@/lib/avatarColor'
@@ -61,7 +60,6 @@ export interface Job {
   // the booking itself was submitted.
   preferredDate: string | null
   servicesNeeded: string[]
-  assignedMechanic?: string
   total?: number
   // Customer agreed to the OBD-II scan fee at booking — the mechanic may scan,
   // and the fee attaches to the job order on approval.
@@ -73,7 +71,7 @@ export interface Job {
   dateArrived?: string | null
 }
 
-type Tab = 'Tickets' | 'Pending' | 'Approved' | 'Cancelled'
+type Tab = 'Tickets' | 'Pending' | 'Awaiting Arrival' | 'Approved' | 'Cancelled'
 
 const validEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 const validPhone = (v: string) => /^(09\d{9}|\+639\d{9})$/.test(v.replace(/\s|-/g, ''))
@@ -89,7 +87,6 @@ const getServiceLabel = (raw: string): string => {
 
 export default function page() {
   const [jobs, setJobs] = useState<Job[]>([])
-  const [mechanics, setMechanics] = useState<any[]>([])
   // Show the loading scene instead of empty cards ("0 Tickets", "No tickets
   // found") while the first fetch is still on its way.
   const [loading, setLoading] = useState(true)
@@ -119,7 +116,6 @@ export default function page() {
               isWarrantyClaim: Boolean(t.is_warranty_claim),
               jobOrderId: t.job_order_id ? Number(t.job_order_id) : undefined,
               dateArrived: t.date_arrived ? new Date(t.date_arrived).toISOString() : null,
-              assignedMechanic: t.mechanic_id ? t.mechanic_id.toString() : undefined,
               status,
               date: new Date(t.request_date).toLocaleDateString(),
               preferredDate: t.preferred_datetime
@@ -128,7 +124,6 @@ export default function page() {
             }
           })
           setJobs(mappedJobs)
-          setMechanics(data.mechanics || [])
         }
       })
       .catch(console.error)
@@ -139,7 +134,7 @@ export default function page() {
     fetchJobs()
   }, [])
 
-  const [tab, setTab] = useState<Tab>('Tickets')
+  const [tab, setTab] = useState<Tab>('Pending')
   // Independent of tab (status) — a warranty claim can be pending, approved,
   // or cancelled just like any ticket, so this is a separate toggle, not a
   // fifth status tab.
@@ -151,7 +146,7 @@ export default function page() {
   // Filter criteria states
   const [selectedVehicle, setSelectedVehicle] = useState('all')
   const [selectedMode, setSelectedMode] = useState('all') // 'all' | 'Shop Visit' | 'Home Service'
-  const [selectedMechanic, setSelectedMechanic] = useState('all') // 'all' | 'unassigned' | mechanicId
+  const [selectedStatus, setSelectedStatus] = useState('all') // 'all' | 'Pending' | 'Awaiting Arrival' | 'Approved' | 'Cancelled'
   const [showFilterMenu, setShowFilterMenu] = useState(false)
   const filterMenuRef = useRef<HTMLDivElement>(null)
 
@@ -172,7 +167,7 @@ export default function page() {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, tab, warrantyOnly, selectedVehicle, selectedMode, selectedMechanic])
+  }, [searchQuery, tab, warrantyOnly, selectedVehicle, selectedMode, selectedStatus])
 
   const vehicleOptions = useMemo(() => {
     const set = new Set<string>()
@@ -182,23 +177,15 @@ export default function page() {
     return Array.from(set).sort()
   }, [jobs])
 
-  const mechanicOptions = useMemo(() => {
-    return mechanics.map((m) => ({
-      id: m.id?.toString(),
-      name: m.full_name || `${m.first_name || ''} ${m.last_name || ''}`.trim() || `Mechanic #${m.id}`,
-      status: m.status,
-    }))
-  }, [mechanics])
-
   const activeFilterCount =
     (selectedVehicle !== 'all' ? 1 : 0) +
     (selectedMode !== 'all' ? 1 : 0) +
-    (selectedMechanic !== 'all' ? 1 : 0)
+    (selectedStatus !== 'all' ? 1 : 0)
 
   const resetFilters = () => {
     setSelectedVehicle('all')
     setSelectedMode('all')
-    setSelectedMechanic('all')
+    setSelectedStatus('all')
     setCurrentPage(1)
   }
 
@@ -208,12 +195,15 @@ export default function page() {
   const [approving, setApproving] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Job | null>(null)
   const [rejectTarget, setRejectTarget] = useState<Job | null>(null)
+  const [checkingInTarget, setCheckingInTarget] = useState<Job | null>(null)
+  const [checkingIn, setCheckingIn] = useState(false)
 
   const counts = useMemo(
     () => ({
       all: jobs.length,
       pending: jobs.filter((c) => c.status === 'Pending').length,
-      approved: jobs.filter((c) => c.status === 'Approved' || c.status === 'In Progress').length,
+      awaitingArrival: jobs.filter((c) => (c.status === 'Approved' || c.status === 'In Progress') && !c.dateArrived).length,
+      approved: jobs.filter((c) => (c.status === 'Approved' || c.status === 'In Progress') && Boolean(c.dateArrived)).length,
       cancelled: jobs.filter((c) => c.status === 'Cancelled').length,
     }),
     [jobs],
@@ -238,8 +228,12 @@ export default function page() {
     const matchesTab =
       tab === 'Tickets' ||
       (tab === 'Pending' && c.status === 'Pending') ||
+      (tab === 'Awaiting Arrival' &&
+        (c.status === 'Approved' || c.status === 'In Progress') &&
+        !c.dateArrived) ||
       (tab === 'Approved' &&
-        (c.status === 'Approved' || c.status === 'In Progress')) ||
+        (c.status === 'Approved' || c.status === 'In Progress') &&
+        Boolean(c.dateArrived)) ||
       (tab === 'Cancelled' && c.status === 'Cancelled')
 
     const matchesWarranty = !warrantyOnly || c.isWarrantyClaim
@@ -250,49 +244,34 @@ export default function page() {
     const matchesMode =
       selectedMode === 'all' || c.serviceMode.toLowerCase() === selectedMode.toLowerCase()
 
-    const matchesMechanic =
-      selectedMechanic === 'all' ||
-      (selectedMechanic === 'unassigned' && (!c.assignedMechanic || c.assignedMechanic === 'Unassigned')) ||
-      c.assignedMechanic === selectedMechanic
+    const matchesStatus =
+      selectedStatus === 'all' ||
+      (selectedStatus === 'Pending' && c.status === 'Pending') ||
+      (selectedStatus === 'Awaiting Arrival' &&
+        (c.status === 'Approved' || c.status === 'In Progress') &&
+        !c.dateArrived) ||
+      (selectedStatus === 'Approved' &&
+        (c.status === 'Approved' || c.status === 'In Progress') &&
+        Boolean(c.dateArrived)) ||
+      (selectedStatus === 'Cancelled' && c.status === 'Cancelled')
 
-    return matchesSearch && matchesTab && matchesWarranty && matchesVehicle && matchesMode && matchesMechanic
+    return matchesSearch && matchesTab && matchesWarranty && matchesVehicle && matchesMode && matchesStatus
   })
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage))
   const paginatedJobs = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   const tabs: { label: Tab; count: number; icon: typeof Wrench }[] = [
-    { label: 'Tickets', count: counts.all, icon: Wrench },
     { label: 'Pending', count: counts.pending, icon: ShieldAlert },
+    { label: 'Awaiting Arrival', count: counts.awaitingArrival, icon: Store },
     { label: 'Approved', count: counts.approved, icon: Package },
     { label: 'Cancelled', count: counts.cancelled, icon: XCircle },
+    { label: 'Tickets', count: counts.all, icon: Wrench },
   ]
   const warrantyClaimCount = jobs.filter((j) => j.isWarrantyClaim).length
 
-  const updateMechanic = (ticketId: number, mechanicIdStr: string) => {
-    if (mechanicIdStr !== 'Unassigned') {
-      const selected = mechanics.find((m) => m.id?.toString() === mechanicIdStr)
-      if (selected && selected.status !== 'active') {
-        toast.error(`${selected.full_name || 'This mechanic'} is currently on leave and cannot be assigned.`)
-        return
-      }
-    }
-    setJobs((prev) =>
-      prev.map((j) => (j.ticketId === ticketId ? { ...j, assignedMechanic: mechanicIdStr === 'Unassigned' ? undefined : mechanicIdStr } : j)),
-    )
-  }
-
   const confirmApprove = async (job: Job, checkInNow = false) => {
     if (approving) return;
-    if (!job.assignedMechanic || job.assignedMechanic === 'Unassigned') {
-      toast.error("Please assign a mechanic first");
-      return;
-    }
-    const assignedMech = mechanics.find((m) => m.id?.toString() === job.assignedMechanic)
-    if (assignedMech && assignedMech.status !== 'active') {
-      toast.error(`${assignedMech.full_name || 'This mechanic'} is currently on leave and cannot be assigned.`);
-      return;
-    }
     setApproving(true);
     try {
       const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
@@ -302,7 +281,6 @@ export default function page() {
         body: JSON.stringify({
           action: 'approve',
           ticketId: job.ticketId,
-          mechanicId: job.assignedMechanic,
           employeeId: activeEmployeeId ? Number(activeEmployeeId) : null,
           checkInNow: Boolean(checkInNow),
         })
@@ -311,7 +289,7 @@ export default function page() {
       if (data.success) {
         toast.success(
           checkInNow
-            ? `Ticket approved & vehicle marked as stored in shop! Inspection is ready.`
+            ? `Ticket approved & vehicle checked in! Inspection is ready.`
             : `Ticket approved! Awaiting vehicle arrival at the shop.`
         );
         setApproveTarget(null);
@@ -384,6 +362,35 @@ export default function page() {
     }
   }
 
+  const confirmCheckIn = async (job: Job) => {
+    setCheckingIn(true)
+    try {
+      const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
+      const res = await fetch('/api/admin/job-queue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'check_in',
+          ticketId: job.ticketId,
+          jobOrderId: job.jobOrderId,
+          employeeId: activeEmployeeId ? Number(activeEmployeeId) : null,
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success(`Vehicle checked in! Inspection unlocked.`)
+        setCheckingInTarget(null)
+        fetchJobs()
+      } else {
+        toast.error(data.message || 'Check-in failed')
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Check-in failed')
+    } finally {
+      setCheckingIn(false)
+    }
+  }
+
   const addTicket = async (data: NewTicketData) => {
     try {
       const activeEmployeeId = typeof window !== 'undefined' ? sessionStorage.getItem('autokita_user_id') : null
@@ -437,7 +444,8 @@ export default function page() {
       <div className="flex flex-wrap gap-5">
         <StatCard label="Total Tickets" value={`${counts.all} Tickets`} icon={Wrench} iconBg="bg-gradient-to-br from-brand/20 to-brand/5" iconColor="text-brand" />
         <StatCard label="Waiting Approval" value={`${counts.pending} Pending`} icon={ShieldAlert} iconBg="bg-gradient-to-br from-violet-100 to-violet-50" iconColor="text-violet-600" />
-        <StatCard label="Approved Service" value={`${counts.approved} Approved`} icon={Package} iconBg="bg-gradient-to-br from-amber-100 to-amber-50" iconColor="text-amber-600" />
+        <StatCard label="Awaiting Arrival" value={`${counts.awaitingArrival} Arriving`} icon={Store} iconBg="bg-gradient-to-br from-amber-100 to-amber-50" iconColor="text-amber-600" />
+        <StatCard label="Approved Service" value={`${counts.approved} Approved`} icon={Package} iconBg="bg-gradient-to-br from-blue-100 to-blue-50" iconColor="text-blue-600" />
         <StatCard label="Cancelled Service" value={`${counts.cancelled} Cancelled`} icon={XCircle} iconBg="bg-gradient-to-br from-rose-100 to-rose-50" iconColor="text-rose-600" />
       </div>
 
@@ -450,7 +458,7 @@ export default function page() {
               }`}
           >
             <Icon size={14} />
-            {label}
+            {label === 'Tickets' ? 'All Tickets' : label}
             <span
               className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs ${tab === label ? 'bg-white/20 text-brand-foreground' : 'bg-accent text-muted-foreground'
                 }`}
@@ -569,21 +577,19 @@ export default function page() {
                     </select>
                   </div>
 
-                  {/* Mechanic */}
+                  {/* Status */}
                   <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Mechanic Assignment</label>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Status</label>
                     <select
-                      value={selectedMechanic}
-                      onChange={(e) => setSelectedMechanic(e.target.value)}
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
                       className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
                     >
-                      <option value="all">All</option>
-                      <option value="unassigned">Unassigned Only</option>
-                      {mechanicOptions.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.name}{m.status === 'on_leave' ? ' (On Leave)' : m.status && m.status !== 'active' ? ` (${m.status})` : ''}
-                        </option>
-                      ))}
+                      <option value="all">All Statuses</option>
+                      <option value="Pending">Pending (Waiting Approval)</option>
+                      <option value="Awaiting Arrival">Awaiting Arrival</option>
+                      <option value="Approved">Approved</option>
+                      <option value="Cancelled">Cancelled</option>
                     </select>
                   </div>
                 </div>
@@ -636,10 +642,10 @@ export default function page() {
               <button onClick={() => setSelectedMode('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
             </span>
           )}
-          {selectedMechanic !== 'all' && (
+          {selectedStatus !== 'all' && (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
-              Mechanic: {selectedMechanic === 'unassigned' ? 'Unassigned' : (mechanicOptions.find(m => m.id === selectedMechanic)?.name || selectedMechanic)}
-              <button onClick={() => setSelectedMechanic('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
+              Status: {selectedStatus}
+              <button onClick={() => setSelectedStatus('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
             </span>
           )}
           <button onClick={resetFilters} className="text-xs text-muted-foreground hover:text-rose-500 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
@@ -660,7 +666,6 @@ export default function page() {
               <th className="px-4 py-3 font-semibold">Mode</th>
               <th className="px-4 py-3 font-semibold">Service Needed</th>
               <th className="px-4 py-3 font-semibold">Preferred Date</th>
-              <th className="px-4 py-3 font-semibold">Mechanic</th>
               <th className="px-4 py-3 font-semibold">Status</th>
               <th className="px-4 py-3 text-right font-semibold">Actions</th>
             </tr>
@@ -668,7 +673,6 @@ export default function page() {
           <tbody>
             {paginatedJobs.map((c) => {
               const approvedLike = c.status === 'Approved' || c.status === 'In Progress'
-              const unassigned = !c.assignedMechanic || c.assignedMechanic === 'Unassigned'
               return (
                 <tr key={c.ticketId} className="border-b border-border/60 align-top last:border-0">
                   <td className="px-4 py-4">
@@ -714,14 +718,6 @@ export default function page() {
                       <Wrench size={12} className="shrink-0 text-muted-foreground" />
                       {c.servicesNeeded.map(getServiceLabel).join(', ')}
                     </span>
-                    {c.diagnosticScanAuthorized && (
-                      <span
-                        title={`Customer agreed to the PHP ${DIAGNOSTIC_SCAN_FEE.toLocaleString()} OBD-II scan fee at booking`}
-                        className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800"
-                      >
-                        <ScanLine size={11} /> OBD-II scan authorized
-                      </span>
-                    )}
                     {c.isWarrantyClaim && (
                       <span
                         title="Started from a customer's warranty claim, not a fresh booking"
@@ -741,45 +737,18 @@ export default function page() {
                     )}
                   </td>
                   <td className="px-4 py-4">
-                    <div className="relative">
-                      <UserCog className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                      <select
-                        value={c.assignedMechanic ?? 'Unassigned'}
-                        onChange={(e) => updateMechanic(c.ticketId, e.target.value)}
-                        className={`cursor-pointer transition-all w-full min-w-[150px] rounded-md border py-1 pl-8 pr-2 text-sm text-foreground ${unassigned ? 'border-amber-300 bg-amber-50 hover:bg-amber-100/80' : 'border-border hover:bg-accent'
-                          }`}
-                      >
-                        <option value="Unassigned">Unassigned</option>
-                        {mechanics.map(m => {
-                          const isLeave = m.status === 'on_leave'
-                          const isUnavailable = m.status !== 'active'
-                          const isCurrent = c.assignedMechanic === m.id.toString()
-                          return (
-                            <option
-                              key={m.id}
-                              value={m.id.toString()}
-                              disabled={isUnavailable && !isCurrent}
-                            >
-                              {m.full_name} {isLeave ? '(On Leave)' : isUnavailable ? `(${m.status})` : ''}
-                            </option>
-                          )
-                        })}
-                      </select>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    {c.status === 'Approved' ? (
+                    {c.status === 'Approved' || c.status === 'In Progress' ? (
                       !c.dateArrived ? (
                         <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
                           <Store size={12} /> Awaiting Arrival
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                          <CheckCircle2 size={12} /> Stored in Shop
+                          <CheckCircle2 size={12} /> Approved
                         </span>
                       )
                     ) : (
-                      <StatusBadge status={c.status === 'In Progress' ? 'Approved' : c.status} />
+                      <StatusBadge status={c.status} />
                     )}
                   </td>
                   <td className="px-4 py-4 text-right">
@@ -794,6 +763,15 @@ export default function page() {
                       {c.status !== 'Cancelled' && (
                         approvedLike ? (
                           <>
+                            {!c.dateArrived && (
+                              <button
+                                onClick={() => setCheckingInTarget(c)}
+                                title="Check In Vehicle"
+                                className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-amber-300 bg-amber-50 p-2 text-amber-800 hover:bg-amber-100 active:translate-y-0"
+                              >
+                                <Store size={14} />
+                              </button>
+                            )}
                             {c.dateArrived && c.jobOrderId && (
                               <a
                                 href={`/job-orders/${c.jobOrderId}/inspection`}
@@ -854,7 +832,6 @@ export default function page() {
       {approveTarget && (
         <ApproveModal
           job={approveTarget}
-          mechanics={mechanics}
           busy={approving}
           onClose={() => setApproveTarget(null)}
           onConfirm={(checkInNow) => confirmApprove(approveTarget, checkInNow)}
@@ -875,8 +852,24 @@ export default function page() {
         />
       )}
 
+      {checkingInTarget && (
+        <ConfirmModal
+          tone="brand"
+          title="Check in this vehicle?"
+          description={`${checkingInTarget.vehicle} (${checkingInTarget.plate}) for ${checkingInTarget.name} has arrived. Marking this vehicle as stored in the shop will unlock inspection.`}
+          confirmLabel={checkingIn ? "Checking in..." : "Check In Vehicle"}
+          onClose={() => setCheckingInTarget(null)}
+          onConfirm={() => confirmCheckIn(checkingInTarget)}
+          disabled={checkingIn}
+        />
+      )}
+
       {viewTarget && (
-        <ViewModal job={viewTarget} mechanics={mechanics} onClose={() => setViewTarget(null)} />
+        <ViewModal
+          job={viewTarget}
+          onClose={() => setViewTarget(null)}
+          onCheckIn={() => setCheckingInTarget(viewTarget)}
+        />
       )}
 
       {deleteTarget && (
@@ -894,21 +887,10 @@ export default function page() {
   )
 }
 
-// Approve modal — shows the job details and blocks approval until a
-// mechanic is assigned.
+// Approve modal — shows the job details. The mechanic is chosen later when
+// scheduling the job on the job order progress page.
 
-function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; mechanics: any[]; busy: boolean; onClose: () => void; onConfirm: (checkInNow: boolean) => void }) {
-  const unassigned = !job.assignedMechanic || job.assignedMechanic === 'Unassigned'
-  const assignedMech = unassigned ? null : mechanics.find((m) => m.id?.toString() === job.assignedMechanic)
-  const isMechanicOnLeave = assignedMech ? assignedMech.status !== 'active' : false
-  const mechanicName = unassigned
-    ? 'Unassigned'
-    : (assignedMech?.full_name ?? job.assignedMechanic) +
-      (assignedMech?.status === 'on_leave'
-        ? ' (On Leave)'
-        : assignedMech?.status && assignedMech.status !== 'active'
-        ? ` (${assignedMech.status})`
-        : '')
+function ApproveModal({ job, busy, onClose, onConfirm }: { job: Job; busy: boolean; onClose: () => void; onConfirm: (checkInNow: boolean) => void }) {
   const [checkInNow, setCheckInNow] = useState(false)
 
   return (
@@ -924,7 +906,7 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
         </div>
 
         <h3 className="mt-4 text-lg font-bold text-foreground">Approve job order?</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Review the details before approving this ticket.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Review the details before approving this ticket. The mechanic is chosen later when you schedule the job.</p>
 
         <dl className="mt-4 space-y-2 rounded-lg bg-accent/50 p-4 text-sm">
           <div className="flex justify-between gap-4">
@@ -937,9 +919,11 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
               {job.vehicle} — {job.plate}
             </dd>
           </div>
-          <div className="flex justify-between gap-4">
+          <div>
             <dt className="text-muted-foreground">Services</dt>
-            <dd className="text-right font-medium text-foreground">{job.servicesNeeded.join(', ')}</dd>
+            <dd className="mt-1 max-h-48 overflow-y-auto text-foreground">
+              <RequestedServices raw={job.servicesNeeded.join('\n')} />
+            </dd>
           </div>
           {job.preferredDate && (
             <div className="flex justify-between gap-4">
@@ -955,12 +939,6 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
               </dd>
             </div>
           )}
-          <div className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">Assigned Mechanic</dt>
-            <dd className={`font-medium ${unassigned ? 'text-amber-600' : isMechanicOnLeave ? 'text-rose-600' : 'text-foreground'}`}>
-              {mechanicName}
-            </dd>
-          </div>
         </dl>
 
         <div className="mt-4 rounded-lg border border-border bg-accent/30 p-3.5 flex items-start gap-3">
@@ -972,27 +950,12 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
             className="mt-0.5 h-4 w-4 rounded border-border text-brand focus:ring-brand cursor-pointer"
           />
           <label htmlFor="modalCheckInNow" className="text-xs text-foreground cursor-pointer select-none">
-            <span className="font-semibold block text-sm">Vehicle has already arrived & is stored in shop now</span>
+            <span className="font-semibold block text-sm">Vehicle has already arrived at the shop</span>
             <span className="text-muted-foreground mt-0.5 block leading-normal">
               Check in immediately. If unchecked, the ticket will be approved as &ldquo;Awaiting Arrival&rdquo; until the vehicle is physically dropped off.
             </span>
           </label>
         </div>
-
-        {unassigned && (
-          <div className="mt-3 flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2.5 text-xs text-amber-700">
-            <AlertCircle size={14} className="mt-0.5 shrink-0" />
-            You must assign a mechanic to this job before it can be approved. Close this dialog and pick one from the
-            table, then try again.
-          </div>
-        )}
-
-        {isMechanicOnLeave && (
-          <div className="mt-3 flex items-start gap-2 rounded-lg bg-rose-50 px-3 py-2.5 text-xs text-rose-700">
-            <AlertCircle size={14} className="mt-0.5 shrink-0" />
-            The assigned mechanic ({assignedMech?.full_name}) is currently on leave and cannot take new job orders. Please reassign this ticket to an available mechanic before approving.
-          </div>
-        )}
 
         <div className="mt-6 flex justify-end gap-3">
           <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm">
@@ -1000,7 +963,7 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
           </button>
           <button
             onClick={() => onConfirm(checkInNow)}
-            disabled={unassigned || isMechanicOnLeave || busy}
+            disabled={busy}
             className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-brand-foreground hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
             {busy ? 'Approving...' : 'Confirm Approval'}
@@ -1013,19 +976,10 @@ function ApproveModal({ job, mechanics, busy, onClose, onConfirm }: { job: Job; 
 
 // Hold modal — requires a reason before putting a job on hold.
 
-function ViewModal({ job, mechanics, onClose }: { job: Job; mechanics: any[]; onClose: () => void }) {
-  const assignedMech = !job.assignedMechanic ? null : mechanics.find((m) => m.id?.toString() === job.assignedMechanic)
-  const mechanicName = !job.assignedMechanic
-    ? 'Not yet assigned'
-    : (assignedMech?.full_name ?? job.assignedMechanic) +
-      (assignedMech?.status === 'on_leave'
-        ? ' (On Leave)'
-        : assignedMech?.status && assignedMech.status !== 'active'
-        ? ` (${assignedMech.status})`
-        : '')
+function ViewModal({ job, onClose, onCheckIn }: { job: Job; onClose: () => void; onCheckIn?: () => void }) {
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-xl bg-background p-6 shadow-2xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-background p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -1097,13 +1051,11 @@ function ViewModal({ job, mechanics, onClose }: { job: Job; mechanics: any[]; on
                 </dt>
                 <dd className="font-medium text-foreground">{job.serviceMode}</dd>
               </div>
-              <div className="flex justify-between gap-4">
-                <dt className="flex items-center gap-1.5 text-muted-foreground">
-                  <Wrench size={12} /> Service(s) Requested
-                </dt>
-                <dd className="text-right font-medium text-foreground">{job.servicesNeeded.join(', ')}</dd>
-              </div>
             </dl>
+            <p className="mt-4 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <Wrench size={12} /> Service(s) Requested
+            </p>
+            <RequestedServices raw={job.servicesNeeded.join('\n')} />
           </section>
 
           <section>
@@ -1120,28 +1072,45 @@ function ViewModal({ job, mechanics, onClose }: { job: Job; mechanics: any[]; on
               {job.preferredDate && (
                 <div className="flex justify-between gap-4">
                   <dt className="flex items-center gap-1.5 text-muted-foreground">
-                    <Calendar size={12} /> Customer's Preferred Date
+                    <Calendar size={12} /> Customer's Shop Visit
                   </dt>
                   <dd className="font-medium text-foreground">{job.preferredDate}</dd>
                 </div>
               )}
-              <div className="flex justify-between gap-4">
-                <dt className="flex items-center gap-1.5 text-muted-foreground">
-                  <UserCog size={12} /> Assigned Mechanic
-                </dt>
-                <dd className="font-medium text-foreground">{mechanicName}</dd>
-              </div>
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-muted-foreground">Current Status</dt>
                 <dd>
-                  <StatusBadge status={job.status === 'In Progress' ? 'Approved' : job.status} />
+                  {job.status === 'Approved' || job.status === 'In Progress' ? (
+                    !job.dateArrived ? (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                        <Store size={12} /> Awaiting Arrival
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+                        <CheckCircle2 size={12} /> Approved
+                      </span>
+                    )
+                  ) : (
+                    <StatusBadge status={job.status} />
+                  )}
                 </dd>
               </div>
             </dl>
           </section>
         </div>
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex justify-end gap-2.5">
+          {onCheckIn && !job.dateArrived && (job.status === 'Approved' || job.status === 'In Progress') && (
+            <button
+              onClick={() => {
+                onClose()
+                onCheckIn()
+              }}
+              className="cursor-pointer flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-100 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm"
+            >
+              <Store size={14} /> Check In Vehicle
+            </button>
+          )}
           <button onClick={onClose} className="cursor-pointer rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:bg-accent hover:shadow-sm">
             Close
           </button>

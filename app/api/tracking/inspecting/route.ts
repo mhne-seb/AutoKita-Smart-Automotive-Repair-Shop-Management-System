@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
 import { getLatestScanAuthorization } from '@/lib/scanAuthorization'
 import { signFileUrls } from '@/lib/storage'
+import { getServiceModeValue } from '@/lib/jobOrderMode'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -36,6 +37,8 @@ export async function GET(request: NextRequest) {
         canCancel: false, scanAuthorization: null,
       })
     }
+
+    if (jobOrder) jobOrder.service_mode = await getServiceModeValue(jobOrder.job_order_id)
 
     const [preDiagRes, findingsRes, walkaroundRes, historyRes, shopRes, cancelRes, scannerRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_quotation($1)`, [jobOrder.job_order_id]),

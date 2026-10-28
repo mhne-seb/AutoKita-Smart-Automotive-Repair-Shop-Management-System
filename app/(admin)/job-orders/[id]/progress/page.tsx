@@ -23,6 +23,8 @@ import { currency } from '@/data/mockData'
 import { ServiceSection, TaskStatus, JobOrderCard, ServiceProgressData, QuotationData, ServiceTask, TaskPart, PartsPurchase, Supplier, ServiceFinding, PullOutRequest, partIsReady } from '@/data/types'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ShopLoading } from '@/components/ShopLoading'
+import { ScheduleJobModal } from '@/components/admin/ScheduleJobModal'
+import { formatHours } from '@/lib/formatHours'
 
 const sectionColors: Record<string, string> = {
   received: 'text-emerald-600',
@@ -166,6 +168,16 @@ export default function page() {
   }, [allTasks])
   const partsToBuy = allParts.filter((p) => p.status === 'to_order')
   const completedCount = serviceTasks.filter((t) => t.status === 'completed').length
+  const [showScheduleJobModal, setShowScheduleJobModal] = useState(false)
+  const hasUnscheduledTasks = useMemo(() => {
+    return serviceTasks.some(
+      (t) =>
+        t.status === 'pending' &&
+        !isRoadTest(t) &&
+        !isDiagnosticScanTask(t) &&
+        (!t.scheduledDate || !t.mechanicId),
+    )
+  }, [serviceTasks])
 
   // For display only: finished services get their own section under the
   // open ones, so the mechanic's "what's left" list isn't padded with done
@@ -249,13 +261,24 @@ export default function page() {
     return { year, type, mileage }
   }, [jobOrder])
 
+  // Latest finish across tasks. A task still waiting on a part cannot finish before the part
+  // arrives (8:00 AM shop opening on its date) plus the task's own hours, scheduled or not.
   const estimatedFinish = useMemo(() => {
-    const withEstimate = serviceTasks.filter((t) => t.estimatedFinish)
-    if (withEstimate.length === 0) return null
-    return withEstimate.reduce<Date | null>((latest, t) => {
-      const d = new Date(t.estimatedFinish!)
-      return !latest || d > latest ? d : latest
-    }, null)
+    let latest: Date | null = null
+    for (const t of serviceTasks) {
+      if (t.status === 'completed') continue
+      const candidates: Date[] = []
+      if (t.estimatedFinish) candidates.push(new Date(t.estimatedFinish))
+      const etas = (t.parts ?? []).filter((p) => !partIsReady(p) && p.estimatedDelivery).map((p) => p.estimatedDelivery!).sort()
+      if (etas.length > 0) {
+        const arrival = new Date(`${etas[etas.length - 1]}T08:00:00`)
+        candidates.push(new Date(arrival.getTime() + (t.estimatedHours ?? 1) * 3600000))
+      }
+      for (const d of candidates) {
+        if (!isNaN(d.getTime()) && (!latest || d > latest)) latest = d
+      }
+    }
+    return latest
   }, [serviceTasks])
 
   const quotationTotal = useMemo(() => {
@@ -419,9 +442,22 @@ export default function page() {
   // test can be drawn in the sidebar with exactly the same card as the rest.
   const renderSection = (section: ServiceSection) => (
     <div key={section.id} className="space-y-3">
-      <p className={`text-sm font-bold uppercase tracking-wide ${sectionColors[section.id] ?? 'text-slate-500'}`}>
-        {section.title}
-      </p>
+      <div className="flex items-center justify-between">
+        <p className={`text-sm font-bold uppercase tracking-wide ${sectionColors[section.id] ?? 'text-slate-500'}`}>
+          {section.title}
+        </p>
+        {/* No quotationConfirmed check here: the suggestion route checks the real rule (job order status). */}
+        {section.id === 'in-progress' && hasUnscheduledTasks && (
+          <button
+            type="button"
+            onClick={() => setShowScheduleJobModal(true)}
+            title="Choose a start, the mechanics and the times for the pending tasks"
+            className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-indigo-700 active:translate-y-0"
+          >
+            <CalendarDays size={13} /> Schedule job
+          </button>
+        )}
+      </div>
       {section.tasks.map((task) => (
           <Fragment key={task.id}>
           <div
@@ -489,10 +525,10 @@ export default function page() {
                     // Est. Finish is scheduled start + predicted duration, so the
                     // duration is just the gap between the two.
                     const estHrs = task.scheduledDate ? (est.getTime() - new Date(task.scheduledDate.replace(' ', 'T')).getTime()) / 3600000 : 0
-                    const hrsLabel = estHrs > 0 ? ` (${estHrs % 1 === 0 ? estHrs : estHrs.toFixed(1)} hrs)` : ''
+                    const hrsLabel = estHrs > 0 ? ` (${formatHours(estHrs)})` : ''
                     return overdueHrs > 0 ? (
                       <span className="flex items-center gap-1 font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
-                        Overdue by {overdueHrs < 1 ? `${Math.round(overdueHrs * 60)} min` : `${overdueHrs.toFixed(1)} hrs`} (est. {label})
+                        Overdue by {formatHours(overdueHrs)} (est. {label})
                       </span>
                     ) : (
                       <span className="flex items-center gap-1 font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
@@ -542,9 +578,8 @@ export default function page() {
                     </span>
                   )}
 
-                  {/* Start is blocked until the task is scheduled to a mechanic
-                      and every part for it has arrived — work doesn't begin on
-                      a car missing parts, or with no one assigned to do it. */}
+                  {/* Start needs a mechanic and a time. A missing part is only a
+                      warning: the shop may start the job before the part arrives. */}
                   {task.status === 'pending' && unscheduled && (
                     <button
                       onClick={() => setSchedulingTask(task)}
@@ -557,10 +592,10 @@ export default function page() {
                   {task.status === 'pending' && !unscheduled && (
                     <button
                       onClick={() => setTaskStatus(task, 'active')}
-                      disabled={busy || missing.length > 0}
+                      disabled={busy}
                       title={
                         missing.length > 0
-                          ? `Waiting for parts (${parts.length - missing.length} of ${parts.length} received)`
+                          ? `Part not here yet (${parts.length - missing.length} of ${parts.length} received). You can still start.`
                           : undefined
                       }
                       className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-indigo-700 active:translate-y-0 disabled:hover:-translate-y-0 disabled:hover:shadow-none disabled:cursor-not-allowed disabled:opacity-40"
@@ -634,6 +669,9 @@ export default function page() {
                             <div className="font-semibold text-slate-800">{p.name}</div>
                             {p.purchaseOrderId && (
                               <div className="text-[11px] text-slate-400">PO-{p.purchaseOrderId} · {p.supplierName} · {p.purchasedOn}</div>
+                            )}
+                            {!ready && p.estimatedDelivery && (
+                              <div className="text-[11px] text-amber-700">Estimated Time of Arrival on Shop: {fmtEta(p.estimatedDelivery)}</div>
                             )}
                           </td>
                           <td className="py-2 pr-3 text-xs text-slate-400">{p.partNo}</td>
@@ -773,7 +811,7 @@ export default function page() {
       <JobOrderBreadcrumb jobOrderId={jobOrderId} current="progress" stage={jobOrder.stage} />
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4 sm:gap-6">
+        <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-5 sm:gap-6">
           <div>
             <p className="text-slate-400">Vehicle</p>
             <p className="font-bold text-slate-900">{jobOrder.vehicle}</p>
@@ -785,6 +823,10 @@ export default function page() {
           <div>
             <p className="text-slate-400">Customer</p>
             <p className="font-bold text-slate-900">{jobOrder.customer}</p>
+          </div>
+          <div>
+            <p className="text-slate-400">Phone Number</p>
+            <p className="font-bold text-slate-900">{jobOrder.contactNumber || '—'}</p>
           </div>
           <div className="sm:text-right">
             <p className="text-slate-400">Job Order</p>
@@ -985,14 +1027,14 @@ export default function page() {
           <div className="space-y-2 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-slate-400">Labor Hours (Est.)</span>
-              <span className="font-semibold text-slate-800">{laborHoursEstimate} hrs</span>
+              <span className="font-semibold text-slate-800">{formatHours(laborHoursEstimate)}</span>
             </div>
             <div className="flex items-center justify-between">
               {/* Wall-clock since the job hit the floor (overnight included), so comparing
                   it to labor hours is meaningless — no red here. Overdue lives on the task cards. */}
               <span className="text-slate-400">{initial.timer.completedAtIso ? 'Total Time in Shop' : 'Time in Shop'}</span>
               <span className="font-semibold text-slate-800">
-                {currentDurationHours} hrs
+                {formatHours(currentDurationHours)}
               </span>
             </div>
           </div>
@@ -1471,6 +1513,16 @@ export default function page() {
           }}
         />
       )}
+      {showScheduleJobModal && (
+        <ScheduleJobModal
+          jobOrderId={jobOrderId}
+          onClose={() => setShowScheduleJobModal(false)}
+          onApplied={async () => {
+            setShowScheduleJobModal(false)
+            await refreshTasks()
+          }}
+        />
+      )}
     </div>
   )
 }
@@ -1590,6 +1642,10 @@ function getTaskLocalDate(dateStr: string | null | undefined): string {
     return toLocalDateValue(new Date(trimmed))
   }
   return trimmed.slice(0, 10)
+}
+
+function fmtEta(dateStr: string): string {
+  return new Date(`${dateStr.slice(0, 10)}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function parseLocalTimestamp(dateStr: string | null | undefined): number {
@@ -1867,7 +1923,7 @@ function ScheduleModal({
             <div className="flex items-center justify-between">
               <p className="font-semibold text-slate-900 text-sm">{task.title}</p>
               <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full">
-                Est: {taskDurationHours} {taskDurationHours === 1 ? 'hr' : 'hrs'}
+                Est: {formatHours(taskDurationHours)}
               </span>
             </div>
             {note.trim() && note.trim() !== 'Describe the service...' && (
@@ -2083,7 +2139,7 @@ function ScheduleModal({
                               {t.startStr} – {t.finishStr}
                             </div>
                             <span className="text-[10px] text-slate-400">
-                              {t.tEstHours} {t.tEstHours === 1 ? 'hr' : 'hrs'}
+                              {formatHours(t.tEstHours)}
                             </span>
                           </div>
                         </div>

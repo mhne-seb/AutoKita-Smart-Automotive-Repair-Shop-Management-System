@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireCustomer } from '@/lib/authGuard'
-import { sendTempPasswordEmail } from '@/lib/mail'
-import { hashPassword } from '@/lib/password'
-import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE } from '@/data/diagnosticScan'
+import { DIAGNOSTIC_SCAN_SERVICE_NAME, DIAGNOSTIC_SCAN_FEE, bookingNeedsScan } from '@/data/diagnosticScan'
+import { ROAD_TEST_TITLE } from '@/data/roadTest'
+import { buildConcernText, MAX_SELECTED_SERVICES, NOTES_MAX_LENGTH, NOTE_MIN_WHEN_NO_SERVICE, ServiceType } from '@/lib/bookingServices'
 import { normalizePlateNumber, isValidPlateNumber, PLATE_FORMAT_ERROR_MESSAGE } from '@/lib/plate'
-import { EMAIL_RE, PHONE_RE } from '@/lib/bookingRules'
 import { getOccupiedBookingSlots, isSlotOccupiedInDb } from '@/lib/bookingSlots'
+import { formatManilaDate, formatManilaTime } from '@/lib/bookingSlotsShared'
+import { slotStartHour, hoursForWeekday, withMargin } from '@/lib/bookingTiming'
 import { CUSTOMER_SESSION_COOKIE, createSessionToken, sessionCookieOptions, sessionSecretConfigured } from '@/lib/session'
 
 export const dynamic = 'force-dynamic'
@@ -33,10 +34,12 @@ export async function GET(_req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const guard = await requireCustomer()
+    if (!guard.ok) return NextResponse.json({ success: false, message: 'Please log in to book a service.' }, { status: 401 })
+    const finalUserId = guard.session.userId
+
     const body = await req.json()
     const {
-      userId,
-      customer,          // { name, email, phone } — used when nobody is logged in
       vehicleId,
       newVehicleDetails,
       serviceMode,
@@ -44,61 +47,166 @@ export async function POST(req: NextRequest) {
       customerConcern,
       diagnosticScanAuthorized,
       preferredDatetime,
+      serviceIds,
+      packageId,
+      notSure,
+      customerNote,
+      overnightOk,
     } = body
 
     const bad =(message: string, code?: string) =>
       NextResponse.json({ success: false, message, ...(code ? { code } : {}) }, { status: 400 })
 
+    // A home service never leaves a vehicle at the shop overnight: the mechanic goes to the customer,
+    // so the overnight agreement below does not apply to it.
+    const isHomeService = serviceMode === 'Home Service'
+
     if (!vehicleId && !newVehicleDetails) return bad('Missing vehicle information')
 
-    // Resolve the customer: use the logged-in id when we have one, otherwise
-    // find them by email or create the account — same as the admin booking route.
-    let finalUserId = userId
-
-    if (finalUserId) {
-      const guard = await requireCustomer(finalUserId)
-      if (!guard.ok) return guard.response
-      finalUserId = guard.session.userId
-    }
-
-    // ---- 1. Check everything BEFORE writing anything --------------------------
-    // (The forms check these too; this is the real check, on the server.)
-    let guest: { email: string; firstName: string; lastName: string; nickname: string; phone: string; address: string | null } | null = null
-    if (!finalUserId) {
-      const email = String(customer?.email ?? '').trim().toLowerCase()
-      if (!EMAIL_RE.test(email)) return bad('Enter a valid email address.')
-      const firstName = String(customer?.firstName ?? '').trim()
-      const lastName = String(customer?.lastName ?? '').trim()
-      if (!firstName || firstName.length > 50) return bad('Enter your first name (up to 50 characters).')
-      if (!lastName || lastName.length > 50) return bad('Enter your last name (up to 50 characters).')
-      const phone = String(customer?.phone ?? '').replace(/[\s-]/g, '')
-      if (!PHONE_RE.test(phone)) return bad('Enter a valid mobile number, like 09171234567.')
-      const nickname = String(customer?.nickname ?? '').trim().slice(0, 50) || firstName
-      const address = customer?.address ? String(customer.address).trim().slice(0, 200) : null
-
-      const found = await db.query(`SELECT id FROM users WHERE LOWER(email) = $1`, [email])
-      if (found.rows.length > 0) {
-        return NextResponse.json(
-          { success: false, code: 'EMAIL_REGISTERED', message: 'This email already has an account. Please log in to book.' },
-          { status: 409 },
+    let finalConcern = ''
+    let validServiceIds: number[] = []
+    if (Array.isArray(serviceIds)) {
+      const ids: number[] = Array.from(
+        new Set(
+          serviceIds
+            .map((id: unknown) => Number(id))
+            .filter((id: number) => Number.isInteger(id) && id > 0)
         )
+      )
+      validServiceIds = ids
+      if (ids.length > MAX_SELECTED_SERVICES) {
+        return bad('Too many services selected.')
       }
 
-      const foundEmp = await db.query(`SELECT id FROM employees WHERE LOWER(email) = $1`, [email])
-      if (foundEmp.rows.length > 0) {
-        return NextResponse.json(
-          { success: false, code: 'EMAIL_REGISTERED', message: 'This email belongs to a staff account. Please use a customer email.' },
-          { status: 409 },
+      let selected: Array<{ name: string; type: ServiceType }> = []
+      let totalHours = 0
+      if (ids.length > 0) {
+        const sRes = await db.query(
+          `SELECT id, service_name, service_type, base_duration_hours FROM services WHERE id = ANY($1::int[]) AND is_active = true`,
+          [ids]
         )
+        if (sRes.rows.length !== ids.length) {
+          return bad('One of the selected services is no longer available. Please reload and pick again.')
+        }
+        for (const row of sRes.rows) {
+          if (row.service_name === DIAGNOSTIC_SCAN_SERVICE_NAME || row.service_name === ROAD_TEST_TITLE) {
+            return bad('One of the selected services is no longer available. Please reload and pick again.')
+          }
+        }
+        const rowById = new Map<number, any>(sRes.rows.map((r: any) => [Number(r.id), r]))
+        selected = ids.map((id) => {
+          const r = rowById.get(id)!
+          return {
+            name: String(r.service_name),
+            type: (r.service_type || 'repair') as ServiceType,
+          }
+        })
+        for (const row of sRes.rows) {
+          const h = Number(row.base_duration_hours)
+          if (row.base_duration_hours != null && Number.isFinite(h) && h > 0) {
+            totalHours += h
+          }
+        }
       }
-      guest = { email, firstName, lastName, nickname, phone, address }
+
+      let packageName: string | null = null
+      let packageServiceNames: string[] = []
+      if (packageId !== undefined && packageId !== null) {
+        const parsedPkgId = Number(packageId)
+        if (!Number.isInteger(parsedPkgId) || parsedPkgId <= 0) {
+          return bad('That package is no longer available. Please reload and pick again.')
+        }
+        const pkgRes = await db.query(
+          `SELECT p.package_name, s.service_name
+           FROM service_packages p
+           JOIN service_package_items i ON i.package_id = p.id
+           JOIN services s ON s.id = i.service_id
+           WHERE p.id = $1 AND p.is_active = true
+           ORDER BY i.sort_order`,
+          [parsedPkgId]
+        )
+        if (pkgRes.rows.length === 0) {
+          return bad('That package is no longer available. Please reload and pick again.')
+        }
+        packageName = pkgRes.rows[0].package_name
+        packageServiceNames = pkgRes.rows.map((r: any) => r.service_name)
+      }
+
+      const note = String(customerNote ?? '').trim()
+      if (note.length > NOTES_MAX_LENGTH) {
+        return bad('Notes are too long (500 characters at most).')
+      }
+
+      const isNotSure = notSure === true
+      if (!(ids.length >= 1 || isNotSure || note.length >= NOTE_MIN_WHEN_NO_SERVICE)) {
+        return bad('Pick at least one service, choose "Not sure", or describe the problem in the notes.')
+      }
+
+      let overnightNeeded = false
+      if (!isHomeService && preferredDatetime && totalHours > 0) {
+        let shopHours = null
+        try {
+          const sHRes = await db.query('SELECT operating_hours FROM shops ORDER BY id ASC LIMIT 1')
+          if (sHRes.rows.length > 0 && sHRes.rows[0].operating_hours != null) {
+            const raw = sHRes.rows[0].operating_hours
+            shopHours = typeof raw === 'string' ? JSON.parse(raw) : raw
+          }
+        } catch (shErr) {
+          console.error('Failed to load shop operating hours for overnight check:', shErr)
+        }
+
+        const manilaDateStr = formatManilaDate(preferredDatetime)
+        const manilaWeekday = new Date(`${manilaDateStr}T12:00:00+08:00`).getDay()
+        const manilaTimeStr = formatManilaTime(preferredDatetime)
+        const startHour = slotStartHour(manilaTimeStr)
+        const shopDayHours = hoursForWeekday(shopHours, manilaWeekday)
+
+        if (shopDayHours !== null && !Number.isNaN(startHour)) {
+          overnightNeeded = startHour + withMargin(totalHours) > shopDayHours.close
+          if (overnightNeeded && overnightOk !== true) {
+            return bad(
+              'This job may finish after we close. Choose an earlier time or allow an overnight stay.',
+              'OVERNIGHT_NOT_AGREED'
+            )
+          }
+        }
+      }
+
+      const selectedNames = selected.map((s) => s.name)
+      if (bookingNeedsScan(isNotSure, selectedNames) && diagnosticScanAuthorized !== true) {
+        return bad('Please agree to the diagnostic scan fee to continue.', 'SCAN_FEE_NOT_AGREED')
+      }
+
+      finalConcern = buildConcernText({
+        packageName,
+        packageServiceNames,
+        selected,
+        notSure: isNotSure,
+        overnightOk: overnightOk === true && overnightNeeded,
+        customerNote: note,
+      })
+    } else {
+      finalConcern = String(customerConcern ?? '').slice(0, 1500)
     }
 
     let finalVehicleId = vehicleId
-    if (finalUserId && finalVehicleId) {
+    if (finalVehicleId) {
       const ownVeh = await db.query(`SELECT 1 FROM vehicles WHERE id = $1 AND user_id = $2`, [finalVehicleId, finalUserId])
       if (ownVeh.rows.length === 0) {
         return NextResponse.json({ success: false, message: 'Forbidden: not your vehicle' }, { status: 403 })
+      }
+
+      // A car that is already in the shop cannot be booked again until its job is released
+      // or cancelled. The screens hide the button; this is the real check.
+      const openJob = await db.query(
+        `SELECT 1 FROM job_orders WHERE vehicle_id = $1 AND status NOT IN ('released', 'cancelled') LIMIT 1`,
+        [finalVehicleId],
+      )
+      if (openJob.rows.length > 0) {
+        return NextResponse.json(
+          { success: false, code: 'VEHICLE_IN_SERVICE', message: 'This car is already in the shop. You can book again after this job is done.' },
+          { status: 409 },
+        )
       }
     }
 
@@ -129,33 +237,13 @@ export async function POST(req: NextRequest) {
     const mappedServiceMode = serviceMode === 'Home Service' ? 'home_service' : 'walk_in'
     const address = mappedServiceMode === 'home_service' ? (homeAddress || 'None') : 'None'
 
-    // Readable copy stays in tempPassword for the welcome email below;
-    // only the hash goes into the database. (Hashing is slow, so do it before
-    // opening the transaction.)
-    let tempPassword: string | null = null
-    let passwordHash: string | null = null
-    if (guest) {
-      tempPassword = `temp-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString().slice(-6)}`
-      passwordHash = await hashPassword(tempPassword)
-    }
-
     // ---- 2. Write everything in ONE transaction -------------------------------
-    // Account, vehicle, ticket and the scan consent are saved together or not
-    // at all, so a failure can never leave an account nobody was told about.
-    let accountEmailed = false
+    // Vehicle, ticket and the scan consent are saved together or not at all, so a
+    // failure can never leave a half-made booking.
     let ticket: any
     const client = await db.connect()
     try {
       await client.query('BEGIN')
-
-      if (guest) {
-        const created = await client.query(
-          `INSERT INTO users (first_name, last_name, nickname, contact_number, email, address, password, registration_date)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING id`,
-          [guest.firstName, guest.lastName, guest.nickname, guest.phone, guest.email, guest.address, passwordHash],
-        )
-        finalUserId = created.rows[0].id
-      }
 
       if (newVehicle) {
         const vehicleResult = await client.query(
@@ -187,10 +275,17 @@ export async function POST(req: NextRequest) {
         finalVehicleId,
         mappedServiceMode,
         address,
-        customerConcern || 'No specific concerns',
+        finalConcern || 'No specific concerns',
         preferredDatetime || null,
       ])
       ticket = ticketResult.rows[0]
+
+      if (validServiceIds.length > 0 && ticket?.id) {
+        await client.query(
+          `UPDATE service_tickets SET booked_service_ids = $1::int[] WHERE id = $2`,
+          [validServiceIds, ticket.id]
+        )
+      }
 
       if (diagnosticScanAuthorized === true) {
         await client.query(
@@ -208,33 +303,9 @@ export async function POST(req: NextRequest) {
       client.release()
     }
 
-    // New guest customer — email the temp password together with a booking copy.
-    // Only after the save went through.
-    if (tempPassword && guest) {
-      try {
-        await sendTempPasswordEmail({
-          to: guest.email,
-          name: guest.firstName,
-          tempPassword,
-          booking: {
-            reference: `AC-${ticket.id}-${new Date().getFullYear()}`,
-            vehicle: newVehicleDetails
-              ? `${newVehicleDetails.make || ''} ${newVehicleDetails.model || ''} ${newVehicleDetails.year || ''} — ${newVehicleDetails.plate || ''}`.trim()
-              : '—',
-            serviceMode: serviceMode || '—',
-            details: customerConcern || 'No specific concerns',
-          },
-        })
-        accountEmailed = true
-      } catch (mailErr) {
-        console.error('Temp password email failed:', mailErr)
-      }
-    }
-
     const res = NextResponse.json({
       success: true,
       ticket,
-      accountEmailed,
       userId: finalUserId,
     })
 

@@ -6,6 +6,7 @@ import { AlertTriangle, Camera, Loader2, Plus, Search, Send, Trash2, Upload, X, 
 import { toast } from 'sonner'
 import type { ProposedPart, ProposedService } from '@/data/types'
 import { reportFinding, uploadFindingPhoto } from '@/controllers/findingsController'
+import { formatHours } from '@/lib/formatHours'
 
 type CatalogService = { id: number; service_name: string; base_price: string | number; base_duration_hours: string | number; is_price_fixed?: boolean }
 type TaskOption = { id: number; title: string }
@@ -371,9 +372,9 @@ export function ReportFindingModal({
                         ) : aiPredictions[s.name] && aiPredictions[s.name].predicted_duration_mins && (
                           <span
                             className="inline-flex cursor-help items-center gap-1 rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-700 hover:bg-purple-200"
-                            title={`${aiPredictions[s.name].is_mock ? 'ai' : 'AI'} suggests ${Math.round(aiPredictions[s.name].predicted_duration_mins! / 60 * 10) / 10} hrs`}
+                            title={`${aiPredictions[s.name].is_mock ? 'ai' : 'AI'} suggests ${formatHours(aiPredictions[s.name].predicted_duration_mins! / 60)}`}
                           >
-                            🤖 {Math.round(aiPredictions[s.name].predicted_duration_mins! / 60 * 10) / 10} hrs
+                            🤖 {formatHours(aiPredictions[s.name].predicted_duration_mins! / 60)}
                           </span>
                         )}
                       </p>
@@ -395,7 +396,7 @@ export function ReportFindingModal({
                           {hoursError && <span className="text-[10px] leading-tight text-red-500 w-full">{hoursError}</span>}
                         </div>
                       ) : (
-                        <span className="font-semibold text-slate-800">{s.hours} hr{s.hours === 1 ? '' : 's'}</span>
+                        <span className="font-semibold text-slate-800">{formatHours(s.hours)}</span>
                       )}
                     </div>
 

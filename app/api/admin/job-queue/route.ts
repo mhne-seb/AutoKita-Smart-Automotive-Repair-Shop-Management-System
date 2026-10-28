@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { signFileUrls } from '@/lib/storage'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
+import { STAFF_ACCESS_SQL } from '@/lib/staffAccess'
+import { syncBookedServicesToJobOrder } from '@/lib/syncBookedServices'
 
 export async function GET(req: NextRequest) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
@@ -36,7 +38,6 @@ export async function GET(req: NextRequest) {
                 AND c.user_id IS NOT NULL
           ) AS diagnostic_scan_authorized,
           la.last_activity,
-          COALESCE(st.assigned_mechanic_id, jo.assigned_mechanic_id) as mechanic_id,
           wc.id IS NOT NULL AS is_warranty_claim,
           jo.id as job_order_id,
           jo.date_arrived,
@@ -63,14 +64,9 @@ export async function GET(req: NextRequest) {
       result.rows[i].avatar_url = signedAvatars[i]
     }
 
-    const mechanicsQuery = `SELECT id, full_name, email, status FROM employees WHERE role = 'mechanic' AND status = 'active' ORDER BY full_name ASC`
-    const mechanicsResult = await db.query(mechanicsQuery)
-    const mechanics = mechanicsResult.rows
-
     return NextResponse.json({
       success: true,
       tickets: result.rows,
-      mechanics
     })
   } catch (err: any) {
     console.error('Job queue GET error:', err)
@@ -86,7 +82,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const { action, ticketId, mechanicId, holdReason } = body
+    const { action, ticketId, holdReason, reason } = body
 
     if (!action) {
       return NextResponse.json({ success: false, message: 'Missing action parameter' }, { status: 400 })
@@ -107,7 +103,7 @@ export async function POST(req: NextRequest) {
           employeeName = empLookup.rows[0].full_name
         }
       } else {
-        const fallbackEmp = await db.query(`SELECT id, full_name FROM employees WHERE role = 'owner' LIMIT 1`)
+        const fallbackEmp = await db.query(`SELECT id, full_name FROM employees WHERE role::text IN ('operations_manager', 'owner') AND ${STAFF_ACCESS_SQL} ORDER BY id LIMIT 1`)
         if (fallbackEmp.rows.length > 0) {
           actingEmpId = fallbackEmp.rows[0].id
           employeeName = fallbackEmp.rows[0].full_name
@@ -180,30 +176,8 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ success: false, message: 'This ticket can no longer be changed.' }, { status: 409 })
         }
 
-        if (mechanicId) {
-          const mechCheck = await client.query(
-            `SELECT full_name, status FROM employees WHERE id = $1 AND role = 'mechanic'`,
-            [mechanicId]
-          )
-          if (mechCheck.rows.length === 0 || mechCheck.rows[0].status !== 'active') {
-            await client.query('ROLLBACK')
-            return NextResponse.json({
-              success: false,
-              code: 'MECHANIC_UNAVAILABLE',
-              message: `${mechCheck.rows[0]?.full_name || 'This mechanic'} is currently on leave and cannot be assigned.`
-            }, { status: 400 })
-          }
-        }
-
-        const joResult = await client.query(`SELECT * FROM create_job_order_from_ticket($1, $2)`, [ticketId, mechanicId || null])
+        const joResult = await client.query(`SELECT * FROM create_job_order_from_ticket($1, $2)`, [ticketId, null])
         const newJo = joResult.rows[0]
-
-        let mechanicName = 'Unassigned'
-        if (mechanicId && newJo) {
-          await client.query(`SELECT assign_mechanic_to_job_order($1, $2)`, [newJo.id, mechanicId])
-          const mRes = await client.query(`SELECT full_name FROM employees WHERE id = $1`, [mechanicId])
-          if (mRes.rows.length > 0) mechanicName = mRes.rows[0].full_name
-        }
 
         // Record ticket acceptance in system_audit_logs. It is part of the
         // transaction: an approval without its audit row is not allowed.
@@ -225,10 +199,8 @@ export async function POST(req: NextRequest) {
               ticket_status: 'approved',
               accepted_by_employee_id: actingEmpId,
               accepted_by: employeeName,
-              assigned_mechanic_id: mechanicId || null,
-              assigned_mechanic: mechanicName,
               job_order_id: newJo?.id || null,
-              description: `Ticket #${ticketId} accepted by ${employeeName} and assigned to ${mechanicName}`
+              description: `Ticket #${ticketId} accepted by ${employeeName}`
             })
           ]
         )
@@ -250,12 +222,12 @@ export async function POST(req: NextRequest) {
             const fee = await client.query(
               `INSERT INTO job_order_services
                  (job_order_id, service_id, assigned_mechanic_id, description_of_work, estimated_hours, estimated_amount, actual_amount)
-               SELECT $1, s.id, $2, $3, s.base_duration_hours, s.base_price, s.base_price
+               SELECT $1, s.id, NULL, $2, s.base_duration_hours, s.base_price, s.base_price
                FROM services s
-               WHERE s.service_name = $4 AND s.is_active
+               WHERE s.service_name = $3 AND s.is_active
                LIMIT 1
                RETURNING id`,
-              [newJo.id, mechanicId || null, 'OBD-II diagnostic scan — authorized by customer at booking. Payable even if repairs are declined.', DIAGNOSTIC_SCAN_SERVICE_NAME],
+              [newJo.id, 'OBD-II diagnostic scan — authorized by customer at booking. Payable even if repairs are declined.', DIAGNOSTIC_SCAN_SERVICE_NAME],
             )
             // The customer agreed to this fee. If the service row is missing
             // or switched off, stop instead of silently dropping the charge.
@@ -267,6 +239,9 @@ export async function POST(req: NextRequest) {
               [newJo.id, DIAGNOSTIC_SCAN_SERVICE_NAME, 'Performed during inspection.'],
             )
           }
+
+          // Populate the job order with all services requested by the customer at booking
+          await syncBookedServicesToJobOrder(newJo.id, ticketId, client)
         }
 
         const checkInNow = Boolean(body.checkInNow)
@@ -350,6 +325,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, jobOrder: updateRes.rows[0] })
     }
     else if (action === 'reject') {
+      const cancelReason = typeof reason === 'string' ? reason.trim() : ''
+      if (!cancelReason) {
+        return NextResponse.json({ success: false, message: 'Enter a reason for the cancellation.' }, { status: 400 })
+      }
+      if (cancelReason.length > 500) {
+        return NextResponse.json({ success: false, message: 'The reason is too long. Keep it under 500 characters.' }, { status: 400 })
+      }
+
       const rejectQuery = `SELECT update_ticket_status($1, 'declined')`
       await db.query(rejectQuery, [ticketId])
 
@@ -371,7 +354,8 @@ export async function POST(req: NextRequest) {
             JSON.stringify({
               ticket_status: 'declined',
               rejected_by_employee_id: actingEmpId,
-              rejected_by: employeeName
+              rejected_by: employeeName,
+              cancellation_reason: cancelReason,
             })
           ]
         )

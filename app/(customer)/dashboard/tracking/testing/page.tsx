@@ -9,6 +9,7 @@ import { StageStepper, stageForStatus } from "@/components/dashboard/StageSteppe
 import { Lightbox } from "@/components/Lightbox";
 import { getTestingData } from "@/controllers/serviceProgressController";
 import { ShopLoading } from "@/components/ShopLoading";
+import { serviceModeFromDb } from "@/lib/serviceMode";
 
 type TestingData = Awaited<ReturnType<typeof getTestingData>>;
 
@@ -73,7 +74,12 @@ function Testing() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-      <StageStepper active={stageForStatus(jobOrder.status)} viewing="testing" jobOrderId={jobOrder.job_order_id} />
+      <StageStepper
+        active={stageForStatus(jobOrder.status)}
+        viewing="testing"
+        jobOrderId={jobOrder.job_order_id}
+        serviceMode={serviceModeFromDb(jobOrder.service_mode)}
+      />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <div className="space-y-6">

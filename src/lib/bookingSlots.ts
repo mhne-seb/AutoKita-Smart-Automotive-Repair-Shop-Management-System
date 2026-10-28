@@ -7,6 +7,7 @@ import {
   formatManilaTime,
   toManilaIso,
 } from './bookingSlotsShared'
+import { parseNaiveTimestamp } from './autoSchedule'
 
 export {
   BOOKING_TIMES,
@@ -15,6 +16,13 @@ export {
   formatManilaDate,
   formatManilaTime,
   toManilaIso,
+}
+
+// Database text like "2026-10-23 17:00:00" is Manila wall-clock time. Returns the real instant in
+// milliseconds, the same on any server time zone (Manila is UTC+8, no daylight saving).
+const MANILA_OFFSET_MS = 8 * 60 * 60 * 1000
+function manilaTextToMs(text: string): number {
+  return parseNaiveTimestamp(text) - MANILA_OFFSET_MS
 }
 
 /**
@@ -77,13 +85,111 @@ export async function getOccupiedBookingSlots() {
     })
   }
 
-  return { occupiedByDate, slots }
+  // Query active mechanics
+  const mechRes = await db.query(
+    `SELECT id, full_name FROM employees WHERE role = 'mechanic' AND status = 'active'`
+  )
+  const activeMechanics = mechRes.rows
+  const activeCount = activeMechanics.length
+
+  // Query ongoing tasks in service_progress_tasks for the upcoming 60 days
+  const tasksRes = await db.query(
+    `SELECT 
+       spt.id,
+       COALESCE(spt.mechanic_id, jo.assigned_mechanic_id) AS mechanic_id,
+       e.full_name AS mechanic_name,
+       COALESCE(spt.scheduled_date, spt.started_at)::text AS scheduled_date,
+       COALESCE(
+         spt.estimated_finish,
+         spt.scheduled_date + (COALESCE(jos.estimated_hours, 1.5) * INTERVAL '1 hour')
+       )::text AS estimated_finish,
+       COALESCE(jos.estimated_hours, 1.5)::numeric AS estimated_hours
+     FROM service_progress_tasks spt
+     JOIN job_orders jo ON jo.id = spt.job_order_id
+     LEFT JOIN employees e ON e.id = COALESCE(spt.mechanic_id, jo.assigned_mechanic_id)
+     LEFT JOIN LATERAL (
+       SELECT jos.estimated_hours
+       FROM services s
+       JOIN job_order_services jos ON jos.service_id = s.id AND jos.job_order_id = spt.job_order_id
+       WHERE s.service_name = spt.task_title
+       LIMIT 1
+     ) jos ON true
+     WHERE spt.task_status <> 'cancelled'
+       AND jo.status NOT IN ('completed', 'released', 'cancelled')
+       AND (spt.scheduled_date IS NOT NULL OR spt.started_at IS NOT NULL)
+       AND COALESCE(spt.scheduled_date, spt.started_at) >= (NOW() - INTERVAL '1 day')
+     ORDER BY scheduled_date ASC`
+  )
+
+  const busyDatesSet = new Set<string>()
+  const earliestAvailableByDate: Record<string, { availableFrom: string; mechanicName: string }> = {}
+
+  if (activeCount > 0) {
+    const tasksByDate: Record<string, typeof tasksRes.rows> = {}
+    for (const t of tasksRes.rows) {
+      if (!t.scheduled_date) continue
+      const ms = manilaTextToMs(t.scheduled_date)
+      if (Number.isNaN(ms)) continue
+      const dStr = formatManilaDate(new Date(ms))
+      if (!tasksByDate[dStr]) tasksByDate[dStr] = []
+      tasksByDate[dStr].push(t)
+    }
+
+    for (const [dStr, dayTasks] of Object.entries(tasksByDate)) {
+      const mechHours: Record<number, number> = {}
+      const mechLatestFinish: Record<number, number> = {}
+      for (const m of activeMechanics) {
+        mechHours[m.id] = 0
+        mechLatestFinish[m.id] = 0
+      }
+
+      for (const t of dayTasks) {
+        const mId = Number(t.mechanic_id)
+        if (mechHours[mId] !== undefined) {
+          mechHours[mId] += Number(t.estimated_hours || 1.5)
+          const finishMs = t.estimated_finish ? manilaTextToMs(t.estimated_finish) : 0
+          if (finishMs > mechLatestFinish[mId]) {
+            mechLatestFinish[mId] = finishMs
+          }
+        }
+      }
+
+      // If all active mechanics have >= 5.5 hours booked, or overall shop workload >= activeCount * 6.0 hrs
+      const allMechsBusy = activeMechanics.every((m) => (mechHours[m.id] || 0) >= 5.5)
+      const totalHours = Object.values(mechHours).reduce((a, b) => a + b, 0)
+      const isCapacityFull = totalHours >= activeCount * 6.0
+
+      if (allMechsBusy || isCapacityFull) {
+        busyDatesSet.add(dStr)
+
+        let soonestMech: { id: number; name: string; finishMs: number } | null = null
+        for (const m of activeMechanics) {
+          const fMs = mechLatestFinish[m.id] || 0
+          if (!soonestMech || (fMs > 0 && fMs < soonestMech.finishMs)) {
+            soonestMech = { id: m.id, name: m.full_name, finishMs: fMs }
+          }
+        }
+
+        if (soonestMech && soonestMech.finishMs > 0) {
+          const availDate = new Date(soonestMech.finishMs)
+          earliestAvailableByDate[dStr] = {
+            availableFrom: availDate.toISOString(),
+            mechanicName: soonestMech.name,
+          }
+        }
+      }
+    }
+  }
+
+  const busyDates = Array.from(busyDatesSet)
+  return { occupiedByDate, slots, busyDates, earliestAvailableByDate }
 }
 
 /**
  * Checks whether a requested preferred_datetime conflicts with an existing active booking.
- * A conflict occurs if another active booking is at the exact time or within 30 minutes.
- * Returns true if the slot is occupied, false otherwise.
+ * Bookings are one-hour windows, one booking per window: a conflict is another active booking in the
+ * same Manila hour (this also catches older bookings saved at 9:30 or 10:30).
+ * Returns true if the window is occupied, false otherwise.
  */
 export async function isSlotOccupiedInDb(preferredDatetime: string, client?: any): Promise<boolean> {
   const executor = client || db
@@ -92,7 +198,8 @@ export async function isSlotOccupiedInDb(preferredDatetime: string, client?: any
      FROM service_tickets st
      LEFT JOIN job_orders jo ON jo.ticket_id = st.id
      WHERE st.preferred_datetime IS NOT NULL
-       AND ABS(EXTRACT(EPOCH FROM (st.preferred_datetime - $1::timestamptz))) < 1800
+       AND date_trunc('hour', st.preferred_datetime AT TIME ZONE 'Asia/Manila')
+         = date_trunc('hour', $1::timestamptz AT TIME ZONE 'Asia/Manila')
        AND st.ticket_status NOT IN ('cancelled', 'declined')
        AND (jo.status IS NULL OR jo.status NOT IN ('completed', 'released', 'cancelled'))
      LIMIT 1`,

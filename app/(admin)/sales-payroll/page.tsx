@@ -1,16 +1,46 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Download, Pencil, Info, Lock, Search, Check, X, Eye, Phone, Wallet, Wrench, CreditCard, Users, History, RefreshCw, CheckCircle2, AlertCircle, Loader2, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
+import { Download, Pencil, Info, Lock, Search, Check, X, Eye, Phone, Wallet, Wrench, CreditCard, Users, History, RefreshCw, CheckCircle2, AlertCircle, Loader2, ChevronLeft, ChevronRight, Sparkles, Package } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
 import type { Mechanic, PaymentRecord, WeeklyService, ServicesDoneRecord } from '@/data/mockData'
 import { currency } from '@/data/mockData'
 const autokitaLogo = '/assets/autokita-logo.png' // static asset path (was a bundler import)
 
+export interface PartDoneRecord {
+  id: number
+  jobOrderId: number
+  customerName: string
+  vehicleModel: string
+  plateNumber: string
+  partNumber: string
+  partName: string
+  qty: number
+  supplierUnitCost: number
+  adminTotalCost: number
+  retailUnitPrice: number
+  customerTotalPaid: number
+  profit: number
+  marginPercent: number
+  completedAt: string | null
+}
+
+export interface PartSummaryRecord {
+  name: string
+  partNumber: string
+  qty: number
+  avgSupplierCost: number | null
+  avgRetailPrice: number | null
+  totalAdminCost: number
+  totalCustomerPaid: number
+  profit: number
+}
+
 const TABS = [
   { key: 'payments', label: 'Customer Payment Records', icon: CreditCard },
   { key: 'payroll', label: 'Employee Payroll & Commission', icon: Users },
   { key: 'services', label: 'Services Done & Commission Breakdown', icon: Wrench },
+  { key: 'parts', label: 'Parts Sold & Profit Breakdown', icon: Package },
 ] as const
 
 type TabKey = (typeof TABS)[number]['key']
@@ -235,6 +265,12 @@ export default function page() {
     prevWeeklyGrossSales: 0,
     salesGrowthPct: '0.0',
     totalCommissions: 0,
+    servicesProfit: 0,
+    partsCustomerPaid: 0,
+    partsAdminCost: 0,
+    partsProfit: 0,
+    partsCount: 0,
+    partsUnits: 0,
     netProfit: 0,
     activeMechanicsCount: 0,
   })
@@ -248,6 +284,13 @@ export default function page() {
   const [itemizedPage, setItemizedPage] = useState(1)
   const itemizedPageSize = 25
 
+  const [partsDone, setPartsDone] = useState<PartDoneRecord[]>([])
+  const [partsSummary, setPartsSummary] = useState<PartSummaryRecord[]>([])
+  const [partsViewMode, setPartsViewMode] = useState<'itemized' | 'aggregate'>('itemized')
+  const [partsSearch, setPartsSearch] = useState('')
+  const [partsPage, setPartsPage] = useState(1)
+  const partsPageSize = 25
+
   const loadData = async (isRefresh = false, selectedCycle = cycle, selectedPoolRate = poolRate) => {
     if (isRefresh) setRefreshing(true)
     else setLoading(true)
@@ -259,6 +302,8 @@ export default function page() {
         setMechanics(data.mechanics || [])
         setWeeklyServices(data.weeklyServices || [])
         setServicesDone(data.servicesDone || [])
+        setPartsDone(data.partsDone || [])
+        setPartsSummary(data.partsSummary || [])
         if (data.poolRate !== undefined) setPoolRate(data.poolRate)
         if (data.kpi) setKpi(data.kpi)
       } else {
@@ -560,6 +605,101 @@ export default function page() {
     )
   }
 
+  // ---------- Parts Sold & Profit Breakdown: search + pagination + export ----------
+  const filteredPartsDone = useMemo(() => {
+    const q = partsSearch.trim().toLowerCase()
+    if (!q) return partsDone
+    return partsDone.filter(
+      (p) =>
+        p.partName.toLowerCase().includes(q) ||
+        (p.partNumber && p.partNumber.toLowerCase().includes(q)) ||
+        p.customerName.toLowerCase().includes(q) ||
+        p.vehicleModel.toLowerCase().includes(q) ||
+        p.plateNumber.toLowerCase().includes(q) ||
+        String(p.jobOrderId).includes(q)
+    )
+  }, [partsSearch, partsDone])
+
+  const totalPagesPartsItemized = Math.max(1, Math.ceil(filteredPartsDone.length / partsPageSize))
+  const paginatedPartsDone = useMemo(() => {
+    const start = (partsPage - 1) * partsPageSize
+    return filteredPartsDone.slice(start, start + partsPageSize)
+  }, [filteredPartsDone, partsPage, partsPageSize])
+
+  const filteredPartsSummary = useMemo(() => {
+    const q = partsSearch.trim().toLowerCase()
+    if (!q) return partsSummary
+    return partsSummary.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        (p.partNumber && p.partNumber.toLowerCase().includes(q))
+    )
+  }, [partsSearch, partsSummary])
+
+  const exportPartsDone = () => {
+    downloadCsv(
+      `finished-parts-itemized-${cycle}.csv`,
+      [
+        'Job Order ID',
+        'Part Name',
+        'Part Number',
+        'Customer Name',
+        'Vehicle Model',
+        'Plate Number',
+        'Completed At',
+        'Quantity',
+        'Admin Unit Cost',
+        'Admin Total Cost',
+        'Customer Retail Unit Price',
+        'Customer Total Paid',
+        'Net Profit',
+        'Margin %',
+      ],
+      filteredPartsDone.map((p) => [
+        p.jobOrderId,
+        p.partName,
+        p.partNumber || '-',
+        p.customerName,
+        p.vehicleModel,
+        p.plateNumber,
+        p.completedAt ? new Date(p.completedAt).toLocaleString('en-PH') : '-',
+        p.qty,
+        p.supplierUnitCost,
+        p.adminTotalCost,
+        p.retailUnitPrice,
+        p.customerTotalPaid,
+        p.profit,
+        `${(p.marginPercent ?? 0).toFixed(1)}%`,
+      ]),
+    )
+  }
+
+  const exportPartsSummary = () => {
+    downloadCsv(
+      `parts-summary-${cycle}.csv`,
+      [
+        'Part Name',
+        'Part Number',
+        'Units Sold',
+        'Avg Admin Cost',
+        'Avg Customer Price',
+        'Total Admin Paid (Cost)',
+        'Total Customer Paid (Sales)',
+        'Total Net Profit',
+      ],
+      filteredPartsSummary.map((p) => [
+        p.name,
+        p.partNumber || '-',
+        p.qty,
+        p.avgSupplierCost ?? 0,
+        p.avgRetailPrice ?? 0,
+        p.totalAdminCost,
+        p.totalCustomerPaid,
+        p.profit,
+      ]),
+    )
+  }
+
   return (
     <div className="space-y-6 p-8">
       {/* Toast Notification */}
@@ -611,7 +751,7 @@ export default function page() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <SummaryCard 
             label="Finished Services Total" 
             value={currency(kpi.finishedServicesTotal || weeklyGrossSales)} 
@@ -626,6 +766,13 @@ export default function page() {
             badge={`${poolRate}% Pool`}
           />
           <SummaryCard 
+            label="Parts Sold & Profit" 
+            value={currency(kpi.partsCustomerPaid || 0)} 
+            sub={`Cost: ${currency(kpi.partsAdminCost || 0)} • Profit: +${currency(kpi.partsProfit || 0)}`} 
+            positive={(kpi.partsProfit || 0) >= 0}
+            badge={`${kpi.partsUnits || 0} Units`}
+          />
+          <SummaryCard 
             label="Gross Sales & Collections" 
             value={currency(weeklyGrossSales)} 
             sub={`${kpi.salesGrowthPct.startsWith('-') ? '' : '+'}${kpi.salesGrowthPct}% vs prior cycle`} 
@@ -634,7 +781,8 @@ export default function page() {
           <SummaryCard 
             label="Net Financial Profit" 
             value={currency(netProfit)} 
-            sub="After employee salaries & commissions" 
+            sub={`Labor: ${currency(kpi.servicesProfit || 0)} + Parts: ${currency(kpi.partsProfit || 0)}`} 
+            positive={netProfit >= 0}
           />
         </div>
       )}
@@ -1406,6 +1554,332 @@ export default function page() {
               <Sparkles size={16} className="text-emerald-600 shrink-0 mt-0.5" />
               <div>
                 <strong>Commission Allocation Rule:</strong> {poolRate}% of every completed service actual billed revenue is accumulated into the {cycle} commission pool ({currency(kpi.totalCommissionPool)}). This pool is allocated to all active shop mechanics based on their individual commission share, fostering team collaboration and fair reward.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'parts' && (
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+          <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
+          <div className="p-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-l-4 border-slate-900 pl-3">
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">
+                  Parts Sold & Profit Breakdown ({cycle.toUpperCase()})
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Inspect parts sold, wholesale cost paid by admin vs retail price paid by customer, and net profit margins.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 border border-slate-200">
+                  <Package size={12} className="text-slate-500" /> Customer Paid: <strong className="text-slate-900">{currency(kpi.partsCustomerPaid)}</strong>
+                </span>
+                <span className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 border border-amber-200">
+                  Admin Cost: <strong className="text-amber-900">{currency(kpi.partsAdminCost)}</strong>
+                </span>
+                <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
+                  <Sparkles size={12} className="text-emerald-600" /> Net Parts Profit: +{currency(kpi.partsProfit)}
+                </span>
+              </div>
+            </div>
+
+            {/* Sub-view toggle (Itemized Parts Log vs Aggregated Part Categories) */}
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-2 rounded-xl bg-slate-100 p-1">
+                <button
+                  onClick={() => {
+                    setPartsViewMode('itemized')
+                    setPartsPage(1)
+                  }}
+                  className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+                    partsViewMode === 'itemized'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
+                >
+                  Itemized Parts Sold Log ({partsDone.length})
+                </button>
+                <button
+                  onClick={() => {
+                    setPartsViewMode('aggregate')
+                    setPartsPage(1)
+                  }}
+                  className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+                    partsViewMode === 'aggregate'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
+                >
+                  Aggregated Part Categories ({partsSummary.length})
+                </button>
+              </div>
+
+              <div className="text-xs font-medium text-slate-500">
+                Cycle: <strong className="text-slate-800">{cycle === 'daily' ? 'Past 24 Hours' : cycle === 'weekly' ? 'Past 7 Days' : cycle === 'monthly' ? 'Past 30 Days' : 'All Recorded Time'}</strong>
+              </div>
+            </div>
+
+            {partsViewMode === 'itemized' ? (
+              <>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <div className="relative flex-1 min-w-[220px]">
+                    <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={partsSearch}
+                      onChange={(e) => {
+                        setPartsSearch(e.target.value)
+                        setPartsPage(1)
+                      }}
+                      placeholder="Search by Job Order ID, Part Name, Part #, Customer, Vehicle, or Plate..."
+                      className="w-full rounded-full border border-slate-200 py-2 pl-9 pr-4 text-sm text-slate-700 outline-none focus:border-slate-400"
+                    />
+                  </div>
+                  <button
+                    onClick={exportPartsDone}
+                    className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
+                  >
+                    <Download size={14} /> Export Itemized CSV
+                  </button>
+                </div>
+
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
+                        <th className="py-3 font-semibold">Job Order #</th>
+                        <th className="py-3 font-semibold">Completed Date</th>
+                        <th className="py-3 font-semibold">Customer</th>
+                        <th className="py-3 font-semibold">Vehicle & Plate</th>
+                        <th className="py-3 font-semibold">Part Details</th>
+                        <th className="py-3 font-semibold text-center">Qty</th>
+                        <th className="py-3 font-semibold">Admin Paid (Cost)</th>
+                        <th className="py-3 font-semibold">Customer Paid (Retail)</th>
+                        <th className="py-3 font-semibold text-right">Net Profit (Margin)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedPartsDone.map((item, idx) => (
+                        <tr key={`${item.id}-${idx}`} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/70 transition-colors">
+                          <td className="py-3.5 font-bold text-slate-900">{item.jobOrderId}</td>
+                          <td className="py-3.5 text-xs text-slate-500 whitespace-nowrap">
+                            {item.completedAt
+                              ? new Date(item.completedAt).toLocaleDateString('en-PH', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })
+                              : '—'}
+                          </td>
+                          <td className="py-3.5 font-medium text-slate-800">{item.customerName}</td>
+                          <td className="py-3.5 text-slate-600">
+                            <div>
+                              <p className="font-medium text-slate-800">{item.vehicleModel || 'Vehicle'}</p>
+                              <p className="text-[11px] font-mono text-slate-400">{item.plateNumber || 'No Plate'}</p>
+                            </div>
+                          </td>
+                          <td className="py-3.5">
+                            <div>
+                              <span className="inline-block rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-800">
+                                {item.partName}
+                              </span>
+                              {item.partNumber && (
+                                <p className="mt-0.5 text-[11px] font-mono text-slate-400">PN: {item.partNumber}</p>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3.5 text-center">
+                            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">
+                              x{item.qty}
+                            </span>
+                          </td>
+                          <td className="py-3.5 text-slate-700">
+                            <div>
+                              <p className="font-bold text-slate-900">{currency(item.adminTotalCost)}</p>
+                              <p className="text-[11px] text-slate-400">@{currency(item.supplierUnitCost)} / unit</p>
+                            </div>
+                          </td>
+                          <td className="py-3.5 text-slate-700">
+                            <div>
+                              <p className="font-bold text-slate-900">{currency(item.customerTotalPaid)}</p>
+                              <p className="text-[11px] text-slate-400">@{currency(item.retailUnitPrice)} / unit</p>
+                            </div>
+                          </td>
+                          <td className="py-3.5 text-right">
+                            <div className="flex flex-col items-end">
+                              <span className="font-bold text-emerald-600">
+                                +{currency(item.profit)}
+                              </span>
+                              <span className="mt-0.5 inline-block rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-100">
+                                {(item.marginPercent ?? 0).toFixed(1)}% margin
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {paginatedPartsDone.length === 0 && (
+                        <tr>
+                          <td colSpan={9} className="py-8 text-center text-sm text-slate-400">
+                            No finished parts found matching your search.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                    {filteredPartsDone.length > 0 && (
+                      <tfoot>
+                        <tr className="border-t-2 border-slate-200 bg-slate-50/80 font-bold text-slate-900 text-sm">
+                          <td colSpan={5} className="py-3.5 pl-3">Total Parts Sold & Profit</td>
+                          <td className="py-3.5 text-center">{filteredPartsDone.reduce((acc, p) => acc + p.qty, 0)}</td>
+                          <td className="py-3.5 text-amber-800">
+                            {currency(filteredPartsDone.reduce((acc, p) => acc + p.adminTotalCost, 0))}
+                          </td>
+                          <td className="py-3.5 text-slate-900">
+                            {currency(filteredPartsDone.reduce((acc, p) => acc + p.customerTotalPaid, 0))}
+                          </td>
+                          <td className="py-3.5 text-right text-emerald-600 font-extrabold">
+                            +{currency(filteredPartsDone.reduce((acc, p) => acc + p.profit, 0))}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    )}
+                  </table>
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500">
+                  <p>
+                    Showing {filteredPartsDone.length > 0 ? (partsPage - 1) * partsPageSize + 1 : 0} to{' '}
+                    {Math.min(partsPage * partsPageSize, filteredPartsDone.length)} of {filteredPartsDone.length} parts records
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setPartsPage((p) => Math.max(1, p - 1))}
+                      disabled={partsPage === 1}
+                      className="flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                    >
+                      <ChevronLeft size={14} /> Prev
+                    </button>
+                    <span className="font-semibold text-slate-700">
+                      Page {partsPage} of {totalPagesPartsItemized}
+                    </span>
+                    <button
+                      onClick={() => setPartsPage((p) => Math.min(totalPagesPartsItemized, p + 1))}
+                      disabled={partsPage >= totalPagesPartsItemized}
+                      className="flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                    >
+                      Next <ChevronRight size={14} />
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <div className="relative flex-1 min-w-[220px]">
+                    <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={partsSearch}
+                      onChange={(e) => setPartsSearch(e.target.value)}
+                      placeholder="Search part names or part numbers..."
+                      className="w-full rounded-full border border-slate-200 py-2 pl-9 pr-4 text-sm text-slate-700 outline-none focus:border-slate-400"
+                    />
+                  </div>
+                  <button
+                    onClick={exportPartsSummary}
+                    className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
+                  >
+                    <Download size={14} /> Export Summary CSV
+                  </button>
+                </div>
+
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
+                        <th className="py-3 font-semibold">Part Name & Number</th>
+                        <th className="py-3 font-semibold text-center">Units Sold (Qty)</th>
+                        <th className="py-3 font-semibold">Avg Admin Cost (Supplier)</th>
+                        <th className="py-3 font-semibold">Avg Customer Price (Retail)</th>
+                        <th className="py-3 font-semibold">Total Admin Paid</th>
+                        <th className="py-3 font-semibold">Total Customer Paid</th>
+                        <th className="py-3 font-semibold text-right">Net Profit</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredPartsSummary.map((p, idx) => (
+                        <tr key={`${p.name}-${p.partNumber}-${idx}`} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
+                          <td className="py-4">
+                            <div>
+                              <p className="font-semibold text-slate-800">{p.name}</p>
+                              {p.partNumber && (
+                                <p className="text-[11px] font-mono text-slate-400">PN: {p.partNumber}</p>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-4 text-center">
+                            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">
+                              {p.qty}
+                            </span>
+                          </td>
+                          <td className="py-4 text-slate-600">
+                            {currency(p.avgSupplierCost ?? 0)}
+                          </td>
+                          <td className="py-4 text-slate-600">
+                            {currency(p.avgRetailPrice ?? 0)}
+                          </td>
+                          <td className="py-4 font-semibold text-amber-800">
+                            {currency(p.totalAdminCost)}
+                          </td>
+                          <td className="py-4 font-bold text-slate-900">
+                            {currency(p.totalCustomerPaid)}
+                          </td>
+                          <td className="py-4 text-right font-bold text-emerald-600">
+                            +{currency(p.profit)}
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredPartsSummary.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="py-8 text-center text-sm text-slate-400">
+                            No matching part summaries in this cycle.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                    {filteredPartsSummary.length > 0 && (
+                      <tfoot>
+                        <tr className="border-t-2 border-slate-200 bg-slate-50/80 font-bold text-slate-900 text-sm">
+                          <td className="py-3.5 pl-3">Total Aggregated Parts</td>
+                          <td className="py-3.5 text-center">{filteredPartsSummary.reduce((acc, p) => acc + p.qty, 0)}</td>
+                          <td className="py-3.5">—</td>
+                          <td className="py-3.5">—</td>
+                          <td className="py-3.5 text-amber-800">
+                            {currency(filteredPartsSummary.reduce((acc, p) => acc + p.totalAdminCost, 0))}
+                          </td>
+                          <td className="py-3.5 text-slate-900">
+                            {currency(filteredPartsSummary.reduce((acc, p) => acc + p.totalCustomerPaid, 0))}
+                          </td>
+                          <td className="py-3.5 text-right text-emerald-600 font-extrabold">
+                            +{currency(filteredPartsSummary.reduce((acc, p) => acc + p.profit, 0))}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    )}
+                  </table>
+                </div>
+              </>
+            )}
+
+            <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50/60 p-3.5 text-xs text-blue-900 flex items-start gap-2.5">
+              <Package size={16} className="text-blue-600 shrink-0 mt-0.5" />
+              <div>
+                <strong>Parts Financial Insight:</strong> Net parts profit is calculated as the Customer Retail Amount minus the Supplier Unit Cost paid by the shop admin. This gross profit directly contributes to the overall business net financial profit alongside labor services.
               </div>
             </div>
           </div>

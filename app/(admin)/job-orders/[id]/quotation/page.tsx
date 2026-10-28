@@ -17,6 +17,28 @@ import { QuotationService, JobOrderCard, QuotationData, MechanicalFinding, findi
 import { RejectPaymentModal } from '@/components/dashboard/RejectPaymentModal'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ShopLoading } from '@/components/ShopLoading'
+import { RequestedServices } from '@/components/admin/RequestedServices'
+import { formatHours } from '@/lib/formatHours'
+import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
+
+function formatPromisedDate(iso?: string | null) {
+  if (!iso) return null
+  try {
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return null
+    return d.toLocaleString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    })
+  } catch {
+    return null
+  }
+}
 
 export default function page() {
   const jobOrderId = String(useParams().id)
@@ -96,6 +118,7 @@ export default function page() {
   const [showRejectModal, setShowRejectModal] = useState(false)
   const [confirmVerifyQuotation, setConfirmVerifyQuotation] = useState(false)
   const [confirmRemoveService, setConfirmRemoveService] = useState<{ id: string; name: string } | null>(null)
+  const [removingScanFee, setRemovingScanFee] = useState(false)
   const [confirmRemovePart, setConfirmRemovePart] = useState<{ serviceId: string; partId: string; name: string } | null>(null)
 
   useEffect(() => {
@@ -295,6 +318,10 @@ export default function page() {
   // Services already on this quotation can't be added twice.
   const alreadyAdded = new Set(services.map((s) => s.name.toLowerCase()))
 
+  // A custom service can't be named like the scan fee (the server would skip it anyway).
+  const customIsScanFee =
+    addCustomService && customServiceName.trim().toLowerCase() === DIAGNOSTIC_SCAN_SERVICE_NAME.toLowerCase()
+
   // Ticked catalog services plus the custom one, if it has a name.
   const pickedCount = selectedServiceIds.length + (addCustomService && customServiceName.trim() ? 1 : 0)
 
@@ -315,6 +342,7 @@ export default function page() {
   const [partStatus, setPartStatus] = useState<'in-stock' | 'to-order'>('to-order')
   const [partWarranty, setPartWarranty] = useState<number | string>('')
   const [partWarrantyError, setPartWarrantyError] = useState(false)
+  const [partEstimatedDelivery, setPartEstimatedDelivery] = useState('')
 
   useEffect(() => {
     let active = true
@@ -322,7 +350,10 @@ export default function page() {
       .then(res => res.json())
       .then(data => {
         if (active && data.success) {
-          setAvailableServices(data.services)
+          // The scan fee is added only when the customer agrees to it, never from this list.
+          setAvailableServices(
+            data.services.filter((s: { service_name: string }) => s.service_name !== DIAGNOSTIC_SCAN_SERVICE_NAME),
+          )
         }
       })
       .catch(console.error)
@@ -428,6 +459,7 @@ export default function page() {
     setPartQty('1')
     setPartUnitPrice('')
     setPartStatus('to-order')
+    setPartEstimatedDelivery('')
     setPartWarranty('')
     setPartWarrantyError(false)
     setShowPartModal(true)
@@ -442,6 +474,7 @@ export default function page() {
     setPartQty(String(part.qty))
     setPartUnitPrice(String(part.unitPrice))
     setPartStatus(part.status)
+    setPartEstimatedDelivery(part.estimated_delivery_date ? String(part.estimated_delivery_date).slice(0, 10) : '')
     setPartWarranty(part.warranty_months === null || part.warranty_months === undefined ? '' : part.warranty_months)
     setPartWarrantyError(false)
     setShowPartModal(true)
@@ -469,6 +502,7 @@ export default function page() {
       unitPrice: Math.max(0, Number(partUnitPrice) || 0),
       status: partStatus,
       warranty_months: Number(partWarranty),
+      estimated_delivery_date: partStatus === 'to-order' && partEstimatedDelivery ? partEstimatedDelivery : null,
     }
     setServices((prev) =>
       prev.map((s) => {
@@ -509,6 +543,10 @@ export default function page() {
         body: JSON.stringify({ notes, services: servicesWithEstimates, estimated_grand_total, actual_grand_total }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const resJson = await res.json().catch(() => null)
+      if (resJson?.date_promised) {
+        setInitial((prev) => (prev ? { ...prev, datePromised: resJson.date_promised } : prev))
+      }
       setHasUnsavedChanges(false)
       setSaveState('saved')
       return true
@@ -593,6 +631,29 @@ export default function page() {
     setHasUnsavedChanges(true)
   }
 
+  // The scan fee has its own rules (scanner report attached, already paid, voucher used), so the
+  // server decides. The row leaves the screen only after the server says yes.
+  async function removeScanFee(serviceId: string) {
+    setRemovingScanFee(true)
+    try {
+      // Let a running auto-save finish first, so it cannot write the row back.
+      while (saveInFlight.current) await new Promise((r) => setTimeout(r, 150))
+      const res = await fetch(`/api/job-orders/${jobOrderId}/scan-authorization`, { method: 'DELETE' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || !data.success) {
+        toast.error(data.message || "The scan fee couldn't be removed. Please try again.")
+        return
+      }
+      removeService(serviceId)
+      if (data.removed) toast.success('Scan fee removed. The customer has been notified.')
+    } catch {
+      toast.error("The scan fee couldn't be removed. Check your connection and try again.")
+    } finally {
+      setRemovingScanFee(false)
+      setConfirmRemoveService(null)
+    }
+  }
+
   function updatePartWarranty(serviceId: string, partId: string, warranty: number | null) {
     setServices((prev) =>
       prev.map((s) => {
@@ -630,6 +691,7 @@ export default function page() {
       })
     }
 
+    if (customIsScanFee) return
     if (addCustomService && customServiceName.trim()) {
       nextNum += 1
       picked.push({
@@ -655,8 +717,8 @@ export default function page() {
       <TopBar title="Vehicle Inspection" subtitle="Inspection workflow & time tracking." showSearch={false} />
       <JobOrderBreadcrumb jobOrderId={jobOrderId} current="quotation" stage={jobOrder.stage} />
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <div className="grid grid-cols-4 gap-6 text-sm">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+        <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-6 sm:gap-6">
           <div>
             <p className="text-slate-400">Vehicle</p>
             <p className="font-bold text-slate-900">{jobOrder.vehicle}</p>
@@ -669,7 +731,27 @@ export default function page() {
             <p className="text-slate-400">Customer</p>
             <p className="font-bold text-slate-900">{jobOrder.customer}</p>
           </div>
-          <div className="text-right">
+          <div>
+            <p className="text-slate-400">Phone Number</p>
+            <p className="font-bold text-slate-900">{jobOrder.contactNumber || '—'}</p>
+          </div>
+          <div>
+            <p className="text-slate-400">Estimated Ready</p>
+            <p className="font-bold text-slate-900 flex items-center gap-1.5">
+              <span>⏱️</span>
+              {initial?.datePromised
+                ? new Date(initial.datePromised).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                  })
+                : 'Pending calculation'}
+            </p>
+          </div>
+          <div className="sm:text-right">
             <p className="text-slate-400">Job Order</p>
             <span className="inline-block rounded bg-slate-900 px-2 py-1 text-xs font-bold text-white">
               JO-{jobOrderId.toUpperCase()}
@@ -844,9 +926,9 @@ export default function page() {
                         ) : aiPredictions[s.id] && aiPredictions[s.id].predicted_duration_mins && (
                           <span
                             className="inline-flex cursor-help items-center gap-1 rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-700 hover:bg-purple-200"
-                            title={`${aiPredictions[s.id].is_mock ? 'ai' : 'AI'} suggests ${Math.round(aiPredictions[s.id].predicted_duration_mins! / 60 * 10) / 10} hrs`}
+                            title={`${aiPredictions[s.id].is_mock ? 'ai' : 'AI'} suggests ${formatHours(aiPredictions[s.id].predicted_duration_mins! / 60)}`}
                           >
-                            🤖 {Math.round(aiPredictions[s.id].predicted_duration_mins! / 60 * 10) / 10} hrs
+                            🤖 {formatHours(aiPredictions[s.id].predicted_duration_mins! / 60)}
                           </span>
                         )}
                       </p>
@@ -861,7 +943,7 @@ export default function page() {
                           className="w-20 rounded border border-slate-300 px-2 py-1 text-sm focus:border-emerald-500 focus:outline-none"
                         />
                       ) : (
-                        <p className="font-semibold text-slate-800">{s.laborHours} hrs</p>
+                        <p className="font-semibold text-slate-800">{formatHours(s.laborHours)}</p>
                       )}
                     </div>
                     <div>
@@ -958,6 +1040,12 @@ export default function page() {
                             >
                               {p.status === 'in-stock' ? 'In Stock' : 'To Order'}
                             </span>
+                            {p.status !== 'in-stock' && p.estimated_delivery_date && (
+                              <div className="mt-1 flex items-center gap-1 text-[11px] font-medium text-amber-700 whitespace-nowrap">
+                                <span>📦</span>
+                                <span>Est. {new Date(p.estimated_delivery_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                              </div>
+                            )}
                           </td>
                           <td className="px-3 py-2">
                              <select
@@ -1029,6 +1117,31 @@ export default function page() {
         </div>
 
         <div className="space-y-6">
+          {jobOrder.request && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="font-bold text-slate-900">Customer&apos;s Request</p>
+              <RequestedServices raw={jobOrder.request} hideCategory />
+            </div>
+          )}
+
+          {/* Estimated Completion Schedule Card */}
+          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50/50 p-5 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                <span>⏱️</span> Estimated Ready
+              </span>
+              <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
+                Scheduled
+              </span>
+            </div>
+            <p className="mt-2 text-lg font-black text-slate-900">
+              {formatPromisedDate(initial?.datePromised || jobOrder.datePromised) || 'Pending schedule'}
+            </p>
+            <p className="mt-2.5 border-t border-emerald-200/60 pt-2 text-[11px] leading-relaxed text-slate-500">
+              Calculated start-to-finish based on active shop hours (8:00 AM – 5:00 PM) with 12:00 PM – 1:00 PM lunch pause observed.
+            </p>
+          </div>
+
           <div className="rounded-2xl bg-slate-900 p-5 text-white">
             <p className="mb-3 font-bold">📄 Quotation Summary</p>
             <div className="space-y-2 text-sm text-slate-300">
@@ -1239,7 +1352,7 @@ export default function page() {
                     </span>
                   </div>
                   <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
-                    <span>Labor · {s.laborHours} hr{s.laborHours === 1 ? '' : 's'}</span>
+                    <span>Labor · {formatHours(s.laborHours)}</span>
                     <span>{currency(s.laborCost)}</span>
                   </div>
                   {s.parts.length > 0 ? (
@@ -1357,6 +1470,11 @@ export default function page() {
                     placeholder="e.g. Special Engine Detail"
                     className="w-full rounded-lg border border-slate-200 p-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
                   />
+                  {customIsScanFee && (
+                    <p className="mt-1 text-xs text-rose-600">
+                      The scan fee is added only when the customer agrees to it. Use another name.
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -1369,7 +1487,7 @@ export default function page() {
                 <button onClick={() => setShowServiceModal(false)} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Cancel</button>
                 <button
                   onClick={confirmAddService}
-                  disabled={pickedCount === 0}
+                  disabled={pickedCount === 0 || customIsScanFee}
                   className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                 >
                   {pickedCount > 1 ? `Add ${pickedCount} Services` : 'Add Service'}
@@ -1459,6 +1577,24 @@ export default function page() {
                 </div>
               </div>
 
+              {partStatus === 'to-order' && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3 space-y-1.5">
+                  <label className="block text-sm font-semibold text-slate-800">
+                    Estimated Arrival Date <span className="font-normal text-slate-500">(optional)</span>
+                  </label>
+                  <input
+                    type="date"
+                    min={new Date().toISOString().slice(0, 10)}
+                    value={partEstimatedDelivery}
+                    onChange={(e) => setPartEstimatedDelivery(e.target.value)}
+                    className="w-full rounded-lg border border-amber-300 bg-white p-2.5 text-sm text-slate-800 outline-none focus:border-amber-500 shadow-sm"
+                  />
+                  <p className="text-xs text-amber-800">
+                    Services requiring this part will be scheduled to start after this date.
+                  </p>
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Warranty</label>
                 <select
@@ -1532,12 +1668,19 @@ export default function page() {
       {confirmRemoveService && (
         <ConfirmActionModal
           tone="danger"
-          title="Remove this service?"
-          description={`${confirmRemoveService.name} and its parts will be removed from the quotation.`}
-          confirmLabel="Remove service"
-          busy={false}
+          title={confirmRemoveService.name === DIAGNOSTIC_SCAN_SERVICE_NAME ? 'Remove the scan fee?' : 'Remove this service?'}
+          description={
+            confirmRemoveService.name === DIAGNOSTIC_SCAN_SERVICE_NAME
+              ? 'Do this only when the car has no scanner port. The fee and its scan record will be removed, and the customer will be notified.'
+              : `${confirmRemoveService.name} and its parts will be removed from the quotation.`
+          }
+          confirmLabel={confirmRemoveService.name === DIAGNOSTIC_SCAN_SERVICE_NAME ? 'Remove scan fee' : 'Remove service'}
+          busy={removingScanFee}
           onClose={() => setConfirmRemoveService(null)}
           onConfirm={() => {
+            if (confirmRemoveService.name === DIAGNOSTIC_SCAN_SERVICE_NAME) {
+              return removeScanFee(confirmRemoveService.id)
+            }
             removeService(confirmRemoveService.id)
             setConfirmRemoveService(null)
           }}

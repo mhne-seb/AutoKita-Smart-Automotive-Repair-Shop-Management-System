@@ -5,6 +5,8 @@ import { DEFAULT_MECHANIC_CAPACITY } from '@/data/mechanicPolicy'
 import { notifyCustomer } from '@/lib/customerNotify'
 import { ROAD_TEST_TITLE } from '@/data/roadTest'
 import { DIAGNOSTIC_SCAN_SERVICE_NAME } from '@/data/diagnosticScan'
+import { MAX_MECHANICS_ON_CAR } from '@/data/shopPolicy'
+import { maxConcurrent } from '@/lib/autoSchedule'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
@@ -124,17 +126,36 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       const proposedStart = new Date(scheduledDate).getTime()
       const proposedFinish = proposedStart + (thisDurationHours * 3600 * 1000)
 
-      // 2. Query any active tasks that could conflict (same mechanic or same job order/vehicle)
+      // Determine target mechanic: passed mechanicId, or currently assigned to this task or job order
+      let targetMechanicId: number | null = mechanicId ? Number(mechanicId) : null
+      if (!targetMechanicId) {
+        const curAssignment = await db.query(
+          `SELECT COALESCE(spt.mechanic_id, jo.assigned_mechanic_id) AS current_mechanic_id
+           FROM service_progress_tasks spt
+           JOIN job_orders jo ON jo.id = spt.job_order_id
+           WHERE spt.id = $1::int`,
+          [taskId]
+        )
+        if (curAssignment.rows[0]?.current_mechanic_id) {
+          targetMechanicId = Number(curAssignment.rows[0].current_mechanic_id)
+        }
+      }
+
+      // 2. Query any active tasks that could conflict (same mechanic across ALL job orders, or same job order/vehicle)
       const conflicts = await db.query(
-        `SELECT spt.id, spt.task_title, spt.scheduled_date, spt.mechanic_id, spt.job_order_id,
+        `SELECT spt.id, spt.task_title, spt.job_order_id,
+                COALESCE(spt.scheduled_date, spt.started_at) AS scheduled_date,
+                COALESCE(spt.mechanic_id, jo.assigned_mechanic_id) AS mechanic_id,
                 COALESCE(
-                  spt.scheduled_date + (jos.estimated_hours * INTERVAL '1 hour'),
-                  spt.scheduled_date + INTERVAL '1.5 hours'
+                  COALESCE(spt.scheduled_date, spt.started_at) + (jos.estimated_hours * INTERVAL '1 hour'),
+                  COALESCE(spt.scheduled_date, spt.started_at) + INTERVAL '1.5 hours'
                 ) AS estimated_finish,
                 COALESCE(jos.estimated_hours, 1.5)::numeric AS estimated_hours,
-                e.full_name AS mechanic_name
+                COALESCE(e.full_name, jo_m.full_name, 'The assigned mechanic') AS mechanic_name
          FROM service_progress_tasks spt
+         JOIN job_orders jo ON jo.id = spt.job_order_id
          LEFT JOIN employees e ON e.id = spt.mechanic_id
+         LEFT JOIN employees jo_m ON jo_m.id = jo.assigned_mechanic_id
          LEFT JOIN LATERAL (
            SELECT jos.estimated_hours
            FROM services s
@@ -144,12 +165,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
          ) jos ON true
          WHERE spt.id != $1::int
            AND spt.task_status NOT IN ('completed', 'cancelled')
-           AND spt.scheduled_date IS NOT NULL
+           AND COALESCE(spt.scheduled_date, spt.started_at) IS NOT NULL
            AND (
-             ($2::int IS NOT NULL AND spt.mechanic_id = $2::int)
+             ($2::int IS NOT NULL AND COALESCE(spt.mechanic_id, jo.assigned_mechanic_id) = $2::int)
              OR spt.job_order_id = $3::int
            )`,
-        [taskId, mechanicId ? Number(mechanicId) : null, jobOrderId]
+        [taskId, targetMechanicId, jobOrderId]
       )
 
       const BUFFER_MS = 15 * 60 * 1000 // 15-minute buffer
@@ -163,20 +184,57 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         const overlaps = (proposedStart < tFinish) && (proposedFinish > tStart)
         const tooClose = (proposedStart < tFinish + BUFFER_MS) && (proposedFinish + BUFFER_MS > tStart)
 
+        const isSameMechanicRow = Boolean(targetMechanicId) && Number(row.mechanic_id) === Number(targetMechanicId)
+        const sameJobOrder = Number(row.job_order_id) === Number(jobOrderId)
+        // Different mechanics may work on one car at the same time. A task of the same job order only
+        // conflicts when the same mechanic holds it, or when either side has no mechanic yet.
+        const vehicleConflict = sameJobOrder && (!targetMechanicId || !row.mechanic_id)
+        if (!isSameMechanicRow && !vehicleConflict) continue
+
         if (tooClose) {
-          const isSameMechanic = mechanicId && Number(row.mechanic_id) === Number(mechanicId)
           const startStr = new Date(tStart).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
           const finishStr = new Date(tFinish).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-          const subject = isSameMechanic ? (row.mechanic_name || 'The assigned mechanic') : 'This vehicle'
-          const relation = overlaps ? 'is already scheduled for' : 'is finishing'
+          const subject = isSameMechanicRow ? (row.mechanic_name || 'The assigned mechanic') : 'This vehicle'
+          const relation = overlaps ? 'is already scheduled for' : 'has a service scheduled too close:'
+          const joContext = sameJobOrder ? 'on this job order' : `on Job Order #JO-${row.job_order_id}`
 
           return NextResponse.json(
             {
               success: false,
               code: 'SCHEDULE_CONFLICT',
-              message: `Scheduling conflict: ${subject} ${relation} "${row.task_title}" (${startStr} – ${finishStr}). Services cannot overlap and require at least 15 minutes buffer between tasks.`,
+              message: `Scheduling conflict: ${subject} ${relation} "${row.task_title}" ${joContext} (${startStr} – ${finishStr}). Overlapping services from the same mechanic are not allowed across all job orders (minimum 15-minute buffer required).`,
             },
             { status: 409 }
+          )
+        }
+      }
+
+      // At most MAX_MECHANICS_ON_CAR different mechanics on this car at the same time.
+      if (targetMechanicId) {
+        const otherMechanicsOnCar = conflicts.rows
+          .filter(
+            (row: any) =>
+              Number(row.job_order_id) === Number(jobOrderId) &&
+              row.mechanic_id &&
+              Number(row.mechanic_id) !== Number(targetMechanicId),
+          )
+          .map((row: any) => {
+            const start = new Date(row.scheduled_date).getTime()
+            const finish = row.estimated_finish
+              ? new Date(row.estimated_finish).getTime()
+              : start + Number(row.estimated_hours || 1.5) * 3600 * 1000
+            return { start, end: finish }
+          })
+        const peak =
+          maxConcurrent({ start: proposedStart, end: proposedFinish }, otherMechanicsOnCar) + 1
+        if (peak > MAX_MECHANICS_ON_CAR) {
+          return NextResponse.json(
+            {
+              success: false,
+              code: 'TOO_MANY_MECHANICS',
+              message: `Only ${MAX_MECHANICS_ON_CAR} mechanics can work on one car at the same time.`,
+            },
+            { status: 409 },
           )
         }
       }

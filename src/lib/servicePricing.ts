@@ -68,11 +68,11 @@ const SYNONYMS: Record<string, string> = {
 export function formatDurationEstimate(hours: number): string {
   if (hours <= 0.25) return '15 – 20 minutes';
   if (hours <= 0.5) return '30 – 45 minutes';
-  if (hours <= 0.75) return '~45 minutes to 1 hour';
-  if (hours <= 1.0) return '1 – 1.5 hours';
-  if (hours <= 1.5) return '1.5 – 2 hours';
-  if (hours <= 2.0) return '2 – 2.5 hours';
-  if (hours <= 3.0) return '2.5 – 3.5 hours';
+  if (hours <= 0.75) return '45 minutes – 1 hour';
+  if (hours <= 1.0) return '1 hour – 1 h 30 min';
+  if (hours <= 1.5) return '1 h 30 min – 2 hours';
+  if (hours <= 2.0) return '2 hours – 2 h 30 min';
+  if (hours <= 3.0) return '2 h 30 min – 3 h 30 min';
   if (hours <= 4.0) return '3 – 5 hours';
   return `${Math.floor(hours)} – ${Math.ceil(hours * 1.3)} hours`;
 }

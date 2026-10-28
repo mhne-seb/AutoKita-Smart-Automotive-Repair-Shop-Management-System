@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { verifyPassword } from '@/lib/password'
+import { STAFF_ACCESS_SQL } from '@/lib/staffAccess'
 import {
   SESSION_COOKIE,
   STAFF_SESSION_COOKIE,
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
     // cannot be overshadowed or demoted by a user record.
     let isCustomer = false
     let result = await db.query(
-      "SELECT id, email, full_name as nickname, split_part(full_name, ' ', 1) as first_name, split_part(full_name, ' ', 2) as last_name, role, password FROM employees WHERE LOWER(email) = LOWER($1) ORDER BY (email = $1) DESC LIMIT 1",
+      `SELECT id, email, full_name as nickname, split_part(full_name, ' ', 1) as first_name, split_part(full_name, ' ', 2) as last_name, role, password FROM employees WHERE LOWER(email) = LOWER($1) AND ${STAFF_ACCESS_SQL} ORDER BY (email = $1) DESC LIMIT 1`,
       [email]
     )
     if (result.rows.length === 0) {

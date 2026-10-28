@@ -20,6 +20,7 @@ export interface JobOrderCard {
   customer: string
   vehicle: string
   customerId: string
+  contactNumber?: string | null
   avatarUrl?: string | null
   rawUserId?: number
   stage: Stage
@@ -39,6 +40,12 @@ export interface JobOrderCard {
   cancelled?: boolean
   dateArrived?: string | null
   arrived?: boolean
+  datePromised?: string | null
+  serviceMode?: 'shop' | 'home'
+  homeAddress?: string | null
+  readyBy?: string | null
+  queueNo?: number | null
+  request?: string | null
 }
 
 export type FindingStatus = 'ok' | 'needs-attention' | 'urgent'
@@ -153,6 +160,7 @@ export interface QuotationPart {
   unitPrice: number
   status: PartStatus
   warranty_months?: number | null
+  estimated_delivery_date?: string | null
 }
 
 export interface QuotationService {
@@ -174,6 +182,8 @@ export interface QuotationData {
   notes: string
   sentToCustomer: boolean
   quotationApproved: boolean
+  datePromised?: string | null
+  assignedMechanicName?: string | null
 }
 
 export type TaskStatus = 'completed' | 'active' | 'pending' | 'cancelled' // cancelled = dropped by an approved pull-out
@@ -192,6 +202,8 @@ export interface TaskPart {
   purchasedOn?: string
   unitCost?: number // what the shop paid per unit (supplier_unit_cost)
   retailPrice?: number // what the customer is charged per unit (retail_unit_price, from the quotation)
+  // Date (YYYY-MM-DD) the part is expected at the shop, declared on the quotation or the purchase.
+  estimatedDelivery?: string
 }
 
 // One "Record purchase" save — a purchase_orders row and the parts it covered.

@@ -266,7 +266,8 @@ CREATE TABLE "job_order_parts" (
   "quantity" int,
   "retail_unit_price" decimal(10,2),
   "total_retail_amount" decimal(10,2),
-  "supplier_unit_cost" decimal(10,2)
+  "supplier_unit_cost" decimal(10,2),
+  "estimated_delivery_date" date
 );
 
 CREATE TABLE "job_order_services" (

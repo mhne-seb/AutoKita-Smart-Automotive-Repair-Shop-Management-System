@@ -1,6 +1,7 @@
 
 import { createHmac, timingSafeEqual } from 'crypto'
 import { db } from '@/lib/db'
+import { STAFF_ACCESS_SQL } from '@/lib/staffAccess'
 
 const TTL_MS = 30 * 60 * 1000
 export const RESET_LINK_MINUTES = TTL_MS / 60_000
@@ -46,7 +47,7 @@ export async function findAccountByEmail(email: string): Promise<ResetAccount | 
 
   const staff = await db.query(
     `SELECT id, email, COALESCE(NULLIF(split_part(full_name, ' ', 1), ''), 'there') AS name, password
-     FROM employees WHERE LOWER(email) = LOWER($1) LIMIT 1`,
+     FROM employees WHERE LOWER(email) = LOWER($1) AND ${STAFF_ACCESS_SQL} LIMIT 1`,
     [email],
   )
   if (staff.rows[0]) return toAccount('staff', staff.rows[0])
@@ -56,7 +57,7 @@ export async function findAccountByEmail(email: string): Promise<ResetAccount | 
 async function findAccountById(kind: AccountKind, id: number): Promise<ResetAccount | null> {
   const sql = kind === 'customer'
     ? `SELECT id, email, COALESCE(NULLIF(first_name, ''), nickname, 'there') AS name, password FROM users WHERE id = $1`
-    : `SELECT id, email, COALESCE(NULLIF(split_part(full_name, ' ', 1), ''), 'there') AS name, password FROM employees WHERE id = $1`
+    : `SELECT id, email, COALESCE(NULLIF(split_part(full_name, ' ', 1), ''), 'there') AS name, password FROM employees WHERE id = $1 AND ${STAFF_ACCESS_SQL}`
   const { rows } = await db.query(sql, [id])
   return rows[0] ? toAccount(kind, rows[0]) : null
 }

@@ -1,6 +1,7 @@
 'use client'
 
 
+import { formatVisitWindow } from '@/lib/bookingSlotsShared'
 import { useEffect, useRef, useState } from 'react'
 import { AlertCircle, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Download, Eye, Loader2, Search, X } from 'lucide-react'
 import { toast } from 'sonner'
@@ -406,7 +407,7 @@ function DetailModal({ ticketId, onClose }: { ticketId: number; onClose: () => v
             <Section title="Booking">
               <Line label="Ticket status" value={words(d.ticket.status)} />
               <Line label="Service" value={words(d.ticket.mode)} />
-              <Line label="Preferred time" value={fmtDateTime(d.ticket.preferred)} />
+              <Line label={d.ticket.mode === 'home_service' ? 'Arrival' : 'Drop-off'} value={formatVisitWindow(d.ticket.preferred) ?? '—'} />
               {d.ticket.isWarrantyClaim && <Line label="Type" value="Warranty claim" />}
               <p className="mt-1 whitespace-pre-wrap text-sm"><span className="text-muted-foreground">Concern: </span>{d.ticket.concern || '—'}</p>
             </Section>
