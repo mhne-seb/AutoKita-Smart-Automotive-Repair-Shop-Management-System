@@ -43,7 +43,7 @@ const PO_STATUS_LABEL: Record<string, string> = {
   fulfilled: 'Received',
 }
 
-export default function page() {
+export default function Page() {
   const jobOrderId = String(useParams().id)
   // Loaded through the controller (mock API) — see jobOrderController.ts.
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)

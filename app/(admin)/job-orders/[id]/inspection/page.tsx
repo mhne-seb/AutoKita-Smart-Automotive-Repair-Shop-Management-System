@@ -26,7 +26,7 @@ import { RequestedServices } from '@/components/admin/RequestedServices'
 // How many stored scanner reports the picker shows at a time.
 const REPORTS_PER_PAGE = 5
 
-export default function page() {
+export default function Page() {
   const jobOrderId = String(useParams().id)
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)
   const w = arrivalWording(jobOrder?.serviceMode ?? 'shop')
@@ -745,7 +745,7 @@ export default function page() {
               {!isLocked && (
                 saveState === 'error' ? (
                   <span className="flex items-center gap-1.5 text-xs font-semibold text-rose-600">
-                    <AlertCircle size={13} /> Couldn't save
+                    <AlertCircle size={13} /> Couldn&apos;t save
                   </span>
                 ) : saveState === 'saving' ? (
                   <span className="flex items-center gap-1.5 text-xs font-medium text-slate-400">

@@ -60,7 +60,7 @@ type TodayAppointment = {
   stage: 'needs-approval' | 'waiting' | 'arrived'
 }
 
-export default function page() {
+export default function Page() {
   const router = useRouter()
   const [jobOrders, setJobOrders] = useState<JobOrderCard[]>([])
   const [revenueTrend, setRevenueTrend] = useState<RevenuePoint[]>([])
@@ -197,7 +197,7 @@ export default function page() {
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-foreground/70">
               Welcome back
             </p>
-            <h2 className="mt-1 text-2xl font-bold">{firstName ? `${firstName}, here's` : "Here's"} today's shop floor.</h2>
+            <h2 className="mt-1 text-2xl font-bold">{firstName ? `${firstName}, here's` : "Here's"} today&apos;s shop floor.</h2>
             <p className="mt-1 max-w-md text-sm text-brand-foreground/80">
               {inProgressOrders} in progress and {pendingTicketsCount} {pendingTicketsCount === 1 ? 'ticket' : 'tickets'} waiting for triage.
             </p>

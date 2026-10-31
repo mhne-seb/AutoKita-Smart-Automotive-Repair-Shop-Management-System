@@ -157,7 +157,7 @@ function Testing() {
           <div className="rounded-xl border bg-card p-4">
             <div className="flex items-center gap-2 text-sm font-semibold"><Gauge className="h-4 w-4 text-teal" /> What is the road test?</div>
             <p className="mt-2 text-xs text-muted-foreground">
-              Before any vehicle is released, a mechanic drives it to confirm the repairs hold up under real conditions. If something isn't right, the affected services are redone and any failed part is replaced under warranty — at no extra cost to you.
+              Before any vehicle is released, a mechanic drives it to confirm the repairs hold up under real conditions. If something isn&apos;t right, the affected services are redone and any failed part is replaced under warranty — at no extra cost to you.
             </p>
           </div>
           <div className="rounded-xl border bg-card p-4">

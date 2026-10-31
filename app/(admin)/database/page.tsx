@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 import { getAuditLogs, type AuditLogEntry } from '@/controllers/databaseController'
 
-export default function page() {
+export default function Page() {
   const [logs, setLogs] = useState<AuditLogEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)

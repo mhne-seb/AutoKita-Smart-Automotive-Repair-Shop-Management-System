@@ -133,7 +133,7 @@ export function TwoFAModal({
       <div className="w-full max-w-sm rounded-xl bg-card p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-bold">Verify It's You</h3>
+            <h3 className="text-lg font-bold">Verify It&apos;s You</h3>
             {/* Several approvals can be waiting at once, each with its own
                 code. Say which one this code is for. */}
             {challenge?.forWork && (
@@ -152,7 +152,7 @@ export function TwoFAModal({
                 : <>Enter the 6-digit code sent to <b>{challenge?.sentTo}</b>. It expires in {challenge?.expiresMinutes} minutes.</>}
             </p>
             {challenge && !challenge.bypassed && status !== "success" && (
-              <p className="mt-1 text-xs text-muted-foreground">Can't find it? Check your Spam or Promotions folder.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Can&apos;t find it? Check your Spam or Promotions folder.</p>
             )}
           </div>
           <button onClick={onClose} className="rounded-full border p-1 hover:bg-accent"><X className="h-4 w-4" /></button>

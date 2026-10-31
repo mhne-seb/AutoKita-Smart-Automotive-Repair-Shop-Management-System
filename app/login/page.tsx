@@ -108,7 +108,7 @@ function LoginPage() {
 
             <h2 className="text-center text-2xl font-bold">Welcome Back!</h2>
             <p className="mt-2 text-center text-sm text-muted-foreground">
-              Sign in to track your vehicle's service
+              Sign in to track your vehicle&apos;s service
             </p>
             <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
               <div>
@@ -305,7 +305,7 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
           {!sent && (
             <form onSubmit={submitEmail} className="space-y-4 animate-fade-up">
               <p className="text-sm text-muted-foreground">
-                Enter the email you use for AutoKita. We'll send you a link to set a new password.
+                Enter the email you use for AutoKita. We&apos;ll send you a link to set a new password.
               </p>
               <div>
                 <label className="text-xs font-medium">Email</label>
@@ -335,7 +335,7 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
                 If <b>{email.trim()}</b> has an AutoKita account, we sent a reset link to it. The link works for 30 minutes.
               </p>
               <p className="text-xs text-muted-foreground">
-                Didn't get it? Check your spam folder, or ask the shop to reset it for you.
+                Didn&apos;t get it? Check your spam folder, or ask the shop to reset it for you.
               </p>
               <button onClick={onClose} className="cursor-pointer w-full rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand/90 hover:shadow-md active:translate-y-0">
                 Back to sign in

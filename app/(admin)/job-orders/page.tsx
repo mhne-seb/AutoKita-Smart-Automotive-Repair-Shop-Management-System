@@ -44,7 +44,7 @@ function parseServices(serviceStr: string): string[] {
     .filter(Boolean)
 }
 
-export default function page() {
+export default function Page() {
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [query, setQuery] = useState('')
 

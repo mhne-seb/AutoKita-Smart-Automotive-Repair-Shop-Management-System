@@ -237,7 +237,7 @@ function About() {
                 AutoKita began with a simple observation: the traditional auto repair experience was broken. Customers felt disconnected from the process, and mechanics were buried in paper logs.
               </p>
               <p>
-                We set out to build a bridge. By combining master-level mechanical expertise with a cutting-edge management platform, we've transformed the garage into a transparent, tech-enabled environment where you're always in control of your vehicle's health.
+                We set out to build a bridge. By combining master-level mechanical expertise with a cutting-edge management platform, we&apos;ve transformed the garage into a transparent, tech-enabled environment where you&apos;re always in control of your vehicle&apos;s health.
               </p>
             </div>
             <div className="mt-8 flex flex-wrap gap-3 animate-fade-up" style={{ animationDelay: "0.3s" }}>
@@ -342,7 +342,7 @@ function About() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand/80 via-brand/10 to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4 text-white">
-                  <p className="text-xs">"The real-time tracking changed how I view car maintenance. I knew exactly when to pick up my SUV." — Sarah K.</p>
+                  <p className="text-xs">&quot;The real-time tracking changed how I view car maintenance. I knew exactly when to pick up my SUV.&quot; — Sarah K.</p>
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between">

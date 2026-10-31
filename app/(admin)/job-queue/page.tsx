@@ -85,7 +85,7 @@ const getServiceLabel = (raw: string): string => {
   return raw.trim()
 }
 
-export default function page() {
+export default function Page() {
   const [jobs, setJobs] = useState<Job[]>([])
   // Show the loading scene instead of empty cards ("0 Tickets", "No tickets
   // found") while the first fetch is still on its way.
@@ -1072,7 +1072,7 @@ function ViewModal({ job, onClose, onCheckIn }: { job: Job; onClose: () => void;
               {job.preferredDate && (
                 <div className="flex justify-between gap-4">
                   <dt className="flex items-center gap-1.5 text-muted-foreground">
-                    <Calendar size={12} /> Customer's Shop Visit
+                    <Calendar size={12} /> Customer&apos;s Shop Visit
                   </dt>
                   <dd className="font-medium text-foreground">{job.preferredDate}</dd>
                 </div>
@@ -1359,7 +1359,7 @@ function NewTicketModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
                       className={fieldClass('email')}
                     />
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">Check the spelling carefully and read it back to the customer. They need this email to set their password ("Forgot password").</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Check the spelling carefully and read it back to the customer. They need this email to set their password (&quot;Forgot password&quot;).</p>
                   <ErrorText field="email" />
                 </div>
               </div>

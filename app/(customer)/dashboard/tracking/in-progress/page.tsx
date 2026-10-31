@@ -305,7 +305,7 @@ function InProgress() {
     return (
       <div className="mx-auto max-w-6xl px-6 py-8">
         <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">
-          You don't have any vehicle currently in service.
+          You don&apos;t have any vehicle currently in service.
         </div>
       </div>
     );
@@ -322,7 +322,7 @@ function InProgress() {
 
       {isHistorical && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
-          <AlertCircle className="h-3.5 w-3.5" /> This service has already been completed. You're viewing a read-only record.
+          <AlertCircle className="h-3.5 w-3.5" /> This service has already been completed. You&apos;re viewing a read-only record.
         </div>
       )}
       {jobOrder.status === "testing" && (
@@ -544,7 +544,7 @@ function InProgress() {
                 <div className="flex justify-between text-muted-foreground"><span>Paid</span><span>− ₱{data.bill.paid.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span></div>
                 <div className="flex items-center justify-between border-t pt-2 font-semibold"><span>Balance to pay</span><span className="text-lg text-teal">₱{data.bill.balance.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span></div>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">Updates as work is added. You'll settle this once the service is completed.</p>
+              <p className="mt-2 text-xs text-muted-foreground">Updates as work is added. You&apos;ll settle this once the service is completed.</p>
             </div>
           )}
 
@@ -582,7 +582,7 @@ function InProgress() {
                   <Info className="h-4 w-4" /> Pull-Out Requested
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Waiting for the shop to answer. If approved, you'd pay about ₱{payableTotal.toLocaleString()}.
+                  Waiting for the shop to answer. If approved, you&apos;d pay about ₱{payableTotal.toLocaleString()}.
                 </p>
                 {pullOutNote && (
                   <div className="mt-2 rounded-md bg-background/60 p-2">
@@ -638,7 +638,7 @@ function InProgress() {
                   <Info className="h-3 w-3" /> Note
                 </div>
                 <p className="mt-1">
-                  Need your car back early? You pay for work that's done or started. Work that hasn't
+                  Need your car back early? You pay for work that&apos;s done or started. Work that hasn&apos;t
                   started is free to cancel — unless its parts are already bought.
                 </p>
               </div>
@@ -732,8 +732,8 @@ function PullOutModal({
               </button>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              Here's what you'd pay if the shop approves. Work that's done or started is charged. Work that
-              hasn't started is free — unless its parts are already bought.
+              Here&apos;s what you&apos;d pay if the shop approves. Work that&apos;s done or started is charged. Work that
+              hasn&apos;t started is free — unless its parts are already bought.
             </p>
 
             {/* One card per outcome so the customer can see at a glance what
@@ -779,7 +779,7 @@ function PullOutModal({
                       <div className="flex items-center justify-between text-xs text-muted-foreground"><span className="pl-5">Parts for the above</span><span>₱{committedPartsTotal.toLocaleString()}</span></div>
                     )}
                   </div>
-                  <p className="mt-2 text-[11px] text-muted-foreground">The shop already paid for these parts, so this can't be cancelled.</p>
+                  <p className="mt-2 text-[11px] text-muted-foreground">The shop already paid for these parts, so this can&apos;t be cancelled.</p>
                 </div>
               )}
               {notStarted.length > 0 && (
@@ -799,7 +799,7 @@ function PullOutModal({
                 <p className="text-xs text-muted-foreground">Nothing has started or been bought yet — no charge.</p>
               )}
               <div className="flex items-center justify-between rounded-lg border bg-card px-3 py-3">
-                <span className="text-sm font-semibold">You'd pay</span>
+                <span className="text-sm font-semibold">You&apos;d pay</span>
                 <span className="text-lg font-bold">₱{payableTotal.toLocaleString()}</span>
               </div>
             </div>

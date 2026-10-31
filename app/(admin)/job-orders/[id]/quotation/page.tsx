@@ -40,7 +40,7 @@ function formatPromisedDate(iso?: string | null) {
   }
 }
 
-export default function page() {
+export default function Page() {
   const jobOrderId = String(useParams().id)
   const router = useRouter()
   const [jobOrder, setJobOrder] = useState<JobOrderCard | null | undefined>(undefined)
@@ -793,7 +793,7 @@ export default function page() {
                     onClick={() => void persistQuotation()}
                     className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                   >
-                    <AlertCircle size={13} /> Couldn't save — retry
+                    <AlertCircle size={13} /> Couldn&apos;t save — retry
                   </button>
                 ) : saveState === 'saving' ? (
                   <span className="flex items-center gap-1.5 text-xs font-medium text-slate-400">

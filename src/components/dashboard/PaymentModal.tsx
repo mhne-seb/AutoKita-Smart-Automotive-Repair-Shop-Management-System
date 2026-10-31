@@ -257,7 +257,7 @@ export function PaymentModal({
 
                 <div className="flex items-start gap-2 rounded-lg bg-muted/30 p-3 text-xs text-muted-foreground">
                   <ImageIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                  This is manually checked against the shop's account — verification may take a little while. Your status will show as "Pending" here until it's confirmed.
+                  {"This is manually checked against the shop's account — verification may take a little while. Your status will show as \"Pending\" here until it's confirmed."}
                 </div>
               </div>
             )}

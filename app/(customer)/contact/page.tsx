@@ -254,7 +254,7 @@ function Contact() {
                 <div className="min-h-0">
                   <div className="flex items-center gap-2 rounded-md border border-success/30 bg-success/10 px-4 py-2.5 text-sm text-success">
                     <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
-                    Thank you! Your message has been sent. We'll get back to you shortly.
+                    Thank you! Your message has been sent. We&apos;ll get back to you shortly.
                   </div>
                 </div>
               </div>

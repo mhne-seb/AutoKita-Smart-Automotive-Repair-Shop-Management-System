@@ -101,7 +101,7 @@ export function WarrantyClaimCard({
       </div>
 
       <div className="mt-4">
-        <label className="text-xs font-semibold text-slate-700">Mechanic's finding</label>
+        <label className="text-xs font-semibold text-slate-700">Mechanic&apos;s finding</label>
         <textarea
           value={finding}
           onChange={(e) => setFinding(e.target.value)}

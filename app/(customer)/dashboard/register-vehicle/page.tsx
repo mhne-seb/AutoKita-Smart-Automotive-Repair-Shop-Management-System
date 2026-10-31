@@ -400,7 +400,7 @@ function RegisterVehicle() {
               <Info className="h-4 w-4" /> NOTE TO CUSTOMER
             </div>
             <p className="mt-2 text-xs text-white/85">
-              Please ensure you have the vehicle's registration documents ready for the mechanic's verification.
+              Please ensure you have the vehicle&apos;s registration documents ready for the mechanic&apos;s verification.
             </p>
           </div>
         </aside>
@@ -438,7 +438,7 @@ function RegisterVehicle() {
               </div>
               <h3 className="mt-4 text-lg font-bold">Booking Confirmed!</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Your vehicle registration and service request have been submitted. We'll notify you once it's reviewed.
+                Your vehicle registration and service request have been submitted. We&apos;ll notify you once it&apos;s reviewed.
               </p>
               <button
                 onClick={() => {

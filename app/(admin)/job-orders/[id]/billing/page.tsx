@@ -125,7 +125,7 @@ export default function BillingPage() {
 
       {notYetDone && (
         <div className="flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
-          <AlertTriangle size={16} /> The job isn't complete yet — the balance becomes collectable once the road test passes.
+          <AlertTriangle size={16} /> The job isn&apos;t complete yet — the balance becomes collectable once the road test passes.
           <Link href={`/job-orders/${jobOrderId}/testing`} className="ml-auto font-semibold underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">Go to Testing</Link>
         </div>
       )}

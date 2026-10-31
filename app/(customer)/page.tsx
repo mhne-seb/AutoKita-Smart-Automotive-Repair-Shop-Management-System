@@ -707,7 +707,7 @@ function Home() {
                       />
                     ))}
                   </div>
-                  <p className="relative mt-4 text-sm text-foreground/80">"{t.quote}"</p>
+                  <p className="relative mt-4 text-sm text-foreground/80">&quot;{t.quote}&quot;</p>
                   <div className="relative mt-6 flex items-center gap-3">
                     <div className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold transition-transform duration-300 group-hover:scale-110 ${t.color}`}>
                       {t.name.split(" ").map(n => n[0]).join("")}

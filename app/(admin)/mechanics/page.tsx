@@ -59,7 +59,7 @@ function avatarUrl(name: string) {
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bg}&color=fff&size=300&bold=true&font-size=0.38`
 }
 
-export default function page() {
+export default function Page() {
   const [mechanicsList, setMechanicsList] = useState<Mechanic[]>([])
   const [scheduleTasks, setScheduleTasks] = useState<ScheduleTask[]>([])
   const [loading, setLoading] = useState(true)
@@ -350,7 +350,7 @@ export default function page() {
                     </div>
                     {full && (
                       <p className="mt-1.5 flex items-center gap-1 text-xs text-destructive">
-                        <AlertCircle size={12} /> At capacity — can't take new job orders
+                        <AlertCircle size={12} /> At capacity — can&apos;t take new job orders
                       </p>
                     )}
                   </div>
@@ -404,7 +404,7 @@ export default function page() {
             </div>
             <h3 className="mt-4 text-lg font-bold text-foreground">Remove {deleteTarget.name}?</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              They'll be taken off the roster and can no longer be assigned. Their finished work and payroll records are kept.
+              They&apos;ll be taken off the roster and can no longer be assigned. Their finished work and payroll records are kept.
             </p>
             {deleteTarget.openTasks > 0 && (
               <p className="mt-2 flex items-center gap-1 text-xs text-destructive">
@@ -820,7 +820,7 @@ function MechanicFormModal({
               inputMode="numeric"
               className={fieldClass('jobsCapacity')}
             />
-            <p className="mt-1 text-xs text-muted-foreground">Max ongoing job orders at once. The scheduler won't assign more than this.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Max ongoing job orders at once. The scheduler won&apos;t assign more than this.</p>
             <ErrorText field="jobsCapacity" />
           </div>
 

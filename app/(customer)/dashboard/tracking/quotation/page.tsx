@@ -218,7 +218,7 @@ function Quotation() {
           </div>
           <div>
             <h2 className="text-lg font-bold text-rose-900">Something went wrong</h2>
-            <p className="mt-1 text-sm text-rose-600">We couldn't load your quotation. Please try again.</p>
+            <p className="mt-1 text-sm text-rose-600">We couldn&apos;t load your quotation. Please try again.</p>
           </div>
           <button
             onClick={() => window.location.reload()}
@@ -235,7 +235,7 @@ function Quotation() {
     return (
       <div className="mx-auto max-w-6xl px-6 py-8">
         <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">
-          You don't have any active quotation right now.
+          You don&apos;t have any active quotation right now.
         </div>
       </div>
     );
@@ -582,7 +582,7 @@ function Quotation() {
 
           {!locked && (
             <div className="rounded-xl border bg-card p-4 text-xs text-muted-foreground">
-              <div className="flex gap-2"><AlertCircle className="h-4 w-4 shrink-0" /> Parts marked "To Order" may add 1-3 business days to the estimated completion time. The workshop will confirm once parts arrive.</div>
+              <div className="flex gap-2"><AlertCircle className="h-4 w-4 shrink-0" /> Parts marked &quot;To Order&quot; may add 1-3 business days to the estimated completion time. The workshop will confirm once parts arrive.</div>
             </div>
           )}
         </aside>

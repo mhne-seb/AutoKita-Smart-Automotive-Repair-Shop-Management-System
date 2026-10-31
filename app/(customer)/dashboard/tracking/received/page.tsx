@@ -66,7 +66,7 @@ function Received() {
     return (
       <div className="mx-auto max-w-6xl px-6 py-8">
         <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">
-          You don't have any vehicle currently checked in.
+          You don&apos;t have any vehicle currently checked in.
         </div>
       </div>
     );
@@ -83,7 +83,7 @@ function Received() {
 
       {isHistorical && (
         <div className="flex items-center gap-2 rounded-lg border border-muted bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
-          <AlertCircle className="h-3.5 w-3.5" /> This job order has already been completed. You're viewing a read-only record.
+          <AlertCircle className="h-3.5 w-3.5" /> This job order has already been completed. You&apos;re viewing a read-only record.
         </div>
       )}
 

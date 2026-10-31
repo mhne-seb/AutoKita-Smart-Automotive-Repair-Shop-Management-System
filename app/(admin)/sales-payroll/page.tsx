@@ -241,7 +241,7 @@ function downloadInvoice(p: PaymentRecord) {
   win.print()
 }
 
-export default function page() {
+export default function Page() {
   const [activeTab, setActiveTab] = useState<TabKey>('payments')
 
   // Live state from Supabase

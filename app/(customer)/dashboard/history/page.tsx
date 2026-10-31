@@ -860,7 +860,7 @@ function WarrantiesPanel({ userId }: { userId: number }) {
                 </div>
                 {claimingId === w.warrantyId && (
                   <div className="mt-3 rounded-lg border bg-muted/20 p-3">
-                    <label className="text-xs font-medium">What's wrong with it?</label>
+                    <label className="text-xs font-medium">What&apos;s wrong with it?</label>
                     <textarea
                       value={claimText}
                       onChange={(e) => setClaimText(e.target.value)}

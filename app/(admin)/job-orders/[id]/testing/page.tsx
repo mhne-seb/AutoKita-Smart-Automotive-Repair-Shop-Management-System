@@ -140,7 +140,7 @@ export default function TestingPage() {
                   <CheckCircle2 size={18} /> Pass — repairs hold up
                 </button>
                 <button type="button" onClick={() => setVerdict('fail')} className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-colors ${verdict === 'fail' ? 'border-rose-500 bg-rose-50 text-rose-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'} cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}>
-                  <XCircle size={18} /> Fail — something's still wrong
+                  <XCircle size={18} /> Fail — something&apos;s still wrong
                 </button>
               </div>
 
