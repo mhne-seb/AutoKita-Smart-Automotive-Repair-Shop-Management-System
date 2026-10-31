@@ -33,14 +33,14 @@ export async function GET(request: NextRequest) {
 
     if (!jobOrder) {
       return NextResponse.json({
-        jobOrder: null, preDiagnostic: null, walkaround: [], findings: [], scannerFindings: [], reviewHistory: [], shop: null,
+        jobOrder: null, preDiagnostic: null, walkaround: [], findings: [], diagnosticReport: null, diagnosticTroubleCodes: [], scannerFindings: [], reviewHistory: [], shop: null,
         canCancel: false, scanAuthorization: null,
       })
     }
 
     if (jobOrder) jobOrder.service_mode = await getServiceModeValue(jobOrder.job_order_id)
 
-    const [preDiagRes, findingsRes, walkaroundRes, historyRes, shopRes, cancelRes, scannerRes] = await Promise.all([
+    const [preDiagRes, findingsRes, walkaroundRes, historyRes, shopRes, cancelRes, diagRes] = await Promise.all([
       db.query(`SELECT * FROM get_job_order_quotation($1)`, [jobOrder.job_order_id]),
       db.query(`SELECT * FROM get_job_order_inspections($1)`, [jobOrder.job_order_id]),
        // Walkaround photos from inspection_photos (child of vehicle_inspections)
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
         `SELECT (
             jo.status = 'inspecting'
             AND NOT EXISTS (
-              SELECT 1 FROM vehicle_inspections vi
+               SELECT 1 FROM vehicle_inspections vi
               WHERE vi.job_order_id = jo.id
                 AND (
                   EXISTS (SELECT 1 FROM inspection_photos ip WHERE ip.inspection_id = vi.id)
@@ -89,14 +89,26 @@ export async function GET(request: NextRequest) {
          FROM job_orders jo WHERE jo.id = $1`,
         [jobOrder.job_order_id],
       ),
-      // Scanner findings, plain-language only — no raw codes or "System"
-      // jargon for the customer. Only current (still-active) codes; a
-      // cleared/history code isn't something they need to act on.
+      // Linked OBD-II report and trouble codes for this job order
       db.query(
-        `SELECT d.description
+        `SELECT
+           r.scanner_tool,
+           r.scanner_software,
+           r.report_date::text AS report_date,
+           r.test_mileage,
+           r.reported_make,
+           r.reported_model,
+           r.reported_year,
+           r.reported_vin,
+           r.reported_plate,
+           r.linked_at::text AS linked_at,
+           d.dtc_code,
+           d.description AS dtc_description,
+           d.state       AS dtc_state,
+           d.system      AS dtc_system
          FROM obd2_diagnostic_reports r
-         JOIN obd2_dtc_codes d ON d.report_id = r.id
-         WHERE r.job_order_id = $1 AND LOWER(d.state) = 'current'
+         LEFT JOIN obd2_dtc_codes d ON d.report_id = r.id
+         WHERE r.job_order_id = $1
          ORDER BY d.datetime_logged ASC`,
         [jobOrder.job_order_id],
       ),
@@ -117,6 +129,50 @@ export async function GET(request: NextRequest) {
     walkaround.forEach((w, i) => { w.photo = signed[i] })
     findings.forEach((f, i) => { f.photo = signed[walkaround.length + i] })
 
+    let diagnosticReport: {
+      scanner_tool: string | null
+      scanner_software: string | null
+      report_date: string | null
+      test_mileage: number | null
+      reported_make: string | null
+      reported_model: string | null
+      reported_year: number | null
+      reported_vin: string | null
+      reported_plate: string | null
+      linked_at: string | null
+    } | null = null
+
+    let diagnosticTroubleCodes: {
+      dtc_code: string
+      dtc_description: string | null
+      dtc_state: string | null
+      dtc_system: string | null
+    }[] = []
+
+    if (reportSent && diagRes.rows.length > 0) {
+      const first = diagRes.rows[0]
+      diagnosticReport = {
+        scanner_tool: first.scanner_tool ?? null,
+        scanner_software: first.scanner_software ?? null,
+        report_date: first.report_date != null ? String(first.report_date) : null,
+        test_mileage: first.test_mileage != null ? Number(first.test_mileage) : null,
+        reported_make: first.reported_make ?? null,
+        reported_model: first.reported_model ?? null,
+        reported_year: first.reported_year != null ? Number(first.reported_year) : null,
+        reported_vin: first.reported_vin ? String(first.reported_vin).trim() : null,
+        reported_plate: first.reported_plate ? String(first.reported_plate).trim() : null,
+        linked_at: first.linked_at != null ? String(first.linked_at) : null,
+      }
+      diagnosticTroubleCodes = diagRes.rows
+        .filter((r) => r.dtc_code !== null && r.dtc_code !== undefined)
+        .map((r) => ({
+          dtc_code: String(r.dtc_code),
+          dtc_description: r.dtc_description ?? null,
+          dtc_state: r.dtc_state ?? null,
+          dtc_system: r.dtc_system ?? null,
+        }))
+    }
+
     return NextResponse.json({
       jobOrder,
       preDiagnostic,
@@ -125,7 +181,13 @@ export async function GET(request: NextRequest) {
       canCancel: Boolean(cancelRes.rows[0]?.can_cancel),
       scanAuthorization,
       findings,
-      scannerFindings: reportSent ? scannerRes.rows.map((r) => r.description as string) : [],
+      diagnosticReport,
+      diagnosticTroubleCodes,
+      scannerFindings: reportSent
+        ? diagnosticTroubleCodes
+            .filter((c) => (c.dtc_state ?? '').toLowerCase() === 'current' && c.dtc_description)
+            .map((c) => c.dtc_description as string)
+        : [],
       shop: shopRes.rows[0] ?? null,
     })
   } catch (err) {

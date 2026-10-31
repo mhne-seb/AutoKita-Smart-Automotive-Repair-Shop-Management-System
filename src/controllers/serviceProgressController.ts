@@ -295,12 +295,33 @@ export async function getReceivedData(userId: number, jobOrderId?: number) {
   }
 }
 
+export type CustomerDiagnosticReport = {
+  scanner_tool: string | null
+  scanner_software: string | null
+  report_date: string | null
+  test_mileage: number | null
+  reported_make: string | null
+  reported_model: string | null
+  reported_year: number | null
+  reported_vin: string | null
+  reported_plate: string | null
+  linked_at: string | null
+}
+
+export type CustomerDiagnosticTroubleCode = {
+  dtc_code: string
+  dtc_description: string | null
+  dtc_state: string | null
+  dtc_system: string | null
+}
+
 export async function getInspectingData(userId: number, jobOrderId?: number) {
   const qs = new URLSearchParams({ userId: String(userId) })
   if (jobOrderId) qs.set('jobOrderId', String(jobOrderId))
   const res = await fetch(`/api/tracking/inspecting?${qs}`)
   const data = await res.json()
   return { _status: res.status, ...data } as {
+    _status?: number
     jobOrder: {
       job_order_id: number
       status: string
@@ -332,7 +353,7 @@ export async function getInspectingData(userId: number, jobOrderId?: number) {
     reviewHistory: {
       id: number
       mechanic_notes: string | null
-      status: 'pending' | 'approved' | 'disputed'
+      status: 'pending' | 'approved' | 'disputed' | 'rejected'
       sent_at: string
       customer_reason: string | null
       responded_at: string | null
@@ -355,9 +376,11 @@ export async function getInspectingData(userId: number, jobOrderId?: number) {
       findings_description: string
       logged_date: string
     }[]
+    diagnosticReport: CustomerDiagnosticReport | null
+    diagnosticTroubleCodes: CustomerDiagnosticTroubleCode[]
     // Plain-language descriptions from a linked OBD-II scan (current/active
-    // codes only) — no raw codes or system jargon, see /api/tracking/inspecting.
-    scannerFindings: string[]
+    // codes only) — retained for backwards-compatibility.
+    scannerFindings?: string[]
     shop: { name: string; address: string } | null
   }
 }

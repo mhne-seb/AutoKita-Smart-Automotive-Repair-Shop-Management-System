@@ -339,7 +339,7 @@ function Quotation() {
                           {s.service_name}
                           {isAuthorizedFee && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
-                              <Lock className="h-3 w-3" /> Already authorized at booking
+                              <Lock className="h-3 w-3" /> Approved scan fee — required
                             </span>
                           )}
                         </div>

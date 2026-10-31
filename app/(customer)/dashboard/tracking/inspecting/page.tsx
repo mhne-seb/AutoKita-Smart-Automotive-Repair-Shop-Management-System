@@ -7,9 +7,9 @@ import { FileText, ChevronRight, Loader2, Camera, AlertCircle, Check, ScanLine, 
 import { toast } from "sonner";
 import { StageStepper, stageForStatus } from "@/components/dashboard/StageStepper";
 import { Lightbox } from "@/components/Lightbox";
-import { getInspectingData, respondToInspection, cancelJobOrder } from "@/controllers/serviceProgressController";
+import { getInspectingData, respondToInspection, cancelJobOrder, type CustomerDiagnosticReport, type CustomerDiagnosticTroubleCode } from "@/controllers/serviceProgressController";
 import { ShopLoading } from "@/components/ShopLoading";
-import { formatStamp } from "@/lib/utils";
+import { formatStamp, parseStamp } from "@/lib/utils";
 import { ScanAuthorizationCard } from "@/components/dashboard/ScanAuthorizationCard";
 import { serviceModeFromDb } from "@/lib/serviceMode";
 
@@ -30,6 +30,160 @@ function findingLabel(status: string | null) {
   return status ?? "";
 }
 
+function DiagnosticReportCard({
+  report,
+  dtcs,
+}: {
+  report: CustomerDiagnosticReport
+  dtcs: CustomerDiagnosticTroubleCode[]
+}) {
+  const reportDate = parseStamp(report.report_date);
+  const linkedAt = parseStamp(report.linked_at);
+
+  return (
+    <div className="rounded-xl border bg-card p-6 space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+          <ScanLine size={20} />
+        </div>
+        <div>
+          <h3 className="text-sm font-bold text-foreground">OBD-II Diagnostic Report</h3>
+          <p className="text-xs text-muted-foreground">
+            Scanner findings from LAUNCH X-431 or compatible tools
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200">
+        <ScanLine size={16} className="flex-shrink-0" />
+        <span>
+          <b>Diagnostic scan completed.</b> These are the results recorded from your vehicle.
+        </span>
+      </div>
+
+      {/* Report details grid */}
+      <div className="grid grid-cols-1 gap-4 rounded-xl border border-border bg-muted/30 p-4 text-xs sm:grid-cols-2 md:grid-cols-3">
+        <div>
+          <p className="text-muted-foreground">Scanner</p>
+          <p className="font-semibold text-foreground">{report.scanner_tool ?? '—'}</p>
+          {report.scanner_software && (
+            <p className="text-muted-foreground">{report.scanner_software}</p>
+          )}
+        </div>
+        <div>
+          <p className="text-muted-foreground">Report Date</p>
+          <p className="font-semibold text-foreground">
+            {reportDate
+              ? reportDate.toLocaleString('en-PH', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              : '—'}
+          </p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Vehicle (Scanner)</p>
+          <p className="font-semibold text-foreground">
+            {[report.reported_make, report.reported_model, report.reported_year]
+              .filter(Boolean)
+              .join(' ') || '—'}
+          </p>
+          <div className="mt-0.5 flex items-center gap-1.5 flex-wrap">
+            {report.reported_plate && (
+              <span className="text-[10px] font-semibold text-foreground/80">
+                {report.reported_plate}
+              </span>
+            )}
+            {report.reported_vin ? (
+              <span className="font-mono text-[10px] text-muted-foreground">
+                VIN: {report.reported_vin}
+              </span>
+            ) : (
+              <span className="text-[10px] font-medium text-amber-600">No VIN</span>
+            )}
+          </div>
+        </div>
+        {report.test_mileage != null && (
+          <div>
+            <p className="text-muted-foreground">Mileage at Scan</p>
+            <p className="font-semibold text-foreground">{report.test_mileage.toLocaleString()} km</p>
+          </div>
+        )}
+        {linkedAt && (
+          <div>
+            <p className="text-muted-foreground">Scan Linked</p>
+            <p className="font-semibold text-foreground">
+              {linkedAt.toLocaleDateString('en-PH', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* DTC codes table */}
+      {dtcs.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No Diagnostic Trouble Codes (DTCs) were extracted from this report.
+        </p>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground">
+            Diagnostic Trouble Codes ({dtcs.length})
+          </p>
+          <div className="overflow-x-auto rounded-xl border border-border">
+            <table className="w-full min-w-[500px] text-xs">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="px-3 py-2 text-left font-semibold text-muted-foreground">Code</th>
+                  <th className="px-3 py-2 text-left font-semibold text-muted-foreground">Description</th>
+                  <th className="px-3 py-2 text-left font-semibold text-muted-foreground">State</th>
+                  <th className="px-3 py-2 text-left font-semibold text-muted-foreground">System</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {dtcs.map((dtc, index) => {
+                  const stateLower = (dtc.dtc_state ?? '').toLowerCase()
+                  const stateClass =
+                    stateLower === 'current'
+                      ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'
+                      : stateLower === 'pending'
+                      ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+                      : 'bg-muted text-muted-foreground'
+                  return (
+                    <tr key={index} className="bg-card hover:bg-muted/30">
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <span className="font-mono font-bold text-foreground">{dtc.dtc_code}</span>
+                      </td>
+                      <td className="px-3 py-2 text-foreground">{dtc.dtc_description ?? '—'}</td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${stateClass}`}>
+                          {dtc.dtc_state ?? '—'}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">
+                        {dtc.dtc_system ?? '—'}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Your mechanic will explain any recommended repair before work begins.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Inspecting() {
   useEffect(() => { document.title = "Inspecting — AutoKita"; }, []);
 
@@ -45,7 +199,7 @@ function Inspecting() {
     const jobOrderId = jobOrderIdParam ? Number(jobOrderIdParam) : undefined;
     setLoading(true);
     getInspectingData(userId, jobOrderId)
-      .then((res: any) => {
+      .then((res) => {
         if (res?._status === 401 || res?._status === 403) {
           sessionStorage.removeItem("autokita_customer");
           sessionStorage.removeItem("autokita_user_id");
@@ -63,7 +217,8 @@ function Inspecting() {
   const findings = data?.findings ?? [];
   const reviewHistory = data?.reviewHistory ?? [];
   const walkaround = data?.walkaround ?? [];
-  const scannerFindings = data?.scannerFindings ?? [];
+  const diagnosticReport = data?.diagnosticReport ?? null;
+  const diagnosticTroubleCodes = data?.diagnosticTroubleCodes ?? [];
   const scanAuthorization = data?.scanAuthorization ?? null;
 
   const isHistorical = jobOrder ? jobOrder.status === "completed" || jobOrder.status === "released" : false;
@@ -447,24 +602,8 @@ function Inspecting() {
             </div>
           )}
 
-          {!awaitingReport && scannerFindings.length > 0 && (
-            <div className="rounded-xl border bg-card p-6">
-              <div className="flex items-center gap-2 text-[color:oklch(0.5_0.2_300)]">
-                <ScanLine className="h-4 w-4" />
-                <span className="text-xs font-bold uppercase tracking-wider">Diagnostic Scan Results</span>
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Issues our scanner picked up on your vehicle.
-              </p>
-              <ul className="mt-4 space-y-2 text-sm">
-                {scannerFindings.map((desc, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
-                    {desc}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {!awaitingReport && diagnosticReport && (
+            <DiagnosticReportCard report={diagnosticReport} dtcs={diagnosticTroubleCodes} />
           )}
         </div>
 

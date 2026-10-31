@@ -61,13 +61,29 @@ export async function GET(request: NextRequest) {
       ),
       db.query(
         `SELECT EXISTS (
-           SELECT 1 FROM system_audit_logs sal
-           JOIN job_orders jo ON jo.ticket_id = sal.entity_id
+           -- The fee can be authorized either while booking, or after staff
+           -- asks for scanner permission during inspection. Both paths make
+           -- the OBD-II line mandatory on the customer quotation.
+           SELECT 1
+           FROM job_orders jo
            WHERE jo.id = $1
-             AND sal.entity_type = 'service_tickets'
-             AND sal.action_performed = 'approved'
-             -- The customer's own consent row, not the admin's acceptance row.
-             AND sal.user_id IS NOT NULL
+             AND (
+               EXISTS (
+                 SELECT 1
+                 FROM system_audit_logs sal
+                 WHERE sal.entity_type = 'service_tickets'
+                   AND sal.entity_id = jo.ticket_id
+                   AND sal.action_performed = 'approved'
+                   -- The customer's own consent row, not the staff ticket-acceptance row.
+                   AND sal.user_id IS NOT NULL
+               )
+               OR EXISTS (
+                 SELECT 1
+                 FROM scan_authorizations sa
+                 WHERE sa.job_order_id = jo.id
+                   AND sa.decision = 'approved'::approval_status
+               )
+             )
          ) AS authorized`,
         [jobOrder.job_order_id],
       ),
