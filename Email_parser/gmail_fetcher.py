@@ -166,7 +166,7 @@ def fetch_and_process():
         sys.exit(1)
 
     print(f"[>>] Connecting to {IMAP_HOST} as {GMAIL_EMAIL}...")
-    mail = imaplib.IMAP4_SSL(IMAP_HOST, IMAP_PORT)
+    mail = imaplib.IMAP4_SSL(IMAP_HOST, IMAP_PORT, timeout=30)
     mail.login(GMAIL_EMAIL, GMAIL_APP_PASSWORD)
     mail.select("INBOX")
 
