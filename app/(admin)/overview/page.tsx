@@ -103,7 +103,17 @@ export default function Page() {
       }
     })
 
-    // 4. Fetching job queue data — pending tickets count, technicians count,
+    // 3b. Fetching mechanics roster for technician count
+    const mechanicsLoad = fetch('/api/admin/mechanics')
+      .then((res) => res.json())
+      .then((data) => {
+        if (active && data.success && Array.isArray(data.mechanics)) {
+          setTechniciansCount(data.mechanics.length)
+        }
+      })
+      .catch(console.error)
+
+    // 4. Fetching job queue data — pending tickets count,
     //    and a live preview of the bookings still waiting for approval.
     const queueLoad = fetch('/api/admin/job-queue')
       .then((res) => res.json())
@@ -167,7 +177,7 @@ export default function Page() {
       })
       .catch(console.error)
 
-    Promise.allSettled([analyticsLoad, jobOrdersLoad, queueLoad]).then(() => {
+    Promise.allSettled([analyticsLoad, jobOrdersLoad, queueLoad, mechanicsLoad]).then(() => {
       if (active) setLoading(false)
     })
 

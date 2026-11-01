@@ -293,3 +293,58 @@ export async function sendSignupCodeEmail(opts: {
         `,
     })
 }
+
+export async function sendAdminContactEmail(opts: {
+    name: string
+    email: string
+    inquiry: string
+    message: string
+}) {
+    const adminEmail = 'proserv.autokita@gmail.com'
+    const escapeHtml = (s: string) => (s || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;')
+
+    await transporter.sendMail({
+        from: FROM,
+        to: adminEmail,
+        replyTo: opts.email,
+        subject: `[${opts.inquiry} Inquiry] Message from ${opts.name}`,
+        text:
+            `You received a new inquiry from the AutoKita website:\n\n` +
+            `Name: ${opts.name}\n` +
+            `Email: ${opts.email}\n` +
+            `Inquiry Type: ${opts.inquiry}\n\n` +
+            `Message:\n${opts.message}\n\n` +
+            `Reply directly to this email to reach the customer.`,
+        html: `
+          <div style="font-family:system-ui,Arial,sans-serif;max-width:560px;margin:auto;color:#111;font-size:15px;line-height:1.6">
+            <div style="background:#0b1730;padding:20px 24px;border-radius:8px 8px 0 0;color:#ffffff">
+              <h2 style="margin:0;font-size:20px;font-weight:700;color:#ffffff">New Customer Inquiry</h2>
+              <p style="margin:4px 0 0 0;font-size:13px;color:#94a3b8">${escapeHtml(opts.inquiry)} Inquiry via AutoKita Support Center</p>
+            </div>
+            <div style="padding:24px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;background:#ffffff">
+              <table style="width:100%;margin-bottom:20px;border-collapse:collapse">
+                <tr>
+                  <td style="padding:6px 0;width:120px;color:#64748b;font-size:13px;font-weight:600">Sender Name:</td>
+                  <td style="padding:6px 0;color:#0f172a;font-weight:600">${escapeHtml(opts.name)}</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;color:#64748b;font-size:13px;font-weight:600">Sender Email:</td>
+                  <td style="padding:6px 0;color:#0f172a"><a href="mailto:${escapeHtml(opts.email)}" style="color:#2563eb;text-decoration:none">${escapeHtml(opts.email)}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;color:#64748b;font-size:13px;font-weight:600">Inquiry Type:</td>
+                  <td style="padding:6px 0"><span style="background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600">${escapeHtml(opts.inquiry)}</span></td>
+                </tr>
+              </table>
+              <div style="background:#f8fafc;padding:16px;border-radius:6px;border-left:4px solid #0b1730">
+                <p style="margin:0 0 8px 0;font-size:12px;font-weight:700;text-transform:uppercase;color:#475569;letter-spacing:0.5px">Customer Message:</p>
+                <p style="margin:0;color:#1e293b;white-space:pre-line">${escapeHtml(opts.message)}</p>
+              </div>
+              <p style="margin-top:20px;font-size:13px;color:#64748b">
+                Tip: Clicking &quot;Reply&quot; in your email client will reply directly to <b>${escapeHtml(opts.email)}</b>.
+              </p>
+            </div>
+          </div>
+        `,
+    })
+}

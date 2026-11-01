@@ -11,6 +11,12 @@ const PAYROLL_SQL = `
   FROM payroll_summaries
   ORDER BY employee_id, period_end DESC`
 
+const LEAVE_AUDIT_SQL = `
+  SELECT entity_id, action_date, old_values, new_values, action_performed
+  FROM system_audit_logs
+  WHERE entity_type = 'employees'
+  ORDER BY action_date ASC`
+
 const AUDIT_SQL = `
   SELECT
     sal.id,
@@ -32,7 +38,7 @@ export async function GET() {
   const auth = await requireStaff(); if (!auth.ok) return auth.response;
 
   try {
-    const [roster, payroll, auditLogsRes] = await Promise.all([
+    const [roster, payroll, auditLogsRes, leaveLogsRes] = await Promise.all([
       db.query(`
         SELECT 
           e.id,
@@ -77,9 +83,48 @@ export async function GET() {
       `, [DEFAULT_MECHANIC_CAPACITY]),
       db.query(PAYROLL_SQL),
       db.query(AUDIT_SQL),
+      db.query(LEAVE_AUDIT_SQL),
     ])
     const payrollByEmployee = new Map(payroll.rows.map((p) => [p.employee_id, p]))
-    const mechanics = roster.rows.map((m) => ({ ...m, last_payroll: payrollByEmployee.get(m.id) ?? null }))
+
+    const leaveHistoryMap = new Map<number, Array<{ start: string; end: string | null }>>()
+    for (const r of leaveLogsRes.rows) {
+      const empId = Number(r.entity_id)
+      if (!empId) continue
+      let oldVal: any = {}, newVal: any = {}
+      try { oldVal = typeof r.old_values === 'string' ? JSON.parse(r.old_values) : (r.old_values || {}) } catch(e){}
+      try { newVal = typeof r.new_values === 'string' ? JSON.parse(r.new_values) : (r.new_values || {}) } catch(e){}
+
+      if (!leaveHistoryMap.has(empId)) leaveHistoryMap.set(empId, [])
+      const list = leaveHistoryMap.get(empId)!
+
+      if (newVal.status === 'on_leave') {
+        const last = list[list.length - 1]
+        if (!last || last.end !== null) {
+          list.push({ start: r.action_date, end: null })
+        }
+      } else if (newVal.status === 'active' || (oldVal.status === 'on_leave' && newVal.status && newVal.status !== 'on_leave')) {
+        const last = list[list.length - 1]
+        if (last && last.end === null) {
+          last.end = r.action_date
+        }
+      }
+    }
+
+    const mechanics = roster.rows.map((m) => {
+      const history = leaveHistoryMap.get(m.id) || []
+      if (m.status === 'on_leave') {
+        const last = history[history.length - 1]
+        if (!last || last.end !== null) {
+          history.push({ start: m.hire_date || new Date().toISOString(), end: null })
+        }
+      }
+      return {
+        ...m,
+        last_payroll: payrollByEmployee.get(m.id) ?? null,
+        leave_history: history,
+      }
+    })
     return NextResponse.json({ success: true, mechanics, auditLogs: auditLogsRes.rows })
   } catch (error) {
     console.error('Mechanics GET error:', error)

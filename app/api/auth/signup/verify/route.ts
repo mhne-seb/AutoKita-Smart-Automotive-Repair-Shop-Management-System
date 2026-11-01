@@ -16,7 +16,8 @@ export async function POST(req: NextRequest) {
     }
 
     const pendingQuery = await db.query(
-      `SELECT * FROM pending_signups WHERE email = $1`,
+      `SELECT *, (expires_at < (NOW() AT TIME ZONE 'Asia/Manila')) AS is_expired 
+       FROM pending_signups WHERE email = $1`,
       [email]
     )
     
@@ -25,9 +26,7 @@ export async function POST(req: NextRequest) {
     }
 
     const pending = pendingQuery.rows[0]
-    // Expiry is compared in SQL, in Manila time, like every other time in this file.
-    const isExpiredRes = await db.query(`SELECT $1::timestamp < (NOW() AT TIME ZONE 'Asia/Manila') as is_expired`, [pending.expires_at])
-    if (isExpiredRes.rows[0].is_expired) {
+    if (pending.is_expired) {
       return NextResponse.json({ success: false, code: 'EXPIRED', message: 'That code has expired. Ask for a new one.' }, { status: 400 })
     }
 

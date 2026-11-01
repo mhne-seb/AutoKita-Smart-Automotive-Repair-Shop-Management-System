@@ -24,6 +24,7 @@ import {
   UserCheck,
   History,
   Calendar as CalendarIcon,
+  CalendarDays,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { StatusBadge } from '@/components/StatusBadge'
@@ -510,6 +511,42 @@ function ProfileModal({ mechanic, onClose }: { mechanic: Mechanic; onClose: () =
               >
                 {lp.status}
               </span>
+            )}
+          </div>
+
+          {/* Leave History Section */}
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+                <CalendarDays size={12} /> Leave History
+              </p>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                mechanic.employeeStatus === 'on_leave' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+              }`}>
+                {mechanic.employeeStatus === 'on_leave' ? 'Currently On Leave' : 'Active'}
+              </span>
+            </div>
+            {mechanic.leaveHistory && mechanic.leaveHistory.length > 0 ? (
+              <div className="mt-2 space-y-1.5 max-h-36 overflow-y-auto rounded-lg border border-border p-2.5 bg-accent/30 text-xs">
+                {mechanic.leaveHistory.map((l, i) => (
+                  <div key={i} className="flex items-center justify-between py-1 border-b border-border/50 last:border-0">
+                    <span className="font-medium text-foreground">
+                      {new Date(l.start).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {' – '}
+                      {l.end ? new Date(l.end).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Present (Ongoing)'}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                      !l.end ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'
+                    }`}>
+                      {!l.end ? 'Ongoing' : 'Completed'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-muted-foreground italic rounded-lg border border-dashed border-border p-3 text-center">
+                No recorded leave history.
+              </p>
             )}
           </div>
         </div>

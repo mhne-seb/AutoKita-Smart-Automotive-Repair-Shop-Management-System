@@ -7,9 +7,9 @@ import { Footer } from "@/components/site/Footer";
 
 const INQUIRIES = ["General", "Booking", "Diagnostic", "Billing"];
 
-const ADDRESS = "971-B Domingo Santiago St, Sampaloc, Manila, 1008 Metro Manila, Philippines";
-const MAPS_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(ADDRESS)}&z=16&output=embed`;
-const MAPS_DIRECTIONS_URL = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(ADDRESS)}`;
+const ADDRESS = "PROSERV AUTOMOTIVE MECHANICAL SERVICES, 971 Domingo Santiago, Sampaloc, Manila, 1008";
+const MAPS_EMBED_SRC = "https://www.google.com/maps?q=PROSERV+AUTOMOTIVE+MECHANICAL+SERVICES,+971+Domingo+Santiago,+Sampaloc,+Manila&z=17&output=embed";
+const MAPS_DIRECTIONS_URL = "https://www.google.com/maps/place/PROSERV+AUTOMOTIVE+MECHANICAL+SERVICES/@14.6060199,120.9991714,17z/data=!3m1!4b1!4m20!1m13!4m12!1m4!2m2!1d121.0220416!2d14.615007!4e1!1m6!1m2!1s0x3397c9e23dfc71ad:0x5248df8d9b133b34!2s971+Domingo+Santiago,+Sampaloc,+Manila!2m2!1d121.0037795!2d14.6060148!3m5!1s0x3397c9e516addab9:0xe606bd94dff46a95!8m2!3d14.6060148!4d121.0037795!16s%2Fg%2F11z22w95by?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D";
 
 type FormErrors = {
   name?: string;
@@ -194,7 +194,7 @@ function Contact() {
     return next;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const next = validate();
     setErrors(next);
@@ -205,17 +205,27 @@ function Contact() {
     }
 
     setSubmitting(true);
-    // Simulate a brief send so the user gets clear "in progress" feedback
-    // rather than an instant flash of the success state.
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, inquiry, message }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to send inquiry.");
+      }
       setSubmitted(true);
       setName("");
       setEmail("");
       setMessage("");
       setInquiry("General");
       setErrors({});
-    }, 900);
+    } catch (err: any) {
+      setErrors({ message: err.message || "Failed to send message. Please try again." });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -385,9 +395,9 @@ function Contact() {
                       <MapPin className="h-3.5 w-3.5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-semibold">Our Central Workshop</div>
+                      <div className="text-sm font-semibold">PROSERV AUTOMOTIVE MECHANICAL SERVICES</div>
                       <div className="truncate text-xs text-muted-foreground">
-                        971-B Domingo Santiago St., Sampaloc, Manila, 1008
+                        971 Domingo Santiago, Sampaloc, Manila, 1008
                       </div>
                     </div>
                     <span className="flex flex-shrink-0 items-center gap-1.5 text-[11px] font-medium text-success">

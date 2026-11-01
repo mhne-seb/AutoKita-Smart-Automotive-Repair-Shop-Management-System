@@ -53,15 +53,18 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const outcome = await afterTaskFinished(jobOrderId)
 
-    await notifyCustomer({
-      jobOrderId,
-      entityType: 'service_progress_tasks',
-      entityId: Number(taskId),
-      event: 'task_finished',
-      title: 'Service Finished',
-      message: `${row.task_title} is done on your vehicle (Job Order #JO-${jobOrderId}). A photo of the finished work is on your service tracker.`,
-      employeeId: row.mechanic_id ?? null,
-    })
+    // Notify customer only when all services in progress have finished
+    if (outcome.allServicesDone) {
+      await notifyCustomer({
+        jobOrderId,
+        entityType: 'job_orders',
+        entityId: Number(jobOrderId),
+        event: 'services_completed',
+        title: 'All Services Completed',
+        message: `All services have been completed for your vehicle (Job Order #JO-${jobOrderId}).`,
+        employeeId: row.mechanic_id ?? null,
+      })
+    }
 
     return NextResponse.json({ success: true, photoUrl: await signFileUrl(photoUrl), ...outcome })
   } catch (error) {

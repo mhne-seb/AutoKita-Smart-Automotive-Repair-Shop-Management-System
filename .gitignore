@@ -17,3 +17,7 @@ venv/
 __pycache__/
 *.pyc
 python
+public/docs
+docs/admin_user_manual_google_docs.html
+docs/customer_user_manual_google_docs.html
+docs/images

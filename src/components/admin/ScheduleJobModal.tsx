@@ -18,6 +18,7 @@ import {
   parseNaiveTimestamp,
   sortLongestFirst,
   sortMaintenanceShortFirst,
+  sortNoPartsShortestFirst,
   type Interval,
   type MechanicInput,
   type Placement,
@@ -45,6 +46,7 @@ interface PlanningTask {
   blockedBy: string | null
   partExpected: string | null
   serviceType?: string | null
+  hasParts?: boolean
 }
 
 interface PlanningData {
@@ -804,9 +806,21 @@ export function ScheduleJobModal({
                       setOrder(sortMaintenanceShortFirst(data.planning.tasks).map((t) => t.id))
                     }
                   }}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
                 >
                   Maintenance / short first
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (data?.planning) {
+                      setOrder(sortNoPartsShortestFirst(data.planning.tasks).map((t) => t.id))
+                    }
+                  }}
+                  title="Shortest service with no parts to longest service with no parts, then shortest service with parts to longest service with parts"
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+                >
+                  No parts / shortest first
                 </button>
               </div>
             </div>

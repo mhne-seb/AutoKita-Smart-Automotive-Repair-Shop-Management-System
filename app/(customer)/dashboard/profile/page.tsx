@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import phAddress from "@/data/ph-address.json";
 import { PASSWORD_RULE_TEXT, passwordProblem } from "@/lib/passwordPolicy";
+import { PasswordChecklist } from "@/components/auth/PasswordChecklist";
 
 const BRAND_GRADIENT = "linear-gradient(90deg, #0b1730 0%, #1d3a68 55%, #3b6cb4 100%)";
 
@@ -137,6 +138,7 @@ function Profile() {
   );
 
   const hasPwdChanges = pwd.current.length > 0 && pwd.next.length > 0 && pwd.confirm.length > 0;
+  const isPwdValid = hasPwdChanges && !passwordProblem(pwd.next, form?.email) && pwd.next === pwd.confirm;
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? sessionStorage.getItem("autokita_user_id") : null;
@@ -461,18 +463,24 @@ function Profile() {
             <PasswordField label="Current password" value={pwd.current} onChange={(v) => setPwd((p) => ({ ...p, current: v }))} />
             <div>
               <PasswordField label="New password" value={pwd.next} onChange={(v) => setPwd((p) => ({ ...p, next: v }))} />
-              <p className="mt-1 text-xs text-muted-foreground">{PASSWORD_RULE_TEXT}</p>
+              <PasswordChecklist password={pwd.next} className="mt-2.5" />
             </div>
-            <PasswordField label="Confirm new password" value={pwd.confirm} onChange={(v) => setPwd((p) => ({ ...p, confirm: v }))} />
+            <div>
+              <PasswordField label="Confirm new password" value={pwd.confirm} onChange={(v) => setPwd((p) => ({ ...p, confirm: v }))} />
+              {pwd.confirm.length > 0 && pwd.next !== pwd.confirm && (
+                <p className="mt-1.5 text-xs font-medium text-destructive">Passwords do not match.</p>
+              )}
+            </div>
           </div>
           <div className="mt-6 flex justify-end">
             <button
               onClick={savePassword}
-              disabled={savingPwd || !hasPwdChanges}
+              disabled={savingPwd || !isPwdValid}
+              title={!hasPwdChanges ? "Enter current, new, and confirm passwords" : !isPwdValid ? (pwd.next !== pwd.confirm ? "Passwords do not match" : "Password does not meet requirements") : undefined}
               className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200 ${
                 pwdSaved
                   ? "bg-emerald-600 text-white"
-                  : !hasPwdChanges
+                  : !isPwdValid
                   ? "bg-muted text-muted-foreground cursor-not-allowed"
                   : "bg-brand text-brand-foreground cursor-pointer hover:-translate-y-0.5 hover:shadow-md hover:opacity-90 active:translate-y-0"
               }`}

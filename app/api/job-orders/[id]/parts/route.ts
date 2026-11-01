@@ -67,29 +67,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     // Once the last part for a service is in, the customer hears that the
     // wait is over. (Only on receiving — Undo doesn't un-announce.)
     const serviceRowId = result.rows[0].job_order_service_id
-    if (status === 'received' && serviceRowId) {
-      const check = await db.query(
-        `SELECT s.service_name,
-                COUNT(*) FILTER (WHERE p.status IN ('to_order', 'ordered', 'in_transit'))::int AS still_waiting
-         FROM job_order_parts p
-         JOIN job_order_services jos ON jos.id = p.job_order_service_id
-         JOIN services s ON s.id = jos.service_id
-         WHERE p.job_order_service_id = $1
-         GROUP BY s.service_name`,
-        [serviceRowId],
-      )
-      const svc = check.rows[0]
-      if (svc && svc.still_waiting === 0) {
-        await notifyCustomer({
-          jobOrderId: Number(jobOrderId),
-          entityType: 'job_order_parts',
-          entityId: Number(partId),
-          event: 'parts_received',
-          title: 'Parts Received',
-          message: `All parts for ${svc.service_name} have arrived at the shop (Job Order #JO-${jobOrderId}). Work can begin as scheduled.`,
-        })
-      }
-    }
+    // Note: parts_received customer notification disabled per specification
 
     return NextResponse.json({ success: true })
   } catch (error) {

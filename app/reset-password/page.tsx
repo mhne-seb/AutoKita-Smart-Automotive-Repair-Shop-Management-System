@@ -3,10 +3,11 @@
 import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Lock, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Lock, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import { Logo } from '@/components/site/Logo'
 import { Header } from '@/components/site/Header'
-import { PASSWORD_RULE_TEXT, passwordProblem } from '@/lib/passwordPolicy'
+import { passwordProblem } from '@/lib/passwordPolicy'
+import { PasswordChecklist } from '@/components/auth/PasswordChecklist'
 
 // Opened from the "Reset your password" email. The link's token is checked
 // first, so a dead link says so before the customer types anything.
@@ -16,6 +17,8 @@ function ResetPasswordForm() {
   const [linkProblem, setLinkProblem] = useState('')
   const [pw, setPw] = useState('')
   const [pw2, setPw2] = useState('')
+  const [showPw, setShowPw] = useState(false)
+  const [showPw2, setShowPw2] = useState(false)
   const [err, setErr] = useState('')
   const [saving, setSaving] = useState(false)
   const [done, setDone] = useState(false)
@@ -59,8 +62,8 @@ function ResetPasswordForm() {
     }
   }
 
-  const inputClass = 'w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20'
-  const buttonClass = 'flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60'
+  const inputClass = 'w-full rounded-md border bg-background py-2 pl-9 pr-10 text-sm transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20'
+  const buttonClass = 'flex w-full items-center justify-center gap-2 rounded-md bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer'
 
   if (linkState === 'checking') {
     return <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Checking your link…</p>
@@ -90,26 +93,60 @@ function ResetPasswordForm() {
   return (
     <form onSubmit={submit} className="space-y-4">
       <h2 className="text-center text-xl font-bold">Set a new password</h2>
+      
       <div>
         <label className="text-xs font-medium">New password</label>
         <div className="mt-1.5 relative">
           <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input type="password" autoComplete="new-password" value={pw} onChange={(e) => { setPw(e.target.value); if (err) setErr('') }} className={inputClass} />
+          <input
+            type={showPw ? 'text' : 'password'}
+            autoComplete="new-password"
+            value={pw}
+            onChange={(e) => { setPw(e.target.value); if (err) setErr('') }}
+            className={inputClass}
+            placeholder="At least 8 characters"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPw((v) => !v)}
+            aria-label={showPw ? 'Hide password' : 'Show password'}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+          >
+            {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
         </div>
-        <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{PASSWORD_RULE_TEXT}</p>
+        <PasswordChecklist password={pw} className="mt-2.5" />
       </div>
+
       <div>
         <label className="text-xs font-medium">Type it again</label>
         <div className="mt-1.5 relative">
           <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input type="password" autoComplete="new-password" value={pw2} onChange={(e) => { setPw2(e.target.value); if (err) setErr('') }} className={inputClass} />
+          <input
+            type={showPw2 ? 'text' : 'password'}
+            autoComplete="new-password"
+            value={pw2}
+            onChange={(e) => { setPw2(e.target.value); if (err) setErr('') }}
+            className={inputClass}
+            placeholder="Repeat your password"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPw2((v) => !v)}
+            aria-label={showPw2 ? 'Hide password' : 'Show password'}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+          >
+            {showPw2 ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
         </div>
       </div>
+
       {err && (
         <p className="flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">
           <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" /> {err}
         </p>
       )}
+
       <button type="submit" disabled={saving} className={buttonClass}>
         {saving ? <>Saving… <Loader2 className="h-4 w-4 animate-spin" /></> : 'Save new password'}
       </button>

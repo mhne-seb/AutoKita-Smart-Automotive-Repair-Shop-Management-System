@@ -171,12 +171,14 @@ export default function Page() {
                     <tr key={entry.id} className="border-b border-border/60 transition-colors hover:bg-accent/40 last:border-0">
                       <td className="py-4 font-semibold text-muted-foreground">{entry.id}</td>
                       <td className="py-4">
-                        <p className="font-semibold text-foreground">User: {entry.user}</p>
+                        <p className="text-sm text-muted-foreground">
+                          User: <strong className="font-semibold text-foreground">{entry.user}</strong>
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           Employee:{' '}
-                          <span className={entry.ticketAcceptance ? 'font-semibold text-blue-600' : ''}>
+                          <strong className={`font-semibold ${entry.ticketAcceptance ? 'text-blue-600' : 'text-foreground'}`}>
                             {entry.employee}
-                          </span>
+                          </strong>
                         </p>
                       </td>
                       <td className="py-4">
@@ -252,9 +254,9 @@ function LogDetailModal({ entry, onClose }: { entry: AuditLogEntry; onClose: () 
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <User size={12} /> Performed By
               </p>
-              <p className="mt-1 font-semibold text-foreground">User: {entry.user}</p>
+              <p className="mt-1 text-sm text-muted-foreground">User: <strong className="font-semibold text-foreground">{entry.user}</strong></p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Employee: <span className="font-medium text-foreground">{entry.employee}</span>
+                Employee: <strong className="font-semibold text-foreground">{entry.employee}</strong>
               </p>
             </div>
             <div className="rounded-xl bg-accent/60 p-3">

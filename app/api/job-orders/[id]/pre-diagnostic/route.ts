@@ -52,6 +52,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       if (partsResult.rows.length > 0) {
          return NextResponse.json({ success: false, message: 'Choose a warranty for every part (No warranty is allowed).' }, { status: 400 })
       }
+    } else {
+      const joCheck = await db.query('SELECT date_arrived FROM job_orders WHERE id = $1::int', [id])
+      if (!joCheck.rows[0]?.date_arrived) {
+        return NextResponse.json({ success: false, message: 'Vehicle must be checked in before an inspection report can be submitted.' }, { status: 400 })
+      }
     }
 
     const inspRes = await db.query(
