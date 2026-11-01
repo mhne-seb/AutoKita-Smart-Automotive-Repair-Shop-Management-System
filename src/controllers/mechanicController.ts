@@ -20,6 +20,7 @@ export interface Mechanic {
   // SUM(price of tasks finished this month) × commission %
   commissionThisMonth: number
   lastPayroll: { periodStart: string; periodEnd: string; netPay: number; status: string; paymentDate: string | null } | null
+  leaveHistory?: Array<{ start: string; end: string | null }>
   // Derived for the badge: on_leave wins, then full vs. has room.
   status: MechanicStatus
 }
@@ -100,6 +101,7 @@ function toMechanic(r: Record<string, unknown>): Mechanic {
           paymentDate: (lp.payment_date as string) ?? null,
         }
       : null,
+    leaveHistory: Array.isArray(r.leave_history) ? (r.leave_history as Array<{ start: string; end: string | null }>) : [],
     status: employeeStatus === 'on_leave' ? 'On Leave' : openTasks >= jobsCapacity ? 'Busy' : 'Available',
   }
 }

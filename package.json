@@ -88,6 +88,7 @@
     "eslint": "^9.32.0",
     "eslint-config-next": "^15.1.6",
     "postcss": "^8.4.49",
+    "puppeteer-core": "^25.14.0",
     "tailwindcss": "^4.2.1",
     "tw-animate-css": "^1.3.4",
     "typescript": "^5.8.3"

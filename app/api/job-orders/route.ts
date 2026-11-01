@@ -60,7 +60,7 @@ export async function GET(request: Request) {
                jo.user_id, u.avatar_url, gol.first_name, gol.last_name, u.contact_number, gol.vehicle_model,
                v.vehicle_year, gol.plate_number, gol.mechanic_name, gol.assigned_mechanic_id, st.service_mode, st.customer_concern,
                q.queue_no
-      ORDER BY (q.queue_no IS NULL), q.queue_no ASC, gol.id DESC
+      ORDER BY gol.id DESC
       LIMIT $1 OFFSET $2
       `,
       [pageSize, offset]

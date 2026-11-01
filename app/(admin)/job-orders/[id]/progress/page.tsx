@@ -169,7 +169,9 @@ export default function page() {
   const partsToBuy = allParts.filter((p) => p.status === 'to_order')
   const completedCount = serviceTasks.filter((t) => t.status === 'completed').length
   const [showScheduleJobModal, setShowScheduleJobModal] = useState(false)
-  const hasUnscheduledTasks = useMemo(() => {
+  const [sortByDate, setSortByDate] = useState(false)
+
+    const hasUnscheduledTasks = useMemo(() => {
     return serviceTasks.some(
       (t) =>
         t.status === 'pending' &&
@@ -184,7 +186,15 @@ export default function page() {
   // work. Other sections (quotation, road test) are shown as they are.
   const displaySections = sections.flatMap((section) => {
     if (section.id !== 'in-progress') return [section]
-    const open = section.tasks.filter((t) => t.status !== 'completed' && t.status !== 'cancelled')
+    let open = section.tasks.filter((t) => t.status !== 'completed' && t.status !== 'cancelled')
+    if (sortByDate) {
+      open = [...open].sort((a, b) => {
+        if (!a.scheduledDate && !b.scheduledDate) return 0
+        if (!a.scheduledDate) return 1
+        if (!b.scheduledDate) return -1
+        return new Date(a.scheduledDate.replace(' ', 'T')).getTime() - new Date(b.scheduledDate.replace(' ', 'T')).getTime()
+      })
+    }
     const done = section.tasks.filter((t) => t.status === 'completed')
     const dropped = section.tasks.filter((t) => t.status === 'cancelled')
     const out: ServiceSection[] = []
@@ -446,16 +456,32 @@ export default function page() {
         <p className={`text-sm font-bold uppercase tracking-wide ${sectionColors[section.id] ?? 'text-slate-500'}`}>
           {section.title}
         </p>
-        {/* No quotationConfirmed check here: the suggestion route checks the real rule (job order status). */}
-        {section.id === 'in-progress' && hasUnscheduledTasks && (
-          <button
-            type="button"
-            onClick={() => setShowScheduleJobModal(true)}
-            title="Choose a start, the mechanics and the times for the pending tasks"
-            className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-indigo-700 active:translate-y-0"
-          >
-            <CalendarDays size={13} /> Schedule job
-          </button>
+        {section.id === 'in-progress' && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSortByDate((v) => !v)}
+              title="Temporarily sort open services chronologically by scheduled date"
+              className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                sortByDate
+                  ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-2xs'
+                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              <CalendarDays size={13} className={sortByDate ? 'text-indigo-600' : 'text-slate-400'} />
+              {sortByDate ? 'Sorted by Date' : 'Sort by Date'}
+            </button>
+            {hasUnscheduledTasks && (
+              <button
+                type="button"
+                onClick={() => setShowScheduleJobModal(true)}
+                title="Choose a start, the mechanics and the times for the pending tasks"
+                className="cursor-pointer flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:bg-indigo-700 active:translate-y-0"
+              >
+                <CalendarDays size={13} /> Schedule job
+              </button>
+            )}
+          </div>
         )}
       </div>
       {section.tasks.map((task) => (
@@ -1791,8 +1817,23 @@ function ScheduleModal({
       const tFinish = t.estimated_finish ? parseLocalTimestamp(t.estimated_finish) : tStart + (tEstHours * 3600000)
       if (isNaN(tFinish)) continue
 
-      const overlaps = (proposedStart < tFinish) && (proposedFinish > tStart)
-      const tooClose = (proposedStart < tFinish + BUFFER_MS) && (proposedFinish + BUFFER_MS > tStart)
+      // Lunch break 12:00 PM - 1:00 PM satisfies 15-minute buffer
+      const [earlierStart, earlierFinish, laterStart, laterFinish] = proposedStart <= tStart
+        ? [proposedStart, proposedFinish, tStart, tFinish]
+        : [tStart, tFinish, proposedStart, proposedFinish]
+
+      const eEndDate = new Date(earlierFinish)
+      const lStartDate = new Date(laterStart)
+      const isSameDay = eEndDate.getFullYear() === lStartDate.getFullYear() &&
+        eEndDate.getMonth() === lStartDate.getMonth() &&
+        eEndDate.getDate() === lStartDate.getDate()
+
+      const endHour = eEndDate.getHours() + eEndDate.getMinutes() / 60
+      const startHour = lStartDate.getHours() + lStartDate.getMinutes() / 60
+      const isSeparatedByLunch = isSameDay && endHour <= 13.0 && startHour >= 13.0
+
+      const overlaps = !isSeparatedByLunch && (proposedStart < tFinish) && (proposedFinish > tStart)
+      const tooClose = !isSeparatedByLunch && (proposedStart < tFinish + BUFFER_MS) && (proposedFinish + BUFFER_MS > tStart)
 
       if (tooClose) {
         const startStr = new Date(tStart).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
@@ -1853,8 +1894,20 @@ function ScheduleModal({
 
         let isConflicting = false
         if (proposedStart && proposedFinish && !isNaN(tStart) && !isNaN(tFinish)) {
-          const overlaps = (proposedStart < tFinish) && (proposedFinish > tStart)
-          const tooClose = (proposedStart < tFinish + BUFFER_MS) && (proposedFinish + BUFFER_MS > tStart)
+          const [earlierStart, earlierFinish, laterStart, laterFinish] = proposedStart <= tStart
+            ? [proposedStart, proposedFinish, tStart, tFinish]
+            : [tStart, tFinish, proposedStart, proposedFinish]
+          const eEndDate = new Date(earlierFinish)
+          const lStartDate = new Date(laterStart)
+          const isSameDay = eEndDate.getFullYear() === lStartDate.getFullYear() &&
+            eEndDate.getMonth() === lStartDate.getMonth() &&
+            eEndDate.getDate() === lStartDate.getDate()
+          const endHour = eEndDate.getHours() + eEndDate.getMinutes() / 60
+          const startHour = lStartDate.getHours() + lStartDate.getMinutes() / 60
+          const isSeparatedByLunch = isSameDay && endHour <= 13.0 && startHour >= 13.0
+
+          const overlaps = !isSeparatedByLunch && (proposedStart < tFinish) && (proposedFinish > tStart)
+          const tooClose = !isSeparatedByLunch && (proposedStart < tFinish + BUFFER_MS) && (proposedFinish + BUFFER_MS > tStart)
           isConflicting = tooClose
         }
 

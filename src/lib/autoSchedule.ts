@@ -47,6 +47,21 @@ export function sortLongestFirst<T extends { hours: number }>(tasks: T[]): T[] {
 
 // Maintenance services first, then everything else. Inside each group the shorter service goes
 // first, and equal lengths keep their original order.
+
+// Shortest service with no parts to longest with no parts, then shortest service with parts to longest with parts.
+export function sortNoPartsShortestFirst<
+  T extends { hours: number; hasParts?: boolean; blockedBy?: string | null },
+>(tasks: T[]): T[] {
+  return tasks
+    .map((task, index) => ({ task, index }))
+    .sort((a, b) => {
+      const aHasParts = Boolean(a.task.hasParts || a.task.blockedBy) ? 1 : 0
+      const bHasParts = Boolean(b.task.hasParts || b.task.blockedBy) ? 1 : 0
+      return aHasParts - bHasParts || a.task.hours - b.task.hours || a.index - b.index
+    })
+    .map((entry) => entry.task)
+}
+
 export function sortMaintenanceShortFirst<
   T extends { hours: number; serviceType?: string | null },
 >(tasks: T[]): T[] {
@@ -67,6 +82,7 @@ export type TaskInput = {
   hours: number
   blockedBy: string | null
   partExpected: string | null
+  hasParts?: boolean
 }
 export type Suggestion =
   | {

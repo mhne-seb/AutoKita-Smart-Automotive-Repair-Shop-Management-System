@@ -139,6 +139,7 @@ export async function GET(
         hours: Number(row.estimated_hours) || DEFAULT_TASK_HOURS,
         blockedBy,
         partExpected,
+        hasParts: matchingParts.length > 0,
       }
     })
 
@@ -328,6 +329,7 @@ export async function GET(
         hours: t.hours,
         blockedBy: t.blockedBy,
         partExpected: t.partExpected,
+        hasParts: t.hasParts ?? false,
         serviceType: serviceTypeByTaskId.get(t.id) ?? null,
       })),
     }

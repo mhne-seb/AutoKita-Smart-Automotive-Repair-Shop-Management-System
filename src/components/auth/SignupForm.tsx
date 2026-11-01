@@ -7,6 +7,7 @@ import { Mail, Lock, Eye, EyeOff, User, Loader2, AlertCircle, ArrowLeft, ArrowRi
 import { startSession } from '@/controllers/authController'
 import { EMAIL_RE } from '@/lib/bookingRules'
 import { PASSWORD_RULE_TEXT, passwordProblem } from '@/lib/passwordPolicy'
+import { PasswordChecklist } from './PasswordChecklist'
 
 // The whole email sign-up, used on /book (inside the booking gate) and on /signup.
 // Step 1: Google button, then name / email / password. Step 2: the 6-digit code.
@@ -40,6 +41,7 @@ export function SignupForm({ heading, intro }: SignupFormProps) {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   // Verify states
   const [code, setCode] = useState('')
@@ -364,13 +366,7 @@ export function SignupForm({ heading, intro }: SignupFormProps) {
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          {/* The rules, in one sentence. They match the server's checks. */}
-          <p
-            className={`mt-2 text-[11px] leading-relaxed ${passwordRuleBroken ? 'text-destructive' : 'text-muted-foreground'}`}
-          >
-            {PASSWORD_RULE_TEXT}
-          </p>
-          {/* A broken rule is already shown in red above, so say it only once. */}
+          <PasswordChecklist password={password} className="mt-2.5" />
           {errors.password && !passwordRuleBroken && <p className="mt-1 text-[10px] text-destructive">{errors.password}</p>}
         </div>
 
@@ -379,13 +375,21 @@ export function SignupForm({ heading, intro }: SignupFormProps) {
           <div className="mt-1.5 relative">
             <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
-              type={showPassword ? 'text' : 'password'}
+              type={showConfirmPassword ? 'text' : 'password'}
               placeholder="Type your password again"
               autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => { setConfirmPassword(e.target.value); setErrors(p => ({ ...p, confirmPassword: '' })) }}
               className={`w-full rounded-md border bg-background py-2 pl-9 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 ${errors.confirmPassword ? 'border-destructive' : 'focus:border-brand'}`}
             />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
           {(errors.confirmPassword || (confirmPassword && confirmPassword !== password ? 'Passwords do not match.' : '')) && (
             <p className="mt-1 text-[10px] text-destructive">

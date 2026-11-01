@@ -182,8 +182,8 @@ def fetch_and_process():
         print("\n[Done] fetched=0 validated=0 stored=0 skipped=0")
         return {"fetched": 0, "validated": 0, "stored": 0, "skipped": 0}
 
-    # Safety cap: process up to 25 latest emails per run so the web request never hangs or times out
-    MAX_BATCH = 25
+    # Safety cap: process up to 10 latest emails per run so the web request never hangs or times out
+    MAX_BATCH = 10
     if len(msg_ids) > MAX_BATCH:
         print(f"[>>] Capping run to the {MAX_BATCH} most recent emails.")
         msg_ids = msg_ids[-MAX_BATCH:]

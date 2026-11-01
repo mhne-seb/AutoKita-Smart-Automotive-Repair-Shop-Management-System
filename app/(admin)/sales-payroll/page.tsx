@@ -40,7 +40,7 @@ const TABS = [
   { key: 'payments', label: 'Customer Payment Records', icon: CreditCard },
   { key: 'payroll', label: 'Employee Payroll & Commission', icon: Users },
   { key: 'services', label: 'Services Done & Commission Breakdown', icon: Wrench },
-  { key: 'parts', label: 'Parts Sold & Profit Breakdown', icon: Package },
+  { key: 'parts', label: 'Parts Sold Revenue Breakdown', icon: Package },
 ] as const
 
 type TabKey = (typeof TABS)[number]['key']
@@ -766,7 +766,7 @@ export default function page() {
             badge={`${poolRate}% Pool`}
           />
           <SummaryCard 
-            label="Parts Sold & Profit" 
+            label="Parts Sold Revenue" 
             value={currency(kpi.partsCustomerPaid || 0)} 
             sub={`Cost: ${currency(kpi.partsAdminCost || 0)} • Profit: +${currency(kpi.partsProfit || 0)}`} 
             positive={(kpi.partsProfit || 0) >= 0}
@@ -1567,7 +1567,7 @@ export default function page() {
             <div className="flex flex-wrap items-center justify-between gap-4 border-l-4 border-slate-900 pl-3">
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">
-                  Parts Sold & Profit Breakdown ({cycle.toUpperCase()})
+                  Parts Sold Revenue Breakdown ({cycle.toUpperCase()})
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Inspect parts sold, wholesale cost paid by admin vs retail price paid by customer, and net profit margins.
@@ -1580,8 +1580,8 @@ export default function page() {
                 <span className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 border border-amber-200">
                   Admin Cost: <strong className="text-amber-900">{currency(kpi.partsAdminCost)}</strong>
                 </span>
-                <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
-                  <Sparkles size={12} className="text-emerald-600" /> Net Parts Profit: +{currency(kpi.partsProfit)}
+                <span className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold border ${kpi.partsProfit < 0 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
+                  <Sparkles size={12} className={kpi.partsProfit < 0 ? 'text-rose-600' : 'text-emerald-600'} /> Net Parts Profit: {kpi.partsProfit < 0 ? `-${currency(Math.abs(kpi.partsProfit))}` : `+${currency(kpi.partsProfit)}`}
                 </span>
               </div>
             </div>
@@ -1712,10 +1712,10 @@ export default function page() {
                           </td>
                           <td className="py-3.5 text-right">
                             <div className="flex flex-col items-end">
-                              <span className="font-bold text-emerald-600">
-                                +{currency(item.profit)}
+                              <span className={`font-bold ${item.profit < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                {item.profit < 0 ? `-${currency(Math.abs(item.profit))}` : `+${currency(item.profit)}`}
                               </span>
-                              <span className="mt-0.5 inline-block rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-100">
+                              <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold border ${item.profit < 0 ? 'bg-rose-50 text-rose-700 border-rose-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100'}`}>
                                 {(item.marginPercent ?? 0).toFixed(1)}% margin
                               </span>
                             </div>
@@ -1733,7 +1733,7 @@ export default function page() {
                     {filteredPartsDone.length > 0 && (
                       <tfoot>
                         <tr className="border-t-2 border-slate-200 bg-slate-50/80 font-bold text-slate-900 text-sm">
-                          <td colSpan={5} className="py-3.5 pl-3">Total Parts Sold & Profit</td>
+                          <td colSpan={5} className="py-3.5 pl-3">Total Parts Sold Revenue</td>
                           <td className="py-3.5 text-center">{filteredPartsDone.reduce((acc, p) => acc + p.qty, 0)}</td>
                           <td className="py-3.5 text-amber-800">
                             {currency(filteredPartsDone.reduce((acc, p) => acc + p.adminTotalCost, 0))}
@@ -1741,8 +1741,10 @@ export default function page() {
                           <td className="py-3.5 text-slate-900">
                             {currency(filteredPartsDone.reduce((acc, p) => acc + p.customerTotalPaid, 0))}
                           </td>
-                          <td className="py-3.5 text-right text-emerald-600 font-extrabold">
-                            +{currency(filteredPartsDone.reduce((acc, p) => acc + p.profit, 0))}
+                          <td className={`py-3.5 text-right font-extrabold ${filteredPartsDone.reduce((acc, p) => acc + p.profit, 0) < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                            {filteredPartsDone.reduce((acc, p) => acc + p.profit, 0) < 0
+                              ? `-${currency(Math.abs(filteredPartsDone.reduce((acc, p) => acc + p.profit, 0)))}`
+                              : `+${currency(filteredPartsDone.reduce((acc, p) => acc + p.profit, 0))}`}
                           </td>
                         </tr>
                       </tfoot>
@@ -1839,8 +1841,8 @@ export default function page() {
                           <td className="py-4 font-bold text-slate-900">
                             {currency(p.totalCustomerPaid)}
                           </td>
-                          <td className="py-4 text-right font-bold text-emerald-600">
-                            +{currency(p.profit)}
+                          <td className={`py-4 text-right font-bold ${p.profit < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                            {p.profit < 0 ? `-${currency(Math.abs(p.profit))}` : `+${currency(p.profit)}`}
                           </td>
                         </tr>
                       ))}
@@ -1865,8 +1867,10 @@ export default function page() {
                           <td className="py-3.5 text-slate-900">
                             {currency(filteredPartsSummary.reduce((acc, p) => acc + p.totalCustomerPaid, 0))}
                           </td>
-                          <td className="py-3.5 text-right text-emerald-600 font-extrabold">
-                            +{currency(filteredPartsSummary.reduce((acc, p) => acc + p.profit, 0))}
+                          <td className={`py-3.5 text-right font-extrabold ${filteredPartsSummary.reduce((acc, p) => acc + p.profit, 0) < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                            {filteredPartsSummary.reduce((acc, p) => acc + p.profit, 0) < 0
+                              ? `-${currency(Math.abs(filteredPartsSummary.reduce((acc, p) => acc + p.profit, 0)))}`
+                              : `+${currency(filteredPartsSummary.reduce((acc, p) => acc + p.profit, 0))}`}
                           </td>
                         </tr>
                       </tfoot>

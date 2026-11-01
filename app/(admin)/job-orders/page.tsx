@@ -201,7 +201,7 @@ export default function page() {
         (selectedPayment === 'pending' && c.paymentStatus === 'Pending')
 
       return matchesTab && matchesQuery && matchesVehicle && matchesService && matchesMechanic && matchesPayment
-    })
+    }).sort((a, b) => Number(b.id) - Number(a.id))
   }, [activeTab, query, selectedVehicle, selectedService, selectedMechanic, selectedPayment, jobOrders])
 
   const total = visibleCards.length

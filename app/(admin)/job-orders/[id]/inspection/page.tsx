@@ -640,6 +640,10 @@ export default function page() {
 
     async function sendInspectionForApproval() {
     if (reportLocked) return
+    if (!jobOrder?.arrived) {
+      toast.error('Vehicle must be checked in before an inspection report can be submitted.')
+      return
+    }
     const missingPhotos = photoSlots.length === 0 || photoSlots.some((slot) => !slot.url)
     if (missingPhotos) {
       setShowPhotoWarning(true)
@@ -763,12 +767,15 @@ export default function page() {
               )}
               <button
                 onClick={sendInspectionForApproval}
-                disabled={sending || reportLocked}
+                disabled={sending || reportLocked || !jobOrder?.arrived}
+                title={!jobOrder?.arrived ? 'Vehicle must be checked in before submitting the inspection report' : undefined}
                 // Disabled normally means "already sent" (green). Held back by
                 // an undecided claim is not sent — grey it out instead.
                 className={`flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 transition-all duration-200 ${
                   claimPending && !isLocked
                     ? 'disabled:cursor-not-allowed disabled:opacity-40'
+                    : !jobOrder?.arrived
+                    ? 'disabled:cursor-not-allowed disabled:opacity-50'
                     : reportLocked
                     ? 'disabled:cursor-default disabled:bg-emerald-600'
                     : 'cursor-pointer hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md'
@@ -783,6 +790,8 @@ export default function page() {
                   )}
                 {sending
                   ? 'Sending…'
+                  : !jobOrder?.arrived
+                  ? 'Check In Vehicle to Submit'
                   : claimPending && !isLocked
                   ? 'Decide the warranty claim first'
                   : inspectionStatus === 'pending'
@@ -1220,16 +1229,19 @@ export default function page() {
                   </button>
                 </div>
               ) : (
-                <button
-                  type="button"
-                  onClick={handleSyncGmail}
-                  disabled={syncingGmail || !initial?.diagnosticScanAuthorized}
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                  title={!initial?.diagnosticScanAuthorized ? 'The customer needs to approve the scan fee first' : 'Run Gmail fetcher to check for scanner diagnostic reports'}
-                >
-                  {syncingGmail ? <Loader2 size={13} className="animate-spin text-indigo-600" /> : <Mail size={13} className="text-rose-500" />}
-                  {syncingGmail ? 'Checking Gmail…' : 'Check Gmail'}
-                </button>
+                <div className="flex flex-col items-end gap-1">
+                  <button
+                    type="button"
+                    onClick={handleSyncGmail}
+                    disabled={syncingGmail || !initial?.diagnosticScanAuthorized}
+                    className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                    title={!initial?.diagnosticScanAuthorized ? 'The customer needs to approve the scan fee first' : 'Run Gmail fetcher to check for scanner diagnostic reports'}
+                  >
+                    {syncingGmail ? <Loader2 size={13} className="animate-spin text-indigo-600" /> : <Mail size={13} className="text-rose-500" />}
+                    {syncingGmail ? 'Checking Gmail…' : 'Check Gmail'}
+                  </button>
+                  <span className="text-[10px] text-slate-400">Checks the 10 most recent emails for OBD-II reports.</span>
+                </div>
               )}
             </div>
 

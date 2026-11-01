@@ -181,8 +181,25 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           ? new Date(row.estimated_finish).getTime()
           : tStart + Number(row.estimated_hours || 1.5) * 3600 * 1000
 
-        const overlaps = (proposedStart < tFinish) && (proposedFinish > tStart)
-        const tooClose = (proposedStart < tFinish + BUFFER_MS) && (proposedFinish + BUFFER_MS > tStart)
+        // Check if the 12:00 PM - 1:00 PM mandatory lunch break separates the tasks
+        const [earlierStart, earlierFinish, laterStart, laterFinish] = proposedStart <= tStart
+          ? [proposedStart, proposedFinish, tStart, tFinish]
+          : [tStart, tFinish, proposedStart, proposedFinish]
+
+        const eEndDate = new Date(earlierFinish)
+        const lStartDate = new Date(laterStart)
+        const isSameDay = eEndDate.getFullYear() === lStartDate.getFullYear() &&
+          eEndDate.getMonth() === lStartDate.getMonth() &&
+          eEndDate.getDate() === lStartDate.getDate()
+
+        const endHour = eEndDate.getHours() + eEndDate.getMinutes() / 60
+        const startHour = lStartDate.getHours() + lStartDate.getMinutes() / 60
+
+        // The 12pm-1pm break already satisfies the 15-minute buffer requirement between morning and afternoon services
+        const isSeparatedByLunch = isSameDay && endHour <= 13.0 && startHour >= 13.0
+
+        const overlaps = !isSeparatedByLunch && (proposedStart < tFinish) && (proposedFinish > tStart)
+        const tooClose = !isSeparatedByLunch && (proposedStart < tFinish + BUFFER_MS) && (proposedFinish + BUFFER_MS > tStart)
 
         const isSameMechanicRow = Boolean(targetMechanicId) && Number(row.mechanic_id) === Number(targetMechanicId)
         const sameJobOrder = Number(row.job_order_id) === Number(jobOrderId)
@@ -262,18 +279,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       )
     }
 
-    // The customer hears when work on a service actually begins.
-    if (status === 'in_progress' && prev && prev.task_status !== 'in_progress') {
-      await notifyCustomer({
-        jobOrderId: Number(jobOrderId),
-        entityType: 'service_progress_tasks',
-        entityId: Number(taskId),
-        event: 'task_started',
-        title: 'Service Started',
-        message: `Work on ${prev.task_title} has started on your vehicle (Job Order #JO-${jobOrderId}).`,
-        employeeId: mechanicId ? Number(mechanicId) : null,
-      })
-    }
+    // Note: Individual task_started notifications disabled per specification
 
     return NextResponse.json({ success: true })
   } catch (error) {

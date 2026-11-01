@@ -148,6 +148,27 @@ const isSameDay = (d1: Date, d2: Date) =>
   d1.getMonth() === d2.getMonth() &&
   d1.getDate() === d2.getDate()
 
+function isMechanicOnLeaveOnDate(mech: any, date: Date): boolean {
+  if (mech.leaveHistory && Array.isArray(mech.leaveHistory) && mech.leaveHistory.length > 0) {
+    const dTime = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+    return mech.leaveHistory.some((l: any) => {
+      const sDate = new Date(l.start)
+      const s = new Date(sDate.getFullYear(), sDate.getMonth(), sDate.getDate()).getTime()
+      let e = Infinity
+      if (l.end) {
+        const eDate = new Date(l.end)
+        e = new Date(eDate.getFullYear(), eDate.getMonth(), eDate.getDate()).getTime()
+      }
+      return dTime >= s && dTime <= e
+    })
+  }
+  const isToday = isSameDay(date, new Date())
+  if (isToday) {
+    return mech.status === 'On Leave' || mech.employeeStatus === 'on_leave'
+  }
+  return false
+}
+
 type ViewMode = 'timeline' | 'agenda'
 
 interface LayoutEvent {
@@ -1100,7 +1121,7 @@ function ModernDayView({
                 const theme = getMechanicTheme(mech.id)
                 const joEvents = mechanicJobOrderLayouts[idx]
                 const taskEvents = mechanicTaskLayouts[idx]
-                const onLeave = mech.status === 'On Leave' || mech.employeeStatus === 'on_leave'
+                const onLeave = isMechanicOnLeaveOnDate(mech, currentDate)
 
                 const countLabel = groupByJobOrder
                   ? `${joEvents.length} ${joEvents.length === 1 ? 'Job Order' : 'Job Orders'}`
@@ -1177,7 +1198,7 @@ function ModernDayView({
                 {/* Lanes for each mechanic */}
                 {displayedMechanics.map((mech, mIdx) => {
                   const theme = getMechanicTheme(mech.id)
-                  const onLeave = mech.status === 'On Leave' || mech.employeeStatus === 'on_leave'
+                  const onLeave = isMechanicOnLeaveOnDate(mech, currentDate)
 
                   return (
                     <div key={mech.id} className="relative h-full p-1">
@@ -1682,7 +1703,7 @@ function ModernTimelineView({
               const mechTasks = tasks.filter(
                 (t) => Number(t.mechanic_id) === Number(mech.id) && t.scheduled_date && isSameDay(new Date(t.scheduled_date), currentDate)
               )
-              const onLeave = mech.status === 'On Leave' || mech.employeeStatus === 'on_leave'
+              const onLeave = isMechanicOnLeaveOnDate(mech, currentDate)
               const opacityStyle = 'opacity-95 hover:opacity-100 shadow-md ring-1 ring-white/10'
 
               return (
