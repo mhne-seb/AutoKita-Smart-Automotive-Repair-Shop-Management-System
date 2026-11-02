@@ -16,11 +16,13 @@ export async function POST(req: NextRequest) {
     }
 
     const pendingQuery = await db.query(
-      `SELECT *, (expires_at < (NOW() AT TIME ZONE 'Asia/Manila')) AS is_expired 
-       FROM pending_signups WHERE email = $1`,
+      `SELECT * ,
+          expires_at <= (NOW() AT TIME ZONE 'Asia/Manila') AS is_expired
+      FROM pending_signups 
+      WHERE email = $1`,
       [email]
     )
-    
+
     if (pendingQuery.rows.length === 0) {
       return NextResponse.json({ success: false, code: 'EXPIRED', message: 'That code has expired. Ask for a new one.' }, { status: 400 })
     }
@@ -49,7 +51,7 @@ export async function POST(req: NextRequest) {
     const client = await db.connect()
     try {
       await client.query('BEGIN')
-      
+
       const checkUser = await client.query(`SELECT id FROM users WHERE LOWER(email) = $1`, [email])
       if (checkUser.rows.length > 0) {
         await client.query('ROLLBACK')
@@ -57,13 +59,13 @@ export async function POST(req: NextRequest) {
       }
 
       const nickname = pending.first_name.slice(0, 40)
-      
+
       const res = await client.query(`
         INSERT INTO users (first_name, last_name, nickname, contact_number, email, password, registration_date, setup_completed_at)
         VALUES ($1, $2, $3, '', $4, $5, NOW(), NULL)
         RETURNING id
       `, [pending.first_name.slice(0, 40), pending.last_name.slice(0, 40), nickname, email, pending.password_hash])
-      
+
       newUserId = res.rows[0].id
 
       await client.query(`DELETE FROM pending_signups WHERE email = $1`, [email])
