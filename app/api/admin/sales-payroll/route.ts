@@ -386,7 +386,7 @@ export async function GET(request: NextRequest) {
     const mechanics = mechanicsRaw.map((m: any) => {
       const rawComm = Number(m.commissionPercent)
       // If employee has a customized commission share, use it; otherwise default to equal share
-      const sharePercent = (!isNaN(rawComm) && rawComm > 0 && rawComm <= 100) ? rawComm : equalSharePercent
+      const sharePercent = (!isNaN(rawComm) && rawComm >= 0 && rawComm <= 100) ? rawComm : equalSharePercent
       const commissionPay = Math.round(totalCommissionPool * (sharePercent / 100))
       const baseSalary = m.baseSalary || 0
       const totalEstimatedPay = baseSalary + commissionPay
