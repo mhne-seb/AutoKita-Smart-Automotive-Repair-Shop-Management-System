@@ -193,8 +193,8 @@ export default function Page() {
   const [approveTarget, setApproveTarget] = useState<Job | null>(null)
   const [viewTarget, setViewTarget] = useState<Job | null>(null)
   const [approving, setApproving] = useState(false)
-  const [deleteTarget, setDeleteTarget] = useState<Job | null>(null)
   const [rejectTarget, setRejectTarget] = useState<Job | null>(null)
+  const [cancelReason, setCancelReason] = useState('')
   const [checkingInTarget, setCheckingInTarget] = useState<Job | null>(null)
   const [checkingIn, setCheckingIn] = useState(false)
 
@@ -315,44 +315,18 @@ export default function Page() {
         body: JSON.stringify({
           action: 'reject',
           ticketId: job.ticketId,
+          reason: cancelReason.trim(),
         })
       });
       const json = await res.json();
       if (res.ok && json.success) {
         toast.success('Ticket declined.');
         setRejectTarget(null);
+        setCancelReason('');
         fetchJobs();
       } else {
         console.error('Failed to decline ticket:', json.message || json.debug);
-        toast.error('Could not decline the ticket. Please try again.');
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Could not decline the ticket. Please try again.');
-    } finally {
-      setRejecting(false);
-    }
-  }
-
-  const confirmDelete = async (job: Job) => {
-    setRejecting(true);
-    try {
-      const res = await fetch('/api/admin/job-queue', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'reject',
-          ticketId: job.ticketId,
-        })
-      });
-      const json = await res.json();
-      if (res.ok && json.success) {
-        toast.success('Ticket declined.');
-        setDeleteTarget(null);
-        fetchJobs();
-      } else {
-        console.error('Failed to decline ticket:', json.message || json.debug);
-        toast.error('Could not decline the ticket. Please try again.');
+        toast.error(json.message || 'Could not decline the ticket. Please try again.');
       }
     } catch (err) {
       console.error(err);
@@ -440,391 +414,383 @@ export default function Page() {
       {loading ? (
         <ShopLoading message="Loading the job queue" />
       ) : (
-      <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-6">
-      <div className="flex flex-wrap gap-5">
-        <StatCard label="Total Tickets" value={`${counts.all} Tickets`} icon={Wrench} iconBg="bg-gradient-to-br from-brand/20 to-brand/5" iconColor="text-brand" />
-        <StatCard label="Waiting Approval" value={`${counts.pending} Pending`} icon={ShieldAlert} iconBg="bg-gradient-to-br from-violet-100 to-violet-50" iconColor="text-violet-600" />
-        <StatCard label="Awaiting Arrival" value={`${counts.awaitingArrival} Arriving`} icon={Store} iconBg="bg-gradient-to-br from-amber-100 to-amber-50" iconColor="text-amber-600" />
-        <StatCard label="Approved Service" value={`${counts.approved} Approved`} icon={Package} iconBg="bg-gradient-to-br from-blue-100 to-blue-50" iconColor="text-blue-600" />
-        <StatCard label="Cancelled Service" value={`${counts.cancelled} Cancelled`} icon={XCircle} iconBg="bg-gradient-to-br from-rose-100 to-rose-50" iconColor="text-rose-600" />
-      </div>
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-6">
+          <div className="flex flex-wrap gap-5">
+            <StatCard label="Total Tickets" value={`${counts.all} Tickets`} icon={Wrench} iconBg="bg-gradient-to-br from-brand/20 to-brand/5" iconColor="text-brand" />
+            <StatCard label="Waiting Approval" value={`${counts.pending} Pending`} icon={ShieldAlert} iconBg="bg-gradient-to-br from-violet-100 to-violet-50" iconColor="text-violet-600" />
+            <StatCard label="Awaiting Arrival" value={`${counts.awaitingArrival} Arriving`} icon={Store} iconBg="bg-gradient-to-br from-amber-100 to-amber-50" iconColor="text-amber-600" />
+            <StatCard label="Approved Service" value={`${counts.approved} Approved`} icon={Package} iconBg="bg-gradient-to-br from-blue-100 to-blue-50" iconColor="text-blue-600" />
+            <StatCard label="Cancelled Service" value={`${counts.cancelled} Cancelled`} icon={XCircle} iconBg="bg-gradient-to-br from-rose-100 to-rose-50" iconColor="text-rose-600" />
+          </div>
 
-      <div className="flex w-fit max-w-full items-center gap-2 overflow-x-auto rounded-full border border-border bg-card p-1.5">
-        {tabs.map(({ label, count, icon: Icon }) => (
+          <div className="flex w-fit max-w-full items-center gap-2 overflow-x-auto rounded-full border border-border bg-card p-1.5">
+            {tabs.map(({ label, count, icon: Icon }) => (
+              <button
+                key={label}
+                onClick={() => { setTab(label); setCurrentPage(1); }}
+                className={`cursor-pointer flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${tab === label ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-brand-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                  }`}
+              >
+                <Icon size={14} />
+                {label === 'Tickets' ? 'All Tickets' : label}
+                <span
+                  className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs ${tab === label ? 'bg-white/20 text-brand-foreground' : 'bg-accent text-muted-foreground'
+                    }`}
+                >
+                  {count}
+                </span>
+              </button>
+            ))}
+          </div>
+
           <button
-            key={label}
-            onClick={() => { setTab(label); setCurrentPage(1); }}
-            className={`cursor-pointer flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${tab === label ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-brand-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+            onClick={() => { setWarrantyOnly((v) => !v); setCurrentPage(1); }}
+            className={`cursor-pointer mt-3 flex w-fit items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${warrantyOnly ? 'border-brand bg-brand-soft text-brand shadow-sm' : 'border-border text-muted-foreground hover:text-foreground hover:bg-accent/50'
               }`}
           >
-            <Icon size={14} />
-            {label === 'Tickets' ? 'All Tickets' : label}
-            <span
-              className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs ${tab === label ? 'bg-white/20 text-brand-foreground' : 'bg-accent text-muted-foreground'
-                }`}
-            >
-              {count}
+            <ShieldCheck size={14} />
+            Warranty Claims
+            <span className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs ${warrantyOnly ? 'bg-brand/15 text-brand' : 'bg-accent text-muted-foreground'}`}>
+              {warrantyClaimCount}
             </span>
           </button>
-        ))}
-      </div>
 
-      <button
-        onClick={() => { setWarrantyOnly((v) => !v); setCurrentPage(1); }}
-        className={`cursor-pointer mt-3 flex w-fit items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${warrantyOnly ? 'border-brand bg-brand-soft text-brand shadow-sm' : 'border-border text-muted-foreground hover:text-foreground hover:bg-accent/50'
-          }`}
-      >
-        <ShieldCheck size={14} />
-        Warranty Claims
-        <span className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs ${warrantyOnly ? 'bg-brand/15 text-brand' : 'bg-accent text-muted-foreground'}`}>
-          {warrantyClaimCount}
-        </span>
-      </button>
+          {/* Unified Toolbar: Page count on left, Search Bar next to Filter next to Prev/Next buttons on right */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-medium text-muted-foreground">
+              Page {currentPage} of {totalPages} · {filtered.length} total service tickets
+            </p>
 
-      {/* Unified Toolbar: Page count on left, Search Bar next to Filter next to Prev/Next buttons on right */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-medium text-muted-foreground">
-          Page {currentPage} of {totalPages} · {filtered.length} total service tickets
-        </p>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Search bar */}
-          <div className="relative">
-            <Search
-              size={15}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search tickets, plates, customer..."
-              className="w-56 sm:w-64 rounded-xl border border-border bg-card py-2 pl-9 pr-7 text-sm text-foreground placeholder:text-muted-foreground shadow-sm transition-all focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-
-          {/* Filter Popover Button & Menu */}
-          <div className="relative" ref={filterMenuRef}>
-            <button
-              onClick={() => setShowFilterMenu((v) => !v)}
-              className={`flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold shadow-sm transition-all ${
-                activeFilterCount > 0
-                  ? 'border-brand bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-brand-foreground'
-                  : 'border-border bg-card text-foreground hover:bg-accent'
-              } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
-            >
-              <SlidersHorizontal size={15} />
-              <span>Filter</span>
-              {activeFilterCount > 0 && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs font-bold text-slate-900">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-
-            {showFilterMenu && (
-              <div className="absolute right-0 z-30 mt-2 w-80 sm:w-96 rounded-2xl border border-border bg-card p-4 shadow-xl animate-in fade-in zoom-in-95 duration-150">
-                <div className="flex items-center justify-between border-b border-border pb-3">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                    <SlidersHorizontal size={15} className="text-brand" />
-                    <span>Filter Service Tickets</span>
-                  </div>
-                  {activeFilterCount > 0 && (
-                    <button
-                      onClick={resetFilters}
-                      className="text-xs font-medium text-rose-500 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
-                    >
-                      Reset All
-                    </button>
-                  )}
-                </div>
-
-                <div className="mt-3 space-y-3.5">
-                  {/* Vehicle */}
-                  <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Vehicle</label>
-                    <select
-                      value={selectedVehicle}
-                      onChange={(e) => setSelectedVehicle(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
-                    >
-                      <option value="all">All Vehicles</option>
-                      {vehicleOptions.map((v) => (
-                        <option key={v} value={v}>{v}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Service Mode */}
-                  <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Service Mode</label>
-                    <select
-                      value={selectedMode}
-                      onChange={(e) => setSelectedMode(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
-                    >
-                      <option value="all">All Service Modes</option>
-                      <option value="Shop Visit">Shop Visit</option>
-                      <option value="Home Service">Home Service</option>
-                    </select>
-                  </div>
-
-                  {/* Status */}
-                  <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Status</label>
-                    <select
-                      value={selectedStatus}
-                      onChange={(e) => setSelectedStatus(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
-                    >
-                      <option value="all">All Statuses</option>
-                      <option value="Pending">Pending (Waiting Approval)</option>
-                      <option value="Awaiting Arrival">Awaiting Arrival</option>
-                      <option value="Approved">Approved</option>
-                      <option value="Cancelled">Cancelled</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex justify-end border-t border-border pt-3">
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Search bar */}
+              <div className="relative">
+                <Search
+                  size={15}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search tickets, plates, customer..."
+                  className="w-56 sm:w-64 rounded-xl border border-border bg-card py-2 pl-9 pr-7 text-sm text-foreground placeholder:text-muted-foreground shadow-sm transition-all focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                />
+                {searchQuery && (
                   <button
-                    onClick={() => setShowFilterMenu(false)}
-                    className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-1.5 text-xs font-semibold text-brand-foreground hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
                   >
-                    Done
+                    <X size={14} />
                   </button>
-                </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Prev / Next Pagination */}
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="flex items-center gap-1 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground shadow-sm transition-all hover:bg-accent disabled:opacity-40"
-            >
-              <ChevronLeft size={14} /> Prev
-            </button>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="flex items-center gap-1 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground shadow-sm transition-all hover:bg-accent disabled:opacity-40"
-            >
-              Next <ChevronRight size={14} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Active filter chips (if any) */}
-      {activeFilterCount > 0 && (
-        <div className="flex flex-wrap items-center gap-2 pt-0.5">
-          <span className="text-xs font-semibold uppercase text-muted-foreground">Active Filters:</span>
-          {selectedVehicle !== 'all' && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
-              Vehicle: {selectedVehicle}
-              <button onClick={() => setSelectedVehicle('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
-            </span>
-          )}
-          {selectedMode !== 'all' && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
-              Mode: {selectedMode}
-              <button onClick={() => setSelectedMode('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
-            </span>
-          )}
-          {selectedStatus !== 'all' && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
-              Status: {selectedStatus}
-              <button onClick={() => setSelectedStatus('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
-            </span>
-          )}
-          <button onClick={resetFilters} className="text-xs text-muted-foreground hover:text-rose-500 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
-            Clear all
-          </button>
-        </div>
-      )}
-
-      {/* Job queue table — every new booking lands here for triage */}
-      <div className="overflow-hidden rounded-2xl border border-border bg-card">
-        <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
-        <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
-              <th className="px-4 py-3 font-semibold">Customer</th>
-              <th className="px-4 py-3 font-semibold">Vehicle</th>
-              <th className="px-4 py-3 font-semibold">Mode</th>
-              <th className="px-4 py-3 font-semibold">Service Needed</th>
-              <th className="px-4 py-3 font-semibold">Preferred Date</th>
-              <th className="px-4 py-3 font-semibold">Status</th>
-              <th className="px-4 py-3 text-right font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedJobs.map((c) => {
-              const approvedLike = c.status === 'Approved' || c.status === 'In Progress'
-              return (
-                <tr key={c.ticketId} className="border-b border-border/60 align-top last:border-0">
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ${avatarColorClass(c.rawUserId)}`}>
-                        {c.name.charAt(0)}
-                        {c.avatarUrl && (
-                          <img
-                            src={c.avatarUrl}
-                            alt={c.name}
-                            className="absolute inset-0 h-9 w-9 rounded-full object-cover"
-                            onError={(e) => { e.currentTarget.style.display = 'none' }}
-                          />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground">{c.name}</p>
-                        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Hash size={11} className="shrink-0" /> {c.customerId}
-                        </p>
-                        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Phone size={11} className="shrink-0" /> {c.phone}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <p className="flex items-center gap-1.5 font-semibold text-foreground">
-                      <Car size={12} className="shrink-0 text-muted-foreground" /> {c.vehicle}
-                    </p>
-                    <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Hash size={11} className="shrink-0" /> {c.plate}
-                    </p>
-                  </td>
-                  <td className="px-4 py-4">
-                    <span className="flex w-fit items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-muted-foreground">
-                      {c.serviceMode === 'Shop Visit' ? <Store size={12} /> : <Home size={12} />}
-                      {c.serviceMode}
+              {/* Filter Popover Button & Menu */}
+              <div className="relative" ref={filterMenuRef}>
+                <button
+                  onClick={() => setShowFilterMenu((v) => !v)}
+                  className={`flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold shadow-sm transition-all ${activeFilterCount > 0
+                    ? 'border-brand bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-brand-foreground'
+                    : 'border-border bg-card text-foreground hover:bg-accent'
+                    } cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md`}
+                >
+                  <SlidersHorizontal size={15} />
+                  <span>Filter</span>
+                  {activeFilterCount > 0 && (
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs font-bold text-slate-900">
+                      {activeFilterCount}
                     </span>
-                  </td>
-                  <td className="px-4 py-4">
-                    <span className="flex items-center gap-1.5 text-foreground/80">
-                      <Wrench size={12} className="shrink-0 text-muted-foreground" />
-                      {c.servicesNeeded.map(getServiceLabel).join(', ')}
-                    </span>
-                    {c.isWarrantyClaim && (
-                      <span
-                        title="Started from a customer's warranty claim, not a fresh booking"
-                        className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-0.5 text-[10px] font-semibold text-brand"
-                      >
-                        <ShieldCheck size={11} /> Warranty claim
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-4">
-                    {c.preferredDate ? (
-                      <span className="flex items-center gap-1.5 text-foreground/80">
-                        <Calendar size={12} className="shrink-0 text-muted-foreground" /> {c.preferredDate}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-4">
-                    {c.status === 'Approved' || c.status === 'In Progress' ? (
-                      !c.dateArrived ? (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
-                          <Store size={12} /> Awaiting Arrival
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                          <CheckCircle2 size={12} /> Approved
-                        </span>
-                      )
-                    ) : (
-                      <StatusBadge status={c.status} />
-                    )}
-                  </td>
-                  <td className="px-4 py-4 text-right">
-                    <div className="flex justify-end gap-2 items-center">
-                      <button
-                        onClick={() => setViewTarget(c)}
-                        title="View"
-                        className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent active:translate-y-0"
-                      >
-                        <Eye size={14} />
-                      </button>
-                      {c.status !== 'Cancelled' && (
-                        approvedLike ? (
-                          <>
-                            {!c.dateArrived && (
-                              <button
-                                onClick={() => setCheckingInTarget(c)}
-                                title="Check In Vehicle"
-                                className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-amber-300 bg-amber-50 p-2 text-amber-800 hover:bg-amber-100 active:translate-y-0"
-                              >
-                                <Store size={14} />
-                              </button>
-                            )}
-                            {c.dateArrived && c.jobOrderId && (
-                              <a
-                                href={`/job-orders/${c.jobOrderId}/inspection`}
-                                title="Go to Inspection"
-                                className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent active:translate-y-0"
-                              >
-                                <Search size={14} />
-                              </a>
-                            )}
-                            <button
-                              onClick={() => setDeleteTarget(c)}
-                              title="Delete"
-                              className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50 active:translate-y-0"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => setApproveTarget(c)}
-                              title="Approve"
-                              className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] p-2 text-brand-foreground hover:opacity-90 active:translate-y-0"
-                            >
-                              <Check size={14} />
-                            </button>
-                            <button
-                              onClick={() => setRejectTarget(c)}
-                              title="Reject"
-                              className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50 active:translate-y-0"
-                            >
-                              <X size={14} />
-                            </button>
-                          </>
-                        )
+                  )}
+                </button>
+
+                {showFilterMenu && (
+                  <div className="absolute right-0 z-30 mt-2 w-80 sm:w-96 rounded-2xl border border-border bg-card p-4 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+                    <div className="flex items-center justify-between border-b border-border pb-3">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                        <SlidersHorizontal size={15} className="text-brand" />
+                        <span>Filter Service Tickets</span>
+                      </div>
+                      {activeFilterCount > 0 && (
+                        <button
+                          onClick={resetFilters}
+                          className="text-xs font-medium text-rose-500 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
+                        >
+                          Reset All
+                        </button>
                       )}
                     </div>
-                  </td>
-                </tr>
-              )
-            })}
-            {paginatedJobs.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-sm text-muted-foreground">
-                  No tickets found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+
+                    <div className="mt-3 space-y-3.5">
+                      {/* Vehicle */}
+                      <div>
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Vehicle</label>
+                        <select
+                          value={selectedVehicle}
+                          onChange={(e) => setSelectedVehicle(e.target.value)}
+                          className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
+                        >
+                          <option value="all">All Vehicles</option>
+                          {vehicleOptions.map((v) => (
+                            <option key={v} value={v}>{v}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Service Mode */}
+                      <div>
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Service Mode</label>
+                        <select
+                          value={selectedMode}
+                          onChange={(e) => setSelectedMode(e.target.value)}
+                          className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
+                        >
+                          <option value="all">All Service Modes</option>
+                          <option value="Shop Visit">Shop Visit</option>
+                          <option value="Home Service">Home Service</option>
+                        </select>
+                      </div>
+
+                      {/* Status */}
+                      <div>
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Status</label>
+                        <select
+                          value={selectedStatus}
+                          onChange={(e) => setSelectedStatus(e.target.value)}
+                          className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
+                        >
+                          <option value="all">All Statuses</option>
+                          <option value="Pending">Pending (Waiting Approval)</option>
+                          <option value="Awaiting Arrival">Awaiting Arrival</option>
+                          <option value="Approved">Approved</option>
+                          <option value="Cancelled">Cancelled</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex justify-end border-t border-border pt-3">
+                      <button
+                        onClick={() => setShowFilterMenu(false)}
+                        className="rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] px-4 py-1.5 text-xs font-semibold text-brand-foreground hover:opacity-90 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"
+                      >
+                        Done
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Prev / Next Pagination */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-1 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground shadow-sm transition-all hover:bg-accent disabled:opacity-40"
+                >
+                  <ChevronLeft size={14} /> Prev
+                </button>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-1 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-muted-foreground shadow-sm transition-all hover:bg-accent disabled:opacity-40"
+                >
+                  Next <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Active filter chips (if any) */}
+          {activeFilterCount > 0 && (
+            <div className="flex flex-wrap items-center gap-2 pt-0.5">
+              <span className="text-xs font-semibold uppercase text-muted-foreground">Active Filters:</span>
+              {selectedVehicle !== 'all' && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
+                  Vehicle: {selectedVehicle}
+                  <button onClick={() => setSelectedVehicle('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
+                </span>
+              )}
+              {selectedMode !== 'all' && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
+                  Mode: {selectedMode}
+                  <button onClick={() => setSelectedMode('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
+                </span>
+              )}
+              {selectedStatus !== 'all' && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
+                  Status: {selectedStatus}
+                  <button onClick={() => setSelectedStatus('all')} className="hover:opacity-70 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md"><X size={12} /></button>
+                </span>
+              )}
+              <button onClick={resetFilters} className="text-xs text-muted-foreground hover:text-rose-500 hover:underline cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md">
+                Clear all
+              </button>
+            </div>
+          )}
+
+          {/* Job queue table — every new booking lands here for triage */}
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
+            <div className="h-1 bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4]" />
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
+                    <th className="px-4 py-3 font-semibold">Customer</th>
+                    <th className="px-4 py-3 font-semibold">Vehicle</th>
+                    <th className="px-4 py-3 font-semibold">Mode</th>
+                    <th className="px-4 py-3 font-semibold">Service Needed</th>
+                    <th className="px-4 py-3 font-semibold">Preferred Date</th>
+                    <th className="px-4 py-3 font-semibold">Status</th>
+                    <th className="px-4 py-3 text-right font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedJobs.map((c) => {
+                    const approvedLike = c.status === 'Approved' || c.status === 'In Progress'
+                    return (
+                      <tr key={c.ticketId} className="border-b border-border/60 align-top last:border-0">
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ${avatarColorClass(c.rawUserId)}`}>
+                              {c.name.charAt(0)}
+                              {c.avatarUrl && (
+                                <img
+                                  src={c.avatarUrl}
+                                  alt={c.name}
+                                  className="absolute inset-0 h-9 w-9 rounded-full object-cover"
+                                  onError={(e) => { e.currentTarget.style.display = 'none' }}
+                                />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-foreground">{c.name}</p>
+                              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <Hash size={11} className="shrink-0" /> {c.customerId}
+                              </p>
+                              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <Phone size={11} className="shrink-0" /> {c.phone}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <p className="flex items-center gap-1.5 font-semibold text-foreground">
+                            <Car size={12} className="shrink-0 text-muted-foreground" /> {c.vehicle}
+                          </p>
+                          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Hash size={11} className="shrink-0" /> {c.plate}
+                          </p>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="flex w-fit items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-muted-foreground">
+                            {c.serviceMode === 'Shop Visit' ? <Store size={12} /> : <Home size={12} />}
+                            {c.serviceMode}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="flex items-center gap-1.5 text-foreground/80">
+                            <Wrench size={12} className="shrink-0 text-muted-foreground" />
+                            {c.servicesNeeded.map(getServiceLabel).join(', ')}
+                          </span>
+                          {c.isWarrantyClaim && (
+                            <span
+                              title="Started from a customer's warranty claim, not a fresh booking"
+                              className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-0.5 text-[10px] font-semibold text-brand"
+                            >
+                              <ShieldCheck size={11} /> Warranty claim
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-4">
+                          {c.preferredDate ? (
+                            <span className="flex items-center gap-1.5 text-foreground/80">
+                              <Calendar size={12} className="shrink-0 text-muted-foreground" /> {c.preferredDate}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-4">
+                          {c.status === 'Approved' || c.status === 'In Progress' ? (
+                            !c.dateArrived ? (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                                <Store size={12} /> Awaiting Arrival
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+                                <CheckCircle2 size={12} /> Approved
+                              </span>
+                            )
+                          ) : (
+                            <StatusBadge status={c.status} />
+                          )}
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          <div className="flex justify-end gap-2 items-center">
+                            <button
+                              onClick={() => setViewTarget(c)}
+                              title="View"
+                              className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent active:translate-y-0"
+                            >
+                              <Eye size={14} />
+                            </button>
+                            {c.status !== 'Cancelled' && (
+                              approvedLike ? (
+                                <>
+                                  {!c.dateArrived && (
+                                    <button
+                                      onClick={() => setCheckingInTarget(c)}
+                                      title="Check In Vehicle"
+                                      className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-amber-300 bg-amber-50 p-2 text-amber-800 hover:bg-amber-100 active:translate-y-0"
+                                    >
+                                      <Store size={14} />
+                                    </button>
+                                  )}
+                                  {c.dateArrived && c.jobOrderId && (
+                                    <a
+                                      href={`/job-orders/${c.jobOrderId}/inspection`}
+                                      title="Go to Inspection"
+                                      className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-border p-2 text-muted-foreground hover:bg-accent active:translate-y-0"
+                                    >
+                                      <Search size={14} />
+                                    </a>
+                                  )}
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    onClick={() => setApproveTarget(c)}
+                                    title="Approve"
+                                    className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] p-2 text-brand-foreground hover:opacity-90 active:translate-y-0"
+                                  >
+                                    <Check size={14} />
+                                  </button>
+                                  <button
+                                    onClick={() => { setCancelReason(''); setRejectTarget(c) }}
+                                    title="Reject"
+                                    className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm flex items-center justify-center rounded-lg border border-rose-200 p-2 text-rose-500 hover:bg-rose-50 active:translate-y-0"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </>
+                              )
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                  {paginatedJobs.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                        No tickets found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
-      </div>
       )}
 
       {showNewTicket && <NewTicketModal onClose={() => setShowNewTicket(false)} onSubmit={addTicket} />}
@@ -844,12 +810,31 @@ export default function Page() {
         <ConfirmModal
           tone="danger"
           title="Reject this ticket?"
-          description={`${rejectTarget.name}'s job order for ${rejectTarget.vehicle} will be marked as cancelled.`}
+          description={`${rejectTarget.name}'s ticket for ${rejectTarget.vehicle} will be marked as declined and moved to Cancelled.`}
           confirmLabel={rejecting ? "Rejecting..." : "Reject Ticket"}
-          onClose={() => setRejectTarget(null)}
+          onClose={() => { setRejectTarget(null); setCancelReason('') }}
           onConfirm={() => confirmReject(rejectTarget)}
           disabled={rejecting}
-        />
+          confirmDisabled={!cancelReason.trim()}
+        >
+          <div className="mt-4">
+            <label htmlFor="reject-reason" className="block text-sm font-medium text-foreground">
+              Reason for declining
+            </label>
+            <textarea
+              id="reject-reason"
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              maxLength={500}
+              rows={3}
+              aria-describedby="reject-reason-error"
+              className="mt-1 w-full rounded-lg border border-border bg-background p-2 text-sm text-foreground focus:border-brand focus:outline-none"
+            />
+            {!cancelReason.trim() && (
+              <p id="reject-reason-error" className="mt-1 text-xs text-rose-600">Enter a reason to continue.</p>
+            )}
+          </div>
+        </ConfirmModal>
       )}
 
       {checkingInTarget && (
@@ -872,17 +857,6 @@ export default function Page() {
         />
       )}
 
-      {deleteTarget && (
-        <ConfirmModal
-          tone="danger"
-          title="Decline this ticket?"
-          description="This ticket will be marked as declined and moved to Cancelled. It is not erased."
-          confirmLabel={rejecting ? "Declining..." : "Decline"}
-          onClose={() => setDeleteTarget(null)}
-          onConfirm={() => confirmDelete(deleteTarget)}
-          disabled={rejecting}
-        />
-      )}
     </div>
   )
 }
@@ -1120,24 +1094,28 @@ function ViewModal({ job, onClose, onCheckIn }: { job: Job; onClose: () => void;
   )
 }
 
-// Generic confirm modal — used for reject + delete.
+// Generic confirmation modal for ticket decisions.
 
 function ConfirmModal({
   tone,
   title,
   description,
+  children,
   confirmLabel,
   onClose,
   onConfirm,
   disabled,
+  confirmDisabled,
 }: {
   tone: 'danger' | 'default' | 'brand'
   title: string
   description: string
+  children?: React.ReactNode
   confirmLabel: string
   onClose: () => void
   onConfirm: () => void
   disabled?: boolean
+  confirmDisabled?: boolean
 }) {
   const isDanger = tone === 'danger'
   const isBrand = tone === 'brand'
@@ -1147,13 +1125,12 @@ function ConfirmModal({
       <div className="w-full max-w-sm rounded-xl bg-background p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div
-            className={`flex h-11 w-11 items-center justify-center rounded-full ${
-              isDanger
-                ? 'bg-destructive/10 text-destructive'
-                : isBrand
+            className={`flex h-11 w-11 items-center justify-center rounded-full ${isDanger
+              ? 'bg-destructive/10 text-destructive'
+              : isBrand
                 ? 'bg-brand/10 text-brand'
                 : 'bg-accent text-foreground'
-            }`}
+              }`}
           >
             {isDanger ? <Trash2 size={20} /> : isBrand ? <Store size={20} /> : <AlertCircle size={20} />}
           </div>
@@ -1164,6 +1141,7 @@ function ConfirmModal({
 
         <h3 className="mt-4 text-lg font-bold text-foreground">{title}</h3>
         <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        {children}
 
         <div className="mt-6 flex justify-end gap-3">
           <button
@@ -1175,14 +1153,13 @@ function ConfirmModal({
           </button>
           <button
             onClick={onConfirm}
-            disabled={disabled}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none ${
-              isDanger
-                ? 'bg-destructive text-destructive-foreground hover:opacity-90'
-                : isBrand
+            disabled={disabled || confirmDisabled}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none ${isDanger
+              ? 'bg-destructive text-destructive-foreground hover:opacity-90'
+              : isBrand
                 ? 'bg-gradient-to-r from-[#0b1730] via-[#1d3a68] to-[#3b6cb4] text-white hover:opacity-90'
                 : 'bg-primary text-primary-foreground hover:opacity-90'
-            }`}
+              }`}
           >
             {confirmLabel}
           </button>
