@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { STAFF_ACCESS_SQL, staffMayUseAdminSite } from '@/lib/staffAccess'
 import { setSessionCookies } from '@/lib/session'
+import { hashPassword } from '@/lib/password'
+import { generatePassword } from '@/lib/generatedPassword'
 import {
   exchangeCode,
   verifyIdToken,
@@ -9,10 +11,15 @@ import {
   oauthCookieOptions,
 } from '@/lib/googleAuth'
 import crypto from 'crypto'
+import {
+  GENERATED_PASSWORD_COOKIE,
+  generatedPasswordCookieOptions,
+  encryptGeneratedPassword,
+} from '@/lib/generatedPasswordCookie'
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)
-  
+
   const oauthCookieStr = req.cookies.get('autokita_google_oauth')?.value
   const cookieData = await readOauthCookie(oauthCookieStr)
   const returnTo = cookieData?.returnTo || 'login'
@@ -37,7 +44,7 @@ export async function GET(req: NextRequest) {
 
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
-  
+
   if (!code || !state || !oauthCookieStr) {
     return fail('failed', 'Missing code, state, or cookie')
   }
@@ -74,6 +81,7 @@ export async function GET(req: NextRequest) {
     let accountType: 'customer' | 'staff' | null = null
     let accountId: number | null = null
     let accountRole: 'customer' | 'staff' | null = null
+    let generatedPassword: string | null = null
 
     // 4a. Existing link
     const existing = await db.query(
@@ -83,7 +91,7 @@ export async function GET(req: NextRequest) {
     if (existing.rows.length > 0) {
       accountType = existing.rows[0].account_type
       accountId = existing.rows[0].account_id
-      
+
       if (accountType === 'staff') {
         const ok = await staffMayUseAdminSite(accountId!)
         if (!ok) return fail('not_allowed', 'Staff account access denied')
@@ -99,7 +107,7 @@ export async function GET(req: NextRequest) {
         `SELECT id, email, full_name, role::text AS role, status::text AS status, can_sign_in FROM employees WHERE LOWER(email) = $1 LIMIT 1`,
         [email]
       )
-      
+
       if (staffByEmail.rows.length > 0) {
         // Evaluate the rule explicitly in JS or execute the SQL
         const staffRes = await db.query(
@@ -118,7 +126,7 @@ export async function GET(req: NextRequest) {
           `SELECT id, email, nickname, first_name, last_name FROM users WHERE LOWER(email) = $1 ORDER BY (email = $1) DESC LIMIT 1`,
           [email]
         )
-        
+
         if (userByEmail.rows.length > 0) {
           accountType = 'customer'
           accountId = userByEmail.rows[0].id
@@ -127,6 +135,8 @@ export async function GET(req: NextRequest) {
           // 4d. Brand-new person: create the customer right now. The phone number is asked
           // inside the account setup (/setup), which the customer pages force until it is
           // finished (setup_completed_at stays NULL for this account).
+          const password = generatePassword()
+          const passwordHash = await hashPassword(password)
           const clean = (s: string) => s.replace(/[\x00-\x1F\x7F]/g, '').trim().substring(0, 40)
           const first = clean(givenName || name.split(' ')[0] || '')
           const last = clean(familyName || name.split(' ').slice(1).join(' ') || '')
@@ -134,11 +144,12 @@ export async function GET(req: NextRequest) {
           try {
             const created = await db.query(
               `INSERT INTO users (first_name, last_name, nickname, contact_number, email, password, registration_date)
-               VALUES ($1, $2, $3, '', $4, NULL, NOW())
+               VALUES ($1, $2, $3, '', $4, $5, NOW())
                RETURNING id`,
-              [first, last, nick, email]
+              [first, last, nick, email, passwordHash]
             )
             accountId = created.rows[0].id
+            generatedPassword = password
           } catch (insertErr: any) {
             // Two sign-ins at the same moment: the unique email rule stops the second one.
             if (insertErr?.code !== '23505') throw insertErr
@@ -172,6 +183,14 @@ export async function GET(req: NextRequest) {
       }
       const res = NextResponse.redirect(new URL(doneUrl, req.url))
       await setSessionCookies(res, { userId: accountId, role: accountRole }, cookieData.remember)
+      if (accountRole === 'customer' && generatedPassword !== null) {
+        const token = await encryptGeneratedPassword(accountId, generatedPassword)
+        res.cookies.set(
+          GENERATED_PASSWORD_COOKIE,
+          token,
+          generatedPasswordCookieOptions
+        )
+      }
       clearOauthCookie(res)
       return res
     }
