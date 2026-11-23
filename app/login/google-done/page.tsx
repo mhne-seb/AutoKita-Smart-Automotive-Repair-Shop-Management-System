@@ -69,7 +69,7 @@ export default function GoogleDonePage() {
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-4 text-muted-foreground animate-pulse">
         <Loader2 className="h-8 w-8 animate-spin text-brand" />
-        <p className="text-sm font-medium">Signing you inΓÇª</p>
+        <p className="text-sm font-medium">Signing you in.</p>
       </div>
     </div>
   )
