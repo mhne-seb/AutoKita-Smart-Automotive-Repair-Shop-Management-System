@@ -26,9 +26,10 @@ function encryptionKey(): Uint8Array {
 
 export async function encryptGeneratedPassword(
     customerId: number,
-    password: string
+    password: string,
+    passwordHash: string
 ): Promise<string> {
-    return new EncryptJWT({ password })
+    return new EncryptJWT({ password, passwordHash })
         .setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
         .setSubject(String(customerId))
         .setIssuedAt()
@@ -38,7 +39,7 @@ export async function encryptGeneratedPassword(
 
 export async function decryptGeneratedPassword(
     token: string | undefined
-): Promise<{ customerId: number; password: string } | null> {
+): Promise<{ customerId: number; password: string; passwordHash: string } | null> {
     if (!token) return null
 
     try {
@@ -48,12 +49,13 @@ export async function decryptGeneratedPassword(
         if (
             !Number.isSafeInteger(customerId) ||
             customerId <= 0 ||
-            typeof payload.password !== 'string'
+            typeof payload.password !== 'string' ||
+            typeof payload.passwordHash !== 'string'
         ) {
             return null
         }
 
-        return { customerId, password: payload.password }
+        return { customerId, password: payload.password, passwordHash: payload.passwordHash }
     } catch {
         return null // Missing, expired, or altered cookie
     }

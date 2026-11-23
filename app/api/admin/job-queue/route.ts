@@ -333,11 +333,27 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, message: 'The reason is too long. Keep it under 500 characters.' }, { status: 400 })
       }
 
-      const rejectQuery = `SELECT update_ticket_status($1, 'declined')`
-      await db.query(rejectQuery, [ticketId])
-
+      const client = await db.connect()
       try {
-        await db.query(
+        await client.query('BEGIN')
+        // Approval and rejection must not race after the earlier eligibility check.
+        const locked = await client.query(
+          `SELECT ticket_status FROM service_tickets WHERE id = $1 FOR UPDATE`,
+          [ticketId],
+        )
+        const oldStatus = locked.rows[0]?.ticket_status
+        if (!oldStatus || !['pending', 'queued', 'inspection_scheduled'].includes(oldStatus)) {
+          await client.query('ROLLBACK')
+          return NextResponse.json({ success: false, message: 'This ticket can no longer be changed.' }, { status: 409 })
+        }
+        const existing = await client.query(`SELECT id FROM job_orders WHERE ticket_id = $1 LIMIT 1`, [ticketId])
+        if (existing.rows.length > 0) {
+          await client.query('ROLLBACK')
+          return NextResponse.json({ success: false, message: 'This ticket already has a job order.' }, { status: 409 })
+        }
+
+        await client.query(`SELECT update_ticket_status($1, 'declined')`, [ticketId])
+        await client.query(
           `INSERT INTO system_audit_logs (
             employees_id,
             action_performed,
@@ -350,7 +366,7 @@ export async function POST(req: NextRequest) {
           [
             actingEmpId,
             ticketId,
-            JSON.stringify({ ticket_status: 'pending' }),
+            JSON.stringify({ ticket_status: oldStatus }),
             JSON.stringify({
               ticket_status: 'declined',
               rejected_by_employee_id: actingEmpId,
@@ -359,8 +375,12 @@ export async function POST(req: NextRequest) {
             })
           ]
         )
-      } catch (auditErr) {
-        console.error('Failed to log ticket rejection audit:', auditErr)
+        await client.query('COMMIT')
+      } catch (rejectErr) {
+        try { await client.query('ROLLBACK') } catch { /* connection already gone */ }
+        throw rejectErr
+      } finally {
+        client.release()
       }
 
       return NextResponse.json({ success: true })

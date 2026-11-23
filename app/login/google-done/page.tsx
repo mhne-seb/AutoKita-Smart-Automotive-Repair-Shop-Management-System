@@ -16,7 +16,10 @@ export default function GoogleDonePage() {
   const checkGeneratedPassword = useCallback(async (nextPage: string) => {
     setLoadError(false)
     try {
-      const response = await fetch('/api/auth/google/generated-password', { cache: 'no-store' })
+      const response = await fetch('/api/auth/google/generated-password', {
+        method: 'POST',
+        cache: 'no-store',
+      })
       if (!response.ok) throw new Error('Could not check the generated password.')
 
       const data: { success?: boolean; password?: string | null } = await response.json()

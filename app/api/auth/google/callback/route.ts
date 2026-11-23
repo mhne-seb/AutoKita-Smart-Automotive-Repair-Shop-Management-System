@@ -82,6 +82,7 @@ export async function GET(req: NextRequest) {
     let accountId: number | null = null
     let accountRole: 'customer' | 'staff' | null = null
     let generatedPassword: string | null = null
+    let generatedPasswordHash: string | null = null
 
     // 4a. Existing link
     const existing = await db.query(
@@ -150,6 +151,7 @@ export async function GET(req: NextRequest) {
             )
             accountId = created.rows[0].id
             generatedPassword = password
+            generatedPasswordHash = passwordHash
           } catch (insertErr: any) {
             // Two sign-ins at the same moment: the unique email rule stops the second one.
             if (insertErr?.code !== '23505') throw insertErr
@@ -183,8 +185,8 @@ export async function GET(req: NextRequest) {
       }
       const res = NextResponse.redirect(new URL(doneUrl, req.url))
       await setSessionCookies(res, { userId: accountId, role: accountRole }, cookieData.remember)
-      if (accountRole === 'customer' && generatedPassword !== null) {
-        const token = await encryptGeneratedPassword(accountId, generatedPassword)
+      if (accountRole === 'customer' && generatedPassword !== null && generatedPasswordHash !== null) {
+        const token = await encryptGeneratedPassword(accountId, generatedPassword, generatedPasswordHash)
         res.cookies.set(
           GENERATED_PASSWORD_COOKIE,
           token,
