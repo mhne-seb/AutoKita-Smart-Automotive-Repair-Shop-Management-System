@@ -120,6 +120,25 @@ export async function sendPasswordResetEmail(opts: {
     })
 }
 
+/** Sent only for a brand-new customer who signed up with a verified Google email. */
+export async function sendGeneratedPasswordEmail(opts: { to: string; name: string; password: string }) {
+    const name = opts.name.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)
+    await transporter.sendMail({
+        from: FROM,
+        to: opts.to,
+        subject: 'Your new AutoKita account password',
+        text: `Hi ${opts.name},\n\nYour AutoKita account was created using Google. You can continue signing in with Google, or use your email and this generated password:\n\n${opts.password}\n\nKeep this email private. You can change your password in your profile or use Forgot password if you lose it.\n\n- AutoKita` + FOOTER_TEXT,
+        html: `<div style="font-family:system-ui,Arial,sans-serif;max-width:480px;margin:auto;color:#111;font-size:16px">
+            <h2 style="color:#1e3a5f">Your AutoKita account password</h2>
+            <p>Hi ${name},</p>
+            <p>Your AutoKita account was created using Google. You can continue with Google or sign in with your email and this password:</p>
+            <p style="font-family:monospace;font-size:20px;overflow-wrap:anywhere"><strong>${opts.password}</strong></p>
+            <p>Keep this email private. You can change your password in your profile or use Forgot password if you lose it.</p>
+            ${FOOTER_HTML}
+          </div>`,
+    })
+}
+
 export async function sendPasswordChangedEmail(opts: { to: string; name: string }) {
     const when = new Date().toLocaleString('en-PH', {
         timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short',

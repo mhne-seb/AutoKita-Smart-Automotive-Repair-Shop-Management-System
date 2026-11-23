@@ -4,6 +4,7 @@ import { STAFF_ACCESS_SQL, staffMayUseAdminSite } from '@/lib/staffAccess'
 import { setSessionCookies } from '@/lib/session'
 import { hashPassword } from '@/lib/password'
 import { generatePassword } from '@/lib/generatedPassword'
+import { sendGeneratedPasswordEmail } from '@/lib/mail'
 import {
   exchangeCode,
   verifyIdToken,
@@ -11,11 +12,6 @@ import {
   oauthCookieOptions,
 } from '@/lib/googleAuth'
 import crypto from 'crypto'
-import {
-  GENERATED_PASSWORD_COOKIE,
-  generatedPasswordCookieOptions,
-  encryptGeneratedPassword,
-} from '@/lib/generatedPasswordCookie'
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)
@@ -82,7 +78,7 @@ export async function GET(req: NextRequest) {
     let accountId: number | null = null
     let accountRole: 'customer' | 'staff' | null = null
     let generatedPassword: string | null = null
-    let generatedPasswordHash: string | null = null
+    let newCustomerName = ''
 
     // 4a. Existing link
     const existing = await db.query(
@@ -151,7 +147,7 @@ export async function GET(req: NextRequest) {
             )
             accountId = created.rows[0].id
             generatedPassword = password
-            generatedPasswordHash = passwordHash
+            newCustomerName = first || nick
           } catch (insertErr: any) {
             // Two sign-ins at the same moment: the unique email rule stops the second one.
             if (insertErr?.code !== '23505') throw insertErr
@@ -174,9 +170,22 @@ export async function GET(req: NextRequest) {
         [sub, accountType, accountId, email]
       )
 
+      // Only a newly inserted customer receives a password. Never replace or
+      // email an existing customer's password on later Google sign-ins.
+      let passwordEmailFailed = false
+      if (accountRole === 'customer' && generatedPassword !== null) {
+        try {
+          await sendGeneratedPasswordEmail({ to: email, name: newCustomerName, password: generatedPassword })
+        } catch (mailErr) {
+          console.error('Could not send new customer password email:', mailErr)
+          passwordEmailFailed = true
+        }
+      }
+
       // 6. Sign in
       let doneUrl = `/login/google-done?role=${accountRole}&remember=${cookieData.remember ? '1' : '0'}`
       if (accountRole === 'customer') {
+        if (passwordEmailFailed) doneUrl += '&passwordEmail=failed'
         if (cookieData.returnTo === 'book') {
           doneUrl += '&next=book'
         } else if (cookieData.returnTo === 'vehicles') {
@@ -185,14 +194,6 @@ export async function GET(req: NextRequest) {
       }
       const res = NextResponse.redirect(new URL(doneUrl, req.url))
       await setSessionCookies(res, { userId: accountId, role: accountRole }, cookieData.remember)
-      if (accountRole === 'customer' && generatedPassword !== null && generatedPasswordHash !== null) {
-        const token = await encryptGeneratedPassword(accountId, generatedPassword, generatedPasswordHash)
-        res.cookies.set(
-          GENERATED_PASSWORD_COOKIE,
-          token,
-          generatedPasswordCookieOptions
-        )
-      }
       clearOauthCookie(res)
       return res
     }
